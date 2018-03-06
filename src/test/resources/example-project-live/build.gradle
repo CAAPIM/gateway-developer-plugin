@@ -1,0 +1,26 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+apply plugin: 'com.ca.apim.gateway.gateway-developer-plugin'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.ca.apim.gateway:gateway-developer-plugin:0.1.00'
+    }
+}
+
+group 'com.ca'
+version '1.2.3-SNAPSHOT'
+
+
+GatewayConnection {
+    url = 'https://gateway-dev:8443/restman'
+    folderPath = '/gateway%20jam'
+}
