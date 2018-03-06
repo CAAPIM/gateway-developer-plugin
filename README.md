@@ -1,5 +1,6 @@
-# About
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/ca-api-gateway/gateway-developer-plugin.svg?columns=all)](https://waffle.io/ca-api-gateway/gateway-developer-plugin)
 
+# About
 The Gateway developer plugin can be used to develop Gateway configuration.
 
 # Usage
