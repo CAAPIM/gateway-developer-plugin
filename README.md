@@ -31,6 +31,9 @@ This will sanitize an exported bundle. It will save the sanitized bundle to: `bu
 ## export
 This will export and explode the bundle to `src/main/gateway`. This can then be locally modified and checked into a version control repository.
 
+## clean-export
+This will delete everything in the `src/main/gateway` directory.
+
 ## zip
 This zips the exported configuration into a bundle that can be used as a bootstrap bundle for a container gateway. The zipped bundle is available here: `build/gateway/zipped.bundle`
 
