@@ -34,7 +34,7 @@ public class CAGatewayConfig implements Plugin<Project> {
         final File exportDir = new File(project.getProjectDir(), "src/main/gateway");
         final File rawExportBundleFile = new File(buildDir, "raw-export.bundle");
         final File sanitizedExportBundleFile = new File(buildDir, "sanitized-export.bundle");
-        final File zippedBundleFile = new File(buildDir, "zipped.bundle");
+        final File zippedBundleFile = new File(buildDir, project.getName() + ".bundle");
 
 
         // Set Defaults
@@ -69,6 +69,13 @@ public class CAGatewayConfig implements Plugin<Project> {
         });
 
         project.getTasks().maybeCreate("build").dependsOn(zipBundleTask);
+
+        project.artifacts(artifactHandler -> artifactHandler.add("archives", zippedBundleFile, configurablePublishArtifact -> {
+            configurablePublishArtifact.builtBy(zipBundleTask);
+            configurablePublishArtifact.setExtension("bundle");
+            configurablePublishArtifact.setName(project.getName());
+            configurablePublishArtifact.setType("bundle");
+        }));
 
     }
 
