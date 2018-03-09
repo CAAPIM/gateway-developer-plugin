@@ -10,6 +10,9 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.Entity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.entity.Service;
 import org.w3c.dom.Element;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ServiceLoader implements EntityLoader {
     @Override
     public Entity load(Element element) {
@@ -18,16 +21,27 @@ public class ServiceLoader implements EntityLoader {
         final Element serviceDetails = EntityLoaderHelper.getSingleElement(service, "l7:ServiceDetail");
         final String id = serviceDetails.getAttribute("id");
         final String folderId = serviceDetails.getAttribute("folderId");
-        serviceDetails.removeAttribute("id");
-        serviceDetails.removeAttribute("folderId");
+
         Element nameElement = EntityLoaderHelper.getSingleElement(serviceDetails, "l7:Name");
+        Element enabledElement = EntityLoaderHelper.getSingleElement(serviceDetails, "l7:Enabled");
+
+        Element serviceMappingsElement = EntityLoaderHelper.getSingleElement(serviceDetails, "l7:ServiceMappings");
+        Element httpMappingElement = EntityLoaderHelper.getSingleElement(serviceMappingsElement, "l7:HttpMapping");
+        Element urlPatternElement = EntityLoaderHelper.getSingleElement(httpMappingElement, "l7:UrlPattern");
+        Element verbsElement = EntityLoaderHelper.getSingleElement(httpMappingElement, "l7:Verbs");
+
         final String name = nameElement.getTextContent();
-        serviceDetails.removeChild(nameElement);
+        final boolean enabled = Boolean.parseBoolean(enabledElement.getTextContent());
+        final String url = urlPatternElement.getTextContent();
+        final List<String> verbs = new ArrayList<>(verbsElement.getChildNodes().getLength());
+        for(int i = 0; i < verbsElement.getChildNodes().getLength(); i++) {
+            verbs.add(verbsElement.getChildNodes().item(i).getTextContent());
+        }
 
         final Element resources = EntityLoaderHelper.getSingleElement(service, "l7:Resources");
         final Element resourceSet = EntityLoaderHelper.getSingleElement(resources, "l7:ResourceSet");
         final Element resource = EntityLoaderHelper.getSingleElement(resourceSet, "l7:Resource");
         final String servicePolicyString = resource.getTextContent();
-        return new Service(name, id, folderId, service, serviceDetails, servicePolicyString);
+        return new Service(name, id, folderId, service, servicePolicyString, enabled, url, verbs);
     }
 }

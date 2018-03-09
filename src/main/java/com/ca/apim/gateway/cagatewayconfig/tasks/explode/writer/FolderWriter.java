@@ -36,4 +36,9 @@ public class FolderWriter implements EntityWriter<Folder> {
             }
         }
     }
+
+    @Override
+    public void finalizeWrite(Path path) {
+        //does nothing
+    }
 }

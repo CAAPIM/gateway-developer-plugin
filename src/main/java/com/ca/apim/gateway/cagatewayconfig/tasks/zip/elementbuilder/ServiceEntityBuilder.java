@@ -13,6 +13,7 @@ import org.w3c.dom.Element;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Collections;
 
 public class ServiceEntityBuilder implements EntityBuilder<Service> {
     private final Document document;
@@ -54,6 +55,6 @@ public class ServiceEntityBuilder implements EntityBuilder<Service> {
         resourcesElement.appendChild(resourceSetElement);
         serviceElement.appendChild(resourcesElement);
 
-        return new Service(name, id, parentFolderID, serviceElement, entityElement, policyString);
+        return new Service(name, id, parentFolderID, serviceElement, policyString, true, "", Collections.emptyList());
     }
 }

@@ -70,24 +70,9 @@ public class ExplodeBundleTask extends DefaultTask {
         //build folder structure
         Bundle bundle = bundleBuilder.getBundle();
 
-        FolderTree folderTree = bundle.getFolderTree();
-        EntityWriter<Folder> folderWriter = getEntityWriter(folderTree, Folder.class);
-        folderTree.stream().forEach(f -> folderWriter.write(exportDir.getAsFile().get().toPath(), f));
+        BundleExploder bundleExploder = new BundleExploder(bundle, documentTools, documentFileUtils);
 
-        Map<Class<? extends Entity>, Map<String, Entity>> entities = bundle.getAllEntities();
-        entities.forEach((entityType, entitiesMap) -> {
-            if (entityType != Folder.class) {
-                entitiesMap.values().forEach(e -> getEntityWriter(folderTree, entityType).write(exportDir.getAsFile().get().toPath(), e));
-            }
-        });
+        bundleExploder.persist(exportDir.getAsFile().get().toPath());
     }
 
-    private EntityWriter getEntityWriter(FolderTree folderTree, Class<? extends Entity> entityType) {
-        if (Folder.class == entityType) {
-            return new FolderWriter(folderTree);
-        } else if (Service.class == entityType) {
-            return new ServiceWriter(folderTree, documentTools, documentFileUtils);
-        } else
-            throw new BundleBuilderException("No entity loader found for entity type: " + entityType);
-    }
 }

@@ -12,4 +12,6 @@ import java.nio.file.Path;
 
 public interface EntityWriter<E extends Entity> {
     void write(Path path, E entity);
+
+    void finalizeWrite(Path path);
 }
