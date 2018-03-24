@@ -1,0 +1,20 @@
+{
+    "gateway jamer/gateway-jamer.xml": {
+        "httpMethods": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE"
+        ],
+        "url": "/petstore"
+    },
+    "gateway jamer/gateway-jam-example.xml": {
+        "httpMethods": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE"
+        ],
+        "url": "/gateway-jam"
+    }
+}

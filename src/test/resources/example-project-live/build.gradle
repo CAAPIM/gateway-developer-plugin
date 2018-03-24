@@ -5,6 +5,7 @@
  */
 
 apply plugin: 'com.ca.apim.gateway.gateway-developer-plugin'
+apply plugin: 'maven'
 
 buildscript {
     repositories {
@@ -12,15 +13,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.ca.apim.gateway:gateway-developer-plugin:0.1.00'
+        classpath 'com.ca.apim.gateway:gateway-developer-plugin:0.2.00'
     }
 }
 
 group 'com.ca'
 version '1.2.3-SNAPSHOT'
 
-
-GatewayConnection {
-    url = 'https://gateway-dev:8443/restman'
-    folderPath = '/gateway%20jam'
+task("my-build-bundle", type: com.ca.apim.gateway.cagatewayconfig.tasks.zip.BuildBundleTask) {
+    from = file('src/main/gateway')
+    into = file('my-bundle.bundle')
 }

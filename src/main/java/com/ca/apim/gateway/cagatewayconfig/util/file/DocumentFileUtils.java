@@ -32,11 +32,11 @@ public final class DocumentFileUtils {
         this.documentTools = documentTools;
     }
 
-    public void createFile(Element element, Path path, boolean addNamespace) {
+    public void createFile(Element element, Path path) {
         OutputStream fos = null;
         try {
             fos = Files.newOutputStream(path);
-            printXML(element, fos, addNamespace);
+            printXML(element, fos);
         } catch (IOException e) {
             throw new DocumentFileUtilsException("Error writing to file '" + path + "': " + e.getMessage(), e);
         } finally {
@@ -44,11 +44,7 @@ public final class DocumentFileUtils {
         }
     }
 
-    private void printXML(final Element node, final OutputStream outStream, boolean addNamespace) {
-        if (addNamespace) {
-            node.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
-        }
-
+    private void printXML(final Element node, final OutputStream outStream) {
         final Transformer transformer = documentTools.getTransformer();
         final OutputStreamWriter writer;
         try {

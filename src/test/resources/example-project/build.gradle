@@ -10,10 +10,3 @@ plugins {
 
 group 'com.ca'
 version '1.2.3-SNAPSHOT'
-
-
-GatewayConnection {
-    userName = 'admin'
-    userPass = 'password'
-    url = 'localhost:8443/restman'
-}
