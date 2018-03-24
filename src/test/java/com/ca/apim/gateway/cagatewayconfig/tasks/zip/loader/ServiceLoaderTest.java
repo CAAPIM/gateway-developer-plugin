@@ -36,21 +36,21 @@ public class ServiceLoaderTest {
     public void loadJSON() throws IOException {
         ServiceLoader serviceLoader = new ServiceLoader(fileUtils, JsonTools.INSTANCE);
         String json = "{\n" +
-                "    \"gateway jamer/gateway-jamer.xml\": {\n" +
+                "    \"example project/example.xml\": {\n" +
                 "        \"httpMethods\": [\n" +
                 "            \"GET\",\n" +
                 "            \"POST\",\n" +
                 "            \"PUT\",\n" +
                 "            \"DELETE\"\n" +
                 "        ],\n" +
-                "        \"url\": \"/petstore\"\n" +
+                "        \"url\": \"/example\"\n" +
                 "    },\n" +
-                "    \"gateway jamer/gateway-jam-example.xml\": {\n" +
+                "    \"example project/example-project.xml\": {\n" +
                 "        \"httpMethods\": [\n" +
                 "            \"PUT\",\n" +
                 "            \"DELETE\"\n" +
                 "        ],\n" +
-                "        \"url\": \"/gateway-jam\"\n" +
+                "        \"url\": \"/example-project\"\n" +
                 "    }\n" +
                 "}";
         File configFolder = rootProjectDir.newFolder("config");
@@ -63,35 +63,35 @@ public class ServiceLoaderTest {
         serviceLoader.load(bundle, rootProjectDir.getRoot());
 
         Assert.assertEquals(2, bundle.getServices().size());
-        Assert.assertEquals("/petstore", bundle.getServices().get("gateway jamer/gateway-jamer.xml").getUrl());
-        Assert.assertEquals("/gateway-jam", bundle.getServices().get("gateway jamer/gateway-jam-example.xml").getUrl());
+        Assert.assertEquals("/example", bundle.getServices().get("example project/example.xml").getUrl());
+        Assert.assertEquals("/example-project", bundle.getServices().get("example project/example-project.xml").getUrl());
 
-        Assert.assertEquals(4, bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().size());
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().contains("GET"));
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().contains("POST"));
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().contains("PUT"));
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().contains("DELETE"));
-        Assert.assertEquals(2, bundle.getServices().get("gateway jamer/gateway-jam-example.xml").getHttpMethods().size());
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jam-example.xml").getHttpMethods().contains("PUT"));
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jam-example.xml").getHttpMethods().contains("DELETE"));
+        Assert.assertEquals(4, bundle.getServices().get("example project/example.xml").getHttpMethods().size());
+        Assert.assertTrue(bundle.getServices().get("example project/example.xml").getHttpMethods().contains("GET"));
+        Assert.assertTrue(bundle.getServices().get("example project/example.xml").getHttpMethods().contains("POST"));
+        Assert.assertTrue(bundle.getServices().get("example project/example.xml").getHttpMethods().contains("PUT"));
+        Assert.assertTrue(bundle.getServices().get("example project/example.xml").getHttpMethods().contains("DELETE"));
+        Assert.assertEquals(2, bundle.getServices().get("example project/example-project.xml").getHttpMethods().size());
+        Assert.assertTrue(bundle.getServices().get("example project/example-project.xml").getHttpMethods().contains("PUT"));
+        Assert.assertTrue(bundle.getServices().get("example project/example-project.xml").getHttpMethods().contains("DELETE"));
     }
 
 
     @Test
     public void loadYAML() throws IOException {
         ServiceLoader serviceLoader = new ServiceLoader(fileUtils, JsonTools.INSTANCE);
-        String json = "gateway jamer/gateway-jamer.xml:\n" +
+        String json = "example project/example.xml:\n" +
                 "  httpMethods:\n" +
                 "  - GET\n" +
                 "  - POST\n" +
                 "  - PUT\n" +
                 "  - DELETE\n" +
-                "  url: \"/petstore\"\n" +
-                "gateway jamer/gateway-jam-example.xml:\n" +
+                "  url: \"/example\"\n" +
+                "example project/example-project.xml:\n" +
                 "  httpMethods:\n" +
                 "  - PUT\n" +
                 "  - DELETE\n" +
-                "  url: \"/gateway-jam\"";
+                "  url: \"/example-project\"";
         File configFolder = rootProjectDir.newFolder("config");
         File servicesFile = new File(configFolder, "services.yml");
         Files.touch(servicesFile);
@@ -102,17 +102,17 @@ public class ServiceLoaderTest {
         serviceLoader.load(bundle, rootProjectDir.getRoot());
 
         Assert.assertEquals(2, bundle.getServices().size());
-        Assert.assertEquals("/petstore", bundle.getServices().get("gateway jamer/gateway-jamer.xml").getUrl());
-        Assert.assertEquals("/gateway-jam", bundle.getServices().get("gateway jamer/gateway-jam-example.xml").getUrl());
+        Assert.assertEquals("/example", bundle.getServices().get("example project/example.xml").getUrl());
+        Assert.assertEquals("/example-project", bundle.getServices().get("example project/example-project.xml").getUrl());
 
-        Assert.assertEquals(4, bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().size());
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().contains("GET"));
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().contains("POST"));
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().contains("PUT"));
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jamer.xml").getHttpMethods().contains("DELETE"));
-        Assert.assertEquals(2, bundle.getServices().get("gateway jamer/gateway-jam-example.xml").getHttpMethods().size());
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jam-example.xml").getHttpMethods().contains("PUT"));
-        Assert.assertTrue(bundle.getServices().get("gateway jamer/gateway-jam-example.xml").getHttpMethods().contains("DELETE"));
+        Assert.assertEquals(4, bundle.getServices().get("example project/example.xml").getHttpMethods().size());
+        Assert.assertTrue(bundle.getServices().get("example project/example.xml").getHttpMethods().contains("GET"));
+        Assert.assertTrue(bundle.getServices().get("example project/example.xml").getHttpMethods().contains("POST"));
+        Assert.assertTrue(bundle.getServices().get("example project/example.xml").getHttpMethods().contains("PUT"));
+        Assert.assertTrue(bundle.getServices().get("example project/example.xml").getHttpMethods().contains("DELETE"));
+        Assert.assertEquals(2, bundle.getServices().get("example project/example-project.xml").getHttpMethods().size());
+        Assert.assertTrue(bundle.getServices().get("example project/example-project.xml").getHttpMethods().contains("PUT"));
+        Assert.assertTrue(bundle.getServices().get("example project/example-project.xml").getHttpMethods().contains("DELETE"));
     }
 
     @Test(expected = BundleLoadException.class)
@@ -141,21 +141,21 @@ public class ServiceLoaderTest {
     public void badJson() throws IOException {
         ServiceLoader serviceLoader = new ServiceLoader(fileUtils, JsonTools.INSTANCE);
         String json = "{\n" +
-                "    \"gateway jamer/gateway-jamer.xml\": {\n" +
+                "    \"example project/example.xml\": {\n" +
                 "        \"httpMethods\": [\n" +
                 "            \"GET\",\n" +
                 "            \"POST\",\n" +
                 "            \"PUT\",\n" +
                 "            \"DELETE\"\n" +
                 "        ],\n" +
-                "        \"url\": \"/petstore\"\n" +
+                "        \"url\": \"/example\"\n" +
                 "    },\n" +
-                "    \"gateway jamer/gateway-jam-example.xml: {\n" +
+                "    \"example project/example-project.xml: {\n" +
                 "        \"httpMethods\": [\n" +
                 "            \"PUT\",\n" +
                 "            \"DELETE\"\n" +
                 "        ],\n" +
-                "        \"url\": \"/gateway-jam\"\n" +
+                "        \"url\": \"/example-project\"\n" +
                 "    }\n" +
                 "}";
         File configFolder = rootProjectDir.newFolder("config");

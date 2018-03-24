@@ -1,4 +1,0 @@
-gateway:
-  hostname: gateway-dev
-  username: admin
-  password: password

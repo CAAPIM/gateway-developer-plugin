@@ -42,7 +42,13 @@ public class CAGatewayDeveloperTest {
                 .build();
 
         LOGGER.log(Level.INFO, result.getOutput());
-
         Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
+
+        File buildDir = new File(testProjectDir, "build");
+        Assert.assertTrue(buildDir.isDirectory());
+        File buildGatewayDir = new File(buildDir, "gateway");
+        Assert.assertTrue(buildGatewayDir.isDirectory());
+        File builtBundleFile = new File(buildGatewayDir, projectFolder + ".bundle");
+        Assert.assertTrue(builtBundleFile.isFile());
     }
 }

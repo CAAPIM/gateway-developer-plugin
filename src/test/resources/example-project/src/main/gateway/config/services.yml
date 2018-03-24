@@ -1,14 +1,12 @@
-gateway jamer/gateway-jamer.xml:
+example project/example.xml:
   httpMethods:
   - GET
   - POST
   - PUT
   - DELETE
-  url: "/petstore"
-gateway jamer/gateway-jam-example.xml:
+  url: "/example"
+example project/example-project.xml:
   httpMethods:
-  - GET
   - POST
   - PUT
-  - DELETE
-  url: "/gateway-jam"
+  url: "/example-project"
