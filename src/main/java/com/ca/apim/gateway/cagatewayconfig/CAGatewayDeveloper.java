@@ -21,27 +21,36 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Add the base plugin to add standard lifecycle tasks: https://docs.gradle.org/current/userguide/standard_plugins.html#sec:base_plugins
         project.getPlugins().apply("base");
 
-        final File buildDir = new File(project.getBuildDir(), "gateway");
-        final File solutionDir = new File(project.getProjectDir(), "src/main/gateway");
-        final File bundleFile = new File(buildDir, project.getName() + ".bundle");
+        final GatewayDeveloperPluginConfig pluginConfig = project.getExtensions().create("GatewaySourceConfig", GatewayDeveloperPluginConfig.class, project);
+        // Set Defaults
+        project.afterEvaluate(p -> setDefaults(pluginConfig, project));
 
         // Create build-bundle task
         final BuildBundleTask buildBundleTask = project.getTasks().create("build-bundle", BuildBundleTask.class, t -> {
-            t.getFrom().set(solutionDir);
-            t.getInto().set(bundleFile);
+            t.getFrom().set(pluginConfig.getSolutionDir());
+            t.getInto().set(pluginConfig.getBuiltBundle());
         });
 
         // add build-bundle to the default build task
         project.getTasks().maybeCreate("build").dependsOn(buildBundleTask);
 
         // add the built bundle to the artifacts
-        project.artifacts(artifactHandler -> artifactHandler.add("archives", bundleFile, configurablePublishArtifact -> {
+        project.artifacts(artifactHandler -> artifactHandler.add("archives", pluginConfig.getBuiltBundle(), configurablePublishArtifact -> {
             configurablePublishArtifact.builtBy(buildBundleTask);
             configurablePublishArtifact.setExtension("bundle");
             configurablePublishArtifact.setName(project.getName());
             configurablePublishArtifact.setType("bundle");
         }));
 
+    }
+
+    private void setDefaults(GatewayDeveloperPluginConfig pluginConfig, Project project) {
+        if (!pluginConfig.getSolutionDir().isPresent()) {
+            pluginConfig.getSolutionDir().set(new File(project.getProjectDir(), "src/main/gateway"));
+        }
+        if (!pluginConfig.getBuiltBundle().isPresent()) {
+            pluginConfig.getBuiltBundle().set(new File(new File(project.getBuildDir(), "gateway"), project.getName() + ".bundle"));
+        }
     }
 }
 

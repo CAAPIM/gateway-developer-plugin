@@ -1,4 +1,4 @@
-[![Waffle.io - Columns and their card count](https://badge.waffle.io/ca-api-gateway/gateway-developer-plugin.svg?columns=all)](https://waffle.io/ca-api-gateway/gateway-developer-plugin)
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/ca-api-Gateway/Gateway-developer-plugin.svg?columns=all)](https://waffle.io/ca-api-Gateway/Gateway-developer-plugin)
 
 # About
 The Gateway developer plugin can be used to develop Gateway configuration.
@@ -8,36 +8,19 @@ In order to use this plugin add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.gateway.gateway-developer-plugin" version "0.1.00"
-}
-
-GatewayConnection {
-    url = 'https://<gateway-host>:8443/restman'
-    folderPath = '/my-solution-folder'
+    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.2.00"
 }
 ```
 
-# Using the Gateway Developer Plugin
+## Using the Gateway Developer Plugin
 > Note: This plugin is still in an Alpha stage
 
 The plugin adds the following tasks:
 
-## export-raw
-This will export a bundle from the gateway using the configuration from the GatewayConnection. It will save the exported bundle to: `build/gateway/raw-export.bundle`
+## build-bundle
+This build a Gateway configuration bundle from the source located in `src/main/Gateway`. This bundle can be used as a bootstrap bundle for a container Gateway. The built bundle is available here: `build/gateway/<project-name>.bundle`
 
-## sanitize-export
-This will sanitize an exported bundle. It will save the sanitized bundle to: `build/gateway/sanitized-export.bundle`
-
-## export
-This will export and explode the bundle to `src/main/gateway`. This can then be locally modified and checked into a version control repository.
-
-## clean-export
-This will delete everything in the `src/main/gateway` directory.
-
-## zip
-This zips the exported configuration into a bundle that can be used as a bootstrap bundle for a container gateway. The zipped bundle is available here: `build/gateway/zipped.bundle`
-
-# Currently Supported Entities
+## Currently Supported Entities
 This plugin currently supports these entities:
 
 Entity | Supported | Description
@@ -46,11 +29,76 @@ Folder | Yes |
 Service | Yes | 
 Policy | No | This will be the next supported entity
 
+## Expected Source Directory Organization
+The Gateway solution directory (`src/main/Gateway` by default) expects the following organization:
+
+* Gateway Solutions Directory
+  * `config`
+    * either `services.yml` or `services.json`
+      * This is a file containing the services that are exposed in the gateway.
+      * An example `services.yml` file would look like:
+        * ```yaml
+          example project/example.xml:
+            httpMethods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            url: "/example"
+          example project/example-project.xml:
+            httpMethods:
+            - POST
+            - PUT
+            url: "/example-project"
+          ```
+        * The above example will expose two services:
+          * A service at `/example` using HTTP Method `GET`,`POST`, `PUT`, `DELETE` with its policy coming from the policy file located at: `example project/example.xml`
+          * A service at `/example-project` using HTTP Method `POST`, `PUT` with its policy coming from the policy file located at: `example project/example-project.xml`
+        * The above file has the following organization:
+          * ```yaml
+            <path-to-policy-file>:
+              <service-description>
+            ```
+            where `<service-description>` lists `httpMethods` and the `url` the service is exposed at.
+        * The same JSON representation would look like:
+          * ```json
+            {
+              "example project/example.xml": {
+                "httpMethods": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "DELETE"
+                ],
+                "url": "/example"
+              },
+              "example project/example-project.xml": {
+                "httpMethods": [
+                  "POST",
+                  "PUT"
+                ],
+                "url": "/example-project"
+              }
+            }
+            ```
+  * `policy`
+    * The policy folder contains the different policies that are available. It can contain may subdirectories to help organize the policy.
+
+## Customizing the Default Plugin Configuration
+You can customize the source solution directory location and the location to put the built bundle file by setting the `GatewaySourceConfig`. For example:
+```groovy
+GatewaySourceConfig {
+    solutionDir = new File("export/gateway/solution")
+    builtBundle = new File("gateway/built-bundle.bundle")
+}
+```
+The above will make the solution direction `export/gateway/solution` and will put the built bundle file in `gateway/built-bundle.bundle`.
+
 # Building the Plugin
 The build is done using gradle. To build the plugin run ```gradle build```. Once built it is available in the `build/libs` directory. 
 
 ### publish to local
-You can also publish the custom assertion builder to your local maven repository by running:
+You can also publish the plugin to your local maven repository by running:
 ```gradle publishToMavenLocal```
 
 ## How You Can Contribute

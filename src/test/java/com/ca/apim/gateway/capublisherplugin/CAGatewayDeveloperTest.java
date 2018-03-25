@@ -51,4 +51,26 @@ public class CAGatewayDeveloperTest {
         File builtBundleFile = new File(buildGatewayDir, projectFolder + ".bundle");
         Assert.assertTrue(builtBundleFile.isFile());
     }
+
+    @Test
+    public void testExampleProjectCustomOrganization() throws IOException, URISyntaxException {
+        String projectFolder = "example-project-custom-organization";
+        File testProjectDir = new File(rootProjectDir.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
+
+        File buildGatewayDir = new File(testProjectDir, "gateway");
+        Assert.assertTrue(buildGatewayDir.isDirectory());
+        File builtBundleFile = new File(buildGatewayDir, "built-bundle.bundle");
+        Assert.assertTrue(builtBundleFile.isFile());
+    }
 }

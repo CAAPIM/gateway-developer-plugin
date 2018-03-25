@@ -9,7 +9,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.File;
@@ -19,7 +19,7 @@ import java.io.IOException;
 public class PolicyAndFolderLoaderTest {
 
     @Mock
-    FileUtils fileUtils;
+    private FileUtils fileUtils;
 
     @Rule
     public final TemporaryFolder rootProjectDir = new TemporaryFolder();
@@ -65,11 +65,11 @@ public class PolicyAndFolderLoaderTest {
 
         File policyFolder = rootProjectDir.newFolder("policy");
         File a = new File(policyFolder, "a");
-        a.mkdir();
+        Assert.assertTrue(a.mkdir());
         File b = new File(a, "b");
-        b.mkdir();
+        Assert.assertTrue(b.mkdir());
         File c = new File(b, "c");
-        c.mkdir();
+        Assert.assertTrue(c.mkdir());
         File policy = new File(c, "policy.xml");
         Files.touch(policy);
 
