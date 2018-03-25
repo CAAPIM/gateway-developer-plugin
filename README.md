@@ -12,6 +12,8 @@ plugins {
 }
 ```
 
+After this is added run `gradle build` in order to build a bundle from a gateway solution located in `src/main/Gateway`.
+
 ## Using the Gateway Developer Plugin
 > Note: This plugin is still in an Alpha stage
 
