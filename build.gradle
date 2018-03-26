@@ -1,0 +1,55 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+plugins {
+    id "com.gradle.plugin-publish" version "0.9.10"
+}
+
+description = 'The gateway-export-plugin enables exporting from gateways into a format that is compatible with the gateway-developer-plugin.'
+group 'com.ca.apim.gateway'
+
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = 1.8
+version = "0.2.00"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile gradleApi()
+    compile 'org.jetbrains:annotations:15.0'
+    compile 'org.apache.httpcomponents:httpclient:4.5'
+    compile 'commons-io:commons-io:+'
+    compile 'commons-lang:commons-lang:+'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.4'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:2.16.0'
+    testCompile gradleTestKit()
+    testCompile 'org.testcontainers:testcontainers:1.4.3'
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+pluginBundle {
+    website = 'https://github.com/ca-api-gateway/gateway-export-plugin'
+    vcsUrl = 'https://github.com/ca-api-gateway/gateway-export-plugin'
+
+    plugins {
+        greetingsPlugin {
+            id = 'com.ca.apim.gateway.gateway-export-plugin'
+            displayName = 'CA API Gateway Export Gradle Plugin'
+            description = 'The gateway-developer-plugin enables developing gateway configuration.'
+            tags = ['ca api gateway','building']
+        }
+    }
+}
