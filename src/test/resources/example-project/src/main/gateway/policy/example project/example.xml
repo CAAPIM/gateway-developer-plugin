@@ -1,0 +1,13 @@
+<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:L7p="http://www.layer7tech.com/ws/policy">
+    <wsp:All wsp:Usage="Required">
+        <L7p:CustomAssertion>
+            <L7p:base64SerializedValue>rO0ABXNyADFjb20ubDd0ZWNoLnBvbGljeS5hc3NlcnRpb24uQ3VzdG9tQXNzZXJ0aW9uSG9sZGVyZtcreFwddTICAAlaAAxpc1VpQXV0b09wZW5MAApjYXRlZ29yaWVzdAAPTGphdmEvdXRpbC9TZXQ7TAAIY2F0ZWdvcnl0ACpMY29tL2w3dGVjaC9wb2xpY3kvYXNzZXJ0aW9uL2V4dC9DYXRlZ29yeTtMAA9jdXN0b21Bc3NlcnRpb250ADFMY29tL2w3dGVjaC9wb2xpY3kvYXNzZXJ0aW9uL2V4dC9DdXN0b21Bc3NlcnRpb247TAAUY3VzdG9tTW9kdWxlRmlsZU5hbWV0ABJMamF2YS9sYW5nL1N0cmluZztMAA9kZXNjcmlwdGlvblRleHRxAH4ABEwAD3BhbGV0dGVOb2RlTmFtZXEAfgAETAAOcG9saWN5Tm9kZU5hbWVxAH4ABEwAHnJlZ2lzdGVyZWRDdXN0b21GZWF0dXJlU2V0TmFtZXEAfgAEeHIAJWNvbS5sN3RlY2gucG9saWN5LmFzc2VydGlvbi5Bc3NlcnRpb27bX2OZPL2isQIAAloAB2VuYWJsZWRMABBhc3NlcnRpb25Db21tZW50dAAvTGNvbS9sN3RlY2gvcG9saWN5L2Fzc2VydGlvbi9Bc3NlcnRpb24kQ29tbWVudDt4cAFwAXNyABFqYXZhLnV0aWwuSGFzaFNldLpEhZWWuLc0AwAAeHB3DAAAAAI/QAAAAAAAAXNyAChjb20ubDd0ZWNoLnBvbGljeS5hc3NlcnRpb24uZXh0LkNhdGVnb3J5WrCcZaFE/jUCAAJJAAVteUtleUwABm15TmFtZXEAfgAEeHAAAAALdAAQQ3VzdG9tQXNzZXJ0aW9uc3hwc3IAMGNvbS5sN3RlY2guY3VzdG9tLmdhdGV3YXlqYW0uR2F0ZXdheUphbUFzc2VydGlvbtB3oB/rZXyjAgABTAASZ2F0ZXdheUphbVZhcmlhYmxlcQB+AAR4cHQAC2dhdGV3YXktamFtdAAeR2F0ZXdheUphbUFzc2VydGlvbi0xLjAuMDAuamFydAAKR2F0ZXdheUphbXQACkdhdGV3YXlKYW10AApHYXRld2F5SmFtcA==</L7p:base64SerializedValue>
+        </L7p:CustomAssertion>
+        <L7p:JsonTransformation>
+            <L7p:PrettyPrint booleanValue="true"/>
+            <L7p:RootTagString stringValue=""/>
+            <L7p:Target target="REQUEST"/>
+            <L7p:UseNumbersWhenPossible booleanValue="true"/>
+        </L7p:JsonTransformation>
+    </wsp:All>
+</wsp:Policy>

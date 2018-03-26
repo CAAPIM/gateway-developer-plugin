@@ -11,12 +11,18 @@ import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * This generates ids that are used on gateway entities. It works by randomly generating an id and then incrementing it to retrieve subsequent ids.
+ */
 public class IdGenerator {
 
     private AtomicLong hi;
     private AtomicLong low;
-    private static final int MAX_GOID_RESERVED_PREFIX = 65536;
+    private static final int MAX_ID_RESERVED_PREFIX = 65536;
 
+    /**
+     * Creates a new IdGenerator. This will randomly seed the initial id
+     */
     public IdGenerator() {
         final Random random = new SecureRandom();
 
@@ -24,27 +30,32 @@ public class IdGenerator {
         do {
             randomHi = random.nextLong();
             // make sure hi cannot be in the range of default prefixes 0 - 2^16
-        } while (randomHi >= 0 && randomHi < MAX_GOID_RESERVED_PREFIX);
+        } while (randomHi >= 0 && randomHi < MAX_ID_RESERVED_PREFIX);
 
         hi = new AtomicLong(randomHi);
         low = new AtomicLong(random.nextLong());
     }
 
+    /**
+     * Return an id that can be used for a Gateway entity. This id will likely be unique, chance of collision is extremely low.
+     *
+     * @return An id that can be used for a gateway entity.
+     */
     public String generate() {
-        //Do not need to increment hi on low rollover. Preforming the increment could lead to race conditions without proper locking.
-        // Also it is extremely unlikely a gateway will create 2^64 entities without restarting.
+        // Do not need to increment hi on low rollover. It is extremely unlikely a we will create 2^32 id's on a single id generator in order to cause a collision.
         return hexDump(ByteBuffer.allocate(16).putLong(hi.get()).putLong(low.getAndIncrement()).array());
     }
 
     private static String hexDump(byte[] binaryData) {
-        return hexDump(binaryData, 0, binaryData.length);
+        return hexDump(binaryData, binaryData.length);
     }
 
     private static final char[] hexadecimal = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-    private static String hexDump(byte[] binaryData, int off, int len) {
+    private static String hexDump(byte[] binaryData, int len) {
+        int off = 0;
         if (binaryData == null) throw new NullPointerException();
-        if (off < 0 || len < 0 || off + len > binaryData.length) throw new IllegalArgumentException();
+        if (len < 0 || off + len > binaryData.length) throw new IllegalArgumentException();
         char[] buffer = new char[len * 2];
         for (int i = 0; i < len; i++) {
             int low = (binaryData[off + i] & 0x0f);

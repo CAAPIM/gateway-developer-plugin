@@ -13,7 +13,7 @@ group 'com.ca.apim.gateway'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.9
 version = "0.2.00"
 
 repositories {
@@ -23,14 +23,14 @@ repositories {
 dependencies {
     compile gradleApi()
     compile 'org.jetbrains:annotations:15.0'
-    compile 'org.apache.httpcomponents:httpclient:4.5'
     compile 'commons-io:commons-io:+'
     compile 'commons-lang:commons-lang:+'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.4'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
 
+
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-all:1.10.19'
+    testCompile 'org.mockito:mockito-core:2.16.0'
     testCompile gradleTestKit()
     testCompile 'org.testcontainers:testcontainers:1.4.3'
 }

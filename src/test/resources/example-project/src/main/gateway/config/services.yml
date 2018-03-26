@@ -1,0 +1,12 @@
+example project/example.xml:
+  httpMethods:
+  - "GET"
+  - "POST"
+  - "PUT"
+  - "DELETE"
+  url: "/example"
+example project/example-project.xml:
+  httpMethods:
+  - POST
+  - PUT
+  url: "/example-project"
