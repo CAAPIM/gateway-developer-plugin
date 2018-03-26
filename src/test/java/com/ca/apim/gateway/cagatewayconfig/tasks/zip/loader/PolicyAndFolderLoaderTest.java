@@ -1,6 +1,8 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -79,9 +81,12 @@ public class PolicyAndFolderLoaderTest {
         Assert.assertNotNull(bundle.getFolders().get(""));
         Assert.assertNotNull(bundle.getFolders().get("a/"));
         Assert.assertNotNull(bundle.getFolders().get("a/b/"));
-        Assert.assertNotNull(bundle.getFolders().get("a/b/c/"));
+        Folder parentFolder = bundle.getFolders().get("a/b/c/");
+        Assert.assertNotNull(parentFolder);
 
-        Assert.assertNotNull(bundle.getPolicies().get("a/b/c/policy.xml"));
+        Policy loadedPolicy = bundle.getPolicies().get("a/b/c/policy.xml");
+        Assert.assertNotNull(loadedPolicy);
+        Assert.assertEquals(parentFolder, loadedPolicy.getParentFolder());
     }
 
 

@@ -16,7 +16,6 @@ services:
       - /opt/SecureSpan/Gateway/node/default/etc/bootstrap/services/restman
       - ./docker/license.xml:/opt/SecureSpan/Gateway/node/default/etc/bootstrap/license/license.xml
 #      - ./docker/delay.req.bundle:/opt/SecureSpan/Gateway/node/default/etc/bootstrap/bundle/delay.req.bundle
-      - ./src/test/resources/example-project-live/build/gateway/example-project-live.bundle:/opt/SecureSpan/Gateway/node/default/etc/bootstrap/bundle/zipped.req.bundle
     environment:
       ACCEPT_LICENSE: "true"
       SSG_ADMIN_USERNAME: "admin"

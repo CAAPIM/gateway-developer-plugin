@@ -51,7 +51,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
                 if (child.isDirectory()) {
                     loadPolicies(child, rootDir, folder, policies, folders);
                 } else {
-                    Policy policy = loadPolicy(child, rootDir, parentFolder);
+                    Policy policy = loadPolicy(child, rootDir, folder);
                     policies.put(policy.getPath(), policy);
                 }
             }
