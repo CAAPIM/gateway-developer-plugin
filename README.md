@@ -19,7 +19,7 @@ After this is added run `gradle build` in order to build a bundle from a gateway
 
 The plugin adds the following tasks:
 
-## build-bundle
+### build-bundle
 This build a Gateway configuration bundle from the source located in `src/main/Gateway`. This bundle can be used as a bootstrap bundle for a container Gateway. The built bundle is available here: `build/gateway/<project-name>.bundle`
 
 ## Currently Supported Entities
@@ -94,7 +94,7 @@ GatewaySourceConfig {
     builtBundle = new File("gateway/built-bundle.bundle")
 }
 ```
-The above will make the solution direction `export/gateway/solution` and will put the built bundle file in `gateway/built-bundle.bundle`.
+The above will make the solution directory `export/gateway/solution` and will put the built bundle file in `gateway/built-bundle.bundle`.
 
 # Building the Plugin
 The build is done using gradle. To build the plugin run ```gradle build```. Once built it is available in the `build/libs` directory. 
