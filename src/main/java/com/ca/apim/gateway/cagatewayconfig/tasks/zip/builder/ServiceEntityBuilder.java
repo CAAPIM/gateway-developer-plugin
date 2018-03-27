@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -19,8 +20,10 @@ import java.util.stream.Collectors;
 public class ServiceEntityBuilder implements EntityBuilder {
     private final Document document;
     private final IdGenerator idGenerator;
+    private final DocumentFileUtils documentFileUtils;
 
-    public ServiceEntityBuilder(Document document, IdGenerator idGenerator) {
+    public ServiceEntityBuilder(DocumentFileUtils documentFileUtils, Document document, IdGenerator idGenerator) {
+        this.documentFileUtils = documentFileUtils;
         this.document = document;
         this.idGenerator = idGenerator;
     }
@@ -61,7 +64,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         Element resourceElement = document.createElement("l7:Resource");
         resourceElement.setAttribute("type", "policy");
 
-        resourceElement.setTextContent(policy.getPolicyXML());
+        resourceElement.setTextContent(documentFileUtils.elementToString(policy.getPolicyDocument()));
 
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
