@@ -16,7 +16,6 @@ public class FolderLoader implements EntityLoader<Folder> {
         final String name = EntityLoaderHelper.getSingleElement(folder, "l7:Name").getTextContent();
         final String id = folder.getAttribute("id");
         final String parentFolderID = folder.getAttribute("folderId");
-        folder.removeAttribute("folderId");
         return new Folder(name, id, parentFolderID, folder);
     }
 }

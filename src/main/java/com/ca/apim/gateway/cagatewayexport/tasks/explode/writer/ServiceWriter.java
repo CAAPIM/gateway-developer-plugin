@@ -8,12 +8,11 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Service;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader.EntityLoaderHelper;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
@@ -44,9 +43,9 @@ public class ServiceWriter implements EntityWriter {
         File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
 
-        Map<String, Service> services = bundle.getEntities(Service.class);
+        Map<String, ServiceEntity> services = bundle.getEntities(ServiceEntity.class);
 
-        Map<String, com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service> serviceBeans = services.values().stream().collect(Collectors.toMap(s -> getServicePath(bundle, s), this::getServiceBean));
+        Map<String, Service> serviceBeans = services.values().stream().collect(Collectors.toMap(s -> getServicePath(bundle, s), this::getServiceBean));
 
         File servicesFile = new File(configFolder, "services.yml");
 
@@ -58,16 +57,16 @@ public class ServiceWriter implements EntityWriter {
         }
     }
 
-    private String getServicePath(Bundle bundle, Service service) {
-        Folder folder = bundle.getFolderTree().getFolderById(service.getFolderId());
+    private String getServicePath(Bundle bundle, ServiceEntity serviceEntity) {
+        Folder folder = bundle.getFolderTree().getFolderById(serviceEntity.getFolderId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return Paths.get(folderPath.toString(), service.getName()+".xml").toString();
+        return Paths.get(folderPath.toString(), serviceEntity.getName() + ".xml").toString();
     }
 
     @NotNull
-    private com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service getServiceBean(Service service) {
-        com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service serviceBean = new com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service();
-        Element serviceMappingsElement = EntityLoaderHelper.getSingleElement(service.getServiceDetailsElement(), "l7:ServiceMappings");
+    private Service getServiceBean(ServiceEntity serviceEntity) {
+        Service serviceBean = new Service();
+        Element serviceMappingsElement = EntityLoaderHelper.getSingleElement(serviceEntity.getServiceDetailsElement(), "l7:ServiceMappings");
         Element httpMappingElement = EntityLoaderHelper.getSingleElement(serviceMappingsElement, "l7:HttpMapping");
         Element urlPatternElement = EntityLoaderHelper.getSingleElement(httpMappingElement, "l7:UrlPattern");
         serviceBean.setUrl(urlPatternElement.getTextContent());

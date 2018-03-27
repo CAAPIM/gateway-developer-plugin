@@ -8,10 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader.EntityLoaderHelper;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader.FolderLoader;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader.ServiceLoader;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -43,7 +40,9 @@ public class BundleBuilder {
     private void handleItem(final Element element) {
         final String type = EntityLoaderHelper.getSingleElement(element, "l7:Type").getTextContent();
         final Entity entity = getEntityLoader(type).load(element);
-        bundle.addEntity(entity);
+        if (entity != null) {
+            bundle.addEntity(entity);
+        }
     }
 
     private EntityLoader getEntityLoader(String entityType) {
@@ -52,6 +51,8 @@ public class BundleBuilder {
                 return new FolderLoader();
             case "SERVICE":
                 return new ServiceLoader();
+            case "POLICY":
+                return new PolicyLoader();
             default:
                 throw new BundleBuilderException("No entity loader found for entity type: " + entityType);
         }

@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import org.w3c.dom.Element;
 
-public class Service implements Entity {
+public class ServiceEntity implements Entity {
     private final String name;
     private final String id;
     private final String parentFolderId;
@@ -17,7 +17,7 @@ public class Service implements Entity {
     private final String policy;
     private final Element serviceXML;
 
-    public Service(final String name, final String id, final String parentFolderId, Element serviceXML, Element serviceDetailsElement, String policy) {
+    public ServiceEntity(final String name, final String id, final String parentFolderId, Element serviceXML, Element serviceDetailsElement, String policy) {
         this.name = name;
         this.id = id;
         this.parentFolderId = parentFolderId == null || parentFolderId.isEmpty() ? null : parentFolderId;
