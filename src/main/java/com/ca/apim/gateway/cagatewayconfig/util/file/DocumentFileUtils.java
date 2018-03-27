@@ -13,10 +13,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Level;
@@ -41,6 +38,18 @@ public final class DocumentFileUtils {
             throw new DocumentFileUtilsException("Error writing to file '" + path + "': " + e.getMessage(), e);
         } finally {
             closeQuietly(fos);
+        }
+    }
+
+    public String elementToString(Element element) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        printXML(element, byteArrayOutputStream);
+        try {
+            return byteArrayOutputStream.toString("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new DocumentFileUtilsException("Error writing xml: " + e.getMessage(), e);
+        } finally {
+            closeQuietly(byteArrayOutputStream);
         }
     }
 

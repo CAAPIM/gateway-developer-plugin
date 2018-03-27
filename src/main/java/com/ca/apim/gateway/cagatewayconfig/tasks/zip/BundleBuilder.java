@@ -36,7 +36,7 @@ public class BundleBuilder {
 
         this.documentFileUtils = documentFileUtils;
         this.entityLoaderRegistry = new EntityLoaderRegistry(fileUtils, jsonTools);
-        this.bundleEntityBuilder = new BundleEntityBuilder(document, idGenerator);
+        this.bundleEntityBuilder = new BundleEntityBuilder(documentFileUtils, documentTools, document, idGenerator);
     }
 
     public void buildBundle(File rootDir, Path outputPath) {

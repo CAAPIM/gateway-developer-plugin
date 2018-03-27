@@ -1,19 +1,18 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+import org.w3c.dom.Element;
+
+import java.util.HashSet;
+import java.util.Set;
+
 public class Policy {
-    private String type;
     private String path;
     private String policyXML;
     private String name;
     private Folder parentFolder;
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
+    private String guid;
+    private Element policyDocument;
+    private final Set<Policy> dependencies = new HashSet<>();
 
     public String getPath() {
         return path;
@@ -45,5 +44,25 @@ public class Policy {
 
     public void setParentFolder(Folder parentFolder) {
         this.parentFolder = parentFolder;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setPolicyDocument(Element policyDocument) {
+        this.policyDocument = policyDocument;
+    }
+
+    public Element getPolicyDocument() {
+        return policyDocument;
+    }
+
+    public Set<Policy> getDependencies() {
+        return dependencies;
     }
 }
