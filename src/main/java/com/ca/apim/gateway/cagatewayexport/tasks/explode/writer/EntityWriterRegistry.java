@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
@@ -24,6 +23,7 @@ public class EntityWriterRegistry {
         loadersCollection.add(new PolicyWriter(documentFileUtils, documentTools));
         loadersCollection.add(new ServiceWriter(documentFileUtils, jsonTools));
         loadersCollection.add(new EncassWriter(documentFileUtils, jsonTools));
+        loadersCollection.add(new GlobalPropertiesWriter(documentFileUtils));
 
         this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
     }
