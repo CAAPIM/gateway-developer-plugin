@@ -9,21 +9,19 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import org.w3c.dom.Element;
 
-public class PolicyEntity implements Entity {
+public class EncassEntity implements Entity {
     private final String name;
     private final String id;
     private final String guid;
-    private final String parentFolderId;
-    private final String policy;
-    private final Element policyXML;
+    private final String policyId;
+    private final Element xml;
 
-    public PolicyEntity(final String name, final String id, final String guid, final String parentFolderId, Element policyXML, String policy) {
+    public EncassEntity(final String name, final String id, final String guid, Element xml, String policyId) {
         this.name = name;
         this.id = id;
         this.guid = guid;
-        this.parentFolderId = parentFolderId == null || parentFolderId.isEmpty() ? null : parentFolderId;
-        this.policyXML = policyXML;
-        this.policy = policy;
+        this.xml = xml;
+        this.policyId = policyId;
     }
 
     @Override
@@ -37,7 +35,7 @@ public class PolicyEntity implements Entity {
 
     @Override
     public Element getXml() {
-        return policyXML;
+        return xml;
     }
 
     @Override
@@ -45,13 +43,8 @@ public class PolicyEntity implements Entity {
         return name;
     }
 
-    public String getFolderId() {
-        return parentFolderId;
-    }
-
-
-    public String getPolicy() {
-        return policy;
+    public String getPolicyId() {
+        return policyId;
     }
 
 }

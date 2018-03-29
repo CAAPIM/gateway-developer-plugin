@@ -17,6 +17,7 @@ public class EntityWriterRegistry {
         final Collection<EntityWriter> loadersCollection = new HashSet<>();
         loadersCollection.add(new PolicyWriter(documentFileUtils, documentTools));
         loadersCollection.add(new ServiceWriter(documentFileUtils, jsonTools));
+        loadersCollection.add(new EncassWriter(documentFileUtils, jsonTools));
 
         this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
     }

@@ -27,11 +27,6 @@ public class ServiceEntity implements Entity {
     }
 
     @Override
-    public String getType() {
-        return "SERVICE";
-    }
-
-    @Override
     public String getId() {
         return id;
     }

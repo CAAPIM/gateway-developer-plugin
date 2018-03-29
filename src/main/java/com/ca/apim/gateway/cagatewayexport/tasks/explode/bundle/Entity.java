@@ -9,8 +9,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 import org.w3c.dom.Element;
 
 public interface Entity {
-    String getType();
-
     String getId();
 
     Element getXml();

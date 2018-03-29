@@ -53,6 +53,8 @@ public class BundleBuilder {
                 return new ServiceLoader();
             case "POLICY":
                 return new PolicyLoader();
+            case "ENCAPSULATED_ASSERTION":
+                return new EncassLoader();
             default:
                 throw new BundleBuilderException("No entity loader found for entity type: " + entityType);
         }

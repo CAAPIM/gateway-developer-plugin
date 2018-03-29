@@ -23,11 +23,6 @@ public class Folder implements Entity {
     }
 
     @Override
-    public String getType() {
-        return "FOLDER";
-    }
-
-    @Override
     public String getId() {
         return id;
     }

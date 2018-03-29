@@ -1,6 +1,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
@@ -80,6 +81,31 @@ public class PolicyWriter implements EntityWriter {
                 policyGuidElement.removeAttribute("stringValue");
             } else {
                 LOGGER.log(Level.WARNING, "Could not find referenced policy include with guid: %s", includedPolicyGuid);
+            }
+        }
+
+        NodeList encapsulatedReferences = policyElement.getElementsByTagName("L7p:Encapsulated");
+        for (int i = 0; i < encapsulatedReferences.getLength(); i++) {
+            Node encapsulatedElement = encapsulatedReferences.item(i);
+            if (!(encapsulatedElement instanceof Element)) {
+                throw new WriteException("Unexpected Assertion node type: " + encapsulatedElement.getNodeType());
+            }
+
+            Element encassGuidElement = EntityLoaderHelper.getSingleElement((Element) encapsulatedElement, "L7p:EncapsulatedAssertionConfigGuid");
+            String encassGuid = encassGuidElement.getAttribute("stringValue");
+            Optional<EncassEntity> encassEntity = bundle.getEntities(EncassEntity.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
+            if (encassEntity.isPresent()) {
+                PolicyEntity policyEntity = bundle.getEntities(PolicyEntity.class).get(encassEntity.get().getPolicyId());
+                if (policyEntity != null) {
+                    ((Element) encapsulatedElement).setAttribute("policyPath", getPolicyPath(bundle, policyEntity));
+                    Element encapsulatedAssertionConfigNameElement = EntityLoaderHelper.getSingleElement((Element) encapsulatedElement, "L7p:EncapsulatedAssertionConfigName");
+                    encapsulatedElement.removeChild(encapsulatedAssertionConfigNameElement);
+                    encapsulatedElement.removeChild(encassGuidElement);
+                } else {
+                    LOGGER.log(Level.WARNING, "Could not find referenced encass policy with id: %s", encassEntity.get().getPolicyId());
+                }
+            } else {
+                LOGGER.log(Level.WARNING, "Could not find referenced encass with guid: %s", encassGuid);
             }
         }
         return policyElement;
