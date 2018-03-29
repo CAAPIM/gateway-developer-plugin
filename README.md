@@ -106,12 +106,6 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
             * An encapsulated assertion with its policy coming from the policy file located at: `example project/encass-policy.xml`
               * It will have arguments `hello` or type `string` and `hello-again` of type `message`
               * It will have results `goodbye` or type `string` and `goodbye-again` of type `message`
-          * The above file has the following organization:
-            * ```yaml
-              <path-to-policy-file>:
-                <service-description>
-              ```
-              where `<service-description>` lists `httpMethods` and the `url` the service is exposed at.
           * The same JSON representation would look like:
             * ```json
               {
