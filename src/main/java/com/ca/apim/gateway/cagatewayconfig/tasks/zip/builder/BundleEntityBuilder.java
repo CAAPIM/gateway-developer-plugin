@@ -20,6 +20,7 @@ public class BundleEntityBuilder {
     private final ServiceEntityBuilder serviceEntityBuilder;
     private final PolicyEntityBuilder policyEntityBuilder;
     private final EncassEntityBuilder encassEntityBuilder;
+    private final ClusterPropertyEntityBuilder clusterPropertyEntityBuilder;
 
     public BundleEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document, IdGenerator idGenerator) {
         this.document = document;
@@ -27,7 +28,7 @@ public class BundleEntityBuilder {
         serviceEntityBuilder = new ServiceEntityBuilder(documentFileUtils, document, idGenerator);
         encassEntityBuilder = new EncassEntityBuilder(document, idGenerator);
         policyEntityBuilder = new PolicyEntityBuilder(documentFileUtils, documentTools, document);
-
+        clusterPropertyEntityBuilder = new ClusterPropertyEntityBuilder(document, idGenerator);
     }
 
     public Element build(Bundle bundle) {
@@ -36,6 +37,7 @@ public class BundleEntityBuilder {
         bundleDocumentBuilder.addEntities(policyEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(encassEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(serviceEntityBuilder.build(bundle));
+        bundleDocumentBuilder.addEntities(clusterPropertyEntityBuilder.build(bundle));
 
         return bundleDocumentBuilder.build();
     }

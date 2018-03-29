@@ -14,6 +14,7 @@ public class Bundle {
     private final Map<String, Encass> encasses = new HashMap<>();
     private final Map<String, Policy> policies = new HashMap<>();
     private final Map<String, Folder> folders = new HashMap<>();
+    private final Map<String, String> globalProperties = new HashMap<>();
 
     public Map<String, Service> getServices() {
         return services;
@@ -45,5 +46,13 @@ public class Bundle {
 
     public Map<String, Encass> getEncasses() {
         return encasses;
+    }
+
+    public void putAllGlobalProperties(Map<String, String> properties) {
+        this.globalProperties.putAll(properties);
+    }
+
+    public Map<String, String> getGlobalProperties() {
+        return globalProperties;
     }
 }
