@@ -1,0 +1,11 @@
+example project/encass-policy.xml:
+  arguments:
+  - name: "hello"
+    type: "string"
+  - name: "hello-again"
+    type: "message"
+  results:
+  - name: "goodbye"
+    type: "string"
+  - name: "goodbye-again"
+    type: "message"

@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,9 +20,11 @@ import java.util.Map;
 public class PolicyAndFolderLoader implements EntityLoader {
 
     private final FileUtils fileUtils;
+    private final IdGenerator idGenerator;
 
-    public PolicyAndFolderLoader(FileUtils fileUtils) {
+    public PolicyAndFolderLoader(FileUtils fileUtils, IdGenerator idGenerator) {
         this.fileUtils = fileUtils;
+        this.idGenerator = idGenerator;
     }
 
     @Override
@@ -72,6 +75,8 @@ public class PolicyAndFolderLoader implements EntityLoader {
         policy.setPolicyXML(fileUtils.getFileAsString(policyFile));
         policy.setName(getPolicyName(policyFile));
         policy.setParentFolder(parentFolder);
+        policy.setGuid(idGenerator.generateGuid());
+        policy.setId(idGenerator.generate());
         return policy;
     }
 
@@ -79,7 +84,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
     String getPolicyName(File policyFile) {
         String fileName = policyFile.getName();
         int indexOfPeriod = fileName.lastIndexOf('.');
-        if(indexOfPeriod > 0) {
+        if (indexOfPeriod > 0) {
             return fileName.substring(0, indexOfPeriod);
         } else {
             return fileName;

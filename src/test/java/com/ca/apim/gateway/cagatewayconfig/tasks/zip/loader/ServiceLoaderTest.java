@@ -9,7 +9,9 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -29,12 +31,18 @@ public class ServiceLoaderTest {
 
     @Rule
     public final TemporaryFolder rootProjectDir = new TemporaryFolder();
+    private JsonTools jsonTools;
     @Mock
     private FileUtils fileUtils;
 
+    @Before
+    public void before() {
+        jsonTools = new JsonTools(fileUtils);
+    }
+
     @Test
     public void loadJSON() throws IOException {
-        ServiceLoader serviceLoader = new ServiceLoader(fileUtils, JsonTools.INSTANCE);
+        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
         String json = "{\n" +
                 "    \"example project/example.xml\": {\n" +
                 "        \"httpMethods\": [\n" +
@@ -79,7 +87,7 @@ public class ServiceLoaderTest {
 
     @Test
     public void loadYAML() throws IOException {
-        ServiceLoader serviceLoader = new ServiceLoader(fileUtils, JsonTools.INSTANCE);
+        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
         String json = "example project/example.xml:\n" +
                 "  httpMethods:\n" +
                 "  - GET\n" +
@@ -115,9 +123,9 @@ public class ServiceLoaderTest {
         Assert.assertTrue(bundle.getServices().get("example project/example-project.xml").getHttpMethods().contains("DELETE"));
     }
 
-    @Test(expected = BundleLoadException.class)
+    @Test(expected = JsonToolsException.class)
     public void testBothJsonAndYaml() throws IOException {
-        ServiceLoader serviceLoader = new ServiceLoader(fileUtils, JsonTools.INSTANCE);
+        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
         File configFolder = rootProjectDir.newFolder("config");
         File servicesJsonFile = new File(configFolder, "services.json");
         Files.touch(servicesJsonFile);
@@ -130,16 +138,16 @@ public class ServiceLoaderTest {
 
     @Test
     public void testNoServices() {
-        ServiceLoader serviceLoader = new ServiceLoader(fileUtils, JsonTools.INSTANCE);
+        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
 
         Bundle bundle = new Bundle();
         serviceLoader.load(bundle, rootProjectDir.getRoot());
         Assert.assertTrue(bundle.getServices().isEmpty());
     }
 
-    @Test(expected = BundleLoadException.class)
+    @Test(expected = JsonToolsException.class)
     public void badJson() throws IOException {
-        ServiceLoader serviceLoader = new ServiceLoader(fileUtils, JsonTools.INSTANCE);
+        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
         String json = "{\n" +
                 "    \"example project/example.xml\": {\n" +
                 "        \"httpMethods\": [\n" +

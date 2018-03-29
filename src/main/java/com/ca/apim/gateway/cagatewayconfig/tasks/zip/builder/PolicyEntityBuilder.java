@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
@@ -21,28 +22,22 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class PolicyEntityBuilder implements EntityBuilder {
-    private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
     private final Document document;
-    private final IdGenerator idGenerator;
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
 
-    public PolicyEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document, IdGenerator idGenerator) {
+    public PolicyEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document) {
         this.documentFileUtils = documentFileUtils;
         this.documentTools = documentTools;
         this.document = document;
-        this.idGenerator = idGenerator;
     }
 
     public List<Entity> build(Bundle bundle) {
-        List<Runnable> secondStageActions = new LinkedList<>();
-
-        bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle, secondStageActions));
-        secondStageActions.forEach(Runnable::run);
+        bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle));
 
         List<Policy> orderedPolicies = new LinkedList<>();
         bundle.getPolicies().forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
@@ -64,44 +59,73 @@ public class PolicyEntityBuilder implements EntityBuilder {
         orderedPolicies.add(policy);
     }
 
-    private void preparePolicy(Policy policy, Bundle bundle, List<Runnable> secondStageActions) {
-        String guid = idGenerator.generateGuid();
-        policy.setGuid(guid);
+    private void preparePolicy(Policy policy, Bundle bundle) {
+        Document policyDocument = stringToXML(policy.getPolicyXML());
+        Element policyElement = policyDocument.getDocumentElement();
 
-        Element policyElement = stringToXML(policy.getPolicyXML());
+        prepareAssertion(policyElement, "L7p:Include", assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
+        prepareAssertion(policyElement, "L7p:Encapsulated", assertionElement -> prepareEncapsulatedAssertion(bundle, policyDocument, assertionElement));
 
-        NodeList includeReferences = policyElement.getElementsByTagName("L7p:Include");
-        for (int i = 0; i < includeReferences.getLength(); i++) {
-            Node includeElement = includeReferences.item(i);
-            if (!(includeElement instanceof Element)) {
-                throw new EntityBuilderException("Unexpected Include assertion node type: " + includeElement.getNodeType());
-            }
-            Element policyGuidElement;
-            try {
-                policyGuidElement = documentTools.getSingleElement((Element) includeElement, "L7p:PolicyGuid");
-            } catch (DocumentParseException e) {
-                throw new EntityBuilderException("Could not find PolicyGuid element in Include Assertion", e);
-            }
-            String policyPath = policyGuidElement.getAttribute("policyPath");
-            Policy includedPolicy = bundle.getPolicies().get(policyPath);
-            if (includedPolicy != null) {
-                policy.getDependencies().add(includedPolicy);
-                //need to do this in a second stage since the included policy might not have its guid set yet
-                secondStageActions.add(() -> {
-                    policyGuidElement.setAttribute("stringValue", includedPolicy.getGuid());
-                    policyGuidElement.removeAttribute("policyPath");
-                });
-            } else {
-                throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
-            }
-        }
         policy.setPolicyDocument(policyElement);
+    }
+
+    private void prepareAssertion(Element policyElement, String assertionTag, Consumer<Element> prepareAssertionMethod) {
+        NodeList assertionReferences = policyElement.getElementsByTagName(assertionTag);
+        for (int i = 0; i < assertionReferences.getLength(); i++) {
+            Node assertionElement = assertionReferences.item(i);
+            if (!(assertionElement instanceof Element)) {
+                throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeType());
+            }
+            prepareAssertionMethod.accept((Element) assertionElement);
+        }
+    }
+
+    private void prepareEncapsulatedAssertion(Bundle bundle, Document policyDocument, Node encapsulatedAssertionElement) {
+        String policyPath = ((Element) encapsulatedAssertionElement).getAttribute("policyPath");
+        Encass referenceEncass = bundle.getEncasses().get(policyPath);
+        if (referenceEncass != null) {
+            Element encapsulatedAssertionConfigNameElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigName");
+            encapsulatedAssertionConfigNameElement.setAttribute("stringValue", policyPath);
+            Node firstChild = encapsulatedAssertionElement.getFirstChild();
+            if (firstChild != null) {
+                encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigNameElement, firstChild);
+            } else {
+                encapsulatedAssertionElement.appendChild(encapsulatedAssertionConfigNameElement);
+            }
+
+            Element encapsulatedAssertionConfigGuidElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigGuid");
+            encapsulatedAssertionConfigGuidElement.setAttribute("stringValue", referenceEncass.getGuid());
+            encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
+
+            ((Element) encapsulatedAssertionElement).removeAttribute("policyPath");
+        } else {
+            throw new EntityBuilderException("Could not find referenced encass with path: " + policyPath);
+        }
+    }
+
+    private void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
+        Element policyGuidElement;
+        try {
+            policyGuidElement = documentTools.getSingleElement(includeAssertionElement, "L7p:PolicyGuid");
+        } catch (DocumentParseException e) {
+            throw new EntityBuilderException("Could not find PolicyGuid element in Include Assertion", e);
+        }
+        String policyPath = policyGuidElement.getAttribute("policyPath");
+        Policy includedPolicy = bundle.getPolicies().get(policyPath);
+        if (includedPolicy != null) {
+            policy.getDependencies().add(includedPolicy);
+            //need to do this in a second stage since the included policy might not have its guid set yet
+            policyGuidElement.setAttribute("stringValue", includedPolicy.getGuid());
+            policyGuidElement.removeAttribute("policyPath");
+        } else {
+            throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
+        }
     }
 
     private Entity buildPolicyEntity(Policy policy) {
         Element policyDetailElement = document.createElement("l7:PolicyDetail");
 
-        String id = idGenerator.generate();
+        String id = policy.getId();
         policyDetailElement.setAttribute("id", id);
         policyDetailElement.setAttribute("guid", policy.getGuid());
         policyDetailElement.setAttribute("folderId", policy.getParentFolder().getId());
@@ -135,7 +159,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return new Entity("POLICY", policy.getName(), id, policyElement);
     }
 
-    private Element stringToXML(String string) {
+    private Document stringToXML(String string) {
         Document documentElement;
         try {
             documentElement = documentTools.parse(string);
@@ -143,6 +167,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
         } catch (DocumentParseException e) {
             throw new EntityBuilderException("Could not load policy: " + e.getMessage(), e);
         }
-        return documentElement.getDocumentElement();
+        return documentElement;
     }
 }

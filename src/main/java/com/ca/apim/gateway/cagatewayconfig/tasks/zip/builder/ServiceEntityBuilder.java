@@ -38,7 +38,9 @@ public class ServiceEntityBuilder implements EntityBuilder {
         Element serviceDetailElement = document.createElement("l7:ServiceDetail");
 
         Policy policy = bundle.getPolicies().get(policyPath);
-
+        if (policy == null) {
+            throw new EntityBuilderException("Could not find policy for service. Policy Path: " + policyPath);
+        }
         String id = idGenerator.generate();
         serviceDetailElement.setAttribute("id", id);
         serviceDetailElement.setAttribute("folderId", policy.getParentFolder().getId());

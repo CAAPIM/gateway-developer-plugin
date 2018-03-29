@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -35,7 +36,7 @@ public class PolicyAndFolderLoaderTest {
         File c = new File(b, "c");
         File policy = new File(c, "policy.xml");
 
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
 
         String path = policyAndFolderLoader.getPath(policy, root);
 
@@ -44,7 +45,7 @@ public class PolicyAndFolderLoaderTest {
 
     @Test
     public void getPolicyNameTest() {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
 
         File policy = new File("policy.xml");
         Assert.assertEquals("policy", policyAndFolderLoader.getPolicyName(policy));
@@ -62,7 +63,7 @@ public class PolicyAndFolderLoaderTest {
 
     @Test
     public void testLoad() throws IOException {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(fileUtils);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(fileUtils, new IdGenerator());
         Mockito.when(fileUtils.getFileAsString(Mockito.any(File.class))).thenReturn("policy-content");
 
         File policyFolder = rootProjectDir.newFolder("policy");
@@ -92,7 +93,7 @@ public class PolicyAndFolderLoaderTest {
 
     @Test
     public void testLoadNoPolicyFolder() {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
         policyAndFolderLoader.load(bundle, rootProjectDir.getRoot());
@@ -102,7 +103,7 @@ public class PolicyAndFolderLoaderTest {
 
     @Test(expected = BundleLoadException.class)
     public void testLoadPolicyFolderIsFile() throws IOException {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
 
         rootProjectDir.newFile("policy");
 
