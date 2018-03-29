@@ -8,14 +8,14 @@ In order to use this plugin add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.2.00"
+    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.3.00"
 }
 ```
 
 After this is added run `gradle build` in order to build a bundle from a gateway solution located in `src/main/Gateway`.
 
 ## Using the Gateway Developer Plugin
-> Note: This plugin is still in an Alpha stage
+> Note: This plugin is still in an Beta stage
 
 The plugin adds the following tasks:
 
@@ -29,7 +29,10 @@ Entity | Supported | Description
 --- | --- | ---
 Folder | Yes | 
 Service | Yes | 
-Policy | No | This will be the next supported entity
+Policy | Yes |
+EncapsulatedAssertion | Yes |
+ClusterProperty | Yes |
+ 
 
 ## Expected Source Directory Organization
 The Gateway solution directory (`src/main/Gateway` by default) expects the following organization:
@@ -83,6 +86,68 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
               }
             }
             ```
+    * either `encass.yml` or `encass.json`
+      * This is a file containing the encapsulated assertions that are available in the gateway.
+      * An example `encass.yml` file would look like:
+        * ```yaml
+          example project/encass-policy.xml:
+            arguments:
+            - name: "hello"
+              type: "string"
+            - name: "hello-again"
+              type: "message"
+            results:
+            - name: "goodbye"
+              type: "string"
+            - name: "goodbye-again"
+              type: "message"
+          ```
+          * The above example will create one encapsulated assertion:
+            * An encapsulated assertion with its policy coming from the policy file located at: `example project/encass-policy.xml`
+              * It will have arguments `hello` or type `string` and `hello-again` of type `message`
+              * It will have results `goodbye` or type `string` and `goodbye-again` of type `message`
+          * The above file has the following organization:
+            * ```yaml
+              <path-to-policy-file>:
+                <service-description>
+              ```
+              where `<service-description>` lists `httpMethods` and the `url` the service is exposed at.
+          * The same JSON representation would look like:
+            * ```json
+              {
+                "example project/encass-policy.xml": {
+                  "arguments": [
+                    {
+                      "name": "hello",
+                      "type": "string"
+                    },
+                    {
+                      "name": "hello-again",
+                      "type": "message"
+                    }
+                  ],
+                  "results": [
+                    {
+                      "name": "goodbye",
+                      "type": "string"
+                    },
+                    {
+                      "name": "goodbye-again",
+                      "type": "message"
+                    }
+                  ]
+                }
+              }
+              ```
+    * `global.properties`
+      * This is a standard java properties file that contains the different cluster properties to create on the Gateway. An example `global.properties` file might look like:
+        * ```properties
+            my-global-property=This is a properties value
+            another-property=\
+              {"another":"properties",\
+               "value":"0"\
+              }
+          ```
   * `policy`
     * The policy folder contains the different policies that are available. It can contain may subdirectories to help organize the policy.
 
