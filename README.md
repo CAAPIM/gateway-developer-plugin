@@ -8,7 +8,7 @@ In order to use this plugin add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.gateway.gateway-export-plugin" version "0.2.00"
+    id "com.ca.apim.gateway.gateway-export-plugin" version "0.3.00"
 }
 
 GatewayConnection {
@@ -19,7 +19,7 @@ GatewayConnection {
 After this is added run `gradle export` in order to export a gateway solution into `src/main/Gateway`.
 
 # Using the Gateway Developer Plugin
-> Note: This plugin is still in an Alpha stage
+> Note: This plugin is still in an Beta stage
 
 The plugin adds the following tasks:
 
@@ -42,7 +42,9 @@ Entity | Supported | Description
 --- | --- | ---
 Folder | Yes | 
 Service | Yes | 
-Policy | No | This will be the next supported entity
+Policy | Yes |
+EncapsulatedAssertion | Yes |
+ClusterProperty | Yes |
 
 ## Customizing the Default Plugin Configuration
 You can customize the source solution directory location and the location to put the built bundle file by setting the `GatewaySourceConfig`. For example:
