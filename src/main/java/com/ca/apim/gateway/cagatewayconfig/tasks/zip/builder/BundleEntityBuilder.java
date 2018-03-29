@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
@@ -13,12 +19,14 @@ public class BundleEntityBuilder {
     private final Document document;
     private final ServiceEntityBuilder serviceEntityBuilder;
     private final PolicyEntityBuilder policyEntityBuilder;
+    private final EncassEntityBuilder encassEntityBuilder;
 
     public BundleEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document, IdGenerator idGenerator) {
         this.document = document;
         folderEntityBuilder = new FolderEntityBuilder(document, idGenerator);
         serviceEntityBuilder = new ServiceEntityBuilder(documentFileUtils, document, idGenerator);
-        policyEntityBuilder = new PolicyEntityBuilder(documentFileUtils, documentTools, document, idGenerator);
+        encassEntityBuilder = new EncassEntityBuilder(document, idGenerator);
+        policyEntityBuilder = new PolicyEntityBuilder(documentFileUtils, documentTools, document);
 
     }
 
@@ -26,6 +34,7 @@ public class BundleEntityBuilder {
         BundleDocumentBuilder bundleDocumentBuilder = new BundleDocumentBuilder(document);
         bundleDocumentBuilder.addEntities(folderEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(policyEntityBuilder.build(bundle));
+        bundleDocumentBuilder.addEntities(encassEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(serviceEntityBuilder.build(bundle));
 
         return bundleDocumentBuilder.build();

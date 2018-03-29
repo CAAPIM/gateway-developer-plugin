@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class Bundle {
     private final Map<String, Service> services = new HashMap<>();
+    private final Map<String, Encass> encasses = new HashMap<>();
     private final Map<String, Policy> policies = new HashMap<>();
     private final Map<String, Folder> folders = new HashMap<>();
 
@@ -36,5 +37,13 @@ public class Bundle {
 
     public Map<String, Folder> getFolders() {
         return folders;
+    }
+
+    public void putAllEncasses(Map<String, Encass> encasses) {
+        this.encasses.putAll(encasses);
+    }
+
+    public Map<String, Encass> getEncasses() {
+        return encasses;
     }
 }

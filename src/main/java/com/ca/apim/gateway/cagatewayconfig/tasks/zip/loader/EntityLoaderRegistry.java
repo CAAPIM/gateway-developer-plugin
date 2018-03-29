@@ -1,5 +1,12 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
@@ -11,10 +18,11 @@ public class EntityLoaderRegistry {
 
     private final Collection<EntityLoader> entityLoaders;
 
-    public EntityLoaderRegistry(FileUtils fileUtils, JsonTools jsonTools) {
+    public EntityLoaderRegistry(FileUtils fileUtils, JsonTools jsonTools, IdGenerator idGenerator) {
         final Collection<EntityLoader> loadersCollection = new HashSet<>();
-        loadersCollection.add(new ServiceLoader(fileUtils, jsonTools));
-        loadersCollection.add(new PolicyAndFolderLoader(fileUtils));
+        loadersCollection.add(new ServiceLoader(jsonTools));
+        loadersCollection.add(new EncassLoader(jsonTools, idGenerator));
+        loadersCollection.add(new PolicyAndFolderLoader(fileUtils, idGenerator));
 
         this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
     }
