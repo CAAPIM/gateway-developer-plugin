@@ -45,7 +45,32 @@ public class BundleDocumentBuilder {
         mapping.setAttribute("action", "NewOrExisting");
         mapping.setAttribute("srcId", entity.getId());
         mapping.setAttribute("type", entity.getType());
+        if (!entity.getMappingProperties().isEmpty()) {
+            final Element mappingProperties = document.createElement("l7:Properties");
+            entity.getMappingProperties().forEach((key, value) -> {
+                final Element mappingProperty = createMappingProperty(key, value, document);
+                mappingProperties.appendChild(mappingProperty);
+            });
+            mapping.appendChild(mappingProperties);
+        }
         return mapping;
+    }
+
+    private Element createMappingProperty(String key, Object value, Document document) {
+        final Element mappingProperty = document.createElement("l7:Property");
+        mappingProperty.setAttribute("key", key);
+        final Element mappingPropertyValue;
+        if (value instanceof String) {
+            mappingPropertyValue = document.createElement("l7:StringValue");
+            mappingPropertyValue.setTextContent((String) value);
+        } else if (value instanceof Boolean) {
+            mappingPropertyValue = document.createElement("l7:BooleanValue");
+            mappingPropertyValue.setTextContent(value.toString());
+        } else {
+            throw new EntityBuilderException("Could not create mapping property for value type: " + value.getClass().getTypeName());
+        }
+        mappingProperty.appendChild(mappingPropertyValue);
+        return mappingProperty;
     }
 
     private Element buildEntityItem(final Entity entity, final Document document) {

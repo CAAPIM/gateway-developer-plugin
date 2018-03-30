@@ -8,11 +8,20 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import org.w3c.dom.Element;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Entity {
+    public static final String MAPPING_PROPERTY_MAP_BY = "MapBy";
+    public static final String MAPPING_PROPERTY_MAP_TO = "MapTo";
+    public static final String MAPPING_PROPERTY_FAIL_ON_NEW = "FailOnNew";
+    public static final String MAPPING_PROPERTY_FAIL_ON_EXISTING = "FailOnExisting";
+
     private String type;
     private String id;
     private Element xml;
     private String name;
+    private Map<String, Object> mappingProperties = new HashMap<>();
 
     public Entity(String type, String name, String id, Element xml) {
         this.type = type;
@@ -51,5 +60,13 @@ public class Entity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Map<String, Object> getMappingProperties() {
+        return mappingProperties;
+    }
+
+    public void setMappingProperty(String key, Object value) {
+        mappingProperties.put(key, value);
     }
 }
