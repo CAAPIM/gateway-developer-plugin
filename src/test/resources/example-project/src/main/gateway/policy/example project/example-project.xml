@@ -51,5 +51,13 @@
             <L7p:Replacement stringValue="&quot;pet-names&quot;: [&quot;$1&quot;]"/>
             <L7p:Target target="RESPONSE"/>
         </L7p:Regex>
+        <L7p:SetVariable>
+            <L7p:Expression>
+                { "test": "value" }
+            </L7p:Expression>
+            <L7p:ContentType stringValue="text/json; charset=utf-8"/>
+            <L7p:DataType variableDataType="message"/>
+            <L7p:VariableToSet stringValue="encass-messsage-input"/>
+        </L7p:SetVariable>
     </wsp:All>
 </wsp:Policy>
