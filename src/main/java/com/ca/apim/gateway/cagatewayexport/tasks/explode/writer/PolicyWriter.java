@@ -22,8 +22,10 @@ import org.w3c.dom.NodeList;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,48 +75,75 @@ public class PolicyWriter implements EntityWriter {
     }
 
     private Element simplifyPolicyXML(Element policyElement, Bundle bundle) {
-        NodeList includeReferences = policyElement.getElementsByTagName("L7p:Include");
+        findAndSimplifyAssertion(policyElement, "L7p:Include", (element) -> simplifyIncludeAssertion(bundle, element));
+        findAndSimplifyAssertion(policyElement, "L7p:Encapsulated", (element) -> simplifyEncapsulatedAssertion(bundle, element));
+        findAndSimplifyAssertion(policyElement, "L7p:SetVariable", this::simplifySetVariable);
+        findAndSimplifyAssertion(policyElement, "L7p:HardcodedResponse", this::simplifyHardcodedResponse);
+        return policyElement;
+    }
+
+    private void simplifyHardcodedResponse(Element element) {
+        Element base64ResponseBodyElement = EntityLoaderHelper.getSingleElement(element, "L7p:Base64ResponseBody");
+        String base64Expression = base64ResponseBodyElement.getAttribute("stringValue");
+        byte[] decoded = Base64.getDecoder().decode(base64Expression);
+
+        Element expressionElement = element.getOwnerDocument().createElement("L7p:ResponseBody");
+        expressionElement.appendChild(element.getOwnerDocument().createCDATASection(new String(decoded)));
+        element.insertBefore(expressionElement, base64ResponseBodyElement);
+        element.removeChild(base64ResponseBodyElement);
+    }
+
+    private void simplifySetVariable(Element element) {
+        Element base64ExpressionElement = EntityLoaderHelper.getSingleElement(element, "L7p:Base64Expression");
+        String base64Expression = base64ExpressionElement.getAttribute("stringValue");
+        byte[] decoded = Base64.getDecoder().decode(base64Expression);
+
+        Element expressionElement = element.getOwnerDocument().createElement("L7p:Expression");
+        expressionElement.appendChild(element.getOwnerDocument().createCDATASection(new String(decoded)));
+        element.insertBefore(expressionElement, base64ExpressionElement);
+        element.removeChild(base64ExpressionElement);
+    }
+
+    private void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) {
+        Element encassGuidElement = EntityLoaderHelper.getSingleElement(encapsulatedAssertionElement, "L7p:EncapsulatedAssertionConfigGuid");
+        String encassGuid = encassGuidElement.getAttribute("stringValue");
+        Optional<EncassEntity> encassEntity = bundle.getEntities(EncassEntity.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
+        if (encassEntity.isPresent()) {
+            PolicyEntity policyEntity = bundle.getEntities(PolicyEntity.class).get(encassEntity.get().getPolicyId());
+            if (policyEntity != null) {
+                encapsulatedAssertionElement.setAttribute("policyPath", getPolicyPath(bundle, policyEntity));
+                Element encapsulatedAssertionConfigNameElement = EntityLoaderHelper.getSingleElement(encapsulatedAssertionElement, "L7p:EncapsulatedAssertionConfigName");
+                encapsulatedAssertionElement.removeChild(encapsulatedAssertionConfigNameElement);
+                encapsulatedAssertionElement.removeChild(encassGuidElement);
+            } else {
+                LOGGER.log(Level.WARNING, "Could not find referenced encass policy with id: %s", encassEntity.get().getPolicyId());
+            }
+        } else {
+            LOGGER.log(Level.WARNING, "Could not find referenced encass with guid: %s", encassGuid);
+        }
+    }
+
+    private void simplifyIncludeAssertion(Bundle bundle, Element assertionElement) {
+        Element policyGuidElement = EntityLoaderHelper.getSingleElement(assertionElement, "L7p:PolicyGuid");
+        String includedPolicyGuid = policyGuidElement.getAttribute("stringValue");
+        Optional<PolicyEntity> policyEntity = bundle.getEntities(PolicyEntity.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
+        if (policyEntity.isPresent()) {
+            policyGuidElement.setAttribute("policyPath", getPolicyPath(bundle, policyEntity.get()));
+            policyGuidElement.removeAttribute("stringValue");
+        } else {
+            LOGGER.log(Level.WARNING, "Could not find referenced policy include with guid: %s", includedPolicyGuid);
+        }
+    }
+
+    private void findAndSimplifyAssertion(Element policyElement, String assertionTagName, Consumer<Element> simplifier) {
+        NodeList includeReferences = policyElement.getElementsByTagName(assertionTagName);
         for (int i = 0; i < includeReferences.getLength(); i++) {
             Node includeElement = includeReferences.item(i);
             if (!(includeElement instanceof Element)) {
-                throw new WriteException("Unexpected Include assertion node type: " + includeElement.getNodeType());
+                throw new WriteException("Unexpected Assertion node type: " + includeElement.getNodeType());
             }
-            Element policyGuidElement = EntityLoaderHelper.getSingleElement((Element) includeElement, "L7p:PolicyGuid");
-            String includedPolicyGuid = policyGuidElement.getAttribute("stringValue");
-            Optional<PolicyEntity> policyEntity = bundle.getEntities(PolicyEntity.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
-            if (policyEntity.isPresent()) {
-                policyGuidElement.setAttribute("policyPath", getPolicyPath(bundle, policyEntity.get()));
-                policyGuidElement.removeAttribute("stringValue");
-            } else {
-                LOGGER.log(Level.WARNING, "Could not find referenced policy include with guid: %s", includedPolicyGuid);
-            }
+            simplifier.accept((Element) includeElement);
         }
-
-        NodeList encapsulatedReferences = policyElement.getElementsByTagName("L7p:Encapsulated");
-        for (int i = 0; i < encapsulatedReferences.getLength(); i++) {
-            Node encapsulatedElement = encapsulatedReferences.item(i);
-            if (!(encapsulatedElement instanceof Element)) {
-                throw new WriteException("Unexpected Assertion node type: " + encapsulatedElement.getNodeType());
-            }
-
-            Element encassGuidElement = EntityLoaderHelper.getSingleElement((Element) encapsulatedElement, "L7p:EncapsulatedAssertionConfigGuid");
-            String encassGuid = encassGuidElement.getAttribute("stringValue");
-            Optional<EncassEntity> encassEntity = bundle.getEntities(EncassEntity.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
-            if (encassEntity.isPresent()) {
-                PolicyEntity policyEntity = bundle.getEntities(PolicyEntity.class).get(encassEntity.get().getPolicyId());
-                if (policyEntity != null) {
-                    ((Element) encapsulatedElement).setAttribute("policyPath", getPolicyPath(bundle, policyEntity));
-                    Element encapsulatedAssertionConfigNameElement = EntityLoaderHelper.getSingleElement((Element) encapsulatedElement, "L7p:EncapsulatedAssertionConfigName");
-                    encapsulatedElement.removeChild(encapsulatedAssertionConfigNameElement);
-                    encapsulatedElement.removeChild(encassGuidElement);
-                } else {
-                    LOGGER.log(Level.WARNING, "Could not find referenced encass policy with id: %s", encassEntity.get().getPolicyId());
-                }
-            } else {
-                LOGGER.log(Level.WARNING, "Could not find referenced encass with guid: %s", encassGuid);
-            }
-        }
-        return policyElement;
     }
 
     private String getPolicyPath(Bundle bundle, PolicyEntity policyEntity) {
