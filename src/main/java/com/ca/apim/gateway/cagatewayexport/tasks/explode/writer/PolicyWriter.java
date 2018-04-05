@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilderException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
@@ -83,7 +84,13 @@ public class PolicyWriter implements EntityWriter {
     }
 
     private void simplifyHardcodedResponse(Element element) {
-        Element base64ResponseBodyElement = EntityLoaderHelper.getSingleElement(element, "L7p:Base64ResponseBody");
+        Element base64ResponseBodyElement;
+        try {
+            base64ResponseBodyElement = EntityLoaderHelper.getSingleElement(element, "L7p:Base64ResponseBody");
+        } catch (BundleBuilderException e) {
+            LOGGER.log(Level.FINE, "Base64ResponseBody missing from hardcoded assertion.");
+            return;
+        }
         String base64Expression = base64ResponseBodyElement.getAttribute("stringValue");
         byte[] decoded = Base64.getDecoder().decode(base64Expression);
 
