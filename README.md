@@ -8,7 +8,7 @@ In order to use this plugin add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.gateway.gateway-export-plugin" version "0.3.00"
+    id "com.ca.apim.gateway.gateway-export-plugin" version "0.4.00"
 }
 
 GatewayConnection {
