@@ -9,23 +9,20 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class PolicyEntityBuilder implements EntityBuilder {
+    private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
+
     private final Document document;
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
@@ -65,19 +62,61 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
         prepareAssertion(policyElement, "L7p:Include", assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
         prepareAssertion(policyElement, "L7p:Encapsulated", assertionElement -> prepareEncapsulatedAssertion(bundle, policyDocument, assertionElement));
+        prepareAssertion(policyElement, "L7p:SetVariable", assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement));
+        prepareAssertion(policyElement, "L7p:HardcodedResponse", assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
         policy.setPolicyDocument(policyElement);
     }
 
-    private void prepareAssertion(Element policyElement, String assertionTag, Consumer<Element> prepareAssertionMethod) {
-        NodeList assertionReferences = policyElement.getElementsByTagName(assertionTag);
-        for (int i = 0; i < assertionReferences.getLength(); i++) {
-            Node assertionElement = assertionReferences.item(i);
-            if (!(assertionElement instanceof Element)) {
-                throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeType());
-            }
-            prepareAssertionMethod.accept((Element) assertionElement);
+    private void prepareHardcodedResponseAssertion(Document policyDocument, Element assertionElement) {
+        Element responseBodyElement;
+        try {
+            responseBodyElement = documentTools.getSingleElement(assertionElement, "L7p:ResponseBody");
+        } catch (DocumentParseException e) {
+            LOGGER.log(Level.FINE, "Did not find 'Expression' tag for SetVariableAssertion. Not generating Base64ed version");
+            return;
         }
+
+        String expression = getCDataOrText(responseBodyElement);
+        String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
+        Element base64ResponseElement = policyDocument.createElement("L7p:Base64ResponseBody");
+        base64ResponseElement.setAttribute("stringValue", encoded);
+        assertionElement.insertBefore(base64ResponseElement, responseBodyElement);
+        assertionElement.removeChild(responseBodyElement);
+    }
+
+    private void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
+        Element expressionElement;
+        try {
+            expressionElement = documentTools.getSingleElement(assertionElement, "L7p:Expression");
+        } catch (DocumentParseException e) {
+            LOGGER.log(Level.FINE, "Did not find 'Expression' tag for SetVariableAssertion. Not generating Base64ed version");
+            return;
+        }
+
+        String expression = getCDataOrText(expressionElement);
+        String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
+        Element base64ExpressionElement = policyDocument.createElement("L7p:Base64Expression");
+        base64ExpressionElement.setAttribute("stringValue", encoded);
+        assertionElement.insertBefore(base64ExpressionElement, expressionElement);
+        assertionElement.removeChild(expressionElement);
+    }
+
+    private String getCDataOrText(Element element) {
+        StringBuilder content = new StringBuilder();
+        NodeList children = element.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            short nodeType = child.getNodeType();
+            if (nodeType == Node.TEXT_NODE) {
+                content.append(child.getTextContent());
+            } else if (nodeType == Node.CDATA_SECTION_NODE) {
+                return ((CDATASection) child).getData();
+            } else {
+                throw new EntityBuilderException("Unexpected set variable assertion expression node type: " + child.getNodeName());
+            }
+        }
+        return content.toString();
     }
 
     private void prepareEncapsulatedAssertion(Bundle bundle, Document policyDocument, Node encapsulatedAssertionElement) {
@@ -119,6 +158,17 @@ public class PolicyEntityBuilder implements EntityBuilder {
             policyGuidElement.removeAttribute("policyPath");
         } else {
             throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
+        }
+    }
+
+    private void prepareAssertion(Element policyElement, String assertionTag, Consumer<Element> prepareAssertionMethod) {
+        NodeList assertionReferences = policyElement.getElementsByTagName(assertionTag);
+        for (int i = 0; i < assertionReferences.getLength(); i++) {
+            Node assertionElement = assertionReferences.item(i);
+            if (!(assertionElement instanceof Element)) {
+                throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
+            }
+            prepareAssertionMethod.accept((Element) assertionElement);
         }
     }
 

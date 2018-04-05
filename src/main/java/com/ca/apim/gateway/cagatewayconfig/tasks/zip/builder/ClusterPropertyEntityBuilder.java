@@ -43,6 +43,8 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         valueElement.setTextContent(value);
         clusterPropertyElement.appendChild(valueElement);
 
-        return new Entity("CLUSTER_PROPERTY", name, id, clusterPropertyElement);
+        Entity entity = new Entity("CLUSTER_PROPERTY", name, id, clusterPropertyElement);
+        entity.setMappingProperty(Entity.MAPPING_PROPERTY_MAP_BY, "name");
+        return entity;
     }
 }
