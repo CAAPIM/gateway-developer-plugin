@@ -14,7 +14,7 @@ apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.9
-version = "0.4.00"
+version = "0.5.00"
 
 repositories {
     mavenCentral()
