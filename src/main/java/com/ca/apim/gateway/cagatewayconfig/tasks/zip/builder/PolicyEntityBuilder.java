@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
+    public static final String STRING_VALUE = "stringValue";
 
     private final Document document;
     private final DocumentTools documentTools;
@@ -80,7 +81,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String expression = getCDataOrText(responseBodyElement);
         String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
         Element base64ResponseElement = policyDocument.createElement("L7p:Base64ResponseBody");
-        base64ResponseElement.setAttribute("stringValue", encoded);
+        base64ResponseElement.setAttribute(STRING_VALUE, encoded);
         assertionElement.insertBefore(base64ResponseElement, responseBodyElement);
         assertionElement.removeChild(responseBodyElement);
     }
@@ -97,7 +98,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String expression = getCDataOrText(expressionElement);
         String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
         Element base64ExpressionElement = policyDocument.createElement("L7p:Base64Expression");
-        base64ExpressionElement.setAttribute("stringValue", encoded);
+        base64ExpressionElement.setAttribute(STRING_VALUE, encoded);
         assertionElement.insertBefore(base64ExpressionElement, expressionElement);
         assertionElement.removeChild(expressionElement);
     }
@@ -124,7 +125,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Encass referenceEncass = bundle.getEncasses().get(policyPath);
         if (referenceEncass != null) {
             Element encapsulatedAssertionConfigNameElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigName");
-            encapsulatedAssertionConfigNameElement.setAttribute("stringValue", policyPath);
+            encapsulatedAssertionConfigNameElement.setAttribute(STRING_VALUE, policyPath);
             Node firstChild = encapsulatedAssertionElement.getFirstChild();
             if (firstChild != null) {
                 encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigNameElement, firstChild);
@@ -133,7 +134,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             }
 
             Element encapsulatedAssertionConfigGuidElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigGuid");
-            encapsulatedAssertionConfigGuidElement.setAttribute("stringValue", referenceEncass.getGuid());
+            encapsulatedAssertionConfigGuidElement.setAttribute(STRING_VALUE, referenceEncass.getGuid());
             encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
 
             ((Element) encapsulatedAssertionElement).removeAttribute("policyPath");
@@ -154,7 +155,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (includedPolicy != null) {
             policy.getDependencies().add(includedPolicy);
             //need to do this in a second stage since the included policy might not have its guid set yet
-            policyGuidElement.setAttribute("stringValue", includedPolicy.getGuid());
+            policyGuidElement.setAttribute(STRING_VALUE, includedPolicy.getGuid());
             policyGuidElement.removeAttribute("policyPath");
         } else {
             throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);

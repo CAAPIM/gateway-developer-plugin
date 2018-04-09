@@ -1,4 +1,6 @@
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/ca-api-Gateway/Gateway-developer-plugin.svg?columns=all)](https://waffle.io/ca-api-Gateway/Gateway-developer-plugin)
+[![Build Status](https://travis-ci.org/ca-api-gateway/gateway-developer-plugin.svg?branch=master)](https://travis-ci.org/ca-api-gateway/gateway-developer-plugin)
+[![Sonar Cloud Status](https://sonarcloud.io/api/project_badges/measure?project=com.ca.apim.gateway%3Agateway-developer-plugin&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.ca.apim.gateway%3Agateway-developer-plugin)
 
 # About
 The Gateway developer plugin can be used to develop Gateway configuration.
@@ -8,7 +10,7 @@ In order to use this plugin add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.4.00"
+    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.5.00"
 }
 ```
 
