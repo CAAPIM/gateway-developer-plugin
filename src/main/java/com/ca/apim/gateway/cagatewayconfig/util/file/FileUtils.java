@@ -16,9 +16,6 @@ import java.nio.file.Files;
 public class FileUtils {
     public static final FileUtils INSTANCE = new FileUtils();
 
-    public FileUtils() {
-    }
-
     public InputStream getInputStream(final File file) {
         final InputStream stream;
         try {

@@ -22,7 +22,9 @@ import java.util.stream.Collectors;
 
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
-    public static final String STRING_VALUE = "stringValue";
+
+    private static final String STRING_VALUE = "stringValue";
+    private static final String POLICY_PATH = "policyPath";
 
     private final Document document;
     private final DocumentTools documentTools;
@@ -121,7 +123,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private void prepareEncapsulatedAssertion(Bundle bundle, Document policyDocument, Node encapsulatedAssertionElement) {
-        String policyPath = ((Element) encapsulatedAssertionElement).getAttribute("policyPath");
+        String policyPath = ((Element) encapsulatedAssertionElement).getAttribute(POLICY_PATH);
         Encass referenceEncass = bundle.getEncasses().get(policyPath);
         if (referenceEncass != null) {
             Element encapsulatedAssertionConfigNameElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigName");
@@ -137,7 +139,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             encapsulatedAssertionConfigGuidElement.setAttribute(STRING_VALUE, referenceEncass.getGuid());
             encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
 
-            ((Element) encapsulatedAssertionElement).removeAttribute("policyPath");
+            ((Element) encapsulatedAssertionElement).removeAttribute(POLICY_PATH);
         } else {
             throw new EntityBuilderException("Could not find referenced encass with path: " + policyPath);
         }
@@ -150,13 +152,13 @@ public class PolicyEntityBuilder implements EntityBuilder {
         } catch (DocumentParseException e) {
             throw new EntityBuilderException("Could not find PolicyGuid element in Include Assertion", e);
         }
-        String policyPath = policyGuidElement.getAttribute("policyPath");
+        String policyPath = policyGuidElement.getAttribute(POLICY_PATH);
         Policy includedPolicy = bundle.getPolicies().get(policyPath);
         if (includedPolicy != null) {
             policy.getDependencies().add(includedPolicy);
             //need to do this in a second stage since the included policy might not have its guid set yet
             policyGuidElement.setAttribute(STRING_VALUE, includedPolicy.getGuid());
-            policyGuidElement.removeAttribute("policyPath");
+            policyGuidElement.removeAttribute(POLICY_PATH);
         } else {
             throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
         }

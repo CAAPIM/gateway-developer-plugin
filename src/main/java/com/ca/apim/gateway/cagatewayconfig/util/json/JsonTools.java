@@ -59,7 +59,7 @@ public class JsonTools {
             type = JsonTools.YAML;
             inputStream = fileUtils.getInputStream(ymlFile);
         } else {
-            LOGGER.log(Level.FINE, "Did not find a " + fileName + " configuration file. Not loading any.");
+            LOGGER.log(Level.FINE, "Did not find a {0} configuration file. Not loading any.", fileName);
             // no services to bundle
             return null;
         }
