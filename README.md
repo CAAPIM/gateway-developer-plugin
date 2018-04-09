@@ -10,7 +10,7 @@ In order to use this plugin add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.4.00"
+    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.5.00"
 }
 ```
 
