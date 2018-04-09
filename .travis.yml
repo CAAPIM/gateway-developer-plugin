@@ -4,6 +4,8 @@ jdk:
 addons:
   sonarcloud:
     organization: "ca-api-gateway"
+    token:
+      secure: $SONAR_TOKEN
 script:
   - ./gradlew sonarqube
 before_cache:

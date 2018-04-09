@@ -25,11 +25,11 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
 
     public List<Entity> build(Bundle bundle) {
         return bundle.getGlobalProperties().entrySet().stream().map(propertyEntry ->
-                buildClusterPropertyEntity(bundle, propertyEntry.getKey(), propertyEntry.getValue())
+                buildClusterPropertyEntity(propertyEntry.getKey(), propertyEntry.getValue())
         ).collect(Collectors.toList());
     }
 
-    private Entity buildClusterPropertyEntity(Bundle bundle, String name, String value) {
+    private Entity buildClusterPropertyEntity(String name, String value) {
         Element clusterPropertyElement = document.createElement("l7:ClusterProperty");
 
         String id = idGenerator.generate();
