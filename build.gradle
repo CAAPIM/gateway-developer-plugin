@@ -5,6 +5,7 @@
  */
 plugins {
     id "com.gradle.plugin-publish" version "0.9.10"
+    id "org.sonarqube" version "2.6.2"
 }
 
 description = 'The gateway-export-plugin enables exporting from gateways into a format that is compatible with the gateway-developer-plugin.'
@@ -12,8 +13,9 @@ group 'com.ca.apim.gateway'
 
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
+apply plugin: "jacoco"
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.9
 version = "0.5.00"
 
 repositories {
@@ -51,5 +53,12 @@ pluginBundle {
             description = 'The gateway-developer-plugin enables developing gateway configuration.'
             tags = ['ca api gateway','building']
         }
+    }
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
     }
 }
