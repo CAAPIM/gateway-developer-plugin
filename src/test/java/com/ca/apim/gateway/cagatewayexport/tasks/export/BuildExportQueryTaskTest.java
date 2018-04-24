@@ -170,10 +170,45 @@ public class BuildExportQueryTaskTest {
         String folder3Id = "339a94822f0983eb2f8ed699eee082fd";
         Mockito.when(gatewayClient.makeAPICall(Mockito.any(), Mockito.eq(gatewayConnectionProperties.getUrl().get() + "/1.0/folders?parentFolder.id=" + folder2Id + "&name=" + folder3))).thenReturn(IOUtils.toInputStream(buildFolderResponse(folder3, folder3Id, folder2Id), Charset.forName("UTF-8")));
 
+        String pbsId = "5c012da2ec439a92bfc9f45746ec48bb";
+        Mockito.when(gatewayClient.makeAPICall(Mockito.any(), Mockito.eq(gatewayConnectionProperties.getUrl().get() + "/1.0/policyBackedServices"))).thenReturn(IOUtils.toInputStream(buildPBSResponse(pbsId), Charset.forName("UTF-8")));
+
         gatewayConnectionProperties.getFolderPath().set("/my/folder/path");
         buildExportQueryTask.perform();
 
-        Assert.assertEquals("?encassAsPolicyDependency=true&folder=" + ROOT_FOLDER_ID + "&folder=" + folder1Id + "&folder=" + folder2Id + "&folder=" + folder3Id, buildExportQueryTask.getExportQuery().get());
+        Assert.assertTrue(buildExportQueryTask.getExportQuery().get().contains("folder=" + ROOT_FOLDER_ID + "&folder=" + folder1Id + "&folder=" + folder2Id + "&folder=" + folder3Id));
+        Assert.assertTrue(buildExportQueryTask.getExportQuery().get().contains("policyBackedService=" + pbsId));
+    }
+
+    private String buildPBSResponse(String pbsId) {
+        return String.format("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                        "<l7:List xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                        "    <l7:Name>POLICY_BACKED_SERVICE List</l7:Name>\n" +
+                        "    <l7:Type>List</l7:Type>\n" +
+                        "    <l7:TimeStamp>2018-04-24T16:38:02.732Z</l7:TimeStamp>\n" +
+                        "    <l7:Link rel=\"self\" uri=\"https://gateway-dev:8443/restman/1.0/policyBackedServices\"/>\n" +
+                        "    <l7:Link rel=\"template\" uri=\"https://gateway-dev:8443/restman/1.0/policyBackedServices/template\"/>\n" +
+                        "    <l7:Item>\n" +
+                        "        <l7:Name>my-pbs</l7:Name>\n" +
+                        "        <l7:Id>%1$s</l7:Id>\n" +
+                        "        <l7:Type>POLICY_BACKED_SERVICE</l7:Type>\n" +
+                        "        <l7:TimeStamp>2018-04-24T16:38:02.724Z</l7:TimeStamp>\n" +
+                        "        <l7:Link rel=\"self\" uri=\"https://gateway-dev:8443/restman/1.0/policyBackedServices/5c012da2ec439a92bfc9f45746ec48bb\"/>\n" +
+                        "        <l7:Resource>\n" +
+                        "            <l7:PolicyBackedService id=\"%1$s\" version=\"0\">\n" +
+                        "                <l7:Name>my-pbs</l7:Name>\n" +
+                        "                <l7:InterfaceName>com.l7tech.objectmodel.polback.BackgroundTask</l7:InterfaceName>\n" +
+                        "                <l7:PolicyBackedServiceOperations>\n" +
+                        "                    <l7:PolicyBackedServiceOperation>\n" +
+                        "                        <l7:PolicyId>5c012da2ec439a92bfc9f45746ec48a8</l7:PolicyId>\n" +
+                        "                        <l7:OperationName>run</l7:OperationName>\n" +
+                        "                    </l7:PolicyBackedServiceOperation>\n" +
+                        "                </l7:PolicyBackedServiceOperations>\n" +
+                        "            </l7:PolicyBackedService>\n" +
+                        "        </l7:Resource>\n" +
+                        "    </l7:Item>\n" +
+                        "</l7:List>\n",
+                pbsId);
     }
 
     private String buildFolderResponse(String folderName, String folderId, String parentFolderId) {
