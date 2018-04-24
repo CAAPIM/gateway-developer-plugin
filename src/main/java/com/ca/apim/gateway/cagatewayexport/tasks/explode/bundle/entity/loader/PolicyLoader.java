@@ -24,7 +24,7 @@ public class PolicyLoader implements EntityLoader {
         final Element policyDetails = EntityLoaderHelper.getSingleElement(policy, "l7:PolicyDetail");
         Element policyTypeElement = EntityLoaderHelper.getSingleElement(policyDetails, "l7:PolicyType");
         if (!"Include".equals(policyTypeElement.getTextContent())) {
-            LOGGER.log(Level.WARNING, "Skipping unsupported PolicyType: %s", policyTypeElement.getTextContent());
+            LOGGER.log(Level.WARNING, "Skipping unsupported PolicyType: {0}", policyTypeElement.getTextContent());
             return null;
         }
 

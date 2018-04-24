@@ -10,9 +10,7 @@ import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 
-import java.io.Serializable;
-
-public class GatewayConnectionProperties implements Serializable {
+public class GatewayConnectionProperties {
     private Property<String> url;
     private Property<String> userName;
     private Property<String> userPass;

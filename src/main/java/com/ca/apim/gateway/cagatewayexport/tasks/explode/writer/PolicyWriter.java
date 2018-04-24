@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 
 public class PolicyWriter implements EntityWriter {
     private static final Logger LOGGER = Logger.getLogger(PolicyWriter.class.getName());
+    public static final String STRING_VALUE = "stringValue";
 
     private final DocumentFileUtils documentFileUtils;
     private final DocumentTools documentTools;
@@ -76,8 +77,8 @@ public class PolicyWriter implements EntityWriter {
     }
 
     private Element simplifyPolicyXML(Element policyElement, Bundle bundle) {
-        findAndSimplifyAssertion(policyElement, "L7p:Include", (element) -> simplifyIncludeAssertion(bundle, element));
-        findAndSimplifyAssertion(policyElement, "L7p:Encapsulated", (element) -> simplifyEncapsulatedAssertion(bundle, element));
+        findAndSimplifyAssertion(policyElement, "L7p:Include", element -> simplifyIncludeAssertion(bundle, element));
+        findAndSimplifyAssertion(policyElement, "L7p:Encapsulated", element -> simplifyEncapsulatedAssertion(bundle, element));
         findAndSimplifyAssertion(policyElement, "L7p:SetVariable", this::simplifySetVariable);
         findAndSimplifyAssertion(policyElement, "L7p:HardcodedResponse", this::simplifyHardcodedResponse);
         return policyElement;
@@ -91,7 +92,7 @@ public class PolicyWriter implements EntityWriter {
             LOGGER.log(Level.FINE, "Base64ResponseBody missing from hardcoded assertion.");
             return;
         }
-        String base64Expression = base64ResponseBodyElement.getAttribute("stringValue");
+        String base64Expression = base64ResponseBodyElement.getAttribute(STRING_VALUE);
         byte[] decoded = Base64.getDecoder().decode(base64Expression);
 
         Element expressionElement = element.getOwnerDocument().createElement("L7p:ResponseBody");
@@ -102,7 +103,7 @@ public class PolicyWriter implements EntityWriter {
 
     private void simplifySetVariable(Element element) {
         Element base64ExpressionElement = EntityLoaderHelper.getSingleElement(element, "L7p:Base64Expression");
-        String base64Expression = base64ExpressionElement.getAttribute("stringValue");
+        String base64Expression = base64ExpressionElement.getAttribute(STRING_VALUE);
         byte[] decoded = Base64.getDecoder().decode(base64Expression);
 
         Element expressionElement = element.getOwnerDocument().createElement("L7p:Expression");
@@ -113,7 +114,7 @@ public class PolicyWriter implements EntityWriter {
 
     private void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) {
         Element encassGuidElement = EntityLoaderHelper.getSingleElement(encapsulatedAssertionElement, "L7p:EncapsulatedAssertionConfigGuid");
-        String encassGuid = encassGuidElement.getAttribute("stringValue");
+        String encassGuid = encassGuidElement.getAttribute(STRING_VALUE);
         Optional<EncassEntity> encassEntity = bundle.getEntities(EncassEntity.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
         if (encassEntity.isPresent()) {
             PolicyEntity policyEntity = bundle.getEntities(PolicyEntity.class).get(encassEntity.get().getPolicyId());
@@ -123,22 +124,22 @@ public class PolicyWriter implements EntityWriter {
                 encapsulatedAssertionElement.removeChild(encapsulatedAssertionConfigNameElement);
                 encapsulatedAssertionElement.removeChild(encassGuidElement);
             } else {
-                LOGGER.log(Level.WARNING, "Could not find referenced encass policy with id: %s", encassEntity.get().getPolicyId());
+                LOGGER.log(Level.WARNING, "Could not find referenced encass policy with id: {0}", encassEntity.get().getPolicyId());
             }
         } else {
-            LOGGER.log(Level.WARNING, "Could not find referenced encass with guid: %s", encassGuid);
+            LOGGER.log(Level.WARNING, "Could not find referenced encass with guid: {0}", encassGuid);
         }
     }
 
     private void simplifyIncludeAssertion(Bundle bundle, Element assertionElement) {
         Element policyGuidElement = EntityLoaderHelper.getSingleElement(assertionElement, "L7p:PolicyGuid");
-        String includedPolicyGuid = policyGuidElement.getAttribute("stringValue");
+        String includedPolicyGuid = policyGuidElement.getAttribute(STRING_VALUE);
         Optional<PolicyEntity> policyEntity = bundle.getEntities(PolicyEntity.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
         if (policyEntity.isPresent()) {
             policyGuidElement.setAttribute("policyPath", getPolicyPath(bundle, policyEntity.get()));
-            policyGuidElement.removeAttribute("stringValue");
+            policyGuidElement.removeAttribute(STRING_VALUE);
         } else {
-            LOGGER.log(Level.WARNING, "Could not find referenced policy include with guid: %s", includedPolicyGuid);
+            LOGGER.log(Level.WARNING, "Could not find referenced policy include with guid: {0}", includedPolicyGuid);
         }
     }
 
