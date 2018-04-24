@@ -16,6 +16,7 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.inject.Inject;
@@ -62,6 +63,7 @@ public class BuildExportQueryTask extends DefaultTask {
 
     /**
      * The path of the folder to export.
+     *
      * @return The generated export query
      */
     @Internal
@@ -90,13 +92,21 @@ public class BuildExportQueryTask extends DefaultTask {
                 gatewayConnectionProperties.getUserName().get(),
                 gatewayConnectionProperties.getUserPass().get());
 
-        exportQuery.set(buildQuery(exportFolderIds));
+        // get all policy backed services since they are not included by default
+        final List<String> exportPBSIds = gatewayClient.makeGatewayAPICallsWithReturn(
+                this::getPBSIds,
+                gatewayConnectionProperties.getUserName().get(),
+                gatewayConnectionProperties.getUserPass().get());
+
+        exportQuery.set(buildQuery(exportFolderIds, exportPBSIds));
     }
 
-    private String buildQuery(final List<String> exportFolderIds) {
+    private String buildQuery(final List<String> exportFolderIds, final List<String> exportPBSIds) {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("?encassAsPolicyDependency=true");
+        stringBuilder.append("&includeDependencies=true");
         exportFolderIds.forEach(s -> stringBuilder.append("&folder=").append(s));
+        exportPBSIds.forEach(s -> stringBuilder.append("&policyBackedService=").append(s));
         return stringBuilder.toString();
     }
 
@@ -112,6 +122,39 @@ public class BuildExportQueryTask extends DefaultTask {
             parentFolderName = segment;
         }
         return folderIds;
+    }
+
+    private List<String> getPBSIds(final HttpClient client) {
+        final LinkedList<String> pbsIds = new LinkedList<>();
+        final String uri = gatewayConnectionProperties.getUrl().get() + "/1.0/policyBackedServices";
+        final InputStream inputStream = gatewayClient.makeAPICall(client, uri);
+
+        final Document allPBSDoc;
+        try {
+            allPBSDoc = documentTools.parse(inputStream);
+        } catch (DocumentParseException e) {
+            throw new ExportException("Could not retrieve Policy Backed Services List. Unable to parse document", e);
+        }
+
+        final XPath xPath = documentTools.newXPath();
+        final NodeList nodeList = allPBSDoc.getElementsByTagName("l7:Item");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            final Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                final NodeList idNode;
+                try {
+                    idNode = (NodeList) xPath.evaluate("/List/Item/Id/text()", node, XPathConstants.NODESET);
+                } catch (XPathExpressionException e) {
+                    throw new ExportException("Could not retrieve Policy Backed Service Id.", e);
+                }
+                if (idNode.getLength() != 1) {
+                    throw new ExportException("Could not retrieve Policy Backed Service Id. Unexpected Item element format.");
+                } else {
+                    pbsIds.add(idNode.item(0).getTextContent());
+                }
+            }
+        }
+        return pbsIds;
     }
 
     String getFolderIdFromRestmanResponse(String folderName, String parentFolderName, final InputStream response) {

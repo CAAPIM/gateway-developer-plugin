@@ -57,6 +57,8 @@ public class BundleBuilder {
                 return new EncassLoader();
             case "CLUSTER_PROPERTY":
                 return new ClusterPropertyLoader();
+            case "POLICY_BACKED_SERVICE":
+                return new PolicyBackedServiceLoader();
             default:
                 throw new BundleBuilderException("No entity loader found for entity type: " + entityType);
         }
