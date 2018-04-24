@@ -6,15 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +41,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         List<Policy> orderedPolicies = new LinkedList<>();
         bundle.getPolicies().forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
 
-        return orderedPolicies.stream().map(this::buildPolicyEntity).collect(Collectors.toList());
+        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle)).collect(Collectors.toList());
     }
 
     private void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
@@ -175,7 +174,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Entity buildPolicyEntity(Policy policy) {
+    private Entity buildPolicyEntity(Policy policy, Bundle bundle) {
         Element policyDetailElement = document.createElement("l7:PolicyDetail");
 
         String id = policy.getId();
@@ -186,10 +185,29 @@ public class PolicyEntityBuilder implements EntityBuilder {
         nameElement.setTextContent(policy.getName());
         policyDetailElement.appendChild(nameElement);
 
+        PolicyTags policyTags = getPolicyTags(policy, bundle);
+
         Element policyTypeElement = document.createElement("l7:PolicyType");
-        policyTypeElement.setTextContent("Include");
+        policyTypeElement.setTextContent(policyTags == null ? "Include" : policyTags.type);
         policyDetailElement.appendChild(policyTypeElement);
 
+        if (policyTags != null) {
+            Element propertiesElement = document.createElement("l7:Properties");
+            policyDetailElement.appendChild(propertiesElement);
+            Element propertyTagElement = document.createElement("l7:Property");
+            propertiesElement.appendChild(propertyTagElement);
+            propertyTagElement.setAttribute("key", "tag");
+            Element tagStringValueElement = document.createElement("l7:StringValue");
+            propertyTagElement.appendChild(tagStringValueElement);
+            tagStringValueElement.setTextContent(policyTags.tag);
+
+            Element propertySubTagElement = document.createElement("l7:Property");
+            propertiesElement.appendChild(propertySubTagElement);
+            propertySubTagElement.setAttribute("key", "subtag");
+            Element subTagStringValueElement = document.createElement("l7:StringValue");
+            propertySubTagElement.appendChild(subTagStringValueElement);
+            subTagStringValueElement.setTextContent(policyTags.subtag);
+        }
 
         Element policyElement = document.createElement("l7:Policy");
         policyElement.setAttribute("id", id);
@@ -212,6 +230,18 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return new Entity("POLICY", policy.getName(), id, policyElement);
     }
 
+    private PolicyTags getPolicyTags(Policy policy, Bundle bundle) {
+        final AtomicReference<PolicyTags> policyTags = new AtomicReference<>();
+        for (PolicyBackedService pbs : bundle.getPolicyBackedServices().values()) {
+            pbs.getOperations().stream().filter(o -> o.getPolicy().equals(policy.getPath())).forEach(o -> {
+                if (!policyTags.compareAndSet(null, new PolicyTags("Service Operation", pbs.getInterfaceName(), o.getOperationName()))) {
+                    throw new EntityBuilderException("Found multiple policy backed service operations for policy: " + policy.getPath());
+                }
+            });
+        }
+        return policyTags.get();
+    }
+
     private Document stringToXML(String string) {
         Document documentElement;
         try {
@@ -221,5 +251,17 @@ public class PolicyEntityBuilder implements EntityBuilder {
             throw new EntityBuilderException("Could not load policy: " + e.getMessage(), e);
         }
         return documentElement;
+    }
+
+    private class PolicyTags {
+        private final String type;
+        private final String tag;
+        private final String subtag;
+
+        private PolicyTags(String type, String tag, String subtag) {
+            this.type = type;
+            this.tag = tag;
+            this.subtag = subtag;
+        }
     }
 }
