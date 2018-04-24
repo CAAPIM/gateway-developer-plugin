@@ -15,6 +15,7 @@ public class Bundle {
     private final Map<String, Policy> policies = new HashMap<>();
     private final Map<String, Folder> folders = new HashMap<>();
     private final Map<String, String> globalProperties = new HashMap<>();
+    private final Map<String, PolicyBackedService> policyBackedServices = new HashMap<>();
 
     public Map<String, Service> getServices() {
         return services;
@@ -54,5 +55,13 @@ public class Bundle {
 
     public Map<String, String> getGlobalProperties() {
         return globalProperties;
+    }
+
+    public void putAllPolicyBackedServices(Map<String, PolicyBackedService> policyBackedServices) {
+        this.policyBackedServices.putAll(policyBackedServices);
+    }
+
+    public Map<String, PolicyBackedService> getPolicyBackedServices() {
+        return policyBackedServices;
     }
 }
