@@ -34,6 +34,7 @@ Service | Yes |
 Policy | Yes |
 EncapsulatedAssertion | Yes |
 ClusterProperty | Yes |
+Policy Backed Service | Yes |
  
 
 ## Expected Source Directory Organization
@@ -135,14 +136,42 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
                 }
               }
               ```
+    * either `policy-backed-services.yml` or `policy-backed-services.json`
+      * This is a file containing the policy backed services that are available in the gateway.
+      * An example `policy-backed-services.yml` file would look like:
+        * ```yaml
+          my-pbs:
+            interfaceName: "com.l7tech.objectmodel.polback.BackgroundTask"
+            operations:
+            - policy: "example project/example-pbs.xml"
+              operationName: "run"
+          ```
+          * The above example will create one policy backed service:
+            * A policy backed service with the name: `my-pbs`
+              * It will use the policy backed interface `com.l7tech.objectmodel.polback.BackgroundTask`
+              * For the single operation `run` it will execute the policy located at: `example project/example-pbs.xml`
+          * The same JSON representation would look like:
+            * ```json
+              {
+                "my-pbs": {
+                  "interfaceName": "com.l7tech.objectmodel.polback.BackgroundTask",
+                  "operations": [
+                    {
+                      "policy": "example project/example-pbs.xml",
+                      "operationName": "run"
+                    }
+                  ]
+                }
+              }
+              ```
     * `global.properties`
       * This is a standard java properties file that contains the different cluster properties to create on the Gateway. An example `global.properties` file might look like:
         * ```properties
-            my-global-property=This is a properties value
-            another-property=\
-              {"another":"properties",\
-               "value":"0"\
-              }
+          my-global-property=This is a properties value
+          another-property=\
+            {"another":"properties",\
+             "value":"0"\
+            }
           ```
   * `policy`
     * The policy folder contains the different policies that are available. It can contain may subdirectories to help organize the policy.
