@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -172,12 +173,22 @@ public class BuildExportQueryTaskTest {
 
         String pbsId = "5c012da2ec439a92bfc9f45746ec48bb";
         Mockito.when(gatewayClient.makeAPICall(Mockito.any(), Mockito.eq(gatewayConnectionProperties.getUrl().get() + "/1.0/policyBackedServices"))).thenReturn(IOUtils.toInputStream(buildPBSResponse(pbsId), Charset.forName("UTF-8")));
+        String folder4 = "anotherFolder";
+        String folder4Id = "5c012da2ec439a92bfc9f45746ec4960";
+        Mockito.when(gatewayClient.makeAPICall(Mockito.any(), Mockito.eq(gatewayConnectionProperties.getUrl().get() + "/1.0/folders"))).thenReturn(IOUtils.toInputStream(buildFolderResponse(Arrays.asList(
+                new FolderInfo(folder1, folder1Id, ROOT_FOLDER_ID),
+                new FolderInfo(folder2, folder2Id, folder1Id),
+                new FolderInfo(folder3, folder3Id, folder2Id),
+                new FolderInfo(folder4, folder4Id, folder1Id)
+        )), Charset.forName("UTF-8")));
 
         gatewayConnectionProperties.getFolderPath().set("/my/folder/path");
         buildExportQueryTask.perform();
 
-        Assert.assertTrue(buildExportQueryTask.getExportQuery().get().contains("folder=" + ROOT_FOLDER_ID + "&folder=" + folder1Id + "&folder=" + folder2Id + "&folder=" + folder3Id));
-        Assert.assertTrue(buildExportQueryTask.getExportQuery().get().contains("policyBackedService=" + pbsId));
+        Assert.assertTrue(buildExportQueryTask.getExportQuery().get().contains("folder=" + ROOT_FOLDER_ID + "&requireFolder=" + ROOT_FOLDER_ID + "&folder=" + folder1Id + "&requireFolder=" + folder1Id + "&folder=" + folder2Id + "&requireFolder=" + folder2Id + "&folder=" + folder3Id));
+        Assert.assertFalse(buildExportQueryTask.getExportQuery().get().contains("requireFolder=" + folder3Id));
+        Assert.assertTrue(buildExportQueryTask.getExportQuery().get().contains("folder=" + folder4Id + "&requireFolder=" + folder4Id));
+        Assert.assertTrue(buildExportQueryTask.getExportQuery().get().contains("requirePolicyBackedService=" + pbsId));
     }
 
     private String buildPBSResponse(String pbsId) {
@@ -211,6 +222,30 @@ public class BuildExportQueryTaskTest {
                 pbsId);
     }
 
+    private String buildFolderResponse(List<FolderInfo> folders) {
+        StringBuilder folderResponse = new StringBuilder();
+        folderResponse.append("<l7:List xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:Name>FOLDER List</l7:Name>\n" +
+                "    <l7:Type>List</l7:Type>\n" +
+                "    <l7:TimeStamp>2018-02-28T23:27:08.468Z</l7:TimeStamp>\n" +
+                "    <l7:Link rel=\"self\" uri=\"https://gateway-dev:8443/restman/1.0/folders\"/>\n" +
+                "    <l7:Link rel=\"template\" uri=\"https://gateway-dev:8443/restman/1.0/folders/template\"/>\n");
+        folders.forEach(folder -> folderResponse.append(String.format("    <l7:Item>\n" +
+                "        <l7:Name>%1$s</l7:Name>\n" +
+                "        <l7:Id>%2$s</l7:Id>\n" +
+                "        <l7:Type>FOLDER</l7:Type>\n" +
+                "        <l7:TimeStamp>2018-02-28T23:27:08.468Z</l7:TimeStamp>\n" +
+                "        <l7:Link rel=\"self\" uri=\"https://gateway-dev:8443/restman/1.0/folders/239a94822f0983eb2f8ed699eee082fd\"/>\n" +
+                "        <l7:Resource>\n" +
+                "            <l7:Folder folderId=\"%3$s\" id=\"%2$s\" version=\"1\">\n" +
+                "                <l7:Name>%1$s</l7:Name>\n" +
+                "            </l7:Folder>\n" +
+                "        </l7:Resource>\n" +
+                "    </l7:Item>\n", folder.name, folder.id, folder.parentId)));
+        folderResponse.append("</l7:List>");
+        return folderResponse.toString();
+    }
+
     private String buildFolderResponse(String folderName, String folderId, String parentFolderId) {
         return String.format("<l7:List xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
                         "    <l7:Name>FOLDER List</l7:Name>\n" +
@@ -232,5 +267,17 @@ public class BuildExportQueryTaskTest {
                         "    </l7:Item>\n" +
                         "</l7:List>",
                 folderName, folderId, parentFolderId);
+    }
+
+    private class FolderInfo {
+        String name;
+        String id;
+        String parentId;
+
+        private FolderInfo(String name, String id, String parentId) {
+            this.name = name;
+            this.id = id;
+            this.parentId = parentId;
+        }
     }
 }

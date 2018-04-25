@@ -92,21 +92,33 @@ public class BuildExportQueryTask extends DefaultTask {
                 gatewayConnectionProperties.getUserName().get(),
                 gatewayConnectionProperties.getUserPass().get());
 
+        //get all folder ID so that we can build up full folder tree structure
+        final List<String> allFolderIds = gatewayClient.makeGatewayAPICallsWithReturn(
+                this::getAllFolderIds,
+                gatewayConnectionProperties.getUserName().get(),
+                gatewayConnectionProperties.getUserPass().get());
+
         // get all policy backed services since they are not included by default
         final List<String> exportPBSIds = gatewayClient.makeGatewayAPICallsWithReturn(
                 this::getPBSIds,
                 gatewayConnectionProperties.getUserName().get(),
                 gatewayConnectionProperties.getUserPass().get());
 
-        exportQuery.set(buildQuery(exportFolderIds, exportPBSIds));
+        exportQuery.set(buildQuery(exportFolderIds, allFolderIds, exportPBSIds));
     }
 
-    private String buildQuery(final List<String> exportFolderIds, final List<String> exportPBSIds) {
+    private String buildQuery(final List<String> exportFolderIds, final List<String> allFolderIds, final List<String> exportPBSIds) {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("?encassAsPolicyDependency=true");
         stringBuilder.append("&includeDependencies=true");
-        exportFolderIds.forEach(s -> stringBuilder.append("&folder=").append(s));
-        exportPBSIds.forEach(s -> stringBuilder.append("&policyBackedService=").append(s));
+        for (int i = 0; i < exportFolderIds.size() - 1; i++) {
+            String exportFolderId = exportFolderIds.get(i);
+            stringBuilder.append("&folder=").append(exportFolderId);
+            stringBuilder.append("&requireFolder=").append(exportFolderId);
+        }
+        stringBuilder.append("&folder=").append(exportFolderIds.get(exportFolderIds.size() - 1));
+        allFolderIds.stream().filter(s -> !exportFolderIds.contains(s)).forEach(s -> stringBuilder.append("&folder=").append(s).append("&requireFolder=").append(s));
+        exportPBSIds.forEach(s -> stringBuilder.append("&requirePolicyBackedService=").append(s));
         return stringBuilder.toString();
     }
 
@@ -124,37 +136,46 @@ public class BuildExportQueryTask extends DefaultTask {
         return folderIds;
     }
 
-    private List<String> getPBSIds(final HttpClient client) {
-        final LinkedList<String> pbsIds = new LinkedList<>();
+    private List<String> getAllFolderIds(HttpClient httpClient) {
+        final String uri = gatewayConnectionProperties.getUrl().get() + "/1.0/folders";
+        return getEntityIds(httpClient, uri, "Folder");
+    }
+
+    private List<String> getPBSIds(final HttpClient httpClient) {
         final String uri = gatewayConnectionProperties.getUrl().get() + "/1.0/policyBackedServices";
+        return getEntityIds(httpClient, uri, "Policy Backed Service");
+    }
+
+    private List<String> getEntityIds(HttpClient client, String uri, final String entityType) {
+        final LinkedList<String> ids = new LinkedList<>();
         final InputStream inputStream = gatewayClient.makeAPICall(client, uri);
 
-        final Document allPBSDoc;
+        final Document allEntityDoc;
         try {
-            allPBSDoc = documentTools.parse(inputStream);
+            allEntityDoc = documentTools.parse(inputStream);
         } catch (DocumentParseException e) {
-            throw new ExportException("Could not retrieve Policy Backed Services List. Unable to parse document", e);
+            throw new ExportException(String.format("Could not retrieve %s List. Unable to parse document", entityType), e);
         }
 
         final XPath xPath = documentTools.newXPath();
-        final NodeList nodeList = allPBSDoc.getElementsByTagName("l7:Item");
+        final NodeList nodeList = allEntityDoc.getElementsByTagName("l7:Item");
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 final NodeList idNode;
                 try {
-                    idNode = (NodeList) xPath.evaluate("/List/Item/Id/text()", node, XPathConstants.NODESET);
+                    idNode = (NodeList) xPath.evaluate("Id/text()", node, XPathConstants.NODESET);
                 } catch (XPathExpressionException e) {
-                    throw new ExportException("Could not retrieve Policy Backed Service Id.", e);
+                    throw new ExportException(String.format("Could not retrieve %s Id.", entityType), e);
                 }
                 if (idNode.getLength() != 1) {
-                    throw new ExportException("Could not retrieve Policy Backed Service Id. Unexpected Item element format.");
+                    throw new ExportException(String.format("Could not retrieve %s Id. Unexpected Item element format.", entityType));
                 } else {
-                    pbsIds.add(idNode.item(0).getTextContent());
+                    ids.add(idNode.item(0).getTextContent());
                 }
             }
         }
-        return pbsIds;
+        return ids;
     }
 
     String getFolderIdFromRestmanResponse(String folderName, String parentFolderName, final InputStream response) {
