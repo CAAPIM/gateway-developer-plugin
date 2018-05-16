@@ -32,7 +32,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         });
 
         // add build-bundle to the default build task
-        project.getTasks().maybeCreate("build").dependsOn(buildBundleTask);
+        project.afterEvaluate(p -> project.getTasks().getByPath("build").dependsOn(buildBundleTask));
 
         // add the built bundle to the artifacts
         project.artifacts(artifactHandler -> artifactHandler.add("archives", pluginConfig.getBuiltBundle(), configurablePublishArtifact -> {
