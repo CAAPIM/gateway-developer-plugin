@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BundleFilter {
@@ -41,13 +42,24 @@ public class BundleFilter {
         filterPBS(filteredBundle.getEntities(PolicyEntity.class), bundle.getEntities(PolicyBackedServiceEntity.class).values()).forEach(filteredBundle::addEntity);
 
         //filter cluster property
-        //TODO:
+        filterGlobalProperties(bundle.getEntities(ClusterProperty.class).values(), bundle.getDependencies(), filteredBundle).forEach(filteredBundle::addEntity);
 
         filterParentFolders(folderPath, bundle.getFolderTree()).forEach(filteredBundle::addEntity);
 
         FolderTree folderTree = new FolderTree(filteredBundle.getEntities(Folder.class).values());
         filteredBundle.setFolderTree(folderTree);
         return filteredBundle;
+    }
+
+    private List<ClusterProperty> filterGlobalProperties(Collection<ClusterProperty> clusterProperties, Map<Dependency, List<Dependency>> dependencies, Bundle filteredBundle) {
+        Set<Dependency> filteredDependencies = dependencies.entrySet().stream()
+                .filter(e -> filteredBundle.getEntities(e.getKey().getType()).get(e.getKey().getId()) != null)
+                .flatMap(e -> e.getValue().stream())
+                .filter(d -> d.getType() == ClusterProperty.class)
+                .collect(Collectors.toSet());
+        return clusterProperties.stream()
+                .filter(c -> filteredDependencies.contains(new Dependency(c.getId(), ClusterProperty.class)))
+                .collect(Collectors.toList());
     }
 
     private List<PolicyBackedServiceEntity> filterPBS(Map<String, PolicyEntity> policies, Collection<PolicyBackedServiceEntity> encasses) {

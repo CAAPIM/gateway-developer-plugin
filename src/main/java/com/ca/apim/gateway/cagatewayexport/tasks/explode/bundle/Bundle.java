@@ -6,15 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Bundle {
     private Map<Class<? extends Entity>, Map<String, Entity>> entities = new HashMap<>();
     private FolderTree folderTree;
+    private Map<Dependency, List<Dependency>> dependencies;
 
     public void addEntity(final Entity entity) {
         entities.compute(entity.getClass(), (k, v) -> {
@@ -44,5 +47,13 @@ public class Bundle {
 
     public void setFolderTree(FolderTree folderTree) {
         this.folderTree = folderTree;
+    }
+
+    public Map<Dependency, List<Dependency>> getDependencies() {
+        return dependencies;
+    }
+
+    public void setDependencies(Map<Dependency, List<Dependency>> dependencies) {
+        this.dependencies = dependencies;
     }
 }
