@@ -25,7 +25,7 @@ public class PolicyBackedServiceWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
-    public PolicyBackedServiceWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    PolicyBackedServiceWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;
     }

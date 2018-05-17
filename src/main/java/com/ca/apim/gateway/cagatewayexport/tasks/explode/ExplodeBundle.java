@@ -8,9 +8,8 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.linker.EntityLinker;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.linker.EntityLinkerRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.BundleFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
@@ -18,23 +17,24 @@ import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 import org.w3c.dom.Document;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 
 import java.io.File;
 import java.util.Collection;
 
-public class ExplodeBundle {
+class ExplodeBundle {
     private final DocumentTools documentTools;
     private final EntityWriterRegistry entityWriterRegistry;
     private final EntityLinkerRegistry entityLinkerRegistry;
 
-    public ExplodeBundle(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    ExplodeBundle(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentTools = documentTools;
         this.entityWriterRegistry = new EntityWriterRegistry(documentFileUtils, jsonTools);
         this.entityLinkerRegistry = new EntityLinkerRegistry(documentTools);
 
     }
 
-    public void explodeBundle(String folderPath, File bundleFile, File explodeDirectory) throws DocumentParseException {
+    void explodeBundle(String folderPath, File bundleFile, File explodeDirectory) throws DocumentParseException {
         final Document bundleDocument = documentTools.parse(bundleFile);
         documentTools.cleanup(bundleDocument);
 

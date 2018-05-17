@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader;
+package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;

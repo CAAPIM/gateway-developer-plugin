@@ -20,7 +20,7 @@ import java.util.Map;
 public class PolicyWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
 
-    public PolicyWriter(DocumentFileUtils documentFileUtils) {
+    PolicyWriter(DocumentFileUtils documentFileUtils) {
         this.documentFileUtils = documentFileUtils;
     }
 
@@ -42,7 +42,7 @@ public class PolicyWriter implements EntityWriter {
         services.values().parallelStream().forEach(serviceEntity -> writePolicy(bundle, policyFolder, serviceEntity.getFolderId(), serviceEntity.getName(), serviceEntity.getPolicyXml()));
 
         Map<String, PolicyEntity> policies = bundle.getEntities(PolicyEntity.class);
-        policies.values().parallelStream().forEach(policyEntity -> writePolicy(bundle, policyFolder, policyEntity.getFolderId(), policyEntity.getName(), policyEntity.getXml()));
+        policies.values().parallelStream().forEach(policyEntity -> writePolicy(bundle, policyFolder, policyEntity.getFolderId(), policyEntity.getName(), policyEntity.getPolicyXML()));
 
     }
 

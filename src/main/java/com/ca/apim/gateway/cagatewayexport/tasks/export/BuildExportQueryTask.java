@@ -11,8 +11,6 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.TaskAction;
 
-import javax.inject.Inject;
-
 public class BuildExportQueryTask extends DefaultTask {
     //Outputs
     private Property<String> exportQuery;

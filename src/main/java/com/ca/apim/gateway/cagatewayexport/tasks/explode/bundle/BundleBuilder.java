@@ -8,7 +8,9 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader.*;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoader;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderRegistry;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -19,9 +21,12 @@ import java.util.logging.Logger;
 public class BundleBuilder {
     private static final Logger LOGGER = Logger.getLogger(BundleBuilder.class.getName());
     private final Bundle bundle;
+    private final EntityLoaderRegistry entityLoaderRegistry;
 
     public BundleBuilder() {
         bundle = new Bundle();
+        this.entityLoaderRegistry = new EntityLoaderRegistry();
+
     }
 
     public void buildBundle(final Element bundleElement) {
@@ -45,33 +50,14 @@ public class BundleBuilder {
 
     private void handleItem(final Element element) {
         final String type = EntityLoaderHelper.getSingleChildElement(element, "l7:Type").getTextContent();
-        EntityLoader entityLoader = getEntityLoader(type);
-        if(entityLoader != null) {
+        final EntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
+        if (entityLoader != null) {
             final Entity entity = entityLoader.load(element);
             if (entity != null) {
                 bundle.addEntity(entity);
             }
         } else {
             LOGGER.log(Level.INFO, "No entity loader found for entity type: {0}", type);
-        }
-    }
-
-    private EntityLoader getEntityLoader(String entityType) {
-        switch (entityType) {
-            case "FOLDER":
-                return new FolderLoader();
-            case "SERVICE":
-                return new ServiceLoader();
-            case "POLICY":
-                return new PolicyLoader();
-            case "ENCAPSULATED_ASSERTION":
-                return new EncassLoader();
-            case "CLUSTER_PROPERTY":
-                return new ClusterPropertyLoader();
-            case "POLICY_BACKED_SERVICE":
-                return new PolicyBackedServiceLoader();
-            default:
-                return null;
         }
     }
 }

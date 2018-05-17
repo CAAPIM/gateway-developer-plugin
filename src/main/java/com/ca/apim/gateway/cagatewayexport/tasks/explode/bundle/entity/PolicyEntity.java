@@ -35,11 +35,11 @@ public class PolicyEntity implements Entity {
         return guid;
     }
 
-    public Element getXml() {
+    public Element getPolicyXML() {
         return policyXML;
     }
 
-    public void setXML(Element policyXML) {
+    public void setPolicyXML(Element policyXML) {
         this.policyXML = policyXML;
     }
 

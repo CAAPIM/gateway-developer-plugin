@@ -4,26 +4,26 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.linker;
+package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class PolicyBackedServiceLinker implements EntityLinker<PolicyBackedServiceEntity>  {
+public class PolicyBackedServiceLinker implements EntityLinker<PolicyBackedServiceEntity> {
 
-    public void link(Bundle filteredBundle, Bundle bundle) {
-        filteredBundle.getEntities(PolicyBackedServiceEntity.class).values().forEach(e -> link(e, bundle));
+    @Override
+    public Class<PolicyBackedServiceEntity> getEntityClass() {
+        return PolicyBackedServiceEntity.class;
     }
 
-    private void link(PolicyBackedServiceEntity pbs, Bundle bundle) {
-        for (String operation: pbs.getOperations().keySet()  ) {
+    @Override
+    public void link(PolicyBackedServiceEntity pbs, Bundle bundle) {
+        for (String operation : pbs.getOperations().keySet()) {
             String policyId = pbs.getOperations().get(operation);
             pbs.getOperations().put(operation, getPolicyPath(bundle, policyId));
         }

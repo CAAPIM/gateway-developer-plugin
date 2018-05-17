@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader;
+package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
@@ -17,6 +17,6 @@ public class ClusterPropertyLoader implements EntityLoader {
         final String name = EntityLoaderHelper.getSingleChildElement(xml, "l7:Name").getTextContent();
         final String value = EntityLoaderHelper.getSingleChildElement(xml, "l7:Value").getTextContent();
         final String id = xml.getAttribute("id");
-        return new ClusterProperty(name, value, id, xml);
+        return new ClusterProperty(name, value, id);
     }
 }

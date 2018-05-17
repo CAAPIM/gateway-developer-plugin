@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.*;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service;
 
 import java.nio.file.Path;
 import java.util.Collection;

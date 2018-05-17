@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
-public class FolderTreeException extends RuntimeException {
-    public FolderTreeException(String message) {
+class FolderTreeException extends RuntimeException {
+    FolderTreeException(String message) {
         super(message);
     }
 }

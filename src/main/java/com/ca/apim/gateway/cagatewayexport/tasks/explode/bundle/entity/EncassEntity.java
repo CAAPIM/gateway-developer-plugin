@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
-import org.w3c.dom.Element;
 
 import java.util.List;
 
@@ -16,16 +15,14 @@ public class EncassEntity implements Entity {
     private final String id;
     private final String guid;
     private final String policyId;
-    private final Element xml;
     private final List<EncassParam> arguments;
     private final List<EncassParam> results;
     private String path;
 
-    public EncassEntity(final String name, final String id, final String guid, Element xml, String policyId, List<EncassParam> arguments, List<EncassParam> results) {
+    public EncassEntity(final String name, final String id, final String guid, String policyId, List<EncassParam> arguments, List<EncassParam> results) {
         this.name = name;
         this.id = id;
         this.guid = guid;
-        this.xml = xml;
         this.policyId = policyId;
         this.arguments = arguments;
         this.results = results;
@@ -78,16 +75,8 @@ public class EncassEntity implements Entity {
             return name;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
         public String getType() {
             return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
         }
     }
 }

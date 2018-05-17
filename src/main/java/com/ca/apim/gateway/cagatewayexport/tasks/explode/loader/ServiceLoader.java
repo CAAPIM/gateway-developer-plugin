@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader;
+package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
@@ -25,6 +25,6 @@ public class ServiceLoader implements EntityLoader {
         final Element resourceSet = EntityLoaderHelper.getSingleChildElement(resources, "l7:ResourceSet");
         final Element resource = EntityLoaderHelper.getSingleChildElement(resourceSet, "l7:Resource");
         final String servicePolicyString = resource.getTextContent();
-        return new ServiceEntity(name, id, folderId, service, serviceDetails, servicePolicyString);
+        return new ServiceEntity(name, id, folderId, serviceDetails, servicePolicyString);
     }
 }

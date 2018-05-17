@@ -26,7 +26,7 @@ public class EncassWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
-    public EncassWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    EncassWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;
     }

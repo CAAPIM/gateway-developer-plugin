@@ -31,6 +31,7 @@ public class Bundle {
 
     public <E extends Entity> Map<String, E> getEntities(Class<E> entityType) {
         try {
+            //noinspection unchecked
             return (Map<String, E>) entities.getOrDefault(entityType, Collections.emptyMap());
         } catch (ClassCastException e) {
             throw new BundleBuilderException("Unable to cast entities properly");
@@ -43,9 +44,5 @@ public class Bundle {
 
     public void setFolderTree(FolderTree folderTree) {
         this.folderTree = folderTree;
-    }
-
-    public Map<Class<? extends Entity>, Map<String, Entity>> getAllEntities() {
-        return entities;
     }
 }

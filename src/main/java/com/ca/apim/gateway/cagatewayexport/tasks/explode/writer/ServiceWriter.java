@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader.EntityLoaderHelper;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
@@ -30,7 +30,7 @@ public class ServiceWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
-    public ServiceWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    ServiceWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;
     }

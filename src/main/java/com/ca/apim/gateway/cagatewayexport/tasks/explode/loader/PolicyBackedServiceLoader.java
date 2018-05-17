@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader;
+package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
@@ -25,7 +25,7 @@ public class PolicyBackedServiceLoader implements EntityLoader {
         Element interfaceNameElement = EntityLoaderHelper.getSingleChildElement(policyBackedService, "l7:InterfaceName");
         final String interfaceName = interfaceNameElement.getTextContent();
 
-        return new PolicyBackedServiceEntity(name, policyBackedService.getAttribute("id"), interfaceName, policyBackedService, buildOperationsMap(policyBackedService));
+        return new PolicyBackedServiceEntity(name, policyBackedService.getAttribute("id"), interfaceName, buildOperationsMap(policyBackedService));
     }
 
     private Map<String, String> buildOperationsMap(Element policyBackedService) {

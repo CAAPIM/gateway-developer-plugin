@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 
 import java.util.Collection;
 import java.util.Collections;

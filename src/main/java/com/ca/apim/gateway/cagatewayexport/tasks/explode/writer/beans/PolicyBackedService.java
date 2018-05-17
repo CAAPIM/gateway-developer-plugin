@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class PolicyBackedService {
     private String interfaceName;
     private List<PolicyBackedServiceOperation> operations;

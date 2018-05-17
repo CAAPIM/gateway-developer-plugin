@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader;
+package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
@@ -27,7 +27,7 @@ public class EncassLoader implements EntityLoader {
         Element guidElement = EntityLoaderHelper.getSingleChildElement(encass, "l7:Guid");
         final String guid = guidElement.getTextContent();
 
-        return new EncassEntity(name, encass.getAttribute("id"), guid, encass, policyId, getArguments(encass), getResults(encass));
+        return new EncassEntity(name, encass.getAttribute("id"), guid, policyId, getArguments(encass), getResults(encass));
     }
 
     private List<EncassEntity.EncassParam> getResults(Element encass) {

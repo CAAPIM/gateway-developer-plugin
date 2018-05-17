@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
+@SuppressWarnings("unused")
 public class PolicyBackedServiceOperation {
     private String policy;
     private String operationName;

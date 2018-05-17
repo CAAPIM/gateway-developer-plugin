@@ -18,7 +18,7 @@ public class ServiceEntity implements Entity {
     private Element policyXML;
     private String path;
 
-    public ServiceEntity(final String name, final String id, final String parentFolderId, Element serviceXML, Element serviceDetailsElement, String policy) {
+    public ServiceEntity(final String name, final String id, final String parentFolderId, Element serviceDetailsElement, String policy) {
         this.name = name;
         this.id = id;
         this.parentFolderId = parentFolderId == null || parentFolderId.isEmpty() ? null : parentFolderId;
