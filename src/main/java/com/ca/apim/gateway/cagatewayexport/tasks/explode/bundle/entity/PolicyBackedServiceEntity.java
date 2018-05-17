@@ -32,11 +32,6 @@ public class PolicyBackedServiceEntity implements Entity {
     }
 
     @Override
-    public Element getXml() {
-        return xml;
-    }
-
-    @Override
     public String getName() {
         return name;
     }

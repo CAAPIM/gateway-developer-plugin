@@ -7,9 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.PolicyBackedServiceOperation;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
@@ -20,8 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -41,7 +37,7 @@ public class PolicyBackedServiceWriter implements EntityWriter {
 
         Map<String, PolicyBackedServiceEntity> policyBackedServiceEntityMap = bundle.getEntities(PolicyBackedServiceEntity.class);
 
-        Map<String, PolicyBackedService> policyBackedServiceBeans = policyBackedServiceEntityMap.values().stream().collect(Collectors.toMap(PolicyBackedServiceEntity::getName, policyBackedServiceEntity -> getPolicyBackedServiceBean(bundle, policyBackedServiceEntity)));
+        Map<String, PolicyBackedService> policyBackedServiceBeans = policyBackedServiceEntityMap.values().stream().collect(Collectors.toMap(PolicyBackedServiceEntity::getName, this::getPolicyBackedServiceBean));
 
         File servicesFile = new File(configFolder, "policy-backed-services.yml");
 
@@ -53,17 +49,10 @@ public class PolicyBackedServiceWriter implements EntityWriter {
         }
     }
 
-    private String getPolicyPath(Bundle bundle, String policyId) {
-        PolicyEntity policy = bundle.getEntities(PolicyEntity.class).get(policyId);
-        Folder folder = bundle.getFolderTree().getFolderById(policy.getFolderId());
-        Path folderPath = bundle.getFolderTree().getPath(folder);
-        return Paths.get(folderPath.toString(), policy.getName() + ".xml").toString();
-    }
-
-    private PolicyBackedService getPolicyBackedServiceBean(Bundle bundle, PolicyBackedServiceEntity policyBackedServiceEntity) {
+    private PolicyBackedService getPolicyBackedServiceBean(PolicyBackedServiceEntity policyBackedServiceEntity) {
         PolicyBackedService policyBackedServiceBean = new PolicyBackedService();
         policyBackedServiceBean.setInterfaceName(policyBackedServiceEntity.getInterfaceName());
-        policyBackedServiceBean.setOperations(policyBackedServiceEntity.getOperations().entrySet().stream().map(e -> new PolicyBackedServiceOperation(e.getKey(), getPolicyPath(bundle, e.getValue()))).collect(Collectors.toList()));
+        policyBackedServiceBean.setOperations(policyBackedServiceEntity.getOperations().entrySet().stream().map(e -> new PolicyBackedServiceOperation(e.getKey(), e.getValue())).collect(Collectors.toList()));
         return policyBackedServiceBean;
     }
 }

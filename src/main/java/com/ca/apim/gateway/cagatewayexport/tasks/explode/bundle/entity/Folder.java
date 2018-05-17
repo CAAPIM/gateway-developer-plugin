@@ -37,11 +37,6 @@ public class Folder implements Entity {
     }
 
     @Override
-    public Element getXml() {
-        return xml;
-    }
-
-    @Override
     public String toString() {
         return id + ":" + name;
     }

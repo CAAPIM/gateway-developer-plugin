@@ -11,7 +11,5 @@ import org.w3c.dom.Element;
 public interface Entity {
     String getId();
 
-    Element getXml();
-
     String getName();
 }

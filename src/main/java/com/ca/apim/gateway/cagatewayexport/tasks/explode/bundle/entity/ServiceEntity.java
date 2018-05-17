@@ -15,13 +15,13 @@ public class ServiceEntity implements Entity {
     private final String parentFolderId;
     private final Element serviceDetailsElement;
     private final String policy;
-    private final Element serviceXML;
+    private Element policyXML;
+    private String path;
 
     public ServiceEntity(final String name, final String id, final String parentFolderId, Element serviceXML, Element serviceDetailsElement, String policy) {
         this.name = name;
         this.id = id;
         this.parentFolderId = parentFolderId == null || parentFolderId.isEmpty() ? null : parentFolderId;
-        this.serviceXML = serviceXML;
         this.serviceDetailsElement = serviceDetailsElement;
         this.policy = policy;
     }
@@ -31,9 +31,12 @@ public class ServiceEntity implements Entity {
         return id;
     }
 
-    @Override
-    public Element getXml() {
-        return serviceXML;
+    public Element getPolicyXml() {
+        return policyXML;
+    }
+
+    public void setPolicyXML(Element policyXML) {
+        this.policyXML = policyXML;
     }
 
     @Override
@@ -53,4 +56,11 @@ public class ServiceEntity implements Entity {
         return policy;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
 }

@@ -13,9 +13,9 @@ import org.w3c.dom.Element;
 public class ClusterPropertyLoader implements EntityLoader {
     @Override
     public Entity load(Element element) {
-        final Element xml = EntityLoaderHelper.getSingleElement(element, "l7:ClusterProperty");
-        final String name = EntityLoaderHelper.getSingleElement(xml, "l7:Name").getTextContent();
-        final String value = EntityLoaderHelper.getSingleElement(xml, "l7:Value").getTextContent();
+        final Element xml = EntityLoaderHelper.getSingleChildElement(EntityLoaderHelper.getSingleChildElement(element, "l7:Resource"), "l7:ClusterProperty");
+        final String name = EntityLoaderHelper.getSingleChildElement(xml, "l7:Name").getTextContent();
+        final String value = EntityLoaderHelper.getSingleChildElement(xml, "l7:Value").getTextContent();
         final String id = xml.getAttribute("id");
         return new ClusterProperty(name, value, id, xml);
     }

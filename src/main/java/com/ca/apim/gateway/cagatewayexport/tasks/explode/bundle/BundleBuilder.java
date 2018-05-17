@@ -13,7 +13,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class BundleBuilder {
+    private static final Logger LOGGER = Logger.getLogger(BundleBuilder.class.getName());
     private final Bundle bundle;
 
     public BundleBuilder() {
@@ -31,6 +35,8 @@ public class BundleBuilder {
         }
         FolderTree folderTree = new FolderTree(bundle.getEntities(Folder.class).values());
         bundle.setFolderTree(folderTree);
+
+//        bundle.setDependencies(EntityLoaderHelper.getSingleChildElement(bundleElement, "l7:Dependencies"));
     }
 
     public Bundle getBundle() {
@@ -38,10 +44,15 @@ public class BundleBuilder {
     }
 
     private void handleItem(final Element element) {
-        final String type = EntityLoaderHelper.getSingleElement(element, "l7:Type").getTextContent();
-        final Entity entity = getEntityLoader(type).load(element);
-        if (entity != null) {
-            bundle.addEntity(entity);
+        final String type = EntityLoaderHelper.getSingleChildElement(element, "l7:Type").getTextContent();
+        EntityLoader entityLoader = getEntityLoader(type);
+        if(entityLoader != null) {
+            final Entity entity = entityLoader.load(element);
+            if (entity != null) {
+                bundle.addEntity(entity);
+            }
+        } else {
+            LOGGER.log(Level.INFO, "No entity loader found for entity type: {0}", type);
         }
     }
 
@@ -60,7 +71,7 @@ public class BundleBuilder {
             case "POLICY_BACKED_SERVICE":
                 return new PolicyBackedServiceLoader();
             default:
-                throw new BundleBuilderException("No entity loader found for entity type: " + entityType);
+                return null;
         }
     }
 }

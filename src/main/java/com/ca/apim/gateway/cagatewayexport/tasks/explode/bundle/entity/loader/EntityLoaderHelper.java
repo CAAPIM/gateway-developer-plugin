@@ -30,4 +30,26 @@ public final class EntityLoaderHelper {
             }
         }
     }
+
+    public static Element getSingleChildElement(final Element entityItemElement, final String elementName) {
+        final NodeList childNodes = entityItemElement.getChildNodes();
+        Node foundNode = null;
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            if(elementName.equals(childNodes.item(i).getNodeName())){
+                if(foundNode == null) {
+                    foundNode = childNodes.item(i);
+                } else {
+                    throw new BundleBuilderException("Multiple " + elementName + " elements found");
+                }
+            }
+        }
+        if(foundNode == null){
+            throw new BundleBuilderException(elementName + " element not found");
+        }
+        if (foundNode.getNodeType() == Node.ELEMENT_NODE) {
+            return (Element) foundNode;
+        } else {
+            throw new BundleBuilderException("Unexpected " + elementName + " node discovered: " + foundNode.toString());
+        }
+    }
 }

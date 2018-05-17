@@ -13,17 +13,17 @@ import org.w3c.dom.Element;
 public class ServiceLoader implements EntityLoader {
     @Override
     public Entity load(Element element) {
-        final Element service = EntityLoaderHelper.getSingleElement(element, "l7:Service");
+        final Element service = EntityLoaderHelper.getSingleChildElement(EntityLoaderHelper.getSingleChildElement(element, "l7:Resource"), "l7:Service");
 
-        final Element serviceDetails = EntityLoaderHelper.getSingleElement(service, "l7:ServiceDetail");
+        final Element serviceDetails = EntityLoaderHelper.getSingleChildElement(service, "l7:ServiceDetail");
         final String id = serviceDetails.getAttribute("id");
         final String folderId = serviceDetails.getAttribute("folderId");
-        Element nameElement = EntityLoaderHelper.getSingleElement(serviceDetails, "l7:Name");
+        Element nameElement = EntityLoaderHelper.getSingleChildElement(serviceDetails, "l7:Name");
         final String name = nameElement.getTextContent();
 
-        final Element resources = EntityLoaderHelper.getSingleElement(service, "l7:Resources");
-        final Element resourceSet = EntityLoaderHelper.getSingleElement(resources, "l7:ResourceSet");
-        final Element resource = EntityLoaderHelper.getSingleElement(resourceSet, "l7:Resource");
+        final Element resources = EntityLoaderHelper.getSingleChildElement(service, "l7:Resources");
+        final Element resourceSet = EntityLoaderHelper.getSingleChildElement(resources, "l7:ResourceSet");
+        final Element resource = EntityLoaderHelper.getSingleChildElement(resourceSet, "l7:Resource");
         final String servicePolicyString = resource.getTextContent();
         return new ServiceEntity(name, id, folderId, service, serviceDetails, servicePolicyString);
     }

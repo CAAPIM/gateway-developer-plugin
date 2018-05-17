@@ -18,9 +18,9 @@ public class EntityWriterRegistry {
 
     private final Collection<EntityWriter> entityLoaders;
 
-    public EntityWriterRegistry(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    public EntityWriterRegistry(final DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         final Collection<EntityWriter> loadersCollection = new HashSet<>();
-        loadersCollection.add(new PolicyWriter(documentFileUtils, documentTools));
+        loadersCollection.add(new PolicyWriter(documentFileUtils));
         loadersCollection.add(new ServiceWriter(documentFileUtils, jsonTools));
         loadersCollection.add(new EncassWriter(documentFileUtils, jsonTools));
         loadersCollection.add(new GlobalPropertiesWriter(documentFileUtils));

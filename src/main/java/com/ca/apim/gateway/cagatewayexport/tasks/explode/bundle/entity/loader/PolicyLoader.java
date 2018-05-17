@@ -18,11 +18,11 @@ public class PolicyLoader implements EntityLoader {
 
     @Override
     public Entity load(Element element) {
-        final Element policy = EntityLoaderHelper.getSingleElement(element, "l7:Policy");
+        final Element policy = EntityLoaderHelper.getSingleChildElement(EntityLoaderHelper.getSingleChildElement(element, "l7:Resource"), "l7:Policy");
         final String guid = policy.getAttribute("guid");
 
-        final Element policyDetails = EntityLoaderHelper.getSingleElement(policy, "l7:PolicyDetail");
-        Element policyTypeElement = EntityLoaderHelper.getSingleElement(policyDetails, "l7:PolicyType");
+        final Element policyDetails = EntityLoaderHelper.getSingleChildElement(policy, "l7:PolicyDetail");
+        Element policyTypeElement = EntityLoaderHelper.getSingleChildElement(policyDetails, "l7:PolicyType");
         if (!("Include".equals(policyTypeElement.getTextContent()) || "Service Operation".equals(policyTypeElement.getTextContent()))) {
             LOGGER.log(Level.WARNING, "Skipping unsupported PolicyType: {0}", policyTypeElement.getTextContent());
             return null;
@@ -30,12 +30,12 @@ public class PolicyLoader implements EntityLoader {
 
         final String id = policyDetails.getAttribute("id");
         final String folderId = policyDetails.getAttribute("folderId");
-        Element nameElement = EntityLoaderHelper.getSingleElement(policyDetails, "l7:Name");
+        Element nameElement = EntityLoaderHelper.getSingleChildElement(policyDetails, "l7:Name");
         final String name = nameElement.getTextContent();
 
-        final Element resources = EntityLoaderHelper.getSingleElement(policy, "l7:Resources");
-        final Element resourceSet = EntityLoaderHelper.getSingleElement(resources, "l7:ResourceSet");
-        final Element resource = EntityLoaderHelper.getSingleElement(resourceSet, "l7:Resource");
+        final Element resources = EntityLoaderHelper.getSingleChildElement(policy, "l7:Resources");
+        final Element resourceSet = EntityLoaderHelper.getSingleChildElement(resources, "l7:ResourceSet");
+        final Element resource = EntityLoaderHelper.getSingleChildElement(resourceSet, "l7:Resource");
         final String policyString = resource.getTextContent();
         return new PolicyEntity(name, id, guid, folderId, policy, policyString);
     }
