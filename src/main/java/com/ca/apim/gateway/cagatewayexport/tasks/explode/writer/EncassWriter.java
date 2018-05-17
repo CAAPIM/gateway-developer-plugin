@@ -54,7 +54,7 @@ public class EncassWriter implements EntityWriter {
     private Encass getEncassBean(EncassEntity encassEntity) {
         Encass encassBean = new Encass();
         encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toList()));
-        encassBean.setArguments(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toList()));
+        encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toList()));
         return encassBean;
     }
 }
