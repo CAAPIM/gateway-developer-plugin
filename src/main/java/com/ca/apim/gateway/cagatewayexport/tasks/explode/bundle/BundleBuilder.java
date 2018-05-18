@@ -55,28 +55,33 @@ public class BundleBuilder {
             if (dependencyNode.getNodeType() == Node.ELEMENT_NODE) {
                 Dependency dependency = buildDependency((Element) dependencyNode);
                 if (dependency != null) {
-                    List<Dependency> dependencyList = new ArrayList<>();
-                    final NodeList dependencyDependenciesNodeList = ((Element) dependencyNode).getElementsByTagName("l7:Dependencies");
-                    for (int k = 0; k < dependencyDependenciesNodeList.getLength(); k++) {
-                        Node dependencyDependenciesNode = dependencyDependenciesNodeList.item(k);
-                        if (dependencyDependenciesNode.getNodeType() == Node.ELEMENT_NODE) {
-                            NodeList dependencyDependencies = dependencyDependenciesNode.getChildNodes();
-                            for (int j = 0; j < dependencyDependencies.getLength(); j++) {
-                                Node dependencyDependencyNode = dependencyDependencies.item(j);
-                                if (dependencyDependencyNode.getNodeType() == Node.ELEMENT_NODE) {
-                                    Dependency dependencyDependency = buildDependency((Element) dependencyDependencyNode);
-                                    if (dependencyDependency != null) {
-                                        dependencyList.add(dependencyDependency);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    List<Dependency> dependencyList = getDependenciesFromNode((Element) dependencyNode);
                     dependencyMap.put(dependency, dependencyList);
                 }
             }
         }
         return dependencyMap;
+    }
+
+    private List<Dependency> getDependenciesFromNode(Element dependencyNode) {
+        List<Dependency> dependencyList = new ArrayList<>();
+        final NodeList dependencyDependenciesNodeList = dependencyNode.getElementsByTagName("l7:Dependencies");
+        for (int k = 0; k < dependencyDependenciesNodeList.getLength(); k++) {
+            Node dependencyDependenciesNode = dependencyDependenciesNodeList.item(k);
+            if (dependencyDependenciesNode.getNodeType() == Node.ELEMENT_NODE) {
+                NodeList dependencyDependencies = dependencyDependenciesNode.getChildNodes();
+                for (int j = 0; j < dependencyDependencies.getLength(); j++) {
+                    Node dependencyDependencyNode = dependencyDependencies.item(j);
+                    if (dependencyDependencyNode.getNodeType() == Node.ELEMENT_NODE) {
+                        Dependency dependencyDependency = buildDependency((Element) dependencyDependencyNode);
+                        if (dependencyDependency != null) {
+                            dependencyList.add(dependencyDependency);
+                        }
+                    }
+                }
+            }
+        }
+        return dependencyList;
     }
 
     private Dependency buildDependency(Element dependencyElement) {
