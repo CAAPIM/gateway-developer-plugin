@@ -60,9 +60,9 @@ public class ExportTask extends DefaultTask {
     }
 
     /**
-     * The path of the folder to export.
+     * The export query to export the bundle with
      *
-     * @return The export query to ecport the bundle with
+     * @return The export query to export the bundle with
      */
     @Input
     public Property<String> getExportQuery() {

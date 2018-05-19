@@ -34,7 +34,7 @@ public class CAGatewayExport implements Plugin<Project> {
         // Set Defaults
         project.afterEvaluate(p -> setDefaults(gatewayConnectionProperties));
 
-        BuildExportQueryTask buildExportQueryTask = project.getTasks().create("build-export-query", BuildExportQueryTask.class, t -> t.setGatewayConnectionProperties(gatewayConnectionProperties));
+        BuildExportQueryTask buildExportQueryTask = project.getTasks().create("build-export-query", BuildExportQueryTask.class);
 
         ExportTask exportTask = project.getTasks().create("export-raw", ExportTask.class, t -> {
             t.setGatewayConnectionProperties(gatewayConnectionProperties);
@@ -50,6 +50,7 @@ public class CAGatewayExport implements Plugin<Project> {
         sanitizeTask.dependsOn(exportTask);
 
         ExplodeBundleTask explodeBundleTask = project.getTasks().create("export", ExplodeBundleTask.class, t -> {
+            t.getFolderPath().set(gatewayConnectionProperties.getFolderPath());
             t.getInputBundleFile().set(pluginConfig.getSanitizedBundle());
             t.getExportDir().set(pluginConfig.getSolutionDir());
         });

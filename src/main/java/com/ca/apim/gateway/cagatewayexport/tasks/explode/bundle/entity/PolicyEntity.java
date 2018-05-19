@@ -15,7 +15,7 @@ public class PolicyEntity implements Entity {
     private final String guid;
     private final String parentFolderId;
     private final String policy;
-    private final Element policyXML;
+    private Element policyXML;
 
     public PolicyEntity(final String name, final String id, final String guid, final String parentFolderId, Element policyXML, String policy) {
         this.name = name;
@@ -35,9 +35,12 @@ public class PolicyEntity implements Entity {
         return guid;
     }
 
-    @Override
-    public Element getXml() {
+    public Element getPolicyXML() {
         return policyXML;
+    }
+
+    public void setPolicyXML(Element policyXML) {
+        this.policyXML = policyXML;
     }
 
     @Override
@@ -53,5 +56,4 @@ public class PolicyEntity implements Entity {
     public String getPolicy() {
         return policy;
     }
-
 }

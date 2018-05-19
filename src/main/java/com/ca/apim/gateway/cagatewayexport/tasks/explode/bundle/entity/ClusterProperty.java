@@ -7,19 +7,16 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
-import org.w3c.dom.Element;
 
 public class ClusterProperty implements Entity {
     private final String name;
     private final String id;
-    private final Element xml;
     private final String value;
 
-    public ClusterProperty(final String name, String value, final String id, Element xml) {
+    public ClusterProperty(final String name, String value, final String id) {
         this.name = name;
         this.value = value;
         this.id = id;
-        this.xml = xml;
     }
 
     @Override
@@ -34,11 +31,6 @@ public class ClusterProperty implements Entity {
 
     public String getValue() {
         return value;
-    }
-
-    @Override
-    public Element getXml() {
-        return xml;
     }
 
     @Override

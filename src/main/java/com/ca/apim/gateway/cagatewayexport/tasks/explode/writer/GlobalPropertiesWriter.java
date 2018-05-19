@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class GlobalPropertiesWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
 
-    public GlobalPropertiesWriter(DocumentFileUtils documentFileUtils) {
+    GlobalPropertiesWriter(DocumentFileUtils documentFileUtils) {
         this.documentFileUtils = documentFileUtils;
     }
 
