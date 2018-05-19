@@ -10,9 +10,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -36,10 +34,31 @@ public class GlobalPropertiesWriter implements EntityWriter {
 
         File servicesFile = new File(configFolder, "global.properties");
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(servicesFile)) {
-            properties.store(fileOutputStream, null);
+        try (OutputStream outputStream = new StripFirstLineStream(new FileOutputStream(servicesFile))) {
+            properties.store(outputStream, null);
         } catch (IOException e) {
             throw new WriteException("Could not create global properties file: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * This is used in order to remove the first line when printing the properties to an output stream
+     * that contains a date-timestamp. Inspired by https://stackoverflow.com/a/39043903/1108370
+     */
+    private static class StripFirstLineStream extends FilterOutputStream {
+        private boolean firstlineseen = false;
+
+        StripFirstLineStream(final OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void write(final int b) throws IOException {
+            if (firstlineseen) {
+                super.write(b);
+            } else if (b == '\n') {
+                firstlineseen = true;
+            }
         }
     }
 }
