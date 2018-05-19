@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PolicyBackedServiceLoader implements EntityLoader {
-    private static final TypeReference<HashMap<String, PolicyBackedService>> policyBackedServiceMapTypeMapping = new TypeReference<>() {
+    private static final TypeReference<HashMap<String, PolicyBackedService>> policyBackedServiceMapTypeMapping = new TypeReference<HashMap<String, PolicyBackedService>>() {
     };
     private final JsonTools jsonTools;
 

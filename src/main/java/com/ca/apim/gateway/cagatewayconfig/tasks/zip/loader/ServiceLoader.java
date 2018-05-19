@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ServiceLoader implements EntityLoader {
-    private static final TypeReference<HashMap<String, Service>> servicesMapTypeMapping = new TypeReference<>() {
+    private static final TypeReference<HashMap<String, Service>> servicesMapTypeMapping = new TypeReference<HashMap<String, Service>>() {
     };
     private final JsonTools jsonTools;
 
