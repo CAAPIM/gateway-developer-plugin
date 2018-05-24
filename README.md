@@ -35,6 +35,7 @@ Policy | Yes |
 EncapsulatedAssertion | Yes |
 ClusterProperty | Yes |
 Policy Backed Service | Yes |
+Listen Port | No | See issue [#36](https://github.com/ca-api-gateway/gateway-developer-plugin/issues/36)
  
 
 ## Expected Source Directory Organization
@@ -175,6 +176,16 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
           ```
   * `policy`
     * The policy folder contains the different policies that are available. It can contain may subdirectories to help organize the policy.
+
+## Adding Bundle Dependencies
+You can depend on other bundles by adding a dependency. For example:
+```groovy
+dependencies {
+    bundle group: 'my-bundle', name: 'my-bundle', version: '1.0.00', ext: 'bundle'
+}
+```
+The above will add a dependency on a bundle called 'my-bundle'. With this added you can reference encapsulated assertions and policies from the dependent bundles. 
+Note that the `ext: 'bundle'` is required to specify that the bundle file extension is `.bundle` 
 
 ## Customizing the Default Plugin Configuration
 You can customize the source solution directory location and the location to put the built bundle file by setting the `GatewaySourceConfig`. For example:

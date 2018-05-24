@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Bundle {
     private final Map<String, Service> services = new HashMap<>();
@@ -16,6 +17,7 @@ public class Bundle {
     private final Map<String, Folder> folders = new HashMap<>();
     private final Map<String, String> globalProperties = new HashMap<>();
     private final Map<String, PolicyBackedService> policyBackedServices = new HashMap<>();
+    private Set<Bundle> dependencies;
 
     public Map<String, Service> getServices() {
         return services;
@@ -63,5 +65,13 @@ public class Bundle {
 
     public Map<String, PolicyBackedService> getPolicyBackedServices() {
         return policyBackedServices;
+    }
+
+    public Set<Bundle> getDependencies() {
+        return dependencies;
+    }
+
+    public void setDependencies(Set<Bundle> dependencies) {
+        this.dependencies = dependencies;
     }
 }
