@@ -6,7 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -122,26 +125,35 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private void prepareEncapsulatedAssertion(Bundle bundle, Document policyDocument, Node encapsulatedAssertionElement) {
-        String policyPath = ((Element) encapsulatedAssertionElement).getAttribute(POLICY_PATH);
-        Encass referenceEncass = bundle.getEncasses().get(policyPath);
-        if (referenceEncass != null) {
-            Element encapsulatedAssertionConfigNameElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigName");
-            encapsulatedAssertionConfigNameElement.setAttribute(STRING_VALUE, policyPath);
-            Node firstChild = encapsulatedAssertionElement.getFirstChild();
-            if (firstChild != null) {
-                encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigNameElement, firstChild);
-            } else {
-                encapsulatedAssertionElement.appendChild(encapsulatedAssertionConfigNameElement);
-            }
-
-            Element encapsulatedAssertionConfigGuidElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigGuid");
-            encapsulatedAssertionConfigGuidElement.setAttribute(STRING_VALUE, referenceEncass.getGuid());
-            encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
-
-            ((Element) encapsulatedAssertionElement).removeAttribute(POLICY_PATH);
-        } else {
+        final String policyPath = ((Element) encapsulatedAssertionElement).getAttribute(POLICY_PATH);
+        LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", policyPath);
+        final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(policyPath));
+        if (referenceEncass.get() == null) {
+            bundle.getDependencies().forEach(b -> {
+                if (!referenceEncass.compareAndSet(null, b.getEncasses().get(policyPath))) {
+                    throw new EntityBuilderException("Found multiple encasses in dependency bundles with policy path: " + policyPath);
+                }
+            });
+        }
+        if (referenceEncass.get() == null) {
             throw new EntityBuilderException("Could not find referenced encass with path: " + policyPath);
         }
+        final String guid = referenceEncass.get().getGuid();
+
+        Element encapsulatedAssertionConfigNameElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigName");
+        encapsulatedAssertionConfigNameElement.setAttribute(STRING_VALUE, policyPath);
+        Node firstChild = encapsulatedAssertionElement.getFirstChild();
+        if (firstChild != null) {
+            encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigNameElement, firstChild);
+        } else {
+            encapsulatedAssertionElement.appendChild(encapsulatedAssertionConfigNameElement);
+        }
+
+        Element encapsulatedAssertionConfigGuidElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigGuid");
+        encapsulatedAssertionConfigGuidElement.setAttribute(STRING_VALUE, guid);
+        encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
+
+        ((Element) encapsulatedAssertionElement).removeAttribute(POLICY_PATH);
     }
 
     private void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
@@ -151,16 +163,24 @@ public class PolicyEntityBuilder implements EntityBuilder {
         } catch (DocumentParseException e) {
             throw new EntityBuilderException("Could not find PolicyGuid element in Include Assertion", e);
         }
-        String policyPath = policyGuidElement.getAttribute(POLICY_PATH);
-        Policy includedPolicy = bundle.getPolicies().get(policyPath);
-        if (includedPolicy != null) {
-            policy.getDependencies().add(includedPolicy);
-            //need to do this in a second stage since the included policy might not have its guid set yet
-            policyGuidElement.setAttribute(STRING_VALUE, includedPolicy.getGuid());
-            policyGuidElement.removeAttribute(POLICY_PATH);
+        final String policyPath = policyGuidElement.getAttribute(POLICY_PATH);
+        LOGGER.log(Level.FINE, "Looking for referenced policy include: {0}", policyPath);
+
+        final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyPath));
+        if (includedPolicy.get() != null) {
+            policy.getDependencies().add(includedPolicy.get());
         } else {
+            bundle.getDependencies().forEach(b -> {
+                if (!includedPolicy.compareAndSet(null, b.getPolicies().get(policyPath))) {
+                    throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
+                }
+            });
+        }
+        if (includedPolicy.get() == null) {
             throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
         }
+        policyGuidElement.setAttribute(STRING_VALUE, includedPolicy.get().getGuid());
+        policyGuidElement.removeAttribute(POLICY_PATH);
     }
 
     private void prepareAssertion(Element policyElement, String assertionTag, Consumer<Element> prepareAssertionMethod) {

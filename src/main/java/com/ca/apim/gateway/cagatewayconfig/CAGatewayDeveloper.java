@@ -14,6 +14,10 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 
 public class CAGatewayDeveloper implements Plugin<Project> {
+
+    private static final String BUNDLE_CONFIGURATION = "bundle";
+    private static final String BUNDLE_FILE_EXTENSION = "bundle";
+
     @Override
     public void apply(@NotNull final Project project) {
         // This plugin builds on the CAGatewayDeveloperBase plugin to define conventions
@@ -25,10 +29,14 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Set Defaults
         project.afterEvaluate(p -> setDefaults(pluginConfig, project));
 
+        //Add bundle configuration
+        project.getConfigurations().create(BUNDLE_CONFIGURATION);
+
         // Create build-bundle task
         final BuildBundleTask buildBundleTask = project.getTasks().create("build-bundle", BuildBundleTask.class, t -> {
             t.getFrom().set(pluginConfig.getSolutionDir());
             t.getInto().set(pluginConfig.getBuiltBundle());
+            t.getDependencies().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
 
         // add build-bundle to the default build task
@@ -37,9 +45,9 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // add the built bundle to the artifacts
         project.artifacts(artifactHandler -> artifactHandler.add("archives", pluginConfig.getBuiltBundle(), configurablePublishArtifact -> {
             configurablePublishArtifact.builtBy(buildBundleTask);
-            configurablePublishArtifact.setExtension("bundle");
+            configurablePublishArtifact.setExtension(BUNDLE_FILE_EXTENSION);
             configurablePublishArtifact.setName(project.getName());
-            configurablePublishArtifact.setType("bundle");
+            configurablePublishArtifact.setType(BUNDLE_FILE_EXTENSION);
         }));
 
     }
