@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
 import java.util.Set;
 
+@SuppressWarnings("unused")
 public class Service {
     private String url;
     private Set<String> httpMethods;

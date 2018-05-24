@@ -13,6 +13,8 @@ import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
@@ -24,6 +26,7 @@ public class ExplodeBundleTask extends DefaultTask {
     private final JsonTools jsonTools;
     private DocumentTools documentTools;
 
+    private Property<String> folderPath;
     private RegularFileProperty inputBundleFile;
     private DirectoryProperty exportDir;
 
@@ -36,8 +39,19 @@ public class ExplodeBundleTask extends DefaultTask {
         this.documentTools = documentTools;
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;
+        folderPath = getProject().getObjects().property(String.class);
         inputBundleFile = newInputFile();
         exportDir = newOutputDirectory();
+    }
+
+    /**
+     * The path of the folder to explode. This will only explode the contents of the given folder
+     *
+     * @return The path of the folder to explode.
+     */
+    @Input
+    public Property<String> getFolderPath() {
+        return folderPath;
     }
 
     @InputFile
@@ -53,6 +67,6 @@ public class ExplodeBundleTask extends DefaultTask {
     @TaskAction
     public void perform() throws DocumentParseException {
         ExplodeBundle explodeBundle = new ExplodeBundle(documentTools, documentFileUtils, jsonTools);
-        explodeBundle.explodeBundle(inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
+        explodeBundle.explodeBundle(folderPath.getOrElse("/"), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
     }
 }

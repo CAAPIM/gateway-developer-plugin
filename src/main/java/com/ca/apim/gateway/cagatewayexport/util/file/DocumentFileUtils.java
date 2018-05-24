@@ -45,7 +45,7 @@ public final class DocumentFileUtils {
         }
     }
 
-    public void createFolder(Path folderPath) {
+    public synchronized void createFolder(Path folderPath) {
         if (!folderPath.toFile().exists()) {
             try {
                 Files.createDirectory(folderPath);

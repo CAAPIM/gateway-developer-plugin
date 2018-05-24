@@ -7,9 +7,8 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.loader.EntityLoaderHelper;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
@@ -22,8 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +30,7 @@ public class ServiceWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
-    public ServiceWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    ServiceWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;
     }
@@ -45,7 +42,7 @@ public class ServiceWriter implements EntityWriter {
 
         Map<String, ServiceEntity> services = bundle.getEntities(ServiceEntity.class);
 
-        Map<String, Service> serviceBeans = services.values().stream().collect(Collectors.toMap(s -> getServicePath(bundle, s), this::getServiceBean));
+        Map<String, Service> serviceBeans = services.values().stream().collect(Collectors.toMap(ServiceEntity::getPath, this::getServiceBean));
 
         File servicesFile = new File(configFolder, "services.yml");
 
@@ -57,21 +54,15 @@ public class ServiceWriter implements EntityWriter {
         }
     }
 
-    private String getServicePath(Bundle bundle, ServiceEntity serviceEntity) {
-        Folder folder = bundle.getFolderTree().getFolderById(serviceEntity.getFolderId());
-        Path folderPath = bundle.getFolderTree().getPath(folder);
-        return Paths.get(folderPath.toString(), serviceEntity.getName() + ".xml").toString();
-    }
-
     @NotNull
     private Service getServiceBean(ServiceEntity serviceEntity) {
         Service serviceBean = new Service();
-        Element serviceMappingsElement = EntityLoaderHelper.getSingleElement(serviceEntity.getServiceDetailsElement(), "l7:ServiceMappings");
-        Element httpMappingElement = EntityLoaderHelper.getSingleElement(serviceMappingsElement, "l7:HttpMapping");
-        Element urlPatternElement = EntityLoaderHelper.getSingleElement(httpMappingElement, "l7:UrlPattern");
+        Element serviceMappingsElement = EntityLoaderHelper.getSingleChildElement(serviceEntity.getServiceDetailsElement(), "l7:ServiceMappings");
+        Element httpMappingElement = EntityLoaderHelper.getSingleChildElement(serviceMappingsElement, "l7:HttpMapping");
+        Element urlPatternElement = EntityLoaderHelper.getSingleChildElement(httpMappingElement, "l7:UrlPattern");
         serviceBean.setUrl(urlPatternElement.getTextContent());
 
-        Element verbsElement = EntityLoaderHelper.getSingleElement(httpMappingElement, "l7:Verbs");
+        Element verbsElement = EntityLoaderHelper.getSingleChildElement(httpMappingElement, "l7:Verbs");
         NodeList verbs = verbsElement.getElementsByTagName("l7:Verb");
         Set<String> httpMethods = new HashSet<>();
         for (int i = 0; i < verbs.getLength(); i++) {

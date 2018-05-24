@@ -1,4 +1,6 @@
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/ca-api-gateway/gateway-developer-plugin.svg?columns=all)](https://waffle.io/ca-api-gateway/gateway-developer-plugin)
+[![Build Status](https://travis-ci.org/ca-api-gateway/gateway-export-plugin.svg?branch=master)](https://travis-ci.org/ca-api-gateway/gateway-export-plugin)
+[![Sonar Cloud Status](https://sonarcloud.io/api/project_badges/measure?project=com.ca.apim.gateway%3Agateway-export-plugin&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.ca.apim.gateway%3Agateway-export-plugin)
 
 # About
 The Gateway developer plugin can be used to develop Gateway configuration.
@@ -45,6 +47,7 @@ Service | Yes |
 Policy | Yes |
 EncapsulatedAssertion | Yes |
 ClusterProperty | Yes |
+Policy Backed Service | Yes |
 
 ## Customizing the Default Plugin Configuration
 You can customize the source solution directory location and the location to put the built bundle file by setting the `GatewaySourceConfig`. For example:

@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class Encass {
     private List<EncassParam> arguments;
     private List<EncassParam> results;

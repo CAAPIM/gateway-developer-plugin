@@ -8,15 +8,19 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 
-public class ClusterProperty implements Entity {
+import java.util.Map;
+
+public class PolicyBackedServiceEntity implements Entity {
     private final String name;
     private final String id;
-    private final String value;
+    private final Map<String, String> operations;
+    private final String interfaceName;
 
-    public ClusterProperty(final String name, String value, final String id) {
+    public PolicyBackedServiceEntity(final String name, final String id, String interfaceName, final Map<String, String> operations) {
         this.name = name;
-        this.value = value;
         this.id = id;
+        this.interfaceName = interfaceName;
+        this.operations = operations;
     }
 
     @Override
@@ -29,12 +33,12 @@ public class ClusterProperty implements Entity {
         return name;
     }
 
-    public String getValue() {
-        return value;
+    public String getInterfaceName() {
+        return interfaceName;
     }
 
-    @Override
-    public String toString() {
-        return id + ":" + name;
+    public Map<String, String> getOperations() {
+        return operations;
     }
+
 }

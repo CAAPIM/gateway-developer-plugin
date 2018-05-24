@@ -82,7 +82,7 @@ public class GatewayClient {
 
         final int statusCode = response.getStatusLine().getStatusCode();
 
-        LOGGER.log(Level.FINE, "Status code is: %d for uri: %s", new Object[]{statusCode, uri});
+        LOGGER.log(Level.FINE, "Status code is: {0} for uri: {1}", new Object[]{statusCode, uri});
         final InputStream inputStream;
         try {
             inputStream = response.getEntity().getContent();

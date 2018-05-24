@@ -7,19 +7,16 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
-import org.w3c.dom.Element;
 
 public class Folder implements Entity {
     private final String name;
     private final String id;
     private final String parentFolderId;
-    private final Element xml;
 
-    public Folder(final String name, final String id, final String parentFolderId, Element folderElement) {
+    public Folder(final String name, final String id, final String parentFolderId) {
         this.name = name;
         this.id = id;
         this.parentFolderId = parentFolderId == null || parentFolderId.isEmpty() ? null : parentFolderId;
-        this.xml = folderElement;
     }
 
     @Override
@@ -34,11 +31,6 @@ public class Folder implements Entity {
 
     public String getParentFolderId() {
         return parentFolderId;
-    }
-
-    @Override
-    public Element getXml() {
-        return xml;
     }
 
     @Override
