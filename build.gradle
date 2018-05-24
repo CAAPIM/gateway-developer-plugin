@@ -15,7 +15,8 @@ apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 apply plugin: "jacoco"
 
-sourceCompatibility = 1.9
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 version = "0.5.00"
 
 repositories {
@@ -55,8 +56,6 @@ pluginBundle {
         }
     }
 }
-
-
 
 test {
     testLogging {

@@ -9,12 +9,14 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +44,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         List<Policy> orderedPolicies = new LinkedList<>();
         bundle.getPolicies().forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
 
-        return orderedPolicies.stream().map(this::buildPolicyEntity).collect(Collectors.toList());
+        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle)).collect(Collectors.toList());
     }
 
     private void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
@@ -123,26 +125,35 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private void prepareEncapsulatedAssertion(Bundle bundle, Document policyDocument, Node encapsulatedAssertionElement) {
-        String policyPath = ((Element) encapsulatedAssertionElement).getAttribute(POLICY_PATH);
-        Encass referenceEncass = bundle.getEncasses().get(policyPath);
-        if (referenceEncass != null) {
-            Element encapsulatedAssertionConfigNameElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigName");
-            encapsulatedAssertionConfigNameElement.setAttribute(STRING_VALUE, policyPath);
-            Node firstChild = encapsulatedAssertionElement.getFirstChild();
-            if (firstChild != null) {
-                encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigNameElement, firstChild);
-            } else {
-                encapsulatedAssertionElement.appendChild(encapsulatedAssertionConfigNameElement);
-            }
-
-            Element encapsulatedAssertionConfigGuidElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigGuid");
-            encapsulatedAssertionConfigGuidElement.setAttribute(STRING_VALUE, referenceEncass.getGuid());
-            encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
-
-            ((Element) encapsulatedAssertionElement).removeAttribute(POLICY_PATH);
-        } else {
+        final String policyPath = ((Element) encapsulatedAssertionElement).getAttribute(POLICY_PATH);
+        LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", policyPath);
+        final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(policyPath));
+        if (referenceEncass.get() == null) {
+            bundle.getDependencies().forEach(b -> {
+                if (!referenceEncass.compareAndSet(null, b.getEncasses().get(policyPath))) {
+                    throw new EntityBuilderException("Found multiple encasses in dependency bundles with policy path: " + policyPath);
+                }
+            });
+        }
+        if (referenceEncass.get() == null) {
             throw new EntityBuilderException("Could not find referenced encass with path: " + policyPath);
         }
+        final String guid = referenceEncass.get().getGuid();
+
+        Element encapsulatedAssertionConfigNameElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigName");
+        encapsulatedAssertionConfigNameElement.setAttribute(STRING_VALUE, policyPath);
+        Node firstChild = encapsulatedAssertionElement.getFirstChild();
+        if (firstChild != null) {
+            encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigNameElement, firstChild);
+        } else {
+            encapsulatedAssertionElement.appendChild(encapsulatedAssertionConfigNameElement);
+        }
+
+        Element encapsulatedAssertionConfigGuidElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigGuid");
+        encapsulatedAssertionConfigGuidElement.setAttribute(STRING_VALUE, guid);
+        encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
+
+        ((Element) encapsulatedAssertionElement).removeAttribute(POLICY_PATH);
     }
 
     private void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
@@ -152,16 +163,24 @@ public class PolicyEntityBuilder implements EntityBuilder {
         } catch (DocumentParseException e) {
             throw new EntityBuilderException("Could not find PolicyGuid element in Include Assertion", e);
         }
-        String policyPath = policyGuidElement.getAttribute(POLICY_PATH);
-        Policy includedPolicy = bundle.getPolicies().get(policyPath);
-        if (includedPolicy != null) {
-            policy.getDependencies().add(includedPolicy);
-            //need to do this in a second stage since the included policy might not have its guid set yet
-            policyGuidElement.setAttribute(STRING_VALUE, includedPolicy.getGuid());
-            policyGuidElement.removeAttribute(POLICY_PATH);
+        final String policyPath = policyGuidElement.getAttribute(POLICY_PATH);
+        LOGGER.log(Level.FINE, "Looking for referenced policy include: {0}", policyPath);
+
+        final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyPath));
+        if (includedPolicy.get() != null) {
+            policy.getDependencies().add(includedPolicy.get());
         } else {
+            bundle.getDependencies().forEach(b -> {
+                if (!includedPolicy.compareAndSet(null, b.getPolicies().get(policyPath))) {
+                    throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
+                }
+            });
+        }
+        if (includedPolicy.get() == null) {
             throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
         }
+        policyGuidElement.setAttribute(STRING_VALUE, includedPolicy.get().getGuid());
+        policyGuidElement.removeAttribute(POLICY_PATH);
     }
 
     private void prepareAssertion(Element policyElement, String assertionTag, Consumer<Element> prepareAssertionMethod) {
@@ -175,7 +194,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Entity buildPolicyEntity(Policy policy) {
+    private Entity buildPolicyEntity(Policy policy, Bundle bundle) {
         Element policyDetailElement = document.createElement("l7:PolicyDetail");
 
         String id = policy.getId();
@@ -186,10 +205,29 @@ public class PolicyEntityBuilder implements EntityBuilder {
         nameElement.setTextContent(policy.getName());
         policyDetailElement.appendChild(nameElement);
 
+        PolicyTags policyTags = getPolicyTags(policy, bundle);
+
         Element policyTypeElement = document.createElement("l7:PolicyType");
-        policyTypeElement.setTextContent("Include");
+        policyTypeElement.setTextContent(policyTags == null ? "Include" : policyTags.type);
         policyDetailElement.appendChild(policyTypeElement);
 
+        if (policyTags != null) {
+            Element propertiesElement = document.createElement("l7:Properties");
+            policyDetailElement.appendChild(propertiesElement);
+            Element propertyTagElement = document.createElement("l7:Property");
+            propertiesElement.appendChild(propertyTagElement);
+            propertyTagElement.setAttribute("key", "tag");
+            Element tagStringValueElement = document.createElement("l7:StringValue");
+            propertyTagElement.appendChild(tagStringValueElement);
+            tagStringValueElement.setTextContent(policyTags.tag);
+
+            Element propertySubTagElement = document.createElement("l7:Property");
+            propertiesElement.appendChild(propertySubTagElement);
+            propertySubTagElement.setAttribute("key", "subtag");
+            Element subTagStringValueElement = document.createElement("l7:StringValue");
+            propertySubTagElement.appendChild(subTagStringValueElement);
+            subTagStringValueElement.setTextContent(policyTags.subtag);
+        }
 
         Element policyElement = document.createElement("l7:Policy");
         policyElement.setAttribute("id", id);
@@ -212,6 +250,18 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return new Entity("POLICY", policy.getName(), id, policyElement);
     }
 
+    private PolicyTags getPolicyTags(Policy policy, Bundle bundle) {
+        final AtomicReference<PolicyTags> policyTags = new AtomicReference<>();
+        for (PolicyBackedService pbs : bundle.getPolicyBackedServices().values()) {
+            pbs.getOperations().stream().filter(o -> o.getPolicy().equals(policy.getPath())).forEach(o -> {
+                if (!policyTags.compareAndSet(null, new PolicyTags("Service Operation", pbs.getInterfaceName(), o.getOperationName()))) {
+                    throw new EntityBuilderException("Found multiple policy backed service operations for policy: " + policy.getPath());
+                }
+            });
+        }
+        return policyTags.get();
+    }
+
     private Document stringToXML(String string) {
         Document documentElement;
         try {
@@ -221,5 +271,17 @@ public class PolicyEntityBuilder implements EntityBuilder {
             throw new EntityBuilderException("Could not load policy: " + e.getMessage(), e);
         }
         return documentElement;
+    }
+
+    private class PolicyTags {
+        private final String type;
+        private final String tag;
+        private final String subtag;
+
+        private PolicyTags(String type, String tag, String subtag) {
+            this.type = type;
+            this.tag = tag;
+            this.subtag = subtag;
+        }
     }
 }

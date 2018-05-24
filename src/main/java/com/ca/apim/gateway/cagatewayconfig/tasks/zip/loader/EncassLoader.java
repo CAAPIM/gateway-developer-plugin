@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EncassLoader implements EntityLoader {
-    private static final TypeReference<HashMap<String, Encass>> encassMapTypeMapping = new TypeReference<>() {
+    private static final TypeReference<HashMap<String, Encass>> encassMapTypeMapping = new TypeReference<HashMap<String, Encass>>() {
     };
     private final JsonTools jsonTools;
     private final IdGenerator idGenerator;

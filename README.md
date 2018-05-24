@@ -34,6 +34,8 @@ Service | Yes |
 Policy | Yes |
 EncapsulatedAssertion | Yes |
 ClusterProperty | Yes |
+Policy Backed Service | Yes |
+Listen Port | No | See issue [#36](https://github.com/ca-api-gateway/gateway-developer-plugin/issues/36)
  
 
 ## Expected Source Directory Organization
@@ -135,17 +137,55 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
                 }
               }
               ```
+    * either `policy-backed-services.yml` or `policy-backed-services.json`
+      * This is a file containing the policy backed services that are available in the gateway.
+      * An example `policy-backed-services.yml` file would look like:
+        * ```yaml
+          my-pbs:
+            interfaceName: "com.l7tech.objectmodel.polback.BackgroundTask"
+            operations:
+            - policy: "example project/example-pbs.xml"
+              operationName: "run"
+          ```
+          * The above example will create one policy backed service:
+            * A policy backed service with the name: `my-pbs`
+              * It will use the policy backed interface `com.l7tech.objectmodel.polback.BackgroundTask`
+              * For the single operation `run` it will execute the policy located at: `example project/example-pbs.xml`
+          * The same JSON representation would look like:
+            * ```json
+              {
+                "my-pbs": {
+                  "interfaceName": "com.l7tech.objectmodel.polback.BackgroundTask",
+                  "operations": [
+                    {
+                      "policy": "example project/example-pbs.xml",
+                      "operationName": "run"
+                    }
+                  ]
+                }
+              }
+              ```
     * `global.properties`
       * This is a standard java properties file that contains the different cluster properties to create on the Gateway. An example `global.properties` file might look like:
         * ```properties
-            my-global-property=This is a properties value
-            another-property=\
-              {"another":"properties",\
-               "value":"0"\
-              }
+          my-global-property=This is a properties value
+          another-property=\
+            {"another":"properties",\
+             "value":"0"\
+            }
           ```
   * `policy`
     * The policy folder contains the different policies that are available. It can contain may subdirectories to help organize the policy.
+
+## Adding Bundle Dependencies
+You can depend on other bundles by adding a dependency. For example:
+```groovy
+dependencies {
+    bundle group: 'my-bundle', name: 'my-bundle', version: '1.0.00', ext: 'bundle'
+}
+```
+The above will add a dependency on a bundle called 'my-bundle'. With this added you can reference encapsulated assertions and policies from the dependent bundles. 
+Note that the `ext: 'bundle'` is required to specify that the bundle file extension is `.bundle` 
 
 ## Customizing the Default Plugin Configuration
 You can customize the source solution directory location and the location to put the built bundle file by setting the `GatewaySourceConfig`. For example:

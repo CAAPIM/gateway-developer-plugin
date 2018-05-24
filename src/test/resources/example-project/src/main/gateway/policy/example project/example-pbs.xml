@@ -1,0 +1,10 @@
+<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:L7p="http://www.layer7tech.com/ws/policy">
+    <wsp:All wsp:Usage="Required">
+        <L7p:CommentAssertion>
+            <L7p:Comment stringValue="Policy Fragment: my-pbs"/>
+        </L7p:CommentAssertion>
+        <L7p:Include>
+            <L7p:PolicyGuid policyPath="another/some other.xml"/>
+        </L7p:Include>
+    </wsp:All>
+</wsp:Policy>

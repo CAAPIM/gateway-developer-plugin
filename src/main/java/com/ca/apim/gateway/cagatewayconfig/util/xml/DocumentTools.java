@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.xml;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyBundleLoadException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.gradle.api.GradleException;
 import org.w3c.dom.Document;
@@ -25,6 +27,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -71,6 +74,14 @@ public class DocumentTools {
         return builder;
     }
 
+    public Document parse(final File file) throws DocumentParseException {
+        try {
+            return parse(FileUtils.openInputStream(file));
+        } catch (IOException e) {
+            throw new DocumentParseException("Exception reading file: " + file, e);
+        }
+    }
+
     public Document parse(String string) throws DocumentParseException {
         try {
             return parse(IOUtils.toInputStream(string, "UTF-8"));
@@ -109,6 +120,28 @@ public class DocumentTools {
             } else {
                 throw new DocumentParseException("Unexpected " + entityName + " node discovered: " + folderNode.toString());
             }
+        }
+    }
+
+    public Element getSingleChildElement(final Element entityItemElement, final String elementName) {
+        final NodeList childNodes = entityItemElement.getChildNodes();
+        Node foundNode = null;
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            if (elementName.equals(childNodes.item(i).getNodeName())) {
+                if (foundNode == null) {
+                    foundNode = childNodes.item(i);
+                } else {
+                    throw new DependencyBundleLoadException("Multiple " + elementName + " elements found");
+                }
+            }
+        }
+        if (foundNode == null) {
+            throw new DependencyBundleLoadException(elementName + " element not found");
+        }
+        if (foundNode.getNodeType() == Node.ELEMENT_NODE) {
+            return (Element) foundNode;
+        } else {
+            throw new DependencyBundleLoadException("Unexpected " + elementName + " node discovered: " + foundNode.toString());
         }
     }
 

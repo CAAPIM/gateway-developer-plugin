@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.DependencyBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -22,12 +23,15 @@ import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BundleBuilder {
 
     private final DocumentFileUtils documentFileUtils;
     private final EntityLoaderRegistry entityLoaderRegistry;
     private final BundleEntityBuilder bundleEntityBuilder;
+    private final DocumentTools documentTools;
 
     public BundleBuilder(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, final FileUtils fileUtils, final JsonTools jsonTools) {
         IdGenerator idGenerator = new IdGenerator();
@@ -35,17 +39,25 @@ public class BundleBuilder {
         final Document document = documentBuilder.newDocument();
 
         this.documentFileUtils = documentFileUtils;
+        this.documentTools = documentTools;
         this.entityLoaderRegistry = new EntityLoaderRegistry(fileUtils, jsonTools, idGenerator);
         this.bundleEntityBuilder = new BundleEntityBuilder(documentFileUtils, documentTools, document, idGenerator);
     }
 
-    public void buildBundle(File rootDir, Path outputPath) {
+    public void buildBundle(File rootDir, Path outputPath, Set<File> dependencies) {
 
-        final Collection<EntityLoader> entityBuilders = entityLoaderRegistry.getEntityLoaders();
+        final Collection<EntityLoader> entityLoaders = entityLoaderRegistry.getEntityLoaders();
         final Bundle bundle = new Bundle();
 
         //Load
-        entityBuilders.parallelStream().forEach(e -> e.load(bundle, rootDir));
+        entityLoaders.parallelStream().forEach(e -> e.load(bundle, rootDir));
+
+        //Load Dependencies
+        // Improvements can be made here by doing this loading in a separate task and caching the intermediate results.
+        // That way the dependent bundles are not re-processed on every new build
+        final DependencyBundleLoader dependencyBundleLoader = new DependencyBundleLoader(documentTools);
+        final Set<Bundle> dependencyBundles = dependencies.stream().map(dependencyBundleLoader::load).collect(Collectors.toSet());
+        bundle.setDependencies(dependencyBundles);
 
         //Zip
         Element bundleElement = bundleEntityBuilder.build(bundle);
