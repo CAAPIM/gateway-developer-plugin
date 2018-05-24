@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class EntityLoaderRegistry {
@@ -15,10 +16,10 @@ public class EntityLoaderRegistry {
     private final Map<String, BundleEntityLoader> entityLoaders;
 
     public EntityLoaderRegistry(DocumentTools documentTools) {
-        this.entityLoaders = Map.of(
-                "POLICY", new PolicyLoader(documentTools),
-                "FOLDER", new FolderLoader(documentTools),
-                "ENCAPSULATED_ASSERTION", new EncassLoader(documentTools));
+        entityLoaders = new HashMap<>();
+        entityLoaders.put("POLICY", new PolicyLoader(documentTools));
+        entityLoaders.put("FOLDER", new FolderLoader(documentTools));
+        entityLoaders.put("ENCAPSULATED_ASSERTION", new EncassLoader(documentTools));
     }
 
     public BundleEntityLoader getLoader(String type) {

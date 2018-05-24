@@ -3,5 +3,8 @@
         <L7p:CommentAssertion>
             <L7p:Comment stringValue="Policy Fragment: my-pbs"/>
         </L7p:CommentAssertion>
+        <L7p:Include>
+            <L7p:PolicyGuid policyPath="another/some other.xml"/>
+        </L7p:Include>
     </wsp:All>
 </wsp:Policy>

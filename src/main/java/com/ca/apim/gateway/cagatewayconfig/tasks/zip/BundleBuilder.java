@@ -53,6 +53,8 @@ public class BundleBuilder {
         entityLoaders.parallelStream().forEach(e -> e.load(bundle, rootDir));
 
         //Load Dependencies
+        // Improvements can be made here by doing this loading in a separate task and caching the intermediate results.
+        // That way the dependent bundles are not re-processed on every new build
         final DependencyBundleLoader dependencyBundleLoader = new DependencyBundleLoader(documentTools);
         final Set<Bundle> dependencyBundles = dependencies.stream().map(dependencyBundleLoader::load).collect(Collectors.toSet());
         bundle.setDependencies(dependencyBundles);
