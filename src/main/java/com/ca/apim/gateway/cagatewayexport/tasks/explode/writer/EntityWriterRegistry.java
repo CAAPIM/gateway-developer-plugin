@@ -22,7 +22,7 @@ public class EntityWriterRegistry {
         loadersCollection.add(new PolicyWriter(documentFileUtils));
         loadersCollection.add(new ServiceWriter(documentFileUtils, jsonTools));
         loadersCollection.add(new EncassWriter(documentFileUtils, jsonTools));
-        loadersCollection.add(new GlobalPropertiesWriter(documentFileUtils));
+        loadersCollection.add(new StaticPropertiesWriter(documentFileUtils));
         loadersCollection.add(new PolicyBackedServiceWriter(documentFileUtils, jsonTools));
 
         this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);

@@ -42,7 +42,7 @@ public class BundleFilter {
         filterPBS(filteredBundle.getEntities(PolicyEntity.class), bundle.getEntities(PolicyBackedServiceEntity.class).values()).forEach(filteredBundle::addEntity);
 
         //filter cluster property
-        filterGlobalProperties(bundle.getEntities(ClusterProperty.class).values(), bundle.getDependencies(), filteredBundle).forEach(filteredBundle::addEntity);
+        filterStaticProperties(bundle.getEntities(ClusterProperty.class).values(), bundle.getDependencies(), filteredBundle).forEach(filteredBundle::addEntity);
 
         filterParentFolders(folderPath, bundle.getFolderTree()).forEach(filteredBundle::addEntity);
 
@@ -51,7 +51,7 @@ public class BundleFilter {
         return filteredBundle;
     }
 
-    private List<ClusterProperty> filterGlobalProperties(Collection<ClusterProperty> clusterProperties, Map<Dependency, List<Dependency>> dependencies, Bundle filteredBundle) {
+    private List<ClusterProperty> filterStaticProperties(Collection<ClusterProperty> clusterProperties, Map<Dependency, List<Dependency>> dependencies, Bundle filteredBundle) {
         Set<Dependency> filteredDependencies = dependencies.entrySet().stream()
                 .filter(e -> filteredBundle.getEntities(e.getKey().getType()).get(e.getKey().getId()) != null)
                 .flatMap(e -> e.getValue().stream())
