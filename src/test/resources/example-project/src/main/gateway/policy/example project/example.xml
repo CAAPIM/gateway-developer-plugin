@@ -5,7 +5,7 @@
                 <![CDATA[{
    "you-say": ["Hello", "Gateway"],
    "gateway-says": ["Hello", "User"],
-   "my-global-property": "${gateway.my-global-property}"
+   "my-static-property": "${gateway.my-static-property}"
    "another-property": "${gateway.another-property}"
 }]]>
             </L7p:ResponseBody>
