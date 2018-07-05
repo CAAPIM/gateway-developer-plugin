@@ -22,7 +22,7 @@ public class PolicyBackedServiceLinker implements EntityLinker<PolicyBackedServi
     }
 
     @Override
-    public void link(PolicyBackedServiceEntity pbs, Bundle bundle) {
+    public void link(PolicyBackedServiceEntity pbs, Bundle bundle, Bundle targetBundle) {
         for (String operation : pbs.getOperations().keySet()) {
             String policyId = pbs.getOperations().get(operation);
             pbs.getOperations().put(operation, getPolicyPath(bundle, policyId));
@@ -31,7 +31,13 @@ public class PolicyBackedServiceLinker implements EntityLinker<PolicyBackedServi
 
     private String getPolicyPath(Bundle bundle, String policyId) {
         PolicyEntity policy = bundle.getEntities(PolicyEntity.class).get(policyId);
+        if (policy == null) {
+            throw new LinkerException("Could not find policy for Policy Backed Service. Policy ID: " + policyId);
+        }
         Folder folder = bundle.getFolderTree().getFolderById(policy.getFolderId());
+        if (folder == null) {
+            throw new LinkerException("Could not find folder for Policy Backed Service policy. Policy Name:ID: " + policy.getName() + ":" + policy.getId() + ". Folder Id: " + policy.getFolderId());
+        }
         Path folderPath = bundle.getFolderTree().getPath(folder);
         return Paths.get(folderPath.toString(), policy.getName() + ".xml").toString();
     }

@@ -14,19 +14,20 @@ import java.util.HashSet;
 
 public class EntityLinkerRegistry {
 
-    private final Collection<EntityLinker> entityLinkers;
+    private final Collection<EntitiesLinker> entityLinkers;
 
     public EntityLinkerRegistry(final DocumentTools documentTools) {
-        final Collection<EntityLinker> linkersCollection = new HashSet<>();
+        final Collection<EntitiesLinker> linkersCollection = new HashSet<>();
         linkersCollection.add(new PolicyLinker(documentTools));
         linkersCollection.add(new ServiceLinker(documentTools));
         linkersCollection.add(new EncassLinker());
         linkersCollection.add(new PolicyBackedServiceLinker());
+        linkersCollection.add(new ClusterPropertyLinker());
 
         this.entityLinkers = Collections.unmodifiableCollection(linkersCollection);
     }
 
-    public Collection<EntityLinker> getEntityLinkers() {
+    public Collection<EntitiesLinker> getEntityLinkers() {
         return entityLinkers;
     }
 }

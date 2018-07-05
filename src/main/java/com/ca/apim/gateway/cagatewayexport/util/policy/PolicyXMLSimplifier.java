@@ -9,8 +9,10 @@ package com.ca.apim.gateway.cagatewayexport.util.policy;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilderException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
@@ -32,12 +34,11 @@ public class PolicyXMLSimplifier {
     private static final Logger LOGGER = Logger.getLogger(PolicyWriter.class.getName());
     private static final String STRING_VALUE = "stringValue";
 
-    public Element simplifyPolicyXML(Element policyElement, Bundle bundle) {
+    public void simplifyPolicyXML(Element policyElement, Bundle bundle, Bundle resultantBundle) {
         findAndSimplifyAssertion(policyElement, "L7p:Include", element -> simplifyIncludeAssertion(bundle, element));
         findAndSimplifyAssertion(policyElement, "L7p:Encapsulated", element -> simplifyEncapsulatedAssertion(bundle, element));
-        findAndSimplifyAssertion(policyElement, "L7p:SetVariable", this::simplifySetVariable);
+        findAndSimplifyAssertion(policyElement, "L7p:SetVariable", element -> simplifySetVariable(element, resultantBundle));
         findAndSimplifyAssertion(policyElement, "L7p:HardcodedResponse", this::simplifyHardcodedResponse);
-        return policyElement;
     }
 
     private void simplifyHardcodedResponse(Element element) {
@@ -57,14 +58,28 @@ public class PolicyXMLSimplifier {
         element.removeChild(base64ResponseBodyElement);
     }
 
-    private void simplifySetVariable(Element element) {
+    private void simplifySetVariable(Element element, Bundle resultantBundle) {
         Element base64ExpressionElement = EntityLoaderHelper.getSingleElement(element, "L7p:Base64Expression");
         String base64Expression = base64ExpressionElement.getAttribute(STRING_VALUE);
-        byte[] decoded = Base64.getDecoder().decode(base64Expression);
+        byte[] decodedValue = Base64.getDecoder().decode(base64Expression);
 
-        Element expressionElement = element.getOwnerDocument().createElement("L7p:Expression");
-        expressionElement.appendChild(element.getOwnerDocument().createCDATASection(new String(decoded)));
-        element.insertBefore(expressionElement, base64ExpressionElement);
+        Element variableToSetElement = EntityLoaderHelper.getSingleElement(element, "L7p:VariableToSet");
+        String variableName = variableToSetElement.getAttribute(STRING_VALUE);
+        if (variableName.startsWith("ENV.")) {
+            if (variableName.startsWith("ENV.gateway.")) {
+                throw new LinkerException("Cannot have local environment property start with the prefix `ENV.gateway.`. Property: " + variableName);
+            }
+            EnvironmentProperty environmentProperty = new EnvironmentProperty(variableName.substring(4), new String(decodedValue), EnvironmentProperty.Type.LOCAL);
+            EnvironmentProperty existingEnvironmentProperty = resultantBundle.getEntities(EnvironmentProperty.class).get(environmentProperty.getId());
+            if (existingEnvironmentProperty != null) {
+                throw new LinkerException("Found duplicate environment property: `" + variableName.substring(4) + "`. Cannot have multiple environment properties with the same name.");
+            }
+            resultantBundle.addEntity(environmentProperty);
+        } else {
+            Element expressionElement = element.getOwnerDocument().createElement("L7p:Expression");
+            expressionElement.appendChild(element.getOwnerDocument().createCDATASection(new String(decodedValue)));
+            element.insertBefore(expressionElement, base64ExpressionElement);
+        }
         element.removeChild(base64ExpressionElement);
     }
 

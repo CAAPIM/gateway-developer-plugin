@@ -7,7 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 
@@ -19,10 +19,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-public class StaticPropertiesWriter implements EntityWriter {
+public class EnvironmentPropertiesWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
 
-    StaticPropertiesWriter(DocumentFileUtils documentFileUtils) {
+    EnvironmentPropertiesWriter(DocumentFileUtils documentFileUtils) {
         this.documentFileUtils = documentFileUtils;
     }
 
@@ -31,12 +31,13 @@ public class StaticPropertiesWriter implements EntityWriter {
         File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
 
-        Map<String, ClusterProperty> clusterProperties = bundle.getEntities(ClusterProperty.class);
+        Map<String, EnvironmentProperty> environmentProperty = bundle.getEntities(EnvironmentProperty.class);
 
         Properties properties = new Properties();
-        properties.putAll(clusterProperties.values().stream().collect(Collectors.toMap(ClusterProperty::getName, ClusterProperty::getValue)));
+        properties.putAll(environmentProperty.values().stream()
+                .collect(Collectors.toMap(property -> (property.getType() == EnvironmentProperty.Type.GLOBAL ? "gateway." : "") + property.getName(), EnvironmentProperty::getValue)));
 
-        File servicesFile = new File(configFolder, "static.properties");
+        File servicesFile = new File(configFolder, "env.properties");
 
         try (OutputStream outputStream = new StripFirstLineStream(new FileOutputStream(servicesFile))) {
             properties.store(outputStream, null);

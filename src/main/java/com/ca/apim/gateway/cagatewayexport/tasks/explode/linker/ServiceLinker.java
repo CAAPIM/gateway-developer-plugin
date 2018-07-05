@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
+import org.w3c.dom.Element;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,11 +34,13 @@ public class ServiceLinker implements EntityLinker<ServiceEntity> {
     }
 
     @Override
-    public void link(ServiceEntity service, Bundle bundle) {
+    public void link(ServiceEntity service, Bundle bundle, Bundle targetBundle) {
         try {
-            service.setPolicyXML(policyXMLSimplifier.simplifyPolicyXML(WriterHelper.stringToXML(documentTools, service.getPolicy()), bundle));
+            Element policyElement = WriterHelper.stringToXML(documentTools, service.getPolicy());
+            policyXMLSimplifier.simplifyPolicyXML(policyElement, bundle, targetBundle);
+            service.setPolicyXML(policyElement);
         } catch (DocumentParseException e) {
-            throw new WriteException("Exception linking and simplifying policy: " + service.getName() + " Message: " + e.getMessage(), e);
+            throw new WriteException("Exception linking and simplifying service: " + service.getName() + " Message: " + e.getMessage(), e);
         }
         service.setPath(getServicePath(bundle, service));
     }
