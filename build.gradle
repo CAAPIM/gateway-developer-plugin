@@ -32,7 +32,7 @@ test {
 dependencies {
     compile gradleApi()
     compile 'org.jetbrains:annotations:16.0.2'
-    compile 'org.apache.httpcomponents:httpclient:4.5'
+    compile 'org.apache.httpcomponents:httpclient:4.5.5'
     compile 'commons-io:commons-io:+'
     compile 'commons-lang:commons-lang:+'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
