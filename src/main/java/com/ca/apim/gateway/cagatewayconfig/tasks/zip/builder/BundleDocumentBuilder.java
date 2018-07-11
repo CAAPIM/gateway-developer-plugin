@@ -34,10 +34,12 @@ public class BundleDocumentBuilder {
     }
 
     private void addEntity(final Element references, final Element mappings, final Entity entity) {
-        final Element folderItem = buildEntityItem(entity, document);
-        references.appendChild(folderItem);
-        final Element folderMapping = buildEntityMapping(entity, document);
-        mappings.appendChild(folderMapping);
+        if (entity.getXml() != null) {
+            final Element entityItem = buildEntityItem(entity, document);
+            references.appendChild(entityItem);
+        }
+        final Element entityMapping = buildEntityMapping(entity, document);
+        mappings.appendChild(entityMapping);
     }
 
     private Element buildEntityMapping(final Entity entity, final Document document) {

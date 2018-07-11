@@ -12,18 +12,18 @@ import org.gradle.api.file.RegularFileProperty;
 
 public class GatewayDeveloperPluginConfig {
     private final DirectoryProperty solutionDir;
-    private RegularFileProperty builtBundle;
+    private DirectoryProperty builtBundleDir;
 
     public GatewayDeveloperPluginConfig(Project project) {
         solutionDir = project.getLayout().directoryProperty();
-        builtBundle = project.getLayout().fileProperty();
+        builtBundleDir = project.getLayout().directoryProperty();
     }
 
     public DirectoryProperty getSolutionDir() {
         return solutionDir;
     }
 
-    public RegularFileProperty getBuiltBundle() {
-        return builtBundle;
+    public DirectoryProperty getBuiltBundleDir() {
+        return builtBundleDir;
     }
 }

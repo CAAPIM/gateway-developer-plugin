@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EnvironmentBundleBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.DependencyBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoaderRegistry;
@@ -21,7 +22,6 @@ import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +31,7 @@ public class BundleBuilder {
     private final DocumentFileUtils documentFileUtils;
     private final EntityLoaderRegistry entityLoaderRegistry;
     private final BundleEntityBuilder bundleEntityBuilder;
+    private final EnvironmentBundleBuilder environmentBundleBuilder;
     private final DocumentTools documentTools;
 
     public BundleBuilder(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, final FileUtils fileUtils, final JsonTools jsonTools) {
@@ -42,9 +43,10 @@ public class BundleBuilder {
         this.documentTools = documentTools;
         this.entityLoaderRegistry = new EntityLoaderRegistry(fileUtils, jsonTools, idGenerator);
         this.bundleEntityBuilder = new BundleEntityBuilder(documentFileUtils, documentTools, document, idGenerator);
+        this.environmentBundleBuilder = new EnvironmentBundleBuilder(document, idGenerator);
     }
 
-    public void buildBundle(File rootDir, Path outputPath, Set<File> dependencies) {
+    public void buildBundle(File rootDir, File outputDir, Set<File> dependencies, String name) {
 
         final Collection<EntityLoader> entityLoaders = entityLoaderRegistry.getEntityLoaders();
         final Bundle bundle = new Bundle();
@@ -61,7 +63,10 @@ public class BundleBuilder {
 
         //Zip
         Element bundleElement = bundleEntityBuilder.build(bundle);
-        documentFileUtils.createFile(bundleElement, outputPath);
+        documentFileUtils.createFile(bundleElement, new File(outputDir, name + ".req.bundle").toPath());
+
+        Element environmentElement = environmentBundleBuilder.build(bundle);
+        documentFileUtils.createFile(environmentElement, new File(outputDir, "_" + name + "-env.req.bundle").toPath());
 
     }
 

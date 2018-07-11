@@ -1,12 +1,12 @@
 package com.ca.apim.gateway.cagatewayconfig.util;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class IdGeneratorTest {
+class IdGeneratorTest {
 
     @Test
-    public void generate() {
+    void generate() {
         IdGenerator idGenerator = new IdGenerator();
         IdGenerator idGenerator2 = new IdGenerator();
 

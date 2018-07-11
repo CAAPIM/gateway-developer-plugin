@@ -91,20 +91,35 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
-        Element expressionElement;
+        Element nameElement;
         try {
-            expressionElement = documentTools.getSingleElement(assertionElement, "L7p:Expression");
+            nameElement = documentTools.getSingleElement(assertionElement, "L7p:VariableToSet");
         } catch (DocumentParseException e) {
-            LOGGER.log(Level.FINE, "Did not find 'Expression' tag for SetVariableAssertion. Not generating Base64ed version");
-            return;
+            throw new EntityBuilderException("Could not find VariableToSet element in a SetVariable Assertion.");
         }
 
-        String expression = getCDataOrText(expressionElement);
-        String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
-        Element base64ExpressionElement = policyDocument.createElement("L7p:Base64Expression");
-        base64ExpressionElement.setAttribute(STRING_VALUE, encoded);
-        assertionElement.insertBefore(base64ExpressionElement, expressionElement);
-        assertionElement.removeChild(expressionElement);
+        String variableName = nameElement.getAttribute(STRING_VALUE);
+        if(variableName.startsWith("ENV.")){
+            Element base64ExpressionElement = policyDocument.createElement("L7p:Base64Expression");
+            base64ExpressionElement.setAttribute("ENV_PARAM_NAME", variableName);
+            assertionElement.insertBefore(base64ExpressionElement, assertionElement.getFirstChild());
+        } else {
+
+            Element expressionElement;
+            try {
+                expressionElement = documentTools.getSingleElement(assertionElement, "L7p:Expression");
+            } catch (DocumentParseException e) {
+                LOGGER.log(Level.FINE, "Did not find 'Expression' tag for SetVariableAssertion. Not generating Base64ed version");
+                return;
+            }
+
+            String expression = getCDataOrText(expressionElement);
+            String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
+            Element base64ExpressionElement = policyDocument.createElement("L7p:Base64Expression");
+            base64ExpressionElement.setAttribute(STRING_VALUE, encoded);
+            assertionElement.insertBefore(base64ExpressionElement, expressionElement);
+            assertionElement.removeChild(expressionElement);
+        }
     }
 
     private String getCDataOrText(Element element) {

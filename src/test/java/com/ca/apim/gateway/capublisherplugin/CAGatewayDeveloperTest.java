@@ -6,15 +6,15 @@
 
 package com.ca.apim.gateway.capublisherplugin;
 
+import io.github.glytching.junit.extension.folder.TemporaryFolder;
+import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.io.FileUtils;
 import org.gradle.internal.impldep.org.junit.Assert;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,16 +23,14 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CAGatewayDeveloperTest {
+class CAGatewayDeveloperTest {
     private static final Logger LOGGER = Logger.getLogger(CAGatewayDeveloperTest.class.getName());
 
-    @Rule
-    public final TemporaryFolder rootProjectDir = new TemporaryFolder();
-
     @Test
-    public void testExampleProject() throws IOException, URISyntaxException {
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProject(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
         String projectFolder = "example-project";
-        File testProjectDir = new File(rootProjectDir.getRoot(), projectFolder);
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
         FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
 
         BuildResult result = GradleRunner.create()
@@ -49,14 +47,17 @@ public class CAGatewayDeveloperTest {
         Assert.assertTrue(buildDir.isDirectory());
         File buildGatewayDir = new File(buildDir, "gateway");
         Assert.assertTrue(buildGatewayDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayDir, projectFolder + ".bundle");
+        File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
+        Assert.assertTrue(buildGatewayBundlesDir.isDirectory());
+        File builtBundleFile = new File(buildGatewayBundlesDir, projectFolder + ".req.bundle");
         Assert.assertTrue(builtBundleFile.isFile());
     }
 
     @Test
-    public void testExampleProjectCustomOrganization() throws IOException, URISyntaxException {
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectCustomOrganization(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
         String projectFolder = "example-project-custom-organization";
-        File testProjectDir = new File(rootProjectDir.getRoot(), projectFolder);
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
         FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
 
         BuildResult result = GradleRunner.create()
@@ -69,9 +70,9 @@ public class CAGatewayDeveloperTest {
         LOGGER.log(Level.INFO, result.getOutput());
         Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
 
-        File buildGatewayDir = new File(testProjectDir, "gateway");
+        File buildGatewayDir = new File(testProjectDir, "dist");
         Assert.assertTrue(buildGatewayDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayDir, "built-bundle.bundle");
+        File builtBundleFile = new File(buildGatewayDir, "example-project-custom-organization.req.bundle");
         Assert.assertTrue(builtBundleFile.isFile());
     }
 }

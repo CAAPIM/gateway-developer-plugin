@@ -5,30 +5,29 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import io.github.glytching.junit.extension.folder.TemporaryFolder;
+import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.File;
 import java.io.IOException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PolicyAndFolderLoaderTest {
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@ExtendWith(MockitoExtension.class)
+class PolicyAndFolderLoaderTest {
 
     @Mock
     private FileUtils fileUtils;
 
-    @Rule
-    public final TemporaryFolder rootProjectDir = new TemporaryFolder();
-
     @Test
-    public void getPolicyAsStringTest() {
+    void getPolicyAsStringTest() {
 
         File root = new File("a");
         File a = new File(root, "a");
@@ -44,7 +43,7 @@ public class PolicyAndFolderLoaderTest {
     }
 
     @Test
-    public void getPolicyNameTest() {
+    void getPolicyNameTest() {
         PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
 
         File policy = new File("policy.xml");
@@ -62,11 +61,12 @@ public class PolicyAndFolderLoaderTest {
     }
 
     @Test
-    public void testLoad() throws IOException {
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testLoad(TemporaryFolder temporaryFolder) throws IOException {
         PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(fileUtils, new IdGenerator());
         Mockito.when(fileUtils.getFileAsString(Mockito.any(File.class))).thenReturn("policy-content");
 
-        File policyFolder = rootProjectDir.newFolder("policy");
+        File policyFolder = temporaryFolder.createDirectory("policy");
         File a = new File(policyFolder, "a");
         Assert.assertTrue(a.mkdir());
         File b = new File(a, "b");
@@ -77,7 +77,7 @@ public class PolicyAndFolderLoaderTest {
         Files.touch(policy);
 
         Bundle bundle = new Bundle();
-        policyAndFolderLoader.load(bundle, rootProjectDir.getRoot());
+        policyAndFolderLoader.load(bundle, temporaryFolder.getRoot());
 
         Assert.assertNotNull(bundle.getFolders().get(""));
         Assert.assertNotNull(bundle.getFolders().get("a/"));
@@ -92,22 +92,25 @@ public class PolicyAndFolderLoaderTest {
 
 
     @Test
-    public void testLoadNoPolicyFolder() {
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testLoadNoPolicyFolder(TemporaryFolder temporaryFolder) {
         PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
-        policyAndFolderLoader.load(bundle, rootProjectDir.getRoot());
+        policyAndFolderLoader.load(bundle, temporaryFolder.getRoot());
 
         Assert.assertTrue(bundle.getFolders().isEmpty());
     }
 
-    @Test(expected = BundleLoadException.class)
-    public void testLoadPolicyFolderIsFile() throws IOException {
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testLoadPolicyFolderIsFile(TemporaryFolder temporaryFolder) throws IOException {
         PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
 
-        rootProjectDir.newFile("policy");
+        temporaryFolder.createFile("policy");
 
         Bundle bundle = new Bundle();
-        policyAndFolderLoader.load(bundle, rootProjectDir.getRoot());
+
+        assertThrows(BundleLoadException.class, () -> policyAndFolderLoader.load(bundle, temporaryFolder.getRoot()));
     }
 }
