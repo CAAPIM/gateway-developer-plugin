@@ -15,24 +15,25 @@ class BuilderUtils {
 
     static Element buildPropertiesElement(final Map<String,Object> properties, final Document document) {
         Element propertiesElement = document.createElement("l7:Properties");
-        for (String key: properties.keySet()) {
+        for (Map.Entry<String, Object> entry: properties.entrySet()) {
             Element propertyElement = document.createElement("l7:Property");
-            propertyElement.setAttribute("key", key);
+            propertyElement.setAttribute("key", entry.getKey());
             Element valueElement;
-            Object value = properties.get(key);
-            if(Integer.class.isAssignableFrom(value.getClass())){
+            if(Integer.class.isAssignableFrom(entry.getValue().getClass())){
                 valueElement = document.createElement("l7:IntValue");
-            } else if(Integer.class.isAssignableFrom(value.getClass())){
+            } else if(Long.class.isAssignableFrom(entry.getValue().getClass())){
                 valueElement = document.createElement("l7:LongValue");
-            } else if(Integer.class.isAssignableFrom(value.getClass())){
+            } else if(Boolean.class.isAssignableFrom(entry.getValue().getClass())){
                 valueElement = document.createElement("l7:BooleanValue");
             } else {
                 valueElement = document.createElement("l7:StringValue");
             }
-            valueElement.setTextContent(value.toString());
+            valueElement.setTextContent(entry.getValue().toString());
             propertyElement.appendChild(valueElement);
             propertiesElement.appendChild(propertyElement);
         }
         return propertiesElement;
     }
+
+    private BuilderUtils() {}
 }

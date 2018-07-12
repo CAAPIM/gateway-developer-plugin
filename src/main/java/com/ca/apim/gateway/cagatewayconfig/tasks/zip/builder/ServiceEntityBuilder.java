@@ -98,8 +98,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
     private Element buildProperties(Service service) {
         Map<String,Object> properties = new HashMap<>();
-        for (String key: service.getProperties().keySet()) {
-            properties.put(key,service.getProperties().get(key));
+        for (Map.Entry<String, String> entry: service.getProperties().entrySet()) {
+            properties.put(entry.getKey(),entry.getValue());
         }
         return BuilderUtils.buildPropertiesElement(properties, document);
     }
