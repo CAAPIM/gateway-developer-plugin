@@ -14,10 +14,9 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ServiceEntityBuilder implements EntityBuilder {
     private final Document document;
@@ -56,7 +55,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
         serviceDetailElement.appendChild(buildServiceMappings(service));
 
         if( service.getProperties() != null) {
-            serviceDetailElement.appendChild(buildProperties(service));
+            serviceDetailElement.appendChild(BuilderUtils.buildPropertiesElement(
+                    service.getProperties().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)), document));
         }
 
         Element serviceElement = document.createElement("l7:Service");
@@ -96,12 +96,5 @@ public class ServiceEntityBuilder implements EntityBuilder {
         return serviceMappingsElement;
     }
 
-    private Element buildProperties(Service service) {
-        Map<String,Object> properties = new HashMap<>();
-        for (Map.Entry<String, String> entry: service.getProperties().entrySet()) {
-            properties.put(entry.getKey(),entry.getValue());
-        }
-        return BuilderUtils.buildPropertiesElement(properties, document);
-    }
 
 }
