@@ -1,6 +1,6 @@
 # Listen Ports Configuration
 This is a file containing the custom listen ports that are available in the gateway.
-The policy backed services configuration file is expected to be in the `config` directory. It should be either `listen-ports.yml` or `listen-ports.json`.
+The listen ports configuration file is expected to be in the `config` directory. It should be either `listen-ports.yml` or `listen-ports.json`.
 
 An example `listen-ports.yml` file would look like:
 ```yaml

@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.entity;
 /**
  * Constants for Gateway entity types supported by the plugin.
  */
+@SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public class EntityTypes {
 
     public static final String CLUSTER_PROPERTY_TYPE = "CLUSTER_PROPERTY";
@@ -19,8 +20,8 @@ public class EntityTypes {
     public static final String SERVICE_TYPE = "SERVICE";
     public static final String POLICY_TYPE = "POLICY";
     public static final String ID_PROVIDER_CONFIG_TYPE = "ID_PROVIDER_CONFIG";
-    @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
     public static final String STORED_PASSWORD_TYPE = "SECURE_PASSWORD";
+    public static final String JDBC_CONNECTION = "JDBC_CONNECTION";
 
     private EntityTypes() { }
 }

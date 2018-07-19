@@ -16,7 +16,6 @@ import org.w3c.dom.NodeList;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElements;
@@ -37,9 +36,18 @@ public class BuilderUtils {
         elementToAppendInto.appendChild(buildPropertiesElement(properties, document));
     }
 
-    static Element buildPropertiesElement(final Map<String, Object> properties, final Document document) {
-        Element propertiesElement = document.createElement(PROPERTIES);
+    public static Element buildPropertiesElement(final Map<String, Object> properties, final Document document) {
+        return buildPropertiesElement(properties, document, PROPERTIES);
+    }
+
+    public static Element buildPropertiesElement(final Map<String, Object> properties, final Document document, final String propertiesElementName) {
+        Element propertiesElement = document.createElement(propertiesElementName);
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            // skip property if null value
+            if (entry.getValue() == null) {
+                continue;
+            }
+
             Element propertyElement = document.createElement(PROPERTY);
             propertyElement.setAttribute(ATTRIBUTE_KEY, entry.getKey());
             String elementType;
@@ -74,10 +82,6 @@ public class BuilderUtils {
     public static Map<String, Object> mapPropertiesElements(final Element propertiesElement) {
         if (propertiesElement == null) {
             return emptyMap();
-        }
-
-        if (!Objects.equals(propertiesElement.getNodeName(), PROPERTIES)) {
-            throw new DependencyBundleLoadException("Current node is not " + PROPERTIES + " node, it is " + propertiesElement.getNodeName());
         }
 
         final List<Element> properties = getChildElements(propertiesElement, PROPERTY);
