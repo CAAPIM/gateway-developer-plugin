@@ -15,7 +15,7 @@ public class Bundle {
     private final Map<String, Encass> encasses = new HashMap<>();
     private final Map<String, Policy> policies = new HashMap<>();
     private final Map<String, Folder> folders = new HashMap<>();
-    private final Map<String, String> globalProperties = new HashMap<>();
+    private final Map<String, String> staticProperties = new HashMap<>();
     private final Map<String, PolicyBackedService> policyBackedServices = new HashMap<>();
     private Set<Bundle> dependencies;
 
@@ -51,12 +51,12 @@ public class Bundle {
         return encasses;
     }
 
-    public void putAllGlobalProperties(Map<String, String> properties) {
-        this.globalProperties.putAll(properties);
+    public void putAllStaticProperties(Map<String, String> properties) {
+        this.staticProperties.putAll(properties);
     }
 
-    public Map<String, String> getGlobalProperties() {
-        return globalProperties;
+    public Map<String, String> getStaticProperties() {
+        return staticProperties;
     }
 
     public void putAllPolicyBackedServices(Map<String, PolicyBackedService> policyBackedServices) {

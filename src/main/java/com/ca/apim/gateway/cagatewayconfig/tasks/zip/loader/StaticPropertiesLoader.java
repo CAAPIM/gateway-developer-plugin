@@ -15,20 +15,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class GlobalPropertiesLoader implements EntityLoader {
+public class StaticPropertiesLoader implements EntityLoader {
     @Override
     public void load(Bundle bundle, File rootDir) {
-        File globalPropertiesFile = new File(rootDir, "config/global.properties");
-        if (globalPropertiesFile.exists()) {
+        File staticPropertiesFile = new File(rootDir, "config/static.properties");
+        if (staticPropertiesFile.exists()) {
             Properties properties = new Properties();
-            try (FileInputStream inStream = new FileInputStream(globalPropertiesFile)) {
+            try (FileInputStream inStream = new FileInputStream(staticPropertiesFile)) {
                 properties.load(inStream);
             } catch (IOException e) {
-                throw new BundleLoadException("Could not load global properties: " + e.getMessage(), e);
+                throw new BundleLoadException("Could not load static properties: " + e.getMessage(), e);
             }
             Map<String, String> map = new HashMap<>();
             properties.forEach((k, v) -> map.put(k.toString(), v.toString()));
-            bundle.putAllGlobalProperties(map);
+            bundle.putAllStaticProperties(map);
         }
     }
 }

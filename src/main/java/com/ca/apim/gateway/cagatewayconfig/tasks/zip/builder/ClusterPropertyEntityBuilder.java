@@ -24,7 +24,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle) {
-        return bundle.getGlobalProperties().entrySet().stream().map(propertyEntry ->
+        return bundle.getStaticProperties().entrySet().stream().map(propertyEntry ->
                 buildClusterPropertyEntity(propertyEntry.getKey(), propertyEntry.getValue())
         ).collect(Collectors.toList());
     }

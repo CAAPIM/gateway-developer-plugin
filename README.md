@@ -165,10 +165,10 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
                 }
               }
               ```
-    * `global.properties`
-      * This is a standard java properties file that contains the different cluster properties to create on the Gateway. An example `global.properties` file might look like:
+    * `static.properties`
+      * This is a standard java properties file that contains the different cluster properties to create on the Gateway. An example `static.properties` file might look like:
         * ```properties
-          my-global-property=This is a properties value
+          my-static-property=This is a properties value
           another-property=\
             {"another":"properties",\
              "value":"0"\
