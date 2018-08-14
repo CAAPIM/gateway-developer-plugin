@@ -47,7 +47,7 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
     * [encass.yml - Encapsulated Assertions Configuration](doc/encapsulated-assertions.md#encapsulated-assertion-configuration)
     * [policy-backed-services.yml - Policy Backed Services Configuration](doc/policy-backed-services.md#policy-backed-services-configuration)
     * [static.properties - Static Properties Configuration](doc/static-properties.md#static-properties-configuration)
-    * [env.yml - Environment Properties Configuration](doc/environment-properties.md#environment-properties-configuration)
+    * [env.properties - Environment Properties Configuration](doc/environment-properties.md#environment-properties-configuration)
   * `policy`
     * The policy folder contains the different policies that are available. It can contain may subdirectories to help organize the policy.
 
