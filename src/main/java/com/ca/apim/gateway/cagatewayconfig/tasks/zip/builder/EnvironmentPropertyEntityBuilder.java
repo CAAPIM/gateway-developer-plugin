@@ -17,7 +17,7 @@ public class EnvironmentPropertyEntityBuilder implements EntityBuilder {
     private final Document document;
     private final IdGenerator idGenerator;
 
-    public EnvironmentPropertyEntityBuilder(Document document, IdGenerator idGenerator) {
+    EnvironmentPropertyEntityBuilder(Document document, IdGenerator idGenerator) {
         this.document = document;
         this.idGenerator = idGenerator;
     }

@@ -32,7 +32,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
 
-    public PolicyEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document) {
+    PolicyEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document) {
         this.documentFileUtils = documentFileUtils;
         this.documentTools = documentTools;
         this.document = document;

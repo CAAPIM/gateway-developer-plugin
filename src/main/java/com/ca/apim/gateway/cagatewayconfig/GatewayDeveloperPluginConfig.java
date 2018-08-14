@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
-import org.gradle.api.file.RegularFileProperty;
 
 public class GatewayDeveloperPluginConfig {
     private final DirectoryProperty solutionDir;
@@ -19,11 +18,11 @@ public class GatewayDeveloperPluginConfig {
         builtBundleDir = project.getLayout().directoryProperty();
     }
 
-    public DirectoryProperty getSolutionDir() {
+    DirectoryProperty getSolutionDir() {
         return solutionDir;
     }
 
-    public DirectoryProperty getBuiltBundleDir() {
+    DirectoryProperty getBuiltBundleDir() {
         return builtBundleDir;
     }
 }

@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class BundleBuilder {
+class BundleBuilder {
 
     private final DocumentFileUtils documentFileUtils;
     private final EntityLoaderRegistry entityLoaderRegistry;
@@ -34,7 +34,7 @@ public class BundleBuilder {
     private final EnvironmentBundleBuilder environmentBundleBuilder;
     private final DocumentTools documentTools;
 
-    public BundleBuilder(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, final FileUtils fileUtils, final JsonTools jsonTools) {
+    BundleBuilder(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, final FileUtils fileUtils, final JsonTools jsonTools) {
         IdGenerator idGenerator = new IdGenerator();
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
@@ -46,7 +46,7 @@ public class BundleBuilder {
         this.environmentBundleBuilder = new EnvironmentBundleBuilder(document, idGenerator);
     }
 
-    public void buildBundle(File rootDir, File outputDir, Set<File> dependencies, String name) {
+    void buildBundle(File rootDir, File outputDir, Set<File> dependencies, String name) {
 
         final Collection<EntityLoader> entityLoaders = entityLoaderRegistry.getEntityLoaders();
         final Bundle bundle = new Bundle();

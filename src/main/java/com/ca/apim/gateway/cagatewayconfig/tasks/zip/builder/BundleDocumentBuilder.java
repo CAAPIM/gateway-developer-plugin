@@ -17,7 +17,7 @@ public class BundleDocumentBuilder {
     private final List<Entity> entities = new LinkedList<>();
     private final Document document;
 
-    public BundleDocumentBuilder(final Document document) {
+    BundleDocumentBuilder(final Document document) {
         this.document = document;
     }
 
@@ -96,7 +96,7 @@ public class BundleDocumentBuilder {
         return item;
     }
 
-    public void addEntities(List<Entity> entitiesToAdd) {
+    void addEntities(List<Entity> entitiesToAdd) {
         entities.addAll(entitiesToAdd);
     }
 }

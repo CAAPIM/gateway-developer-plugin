@@ -19,7 +19,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
     private final Document document;
     private final IdGenerator idGenerator;
 
-    public ClusterPropertyEntityBuilder(Document document, IdGenerator idGenerator) {
+    ClusterPropertyEntityBuilder(Document document, IdGenerator idGenerator) {
         this.document = document;
         this.idGenerator = idGenerator;
     }
