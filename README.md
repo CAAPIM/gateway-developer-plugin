@@ -10,7 +10,7 @@ In order to use this plugin add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.5.00"
+    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.5.0"
 }
 ```
 
@@ -22,7 +22,7 @@ After this is added run `gradle build` in order to build a bundle from a gateway
 The plugin adds the following tasks:
 
 ### build-bundle
-This build a Gateway configuration bundle from the source located in `src/main/Gateway`. This bundle can be used as a bootstrap bundle for a container Gateway. The built bundle is available here: `build/gateway/<project-name>.bundle`
+This build a Gateway configuration bundle from the source located in `src/main/Gateway`. This bundle can be used as a bootstrap bundle for a container Gateway. The built bundle is available in: `build/gateway/bundle`
 
 ## Currently Supported Entities
 This plugin currently supports these entities:
@@ -43,91 +43,11 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
 
 * Gateway Solutions Directory
   * `config`
-    * [Services Configuration](doc/services.md#services-configuration)
-    * either `encass.yml` or `encass.json`
-      * This is a file containing the encapsulated assertions that are available in the gateway.
-      * An example `encass.yml` file would look like:
-        * ```yaml
-          example project/encass-policy.xml:
-            arguments:
-            - name: "hello"
-              type: "string"
-            - name: "hello-again"
-              type: "message"
-            results:
-            - name: "goodbye"
-              type: "string"
-            - name: "goodbye-again"
-              type: "message"
-          ```
-          * The above example will create one encapsulated assertion:
-            * An encapsulated assertion with its policy coming from the policy file located at: `example project/encass-policy.xml`
-              * It will have arguments `hello` or type `string` and `hello-again` of type `message`
-              * It will have results `goodbye` or type `string` and `goodbye-again` of type `message`
-          * The same JSON representation would look like:
-            * ```json
-              {
-                "example project/encass-policy.xml": {
-                  "arguments": [
-                    {
-                      "name": "hello",
-                      "type": "string"
-                    },
-                    {
-                      "name": "hello-again",
-                      "type": "message"
-                    }
-                  ],
-                  "results": [
-                    {
-                      "name": "goodbye",
-                      "type": "string"
-                    },
-                    {
-                      "name": "goodbye-again",
-                      "type": "message"
-                    }
-                  ]
-                }
-              }
-              ```
-    * either `policy-backed-services.yml` or `policy-backed-services.json`
-      * This is a file containing the policy backed services that are available in the gateway.
-      * An example `policy-backed-services.yml` file would look like:
-        * ```yaml
-          my-pbs:
-            interfaceName: "com.l7tech.objectmodel.polback.BackgroundTask"
-            operations:
-            - policy: "example project/example-pbs.xml"
-              operationName: "run"
-          ```
-          * The above example will create one policy backed service:
-            * A policy backed service with the name: `my-pbs`
-              * It will use the policy backed interface `com.l7tech.objectmodel.polback.BackgroundTask`
-              * For the single operation `run` it will execute the policy located at: `example project/example-pbs.xml`
-          * The same JSON representation would look like:
-            * ```json
-              {
-                "my-pbs": {
-                  "interfaceName": "com.l7tech.objectmodel.polback.BackgroundTask",
-                  "operations": [
-                    {
-                      "policy": "example project/example-pbs.xml",
-                      "operationName": "run"
-                    }
-                  ]
-                }
-              }
-              ```
-    * `static.properties`
-      * This is a standard java properties file that contains the different cluster properties to create on the Gateway. An example `static.properties` file might look like:
-        * ```properties
-          my-static-property=This is a properties value
-          another-property=\
-            {"another":"properties",\
-             "value":"0"\
-            }
-          ```
+    * [services.yml - Services Configuration](doc/services.md#services-configuration)
+    * [encass.yml - Encapsulated Assertions Configuration](doc/encapsulated-assertions.md#encapsulated-assertion-configuration)
+    * [policy-backed-services.yml - Policy Backed Services Configuration](doc/policy-backed-services.md#policy-backed-services-configuration)
+    * [static.properties - Static Properties Configuration](doc/static-properties.md#static-properties-configuration)
+    * [env.yml - Environment Properties Configuration](doc/environment-properties.md#environment-properties-configuration)
   * `policy`
     * The policy folder contains the different policies that are available. It can contain may subdirectories to help organize the policy.
 
@@ -146,13 +66,13 @@ You can customize the source solution directory location and the location to put
 ```groovy
 GatewaySourceConfig {
     solutionDir = new File("export/gateway/solution")
-    builtBundle = new File("gateway/built-bundle.bundle")
+    builtBundleDir = new File("gateway")
 }
 ```
-The above will make the solution directory `export/gateway/solution` and will put the built bundle file in `gateway/built-bundle.bundle`.
+The above will make the solution directory `export/gateway/solution` and will put the built bundle file in `gateway` directory.
 
 # Building the Plugin
-The build is done using gradle. To build the plugin run ```gradle build```. Once built it is available in the `build/libs` directory. 
+The build is done using gradle. To build the plugin run ```./gradlew build```. Once built it is available in the `build/libs` directory. 
 
 ## Versioning
 Versioning is done using the [gradle-semantic-build-versioning](https://github.com/vivin/gradle-semantic-build-versioning) plugin. 
