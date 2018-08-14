@@ -43,7 +43,7 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
 
 * Gateway Solutions Directory
   * `config`
-    * [services configuration](doc/services.md)
+    * [Services Configuration](doc/services.md#services-configuration)
     * either `encass.yml` or `encass.json`
       * This is a file containing the encapsulated assertions that are available in the gateway.
       * An example `encass.yml` file would look like:
