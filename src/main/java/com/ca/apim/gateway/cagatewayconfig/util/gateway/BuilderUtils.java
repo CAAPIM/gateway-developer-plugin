@@ -4,26 +4,26 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
+package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.Map;
 
-class BuilderUtils {
+public class BuilderUtils {
 
-    static Element buildPropertiesElement(final Map<String,Object> properties, final Document document) {
+    public static Element buildPropertiesElement(final Map<String, Object> properties, final Document document) {
         Element propertiesElement = document.createElement("l7:Properties");
-        for (Map.Entry<String, Object> entry: properties.entrySet()) {
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
             Element propertyElement = document.createElement("l7:Property");
             propertyElement.setAttribute("key", entry.getKey());
             Element valueElement;
-            if(Integer.class.isAssignableFrom(entry.getValue().getClass())){
+            if (Integer.class.isAssignableFrom(entry.getValue().getClass())) {
                 valueElement = document.createElement("l7:IntValue");
-            } else if(Long.class.isAssignableFrom(entry.getValue().getClass())){
+            } else if (Long.class.isAssignableFrom(entry.getValue().getClass())) {
                 valueElement = document.createElement("l7:LongValue");
-            } else if(Boolean.class.isAssignableFrom(entry.getValue().getClass())){
+            } else if (Boolean.class.isAssignableFrom(entry.getValue().getClass())) {
                 valueElement = document.createElement("l7:BooleanValue");
             } else {
                 valueElement = document.createElement("l7:StringValue");
@@ -35,5 +35,6 @@ class BuilderUtils {
         return propertiesElement;
     }
 
-    private BuilderUtils() {}
+    private BuilderUtils() {
+    }
 }
