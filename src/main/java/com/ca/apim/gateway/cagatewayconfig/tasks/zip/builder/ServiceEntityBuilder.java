@@ -11,10 +11,12 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ServiceEntityBuilder implements EntityBuilder {
@@ -22,7 +24,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
     private final IdGenerator idGenerator;
     private final DocumentFileUtils documentFileUtils;
 
-    public ServiceEntityBuilder(DocumentFileUtils documentFileUtils, Document document, IdGenerator idGenerator) {
+    ServiceEntityBuilder(DocumentFileUtils documentFileUtils, Document document, IdGenerator idGenerator) {
         this.documentFileUtils = documentFileUtils;
         this.document = document;
         this.idGenerator = idGenerator;
@@ -51,8 +53,12 @@ public class ServiceEntityBuilder implements EntityBuilder {
         Element enabledElement = document.createElement("l7:Enabled");
         enabledElement.setTextContent("true");
         serviceDetailElement.appendChild(enabledElement);
-
         serviceDetailElement.appendChild(buildServiceMappings(service));
+
+        if (service.getProperties() != null) {
+            serviceDetailElement.appendChild(BuilderUtils.buildPropertiesElement(
+                    service.getProperties().entrySet().stream().collect(Collectors.toMap(stringStringEntry -> "property." + stringStringEntry.getKey(), Map.Entry::getValue)), document));
+        }
 
         Element serviceElement = document.createElement("l7:Service");
         serviceElement.setAttribute("id", id);

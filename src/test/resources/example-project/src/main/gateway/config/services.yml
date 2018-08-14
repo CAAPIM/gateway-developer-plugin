@@ -10,3 +10,6 @@ example project/example-project.xml:
   - POST
   - PUT
   url: "/example-project"
+  properties:
+    key: "value"
+    key.1: "value.1"

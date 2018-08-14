@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ServiceEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
@@ -58,7 +59,11 @@ public class ServiceLoaderTest {
                 "            \"PUT\",\n" +
                 "            \"DELETE\"\n" +
                 "        ],\n" +
-                "        \"url\": \"/example-project\"\n" +
+                "        \"url\": \"/example-project\",\n" +
+                "        \"properties\": {\n" +
+                "            \"key\": \"value\",\n" +
+                "            \"key.1\": \"value.1\"\n" +
+                "        }" +
                 "    }\n" +
                 "}";
         File configFolder = rootProjectDir.newFolder("config");
@@ -82,6 +87,9 @@ public class ServiceLoaderTest {
         Assert.assertEquals(2, bundle.getServices().get("example project/example-project.xml").getHttpMethods().size());
         Assert.assertTrue(bundle.getServices().get("example project/example-project.xml").getHttpMethods().contains("PUT"));
         Assert.assertTrue(bundle.getServices().get("example project/example-project.xml").getHttpMethods().contains("DELETE"));
+        Assert.assertEquals(2, bundle.getServices().get("example project/example-project.xml").getProperties().keySet().size());
+        Assert.assertEquals("value", bundle.getServices().get("example project/example-project.xml").getProperties().get("key"));
+        Assert.assertEquals("value.1", bundle.getServices().get("example project/example-project.xml").getProperties().get("key.1"));
     }
 
 
@@ -99,7 +107,10 @@ public class ServiceLoaderTest {
                 "  httpMethods:\n" +
                 "  - PUT\n" +
                 "  - DELETE\n" +
-                "  url: \"/example-project\"";
+                "  url: \"/example-project\"\n" +
+                "  properties:\n" +
+                "    key: \"value\"\n" +
+                "    key.1: \"value.1\"";
         File configFolder = rootProjectDir.newFolder("config");
         File servicesFile = new File(configFolder, "services.yml");
         Files.touch(servicesFile);
@@ -121,6 +132,9 @@ public class ServiceLoaderTest {
         Assert.assertEquals(2, bundle.getServices().get("example project/example-project.xml").getHttpMethods().size());
         Assert.assertTrue(bundle.getServices().get("example project/example-project.xml").getHttpMethods().contains("PUT"));
         Assert.assertTrue(bundle.getServices().get("example project/example-project.xml").getHttpMethods().contains("DELETE"));
+        Assert.assertEquals(2, bundle.getServices().get("example project/example-project.xml").getProperties().keySet().size());
+        Assert.assertEquals("value", bundle.getServices().get("example project/example-project.xml").getProperties().get("key"));
+        Assert.assertEquals("value.1", bundle.getServices().get("example project/example-project.xml").getProperties().get("key.1"));
     }
 
     @Test(expected = JsonToolsException.class)

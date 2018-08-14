@@ -43,53 +43,7 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
 
 * Gateway Solutions Directory
   * `config`
-    * either `services.yml` or `services.json`
-      * This is a file containing the services that are exposed in the gateway.
-      * An example `services.yml` file would look like:
-        * ```yaml
-          example project/example.xml:
-            httpMethods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-            url: "/example"
-          example project/example-project.xml:
-            httpMethods:
-            - POST
-            - PUT
-            url: "/example-project"
-          ```
-        * The above example will expose two services:
-          * A service at `/example` using HTTP Method `GET`,`POST`, `PUT`, `DELETE` with its policy coming from the policy file located at: `example project/example.xml`
-          * A service at `/example-project` using HTTP Method `POST`, `PUT` with its policy coming from the policy file located at: `example project/example-project.xml`
-        * The above file has the following organization:
-          * ```yaml
-            <path-to-policy-file>:
-              <service-description>
-            ```
-            where `<service-description>` lists `httpMethods` and the `url` the service is exposed at.
-        * The same JSON representation would look like:
-          * ```json
-            {
-              "example project/example.xml": {
-                "httpMethods": [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "DELETE"
-                ],
-                "url": "/example"
-              },
-              "example project/example-project.xml": {
-                "httpMethods": [
-                  "POST",
-                  "PUT"
-                ],
-                "url": "/example-project"
-              }
-            }
-            ```
+    * [Services Configuration](doc/services.md#services-configuration)
     * either `encass.yml` or `encass.json`
       * This is a file containing the encapsulated assertions that are available in the gateway.
       * An example `encass.yml` file would look like:
@@ -199,6 +153,11 @@ The above will make the solution directory `export/gateway/solution` and will pu
 
 # Building the Plugin
 The build is done using gradle. To build the plugin run ```gradle build```. Once built it is available in the `build/libs` directory. 
+
+## Versioning
+Versioning is done using the [gradle-semantic-build-versioning](https://github.com/vivin/gradle-semantic-build-versioning) plugin. 
+Every time a pull request is merged into `master` the patch version will be updated. For example, if the current version is `1.3.2` the next pull request merged into master will cause the version to be updated to `1.3.3`.
+In order to update the major or minor version put either `[major]` or `[minor]` into the commit message.
 
 ### publish to local
 You can also publish the plugin to your local maven repository by running:
