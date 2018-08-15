@@ -51,6 +51,7 @@ do
                 echo "Detemplatizing variable '${templateVar}' with value '${envValue}' in file: ${file}"
                 # replace all instances of $#{var}# with the value of $var
                 sed -i.bak "s/L7p:Base64Expression ENV_PARAM_NAME=\"ENV.${templateVar}\"/L7p:Base64Expression stringValue=\"${envValueEncoded}\"/g" ${file}
+                sed -i.bak "s/l7:StringValue>SERVICE_PROPERTY_ENV.${templateVar}</l7:StringValue>${envValue}</g" ${file}
                 rm -f ${FILE_PATTERN_TO_TEMPLATIZE}.bak
             fi
         done
@@ -63,6 +64,10 @@ for file in ${FILE_PATTERN_TO_TEMPLATIZE}
 do
     if grep -q "L7p:Base64Expression ENV_PARAM_NAME" "${file}"; then
         grep "L7p:Base64Expression ENV_PARAM_NAME" "${file}"
+        exit "Need to provide additional environment Variables"
+    fi
+    if grep -q "l7:StringValue>SERVICE_PROPERTY_ENV." "${file}"; then
+        grep "l7:StringValue>SERVICE_PROPERTY_ENV." "${file}"
         exit "Need to provide additional environment Variables"
     fi
 done

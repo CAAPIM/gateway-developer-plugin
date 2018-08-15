@@ -16,7 +16,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ServiceEntityBuilder implements EntityBuilder {
@@ -57,7 +56,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
         if (service.getProperties() != null) {
             serviceDetailElement.appendChild(BuilderUtils.buildPropertiesElement(
-                    service.getProperties().entrySet().stream().collect(Collectors.toMap(stringStringEntry -> "property." + stringStringEntry.getKey(), Map.Entry::getValue)), document));
+                    service.getProperties().entrySet().stream().collect(Collectors.toMap(p -> "property." + p.getKey(), p -> p.getKey().startsWith("ENV.") ? "SERVICE_PROPERTY_" + p.getKey() :  p.getValue())), document));
         }
 
         Element serviceElement = document.createElement("l7:Service");
