@@ -74,4 +74,4 @@ In order to create a service property that should be specified as an environment
     properties:
       ENV.rate-limit:
 ```
-For can then using this service property in your policy by referring to it using: `${service.property.ENV.rate-limit}`
+You can then use this service property in your policy by referring to it using: `${service.property.ENV.rate-limit}`
