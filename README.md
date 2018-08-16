@@ -10,7 +10,7 @@ In order to use this plugin add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.gateway.gateway-export-plugin" version "0.4.00"
+    id "com.ca.apim.gateway.gateway-export-plugin" version "0.5.0"
 }
 
 GatewayConnection {
@@ -62,6 +62,11 @@ The above will make the solution directort `export/gateway/solution`. It will pu
  
 # Building the Plugin
 The build is done using gradle. To build the plugin run ```gradle build```. Once built it is available in the `build/libs` directory. 
+
+## Versioning
+Versioning is done using the [gradle-semantic-build-versioning](https://github.com/vivin/gradle-semantic-build-versioning) plugin. 
+Every time a pull request is merged into `master` the patch version will be updated. For example, if the current version is `1.3.2` the next pull request merged into master will cause the version to be updated to `1.3.3`.
+In order to update the major or minor version put either `[major]` or `[minor]` into the commit message.
 
 ### publish to local
 You can also publish the custom assertion builder to your local maven repository by running:
