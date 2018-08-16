@@ -9,7 +9,8 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.BundleFilter;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinker;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
@@ -17,7 +18,6 @@ import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 import org.w3c.dom.Document;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 
 import java.io.File;
 import java.util.Collection;
@@ -49,8 +49,8 @@ class ExplodeBundle {
         BundleFilter bundleFilter = new BundleFilter(bundle);
         Bundle filteredBundle = bundleFilter.filter(folderPath);
 
-        //Link and simplify entities
-        final Collection<EntityLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
+        //Link, simplify and process entities
+        final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
         entityLinkers.parallelStream().forEach(e -> e.link(filteredBundle, bundle));
 
         //write the bundle in the exploded format

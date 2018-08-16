@@ -9,16 +9,20 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-public class GlobalPropertiesWriter implements EntityWriter {
+public class StaticPropertiesWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
 
-    GlobalPropertiesWriter(DocumentFileUtils documentFileUtils) {
+    StaticPropertiesWriter(DocumentFileUtils documentFileUtils) {
         this.documentFileUtils = documentFileUtils;
     }
 
@@ -32,33 +36,12 @@ public class GlobalPropertiesWriter implements EntityWriter {
         Properties properties = new Properties();
         properties.putAll(clusterProperties.values().stream().collect(Collectors.toMap(ClusterProperty::getName, ClusterProperty::getValue)));
 
-        File servicesFile = new File(configFolder, "global.properties");
+        File servicesFile = new File(configFolder, "static.properties");
 
         try (OutputStream outputStream = new StripFirstLineStream(new FileOutputStream(servicesFile))) {
             properties.store(outputStream, null);
         } catch (IOException e) {
-            throw new WriteException("Could not create global properties file: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * This is used in order to remove the first line when printing the properties to an output stream
-     * that contains a date-timestamp. Inspired by https://stackoverflow.com/a/39043903/1108370
-     */
-    private static class StripFirstLineStream extends FilterOutputStream {
-        private boolean firstlineseen = false;
-
-        StripFirstLineStream(final OutputStream out) {
-            super(out);
-        }
-
-        @Override
-        public void write(final int b) throws IOException {
-            if (firstlineseen) {
-                super.write(b);
-            } else if (b == '\n') {
-                firstlineseen = true;
-            }
+            throw new WriteException("Could not create static properties file: " + e.getMessage(), e);
         }
     }
 }

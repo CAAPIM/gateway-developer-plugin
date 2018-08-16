@@ -9,14 +9,14 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 
-public interface EntityLinker<E extends Entity> {
+public interface EntityLinker<E extends Entity> extends EntitiesLinker {
 
     default void link(Bundle filteredBundle, Bundle bundle) {
-        filteredBundle.getEntities(getEntityClass()).values().forEach(e -> link(e, bundle));
+        filteredBundle.getEntities(getEntityClass()).values().forEach(e -> link(e, bundle, filteredBundle));
     }
 
     Class<E> getEntityClass();
 
-    void link(E encass, Bundle bundle);
+    void link(E encass, Bundle bundle, Bundle targetBundle);
 
 }

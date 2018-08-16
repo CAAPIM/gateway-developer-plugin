@@ -1,0 +1,2800 @@
+<!--
+  ~ Copyright (c) 2018 CA. All rights reserved.
+  ~ This software may be modified and distributed under the terms
+  ~ of the MIT license.  See the LICENSE file for details.
+  -->
+
+<l7:Bundle xmlns:l7="http://ns.l7tech.com/2010/04/gateway-management">
+    <l7:References>
+        <l7:Item>
+            <l7:Name>Root Node</l7:Name>
+            <l7:Id>0000000000000000ffffffffffffec76</l7:Id>
+            <l7:Type>FOLDER</l7:Type>
+            <l7:Resource>
+                <l7:Folder id="0000000000000000ffffffffffffec76">
+                    <l7:Name>Root Node</l7:Name>
+                </l7:Folder>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>environment-variable</l7:Name>
+            <l7:Id>eb1489ba1cd08206f8736a13e7c12be2</l7:Id>
+            <l7:Type>FOLDER</l7:Type>
+            <l7:Resource>
+                <l7:Folder folderId="0000000000000000ffffffffffffec76" id="eb1489ba1cd08206f8736a13e7c12be2">
+                    <l7:Name>environment-variable</l7:Name>
+                </l7:Folder>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>another-property</l7:Name>
+            <l7:Id>eb1489ba1cd08206f8736a13e7c12be3</l7:Id>
+            <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            <l7:Resource>
+                <l7:ClusterProperty id="eb1489ba1cd08206f8736a13e7c12be3">
+                    <l7:Name>another-property</l7:Name>
+                    <l7:Value>another static</l7:Value>
+                </l7:ClusterProperty>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>ENV.another.global</l7:Name>
+            <l7:Id>eb1489ba1cd08206f8736a13e7c12be8</l7:Id>
+            <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            <l7:Resource>
+                <l7:ClusterProperty id="eb1489ba1cd08206f8736a13e7c12be8">
+                    <l7:Name>ENV.another.global</l7:Name>
+                    <l7:Value>hello</l7:Value>
+                </l7:ClusterProperty>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>ENV.my-global-property</l7:Name>
+            <l7:Id>eb1489ba1cd08206f8736a13e7c12be7</l7:Id>
+            <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            <l7:Resource>
+                <l7:ClusterProperty id="eb1489ba1cd08206f8736a13e7c12be7">
+                    <l7:Name>ENV.my-global-property</l7:Name>
+                    <l7:Value>This is a global environment variable</l7:Value>
+                </l7:ClusterProperty>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>my-global-property</l7:Name>
+            <l7:Id>eb1489ba1cd08206f8736a13e7c12be4</l7:Id>
+            <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            <l7:Resource>
+                <l7:ClusterProperty id="eb1489ba1cd08206f8736a13e7c12be4">
+                    <l7:Name>my-global-property</l7:Name>
+                    <l7:Value>Static property</l7:Value>
+                </l7:ClusterProperty>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>environment-variable</l7:Name>
+            <l7:Id>eb1489ba1cd08206f8736a13e7c12be1</l7:Id>
+            <l7:Type>POLICY</l7:Type>
+            <l7:Resource>
+                <l7:Policy guid="be7460e6-1067-434d-92c4-88ce96cbd865" id="eb1489ba1cd08206f8736a13e7c12be1">
+                    <l7:PolicyDetail folderId="eb1489ba1cd08206f8736a13e7c12be2"
+                                     guid="be7460e6-1067-434d-92c4-88ce96cbd865" id="eb1489ba1cd08206f8736a13e7c12be1"
+                                     version="1">
+                        <l7:Name>environment-variable</l7:Name>
+                        <l7:PolicyType>Include</l7:PolicyType>
+                        <l7:Properties>
+                            <l7:Property key="soap">
+                                <l7:BooleanValue>false</l7:BooleanValue>
+                            </l7:Property>
+                        </l7:Properties>
+                    </l7:PolicyDetail>
+                    <l7:Resources>
+                        <l7:ResourceSet tag="policy">
+                            <l7:Resource type="policy">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+                                &lt;wsp:Policy xmlns:L7p="http://www.layer7tech.com/ws/policy"
+                                xmlns:wsp="http://schemas.xmlsoap.org/ws/2002/12/policy"&gt;
+                                &lt;wsp:All wsp:Usage="Required"&gt;
+                                &lt;L7p:SetVariable&gt;
+                                &lt;L7p:Base64Expression stringValue="aGVsbG8="/&gt;
+                                &lt;L7p:VariableToSet stringValue="ENV.local.env.var"/&gt;
+                                &lt;/L7p:SetVariable&gt;
+                                &lt;L7p:SetVariable&gt;
+                                &lt;L7p:Base64Expression stringValue=""/&gt;
+                                &lt;L7p:VariableToSet stringValue="env.no-capitalized-env"/&gt;
+                                &lt;/L7p:SetVariable&gt;
+                                &lt;L7p:SetVariable&gt;
+                                &lt;L7p:Base64Expression stringValue=""/&gt;
+                                &lt;L7p:VariableToSet stringValue="other-context-variable"/&gt;
+                                &lt;/L7p:SetVariable&gt;
+                                &lt;L7p:SetVariable&gt;
+                                &lt;L7p:Base64Expression stringValue="aGVsbG8="/&gt;
+                                &lt;L7p:ContentType stringValue="text/xml; charset=utf-8"/&gt;
+                                &lt;L7p:DataType variableDataType="message"/&gt;
+                                &lt;L7p:VariableToSet stringValue="ENV.message-variable"/&gt;
+                                &lt;/L7p:SetVariable&gt;
+                                &lt;L7p:SetVariable&gt;
+                                &lt;L7p:Base64Expression stringValue="aGVsbG8="/&gt;
+                                &lt;L7p:VariableToSet stringValue="ENV.empty-value"/&gt;
+                                &lt;/L7p:SetVariable&gt;
+                                &lt;L7p:SetVariable&gt;
+                                &lt;L7p:Base64Expression
+                                stringValue="JHtnYXRld2F5Lm15LWdsb2JhbC1wcm9wZXJ0eX0KJHtnYXRld2F5LkVOVi5teS1nbG9iYWwtcHJvcGVydHl9CiR7Z2F0ZXdheS5FTlYuYW5vdGhlci5nbG9iYWx9CiR7Z2F0ZXdheS5hbm90aGVyLXByb3BlcnR5fQ=="/&gt;
+                                &lt;L7p:VariableToSet stringValue="referencing-globals"/&gt;
+                                &lt;/L7p:SetVariable&gt;
+                                &lt;/wsp:All&gt;
+                                &lt;/wsp:Policy&gt;
+                            </l7:Resource>
+                        </l7:ResourceSet>
+                    </l7:Resources>
+                </l7:Policy>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>cluster.hostname</l7:Name>
+            <l7:Id>0000000000000000fffffffffff5519f</l7:Id>
+            <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            <l7:Resource>
+                <l7:ClusterProperty id="0000000000000000fffffffffff5519f">
+                    <l7:Name>cluster.hostname</l7:Name>
+                    <l7:Value>gateway-dev</l7:Value>
+                </l7:ClusterProperty>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Internal Identity Provider</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffffe</l7:Id>
+            <l7:Type>ID_PROVIDER_CONFIG</l7:Type>
+            <l7:Resource>
+                <l7:IdentityProvider id="0000000000000000fffffffffffffffe">
+                    <l7:Name>Internal Identity Provider</l7:Name>
+                    <l7:IdentityProviderType>Internal</l7:IdentityProviderType>
+                </l7:IdentityProvider>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>loopback</l7:Name>
+            <l7:Id>742a7604-699c-368a-a19a-0ddd73085575</l7:Id>
+            <l7:Type>INTERFACE_TAG</l7:Type>
+            <l7:Resource>
+                <l7:InterfaceTag id="742a7604-699c-368a-a19a-0ddd73085575">
+                    <l7:Name>loopback</l7:Name>
+                    <l7:AddressPatterns>
+                        <l7:StringValue>127.0.0.1</l7:StringValue>
+                    </l7:AddressPatterns>
+                </l7:InterfaceTag>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Default HTTPS (8443)</l7:Name>
+            <l7:Id>6ead076e287fdd14442fe19c19c7cf95</l7:Id>
+            <l7:Type>SSG_CONNECTOR</l7:Type>
+            <l7:Resource>
+                <l7:ListenPort id="6ead076e287fdd14442fe19c19c7cf95">
+                    <l7:Name>Default HTTPS (8443)</l7:Name>
+                    <l7:Enabled>true</l7:Enabled>
+                    <l7:Protocol>HTTPS</l7:Protocol>
+                    <l7:Port>8443</l7:Port>
+                    <l7:EnabledFeatures>
+                        <l7:StringValue>Published service message input</l7:StringValue>
+                        <l7:StringValue>Administrative access</l7:StringValue>
+                        <l7:StringValue>Browser-based administration</l7:StringValue>
+                        <l7:StringValue>Built-in services</l7:StringValue>
+                    </l7:EnabledFeatures>
+                    <l7:TlsSettings>
+                        <l7:ClientAuthentication>Optional</l7:ClientAuthentication>
+                        <l7:EnabledVersions>
+                            <l7:StringValue>TLSv1</l7:StringValue>
+                            <l7:StringValue>TLSv1.1</l7:StringValue>
+                            <l7:StringValue>TLSv1.2</l7:StringValue>
+                        </l7:EnabledVersions>
+                        <l7:EnabledCipherSuites>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_256_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_256_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>SSL_RSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                        </l7:EnabledCipherSuites>
+                        <l7:Properties>
+                            <l7:Property key="usesTLS">
+                                <l7:BooleanValue>true</l7:BooleanValue>
+                            </l7:Property>
+                        </l7:Properties>
+                    </l7:TlsSettings>
+                </l7:ListenPort>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Default HTTP (8080)</l7:Name>
+            <l7:Id>6ead076e287fdd14442fe19c19c7cf96</l7:Id>
+            <l7:Type>SSG_CONNECTOR</l7:Type>
+            <l7:Resource>
+                <l7:ListenPort id="6ead076e287fdd14442fe19c19c7cf96">
+                    <l7:Name>Default HTTP (8080)</l7:Name>
+                    <l7:Enabled>true</l7:Enabled>
+                    <l7:Protocol>HTTP</l7:Protocol>
+                    <l7:Port>8080</l7:Port>
+                    <l7:EnabledFeatures>
+                        <l7:StringValue>Published service message input</l7:StringValue>
+                        <l7:StringValue>Policy download service</l7:StringValue>
+                        <l7:StringValue>Ping service</l7:StringValue>
+                        <l7:StringValue>WS-Trust security token service</l7:StringValue>
+                        <l7:StringValue>WSDL download service</l7:StringValue>
+                        <l7:StringValue>SNMP Query service</l7:StringValue>
+                    </l7:EnabledFeatures>
+                </l7:ListenPort>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Default HTTPS (9443)</l7:Name>
+            <l7:Id>6ead076e287fdd14442fe19c19c7cf97</l7:Id>
+            <l7:Type>SSG_CONNECTOR</l7:Type>
+            <l7:Resource>
+                <l7:ListenPort id="6ead076e287fdd14442fe19c19c7cf97">
+                    <l7:Name>Default HTTPS (9443)</l7:Name>
+                    <l7:Enabled>true</l7:Enabled>
+                    <l7:Protocol>HTTPS</l7:Protocol>
+                    <l7:Port>9443</l7:Port>
+                    <l7:EnabledFeatures>
+                        <l7:StringValue>Published service message input</l7:StringValue>
+                        <l7:StringValue>Administrative access</l7:StringValue>
+                        <l7:StringValue>Browser-based administration</l7:StringValue>
+                        <l7:StringValue>Built-in services</l7:StringValue>
+                    </l7:EnabledFeatures>
+                    <l7:TlsSettings>
+                        <l7:ClientAuthentication>None</l7:ClientAuthentication>
+                        <l7:EnabledVersions>
+                            <l7:StringValue>TLSv1</l7:StringValue>
+                            <l7:StringValue>TLSv1.1</l7:StringValue>
+                            <l7:StringValue>TLSv1.2</l7:StringValue>
+                        </l7:EnabledVersions>
+                        <l7:EnabledCipherSuites>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_256_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_256_GCM_SHA384</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_256_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_128_GCM_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_128_CBC_SHA256</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>SSL_RSA_WITH_3DES_EDE_CBC_SHA</l7:StringValue>
+                        </l7:EnabledCipherSuites>
+                        <l7:Properties>
+                            <l7:Property key="usesTLS">
+                                <l7:BooleanValue>true</l7:BooleanValue>
+                            </l7:Property>
+                        </l7:Properties>
+                    </l7:TlsSettings>
+                </l7:ListenPort>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Node HTTPS (2124)</l7:Name>
+            <l7:Id>6ead076e287fdd14442fe19c19c7cf98</l7:Id>
+            <l7:Type>SSG_CONNECTOR</l7:Type>
+            <l7:Resource>
+                <l7:ListenPort id="6ead076e287fdd14442fe19c19c7cf98">
+                    <l7:Name>Node HTTPS (2124)</l7:Name>
+                    <l7:Enabled>true</l7:Enabled>
+                    <l7:Protocol>HTTPS</l7:Protocol>
+                    <l7:Port>2124</l7:Port>
+                    <l7:EnabledFeatures>
+                        <l7:StringValue>Node Control</l7:StringValue>
+                        <l7:StringValue>Inter-Node Communication</l7:StringValue>
+                    </l7:EnabledFeatures>
+                    <l7:TlsSettings>
+                        <l7:ClientAuthentication>Optional</l7:ClientAuthentication>
+                        <l7:EnabledVersions>
+                            <l7:StringValue>TLSv1</l7:StringValue>
+                            <l7:StringValue>TLSv1.1</l7:StringValue>
+                            <l7:StringValue>TLSv1.2</l7:StringValue>
+                        </l7:EnabledVersions>
+                        <l7:EnabledCipherSuites>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_DHE_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_RSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                            <l7:StringValue>TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA</l7:StringValue>
+                        </l7:EnabledCipherSuites>
+                        <l7:Properties>
+                            <l7:Property key="usesTLS">
+                                <l7:BooleanValue>true</l7:BooleanValue>
+                            </l7:Property>
+                        </l7:Properties>
+                    </l7:TlsSettings>
+                    <l7:Properties>
+                        <l7:Property key="threadPoolSize">
+                            <l7:StringValue>10</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:ListenPort>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>admin</l7:Name>
+            <l7:Id>00000000000000000000000000000003</l7:Id>
+            <l7:Type>USER</l7:Type>
+            <l7:Resource>
+                <l7:User providerId="0000000000000000fffffffffffffffe" id="00000000000000000000000000000003">
+                    <l7:Login>admin</l7:Login>
+                    <l7:Properties>
+                        <l7:Property key="accountExpiration">
+                            <l7:LongValue>-1</l7:LongValue>
+                        </l7:Property>
+                        <l7:Property key="enabled">
+                            <l7:BooleanValue>true</l7:BooleanValue>
+                        </l7:Property>
+                        <l7:Property key="name">
+                            <l7:StringValue>admin</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:User>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Log Sinks</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffce0</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffce0">
+                    <l7:name>Manage Log Sinks</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        log sinks.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Internal Users and Groups</l7:Name>
+            <l7:Id>0000000000000000ffffffffffffff38</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000ffffffffffffff38">
+                    <l7:name>Manage Internal Users and Groups</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to create, read, update and delete
+                        users and groups in the internal identity provider.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage UDDI Registries</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffc18</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffc18">
+                    <l7:name>Manage UDDI Registries</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        UDDI Registry connections.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Work Queue</l7:Name>
+            <l7:Id>0000000000000000fffffffffffff95c</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffff95c">
+                    <l7:name>Manage Work Queue</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        work queues.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>WORK_QUEUE</l7:entityType>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Gateway Maintenance</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffcae</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffcae">
+                    <l7:name>Gateway Maintenance</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to perform Gateway maintenance
+                        tasks.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Listen Ports</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffd12</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffd12">
+                    <l7:name>Manage Listen Ports</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        Gateway listen ports (HTTP(S) and FTP(S)) and to list published services.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>View environment-variable Folder (#eb1489ba1cd08206f8736a13e7c12be2)</l7:Name>
+            <l7:Id>6ead076e287fdd14442fe19c19c7cfe1</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="6ead076e287fdd14442fe19c19c7cfe1">
+                    <l7:name>View environment-variable Folder (#eb1489ba1cd08206f8736a13e7c12be2)</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to view services and policies within
+                        the {1} folder.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>FOLDER</l7:entityType>
+                    <l7:entityID>eb1489ba1cd08206f8736a13e7c12be2</l7:entityID>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Message Destinations</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffd76</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffd76">
+                    <l7:name>Manage Message Destinations</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        message destinations.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Custom Key Value Store</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffa56</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffa56">
+                    <l7:name>Manage Custom Key Value Store</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update, and delete
+                        key values from custom key value store.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>CUSTOM_KEY_VALUE_STORE</l7:entityType>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>ssg</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffcd6</l7:Id>
+            <l7:Type>LOG_SINK</l7:Type>
+            <l7:Resource>
+                <l7:LogSink id="0000000000000000fffffffffffffcd6">
+                    <l7:Name>ssg</l7:Name>
+                    <l7:Description>Main log</l7:Description>
+                    <l7:Type>FILE</l7:Type>
+                    <l7:Categories>
+                        <l7:Category>AUDIT</l7:Category>
+                        <l7:Category>LOG</l7:Category>
+                    </l7:Categories>
+                    <l7:Enabled>true</l7:Enabled>
+                    <l7:Severity>INFO</l7:Severity>
+                    <l7:SyslogHosts/>
+                    <l7:Filters/>
+                    <l7:Properties>
+                        <l7:Property key="file.format">
+                            <l7:StringValue>STANDARD</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="file.logCount">
+                            <l7:StringValue>10</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="file.maxSize">
+                            <l7:StringValue>20000</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:LogSink>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>View ssg Log Sink (#-1,300)</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffaec</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffaec">
+                    <l7:name>View ssg Log Sink (#-1,300)</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read the log sink and any
+                        associated log files.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>LOG_SINK</l7:entityType>
+                    <l7:entityID>0000000000000000fffffffffffffcd6</l7:entityID>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Certificates (truststore)</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffda8</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffda8">
+                    <l7:name>Manage Certificates (truststore)</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        trusted certificates and policies for revocation checking.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Password Policies</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffb82</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffb82">
+                    <l7:name>Manage Password Policies</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read and update any stored
+                        password policy and view the identity providers.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>View Service Metrics</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffe0c</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffe0c">
+                    <l7:name>View Service Metrics</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to monitor service metrics in the
+                        manager.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage environment-variable Folder (#eb1489ba1cd08206f8736a13e7c12be2)</l7:Name>
+            <l7:Id>6ead076e287fdd14442fe19c19c7cff8</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="6ead076e287fdd14442fe19c19c7cff8">
+                    <l7:name>Manage environment-variable Folder (#eb1489ba1cd08206f8736a13e7c12be2)</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to view, update and delete services
+                        and policies within the {1} folder.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>FOLDER</l7:entityType>
+                    <l7:entityID>eb1489ba1cd08206f8736a13e7c12be2</l7:entityID>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Publish Webservices</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffea2</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffea2">
+                    <l7:name>Publish Webservices</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to publish new web services.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Secure Passwords</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffbe6</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffbe6">
+                    <l7:name>Manage Secure Passwords</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        any stored password.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Operator</l7:Name>
+            <l7:Id>0000000000000000ffffffffffffff6a</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000ffffffffffffff6a">
+                    <l7:name>Operator</l7:name>
+                    <l7:description>Users assigned to the {0} role have read only access to the gateway.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage JDBC Connections</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffc4a</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffc4a">
+                    <l7:name>Manage JDBC Connections</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        JDBC connections.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Publish External Identity Providers</l7:Name>
+            <l7:Id>0000000000000000ffffffffffffff06</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000ffffffffffffff06">
+                    <l7:name>Publish External Identity Providers</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to create new external identity
+                        providers.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Scheduled Task</l7:Name>
+            <l7:Id>0000000000000000fffffffffffff92a</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffff92a">
+                    <l7:name>Manage Scheduled Task</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        Scheduled Task.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>SCHEDULED_TASK</l7:entityType>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage CA Single Sign-On Configuration</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffa24</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffa24">
+                    <l7:name>Manage CA Single Sign-On Configuration</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        CA Single Sign-On configuration.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>SITEMINDER_CONFIGURATION</l7:entityType>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Cassandra Connection</l7:Name>
+            <l7:Id>0000000000000000fffffffffffff9c0</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffff9c0">
+                    <l7:name>Manage Cassandra Connection</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        Cassandra connection.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>CASSANDRA_CONFIGURATION</l7:entityType>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Modules Installable via Policy Manager</l7:Name>
+            <l7:Id>0000000000000000fffffffffffff98e</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffff98e">
+                    <l7:name>Manage Modules Installable via Policy Manager</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        Modules Installable via Policy Manager.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>SERVER_MODULE_FILE</l7:entityType>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Cluster Properties</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffd44</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffd44">
+                    <l7:name>Manage Cluster Properties</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        cluster properties.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Cluster Status</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffdda</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffdda">
+                    <l7:name>Manage Cluster Status</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        cluster status information.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Firewall Rules</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffa88</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffa88">
+                    <l7:name>Manage Firewall Rules</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        Firewall rules.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>FIREWALL_RULE</l7:entityType>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Encapsulated Assertions</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffaba</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffaba">
+                    <l7:name>Manage Encapsulated Assertions</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to create/read/update/delete
+                        encapsulated assertions.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>ENCAPSULATED_ASSERTION</l7:entityType>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Invoke Audit Viewer Policy</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffb50</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffb50">
+                    <l7:name>Invoke Audit Viewer Policy</l7:name>
+                    <l7:description>Allow the INTERNAL audit-viewer policy to be invoked for an audited message (request
+                        / response or detail)
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Webservices</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffe70</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffe70">
+                    <l7:name>Manage Webservices</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to publish new services and edit
+                        existing ones.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>View Audit Records</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffe3e</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffe3e">
+                    <l7:name>View Audit Records</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to view audits in the manager.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Search Users and Groups</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffed4</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffed4">
+                    <l7:name>Search Users and Groups</l7:name>
+                    <l7:description>Users assigned to the {0} role have permission to search and view users and groups
+                        in all identity providers.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Administrative Accounts Configuration</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffb1e</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffb1e">
+                    <l7:name>Manage Administrative Accounts Configuration</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to create/read/update cluster
+                        properties applicable to administrative accounts configurations.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage environment-variable Policy (#eb1489ba1cd08206f8736a13e7c12be1)</l7:Name>
+            <l7:Id>6ead076e287fdd14442fe19c19c7d01d</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="6ead076e287fdd14442fe19c19c7d01d">
+                    <l7:name>Manage environment-variable Policy (#eb1489ba1cd08206f8736a13e7c12be1)</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, update and delete the {1}
+                        policy.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                    <l7:entityType>POLICY</l7:entityType>
+                    <l7:entityID>eb1489ba1cd08206f8736a13e7c12be1</l7:entityID>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Private Keys</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffbb4</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffbb4">
+                    <l7:name>Manage Private Keys</l7:name>
+                    <l7:description>Users in this role have the ability to read, create, update, and delete private
+                        keys, as well as the ability to change the designated special-purpose keys (eg, the SSL or CA
+                        key).
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Manage Email Listeners</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffc7c</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000fffffffffffffc7c">
+                    <l7:name>Manage Email Listeners</l7:name>
+                    <l7:description>Users assigned to the {0} role have the ability to read, create, update and delete
+                        email listeners.
+                    </l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments/>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Administrator</l7:Name>
+            <l7:Id>0000000000000000ffffffffffffff9c</l7:Id>
+            <l7:Type>RBAC_ROLE</l7:Type>
+            <l7:Resource>
+                <l7:Role id="0000000000000000ffffffffffffff9c">
+                    <l7:name>Administrator</l7:name>
+                    <l7:description>Users assigned to the {0} role have full access to the gateway.</l7:description>
+                    <l7:userCreated>false</l7:userCreated>
+                    <l7:assignments>
+                        <l7:assignment id="0000000000000000ffffffffffffff97">
+                            <l7:providerId>0000000000000000fffffffffffffffe</l7:providerId>
+                            <l7:identityId>00000000000000000000000000000003</l7:identityId>
+                            <l7:entityType>User</l7:entityType>
+                        </l7:assignment>
+                    </l7:assignments>
+                </l7:Role>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>gateway-hazelcast</l7:Name>
+            <l7:Id>6ead076e287fdd14442fe19c19c7cf8e</l7:Id>
+            <l7:Type>FIREWALL_RULE</l7:Type>
+            <l7:Resource>
+                <l7:FirewallRule id="6ead076e287fdd14442fe19c19c7cf8e">
+                    <l7:Name>gateway-hazelcast</l7:Name>
+                    <l7:Enabled>true</l7:Enabled>
+                    <l7:Ordinal>0</l7:Ordinal>
+                    <l7:Properties>
+                        <l7:Property key="chain">
+                            <l7:StringValue>INPUT</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="destination-port">
+                            <l7:StringValue>8777</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="jump">
+                            <l7:StringValue>ACCEPT</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="protocol">
+                            <l7:StringValue>tcp</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="table">
+                            <l7:StringValue>filter</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:FirewallRule>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>http://www.w3.org/2001/XMLSchema.dtd</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffff9</l7:Id>
+            <l7:Type>RESOURCE_ENTRY</l7:Type>
+            <l7:Resource>
+                <l7:ResourceDocument id="0000000000000000fffffffffffffff9">
+                    <l7:Resource sourceUrl="http://www.w3.org/2001/XMLSchema.dtd" type="dtd">&lt;!-- DTD for XML
+                        Schemas: Part 1: Structures
+                        Public Identifier: "-//W3C//DTD XMLSCHEMA 200102//EN"
+                        Official Location: http://www.w3.org/2001/XMLSchema.dtd --&gt;
+                        &lt;!-- $Id: XMLSchema.dtd,v 1.31 2001/10/24 15:50:16 ht Exp $ --&gt;
+                        &lt;!-- Note this DTD is NOT normative, or even definitive. --&gt; &lt;!--d--&gt;
+                        &lt;!-- prose copy in the structures REC is the definitive version --&gt; &lt;!--d--&gt;
+                        &lt;!-- (which shouldn't differ from this one except for this --&gt; &lt;!--d--&gt;
+                        &lt;!-- comment and entity expansions, but just in case) --&gt; &lt;!--d--&gt;
+                        &lt;!-- With the exception of cases with multiple namespace
+                        prefixes for the XML Schema namespace, any XML document which is
+                        not valid per this DTD given redefinitions in its internal subset of the
+                        'p' and 's' parameter entities below appropriate to its namespace
+                        declaration of the XML Schema namespace is almost certainly not
+                        a valid schema. --&gt;
+                        &lt;!-- The simpleType element and its constituent parts
+                        are defined in XML Schema: Part 2: Datatypes --&gt;
+                        &lt;!ENTITY % xs-datatypes PUBLIC 'datatypes' 'datatypes.dtd' &gt;
+                        &lt;!ENTITY % p 'xs:'&gt; &lt;!-- can be overriden in the internal subset of a
+                        schema document to establish a different
+                        namespace prefix --&gt;
+                        &lt;!ENTITY % s ':xs'&gt; &lt;!-- if %p is defined (e.g. as foo:) then you must
+                        also define %s as the suffix for the appropriate
+                        namespace declaration (e.g. :foo) --&gt;
+                        &lt;!ENTITY % nds 'xmlns%s;'&gt;
+                        &lt;!-- Define all the element names, with optional prefix --&gt;
+                        &lt;!ENTITY % schema "%p;schema"&gt;
+                        &lt;!ENTITY % complexType "%p;complexType"&gt;
+                        &lt;!ENTITY % complexContent "%p;complexContent"&gt;
+                        &lt;!ENTITY % simpleContent "%p;simpleContent"&gt;
+                        &lt;!ENTITY % extension "%p;extension"&gt;
+                        &lt;!ENTITY % element "%p;element"&gt;
+                        &lt;!ENTITY % unique "%p;unique"&gt;
+                        &lt;!ENTITY % key "%p;key"&gt;
+                        &lt;!ENTITY % keyref "%p;keyref"&gt;
+                        &lt;!ENTITY % selector "%p;selector"&gt;
+                        &lt;!ENTITY % field "%p;field"&gt;
+                        &lt;!ENTITY % group "%p;group"&gt;
+                        &lt;!ENTITY % all "%p;all"&gt;
+                        &lt;!ENTITY % choice "%p;choice"&gt;
+                        &lt;!ENTITY % sequence "%p;sequence"&gt;
+                        &lt;!ENTITY % any "%p;any"&gt;
+                        &lt;!ENTITY % anyAttribute "%p;anyAttribute"&gt;
+                        &lt;!ENTITY % attribute "%p;attribute"&gt;
+                        &lt;!ENTITY % attributeGroup "%p;attributeGroup"&gt;
+                        &lt;!ENTITY % include "%p;include"&gt;
+                        &lt;!ENTITY % import "%p;import"&gt;
+                        &lt;!ENTITY % redefine "%p;redefine"&gt;
+                        &lt;!ENTITY % notation "%p;notation"&gt;
+                        &lt;!-- annotation elements --&gt;
+                        &lt;!ENTITY % annotation "%p;annotation"&gt;
+                        &lt;!ENTITY % appinfo "%p;appinfo"&gt;
+                        &lt;!ENTITY % documentation "%p;documentation"&gt;
+                        &lt;!-- Customisation entities for the ATTLIST of each element type.
+                        Define one of these if your schema takes advantage of the
+                        anyAttribute='##other' in the schema for schemas --&gt;
+                        &lt;!ENTITY % schemaAttrs ''&gt;
+                        &lt;!ENTITY % complexTypeAttrs ''&gt;
+                        &lt;!ENTITY % complexContentAttrs ''&gt;
+                        &lt;!ENTITY % simpleContentAttrs ''&gt;
+                        &lt;!ENTITY % extensionAttrs ''&gt;
+                        &lt;!ENTITY % elementAttrs ''&gt;
+                        &lt;!ENTITY % groupAttrs ''&gt;
+                        &lt;!ENTITY % allAttrs ''&gt;
+                        &lt;!ENTITY % choiceAttrs ''&gt;
+                        &lt;!ENTITY % sequenceAttrs ''&gt;
+                        &lt;!ENTITY % anyAttrs ''&gt;
+                        &lt;!ENTITY % anyAttributeAttrs ''&gt;
+                        &lt;!ENTITY % attributeAttrs ''&gt;
+                        &lt;!ENTITY % attributeGroupAttrs ''&gt;
+                        &lt;!ENTITY % uniqueAttrs ''&gt;
+                        &lt;!ENTITY % keyAttrs ''&gt;
+                        &lt;!ENTITY % keyrefAttrs ''&gt;
+                        &lt;!ENTITY % selectorAttrs ''&gt;
+                        &lt;!ENTITY % fieldAttrs ''&gt;
+                        &lt;!ENTITY % includeAttrs ''&gt;
+                        &lt;!ENTITY % importAttrs ''&gt;
+                        &lt;!ENTITY % redefineAttrs ''&gt;
+                        &lt;!ENTITY % notationAttrs ''&gt;
+                        &lt;!ENTITY % annotationAttrs ''&gt;
+                        &lt;!ENTITY % appinfoAttrs ''&gt;
+                        &lt;!ENTITY % documentationAttrs ''&gt;
+                        &lt;!ENTITY % complexDerivationSet "CDATA"&gt;
+                        &lt;!-- #all or space-separated list drawn from derivationChoice --&gt;
+                        &lt;!ENTITY % blockSet "CDATA"&gt;
+                        &lt;!-- #all or space-separated list drawn from
+                        derivationChoice + 'substitution' --&gt;
+                        &lt;!ENTITY % mgs '%all; | %choice; | %sequence;'&gt;
+                        &lt;!ENTITY % cs '%choice; | %sequence;'&gt;
+                        &lt;!ENTITY % formValues '(qualified|unqualified)'&gt;
+                        &lt;!ENTITY % attrDecls '((%attribute;| %attributeGroup;)*,(%anyAttribute;)?)'&gt;
+                        &lt;!ENTITY % particleAndAttrs '((%mgs; | %group;)?, %attrDecls;)'&gt;
+                        &lt;!-- This is used in part2 --&gt;
+                        &lt;!ENTITY % restriction1 '((%mgs; | %group;)?)'&gt;
+                        %xs-datatypes;
+                        &lt;!-- the duplication below is to produce an unambiguous content model
+                        which allows annotation everywhere --&gt;
+                        &lt;!ELEMENT %schema; ((%include; | %import; | %redefine; | %annotation;)*,
+                        ((%simpleType; | %complexType;
+                        | %element; | %attribute;
+                        | %attributeGroup; | %group;
+                        | %notation; ),
+                        (%annotation;)*)* )&gt;
+                        &lt;!ATTLIST %schema;
+                        targetNamespace %URIref; #IMPLIED
+                        version CDATA #IMPLIED
+                        %nds; %URIref; #FIXED 'http://www.w3.org/2001/XMLSchema'
+                        xmlns CDATA #IMPLIED
+                        finalDefault %complexDerivationSet; ''
+                        blockDefault %blockSet; ''
+                        id ID #IMPLIED
+                        elementFormDefault %formValues; 'unqualified'
+                        attributeFormDefault %formValues; 'unqualified'
+                        xml:lang CDATA #IMPLIED
+                        %schemaAttrs;&gt;
+                        &lt;!-- Note the xmlns declaration is NOT in the Schema for Schemas,
+                        because at the Infoset level where schemas operate,
+                        xmlns(:prefix) is NOT an attribute! --&gt;
+                        &lt;!-- The declaration of xmlns is a convenience for schema authors --&gt;
+                        &lt;!-- The id attribute here and below is for use in external references
+                        from non-schemas using simple fragment identifiers.
+                        It is NOT used for schema-to-schema reference, internal or
+                        external. --&gt;
+                        &lt;!-- a type is a named content type specification which allows attribute
+                        declarations--&gt;
+                        &lt;!-- --&gt;
+                        &lt;!ELEMENT %complexType; ((%annotation;)?,
+                        (%simpleContent;|%complexContent;|
+                        %particleAndAttrs;))&gt;
+                        &lt;!ATTLIST %complexType;
+                        name %NCName; #IMPLIED
+                        id ID #IMPLIED
+                        abstract %boolean; #IMPLIED
+                        final %complexDerivationSet; #IMPLIED
+                        block %complexDerivationSet; #IMPLIED
+                        mixed (true|false) 'false'
+                        %complexTypeAttrs;&gt;
+                        &lt;!-- particleAndAttrs is shorthand for a root type --&gt;
+                        &lt;!-- mixed is disallowed if simpleContent, overriden if complexContent
+                        has one too. --&gt;
+                        &lt;!-- If anyAttribute appears in one or more referenced attributeGroups
+                        and/or explicitly, the intersection of the permissions is used --&gt;
+                        &lt;!ELEMENT %complexContent; ((%annotation;)?, (%restriction;|%extension;))&gt;
+                        &lt;!ATTLIST %complexContent;
+                        mixed (true|false) #IMPLIED
+                        id ID #IMPLIED
+                        %complexContentAttrs;&gt;
+                        &lt;!-- restriction should use the branch defined above, not the simple
+                        one from part2; extension should use the full model --&gt;
+                        &lt;!ELEMENT %simpleContent; ((%annotation;)?, (%restriction;|%extension;))&gt;
+                        &lt;!ATTLIST %simpleContent;
+                        id ID #IMPLIED
+                        %simpleContentAttrs;&gt;
+                        &lt;!-- restriction should use the simple branch from part2, not the
+                        one defined above; extension should have no particle --&gt;
+                        &lt;!ELEMENT %extension; ((%annotation;)?, (%particleAndAttrs;))&gt;
+                        &lt;!ATTLIST %extension;
+                        base %QName; #REQUIRED
+                        id ID #IMPLIED
+                        %extensionAttrs;&gt;
+                        &lt;!-- an element is declared by either:
+                        a name and a type (either nested or referenced via the type attribute)
+                        or a ref to an existing element declaration --&gt;
+                        &lt;!ELEMENT %element; ((%annotation;)?, (%complexType;| %simpleType;)?,
+                        (%unique; | %key; | %keyref;)*)&gt;
+                        &lt;!-- simpleType or complexType only if no type|ref attribute --&gt;
+                        &lt;!-- ref not allowed at top level --&gt;
+                        &lt;!ATTLIST %element;
+                        name %NCName; #IMPLIED
+                        id ID #IMPLIED
+                        ref %QName; #IMPLIED
+                        type %QName; #IMPLIED
+                        minOccurs %nonNegativeInteger; #IMPLIED
+                        maxOccurs CDATA #IMPLIED
+                        nillable %boolean; #IMPLIED
+                        substitutionGroup %QName; #IMPLIED
+                        abstract %boolean; #IMPLIED
+                        final %complexDerivationSet; #IMPLIED
+                        block %blockSet; #IMPLIED
+                        default CDATA #IMPLIED
+                        fixed CDATA #IMPLIED
+                        form %formValues; #IMPLIED
+                        %elementAttrs;&gt;
+                        &lt;!-- type and ref are mutually exclusive.
+                        name and ref are mutually exclusive, one is required --&gt;
+                        &lt;!-- In the absence of type AND ref, type defaults to type of
+                        substitutionGroup, if any, else the ur-type, i.e. unconstrained --&gt;
+                        &lt;!-- default and fixed are mutually exclusive --&gt;
+                        &lt;!ELEMENT %group; ((%annotation;)?,(%mgs;)?)&gt;
+                        &lt;!ATTLIST %group;
+                        name %NCName; #IMPLIED
+                        ref %QName; #IMPLIED
+                        minOccurs %nonNegativeInteger; #IMPLIED
+                        maxOccurs CDATA #IMPLIED
+                        id ID #IMPLIED
+                        %groupAttrs;&gt;
+                        &lt;!ELEMENT %all; ((%annotation;)?, (%element;)*)&gt;
+                        &lt;!ATTLIST %all;
+                        minOccurs (1) #IMPLIED
+                        maxOccurs (1) #IMPLIED
+                        id ID #IMPLIED
+                        %allAttrs;&gt;
+                        &lt;!ELEMENT %choice; ((%annotation;)?, (%element;| %group;| %cs; | %any;)*)&gt;
+                        &lt;!ATTLIST %choice;
+                        minOccurs %nonNegativeInteger; #IMPLIED
+                        maxOccurs CDATA #IMPLIED
+                        id ID #IMPLIED
+                        %choiceAttrs;&gt;
+                        &lt;!ELEMENT %sequence; ((%annotation;)?, (%element;| %group;| %cs; | %any;)*)&gt;
+                        &lt;!ATTLIST %sequence;
+                        minOccurs %nonNegativeInteger; #IMPLIED
+                        maxOccurs CDATA #IMPLIED
+                        id ID #IMPLIED
+                        %sequenceAttrs;&gt;
+                        &lt;!-- an anonymous grouping in a model, or
+                        a top-level named group definition, or a reference to same --&gt;
+                        &lt;!-- Note that if order is 'all', group is not allowed inside.
+                        If order is 'all' THIS group must be alone (or referenced alone) at
+                        the top level of a content model --&gt;
+                        &lt;!-- If order is 'all', minOccurs==maxOccurs==1 on element/any inside --&gt;
+                        &lt;!-- Should allow minOccurs=0 inside order='all' . . . --&gt;
+                        &lt;!ELEMENT %any; (%annotation;)?&gt;
+                        &lt;!ATTLIST %any;
+                        namespace CDATA '##any'
+                        processContents (skip|lax|strict) 'strict'
+                        minOccurs %nonNegativeInteger; '1'
+                        maxOccurs CDATA '1'
+                        id ID #IMPLIED
+                        %anyAttrs;&gt;
+                        &lt;!-- namespace is interpreted as follows:
+                        ##any - - any non-conflicting WFXML at all
+                        ##other - - any non-conflicting WFXML from namespace other
+                        than targetNamespace
+                        ##local - - any unqualified non-conflicting WFXML/attribute
+                        one or - - any non-conflicting WFXML from
+                        more URI the listed namespaces
+                        references
+                        ##targetNamespace ##local may appear in the above list,
+                        with the obvious meaning --&gt;
+                        &lt;!ELEMENT %anyAttribute; (%annotation;)?&gt;
+                        &lt;!ATTLIST %anyAttribute;
+                        namespace CDATA '##any'
+                        processContents (skip|lax|strict) 'strict'
+                        id ID #IMPLIED
+                        %anyAttributeAttrs;&gt;
+                        &lt;!-- namespace is interpreted as for 'any' above --&gt;
+                        &lt;!-- simpleType only if no type|ref attribute --&gt;
+                        &lt;!-- ref not allowed at top level, name iff at top level --&gt;
+                        &lt;!ELEMENT %attribute; ((%annotation;)?, (%simpleType;)?)&gt;
+                        &lt;!ATTLIST %attribute;
+                        name %NCName; #IMPLIED
+                        id ID #IMPLIED
+                        ref %QName; #IMPLIED
+                        type %QName; #IMPLIED
+                        use (prohibited|optional|required) #IMPLIED
+                        default CDATA #IMPLIED
+                        fixed CDATA #IMPLIED
+                        form %formValues; #IMPLIED
+                        %attributeAttrs;&gt;
+                        &lt;!-- type and ref are mutually exclusive.
+                        name and ref are mutually exclusive, one is required --&gt;
+                        &lt;!-- default for use is optional when nested, none otherwise --&gt;
+                        &lt;!-- default and fixed are mutually exclusive --&gt;
+                        &lt;!-- type attr and simpleType content are mutually exclusive --&gt;
+                        &lt;!-- an attributeGroup is a named collection of attribute decls, or a
+                        reference thereto --&gt;
+                        &lt;!ELEMENT %attributeGroup; ((%annotation;)?,
+                        (%attribute; | %attributeGroup;)*,
+                        (%anyAttribute;)?) &gt;
+                        &lt;!ATTLIST %attributeGroup;
+                        name %NCName; #IMPLIED
+                        id ID #IMPLIED
+                        ref %QName; #IMPLIED
+                        %attributeGroupAttrs;&gt;
+                        &lt;!-- ref iff no content, no name. ref iff not top level --&gt;
+                        &lt;!-- better reference mechanisms --&gt;
+                        &lt;!ELEMENT %unique; ((%annotation;)?, %selector;, (%field;)+)&gt;
+                        &lt;!ATTLIST %unique;
+                        name %NCName; #REQUIRED
+                        id ID #IMPLIED
+                        %uniqueAttrs;&gt;
+                        &lt;!ELEMENT %key; ((%annotation;)?, %selector;, (%field;)+)&gt;
+                        &lt;!ATTLIST %key;
+                        name %NCName; #REQUIRED
+                        id ID #IMPLIED
+                        %keyAttrs;&gt;
+                        &lt;!ELEMENT %keyref; ((%annotation;)?, %selector;, (%field;)+)&gt;
+                        &lt;!ATTLIST %keyref;
+                        name %NCName; #REQUIRED
+                        refer %QName; #REQUIRED
+                        id ID #IMPLIED
+                        %keyrefAttrs;&gt;
+                        &lt;!ELEMENT %selector; ((%annotation;)?)&gt;
+                        &lt;!ATTLIST %selector;
+                        xpath %XPathExpr; #REQUIRED
+                        id ID #IMPLIED
+                        %selectorAttrs;&gt;
+                        &lt;!ELEMENT %field; ((%annotation;)?)&gt;
+                        &lt;!ATTLIST %field;
+                        xpath %XPathExpr; #REQUIRED
+                        id ID #IMPLIED
+                        %fieldAttrs;&gt;
+                        &lt;!-- Schema combination mechanisms --&gt;
+                        &lt;!ELEMENT %include; (%annotation;)?&gt;
+                        &lt;!ATTLIST %include;
+                        schemaLocation %URIref; #REQUIRED
+                        id ID #IMPLIED
+                        %includeAttrs;&gt;
+                        &lt;!ELEMENT %import; (%annotation;)?&gt;
+                        &lt;!ATTLIST %import;
+                        namespace %URIref; #IMPLIED
+                        schemaLocation %URIref; #IMPLIED
+                        id ID #IMPLIED
+                        %importAttrs;&gt;
+                        &lt;!ELEMENT %redefine; (%annotation; | %simpleType; | %complexType; |
+                        %attributeGroup; | %group;)*&gt;
+                        &lt;!ATTLIST %redefine;
+                        schemaLocation %URIref; #REQUIRED
+                        id ID #IMPLIED
+                        %redefineAttrs;&gt;
+                        &lt;!ELEMENT %notation; (%annotation;)?&gt;
+                        &lt;!ATTLIST %notation;
+                        name %NCName; #REQUIRED
+                        id ID #IMPLIED
+                        public CDATA #REQUIRED
+                        system %URIref; #IMPLIED
+                        %notationAttrs;&gt;
+                        &lt;!-- Annotation is either application information or documentation --&gt;
+                        &lt;!-- By having these here they are available for datatypes as well
+                        as all the structures elements --&gt;
+                        &lt;!ELEMENT %annotation; (%appinfo; | %documentation;)*&gt;
+                        &lt;!ATTLIST %annotation; %annotationAttrs;&gt;
+                        &lt;!-- User must define annotation elements in internal subset for this
+                        to work --&gt;
+                        &lt;!ELEMENT %appinfo; ANY&gt; &lt;!-- too restrictive --&gt;
+                        &lt;!ATTLIST %appinfo;
+                        source %URIref; #IMPLIED
+                        id ID #IMPLIED
+                        %appinfoAttrs;&gt;
+                        &lt;!ELEMENT %documentation; ANY&gt; &lt;!-- too restrictive --&gt;
+                        &lt;!ATTLIST %documentation;
+                        source %URIref; #IMPLIED
+                        id ID #IMPLIED
+                        xml:lang CDATA #IMPLIED
+                        %documentationAttrs;&gt;
+                        &lt;!NOTATION XMLSchemaStructures PUBLIC
+                        'structures' 'http://www.w3.org/2001/XMLSchema.xsd' &gt;
+                        &lt;!NOTATION XML PUBLIC
+                        'REC-xml-1998-0210' 'http://www.w3.org/TR/1998/REC-xml-19980210' &gt;
+                    </l7:Resource>
+                    <l7:Properties>
+                        <l7:Property key="publicIdentifier">
+                            <l7:StringValue>-//W3C//DTD XMLSCHEMA 200102//EN</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:ResourceDocument>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>http://schemas.xmlsoap.org/soap/envelope/</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffffd</l7:Id>
+            <l7:Type>RESOURCE_ENTRY</l7:Type>
+            <l7:Resource>
+                <l7:ResourceDocument id="0000000000000000fffffffffffffffd">
+                    <l7:Resource sourceUrl="http://schemas.xmlsoap.org/soap/envelope/" type="xmlschema">&lt;?xml
+                        version='1.0' encoding='UTF-8' ?&gt;
+                        &lt;xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                        xmlns:tns="http://schemas.xmlsoap.org/soap/envelope/"
+                        targetNamespace="http://schemas.xmlsoap.org/soap/envelope/" &gt;
+                        &lt;!-- Envelope, header and body --&gt;
+                        &lt;xs:element name="Envelope" type="tns:Envelope" /&gt;
+                        &lt;xs:complexType name="Envelope" &gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:element ref="tns:Header" minOccurs="0" /&gt;
+                        &lt;xs:element ref="tns:Body" minOccurs="1" /&gt;
+                        &lt;xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;xs:anyAttribute namespace="##other" processContents="lax" /&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:element name="Header" type="tns:Header" /&gt;
+                        &lt;xs:complexType name="Header" &gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:any namespace="##other" minOccurs="0" maxOccurs="unbounded" processContents="lax" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;xs:anyAttribute namespace="##other" processContents="lax" /&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:element name="Body" type="tns:Body" /&gt;
+                        &lt;xs:complexType name="Body" &gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:any namespace="##any" minOccurs="0" maxOccurs="unbounded" processContents="lax" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;xs:anyAttribute namespace="##any" processContents="lax" &gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;
+                        Prose in the spec does not specify that attributes are allowed on the Body element
+                        &lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;/xs:anyAttribute&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;!-- Global Attributes. The following attributes are intended to be usable via qualified
+                        attribute names on any complex type referencing them. --&gt;
+                        &lt;xs:attribute name="mustUnderstand" &gt;
+                        &lt;xs:simpleType&gt;
+                        &lt;xs:restriction base='xs:boolean'&gt;
+                        &lt;xs:pattern value='0|1' /&gt;
+                        &lt;/xs:restriction&gt;
+                        &lt;/xs:simpleType&gt;
+                        &lt;/xs:attribute&gt;
+                        &lt;xs:attribute name="actor" type="xs:anyURI" /&gt;
+                        &lt;xs:simpleType name="encodingStyle" &gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;
+                        'encodingStyle' indicates any canonicalization conventions followed in the contents of the
+                        containing element. For example, the value 'http://schemas.xmlsoap.org/soap/encoding/' indicates
+                        the pattern described in SOAP specification
+                        &lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;xs:list itemType="xs:anyURI" /&gt;
+                        &lt;/xs:simpleType&gt;
+                        &lt;xs:attribute name="encodingStyle" type="tns:encodingStyle" /&gt;
+                        &lt;xs:attributeGroup name="encodingStyle" &gt;
+                        &lt;xs:attribute ref="tns:encodingStyle" /&gt;
+                        &lt;/xs:attributeGroup&gt; &lt;xs:element name="Fault" type="tns:Fault" /&gt;
+                        &lt;xs:complexType name="Fault" final="extension" &gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;
+                        Fault reporting structure
+                        &lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:element name="faultcode" type="xs:QName" /&gt;
+                        &lt;xs:element name="faultstring" type="xs:string" /&gt;
+                        &lt;xs:element name="faultactor" type="xs:anyURI" minOccurs="0" /&gt;
+                        &lt;xs:element name="detail" type="tns:detail" minOccurs="0" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:complexType name="detail"&gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:any namespace="##any" minOccurs="0" maxOccurs="unbounded" processContents="lax" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;xs:anyAttribute namespace="##any" processContents="lax" /&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;/xs:schema&gt;
+                    </l7:Resource>
+                    <l7:Properties>
+                        <l7:Property key="targetNamespace">
+                            <l7:StringValue>http://schemas.xmlsoap.org/soap/envelope/</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:ResourceDocument>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>http://www.w3.org/2003/05/soap-envelope/</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffffc</l7:Id>
+            <l7:Type>RESOURCE_ENTRY</l7:Type>
+            <l7:Resource>
+                <l7:ResourceDocument id="0000000000000000fffffffffffffffc">
+                    <l7:Resource sourceUrl="http://www.w3.org/2003/05/soap-envelope/" type="xmlschema">&lt;?xml
+                        version='1.0'?&gt;
+                        &lt;!-- Schema defined in the SOAP Version 1.2 Part 1 specification
+                        Recommendation:
+                        http://www.w3.org/TR/2003/REC-soap12-part1-20030624/
+                        Copyright (C)2003 W3C(R) (MIT, ERCIM, Keio), All Rights Reserved.
+                        W3C viability, trademark, document use and software licensing rules
+                        apply.
+                        http://www.w3.org/Consortium/Legal/
+                        This document is governed by the W3C Software License [1] as
+                        described in the FAQ [2].
+                        [1] http://www.w3.org/Consortium/Legal/copyright-software-19980720
+                        [2] http://www.w3.org/Consortium/Legal/IPR-FAQ-20000620.html#DTD
+                        --&gt;
+                        &lt;xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                        xmlns:tns="http://www.w3.org/2003/05/soap-envelope"
+                        targetNamespace="http://www.w3.org/2003/05/soap-envelope"
+                        elementFormDefault="qualified" &gt;
+                        &lt;xs:import namespace="http://www.w3.org/XML/1998/namespace"
+                        schemaLocation="http://www.w3.org/2001/xml.xsd"/&gt;
+                        &lt;!-- Envelope, header and body --&gt;
+                        &lt;xs:element name="Envelope" type="tns:Envelope" /&gt;
+                        &lt;xs:complexType name="Envelope" &gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:element ref="tns:Header" minOccurs="0" /&gt;
+                        &lt;xs:element ref="tns:Body" minOccurs="1" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;xs:anyAttribute namespace="##other" processContents="lax" /&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:element name="Header" type="tns:Header" /&gt;
+                        &lt;xs:complexType name="Header" &gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;
+                        Elements replacing the wildcard MUST be namespace qualified, but can be in the targetNamespace
+                        &lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;xs:anyAttribute namespace="##other" processContents="lax" /&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:element name="Body" type="tns:Body" /&gt;
+                        &lt;xs:complexType name="Body" &gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;xs:anyAttribute namespace="##other" processContents="lax" /&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;!-- Global Attributes. The following attributes are intended to be
+                        usable via qualified attribute names on any complex type referencing
+                        them. --&gt;
+                        &lt;xs:attribute name="mustUnderstand" type="xs:boolean" default="0" /&gt;
+                        &lt;xs:attribute name="relay" type="xs:boolean" default="0" /&gt;
+                        &lt;xs:attribute name="role" type="xs:anyURI" /&gt;
+                        &lt;!-- 'encodingStyle' indicates any canonicalization conventions
+                        followed in the contents of the containing element. For example, the
+                        value 'http://www.w3.org/2003/05/soap-encoding' indicates the pattern
+                        described in the SOAP Version 1.2 Part 2: Adjuncts Recommendation --&gt;
+                        &lt;xs:attribute name="encodingStyle" type="xs:anyURI" /&gt;
+                        &lt;xs:element name="Fault" type="tns:Fault" /&gt;
+                        &lt;xs:complexType name="Fault" final="extension" &gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;
+                        Fault reporting structure
+                        &lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:element name="Code" type="tns:faultcode" /&gt;
+                        &lt;xs:element name="Reason" type="tns:faultreason" /&gt;
+                        &lt;xs:element name="Node" type="xs:anyURI" minOccurs="0" /&gt;
+                        &lt;xs:element name="Role" type="xs:anyURI" minOccurs="0" /&gt;
+                        &lt;xs:element name="Detail" type="tns:detail" minOccurs="0" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:complexType name="faultreason" &gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:element name="Text" type="tns:reasontext"
+                        minOccurs="1" maxOccurs="unbounded" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:complexType name="reasontext" &gt;
+                        &lt;xs:simpleContent&gt;
+                        &lt;xs:extension base="xs:string" &gt;
+                        &lt;xs:attribute ref="xml:lang" use="required" /&gt;
+                        &lt;/xs:extension&gt;
+                        &lt;/xs:simpleContent&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:complexType name="faultcode"&gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:element name="Value"
+                        type="tns:faultcodeEnum"/&gt;
+                        &lt;xs:element name="Subcode"
+                        type="tns:subcode"
+                        minOccurs="0"/&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:simpleType name="faultcodeEnum"&gt;
+                        &lt;xs:restriction base="xs:QName"&gt;
+                        &lt;xs:enumeration value="tns:DataEncodingUnknown"/&gt;
+                        &lt;xs:enumeration value="tns:MustUnderstand"/&gt;
+                        &lt;xs:enumeration value="tns:Receiver"/&gt;
+                        &lt;xs:enumeration value="tns:Sender"/&gt;
+                        &lt;xs:enumeration value="tns:VersionMismatch"/&gt;
+                        &lt;/xs:restriction&gt;
+                        &lt;/xs:simpleType&gt;
+                        &lt;xs:complexType name="subcode"&gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:element name="Value"
+                        type="xs:QName"/&gt;
+                        &lt;xs:element name="Subcode"
+                        type="tns:subcode"
+                        minOccurs="0"/&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:complexType name="detail"&gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;xs:anyAttribute namespace="##other" processContents="lax" /&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;!-- Global element declaration and complex type definition for header entry returned due to
+                        a mustUnderstand fault --&gt;
+                        &lt;xs:element name="NotUnderstood" type="tns:NotUnderstoodType" /&gt;
+                        &lt;xs:complexType name="NotUnderstoodType" &gt;
+                        &lt;xs:attribute name="qname" type="xs:QName" use="required" /&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;!-- Global element and associated types for managing version transition as described in
+                        Appendix A of the SOAP Version 1.2 Part 1 Recommendation --&gt; &lt;xs:complexType
+                        name="SupportedEnvType" &gt;
+                        &lt;xs:attribute name="qname" type="xs:QName" use="required" /&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;xs:element name="Upgrade" type="tns:UpgradeType" /&gt;
+                        &lt;xs:complexType name="UpgradeType" &gt;
+                        &lt;xs:sequence&gt;
+                        &lt;xs:element name="SupportedEnvelope" type="tns:SupportedEnvType" minOccurs="1"
+                        maxOccurs="unbounded" /&gt;
+                        &lt;/xs:sequence&gt;
+                        &lt;/xs:complexType&gt;
+                        &lt;/xs:schema&gt;
+                    </l7:Resource>
+                    <l7:Properties>
+                        <l7:Property key="targetNamespace">
+                            <l7:StringValue>http://www.w3.org/2003/05/soap-envelope</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:ResourceDocument>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>http://www.w3.org/2001/xml.xsd</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffffb</l7:Id>
+            <l7:Type>RESOURCE_ENTRY</l7:Type>
+            <l7:Resource>
+                <l7:ResourceDocument id="0000000000000000fffffffffffffffb">
+                    <l7:Resource sourceUrl="http://www.w3.org/2001/xml.xsd" type="xmlschema">&lt;?xml version='1.0'?&gt;
+                        &lt;xs:schema targetNamespace="http://www.w3.org/XML/1998/namespace"
+                        xmlns:xs="http://www.w3.org/2001/XMLSchema" xml:lang="en"&gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;
+                        See http://www.w3.org/XML/1998/namespace.html and
+                        http://www.w3.org/TR/REC-xml for information about this namespace.
+                        This schema document describes the XML namespace, in a form
+                        suitable for import by other schema documents.
+                        Note that local names in this namespace are intended to be defined
+                        only by the World Wide Web Consortium or its subgroups. The
+                        following names are currently defined in this namespace and should
+                        not be used with conflicting semantics by any Working Group,
+                        specification, or document instance:
+                        base (as an attribute name): denotes an attribute whose value
+                        provides a URI to be used as the base for interpreting any
+                        relative URIs in the scope of the element on which it
+                        appears; its value is inherited. This name is reserved
+                        by virtue of its definition in the XML Base specification.
+                        id (as an attribute name): denotes an attribute whose value
+                        should be interpreted as if declared to be of type ID.
+                        This name is reserved by virtue of its definition in the
+                        xml:id specification.
+                        lang (as an attribute name): denotes an attribute whose value
+                        is a language code for the natural language of the content of
+                        any element; its value is inherited. This name is reserved
+                        by virtue of its definition in the XML specification.
+                        space (as an attribute name): denotes an attribute whose
+                        value is a keyword indicating what whitespace processing
+                        discipline is intended for the content of the element; its
+                        value is inherited. This name is reserved by virtue of its
+                        definition in the XML specification.
+                        Father (in any context at all): denotes Jon Bosak, the chair of
+                        the original XML Working Group. This name is reserved by
+                        the following decision of the W3C XML Plenary and
+                        XML Coordination groups:
+                        In appreciation for his vision, leadership and dedication
+                        the W3C XML Plenary on this 10th day of February, 2000
+                        reserves for Jon Bosak in perpetuity the XML name
+                        xml:Father
+                        &lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;This schema defines attributes and an attribute group
+                        suitable for use by
+                        schemas wishing to allow xml:base, xml:lang, xml:space or xml:id
+                        attributes on elements they define.
+                        To enable this, such a schema must import this schema
+                        for the XML namespace, e.g. as follows:
+                        &amp;lt;schema . . .&gt;
+                        . . .
+                        &amp;lt;import namespace="http://www.w3.org/XML/1998/namespace"
+                        schemaLocation="http://www.w3.org/2001/xml.xsd"/&gt;
+                        Subsequently, qualified reference to any of the attributes
+                        or the group defined below will have the desired effect, e.g.
+                        &amp;lt;type . . .&gt;
+                        . . .
+                        &amp;lt;attributeGroup ref="xml:specialAttrs"/&gt;
+                        will define a type which will schema-validate an instance
+                        element with any of those attributes&lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;In keeping with the XML Schema WG's standard versioning
+                        policy, this schema document will persist at
+                        http://www.w3.org/2007/08/xml.xsd.
+                        At the date of issue it can also be found at
+                        http://www.w3.org/2001/xml.xsd.
+                        The schema document at that URI may however change in the future,
+                        in order to remain compatible with the latest version of XML Schema
+                        itself, or with the XML namespace itself. In other words, if the XML
+                        Schema or XML namespaces change, the version of this document at
+                        http://www.w3.org/2001/xml.xsd will change
+                        accordingly; the version at
+                        http://www.w3.org/2007/08/xml.xsd will not change.
+                        &lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;xs:attribute name="lang"&gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;Attempting to install the relevant ISO 2- and 3-letter
+                        codes as the enumerated possible values is probably never
+                        going to be a realistic possibility. See
+                        RFC 3066 at http://www.ietf.org/rfc/rfc3066.txt and the IANA registry
+                        at http://www.iana.org/assignments/lang-tag-apps.htm for
+                        further information.
+                        The union allows for the 'un-declaration' of xml:lang with
+                        the empty string.&lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;xs:simpleType&gt;
+                        &lt;xs:union memberTypes="xs:language"&gt;
+                        &lt;xs:simpleType&gt;
+                        &lt;xs:restriction base="xs:string"&gt;
+                        &lt;xs:enumeration value=""/&gt;
+                        &lt;/xs:restriction&gt;
+                        &lt;/xs:simpleType&gt;
+                        &lt;/xs:union&gt;
+                        &lt;/xs:simpleType&gt;
+                        &lt;/xs:attribute&gt;
+                        &lt;xs:attribute name="space"&gt;
+                        &lt;xs:simpleType&gt;
+                        &lt;xs:restriction base="xs:NCName"&gt;
+                        &lt;xs:enumeration value="default"/&gt;
+                        &lt;xs:enumeration value="preserve"/&gt;
+                        &lt;/xs:restriction&gt;
+                        &lt;/xs:simpleType&gt;
+                        &lt;/xs:attribute&gt;
+                        &lt;xs:attribute name="base" type="xs:anyURI"&gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;See http://www.w3.org/TR/xmlbase/ for
+                        information about this attribute.&lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;/xs:attribute&gt;
+                        &lt;xs:attribute name="id" type="xs:ID"&gt;
+                        &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;See http://www.w3.org/TR/xml-id/ for
+                        information about this attribute.&lt;/xs:documentation&gt;
+                        &lt;/xs:annotation&gt;
+                        &lt;/xs:attribute&gt;
+                        &lt;xs:attributeGroup name="specialAttrs"&gt;
+                        &lt;xs:attribute ref="xml:base"/&gt;
+                        &lt;xs:attribute ref="xml:lang"/&gt;
+                        &lt;xs:attribute ref="xml:space"/&gt;
+                        &lt;xs:attribute ref="xml:id"/&gt;
+                        &lt;/xs:attributeGroup&gt;
+                        &lt;/xs:schema&gt;
+                    </l7:Resource>
+                    <l7:Properties>
+                        <l7:Property key="targetNamespace">
+                            <l7:StringValue>http://www.w3.org/XML/1998/namespace</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:ResourceDocument>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>http://www.w3.org/2001/datatypes.dtd</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffffa</l7:Id>
+            <l7:Type>RESOURCE_ENTRY</l7:Type>
+            <l7:Resource>
+                <l7:ResourceDocument id="0000000000000000fffffffffffffffa">
+                    <l7:Resource sourceUrl="http://www.w3.org/2001/datatypes.dtd" type="dtd">&lt;!--
+                        DTD for XML Schemas: Part 2: Datatypes
+                        $Id: datatypes.dtd,v 1.23 2001/03/16 17:36:30 ht Exp $
+                        Note this DTD is NOT normative, or even definitive. - - the
+                        prose copy in the datatypes REC is the definitive version
+                        (which shouldn't differ from this one except for this comment
+                        and entity expansions, but just in case)
+                        --&gt;
+                        &lt;!--
+                        This DTD cannot be used on its own, it is intended
+                        only for incorporation in XMLSchema.dtd, q.v.
+                        --&gt;
+                        &lt;!-- Define all the element names, with optional prefix --&gt;
+                        &lt;!ENTITY % simpleType "%p;simpleType"&gt;
+                        &lt;!ENTITY % restriction "%p;restriction"&gt;
+                        &lt;!ENTITY % list "%p;list"&gt;
+                        &lt;!ENTITY % union "%p;union"&gt;
+                        &lt;!ENTITY % maxExclusive "%p;maxExclusive"&gt;
+                        &lt;!ENTITY % minExclusive "%p;minExclusive"&gt;
+                        &lt;!ENTITY % maxInclusive "%p;maxInclusive"&gt;
+                        &lt;!ENTITY % minInclusive "%p;minInclusive"&gt;
+                        &lt;!ENTITY % totalDigits "%p;totalDigits"&gt;
+                        &lt;!ENTITY % fractionDigits "%p;fractionDigits"&gt;
+                        &lt;!ENTITY % length "%p;length"&gt;
+                        &lt;!ENTITY % minLength "%p;minLength"&gt;
+                        &lt;!ENTITY % maxLength "%p;maxLength"&gt;
+                        &lt;!ENTITY % enumeration "%p;enumeration"&gt;
+                        &lt;!ENTITY % whiteSpace "%p;whiteSpace"&gt;
+                        &lt;!ENTITY % pattern "%p;pattern"&gt;
+                        &lt;!--
+                        Customisation entities for the ATTLIST of each element
+                        type. Define one of these if your schema takes advantage
+                        of the anyAttribute='##other' in the schema for schemas
+                        --&gt;
+                        &lt;!ENTITY % simpleTypeAttrs ""&gt;
+                        &lt;!ENTITY % restrictionAttrs ""&gt;
+                        &lt;!ENTITY % listAttrs ""&gt;
+                        &lt;!ENTITY % unionAttrs ""&gt;
+                        &lt;!ENTITY % maxExclusiveAttrs ""&gt;
+                        &lt;!ENTITY % minExclusiveAttrs ""&gt;
+                        &lt;!ENTITY % maxInclusiveAttrs ""&gt;
+                        &lt;!ENTITY % minInclusiveAttrs ""&gt;
+                        &lt;!ENTITY % totalDigitsAttrs ""&gt;
+                        &lt;!ENTITY % fractionDigitsAttrs ""&gt;
+                        &lt;!ENTITY % lengthAttrs ""&gt;
+                        &lt;!ENTITY % minLengthAttrs ""&gt;
+                        &lt;!ENTITY % maxLengthAttrs ""&gt;
+                        &lt;!ENTITY % enumerationAttrs ""&gt;
+                        &lt;!ENTITY % whiteSpaceAttrs ""&gt;
+                        &lt;!ENTITY % patternAttrs ""&gt;
+                        &lt;!-- Define some entities for informative use as attribute
+                        types --&gt;
+                        &lt;!ENTITY % URIref "CDATA"&gt;
+                        &lt;!ENTITY % XPathExpr "CDATA"&gt;
+                        &lt;!ENTITY % QName "NMTOKEN"&gt;
+                        &lt;!ENTITY % QNames "NMTOKENS"&gt;
+                        &lt;!ENTITY % NCName "NMTOKEN"&gt;
+                        &lt;!ENTITY % nonNegativeInteger "NMTOKEN"&gt;
+                        &lt;!ENTITY % boolean "(true|false)"&gt;
+                        &lt;!ENTITY % simpleDerivationSet "CDATA"&gt;
+                        &lt;!--
+                        #all or space-separated list drawn from derivationChoice
+                        --&gt;
+                        &lt;!--
+                        Note that the use of 'facet' below is less restrictive
+                        than is really intended: There should in fact be no
+                        more than one of each of minInclusive, minExclusive,
+                        maxInclusive, maxExclusive, totalDigits, fractionDigits,
+                        length, maxLength, minLength within datatype,
+                        and the min- and max- variants of Inclusive and Exclusive
+                        are mutually exclusive. On the other hand, pattern and
+                        enumeration may repeat.
+                        --&gt;
+                        &lt;!ENTITY % minBound "(%minInclusive; | %minExclusive;)"&gt;
+                        &lt;!ENTITY % maxBound "(%maxInclusive; | %maxExclusive;)"&gt;
+                        &lt;!ENTITY % bounds "%minBound; | %maxBound;"&gt;
+                        &lt;!ENTITY % numeric "%totalDigits; | %fractionDigits;"&gt;
+                        &lt;!ENTITY % ordered "%bounds; | %numeric;"&gt;
+                        &lt;!ENTITY % unordered
+                        "%pattern; | %enumeration; | %whiteSpace; | %length; |
+                        %maxLength; | %minLength;"&gt;
+                        &lt;!ENTITY % facet "%ordered; | %unordered;"&gt;
+                        &lt;!ENTITY % facetAttr
+                        "value CDATA #REQUIRED
+                        id ID #IMPLIED"&gt;
+                        &lt;!ENTITY % fixedAttr "fixed %boolean; #IMPLIED"&gt;
+                        &lt;!ENTITY % facetModel "(%annotation;)?"&gt;
+                        &lt;!ELEMENT %simpleType;
+                        ((%annotation;)?, (%restriction; | %list; | %union;))&gt;
+                        &lt;!ATTLIST %simpleType;
+                        name %NCName; #IMPLIED
+                        final %simpleDerivationSet; #IMPLIED
+                        id ID #IMPLIED
+                        %simpleTypeAttrs;&gt;
+                        &lt;!-- name is required at top level --&gt;
+                        &lt;!ELEMENT %restriction; ((%annotation;)?,
+                        (%restriction1; |
+                        ((%simpleType;)?,(%facet;)*)),
+                        (%attrDecls;))&gt;
+                        &lt;!ATTLIST %restriction;
+                        base %QName; #IMPLIED
+                        id ID #IMPLIED
+                        %restrictionAttrs;&gt;
+                        &lt;!--
+                        base and simpleType child are mutually exclusive,
+                        one is required.
+                        restriction is shared between simpleType and
+                        simpleContent and complexContent (in XMLSchema.xsd).
+                        restriction1 is for the latter cases, when this
+                        is restricting a complex type, as is attrDecls.
+                        --&gt;
+                        &lt;!ELEMENT %list; ((%annotation;)?,(%simpleType;)?)&gt;
+                        &lt;!ATTLIST %list;
+                        itemType %QName; #IMPLIED
+                        id ID #IMPLIED
+                        %listAttrs;&gt;
+                        &lt;!--
+                        itemType and simpleType child are mutually exclusive,
+                        one is required
+                        --&gt;
+                        &lt;!ELEMENT %union; ((%annotation;)?,(%simpleType;)*)&gt;
+                        &lt;!ATTLIST %union;
+                        id ID #IMPLIED
+                        memberTypes %QNames; #IMPLIED
+                        %unionAttrs;&gt;
+                        &lt;!--
+                        At least one item in memberTypes or one simpleType
+                        child is required
+                        --&gt;
+                        &lt;!ELEMENT %maxExclusive; %facetModel;&gt;
+                        &lt;!ATTLIST %maxExclusive;
+                        %facetAttr;
+                        %fixedAttr;
+                        %maxExclusiveAttrs;&gt;
+                        &lt;!ELEMENT %minExclusive; %facetModel;&gt;
+                        &lt;!ATTLIST %minExclusive;
+                        %facetAttr;
+                        %fixedAttr;
+                        %minExclusiveAttrs;&gt;
+                        &lt;!ELEMENT %maxInclusive; %facetModel;&gt;
+                        &lt;!ATTLIST %maxInclusive;
+                        %facetAttr;
+                        %fixedAttr;
+                        %maxInclusiveAttrs;&gt;
+                        &lt;!ELEMENT %minInclusive; %facetModel;&gt;
+                        &lt;!ATTLIST %minInclusive;
+                        %facetAttr;
+                        %fixedAttr;
+                        %minInclusiveAttrs;&gt;
+                        &lt;!ELEMENT %totalDigits; %facetModel;&gt;
+                        &lt;!ATTLIST %totalDigits;
+                        %facetAttr;
+                        %fixedAttr;
+                        %totalDigitsAttrs;&gt;
+                        &lt;!ELEMENT %fractionDigits; %facetModel;&gt;
+                        &lt;!ATTLIST %fractionDigits;
+                        %facetAttr;
+                        %fixedAttr;
+                        %fractionDigitsAttrs;&gt;
+                        &lt;!ELEMENT %length; %facetModel;&gt;
+                        &lt;!ATTLIST %length;
+                        %facetAttr;
+                        %fixedAttr;
+                        %lengthAttrs;&gt;
+                        &lt;!ELEMENT %minLength; %facetModel;&gt;
+                        &lt;!ATTLIST %minLength;
+                        %facetAttr;
+                        %fixedAttr;
+                        %minLengthAttrs;&gt;
+                        &lt;!ELEMENT %maxLength; %facetModel;&gt;
+                        &lt;!ATTLIST %maxLength;
+                        %facetAttr;
+                        %fixedAttr;
+                        %maxLengthAttrs;&gt;
+                        &lt;!-- This one can be repeated --&gt;
+                        &lt;!ELEMENT %enumeration; %facetModel;&gt;
+                        &lt;!ATTLIST %enumeration;
+                        %facetAttr;
+                        %enumerationAttrs;&gt;
+                        &lt;!ELEMENT %whiteSpace; %facetModel;&gt;
+                        &lt;!ATTLIST %whiteSpace;
+                        %facetAttr;
+                        %fixedAttr;
+                        %whiteSpaceAttrs;&gt;
+                        &lt;!-- This one can be repeated --&gt;
+                        &lt;!ELEMENT %pattern; %facetModel;&gt;
+                        &lt;!ATTLIST %pattern;
+                        %facetAttr;
+                        %patternAttrs;&gt;
+                    </l7:Resource>
+                    <l7:Properties>
+                        <l7:Property key="publicIdentifier">
+                            <l7:StringValue>datatypes</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:ResourceDocument>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>sspc</l7:Name>
+            <l7:Id>0000000000000000fffffffffffffcd5</l7:Id>
+            <l7:Type>LOG_SINK</l7:Type>
+            <l7:Resource>
+                <l7:LogSink id="0000000000000000fffffffffffffcd5">
+                    <l7:Name>sspc</l7:Name>
+                    <l7:Description>Process Controller Log</l7:Description>
+                    <l7:Type>FILE</l7:Type>
+                    <l7:Categories>
+                        <l7:Category>SSPC</l7:Category>
+                    </l7:Categories>
+                    <l7:Enabled>false</l7:Enabled>
+                    <l7:Severity>FINEST</l7:Severity>
+                    <l7:SyslogHosts/>
+                    <l7:Filters/>
+                    <l7:Properties>
+                        <l7:Property key="file.format">
+                            <l7:StringValue>STANDARD</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="file.logCount">
+                            <l7:StringValue>10</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="file.maxSize">
+                            <l7:StringValue>20000</l7:StringValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:LogSink>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>AuditConfig</l7:Name>
+            <l7:Id>00000000000000040000000000000001</l7:Id>
+            <l7:Type>AUDIT_CONFIG</l7:Type>
+            <l7:Resource>
+                <l7:AuditConfiguration>
+                    <l7:AlwaysSaveInternal>true</l7:AlwaysSaveInternal>
+                </l7:AuditConfiguration>
+            </l7:Resource>
+        </l7:Item>
+    </l7:References>
+    <l7:Mappings>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000ffffffffffffec76" type="FOLDER">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="eb1489ba1cd08206f8736a13e7c12be2" type="FOLDER"/>
+        <l7:Mapping action="NewOrExisting" srcId="eb1489ba1cd08206f8736a13e7c12be3" type="CLUSTER_PROPERTY">
+            <l7:Properties>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>name</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="eb1489ba1cd08206f8736a13e7c12be8" type="CLUSTER_PROPERTY">
+            <l7:Properties>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>name</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="eb1489ba1cd08206f8736a13e7c12be7" type="CLUSTER_PROPERTY">
+            <l7:Properties>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>name</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="eb1489ba1cd08206f8736a13e7c12be4" type="CLUSTER_PROPERTY">
+            <l7:Properties>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>name</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="eb1489ba1cd08206f8736a13e7c12be1" type="POLICY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffff5519f" type="CLUSTER_PROPERTY">
+            <l7:Properties>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>name</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffe" type="ID_PROVIDER_CONFIG">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="742a7604-699c-368a-a19a-0ddd73085575" type="INTERFACE_TAG"/>
+        <l7:Mapping action="NewOrExisting" srcId="00000000000000000000000000000002:SSL" type="SSG_KEY_ENTRY">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="6ead076e287fdd14442fe19c19c7cf95" type="SSG_CONNECTOR">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>name</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="6ead076e287fdd14442fe19c19c7cf96" type="SSG_CONNECTOR">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>name</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="6ead076e287fdd14442fe19c19c7cf97" type="SSG_CONNECTOR">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>name</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="6ead076e287fdd14442fe19c19c7cf98" type="SSG_CONNECTOR">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>name</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="00000000000000000000000000000003" type="USER">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffce0" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000ffffffffffffff38" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffc18" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffff95c" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffcae" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffd12" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="6ead076e287fdd14442fe19c19c7cfe1" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>mapByRoleEntity</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffd76" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffa56" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffcd6" type="LOG_SINK"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffaec" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>mapByRoleEntity</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffda8" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffb82" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffe0c" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="6ead076e287fdd14442fe19c19c7cff8" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>mapByRoleEntity</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffea2" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffbe6" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000ffffffffffffff6a" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffc4a" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000ffffffffffffff06" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffff92a" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffa24" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffff9c0" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffff98e" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffd44" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffdda" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffa88" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffaba" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffb50" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffe70" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffe3e" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffed4" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffb1e" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="6ead076e287fdd14442fe19c19c7d01d" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+                <l7:Property key="MapBy">
+                    <l7:StringValue>mapByRoleEntity</l7:StringValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffbb4" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffc7c" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000ffffffffffffff9c" type="RBAC_ROLE">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+        <l7:Mapping action="NewOrExisting" srcId="6ead076e287fdd14442fe19c19c7cf8e" type="FIREWALL_RULE"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffff9" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffd" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffc" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffb" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffa" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffcd5" type="LOG_SINK"/>
+        <l7:Mapping action="NewOrExisting" srcId="00000000000000040000000000000001" type="AUDIT_CONFIG">
+            <l7:Properties>
+                <l7:Property key="FailOnNew">
+                    <l7:BooleanValue>true</l7:BooleanValue>
+                </l7:Property>
+            </l7:Properties>
+        </l7:Mapping>
+    </l7:Mappings>
+    <l7:DependencyGraph>
+        <l7:Dependencies>
+            <l7:Dependency>
+                <l7:Name>Root Node</l7:Name>
+                <l7:Id>0000000000000000ffffffffffffec76</l7:Id>
+                <l7:Type>FOLDER</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>environment-variable</l7:Name>
+                        <l7:Id>eb1489ba1cd08206f8736a13e7c12be2</l7:Id>
+                        <l7:Type>FOLDER</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>environment-variable</l7:Name>
+                <l7:Id>eb1489ba1cd08206f8736a13e7c12be2</l7:Id>
+                <l7:Type>FOLDER</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>environment-variable</l7:Name>
+                        <l7:Id>eb1489ba1cd08206f8736a13e7c12be1</l7:Id>
+                        <l7:Type>POLICY</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>another-property</l7:Name>
+                <l7:Id>eb1489ba1cd08206f8736a13e7c12be3</l7:Id>
+                <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>ENV.another.global</l7:Name>
+                <l7:Id>eb1489ba1cd08206f8736a13e7c12be8</l7:Id>
+                <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>ENV.my-global-property</l7:Name>
+                <l7:Id>eb1489ba1cd08206f8736a13e7c12be7</l7:Id>
+                <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>my-global-property</l7:Name>
+                <l7:Id>eb1489ba1cd08206f8736a13e7c12be4</l7:Id>
+                <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>environment-variable</l7:Name>
+                <l7:Id>eb1489ba1cd08206f8736a13e7c12be1</l7:Id>
+                <l7:Type>POLICY</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>another-property</l7:Name>
+                        <l7:Id>eb1489ba1cd08206f8736a13e7c12be3</l7:Id>
+                        <l7:Type>CLUSTER_PROPERTY</l7:Type>
+                    </l7:Dependency>
+                    <l7:Dependency>
+                        <l7:Name>ENV.another.global</l7:Name>
+                        <l7:Id>eb1489ba1cd08206f8736a13e7c12be8</l7:Id>
+                        <l7:Type>CLUSTER_PROPERTY</l7:Type>
+                    </l7:Dependency>
+                    <l7:Dependency>
+                        <l7:Name>ENV.my-global-property</l7:Name>
+                        <l7:Id>eb1489ba1cd08206f8736a13e7c12be7</l7:Id>
+                        <l7:Type>CLUSTER_PROPERTY</l7:Type>
+                    </l7:Dependency>
+                    <l7:Dependency>
+                        <l7:Name>my-global-property</l7:Name>
+                        <l7:Id>eb1489ba1cd08206f8736a13e7c12be4</l7:Id>
+                        <l7:Type>CLUSTER_PROPERTY</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>cluster.hostname</l7:Name>
+                <l7:Id>0000000000000000fffffffffff5519f</l7:Id>
+                <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Internal Identity Provider</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffffe</l7:Id>
+                <l7:Type>ID_PROVIDER_CONFIG</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>loopback</l7:Name>
+                <l7:Id>742a7604-699c-368a-a19a-0ddd73085575</l7:Id>
+                <l7:Type>INTERFACE_TAG</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>SSL</l7:Name>
+                <l7:Id>00000000000000000000000000000002:SSL</l7:Id>
+                <l7:Type>SSG_KEY_ENTRY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Default HTTPS (8443)</l7:Name>
+                <l7:Id>6ead076e287fdd14442fe19c19c7cf95</l7:Id>
+                <l7:Type>SSG_CONNECTOR</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>SSL</l7:Name>
+                        <l7:Id>00000000000000000000000000000002:SSL</l7:Id>
+                        <l7:Type>SSG_KEY_ENTRY</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Default HTTP (8080)</l7:Name>
+                <l7:Id>6ead076e287fdd14442fe19c19c7cf96</l7:Id>
+                <l7:Type>SSG_CONNECTOR</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Default HTTPS (9443)</l7:Name>
+                <l7:Id>6ead076e287fdd14442fe19c19c7cf97</l7:Id>
+                <l7:Type>SSG_CONNECTOR</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>SSL</l7:Name>
+                        <l7:Id>00000000000000000000000000000002:SSL</l7:Id>
+                        <l7:Type>SSG_KEY_ENTRY</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Node HTTPS (2124)</l7:Name>
+                <l7:Id>6ead076e287fdd14442fe19c19c7cf98</l7:Id>
+                <l7:Type>SSG_CONNECTOR</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>SSL</l7:Name>
+                        <l7:Id>00000000000000000000000000000002:SSL</l7:Id>
+                        <l7:Type>SSG_KEY_ENTRY</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>admin</l7:Name>
+                <l7:Id>00000000000000000000000000000003</l7:Id>
+                <l7:Type>USER</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Log Sinks</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffce0</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Internal Users and Groups</l7:Name>
+                <l7:Id>0000000000000000ffffffffffffff38</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage UDDI Registries</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffc18</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Work Queue</l7:Name>
+                <l7:Id>0000000000000000fffffffffffff95c</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Gateway Maintenance</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffcae</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Listen Ports</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffd12</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>View environment-variable Folder (#eb1489ba1cd08206f8736a13e7c12be2)</l7:Name>
+                <l7:Id>6ead076e287fdd14442fe19c19c7cfe1</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>environment-variable</l7:Name>
+                        <l7:Id>eb1489ba1cd08206f8736a13e7c12be2</l7:Id>
+                        <l7:Type>FOLDER</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Message Destinations</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffd76</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Custom Key Value Store</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffa56</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>ssg</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffcd6</l7:Id>
+                <l7:Type>LOG_SINK</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>View ssg Log Sink (#-1,300)</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffaec</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>ssg</l7:Name>
+                        <l7:Id>0000000000000000fffffffffffffcd6</l7:Id>
+                        <l7:Type>LOG_SINK</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Certificates (truststore)</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffda8</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Password Policies</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffb82</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>View Service Metrics</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffe0c</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage environment-variable Folder (#eb1489ba1cd08206f8736a13e7c12be2)</l7:Name>
+                <l7:Id>6ead076e287fdd14442fe19c19c7cff8</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>environment-variable</l7:Name>
+                        <l7:Id>eb1489ba1cd08206f8736a13e7c12be2</l7:Id>
+                        <l7:Type>FOLDER</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Publish Webservices</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffea2</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Secure Passwords</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffbe6</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Operator</l7:Name>
+                <l7:Id>0000000000000000ffffffffffffff6a</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage JDBC Connections</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffc4a</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Publish External Identity Providers</l7:Name>
+                <l7:Id>0000000000000000ffffffffffffff06</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Scheduled Task</l7:Name>
+                <l7:Id>0000000000000000fffffffffffff92a</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage CA Single Sign-On Configuration</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffa24</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Cassandra Connection</l7:Name>
+                <l7:Id>0000000000000000fffffffffffff9c0</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Modules Installable via Policy Manager</l7:Name>
+                <l7:Id>0000000000000000fffffffffffff98e</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Cluster Properties</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffd44</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Cluster Status</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffdda</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Firewall Rules</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffa88</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Encapsulated Assertions</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffaba</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Invoke Audit Viewer Policy</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffb50</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Webservices</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffe70</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>View Audit Records</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffe3e</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Search Users and Groups</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffed4</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Administrative Accounts Configuration</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffb1e</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage environment-variable Policy (#eb1489ba1cd08206f8736a13e7c12be1)</l7:Name>
+                <l7:Id>6ead076e287fdd14442fe19c19c7d01d</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+                <l7:Dependencies>
+                    <l7:Dependency>
+                        <l7:Name>environment-variable</l7:Name>
+                        <l7:Id>eb1489ba1cd08206f8736a13e7c12be1</l7:Id>
+                        <l7:Type>POLICY</l7:Type>
+                    </l7:Dependency>
+                </l7:Dependencies>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Private Keys</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffbb4</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Manage Email Listeners</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffc7c</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>Administrator</l7:Name>
+                <l7:Id>0000000000000000ffffffffffffff9c</l7:Id>
+                <l7:Type>RBAC_ROLE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>gateway-hazelcast</l7:Name>
+                <l7:Id>6ead076e287fdd14442fe19c19c7cf8e</l7:Id>
+                <l7:Type>FIREWALL_RULE</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>http://www.w3.org/2001/XMLSchema.dtd</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffff9</l7:Id>
+                <l7:Type>RESOURCE_ENTRY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>http://schemas.xmlsoap.org/soap/envelope/</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffffd</l7:Id>
+                <l7:Type>RESOURCE_ENTRY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>http://www.w3.org/2003/05/soap-envelope/</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffffc</l7:Id>
+                <l7:Type>RESOURCE_ENTRY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>http://www.w3.org/2001/xml.xsd</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffffb</l7:Id>
+                <l7:Type>RESOURCE_ENTRY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>http://www.w3.org/2001/datatypes.dtd</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffffa</l7:Id>
+                <l7:Type>RESOURCE_ENTRY</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>sspc</l7:Name>
+                <l7:Id>0000000000000000fffffffffffffcd5</l7:Id>
+                <l7:Type>LOG_SINK</l7:Type>
+            </l7:Dependency>
+            <l7:Dependency>
+                <l7:Name>AuditConfig</l7:Name>
+                <l7:Id>00000000000000040000000000000001</l7:Id>
+                <l7:Type>AUDIT_CONFIG</l7:Type>
+            </l7:Dependency>
+        </l7:Dependencies>
+        <l7:MissingDependencies/>
+    </l7:DependencyGraph>
+</l7:Bundle>
+    

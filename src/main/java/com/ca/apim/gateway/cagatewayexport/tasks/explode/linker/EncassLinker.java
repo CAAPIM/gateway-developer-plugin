@@ -21,13 +21,19 @@ public class EncassLinker implements EntityLinker<EncassEntity> {
     }
 
     @Override
-    public void link(EncassEntity encass, Bundle bundle) {
+    public void link(EncassEntity encass, Bundle bundle, Bundle targetBundle) {
         encass.setPath(getEncassPath(bundle, encass));
     }
 
     private String getEncassPath(Bundle bundle, EncassEntity encassEntity) {
         PolicyEntity policy = bundle.getEntities(PolicyEntity.class).get(encassEntity.getPolicyId());
+        if (policy == null) {
+            throw new LinkerException("Could not find policy for Encapsulated Assertion: " + encassEntity.getName() + ". Policy ID: " + encassEntity.getPolicyId());
+        }
         Folder folder = bundle.getFolderTree().getFolderById(policy.getFolderId());
+        if (folder == null) {
+            throw new LinkerException("Could not find folder for Encapsulated Assertion policy. Encapsulated Assertion: " + encassEntity.getName() + ". Policy Name:ID: " + policy.getName() + ":" + policy.getId() + ". Folder Id: " + policy.getFolderId());
+        }
         Path folderPath = bundle.getFolderTree().getPath(folder);
         return Paths.get(folderPath.toString(), policy.getName() + ".xml").toString();
     }

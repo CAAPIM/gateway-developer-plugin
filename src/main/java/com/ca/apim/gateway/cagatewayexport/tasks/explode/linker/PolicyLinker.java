@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
+import org.w3c.dom.Element;
 
 public class PolicyLinker implements EntityLinker<PolicyEntity> {
     private final DocumentTools documentTools;
@@ -29,9 +30,11 @@ public class PolicyLinker implements EntityLinker<PolicyEntity> {
     }
 
     @Override
-    public void link(PolicyEntity policy, Bundle bundle) {
+    public void link(PolicyEntity policy, Bundle bundle, Bundle targetBundle) {
         try {
-            policy.setPolicyXML(policyXMLSimplifier.simplifyPolicyXML(WriterHelper.stringToXML(documentTools, policy.getPolicy()), bundle));
+            Element policyElement = WriterHelper.stringToXML(documentTools, policy.getPolicy());
+            policyXMLSimplifier.simplifyPolicyXML(policyElement, bundle, targetBundle);
+            policy.setPolicyXML(policyElement);
         } catch (DocumentParseException e) {
             throw new WriteException("Exception linking and simplifying policy: " + policy.getName() + " Message: " + e.getMessage(), e);
         }
