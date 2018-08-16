@@ -6,9 +6,14 @@ addons:
     organization: "ca-api-gateway"
     token:
       secure: $SONAR_TOKEN
-  srcclr: true
+#  srcclr: true
 script:
   - ./gradlew sonarqube
+deploy:
+  provider: script
+  script: ./gradlew printVersion tag -Prelease && git push "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git" --tags && ./gradlew publishPlugins -Prelease
+  on:
+    branch: master
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
