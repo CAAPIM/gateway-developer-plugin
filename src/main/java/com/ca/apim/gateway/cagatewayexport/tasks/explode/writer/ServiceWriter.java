@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +70,21 @@ public class ServiceWriter implements EntityWriter {
             httpMethods.add(verbs.item(i).getTextContent());
         }
         serviceBean.setHttpMethods(httpMethods);
+
+        Element servicePropertiesElement = EntityLoaderHelper.getSingleChildElement(serviceEntity.getServiceDetailsElement(), "l7:Properties");
+        NodeList propertyNodes = servicePropertiesElement.getElementsByTagName("l7:Property");
+        Map<String, String> properties = new HashMap<>();
+        for (int i = 0; i < propertyNodes.getLength(); i++) {
+            if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.")) {
+                String propertyValue = null;
+                if (!propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.ENV.")) {
+                    propertyValue = EntityLoaderHelper.getSingleChildElement((Element) propertyNodes.item(i), "l7:StringValue").getTextContent();
+                }
+                properties.put(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(9), propertyValue);
+            }
+        }
+        serviceBean.setProperties(properties);
+
         return serviceBean;
     }
 }

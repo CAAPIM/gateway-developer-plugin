@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 
@@ -35,7 +36,18 @@ public class EnvironmentPropertiesWriter implements EntityWriter {
 
         Properties properties = new Properties();
         properties.putAll(environmentProperty.values().stream()
-                .collect(Collectors.toMap(property -> (property.getType() == EnvironmentProperty.Type.GLOBAL ? "gateway." : "") + property.getName(), EnvironmentProperty::getValue)));
+                .collect(Collectors.toMap(property -> {
+                    switch (property.getType()) {
+                        case LOCAL:
+                            return property.getName();
+                        case GLOBAL:
+                            return "gateway." + property.getName();
+                        case SERVICE:
+                            return "service.property." + property.getName();
+                        default:
+                            throw new LinkerException("Unknown Environment Property Type: " + property.getType());
+                    }
+                }, EnvironmentProperty::getValue)));
 
         File servicesFile = new File(configFolder, "env.properties");
 

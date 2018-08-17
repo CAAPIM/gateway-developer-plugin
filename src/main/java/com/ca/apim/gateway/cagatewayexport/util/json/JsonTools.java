@@ -7,12 +7,12 @@
 package com.ca.apim.gateway.cagatewayexport.util.json;
 
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +43,15 @@ public class JsonTools {
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {
         ObjectMapper objectMapper = new ObjectMapper(jf);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        if (jf instanceof YAMLFactory) {
+            //make it so that null values get left as blanks rather then the string `null`
+            objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<Object>() {
+                @Override
+                public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                    gen.writeNumber("");
+                }
+            });
+        }
         return objectMapper;
     }
 }

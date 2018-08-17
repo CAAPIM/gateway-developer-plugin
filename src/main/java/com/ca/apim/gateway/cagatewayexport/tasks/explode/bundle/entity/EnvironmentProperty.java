@@ -45,6 +45,6 @@ public class EnvironmentProperty implements Entity {
     }
 
     public enum Type {
-        LOCAL, GLOBAL
+        LOCAL, GLOBAL, SERVICE
     }
 }
