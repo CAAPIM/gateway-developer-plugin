@@ -171,4 +171,10 @@ public class DocumentTools {
             node.getParentNode().removeChild(node);
         }
     }
+
+    public static Element createElement(final Document document, final String tag, final String value) {
+        Element element = document.createElement(tag);
+        element.setTextContent(value);
+        return element;
+    }
 }

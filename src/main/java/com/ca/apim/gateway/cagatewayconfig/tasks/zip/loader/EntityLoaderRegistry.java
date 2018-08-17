@@ -25,6 +25,7 @@ public class EntityLoaderRegistry {
         loadersCollection.add(new PolicyAndFolderLoader(fileUtils, idGenerator));
         loadersCollection.add(new StaticPropertiesLoader());
         loadersCollection.add(new PolicyBackedServiceLoader(jsonTools));
+        loadersCollection.add(new IdentityProviderLoader(jsonTools));
 
         this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
     }

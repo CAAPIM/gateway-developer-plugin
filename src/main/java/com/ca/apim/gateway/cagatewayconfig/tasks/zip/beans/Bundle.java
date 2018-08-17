@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +19,7 @@ public class Bundle {
     private final Map<String, Folder> folders = new HashMap<>();
     private final Map<String, String> staticProperties = new HashMap<>();
     private final Map<String, PolicyBackedService> policyBackedServices = new HashMap<>();
+    private final Map<String, IdentityProvider> identityProviders = new HashMap<>();
     private Set<Bundle> dependencies;
 
     public Map<String, Service> getServices() {
@@ -65,6 +68,14 @@ public class Bundle {
 
     public Map<String, PolicyBackedService> getPolicyBackedServices() {
         return policyBackedServices;
+    }
+
+    public Map<String, IdentityProvider> getIdentityProviders() {
+        return identityProviders;
+    }
+
+    public void putAllIdentityProviders(Map<String, IdentityProvider> identityProviders) {
+        this.identityProviders.putAll(identityProviders);
     }
 
     public Set<Bundle> getDependencies() {
