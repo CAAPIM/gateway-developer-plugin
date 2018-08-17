@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,13 +27,15 @@ public class EnvironmentPropertyEntityBuilder implements EntityBuilder {
         return bundle.getEnvironmentProperties().entrySet().stream()
                 .filter(propertyEntry -> propertyEntry.getKey().startsWith("gateway."))
                 .map(propertyEntry ->
-                        buildEnvironmentPropertyEntity("ENV." + propertyEntry.getKey().substring(8), propertyEntry.getValue())
+                        buildEnvironmentPropertyEntity(propertyEntry.getKey().substring(8))
                 ).collect(Collectors.toList());
     }
 
-    private Entity buildEnvironmentPropertyEntity(String name, String value) {
+    private Entity buildEnvironmentPropertyEntity(String name) {
         String id = idGenerator.generate();
-        Entity entity = new Entity("CLUSTER_PROPERTY", name, id, ClusterPropertyEntityBuilder.buildClusterPropertyElement(name, id, value, document));
+        Entity entity = new Entity("CLUSTER_PROPERTY", "ENV." + name, id, ClusterPropertyEntityBuilder.buildClusterPropertyElement("ENV." + name, id, "ENV.gateway." + name, document, new HashMap<String, String>() {{
+            put("env", "true");
+        }}));
         entity.setMappingProperty(Entity.MAPPING_PROPERTY_MAP_BY, "name");
         return entity;
     }

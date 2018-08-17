@@ -11,7 +11,9 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,7 +46,11 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         return entity;
     }
 
-    static Element buildClusterPropertyElement(String name, String id, String value, Document document) {
+    private static Element buildClusterPropertyElement(String name, String id, String value, Document document) {
+        return buildClusterPropertyElement(name, id, value, document, Collections.emptyMap());
+    }
+
+    static Element buildClusterPropertyElement(String name, String id, String value, Document document, Map<String,String> valueAttrivutes) {
         Element clusterPropertyElement = document.createElement("l7:ClusterProperty");
 
         clusterPropertyElement.setAttribute("id", id);
@@ -54,6 +60,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         clusterPropertyElement.appendChild(nameElement);
 
         Element valueElement = document.createElement("l7:Value");
+        valueAttrivutes.forEach(valueElement::setAttribute);
         valueElement.setTextContent(value);
         clusterPropertyElement.appendChild(valueElement);
         return clusterPropertyElement;

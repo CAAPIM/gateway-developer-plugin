@@ -52,6 +52,7 @@ do
                 # replace all instances of $#{var}# with the value of $var
                 sed -i.bak "s/L7p:Base64Expression ENV_PARAM_NAME=\"ENV.${templateVar}\"/L7p:Base64Expression stringValue=\"${envValueEncoded}\"/g" ${file}
                 sed -i.bak "s/l7:StringValue>SERVICE_PROPERTY_ENV.${templateVar}</l7:StringValue>${envValue}</g" ${file}
+                sed -i.bak "s/l7:Value env=\"true\">ENV.${templateVar}</l7:Value>${envValue}</g" ${file}
                 rm -f ${FILE_PATTERN_TO_TEMPLATIZE}.bak
             fi
         done
@@ -68,6 +69,10 @@ do
     fi
     if grep -q "l7:StringValue>SERVICE_PROPERTY_ENV." "${file}"; then
         grep "l7:StringValue>SERVICE_PROPERTY_ENV." "${file}"
+        exit "Need to provide additional environment Variables"
+    fi
+    if grep -q "l7:Value env=\"true\">ENV." "${file}"; then
+        grep "l7:Value env=\"true\">ENV." "${file}"
         exit "Need to provide additional environment Variables"
     fi
 done
