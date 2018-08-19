@@ -33,9 +33,9 @@ public class EnvironmentPropertyEntityBuilder implements EntityBuilder {
 
     private Entity buildEnvironmentPropertyEntity(String name) {
         String id = idGenerator.generate();
-        Entity entity = new Entity("CLUSTER_PROPERTY", "ENV." + name, id, ClusterPropertyEntityBuilder.buildClusterPropertyElement("ENV." + name, id, "ENV.gateway." + name, document, new HashMap<String, String>() {{
-            put("env", "true");
-        }}));
+        HashMap<String, String> valueAttributes = new HashMap<>();
+        valueAttributes.put("env", "true");
+        Entity entity = new Entity("CLUSTER_PROPERTY", "ENV." + name, id, ClusterPropertyEntityBuilder.buildClusterPropertyElement("ENV." + name, id, "ENV.gateway." + name, document, valueAttributes));
         entity.setMappingProperty(Entity.MAPPING_PROPERTY_MAP_BY, "name");
         return entity;
     }

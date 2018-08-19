@@ -50,7 +50,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         return buildClusterPropertyElement(name, id, value, document, Collections.emptyMap());
     }
 
-    static Element buildClusterPropertyElement(String name, String id, String value, Document document, Map<String,String> valueAttrivutes) {
+    static Element buildClusterPropertyElement(String name, String id, String value, Document document, Map<String,String> valueAttributes) {
         Element clusterPropertyElement = document.createElement("l7:ClusterProperty");
 
         clusterPropertyElement.setAttribute("id", id);
@@ -60,7 +60,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         clusterPropertyElement.appendChild(nameElement);
 
         Element valueElement = document.createElement("l7:Value");
-        valueAttrivutes.forEach(valueElement::setAttribute);
+        valueAttributes.forEach(valueElement::setAttribute);
         valueElement.setTextContent(value);
         clusterPropertyElement.appendChild(valueElement);
         return clusterPropertyElement;
