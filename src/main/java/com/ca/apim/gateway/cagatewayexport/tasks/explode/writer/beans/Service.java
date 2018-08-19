@@ -6,12 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
+import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("unused")
 public class Service {
     private String url;
     private Set<String> httpMethods;
+    private Map<String, String> properties;
 
     public String getUrl() {
         return url;
@@ -27,5 +29,13 @@ public class Service {
 
     public void setHttpMethods(Set<String> httpMethods) {
         this.httpMethods = httpMethods;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 }
