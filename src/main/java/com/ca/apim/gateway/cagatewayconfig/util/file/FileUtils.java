@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderExcept
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 
 public class FileUtils {
@@ -22,6 +23,16 @@ public class FileUtils {
             stream = Files.newInputStream(file.toPath());
         } catch (IOException e) {
             throw new EntityBuilderException("Could not read file " + file.getPath(), e);
+        }
+        return stream;
+    }
+
+    public OutputStream getOutputStream(final File file) {
+        final OutputStream stream;
+        try {
+            stream = Files.newOutputStream(file.toPath());
+        } catch (IOException e) {
+            throw new EntityBuilderException("Could not write to file " + file.getPath(), e);
         }
         return stream;
     }
