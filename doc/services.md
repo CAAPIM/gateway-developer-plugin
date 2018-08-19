@@ -63,3 +63,15 @@ The same JSON representation would look like:
   }
 }
 ```
+
+## Environment
+In order to create a service property that should be specified as an environment variable the service property should ve prefixed with `ENV.`. For example:
+```yaml
+  solution/my-service.xml:
+    httpMethods:
+    - GET
+    url: "/my-service"
+    properties:
+      ENV.rate-limit:
+```
+You can then use this service property in your policy by referring to it using: `${service.property.ENV.rate-limit}`

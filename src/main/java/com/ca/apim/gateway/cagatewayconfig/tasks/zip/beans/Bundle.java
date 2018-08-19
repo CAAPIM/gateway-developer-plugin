@@ -16,6 +16,7 @@ public class Bundle {
     private final Map<String, Policy> policies = new HashMap<>();
     private final Map<String, Folder> folders = new HashMap<>();
     private final Map<String, String> staticProperties = new HashMap<>();
+    private final Map<String, String> environmentProperties = new HashMap<>();
     private final Map<String, PolicyBackedService> policyBackedServices = new HashMap<>();
     private Set<Bundle> dependencies;
 
@@ -57,6 +58,14 @@ public class Bundle {
 
     public Map<String, String> getStaticProperties() {
         return staticProperties;
+    }
+
+    public void putAllEnvironmentProperties(Map<String, String> properties) {
+        this.environmentProperties.putAll(properties);
+    }
+
+    public Map<String, String> getEnvironmentProperties() {
+        return environmentProperties;
     }
 
     public void putAllPolicyBackedServices(Map<String, PolicyBackedService> policyBackedServices) {

@@ -88,7 +88,7 @@ public class ServiceEntityBuilderTest {
         service.setUrl("/my/service/url");
         service.setProperties(new HashMap<String, String>() {{
             put("key1", "value1");
-            put("key2", "value2");
+            put("ENV.key.environment", "something");
         }});
 
         bundle.putAllServices(new HashMap<String, Service>() {{
@@ -130,9 +130,9 @@ public class ServiceEntityBuilderTest {
             property1 = propertyList.item(1);
         }
         Assert.assertEquals("property.key1", property1.getAttributes().getNamedItem("key").getTextContent());
-        Assert.assertEquals("property.key2", property2.getAttributes().getNamedItem("key").getTextContent());
+        Assert.assertEquals("property.ENV.key.environment", property2.getAttributes().getNamedItem("key").getTextContent());
         Assert.assertEquals("value1", DocumentTools.INSTANCE.getSingleElement((Element) property1, "l7:StringValue").getTextContent());
-        Assert.assertEquals("value2", DocumentTools.INSTANCE.getSingleElement((Element) property2, "l7:StringValue").getTextContent());
+        Assert.assertEquals("SERVICE_PROPERTY_ENV.key.environment", DocumentTools.INSTANCE.getSingleElement((Element) property2, "l7:StringValue").getTextContent());
 
         Element serviceResources = DocumentTools.INSTANCE.getSingleElement(serviceEntityXml, "l7:Resources");
         Element serviceResourceSet = DocumentTools.INSTANCE.getSingleElement(serviceResources, "l7:ResourceSet");

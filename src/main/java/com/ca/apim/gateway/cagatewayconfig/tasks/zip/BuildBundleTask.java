@@ -13,10 +13,9 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
-import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
@@ -31,7 +30,7 @@ public class BuildBundleTask extends DefaultTask {
     private final JsonTools jsonTools;
     private final FileUtils fileUtils;
     private DirectoryProperty from;
-    private RegularFileProperty into;
+    private DirectoryProperty into;
     private ConfigurableFileCollection dependencies;
 
     /**
@@ -43,7 +42,7 @@ public class BuildBundleTask extends DefaultTask {
     }
 
     private BuildBundleTask(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, FileUtils fileUtils, final JsonTools jsonTools) {
-        into = newOutputFile();
+        into = newOutputDirectory();
         from = newInputDirectory();
         dependencies = getProject().files();
 
@@ -58,8 +57,8 @@ public class BuildBundleTask extends DefaultTask {
         return from;
     }
 
-    @OutputFile
-    public RegularFileProperty getInto() {
+    @OutputDirectory
+    public DirectoryProperty getInto() {
         return into;
     }
 
@@ -71,6 +70,6 @@ public class BuildBundleTask extends DefaultTask {
     @TaskAction
     public void perform() {
         BundleBuilder bundleBuilder = new BundleBuilder(documentTools, documentFileUtils, fileUtils, jsonTools);
-        bundleBuilder.buildBundle(from.getAsFile().get(), into.getAsFile().get().toPath(), dependencies.getFiles());
+        bundleBuilder.buildBundle(from.getAsFile().get(), into.getAsFile().get(), dependencies.getFiles(), getProject().getName());
     }
 }

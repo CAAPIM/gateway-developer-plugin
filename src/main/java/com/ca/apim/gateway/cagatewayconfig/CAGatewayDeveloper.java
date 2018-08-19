@@ -17,6 +17,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 
     private static final String BUNDLE_CONFIGURATION = "bundle";
     private static final String BUNDLE_FILE_EXTENSION = "bundle";
+    private static final String BUILT_BUNDLE_DIRECTORY = "bundle";
 
     @Override
     public void apply(@NotNull final Project project) {
@@ -35,7 +36,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Create build-bundle task
         final BuildBundleTask buildBundleTask = project.getTasks().create("build-bundle", BuildBundleTask.class, t -> {
             t.getFrom().set(pluginConfig.getSolutionDir());
-            t.getInto().set(pluginConfig.getBuiltBundle());
+            t.getInto().set(pluginConfig.getBuiltBundleDir());
             t.getDependencies().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
 
@@ -43,7 +44,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         project.afterEvaluate(p -> project.getTasks().getByPath("build").dependsOn(buildBundleTask));
 
         // add the built bundle to the artifacts
-        project.artifacts(artifactHandler -> artifactHandler.add("archives", pluginConfig.getBuiltBundle(), configurablePublishArtifact -> {
+        project.artifacts(artifactHandler -> artifactHandler.add("archives", pluginConfig.getBuiltBundleDir(), configurablePublishArtifact -> {
             configurablePublishArtifact.builtBy(buildBundleTask);
             configurablePublishArtifact.setExtension(BUNDLE_FILE_EXTENSION);
             configurablePublishArtifact.setName(project.getName());
@@ -56,8 +57,8 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         if (!pluginConfig.getSolutionDir().isPresent()) {
             pluginConfig.getSolutionDir().set(new File(project.getProjectDir(), "src/main/gateway"));
         }
-        if (!pluginConfig.getBuiltBundle().isPresent()) {
-            pluginConfig.getBuiltBundle().set(new File(new File(project.getBuildDir(), "gateway"), project.getName() + ".bundle"));
+        if (!pluginConfig.getBuiltBundleDir().isPresent()) {
+            pluginConfig.getBuiltBundleDir().set(new File(new File(project.getBuildDir(), "gateway"), BUILT_BUNDLE_DIRECTORY));
         }
     }
 }

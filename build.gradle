@@ -30,6 +30,10 @@ repositories {
     mavenCentral()
 }
 
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
     compile gradleApi()
     compile 'org.jetbrains:annotations:16.0.2'
@@ -39,8 +43,10 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 
 
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.16.0'
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
+    testCompile("io.github.glytching:junit-extensions:2.2.0")
+    testCompile 'org.mockito:mockito-junit-jupiter:2.19.0'
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
     testCompile gradleTestKit()
     testCompile 'org.testcontainers:testcontainers:1.4.3'
 }
