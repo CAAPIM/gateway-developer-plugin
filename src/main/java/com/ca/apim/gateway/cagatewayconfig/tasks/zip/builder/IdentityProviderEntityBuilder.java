@@ -52,24 +52,11 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
                 identityProviderElement.appendChild(buildBindOnlyLdapIPDetails(identityProvider));
                 break;
             case LDAP:
-                //do something
-                if (identityProvider.getProperties() != null) {
-                    identityProviderElement.appendChild(BuilderUtils.buildPropertiesElement(
-                            identityProvider.getProperties().entrySet()
-                                    .stream()
-                                    .collect(Collectors.toMap(stringStringEntry -> "property." + stringStringEntry.getKey(), Map.Entry::getValue)), document));
-                }
-                //TODO: fill out other ldap details
-
-                break;
             case INTERNAL:
-                //TODO:do something
             case FEDERATED:
-                //TODO:do something
             case POLICY_BACKED:
-                //TODO:do something
             default:
-                //should not occur
+                throw new EntityBuilderException("Please Specify the Identity Provider Type as one of: 'BIND_ONLY_LDAP'");
         }
 
         return new Entity("ID_PROVIDER_CONFIG", name, id, identityProviderElement);

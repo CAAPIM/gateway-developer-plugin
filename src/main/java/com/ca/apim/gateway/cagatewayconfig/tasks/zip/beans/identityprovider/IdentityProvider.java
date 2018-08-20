@@ -6,6 +6,9 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider;
  * of the MIT license.  See the LICENSE file for details.
  */
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.util.Map;
 
 public class IdentityProvider {
@@ -27,6 +30,12 @@ public class IdentityProvider {
 
     private IdentityProviderType type;
     private Map<String,String> properties;
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
+    @JsonSubTypes( {
+            @JsonSubTypes.Type(value=BindOnlyLdapIdentityProviderDetail.class, name="BIND_ONLY_LDAP"),
+            @JsonSubTypes.Type(value=LdapIdentityProviderDetail.class, name="LDAP")
+    })
     private IdentityProviderDetail identityProviderDetail;
 
     public IdentityProviderType getType() {

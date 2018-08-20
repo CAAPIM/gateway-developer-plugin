@@ -46,7 +46,6 @@ public class IdentityProviderLoaderTest {
                 "  \"simple ldap\": {\n" +
                 "    \"type\" : \"BIND_ONLY_LDAP\",\n" +
                 "    \"identityProviderDetail\" : {\n" +
-                "      \"type\" : \"BIND_ONLY_LDAP\",\n" +
                 "      \"serverUrls\": [\n" +
                 "        \"ldap://host:port\",\n" +
                 "        \"ldap://host:port2\"\n" +
@@ -74,7 +73,6 @@ public class IdentityProviderLoaderTest {
         final String yml = "simple ldap:\n" +
                 "  type: BIND_ONLY_LDAP\n" +
                 "  identityProviderDetail:\n" +
-                "    type: BIND_ONLY_LDAP\n" +
                 "    serverUrls:\n" +
                 "      - ldap://host:port\n" +
                 "      - ldap://host:port2\n" +
@@ -99,7 +97,6 @@ public class IdentityProviderLoaderTest {
                 "  \"simple ldap\": {\n" +
                 "    \"type\" : \"BIND_ONLY_LDAP\",\n" +
                 "    \"identityProviderDetail\" : {\n" +
-                "      \"type\" : \"BIND_ONLY_LDAP\",\n" +
                 "      \"serverUrls\": [\n" +
                 "        \"ldap://host:port\",\n" +
                 "        \"ldap://host:port2\"\n" +

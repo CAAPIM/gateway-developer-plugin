@@ -43,7 +43,7 @@ public class IdentityProviderEntityBuilderTest {
     }
 
     @Test(expected = EntityBuilderException.class)
-    public void buildBindOnlyIPWithoutMissingDetails() {
+    public void buildBindOnlyIPWithMissingDetails() {
         final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
         final Bundle bundle = new Bundle();
         final IdentityProvider identityProvider = new IdentityProvider();

@@ -1,7 +1,6 @@
 simple ldap:
   type: BIND_ONLY_LDAP
   identityProviderDetail:
-    type: BIND_ONLY_LDAP
     serverUrls:
       - ldap://host:port
       - ldap://host:port2
