@@ -69,7 +69,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             pluginConfig.getSolutionDir().set(new File(project.getProjectDir(), "src/main/gateway"));
         }
         if (!pluginConfig.getBuiltBundleDir().isPresent()) {
-            pluginConfig.getBuiltBundleDir().set(new File(new File(project.getBuildDir(), "gateway"), BUILT_BUNDLE_DIRECTORY));
+            pluginConfig.getBuiltBundleDir().set(new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), BUILT_BUNDLE_DIRECTORY));
         }
     }
 }
