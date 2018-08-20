@@ -110,6 +110,8 @@ public class BundleBuilder {
                 return EncassEntity.class;
             case "CLUSTER_PROPERTY":
                 return ClusterProperty.class;
+            case "SSG_CONNECTOR":
+                return ListenPortEntity.class;
             default:
                 return null;
         }

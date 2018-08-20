@@ -21,6 +21,7 @@ public class EntityLoaderRegistry {
         entityLoaders.put("FOLDER", new FolderLoader());
         entityLoaders.put("ENCAPSULATED_ASSERTION", new EncassLoader());
         entityLoaders.put("CLUSTER_PROPERTY", new ClusterPropertyLoader());
+        entityLoaders.put("SSG_CONNECTOR", new ListenPortLoader());
     }
 
     public EntityLoader getLoader(String type) {
