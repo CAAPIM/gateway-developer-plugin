@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayexport.util.json.JsonTools.YAML;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 public class WriterHelper {
 
@@ -63,11 +65,11 @@ public class WriterHelper {
      * Copy one list to new one, returning null if the original is empty or null.
      *
      * @param originalList
-     * @return null if originalList is null, otherwise new arraylist with the contents.
+     * @return empty list if originalList is null, otherwise new arraylist with the contents.
      */
     public static <B> List<B> copyList(List<B> originalList) {
         if (originalList == null) {
-            return null;
+            return emptyList();
         }
 
         return new ArrayList<>(originalList);
@@ -77,11 +79,11 @@ public class WriterHelper {
      * Copy one map to new one, returning null if the original is empty or null.
      *
      * @param originalMap
-     * @return null if originalMap is null, otherwise new linked hash map with the contents.
+     * @return empty map if originalMap is null, otherwise new linked hash map with the contents.
      */
     public static <K, V> Map<K, V> copyMap(Map<K, V> originalMap) {
         if (originalMap == null) {
-            return null;
+            return emptyMap();
         }
 
         // keeping original order if any
