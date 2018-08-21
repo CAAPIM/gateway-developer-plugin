@@ -24,8 +24,9 @@ public class ListenPortEntity implements Entity {
     private final List<String> enabledFeatures;
     private final ListenPortEntityTlsSettings tlsSettings;
     private final Map<String, Object> properties;
+    private String targetServiceReference;
 
-    public ListenPortEntity(String id, String name, String protocol, int port, List<String> enabledFeatures, ListenPortEntityTlsSettings tlsSettings, Map<String, Object> properties) {
+    public ListenPortEntity(String id, String name, String protocol, int port, List<String> enabledFeatures, ListenPortEntityTlsSettings tlsSettings, Map<String, Object> properties, String targetServiceReference) {
         this.id = id;
         this.name = name;
         this.protocol = protocol;
@@ -33,6 +34,7 @@ public class ListenPortEntity implements Entity {
         this.enabledFeatures = enabledFeatures;
         this.tlsSettings = tlsSettings;
         this.properties = properties;
+        this.targetServiceReference = targetServiceReference;
     }
 
     public String getId() {
@@ -61,6 +63,14 @@ public class ListenPortEntity implements Entity {
 
     public ListenPortEntityTlsSettings getTlsSettings() {
         return tlsSettings;
+    }
+
+    public String getTargetServiceReference() {
+        return targetServiceReference;
+    }
+
+    public void setTargetServiceReference(String targetServiceReference) {
+        this.targetServiceReference = targetServiceReference;
     }
 
     public static class ListenPortEntityTlsSettings {

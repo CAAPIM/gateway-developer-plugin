@@ -49,6 +49,7 @@ public class ListenPortWriter implements EntityWriter {
         listenPort.setProperties(new HashMap<>(listenPortEntity.getProperties()));
         listenPort.setProtocol(listenPortEntity.getProtocol());
         listenPort.setTlsSettings(getTlsSettingsBean(listenPortEntity.getTlsSettings()));
+        listenPort.setTargetServiceReference(listenPortEntity.getTargetServiceReference());
 
         return listenPort;
     }

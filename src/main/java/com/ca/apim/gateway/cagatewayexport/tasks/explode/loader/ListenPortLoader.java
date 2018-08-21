@@ -22,6 +22,7 @@ public class ListenPortLoader implements EntityLoader {
     private static final String ELEMENT_LISTEN_PORT = "l7:ListenPort";
     private static final String ELEMENT_PROTOCOL = "l7:Protocol";
     private static final String ELEMENT_PORT = "l7:Port";
+    private static final String ELEMENT_TARGET_SERVICE_REFERENCE = "l7:TargetServiceReference";
     private static final String ELEMENT_ENABLED_FEATURES = "l7:EnabledFeatures";
     private static final String ELEMENT_TLS_SETTINGS = "l7:TlsSettings";
     private static final String ELEMENT_TLS_CLIENT_AUTHENTICATION = "l7:ClientAuthentication";
@@ -38,8 +39,9 @@ public class ListenPortLoader implements EntityLoader {
         final List<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPort, ELEMENT_ENABLED_FEATURES), ELEMENT_STRING_VALUE);
         final ListenPortEntityTlsSettings tlsSettings = buildTlsSettings(getSingleChildElement(listenPort, ELEMENT_TLS_SETTINGS, true));
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPort, ELEMENT_PROPERTIES, true));
+        final String targetServiceReference = getSingleChildElementAttribute(listenPort, ELEMENT_TARGET_SERVICE_REFERENCE, "id");
 
-        return new ListenPortEntity(listenPort.getAttribute("id"), name, protocol, port, enabledFeatures, tlsSettings, properties);
+        return new ListenPortEntity(listenPort.getAttribute("id"), name, protocol, port, enabledFeatures, tlsSettings, properties, targetServiceReference);
     }
 
     private ListenPortEntityTlsSettings buildTlsSettings(final Element tlsSettingsElement) {

@@ -7,15 +7,16 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.util.List;
 import java.util.Map;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 /**
  * Listen port representation for yaml/json files.
  */
-@JsonInclude(Include.NON_NULL)
+@JsonInclude(NON_NULL)
 public class ListenPort {
 
     private String protocol;
@@ -23,6 +24,7 @@ public class ListenPort {
     private List<String> enabledFeatures;
     private ListenPortTlsSettings tlsSettings;
     private Map<String, Object> properties;
+    private String targetServiceReference;
 
     public String getProtocol() {
         return protocol;
@@ -64,7 +66,15 @@ public class ListenPort {
         this.tlsSettings = tlsSettings;
     }
 
-    @JsonInclude(Include.NON_NULL)
+    public String getTargetServiceReference() {
+        return targetServiceReference;
+    }
+
+    public void setTargetServiceReference(String targetServiceReference) {
+        this.targetServiceReference = targetServiceReference;
+    }
+
+    @JsonInclude(NON_NULL)
     public static class ListenPortTlsSettings {
 
         private ClientAuthentication clientAuthentication;
