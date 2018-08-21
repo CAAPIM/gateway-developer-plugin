@@ -60,7 +60,7 @@ public class PackageTask extends DefaultTask {
 
     @TaskAction
     public void perform() {
-        Packager packager = new Packager(fileUtils);
+        GW7Builder packager = new GW7Builder(fileUtils);
         packager.buildPackage(into.getAsFile().get(), templatizedBundles.getFiles(), scripts.getFiles());
     }
 }

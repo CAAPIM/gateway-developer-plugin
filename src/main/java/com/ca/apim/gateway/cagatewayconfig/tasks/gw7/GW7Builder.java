@@ -18,25 +18,56 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-public class Packager {
+/**
+ * The packager build a Gateway Deployment Package. A GW7 file is to be able to package bundles, aars, bootstrap
+ * scripts, solution kits, etc... all into a single file. This helps make distributing and deploying solutions simpler,
+ * a single file to download, a single volume to mount.
+ * <p>
+ * Here is an example of a GW7 file structure:
+ * <pre>
+ * opt/
+ *   - docker/rc.d/
+ *     - apply-environment.sh
+ *   - SecureSpan/Gateway/
+ *     - node/default/etc/bootstrap/bundle/
+ *       - 1-my-bundle-1.0.00.req.bundle
+ *       - custom-assertion.req.bundle
+ *       - gateway-developer-example.req.bundle
+ *       - helloworld.req.bundle
+ *     - runtime/modules/
+ *       - assertions/
+ *         - Hello-World-Assertion-0.1.01.aar
+ *       - lib/
+ *         - custom-assertion-1.0.0.jar
+ * </pre>
+ * The above package will add:
+ * <ul>
+ * <li>a bootstrap script apply-environment.sh</li>
+ * <li>4 bundle: 1-my-bundle-1.0.00.req.bundle, custom-assertion.req.bundle, gateway-developer-example.req.bundle, helloworld.req.bundle</li>
+ * <li>a modular assertion: Hello-World-Assertion-0.1.01.aar</li>
+ * <li>a custom assertion: custom-assertion-1.0.0.jar</li>
+ * </ul>
+ */
+class GW7Builder {
+    private static final String DIRECTORY_OPT_DOCKER_RC_D = "/opt/docker/rc.d/";
     private final FileUtils fileUtils;
 
-    public Packager(FileUtils fileUtils) {
+    GW7Builder(FileUtils fileUtils) {
         this.fileUtils = fileUtils;
     }
 
-    public void buildPackage(File gw7File, Set<File> templatizedBundles, Set<File> scripts) {
+    void buildPackage(File gw7File, Set<File> templatizedBundles, Set<File> scripts) {
         byte[] applyEnvBytes = getApplyEnvironmentScriptBytes();
 
         try (TarArchiveOutputStream taos = new TarArchiveOutputStream(new GzipCompressorOutputStream(fileUtils.getOutputStream(gw7File)))) {
-            TarArchiveEntry applyEnv = new TarArchiveEntry("/opt/docker/rc.d/apply-environment.sh");
+            TarArchiveEntry applyEnv = new TarArchiveEntry(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh");
             applyEnv.setSize(applyEnvBytes.length);
             try (ByteArrayInputStream input = new ByteArrayInputStream(applyEnvBytes)) {
                 addTarEntry(taos, applyEnv, input);
             }
 
-            writeFiles(taos, scripts, "/opt/docker/rc.d/");
-            writeFiles(taos, templatizedBundles, "/opt/docker/rc.d/bundle/templatized/");
+            writeFiles(taos, scripts, DIRECTORY_OPT_DOCKER_RC_D);
+            writeFiles(taos, templatizedBundles, DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/");
         } catch (IOException e) {
             throw new PackageBuildException("Error building GW7 Package: " + e.getMessage(), e);
         }
