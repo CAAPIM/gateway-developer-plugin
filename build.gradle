@@ -76,3 +76,8 @@ test {
         exceptionFormat "full"
     }
 }
+
+// avoid excessive javadoc warnings
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
