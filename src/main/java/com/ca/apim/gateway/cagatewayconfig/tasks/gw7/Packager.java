@@ -26,15 +26,14 @@ public class Packager {
     }
 
     public void buildPackage(File gw7File, Set<File> templatizedBundles, Set<File> scripts) {
-        try(TarArchiveOutputStream taos = new TarArchiveOutputStream(new GzipCompressorOutputStream(fileUtils.getOutputStream(gw7File)))) {
-            InputStream applyEnvStream = getClass().getResourceAsStream("/scripts/apply-environment.sh");
-            byte[] applyEnvBytes = IOUtils.toByteArray(applyEnvStream);
-            applyEnvStream.close();
+        byte[] applyEnvBytes = getApplyEnvironmentScriptBytes();
+
+        try (TarArchiveOutputStream taos = new TarArchiveOutputStream(new GzipCompressorOutputStream(fileUtils.getOutputStream(gw7File)))) {
             TarArchiveEntry applyEnv = new TarArchiveEntry("/opt/docker/rc.d/apply-environment.sh");
             applyEnv.setSize(applyEnvBytes.length);
-            taos.putArchiveEntry(applyEnv);
-            IOUtils.copy(new ByteArrayInputStream(applyEnvBytes), taos);
-            taos.closeArchiveEntry();
+            try (ByteArrayInputStream input = new ByteArrayInputStream(applyEnvBytes)) {
+                addTarEntry(taos, applyEnv, input);
+            }
 
             writeFiles(taos, scripts, "/opt/docker/rc.d/");
             writeFiles(taos, templatizedBundles, "/opt/docker/rc.d/bundle/templatized/");
@@ -45,16 +44,25 @@ public class Packager {
 
     private void writeFiles(TarArchiveOutputStream taos, Set<File> files, String directory) {
         for (File file : files) {
-            try {
-                TarArchiveEntry ze = new TarArchiveEntry(file, directory + file.getName());
-                taos.putArchiveEntry(ze);
-                InputStream inputStream = fileUtils.getInputStream(file);
-                IOUtils.copy(inputStream, taos);
-                inputStream.close();
-                taos.closeArchiveEntry();
+            try (InputStream inputStream = fileUtils.getInputStream(file)) {
+                addTarEntry(taos, new TarArchiveEntry(file, directory + file.getName()), inputStream);
             } catch (IOException e) {
                 throw new PackageBuildException("Error building GW7 Package. Error adding file: " + file.getPath() + " Message: " + e.getMessage(), e);
             }
+        }
+    }
+
+    private void addTarEntry(TarArchiveOutputStream taos, TarArchiveEntry tarEntry, InputStream entryStream) throws IOException {
+        taos.putArchiveEntry(tarEntry);
+        IOUtils.copy(entryStream, taos);
+        taos.closeArchiveEntry();
+    }
+
+    private byte[] getApplyEnvironmentScriptBytes() {
+        try (InputStream applyEnvStream = getClass().getResourceAsStream("/scripts/apply-environment.sh")) {
+            return IOUtils.toByteArray(applyEnvStream);
+        } catch (IOException e) {
+            throw new PackageBuildException("Error loading apply-environment.sh script bytes: " + e.getMessage(), e);
         }
     }
 }
