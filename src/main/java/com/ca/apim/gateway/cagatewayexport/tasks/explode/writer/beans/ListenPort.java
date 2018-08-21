@@ -6,9 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import java.util.List;
 import java.util.Map;
 
+@JsonInclude(Include.NON_NULL)
 public class ListenPort {
 
     private String protocol;
@@ -57,6 +61,7 @@ public class ListenPort {
         this.tlsSettings = tlsSettings;
     }
 
+    @JsonInclude(Include.NON_NULL)
     public static class ListenPortTlsSettings {
 
         private ClientAuthentication clientAuthentication;
