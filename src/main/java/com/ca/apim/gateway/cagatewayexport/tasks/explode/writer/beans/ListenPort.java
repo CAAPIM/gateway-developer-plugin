@@ -12,6 +12,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Listen port representation for yaml/json files.
+ */
 @JsonInclude(Include.NON_NULL)
 public class ListenPort {
 

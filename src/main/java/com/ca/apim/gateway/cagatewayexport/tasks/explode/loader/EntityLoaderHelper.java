@@ -35,6 +35,14 @@ public final class EntityLoaderHelper {
     private EntityLoaderHelper() {
     }
 
+    /**
+     * Search in the children of the element specified a single element with the name specified.
+     *
+     * @param entityItemElement element to search into
+     * @param entityName element name to search
+     * @return a single element found
+     * @throws BundleBuilderException if not found, multiple found or invalid node type found (not element)
+     */
     public static Element getSingleElement(final Element entityItemElement, final String entityName) {
         final NodeList folderNodes = entityItemElement.getElementsByTagName(entityName);
         if (folderNodes.getLength() < 1) {
@@ -51,10 +59,27 @@ public final class EntityLoaderHelper {
         }
     }
 
+    /**
+     * Search in the children of the element specified a single element with the name specified.
+     *
+     * @param entityItemElement element to search into
+     * @param elementName element name to search
+     * @return a single element found
+     * @throws BundleBuilderException if not found, multiple found or invalid node type found (not element)
+     */
     public static Element getSingleChildElement(final Element entityItemElement, final String elementName) {
         return getSingleChildElement(entityItemElement, elementName, false);
     }
 
+    /**
+     * Search in the children of the element specified a single element with the name specified .
+     *
+     * @param entityItemElement element to search into
+     * @param elementName element name to search
+     * @param optional if not found returns null instead of throwing exception
+     * @return a single element found
+     * @throws BundleBuilderException if multiple found or invalid node type found (not element)
+     */
     public static Element getSingleChildElement(final Element entityItemElement, final String elementName, boolean optional) {
         final NodeList childNodes = entityItemElement.getChildNodes();
         Node foundNode = null;
@@ -81,10 +106,42 @@ public final class EntityLoaderHelper {
         }
     }
 
+    /**
+     * Search in the children of the element specified a single element with the name specified and returns its text content.
+     *
+     * @param entityItemElement element to search into
+     * @param elementName element name to search
+     * @return text content from a single element found
+     * @throws BundleBuilderException if multiple found or invalid node type found (not element)
+     */
     public static String getSingleChildElementTextContent(final Element entityItemElement, final String elementName) {
         return getSingleChildElement(entityItemElement, elementName).getTextContent();
     }
+    /**
+     * Search in the children of the element specified a single element with the name specified and returns the value from the attribute specified.
+     *
+     * @param entityItemElement element to search into
+     * @param elementName element name to search
+     * @param attributeName attribute name to get value
+     * @return value from the attribute found in a single element, null if element is not present or attribute is not present or its value is empty
+     */
+    public static String getSingleChildElementAttribute(final Element entityItemElement, final String elementName, final String attributeName) {
+        Element element = getSingleChildElement(entityItemElement, elementName, true);
+        if (element == null) {
+            return null;
+        }
 
+        String attribute = element.getAttribute(attributeName);
+        return attribute == null || attribute.isEmpty() ? null : attribute;
+    }
+
+    /**
+     * Search in the children of the element specified all elements with the name specified .
+     *
+     * @param entityItemElement element to search into
+     * @param elementName element name to search
+     * @return list of elements found, empty if not found any
+     */
     public static List<Element> getChildElements(final Element entityItemElement, final String elementName) {
         if (entityItemElement == null) {
             return emptyList();
@@ -102,10 +159,24 @@ public final class EntityLoaderHelper {
         return elements;
     }
 
+    /**
+     * Search in the children of the element specified all elements with the name specified and returns text contents from all of them.
+     *
+     * @param entityItemElement element to search into
+     * @param elementName element name to search
+     * @return list of contents from elements found, empty if not found any
+     */
     public static List<String> getChildElementsTextContents(final Element entityItemElement, final String elementName) {
         return getChildElements(entityItemElement, elementName).stream().map(Element::getTextContent).collect(toList());
     }
 
+    /**
+     * Map a l7:Properties element values into a Map of key-value objects.
+     *
+     * @param propertiesElement properties element of bundle (l7:Properties)
+     * @return map of properties found into element, empty if null or no properties
+     * @throws BundleBuilderException if node is not l7:Properties, if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
+     */
     public static Map<String, Object> mapPropertiesElements(final Element propertiesElement) {
         if (propertiesElement == null) {
             return emptyMap();

@@ -36,6 +36,15 @@ public class WriterHelper {
         return document.getDocumentElement();
     }
 
+    /**
+     * Write map of beans to config folder into rootFolder specified, using specified fileName, in format yaml.
+     *
+     * @param rootFolder root folder
+     * @param documentFileUtils file utility
+     * @param jsonTools json utility
+     * @param beans map of beans to be written
+     * @param fileName name of the file
+     */
     public static <B> void writeFile(File rootFolder, DocumentFileUtils documentFileUtils, JsonTools jsonTools, Map<String, B> beans, String fileName) {
         File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
@@ -50,6 +59,12 @@ public class WriterHelper {
         }
     }
 
+    /**
+     * Copy one list to new one, returning null if the original is empty or null.
+     *
+     * @param originalList
+     * @return null if originalList is null or empty, otherwise new arraylist with the contents.
+     */
     public static <B> List<B> copyList(List<B> originalList) {
         if (originalList == null || originalList.isEmpty()) {
             return null;
@@ -58,6 +73,12 @@ public class WriterHelper {
         return new ArrayList<>(originalList);
     }
 
+    /**
+     * Copy one map to new one, returning null if the original is empty or null.
+     *
+     * @param originalMap
+     * @return null if originalMap is null or empty, otherwise new linked hash map with the contents.
+     */
     public static <K, V> Map<K, V> copyMap(Map<K, V> originalMap) {
         if (originalMap == null) {
             return null;
