@@ -119,7 +119,7 @@ public class ListenPortEntity implements Entity {
         }
 
         public static ClientAuthentication fromType(String type) {
-            return stream(values()).filter(c -> c.type.equals(type)).findFirst().get();
+            return stream(values()).filter(c -> c.type.equals(type)).findFirst().orElse(null);
         }
     }
 

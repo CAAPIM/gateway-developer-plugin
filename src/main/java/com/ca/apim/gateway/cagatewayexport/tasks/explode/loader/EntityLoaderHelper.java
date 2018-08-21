@@ -7,14 +7,14 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilderException;
-import org.apache.commons.lang.BooleanUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -25,12 +25,12 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public final class EntityLoaderHelper {
 
-    public static final String ELEMENT_RESOURCE = "l7:Resource";
-    public static final String ELEMENT_NAME = "l7:Name";
-    public static final String ELEMENT_PROPERTIES = "l7:Properties";
-    public static final String ELEMENT_STRING_VALUE = "l7:StringValue";
-    public static final String ELEMENT_BOOLEAN_VALUE = "l7:BooleanValue";
-    public static final String ELEMENT_PROPERTY = "l7:Property";
+    static final String ELEMENT_RESOURCE = "l7:Resource";
+    static final String ELEMENT_NAME = "l7:Name";
+    static final String ELEMENT_PROPERTIES = "l7:Properties";
+    static final String ELEMENT_STRING_VALUE = "l7:StringValue";
+    private static final String ELEMENT_BOOLEAN_VALUE = "l7:BooleanValue";
+    private static final String ELEMENT_PROPERTY = "l7:Property";
 
     private EntityLoaderHelper() {
     }
@@ -114,7 +114,7 @@ public final class EntityLoaderHelper {
      * @return text content from a single element found
      * @throws BundleBuilderException if multiple found or invalid node type found (not element)
      */
-    public static String getSingleChildElementTextContent(final Element entityItemElement, final String elementName) {
+    static String getSingleChildElementTextContent(final Element entityItemElement, final String elementName) {
         return getSingleChildElement(entityItemElement, elementName).getTextContent();
     }
     /**
@@ -125,7 +125,7 @@ public final class EntityLoaderHelper {
      * @param attributeName attribute name to get value
      * @return value from the attribute found in a single element, null if element is not present or attribute is not present or its value is empty
      */
-    public static String getSingleChildElementAttribute(final Element entityItemElement, final String elementName, final String attributeName) {
+    static String getSingleChildElementAttribute(final Element entityItemElement, final String elementName, final String attributeName) {
         Element element = getSingleChildElement(entityItemElement, elementName, true);
         if (element == null) {
             return null;
@@ -142,7 +142,7 @@ public final class EntityLoaderHelper {
      * @param elementName element name to search
      * @return list of elements found, empty if not found any
      */
-    public static List<Element> getChildElements(final Element entityItemElement, final String elementName) {
+    private static List<Element> getChildElements(final Element entityItemElement, final String elementName) {
         if (entityItemElement == null) {
             return emptyList();
         }
@@ -166,7 +166,7 @@ public final class EntityLoaderHelper {
      * @param elementName element name to search
      * @return list of contents from elements found, empty if not found any
      */
-    public static List<String> getChildElementsTextContents(final Element entityItemElement, final String elementName) {
+    static List<String> getChildElementsTextContents(final Element entityItemElement, final String elementName) {
         return getChildElements(entityItemElement, elementName).stream().map(Element::getTextContent).collect(toList());
     }
 
@@ -177,7 +177,7 @@ public final class EntityLoaderHelper {
      * @return map of properties found into element, empty if null or no properties
      * @throws BundleBuilderException if node is not l7:Properties, if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
      */
-    public static Map<String, Object> mapPropertiesElements(final Element propertiesElement) {
+    static Map<String, Object> mapPropertiesElements(final Element propertiesElement) {
         if (propertiesElement == null) {
             return emptyMap();
         }
