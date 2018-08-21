@@ -31,13 +31,17 @@ public class ListenPortLoader implements EntityLoader {
         final String protocol = getSingleChildElement(listenPort, ELEMENT_PROTOCOL).getTextContent();
         final int port = Integer.parseInt(getSingleChildElement(listenPort, ELEMENT_PORT).getTextContent());
         final List<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPort, ELEMENT_ENABLED_FEATURES), ELEMENT_STRING_VALUE);
-        final ListenPortEntityTlsSettings tlsSettings = buildTlsSettings(getSingleChildElement(listenPort, ELEMENT_TLS_SETTINGS));
+        final ListenPortEntityTlsSettings tlsSettings = buildTlsSettings(getSingleChildElement(listenPort, ELEMENT_TLS_SETTINGS, true));
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPort, ELEMENT_PROPERTIES, true));
 
         return new ListenPortEntity(listenPort.getAttribute("id"), name, protocol, port, enabledFeatures, tlsSettings, properties);
     }
 
     private ListenPortEntityTlsSettings buildTlsSettings(final Element tlsSettingsElement) {
+        if (tlsSettingsElement == null) {
+            return null;
+        }
+
         final ClientAuthentication clientAuthentication = fromType(getSingleChildElementTextContent(tlsSettingsElement, ELEMENT_TLS_CLIENT_AUTHENTICATION));
         final List<String> enabledVersions = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ELEMENT_TLS_ENABLED_VERSIONS), ELEMENT_STRING_VALUE);
         final List<String> enabledCipherSuites = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ELEMENT_TLS_ENABLED_CIPHER_SUITES), ELEMENT_STRING_VALUE);
