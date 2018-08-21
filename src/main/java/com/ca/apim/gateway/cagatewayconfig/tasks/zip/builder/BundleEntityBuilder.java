@@ -23,7 +23,7 @@ public class BundleEntityBuilder {
     private final ClusterPropertyEntityBuilder clusterPropertyEntityBuilder;
     private final PolicyBackedServiceEntityBuilder policyBackedServiceEntityBuilder;
     private final IdentityProviderEntityBuilder identityProviderEntityBuilder;
-
+    private final ListenPortEntityBuilder listenPortEntityBuilder;
 
     public BundleEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document, IdGenerator idGenerator) {
         this.document = document;
@@ -34,6 +34,7 @@ public class BundleEntityBuilder {
         clusterPropertyEntityBuilder = new ClusterPropertyEntityBuilder(document, idGenerator);
         policyBackedServiceEntityBuilder = new PolicyBackedServiceEntityBuilder(document, idGenerator);
         identityProviderEntityBuilder = new IdentityProviderEntityBuilder(document, idGenerator);
+        listenPortEntityBuilder = new ListenPortEntityBuilder(document, idGenerator);
     }
 
     public Element build(Bundle bundle) {
@@ -45,6 +46,7 @@ public class BundleEntityBuilder {
         bundleDocumentBuilder.addEntities(clusterPropertyEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(policyBackedServiceEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(identityProviderEntityBuilder.build(bundle));
+        bundleDocumentBuilder.addEntities(listenPortEntityBuilder.build(bundle));
 
         return bundleDocumentBuilder.build();
     }

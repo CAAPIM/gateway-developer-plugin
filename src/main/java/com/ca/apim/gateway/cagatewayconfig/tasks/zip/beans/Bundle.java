@@ -21,6 +21,7 @@ public class Bundle {
     private final Map<String, String> environmentProperties = new HashMap<>();
     private final Map<String, PolicyBackedService> policyBackedServices = new HashMap<>();
     private final Map<String, IdentityProvider> identityProviders = new HashMap<>();
+    private final Map<String, ListenPort> listenPorts = new HashMap<>();
     private Set<Bundle> dependencies;
 
     public Map<String, Service> getServices() {
@@ -85,6 +86,10 @@ public class Bundle {
 
     public void putAllIdentityProviders(Map<String, IdentityProvider> identityProviders) {
         this.identityProviders.putAll(identityProviders);
+    }
+
+    public Map<String, ListenPort> getListenPorts() {
+        return listenPorts;
     }
 
     public Set<Bundle> getDependencies() {
