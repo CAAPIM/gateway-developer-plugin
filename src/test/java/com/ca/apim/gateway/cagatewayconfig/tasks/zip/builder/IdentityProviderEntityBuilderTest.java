@@ -9,6 +9,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.Assert;
 import org.junit.Test;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.Arrays;
@@ -70,6 +71,10 @@ public class IdentityProviderEntityBuilderTest {
 
         final IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
+        identityProvider.setProperties(new HashMap<String, String>() {{
+            put("key1", "value1");
+            put("key2", "value2");
+        }});
 
         final BindOnlyLdapIdentityProviderDetail identityProviderDetail = new BindOnlyLdapIdentityProviderDetail();
         identityProviderDetail.setUseSslClientAuthentication(false);
@@ -88,11 +93,26 @@ public class IdentityProviderEntityBuilderTest {
         final Entity identityProviderEntity = identityProviders.get(0);
         Assert.assertEquals("ID_PROVIDER_CONFIG", identityProviderEntity.getType());
         Assert.assertNotNull(identityProviderEntity.getId());
-        Element identityProviderEntityXml = identityProviderEntity.getXml();
+        final Element identityProviderEntityXml = identityProviderEntity.getXml();
         Assert.assertEquals("l7:IdentityProvider", identityProviderEntityXml.getTagName());
-        Element identityProviderNameXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, "l7:Name");
+        final Element identityProviderNameXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, "l7:Name");
         Assert.assertEquals("simple ldap config", identityProviderNameXml.getTextContent());
+        final Element identityProviderTypeXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, "l7:IdentityProviderType");
+        Assert.assertEquals(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP.getValue(), identityProviderTypeXml.getTextContent());
 
+        final Element idProviderProperties = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, "l7:Properties");
+        final NodeList propertyList = idProviderProperties.getElementsByTagName("l7:Property");
+        Assert.assertEquals(2, propertyList.getLength());
+        Node property1 = propertyList.item(0);
+        Node property2 = propertyList.item(1);
+        if (!"property.key1".equals(property1.getAttributes().getNamedItem("key").getTextContent())) {
+            property2 = propertyList.item(0);
+            property1 = propertyList.item(1);
+        }
+        Assert.assertEquals("property.key1", property1.getAttributes().getNamedItem("key").getTextContent());
+        Assert.assertEquals("property.key2", property2.getAttributes().getNamedItem("key").getTextContent());
+        Assert.assertEquals("value1", DocumentTools.INSTANCE.getSingleElement((Element) property1, "l7:StringValue").getTextContent());
+        Assert.assertEquals("value2", DocumentTools.INSTANCE.getSingleElement((Element) property2, "l7:StringValue").getTextContent());
 
         final Element bindOnlyLdapIdentityProviderDetailXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, "l7:BindOnlyLdapIdentityProviderDetail");
         final Element serverUrls = DocumentTools.INSTANCE.getSingleElement(bindOnlyLdapIdentityProviderDetailXml, "l7:ServerUrls");

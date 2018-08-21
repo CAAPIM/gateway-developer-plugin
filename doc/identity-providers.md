@@ -6,6 +6,9 @@ An example `identity-providers.yml` file for a BIND_ONLY_LDAP configuration woul
 ```yaml
   simple ldap:
     type: BIND_ONLY_LDAP
+    properties:
+      key1: "value1"
+      key2: "value2"
     identityProviderDetail:
       serverUrls:
         - ldap://host:port
@@ -28,13 +31,15 @@ Possible arguments for id-provider-description:
 * `bindPatternPrefix`, `bindPatternSuffix`: Optional prefix or suffix for the authorization DN
 * `properties`: A list of keys and values associated with the ID provider.
 
-
-
 The same JSON representation would look like:
 ```json
 {
   "simple ldap": {
     "type" : "BIND_ONLY_LDAP",
+    "properties": {
+      "key1":"value1",
+      "key2":"value2"
+    },
     "identityProviderDetail" : {
       "serverUrls": [
         "ldap://host:port",

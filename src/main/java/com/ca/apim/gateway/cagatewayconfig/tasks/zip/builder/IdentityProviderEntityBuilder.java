@@ -76,9 +76,9 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
         if (serverUrls == null || serverUrls.isEmpty()) {
             throw new EntityBuilderException("serverUrls must be a list of urls.");
         }
-        identityProviderDetail.getServerUrls().forEach(url -> {
-            serverUrlsElement.appendChild(DocumentTools.createElement(document, "l7:StringValue", url));
-        });
+        identityProviderDetail.getServerUrls().forEach(url ->
+            serverUrlsElement.appendChild(DocumentTools.createElement(document, "l7:StringValue", url))
+        );
         bindOnlyLdapIdentityProviderDetailElement.appendChild(
                 DocumentTools.createElement(
                         document,

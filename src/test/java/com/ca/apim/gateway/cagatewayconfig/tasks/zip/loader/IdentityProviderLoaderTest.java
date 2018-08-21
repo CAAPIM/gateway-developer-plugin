@@ -45,6 +45,10 @@ public class IdentityProviderLoaderTest {
         final String json = "{\n" +
                 "  \"simple ldap\": {\n" +
                 "    \"type\" : \"BIND_ONLY_LDAP\",\n" +
+                "    \"properties\": {\n" +
+                "      \"key1\":\"value1\",\n" +
+                "      \"key2\":\"value2\"\n" +
+                "    },\n" +
                 "    \"identityProviderDetail\" : {\n" +
                 "      \"serverUrls\": [\n" +
                 "        \"ldap://host:port\",\n" +
@@ -55,7 +59,7 @@ public class IdentityProviderLoaderTest {
                 "      \"bindPatternSuffix\": \"someSuffix\"\n" +
                 "    }\n" +
                 "  }\n" +
-                "}";
+                "}\n";
         final File configFolder = rootProjectDir.newFolder("config");
         final File identityProvidersFile = new File(configFolder, "identity-providers.json");
         Files.touch(identityProvidersFile);
@@ -70,15 +74,18 @@ public class IdentityProviderLoaderTest {
     @Test
     public void loadBindOnlyLdapYml() throws IOException {
         final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
-        final String yml = "simple ldap:\n" +
-                "  type: BIND_ONLY_LDAP\n" +
-                "  identityProviderDetail:\n" +
-                "    serverUrls:\n" +
-                "      - ldap://host:port\n" +
-                "      - ldap://host:port2\n" +
-                "    useSslClientAuthentication: false\n" +
-                "    bindPatternPrefix: somePrefix\n" +
-                "    bindPatternSuffix: someSuffix";
+        final String yml = "  simple ldap:\n" +
+                "    type: BIND_ONLY_LDAP\n" +
+                "    properties:\n" +
+                "      key1: \"value1\"\n" +
+                "      key2: \"value2\"\n" +
+                "    identityProviderDetail:\n" +
+                "      serverUrls:\n" +
+                "        - ldap://host:port\n" +
+                "        - ldap://host:port2\n" +
+                "      useSslClientAuthentication: false\n" +
+                "      bindPatternPrefix: somePrefix\n" +
+                "      bindPatternSuffix: someSuffix";
         final File configFolder = rootProjectDir.newFolder("config");
         final File identityProvidersFile = new File(configFolder, "identity-providers.yml");
         Files.touch(identityProvidersFile);
@@ -96,17 +103,21 @@ public class IdentityProviderLoaderTest {
         final String json = "{\n" +
                 "  \"simple ldap\": {\n" +
                 "    \"type\" : \"BIND_ONLY_LDAP\",\n" +
+                "    \"properties\": {\n" +
+                "      \"key1\":\"value1\",\n" +
+                "      \"key2\":\"value2\"\n" +
+                "    },\n" +
                 "    \"identityProviderDetail\" : {\n" +
                 "      \"serverUrls\": [\n" +
                 "        \"ldap://host:port\",\n" +
                 "        \"ldap://host:port2\"\n" +
                 "      ],\n" +
-                "      \"useSslClientAuthentication\":x,\n" +
+                "      \"useSslClientAuthentication\":NOT_A_BOOLEAN,\n" +
                 "      \"bindPatternPrefix\": \"somePrefix\",\n" +
                 "      \"bindPatternSuffix\": \"someSuffix\"\n" +
                 "    }\n" +
                 "  }\n" +
-                "}";
+                "}\n";
         final File configFolder = rootProjectDir.newFolder("config");
         final File identityProvidersFile = new File(configFolder, "identity-providers.json");
         Files.touch(identityProvidersFile);
@@ -121,7 +132,7 @@ public class IdentityProviderLoaderTest {
         assertEquals(1, bundle.getIdentityProviders().size());
 
         final IdentityProvider identityProvider = bundle.getIdentityProviders().get("simple ldap");
-        assertNull("No properties in BIND_ONLY_LDAP", identityProvider.getProperties());
+        assertTrue("Two items in properties", identityProvider.getProperties().size() == 2);
         assertTrue("Type is BIND_ONLY_LDAP", identityProvider.getType() == IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
         assertTrue("IdentityProviderDetail deserialized to BindOnlyLdapIdentityProviderDetail", identityProvider.getIdentityProviderDetail() instanceof BindOnlyLdapIdentityProviderDetail);
 
