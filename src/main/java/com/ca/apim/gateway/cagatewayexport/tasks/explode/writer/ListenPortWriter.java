@@ -3,6 +3,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  */
+
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
@@ -15,10 +16,11 @@ import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.copyList;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.copyMap;
 import static java.util.stream.Collectors.toMap;
 
 public class ListenPortWriter implements EntityWriter {
@@ -52,11 +54,15 @@ public class ListenPortWriter implements EntityWriter {
     }
 
     private ListenPortTlsSettings getTlsSettingsBean(ListenPortEntityTlsSettings tlsSettingsEntity) {
+        if (tlsSettingsEntity == null) {
+            return null;
+        }
+
         ListenPortTlsSettings tlsSettings = new ListenPortTlsSettings();
-        tlsSettings.setClientAuthentication(ClientAuthentication.valueOf(tlsSettings.getClientAuthentication().name()));
-        tlsSettings.setEnabledCipherSuites(new ArrayList<>(tlsSettingsEntity.getEnabledCipherSuites()));
-        tlsSettings.setEnabledVersions(new ArrayList<>(tlsSettingsEntity.getEnabledVersions()));
-        tlsSettings.setProperties(new HashMap<>(tlsSettingsEntity.getProperties()));
+        tlsSettings.setClientAuthentication(ClientAuthentication.valueOf(tlsSettingsEntity.getClientAuthentication().name()));
+        tlsSettings.setEnabledCipherSuites(copyList(tlsSettingsEntity.getEnabledCipherSuites()));
+        tlsSettings.setEnabledVersions(copyList(tlsSettingsEntity.getEnabledVersions()));
+        tlsSettings.setProperties(copyMap(tlsSettingsEntity.getProperties()));
 
         return tlsSettings;
     }

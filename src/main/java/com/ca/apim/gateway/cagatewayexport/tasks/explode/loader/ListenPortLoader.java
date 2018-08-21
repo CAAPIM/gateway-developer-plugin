@@ -49,7 +49,7 @@ public class ListenPortLoader implements EntityLoader {
 
         final ClientAuthentication clientAuthentication = fromType(getSingleChildElementTextContent(tlsSettingsElement, ELEMENT_TLS_CLIENT_AUTHENTICATION));
         final List<String> enabledVersions = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ELEMENT_TLS_ENABLED_VERSIONS), ELEMENT_STRING_VALUE);
-        final List<String> enabledCipherSuites = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ELEMENT_TLS_ENABLED_CIPHER_SUITES), ELEMENT_STRING_VALUE);
+        final List<String> enabledCipherSuites = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ELEMENT_TLS_ENABLED_CIPHER_SUITES, true), ELEMENT_STRING_VALUE);
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(tlsSettingsElement, ELEMENT_PROPERTIES, true));
 
         return new ListenPortEntityTlsSettings(clientAuthentication, enabledVersions, enabledCipherSuites, properties);

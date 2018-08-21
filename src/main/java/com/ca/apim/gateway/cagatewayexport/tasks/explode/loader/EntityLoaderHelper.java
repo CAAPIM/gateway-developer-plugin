@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilderException;
+import org.apache.commons.lang.BooleanUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -15,9 +16,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.lang.BooleanUtils.toBoolean;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public final class EntityLoaderHelper {
@@ -83,6 +86,10 @@ public final class EntityLoaderHelper {
     }
 
     public static List<Element> getChildElements(final Element entityItemElement, final String elementName) {
+        if (entityItemElement == null) {
+            return emptyList();
+        }
+
         final List<Element> elements = new ArrayList<>();
         final NodeList childNodes = entityItemElement.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
@@ -110,15 +117,26 @@ public final class EntityLoaderHelper {
 
         final List<Element> properties = getChildElements(propertiesElement, ELEMENT_PROPERTY);
         return properties.stream().collect(toMap(s -> s.getAttribute("key"), o -> {
+            final String propKey = o.getAttribute("key");
             final NodeList childNodes = o.getChildNodes();
+
             for (int i = 0; i < childNodes.getLength(); i++) {
                 final Node child = childNodes.item(i);
-                if ((ELEMENT_STRING_VALUE.equals(child.getNodeName()) || ELEMENT_BOOLEAN_VALUE.equals(child.getNodeName())) && child.getNodeType() == ELEMENT_NODE) {
-                    return child;
+                if (child.getNodeType() == ELEMENT_NODE) {
+                    return extractPropertyValue(propKey, (Element) child);
                 }
             }
 
-            throw new BundleBuilderException("Property " + o.getAttribute("key") + " does not have a valid value of type " + ELEMENT_BOOLEAN_VALUE + " or " + ELEMENT_STRING_VALUE);
+            throw new BundleBuilderException("Property " + propKey + " does not have a value");
         }));
+    }
+
+    private static Object extractPropertyValue(final String key, final Element valueElement) {
+        switch (valueElement.getNodeName()) {
+            case ELEMENT_STRING_VALUE: return valueElement.getTextContent();
+            case ELEMENT_BOOLEAN_VALUE: return toBoolean(valueElement.getTextContent());
+            default:
+                throw new BundleBuilderException("Type of property " + key + " is " + valueElement.getNodeName() + " which is not yet supported");
+        }
     }
 }
