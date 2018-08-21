@@ -11,13 +11,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.w3c.dom.Node.ELEMENT_NODE;
@@ -51,6 +49,10 @@ public final class EntityLoaderHelper {
     }
 
     public static Element getSingleChildElement(final Element entityItemElement, final String elementName) {
+        return getSingleChildElement(entityItemElement, elementName, false);
+    }
+
+    public static Element getSingleChildElement(final Element entityItemElement, final String elementName, boolean optional) {
         final NodeList childNodes = entityItemElement.getChildNodes();
         Node foundNode = null;
         for (int i = 0; i < childNodes.getLength(); i++) {
@@ -62,7 +64,11 @@ public final class EntityLoaderHelper {
                 }
             }
         }
-        if(foundNode == null){
+        if (foundNode == null){
+            if (optional) {
+                return null;
+            }
+
             throw new BundleBuilderException(elementName + " element not found");
         }
         if (foundNode.getNodeType() == ELEMENT_NODE) {
@@ -86,9 +92,6 @@ public final class EntityLoaderHelper {
             }
         }
 
-        if (elements.isEmpty()){
-            throw new BundleBuilderException(elementName + " element not found");
-        }
         return elements;
     }
 
@@ -97,6 +100,10 @@ public final class EntityLoaderHelper {
     }
 
     public static Map<String, Object> mapPropertiesElements(final Element propertiesElement) {
+        if (propertiesElement == null) {
+            return emptyMap();
+        }
+
         if (!Objects.equals(propertiesElement.getNodeName(), ELEMENT_PROPERTIES)) {
             throw new BundleBuilderException("Current node is not l7:Properties node, it is " + propertiesElement.getNodeName());
         }
