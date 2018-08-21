@@ -63,10 +63,10 @@ public class WriterHelper {
      * Copy one list to new one, returning null if the original is empty or null.
      *
      * @param originalList
-     * @return null if originalList is null or empty, otherwise new arraylist with the contents.
+     * @return null if originalList is null, otherwise new arraylist with the contents.
      */
     public static <B> List<B> copyList(List<B> originalList) {
-        if (originalList == null || originalList.isEmpty()) {
+        if (originalList == null) {
             return null;
         }
 
@@ -77,7 +77,7 @@ public class WriterHelper {
      * Copy one map to new one, returning null if the original is empty or null.
      *
      * @param originalMap
-     * @return null if originalMap is null or empty, otherwise new linked hash map with the contents.
+     * @return null if originalMap is null, otherwise new linked hash map with the contents.
      */
     public static <K, V> Map<K, V> copyMap(Map<K, V> originalMap) {
         if (originalMap == null) {
