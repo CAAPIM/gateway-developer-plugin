@@ -18,6 +18,7 @@ public class Bundle {
     private final Map<String, String> staticProperties = new HashMap<>();
     private final Map<String, String> environmentProperties = new HashMap<>();
     private final Map<String, PolicyBackedService> policyBackedServices = new HashMap<>();
+    private final Map<String, ListenPort> listenPorts = new HashMap<>();
     private Set<Bundle> dependencies;
 
     public Map<String, Service> getServices() {
@@ -74,6 +75,10 @@ public class Bundle {
 
     public Map<String, PolicyBackedService> getPolicyBackedServices() {
         return policyBackedServices;
+    }
+
+    public Map<String, ListenPort> getListenPorts() {
+        return listenPorts;
     }
 
     public Set<Bundle> getDependencies() {
