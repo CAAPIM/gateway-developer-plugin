@@ -17,25 +17,14 @@ public class ListenPortEntity implements Entity {
 
     public static final List<Integer> DEFAULT_PORTS = Arrays.asList(8080, 8443, 9443, 2124);
 
-    private final String id;
-    private final String name;
-    private final String protocol;
-    private final int port;
-    private final List<String> enabledFeatures;
-    private final ListenPortEntityTlsSettings tlsSettings;
-    private final Map<String, Object> properties;
+    private String id;
+    private String name;
+    private String protocol;
+    private int port;
+    private List<String> enabledFeatures;
+    private ListenPortEntityTlsSettings tlsSettings;
+    private Map<String, Object> properties;
     private String targetServiceReference;
-
-    public ListenPortEntity(String id, String name, String protocol, int port, List<String> enabledFeatures, ListenPortEntityTlsSettings tlsSettings, Map<String, Object> properties, String targetServiceReference) {
-        this.id = id;
-        this.name = name;
-        this.protocol = protocol;
-        this.port = port;
-        this.enabledFeatures = enabledFeatures;
-        this.tlsSettings = tlsSettings;
-        this.properties = properties;
-        this.targetServiceReference = targetServiceReference;
-    }
 
     public String getId() {
         return id;
@@ -69,8 +58,44 @@ public class ListenPortEntity implements Entity {
         return targetServiceReference;
     }
 
-    public void setTargetServiceReference(String targetServiceReference) {
+    public ListenPortEntity setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public ListenPortEntity setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public ListenPortEntity setProtocol(String protocol) {
+        this.protocol = protocol;
+        return this;
+    }
+
+    public ListenPortEntity setPort(int port) {
+        this.port = port;
+        return this;
+    }
+
+    public ListenPortEntity setEnabledFeatures(List<String> enabledFeatures) {
+        this.enabledFeatures = enabledFeatures;
+        return this;
+    }
+
+    public ListenPortEntity setTlsSettings(ListenPortEntityTlsSettings tlsSettings) {
+        this.tlsSettings = tlsSettings;
+        return this;
+    }
+
+    public ListenPortEntity setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+        return this;
+    }
+
+    public ListenPortEntity setTargetServiceReference(String targetServiceReference) {
         this.targetServiceReference = targetServiceReference;
+        return this;
     }
 
     public static class ListenPortEntityTlsSettings {

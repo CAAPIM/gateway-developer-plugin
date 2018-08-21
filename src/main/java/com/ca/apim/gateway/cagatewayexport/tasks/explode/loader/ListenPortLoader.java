@@ -41,7 +41,7 @@ public class ListenPortLoader implements EntityLoader {
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPort, ELEMENT_PROPERTIES, true));
         final String targetServiceReference = getSingleChildElementAttribute(listenPort, ELEMENT_TARGET_SERVICE_REFERENCE, "id");
 
-        return new ListenPortEntity(listenPort.getAttribute("id"), name, protocol, port, enabledFeatures, tlsSettings, properties, targetServiceReference);
+        return new ListenPortEntity().setId(listenPort.getAttribute("id")).setName(name).setProtocol(protocol).setPort(port).setEnabledFeatures(enabledFeatures).setTlsSettings(tlsSettings).setProperties(properties).setTargetServiceReference(targetServiceReference);
     }
 
     private ListenPortEntityTlsSettings buildTlsSettings(final Element tlsSettingsElement) {
