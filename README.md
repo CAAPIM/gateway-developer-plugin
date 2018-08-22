@@ -35,7 +35,7 @@ Policy | Yes |
 EncapsulatedAssertion | Yes |
 ClusterProperty | Yes |
 Policy Backed Service | Yes |
-Listen Port | No | See issue [#36](https://github.com/ca-api-gateway/gateway-developer-plugin/issues/36)
+Listen Port | Yes | 
  
 
 ## Expected Source Directory Organization
@@ -46,6 +46,7 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
     * [services.yml - Services Configuration](doc/services.md#services-configuration)
     * [encass.yml - Encapsulated Assertions Configuration](doc/encapsulated-assertions.md#encapsulated-assertion-configuration)
     * [policy-backed-services.yml - Policy Backed Services Configuration](doc/policy-backed-services.md#policy-backed-services-configuration)
+    * [listen-ports.yml - Listen Ports Configuration](doc/listen-ports.md#listen-ports-configuration)
     * [static.properties - Static Properties Configuration](doc/static-properties.md#static-properties-configuration)
     * [env.properties - Environment Properties Configuration](doc/environment-properties.md#environment-properties-configuration)
   * `policy`
