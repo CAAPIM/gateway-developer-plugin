@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 
 import java.util.HashMap;
@@ -20,6 +21,7 @@ public class EntityLoaderRegistry {
         entityLoaders.put("POLICY", new PolicyLoader(documentTools));
         entityLoaders.put("FOLDER", new FolderLoader(documentTools));
         entityLoaders.put("ENCAPSULATED_ASSERTION", new EncassLoader(documentTools));
+        entityLoaders.put(ListenPort.TYPE, new ListenPortLoader(documentTools));
     }
 
     public BundleEntityLoader getLoader(String type) {

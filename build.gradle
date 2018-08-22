@@ -40,6 +40,7 @@ dependencies {
     compile 'commons-io:commons-io:+'
     compile 'commons-lang:commons-lang:+'
     compile 'org.apache.commons:commons-compress:+'
+    compile 'org.apache.commons:commons-collections4:+'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 

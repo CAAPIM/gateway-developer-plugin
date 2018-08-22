@@ -11,23 +11,26 @@ import org.w3c.dom.Element;
 
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+
 public class BuilderUtils {
 
     public static Element buildPropertiesElement(final Map<String, Object> properties, final Document document) {
-        Element propertiesElement = document.createElement("l7:Properties");
+        Element propertiesElement = document.createElement(PROPERTIES);
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            Element propertyElement = document.createElement("l7:Property");
+            Element propertyElement = document.createElement(PROPERTY);
             propertyElement.setAttribute("key", entry.getKey());
-            Element valueElement;
+            String elementType = STRING_VALUE;
+
             if (Integer.class.isAssignableFrom(entry.getValue().getClass())) {
-                valueElement = document.createElement("l7:IntValue");
+                elementType = INT_VALUE;
             } else if (Long.class.isAssignableFrom(entry.getValue().getClass())) {
-                valueElement = document.createElement("l7:LongValue");
+                elementType = LONG_VALUE;
             } else if (Boolean.class.isAssignableFrom(entry.getValue().getClass())) {
-                valueElement = document.createElement("l7:BooleanValue");
-            } else {
-                valueElement = document.createElement("l7:StringValue");
+                elementType = BOOLEAN_VALUE;
             }
+
+            Element valueElement = document.createElement(elementType);
             valueElement.setTextContent(entry.getValue().toString());
             propertyElement.appendChild(valueElement);
             propertiesElement.appendChild(propertyElement);

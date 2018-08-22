@@ -2,6 +2,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ListenPortTlsSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -9,8 +10,13 @@ import org.w3c.dom.Element;
 import java.util.List;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 
 /**
  * Builder for Listen ports
@@ -33,17 +39,52 @@ public class ListenPortEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildListenPortEntity(Bundle bundle, String name, ListenPort listenPort) {
-        Element listenPortElement = document.createElement("l7:ListenPort");
+        Element listenPortElement = document.createElement(LISTEN_PORT);
 
         String id = idGenerator.generate();
         listenPortElement.setAttribute("id", id);
-        listenPortElement.appendChild(createElementWithTextContent(document,"l7:Name", name));
-        listenPortElement.appendChild(createElementWithTextContent(document,"l7:Enabled", Boolean.toString(listenPort.isEnabled())));
-        listenPortElement.appendChild(createElementWithTextContent(document,"l7:Protocol", listenPort.getProtocol()));
-        listenPortElement.appendChild(createElementWithTextContent(document,"l7:Port", Integer.toString(listenPort.getPort())));
-        listenPortElement.appendChild(createElementWithTextContent(document,"l7:Interface", listenPort.getTargetServiceId()));
-        listenPortElement.appendChild(createElementWithTextContent(document,"l7:TargetServiceReference", name));
+        listenPortElement.appendChild(createElementWithTextContent(document, NAME, name));
+        listenPortElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString())); // people should not bootstrap a disabled listen port.
+        listenPortElement.appendChild(createElementWithTextContent(document, PROTOCOL, listenPort.getProtocol()));
+        listenPortElement.appendChild(createElementWithTextContent(document, PORT, Integer.toString(listenPort.getPort())));
 
+        Element enabledFeatures = document.createElement(ENABLED_FEATURES);
+        listenPort.getEnabledFeatures().forEach(s -> enabledFeatures.appendChild(createElementWithTextContent(document, STRING_VALUE, s)));
+        listenPortElement.appendChild(enabledFeatures);
+
+        if (listenPort.getTargetServiceReference() != null) {
+            // TODO find the correct service id
+            listenPortElement.appendChild(createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, "id", listenPort.getTargetServiceReference()));
+        }
+
+        if (listenPort.getTlsSettings() != null) {
+            ListenPortTlsSettings tlsSettings = listenPort.getTlsSettings();
+
+            Element tlsSettingsElement = document.createElement(TLS_SETTINGS);
+            tlsSettingsElement.appendChild(createElementWithTextContent(document, CLIENT_AUTHENTICATION, tlsSettings.getClientAuthentication().getType()));
+
+            if (isNotEmpty(tlsSettings.getEnabledVersions())) {
+                Element enabledVersions = document.createElement(ENABLED_VERSIONS);
+                tlsSettings.getEnabledVersions().forEach(s -> enabledVersions.appendChild(createElementWithTextContent(document, STRING_VALUE, s)));
+                tlsSettingsElement.appendChild(enabledVersions);
+            }
+
+            if (isNotEmpty(tlsSettings.getEnabledCipherSuites())) {
+                Element enabledCipherSuites = document.createElement(ENABLED_CIPHER_SUITES);
+                tlsSettings.getEnabledCipherSuites().forEach(s -> enabledCipherSuites.appendChild(createElementWithTextContent(document, STRING_VALUE, s)));
+                tlsSettingsElement.appendChild(enabledCipherSuites);
+            }
+
+            if (isNotEmpty(tlsSettings.getProperties())) {
+                tlsSettingsElement.appendChild(buildPropertiesElement(tlsSettings.getProperties(), document));
+            }
+
+            listenPortElement.appendChild(tlsSettingsElement);
+        }
+
+        if (isNotEmpty(listenPort.getProperties())) {
+            listenPortElement.appendChild(buildPropertiesElement(listenPort.getProperties(), document));
+        }
 
         return new Entity(TYPE, name, id, listenPortElement);
     }
