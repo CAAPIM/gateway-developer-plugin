@@ -7,15 +7,16 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Collections.unmodifiableList;
 
 public class ListenPortEntity implements Entity {
 
-    public static final List<Integer> DEFAULT_PORTS = Arrays.asList(8080, 8443, 9443, 2124);
+    public static final List<Integer> DEFAULT_PORTS = unmodifiableList(asList(8080, 8443, 9443, 2124));
 
     private String id;
     private String name;
