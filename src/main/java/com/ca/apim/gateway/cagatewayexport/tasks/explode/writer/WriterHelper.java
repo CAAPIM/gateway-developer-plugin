@@ -46,6 +46,7 @@ public class WriterHelper {
      * @param jsonTools json utility
      * @param beans map of beans to be written
      * @param fileName name of the file
+     * @param <B> type of bean
      */
     public static <B> void writeFile(File rootFolder, DocumentFileUtils documentFileUtils, JsonTools jsonTools, Map<String, B> beans, String fileName) {
         File configFolder = new File(rootFolder, "config");
@@ -64,8 +65,9 @@ public class WriterHelper {
     /**
      * Copy one list to new one, returning null if the original is empty or null.
      *
-     * @param originalList
+     * @param originalList original list of beans
      * @return empty list if originalList is null, otherwise new arraylist with the contents.
+     * @param <B> type of bean
      */
     public static <B> List<B> copyList(List<B> originalList) {
         if (originalList == null) {
@@ -78,8 +80,10 @@ public class WriterHelper {
     /**
      * Copy one map to new one, returning null if the original is empty or null.
      *
-     * @param originalMap
+     * @param originalMap original map of beans
      * @return empty map if originalMap is null, otherwise new linked hash map with the contents.
+     * @param <K> type of key
+     * @param <V> type of value
      */
     public static <K, V> Map<K, V> copyMap(Map<K, V> originalMap) {
         if (originalMap == null) {

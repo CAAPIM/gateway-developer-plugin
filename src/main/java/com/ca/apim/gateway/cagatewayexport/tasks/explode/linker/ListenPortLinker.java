@@ -28,7 +28,7 @@ public class ListenPortLinker implements EntityLinker<ListenPortEntity> {
 
         ServiceEntity service = bundle.getEntities(ServiceEntity.class).get(entity.getTargetServiceReference());
         if (service == null) {
-            return;
+            throw new LinkerException("Could not find Service for Listen Port: " + entity.getName() + ". Service Reference: " + entity.getTargetServiceReference());
         }
 
         entity.setTargetServiceReference(service.getPath());
