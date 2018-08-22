@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ListenPortTlsSettings;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -12,8 +13,8 @@ import java.util.List;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.createElementWithAttribute;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.createElementWithTextContent;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.collections4.MapUtils.isNotEmpty;
@@ -53,8 +54,11 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         listenPortElement.appendChild(enabledFeatures);
 
         if (listenPort.getTargetServiceReference() != null) {
-            // TODO find the correct service id
-            listenPortElement.appendChild(createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, "id", listenPort.getTargetServiceReference()));
+            final Service service = bundle.getServices().get(listenPort.getTargetServiceReference());
+            if (service == null) {
+                throw new EntityBuilderException("Could not find service binded to listen port " + name + ". Service Path: " + listenPort.getTargetServiceReference());
+            }
+            listenPortElement.appendChild(createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, "id", service.getId()));
         }
 
         if (listenPort.getTlsSettings() != null) {

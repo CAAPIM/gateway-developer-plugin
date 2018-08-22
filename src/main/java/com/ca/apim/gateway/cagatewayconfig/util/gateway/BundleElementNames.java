@@ -13,6 +13,7 @@ public class BundleElementNames {
     public static final String LONG_VALUE = "l7:LongValue";
     public static final String BOOLEAN_VALUE = "l7:BooleanValue";
     public static final String STRING_VALUE = "l7:StringValue";
+    public static final String RESOURCE = "l7:Resource";
 
     // Listen Port Elements
     public static final String LISTEN_PORT = "l7:ListenPort";

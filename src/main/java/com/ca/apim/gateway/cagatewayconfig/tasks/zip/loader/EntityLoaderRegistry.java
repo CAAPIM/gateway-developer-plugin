@@ -27,6 +27,7 @@ public class EntityLoaderRegistry {
         loadersCollection.add(new EnvironmentPropertiesLoader());
         loadersCollection.add(new PolicyBackedServiceLoader(jsonTools));
         loadersCollection.add(new IdentityProviderLoader(jsonTools));
+        loadersCollection.add(new ListenPortLoader(jsonTools));
 
         this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
     }

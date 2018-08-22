@@ -92,6 +92,10 @@ public class Bundle {
         return listenPorts;
     }
 
+    public void putAllListenPorts(Map<String, ListenPort> listenPorts) {
+        this.listenPorts.putAll(listenPorts);
+    }
+
     public Set<Bundle> getDependencies() {
         return dependencies;
     }

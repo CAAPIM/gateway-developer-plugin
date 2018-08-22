@@ -3,6 +3,8 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.stream;
+
 public class ListenPort {
 
     public static final String TYPE = "SSG_CONNECTOR";
@@ -114,6 +116,10 @@ public class ListenPort {
 
         public String getType() {
             return type;
+        }
+
+        public static ClientAuthentication fromType(String type) {
+            return stream(values()).filter(c -> c.type.equals(type)).findFirst().orElse(null);
         }
     }
 }
