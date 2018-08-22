@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyBundleLoadException;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

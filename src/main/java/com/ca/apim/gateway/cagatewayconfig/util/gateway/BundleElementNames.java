@@ -3,27 +3,27 @@ package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 /**
  * Utility class to hold element names used in gateway bundles.
  */
-public class BundleElementNames {
+public interface BundleElementNames {
 
     // Common Elements
-    public static final String NAME = "l7:Name";
-    public static final String PROPERTIES = "l7:Properties";
-    public static final String PROPERTY = "l7:Property";
-    public static final String INT_VALUE = "l7:IntValue";
-    public static final String LONG_VALUE = "l7:LongValue";
-    public static final String BOOLEAN_VALUE = "l7:BooleanValue";
-    public static final String STRING_VALUE = "l7:StringValue";
-    public static final String RESOURCE = "l7:Resource";
+    String NAME = "l7:Name";
+    String PROPERTIES = "l7:Properties";
+    String PROPERTY = "l7:Property";
+    String INT_VALUE = "l7:IntValue";
+    String LONG_VALUE = "l7:LongValue";
+    String BOOLEAN_VALUE = "l7:BooleanValue";
+    String STRING_VALUE = "l7:StringValue";
+    String RESOURCE = "l7:Resource";
 
     // Listen Port Elements
-    public static final String LISTEN_PORT = "l7:ListenPort";
-    public static final String ENABLED = "l7:Enabled";
-    public static final String PROTOCOL = "l7:Protocol";
-    public static final String PORT = "l7:Port";
-    public static final String ENABLED_FEATURES = "l7:EnabledFeatures";
-    public static final String TARGET_SERVICE_REFERENCE = "l7:TargetServiceReference";
-    public static final String TLS_SETTINGS = "l7:TlsSettings";
-    public static final String CLIENT_AUTHENTICATION = "l7:ClientAuthentication";
-    public static final String ENABLED_VERSIONS = "l7:EnabledVersions";
-    public static final String ENABLED_CIPHER_SUITES = "l7:EnabledCipherSuites";
+    String LISTEN_PORT = "l7:ListenPort";
+    String ENABLED = "l7:Enabled";
+    String PROTOCOL = "l7:Protocol";
+    String PORT = "l7:Port";
+    String ENABLED_FEATURES = "l7:EnabledFeatures";
+    String TARGET_SERVICE_REFERENCE = "l7:TargetServiceReference";
+    String TLS_SETTINGS = "l7:TlsSettings";
+    String CLIENT_AUTHENTICATION = "l7:ClientAuthentication";
+    String ENABLED_VERSIONS = "l7:EnabledVersions";
+    String ENABLED_CIPHER_SUITES = "l7:EnabledCipherSuites";
 }

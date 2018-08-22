@@ -32,14 +32,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang.BooleanUtils.toBoolean;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
