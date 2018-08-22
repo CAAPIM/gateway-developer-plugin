@@ -45,10 +45,10 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Create package task
         final PackageTask packageGW7Task = project.getTasks().create("package-gw7", PackageTask.class, t -> {
             t.dependsOn(buildBundleTask);
-            t.getInto().set(new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY),project.getName() + ".gw7"));
-            t.getTemplatizedBundles().setFrom(
-                    pluginConfig.getBuiltBundleDir().getAsFileTree().matching(patternFilterable -> patternFilterable.include("*.bundle")),
-                    project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
+            t.getInto().set(new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), project.getName() + ".gw7"));
+            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(project.getName() + ".req.bundle"));
+            t.getEnvironmentBundle().set(pluginConfig.getBuiltBundleDir().file("_" + project.getName() + "-env.req.bundle"));
+            t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
 
         // add build-bundle to the default build task
