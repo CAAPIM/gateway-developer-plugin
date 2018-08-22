@@ -51,7 +51,7 @@ class ExplodeBundle {
 
         //Link, simplify and process entities
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
-        entityLinkers.forEach(e -> e.link(filteredBundle, bundle));
+        entityLinkers.parallelStream().forEach(e -> e.link(filteredBundle, bundle));
 
         //write the bundle in the exploded format
 

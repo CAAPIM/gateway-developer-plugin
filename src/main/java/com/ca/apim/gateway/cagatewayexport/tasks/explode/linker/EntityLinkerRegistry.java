@@ -10,14 +10,14 @@ import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 
 public class EntityLinkerRegistry {
 
     private final Collection<EntitiesLinker> entityLinkers;
 
     public EntityLinkerRegistry(final DocumentTools documentTools) {
-        final Collection<EntitiesLinker> linkersCollection = new LinkedHashSet<>();
+        final Collection<EntitiesLinker> linkersCollection = new HashSet<>();
         linkersCollection.add(new PolicyLinker(documentTools));
         linkersCollection.add(new ServiceLinker(documentTools));
         linkersCollection.add(new EncassLinker());
