@@ -18,7 +18,6 @@ public class ListenPort {
     public static final Integer HTTP_DEFAULT_PORT = 8080;
     public static final Integer HTTPS_DEFAULT_PORT = 8443;
 
-
     private String protocol;
     private int port;
     private List<String> enabledFeatures;
