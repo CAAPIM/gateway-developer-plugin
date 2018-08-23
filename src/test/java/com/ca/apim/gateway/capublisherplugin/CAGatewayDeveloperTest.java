@@ -51,6 +51,8 @@ class CAGatewayDeveloperTest {
         Assert.assertTrue(buildGatewayBundlesDir.isDirectory());
         File builtBundleFile = new File(buildGatewayBundlesDir, projectFolder + ".req.bundle");
         Assert.assertTrue(builtBundleFile.isFile());
+        File gw7PackageFile = new File(buildGatewayDir, projectFolder + ".gw7");
+        Assert.assertTrue(gw7PackageFile.isFile());
     }
 
     @Test
