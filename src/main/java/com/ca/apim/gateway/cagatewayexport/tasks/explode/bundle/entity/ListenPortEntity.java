@@ -7,7 +7,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
