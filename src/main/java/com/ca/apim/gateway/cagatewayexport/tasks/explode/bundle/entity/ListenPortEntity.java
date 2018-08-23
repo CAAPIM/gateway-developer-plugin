@@ -26,7 +26,7 @@ public class ListenPortEntity implements Entity {
     private final List<String> enabledFeatures;
     private final ListenPortEntityTlsSettings tlsSettings;
     private final Map<String, Object> properties;
-    private final String targetServiceReference;
+    private String targetServiceReference;
 
     private ListenPortEntity(final Builder builder) {
         id = builder.id;
@@ -69,6 +69,10 @@ public class ListenPortEntity implements Entity {
 
     public String getTargetServiceReference() {
         return targetServiceReference;
+    }
+
+    public void setTargetServiceReference(String targetServiceReference) {
+        this.targetServiceReference = targetServiceReference;
     }
 
     public static class Builder {
