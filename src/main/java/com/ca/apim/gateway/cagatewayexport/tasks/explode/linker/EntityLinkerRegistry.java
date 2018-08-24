@@ -23,6 +23,7 @@ public class EntityLinkerRegistry {
         linkersCollection.add(new EncassLinker());
         linkersCollection.add(new PolicyBackedServiceLinker());
         linkersCollection.add(new ClusterPropertyLinker());
+        linkersCollection.add(new ListenPortLinker());
 
         this.entityLinkers = Collections.unmodifiableCollection(linkersCollection);
     }

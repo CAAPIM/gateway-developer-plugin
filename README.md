@@ -3,7 +3,7 @@
 [![Sonar Cloud Status](https://sonarcloud.io/api/project_badges/measure?project=com.ca.apim.gateway%3Agateway-export-plugin&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.ca.apim.gateway%3Agateway-export-plugin)
 
 # About
-The Gateway developer plugin can be used to develop Gateway configuration.
+The Gateway export plugin can be used to extract configuration from a running Gateway.
 
 # Usage
 In order to use this plugin add the following you your gradle file:
@@ -48,6 +48,7 @@ Policy | Yes |
 EncapsulatedAssertion | Yes |
 ClusterProperty | Yes |
 Policy Backed Service | Yes |
+Listen Port | Yes |
 
 ## Customizing the Default Plugin Configuration
 You can customize the source solution directory location and the location to put the built bundle file by setting the `GatewaySourceConfig`. For example:

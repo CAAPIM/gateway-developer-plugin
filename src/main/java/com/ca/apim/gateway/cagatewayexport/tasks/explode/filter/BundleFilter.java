@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.DEFAULT_PORTS;
+
 public class BundleFilter {
     private final Bundle bundle;
 
@@ -43,6 +45,9 @@ public class BundleFilter {
 
         //filter cluster property
         filterStaticProperties(bundle.getEntities(ClusterProperty.class).values(), bundle.getDependencies(), filteredBundle).forEach(filteredBundle::addEntity);
+
+        // filter listen ports
+        filterListenPorts(bundle.getEntities(ListenPortEntity.class).values()).forEach(filteredBundle::addEntity);
 
         filterParentFolders(folderPath, bundle.getFolderTree()).forEach(filteredBundle::addEntity);
 
@@ -90,5 +95,9 @@ public class BundleFilter {
             Path path = folderTree.getPath(f);
             return folderPath.startsWith("/" + path.toString());
         }).collect(Collectors.toList());
+    }
+
+    private List<ListenPortEntity> filterListenPorts(Collection<ListenPortEntity> listenPorts) {
+        return listenPorts.stream().filter(l -> !DEFAULT_PORTS.contains(l.getPort())).collect(Collectors.toList());
     }
 }
