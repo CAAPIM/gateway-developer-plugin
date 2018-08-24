@@ -41,9 +41,9 @@ import static org.apache.commons.collections4.MapUtils.unmodifiableMap;
  */
 public class ListenPortEntityBuilder implements EntityBuilder {
 
-    public static final String DEFAULT_HTTP_8080 = "Default HTTP (8080)";
-    public static final String DEFAULT_HTTPS_8443 = "Default HTTPS (8443)";
-    public static final List<String> DEFAULT_RECOMMENDED_CIPHERS = Collections.unmodifiableList(asList(
+    static final String DEFAULT_HTTP_8080 = "Default HTTP (8080)";
+    static final String DEFAULT_HTTPS_8443 = "Default HTTPS (8443)";
+    static final List<String> DEFAULT_RECOMMENDED_CIPHERS = Collections.unmodifiableList(asList(
             "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
             "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
             "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
@@ -80,13 +80,13 @@ public class ListenPortEntityBuilder implements EntityBuilder {
             "TLS_RSA_WITH_AES_128_GCM_SHA256",
             "TLS_RSA_WITH_AES_128_CBC_SHA256",
             "TLS_RSA_WITH_AES_128_CBC_SHA"));
-    public static final List<String> TLS_VERSIONS = asList("TLSv1", "TLSv1.1", "TLSv1.2");
+    static final List<String> TLS_VERSIONS = asList("TLSv1", "TLSv1.1", "TLSv1.2");
     private static final Map<String, ListenPort> DEFAULT_PORTS = unmodifiableMap(createDefaultListenPorts());
 
     private final Document document;
     private final IdGenerator idGenerator;
 
-    public ListenPortEntityBuilder(Document document, IdGenerator idGenerator) {
+    ListenPortEntityBuilder(Document document, IdGenerator idGenerator) {
         this.document = document;
         this.idGenerator = idGenerator;
     }

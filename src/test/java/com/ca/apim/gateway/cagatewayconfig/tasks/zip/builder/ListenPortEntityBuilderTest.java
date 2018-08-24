@@ -10,7 +10,6 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.w3c.dom.Element;
