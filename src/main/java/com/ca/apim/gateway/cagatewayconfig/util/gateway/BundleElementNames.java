@@ -10,6 +10,9 @@ package com.ca.apim.gateway.cagatewayconfig.util.gateway;
  */
 public class BundleElementNames {
 
+    // Attributes
+    public static final String ID = "id";
+
     // Common Elements
     public static final String NAME = "l7:Name";
     public static final String PROPERTIES = "l7:Properties";

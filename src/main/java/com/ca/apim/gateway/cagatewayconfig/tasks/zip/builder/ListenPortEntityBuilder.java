@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.*;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -40,7 +41,9 @@ import static org.apache.commons.collections4.MapUtils.unmodifiableMap;
  */
 public class ListenPortEntityBuilder implements EntityBuilder {
 
-    private static final List<String> DEFAULT_RECOMMENDED_CIPHERS = Collections.unmodifiableList(asList(
+    public static final String DEFAULT_HTTP_8080 = "Default HTTP (8080)";
+    public static final String DEFAULT_HTTPS_8443 = "Default HTTPS (8443)";
+    public static final List<String> DEFAULT_RECOMMENDED_CIPHERS = Collections.unmodifiableList(asList(
             "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
             "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
             "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
@@ -77,7 +80,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
             "TLS_RSA_WITH_AES_128_GCM_SHA256",
             "TLS_RSA_WITH_AES_128_CBC_SHA256",
             "TLS_RSA_WITH_AES_128_CBC_SHA"));
-    private static final List<String> TLS_VERSIONS = asList("TLSv1", "TLSv1.1", "TLSv1.2");
+    public static final List<String> TLS_VERSIONS = asList("TLSv1", "TLSv1.1", "TLSv1.2");
     private static final Map<String, ListenPort> DEFAULT_PORTS = unmodifiableMap(createDefaultListenPorts());
 
     private final Document document;
@@ -98,7 +101,8 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         ).collect(toList());
     }
 
-    private Entity buildListenPortEntity(Bundle bundle, String name, ListenPort listenPort) {
+    // also visible for testing
+    Entity buildListenPortEntity(Bundle bundle, String name, ListenPort listenPort) {
         Element listenPortElement = document.createElement(LISTEN_PORT);
 
         String id = idGenerator.generate();
@@ -152,19 +156,18 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         return new Entity(TYPE, name, id, listenPortElement);
     }
 
-    private static Map<String, ListenPort> createDefaultListenPorts() {
+    // visibility for unit testing
+    static Map<String, ListenPort> createDefaultListenPorts() {
         Map<String, ListenPort> defaultPorts = new HashMap<>();
 
-        ListenPort defaultHttp = new ListenPort();
-        defaultHttp.setPort(HTTP_DEFAULT_PORT);
-        defaultHttp.setProtocol(PROTOCOL_HTTP);
-        defaultHttp.setEnabledFeatures(asList(MESSAGE_INPUT.getDescription(),
-                POLICYDISCO.getDescription(),
-                PING.getDescription(),
-                STS.getDescription(),
-                WSDLPROXY.getDescription(),
-                SNMPQUERY.getDescription()));
+        defaultPorts.put(DEFAULT_HTTP_8080, createDefaultHttp());
+        defaultPorts.put(DEFAULT_HTTPS_8443, createDefaultHttps());
 
+        return defaultPorts;
+    }
+
+    @NotNull
+    static ListenPort createDefaultHttps() {
         ListenPort defaultHttps = new ListenPort();
         defaultHttps.setPort(HTTPS_DEFAULT_PORT);
         defaultHttps.setProtocol(PROTOCOL_HTTPS);
@@ -176,13 +179,23 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         defaultHttps.getTlsSettings().setClientAuthentication(OPTIONAL);
         defaultHttps.getTlsSettings().setEnabledVersions(TLS_VERSIONS);
         defaultHttps.getTlsSettings().setEnabledCipherSuites(DEFAULT_RECOMMENDED_CIPHERS);
-        defaultHttps.setProperties(new HashMap<>());
-        defaultHttps.getProperties().put("usesTLS", TRUE);
+        defaultHttps.getTlsSettings().setProperties(new HashMap<>());
+        defaultHttps.getTlsSettings().getProperties().put("usesTLS", TRUE);
+        return defaultHttps;
+    }
 
-        defaultPorts.put("Default HTTP (8080)", defaultHttp);
-        defaultPorts.put("Default HTTPS (8443)", defaultHttps);
-
-        return defaultPorts;
+    @NotNull
+    static ListenPort createDefaultHttp() {
+        ListenPort defaultHttp = new ListenPort();
+        defaultHttp.setPort(HTTP_DEFAULT_PORT);
+        defaultHttp.setProtocol(PROTOCOL_HTTP);
+        defaultHttp.setEnabledFeatures(asList(MESSAGE_INPUT.getDescription(),
+                POLICYDISCO.getDescription(),
+                PING.getDescription(),
+                STS.getDescription(),
+                WSDLPROXY.getDescription(),
+                SNMPQUERY.getDescription()));
+        return defaultHttp;
     }
 
 

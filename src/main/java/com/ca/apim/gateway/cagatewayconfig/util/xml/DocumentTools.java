@@ -130,7 +130,7 @@ public class DocumentTools {
         }
     }
 
-    public Element getSingleChildElement(final Element entityItemElement, final String elementName) {
+    public static Element getSingleChildElement(final Element entityItemElement, final String elementName) {
         return getSingleChildElement(entityItemElement, elementName, false);
     }
 
