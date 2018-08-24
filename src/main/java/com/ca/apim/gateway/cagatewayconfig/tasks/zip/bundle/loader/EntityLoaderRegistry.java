@@ -21,7 +21,7 @@ public class EntityLoaderRegistry {
         entityLoaders.put("POLICY", new PolicyLoader(documentTools));
         entityLoaders.put("FOLDER", new FolderLoader(documentTools));
         entityLoaders.put("ENCAPSULATED_ASSERTION", new EncassLoader(documentTools));
-        entityLoaders.put(ListenPort.TYPE, new ListenPortLoader(documentTools));
+        entityLoaders.put(ListenPort.TYPE, new ListenPortLoader());
     }
 
     public BundleEntityLoader getLoader(String type) {
