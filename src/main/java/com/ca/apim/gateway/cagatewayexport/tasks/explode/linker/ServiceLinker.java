@@ -10,7 +10,6 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
@@ -21,6 +20,10 @@ import org.w3c.dom.NodeList;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty.Type.SERVICE;
+import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
 public class ServiceLinker implements EntityLinker<ServiceEntity> {
     private final DocumentTools documentTools;
@@ -47,13 +50,13 @@ public class ServiceLinker implements EntityLinker<ServiceEntity> {
         }
         service.setPath(getServicePath(bundle, service));
 
-        Element servicePropertiesElement = EntityLoaderHelper.getSingleChildElement(service.getServiceDetailsElement(), "l7:Properties");
-        NodeList propertyNodes = servicePropertiesElement.getElementsByTagName("l7:Property");
+        Element servicePropertiesElement = getSingleChildElement(service.getServiceDetailsElement(), PROPERTIES);
+        NodeList propertyNodes = servicePropertiesElement.getElementsByTagName(PROPERTY);
         for (int i = 0; i < propertyNodes.getLength(); i++) {
             if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.ENV.")) {
                 targetBundle.addEntity(new EnvironmentProperty(
                         propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(13),
-                        EntityLoaderHelper.getSingleChildElement((Element) propertyNodes.item(i), "l7:StringValue").getTextContent(), EnvironmentProperty.Type.SERVICE));
+                        getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent(), SERVICE));
             }
         }
     }
@@ -65,7 +68,7 @@ public class ServiceLinker implements EntityLinker<ServiceEntity> {
      * @param serviceEntity the service entiy
      * @return the full path for the specified service
      */
-    public static String getServicePath(Bundle bundle, ServiceEntity serviceEntity) {
+    static String getServicePath(Bundle bundle, ServiceEntity serviceEntity) {
         Folder folder = bundle.getFolderTree().getFolderById(serviceEntity.getFolderId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
         return Paths.get(folderPath.toString(), serviceEntity.getName() + ".xml").toString();

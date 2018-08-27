@@ -6,24 +6,27 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import org.w3c.dom.Element;
 
-public class ServiceLoader implements EntityLoader {
-    @Override
-    public Entity load(Element element) {
-        final Element service = EntityLoaderHelper.getSingleChildElement(EntityLoaderHelper.getSingleChildElement(element, "l7:Resource"), "l7:Service");
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
-        final Element serviceDetails = EntityLoaderHelper.getSingleChildElement(service, "l7:ServiceDetail");
-        final String id = serviceDetails.getAttribute("id");
-        final String folderId = serviceDetails.getAttribute("folderId");
-        Element nameElement = EntityLoaderHelper.getSingleChildElement(serviceDetails, "l7:Name");
+public class ServiceLoader implements EntityLoader<ServiceEntity> {
+
+    @Override
+    public ServiceEntity load(Element element) {
+        final Element service = getSingleChildElement(getSingleChildElement(element, RESOURCE), SERVICE);
+
+        final Element serviceDetails = getSingleChildElement(service, SERVICE_DETAIL);
+        final String id = serviceDetails.getAttribute(ATTRIBUTE_ID);
+        final String folderId = serviceDetails.getAttribute(ATTRIBUTE_FOLDER_ID);
+        Element nameElement = getSingleChildElement(serviceDetails, NAME);
         final String name = nameElement.getTextContent();
 
-        final Element resources = EntityLoaderHelper.getSingleChildElement(service, "l7:Resources");
-        final Element resourceSet = EntityLoaderHelper.getSingleChildElement(resources, "l7:ResourceSet");
-        final Element resource = EntityLoaderHelper.getSingleChildElement(resourceSet, "l7:Resource");
+        final Element resources = getSingleChildElement(service, RESOURCES);
+        final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
+        final Element resource = getSingleChildElement(resourceSet, RESOURCE);
         final String servicePolicyString = resource.getTextContent();
         return new ServiceEntity(name, id, folderId, serviceDetails, servicePolicyString);
     }

@@ -16,6 +16,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
+import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -27,6 +28,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleElement;
 
 public class PolicyXMLSimplifier {
     public static final PolicyXMLSimplifier INSTANCE = new PolicyXMLSimplifier();
@@ -44,7 +47,7 @@ public class PolicyXMLSimplifier {
     private void simplifyHardcodedResponse(Element element) {
         Element base64ResponseBodyElement;
         try {
-            base64ResponseBodyElement = EntityLoaderHelper.getSingleElement(element, "L7p:Base64ResponseBody");
+            base64ResponseBodyElement = getSingleElement(element, "L7p:Base64ResponseBody");
         } catch (BundleBuilderException e) {
             LOGGER.log(Level.FINE, "Base64ResponseBody missing from hardcoded assertion.");
             return;
@@ -59,11 +62,11 @@ public class PolicyXMLSimplifier {
     }
 
     private void simplifySetVariable(Element element, Bundle resultantBundle) {
-        Element base64ExpressionElement = EntityLoaderHelper.getSingleElement(element, "L7p:Base64Expression");
+        Element base64ExpressionElement = getSingleElement(element, "L7p:Base64Expression");
         String base64Expression = base64ExpressionElement.getAttribute(STRING_VALUE);
         byte[] decodedValue = Base64.getDecoder().decode(base64Expression);
 
-        Element variableToSetElement = EntityLoaderHelper.getSingleElement(element, "L7p:VariableToSet");
+        Element variableToSetElement = getSingleElement(element, "L7p:VariableToSet");
         String variableName = variableToSetElement.getAttribute(STRING_VALUE);
         if (variableName.startsWith("ENV.")) {
             if (variableName.startsWith("ENV.gateway.")) {
@@ -84,14 +87,14 @@ public class PolicyXMLSimplifier {
     }
 
     private void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) {
-        Element encassGuidElement = EntityLoaderHelper.getSingleElement(encapsulatedAssertionElement, "L7p:EncapsulatedAssertionConfigGuid");
+        Element encassGuidElement = getSingleElement(encapsulatedAssertionElement, "L7p:EncapsulatedAssertionConfigGuid");
         String encassGuid = encassGuidElement.getAttribute(STRING_VALUE);
         Optional<EncassEntity> encassEntity = bundle.getEntities(EncassEntity.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
         if (encassEntity.isPresent()) {
             PolicyEntity policyEntity = bundle.getEntities(PolicyEntity.class).get(encassEntity.get().getPolicyId());
             if (policyEntity != null) {
                 encapsulatedAssertionElement.setAttribute("policyPath", getPolicyPath(bundle, policyEntity));
-                Element encapsulatedAssertionConfigNameElement = EntityLoaderHelper.getSingleElement(encapsulatedAssertionElement, "L7p:EncapsulatedAssertionConfigName");
+                Element encapsulatedAssertionConfigNameElement = getSingleElement(encapsulatedAssertionElement, "L7p:EncapsulatedAssertionConfigName");
                 encapsulatedAssertionElement.removeChild(encapsulatedAssertionConfigNameElement);
                 encapsulatedAssertionElement.removeChild(encassGuidElement);
             } else {
@@ -103,7 +106,7 @@ public class PolicyXMLSimplifier {
     }
 
     private void simplifyIncludeAssertion(Bundle bundle, Element assertionElement) {
-        Element policyGuidElement = EntityLoaderHelper.getSingleElement(assertionElement, "L7p:PolicyGuid");
+        Element policyGuidElement = getSingleElement(assertionElement, "L7p:PolicyGuid");
         String includedPolicyGuid = policyGuidElement.getAttribute(STRING_VALUE);
         Optional<PolicyEntity> policyEntity = bundle.getEntities(PolicyEntity.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
         if (policyEntity.isPresent()) {

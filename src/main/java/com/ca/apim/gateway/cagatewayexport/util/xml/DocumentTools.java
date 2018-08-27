@@ -80,10 +80,8 @@ public class DocumentTools {
     public synchronized Document parse(final InputStream inputStream) throws DocumentParseException {
         try {
             return builder.parse(inputStream);
-        } catch (SAXException e) {
+        } catch (SAXException | IOException e) {
             throw new DocumentParseException("Exception parsing document from input stream", e);
-        } catch (IOException e) {
-            throw new DocumentParseException("Exception reading document from input stream", e);
         }
     }
 

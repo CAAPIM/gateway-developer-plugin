@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import org.w3c.dom.Element;
@@ -15,46 +14,50 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EncassLoader implements EntityLoader {
-    @Override
-    public Entity load(Element element) {
-        final Element encass = EntityLoaderHelper.getSingleChildElement(EntityLoaderHelper.getSingleChildElement(element, "l7:Resource"), "l7:EncapsulatedAssertion");
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
-        final Element policyReference = EntityLoaderHelper.getSingleChildElement(encass, "l7:PolicyReference");
-        final String policyId = policyReference.getAttribute("id");
-        Element nameElement = EntityLoaderHelper.getSingleChildElement(encass, "l7:Name");
+public class EncassLoader implements EntityLoader<EncassEntity> {
+
+    @Override
+    public EncassEntity load(Element element) {
+        final Element encass = getSingleChildElement(getSingleChildElement(element, RESOURCE), ENCAPSULATED_ASSERTION);
+
+        final Element policyReference = getSingleChildElement(encass, POLICY_REFERENCE);
+        final String policyId = policyReference.getAttribute(ATTRIBUTE_ID);
+        Element nameElement = getSingleChildElement(encass, NAME);
         final String name = nameElement.getTextContent();
-        Element guidElement = EntityLoaderHelper.getSingleChildElement(encass, "l7:Guid");
+        Element guidElement = getSingleChildElement(encass, GUID);
         final String guid = guidElement.getTextContent();
 
-        return new EncassEntity(name, encass.getAttribute("id"), guid, policyId, getArguments(encass), getResults(encass));
+        return new EncassEntity(name, encass.getAttribute(ATTRIBUTE_ID), guid, policyId, getArguments(encass), getResults(encass));
     }
 
     private List<EncassEntity.EncassParam> getResults(Element encass) {
-        Element encapsulatedResultsElement = EntityLoaderHelper.getSingleChildElement(encass, "l7:EncapsulatedResults");
-        NodeList encapsulatedAssertionResultElement = encapsulatedResultsElement.getElementsByTagName("l7:EncapsulatedAssertionResult");
+        Element encapsulatedResultsElement = getSingleChildElement(encass, ENCAPSULATED_RESULTS);
+        NodeList encapsulatedAssertionResultElement = encapsulatedResultsElement.getElementsByTagName(ENCAPSULATED_ASSERTION_RESULT);
         List<EncassEntity.EncassParam> encassResults = new ArrayList<>(encapsulatedAssertionResultElement.getLength());
         for (int i = 0; i < encapsulatedAssertionResultElement.getLength(); i++) {
             if (!(encapsulatedAssertionResultElement.item(i) instanceof Element)) {
                 throw new WriteException("Unexpected encass results node: " + encapsulatedResultsElement.getClass());
             }
-            Element resultNameElement = EntityLoaderHelper.getSingleChildElement((Element) encapsulatedAssertionResultElement.item(i), "l7:ResultName");
-            Element resultTypeElement = EntityLoaderHelper.getSingleChildElement((Element) encapsulatedAssertionResultElement.item(i), "l7:ResultType");
+            Element resultNameElement = getSingleChildElement((Element) encapsulatedAssertionResultElement.item(i), RESULT_NAME);
+            Element resultTypeElement = getSingleChildElement((Element) encapsulatedAssertionResultElement.item(i), RESULT_TYPE);
             encassResults.add(new EncassEntity.EncassParam(resultNameElement.getTextContent(), resultTypeElement.getTextContent()));
         }
         return encassResults;
     }
 
     private List<EncassEntity.EncassParam> getArguments(Element encass) {
-        Element encapsulatedArgumentsElement = EntityLoaderHelper.getSingleChildElement(encass, "l7:EncapsulatedArguments");
-        NodeList encapsulatedAssertionArgumentElement = encapsulatedArgumentsElement.getElementsByTagName("l7:EncapsulatedAssertionArgument");
+        Element encapsulatedArgumentsElement = getSingleChildElement(encass, ENCAPSULATED_ARGUMENTS);
+        NodeList encapsulatedAssertionArgumentElement = encapsulatedArgumentsElement.getElementsByTagName(ENCAPSULATED_ASSERTION_ARGUMENT);
         List<EncassEntity.EncassParam> encassArguments = new ArrayList<>(encapsulatedAssertionArgumentElement.getLength());
         for (int i = 0; i < encapsulatedAssertionArgumentElement.getLength(); i++) {
             if (!(encapsulatedAssertionArgumentElement.item(i) instanceof Element)) {
                 throw new WriteException("Unexpected encass argument node: " + encapsulatedArgumentsElement.getClass());
             }
-            Element argumentNameElement = EntityLoaderHelper.getSingleChildElement((Element) encapsulatedAssertionArgumentElement.item(i), "l7:ArgumentName");
-            Element argumentTypeElement = EntityLoaderHelper.getSingleChildElement((Element) encapsulatedAssertionArgumentElement.item(i), "l7:ArgumentType");
+            Element argumentNameElement = getSingleChildElement((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_NAME);
+            Element argumentTypeElement = getSingleChildElement((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_TYPE);
             encassArguments.add(new EncassEntity.EncassParam(argumentNameElement.getTextContent(), argumentTypeElement.getTextContent()));
         }
         return encassArguments;

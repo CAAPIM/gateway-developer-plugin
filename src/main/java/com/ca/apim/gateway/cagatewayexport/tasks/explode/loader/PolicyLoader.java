@@ -6,36 +6,40 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import org.w3c.dom.Element;
 
+import javax.print.attribute.standard.MediaSize.NA;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PolicyLoader implements EntityLoader {
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
+
+public class PolicyLoader implements EntityLoader<PolicyEntity> {
     private static final Logger LOGGER = Logger.getLogger(PolicyLoader.class.getName());
 
     @Override
-    public Entity load(Element element) {
-        final Element policy = EntityLoaderHelper.getSingleChildElement(EntityLoaderHelper.getSingleChildElement(element, "l7:Resource"), "l7:Policy");
-        final String guid = policy.getAttribute("guid");
+    public PolicyEntity load(Element element) {
+        final Element policy = getSingleChildElement(getSingleChildElement(element, RESOURCE), POLICY);
+        final String guid = policy.getAttribute(ATTRIBUTE_GUID);
 
-        final Element policyDetails = EntityLoaderHelper.getSingleChildElement(policy, "l7:PolicyDetail");
-        Element policyTypeElement = EntityLoaderHelper.getSingleChildElement(policyDetails, "l7:PolicyType");
+        final Element policyDetails = getSingleChildElement(policy, POLICY_DETAIL);
+        Element policyTypeElement = getSingleChildElement(policyDetails, POLICY_TYPE);
         if (!("Include".equals(policyTypeElement.getTextContent()) || "Service Operation".equals(policyTypeElement.getTextContent()))) {
             LOGGER.log(Level.WARNING, "Skipping unsupported PolicyType: {0}", policyTypeElement.getTextContent());
             return null;
         }
 
-        final String id = policyDetails.getAttribute("id");
-        final String folderId = policyDetails.getAttribute("folderId");
-        Element nameElement = EntityLoaderHelper.getSingleChildElement(policyDetails, "l7:Name");
+        final String id = policyDetails.getAttribute(ATTRIBUTE_ID);
+        final String folderId = policyDetails.getAttribute(ATTRIBUTE_FOLDER_ID);
+        Element nameElement = getSingleChildElement(policyDetails, NAME);
         final String name = nameElement.getTextContent();
 
-        final Element resources = EntityLoaderHelper.getSingleChildElement(policy, "l7:Resources");
-        final Element resourceSet = EntityLoaderHelper.getSingleChildElement(resources, "l7:ResourceSet");
-        final Element resource = EntityLoaderHelper.getSingleChildElement(resourceSet, "l7:Resource");
+        final Element resources = getSingleChildElement(policy, RESOURCES);
+        final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
+        final Element resource = getSingleChildElement(resourceSet, RESOURCE);
         final String policyString = resource.getTextContent();
         return new PolicyEntity(name, id, guid, folderId, policy, policyString);
     }
