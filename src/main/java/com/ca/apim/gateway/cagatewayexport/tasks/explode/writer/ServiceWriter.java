@@ -8,11 +8,9 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;

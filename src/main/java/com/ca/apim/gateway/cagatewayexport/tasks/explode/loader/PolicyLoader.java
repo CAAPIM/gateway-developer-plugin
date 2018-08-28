@@ -6,11 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import org.w3c.dom.Element;
 
-import javax.print.attribute.standard.MediaSize.NA;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

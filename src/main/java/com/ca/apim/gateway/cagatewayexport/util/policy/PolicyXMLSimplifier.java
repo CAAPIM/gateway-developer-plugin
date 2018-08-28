@@ -13,10 +13,8 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Environme
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
