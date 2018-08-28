@@ -26,9 +26,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
 public class ServiceWriter implements EntityWriter {
+
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
@@ -59,27 +61,27 @@ public class ServiceWriter implements EntityWriter {
     @NotNull
     private Service getServiceBean(ServiceEntity serviceEntity) {
         Service serviceBean = new Service();
-        Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), "l7:ServiceMappings");
-        Element httpMappingElement = getSingleChildElement(serviceMappingsElement, "l7:HttpMapping");
-        Element urlPatternElement = getSingleChildElement(httpMappingElement, "l7:UrlPattern");
+        Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);
+        Element httpMappingElement = getSingleChildElement(serviceMappingsElement, HTTP_MAPPING);
+        Element urlPatternElement = getSingleChildElement(httpMappingElement, URL_PATTERN);
         serviceBean.setUrl(urlPatternElement.getTextContent());
 
-        Element verbsElement = getSingleChildElement(httpMappingElement, "l7:Verbs");
-        NodeList verbs = verbsElement.getElementsByTagName("l7:Verb");
+        Element verbsElement = getSingleChildElement(httpMappingElement, VERBS);
+        NodeList verbs = verbsElement.getElementsByTagName(VERB);
         Set<String> httpMethods = new HashSet<>();
         for (int i = 0; i < verbs.getLength(); i++) {
             httpMethods.add(verbs.item(i).getTextContent());
         }
         serviceBean.setHttpMethods(httpMethods);
 
-        Element servicePropertiesElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), "l7:Properties");
-        NodeList propertyNodes = servicePropertiesElement.getElementsByTagName("l7:Property");
+        Element servicePropertiesElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), PROPERTIES);
+        NodeList propertyNodes = servicePropertiesElement.getElementsByTagName(PROPERTY);
         Map<String, String> properties = new HashMap<>();
         for (int i = 0; i < propertyNodes.getLength(); i++) {
             if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.")) {
                 String propertyValue = null;
                 if (!propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.ENV.")) {
-                    propertyValue = getSingleChildElement((Element) propertyNodes.item(i), "l7:StringValue").getTextContent();
+                    propertyValue = getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent();
                 }
                 properties.put(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(9), propertyValue);
             }

@@ -34,6 +34,11 @@ public class BundleElementNames {
     // Service
     public static final String SERVICE = "l7:Service";
     public static final String SERVICE_DETAIL = "l7:ServiceDetail";
+    public static final String SERVICE_MAPPINGS = "l7:ServiceMappings";
+    public static final String HTTP_MAPPING = "l7:HttpMapping";
+    public static final String URL_PATTERN = "l7:UrlPattern";
+    public static final String VERBS = "l7:Verbs";
+    public static final String VERB = "l7:Verb";
 
     // Policy
     public static final String POLICY = "l7:Policy";
