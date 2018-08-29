@@ -6,12 +6,15 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.Iden
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
-import org.junit.*;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import io.github.glytching.junit.extension.folder.TemporaryFolder;
+import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.Extensions;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
@@ -24,23 +27,22 @@ import static org.junit.Assert.*;
 /**
  * Created by chaoy01 on 2018-08-17.
  */
+@Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
+class IdentityProviderLoaderTest {
 
-@RunWith(MockitoJUnitRunner.class)
-public class IdentityProviderLoaderTest {
-
-    @Rule
-    public final TemporaryFolder rootProjectDir = new TemporaryFolder();
+    private TemporaryFolder rootProjectDir;
     private JsonTools jsonTools;
     @Mock
     private FileUtils fileUtils;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp(TemporaryFolder rootProjectDir) {
         jsonTools = new JsonTools(fileUtils);
+        this.rootProjectDir = rootProjectDir;
     }
 
     @Test
-    public void loadBindOnlyLdapJSON() throws IOException {
+    void loadBindOnlyLdapJSON() throws IOException {
         final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
         final String json = "{\n" +
                 "  \"simple ldap\": {\n" +
@@ -60,7 +62,7 @@ public class IdentityProviderLoaderTest {
                 "    }\n" +
                 "  }\n" +
                 "}\n";
-        final File configFolder = rootProjectDir.newFolder("config");
+        final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "identity-providers.json");
         Files.touch(identityProvidersFile);
 
@@ -72,7 +74,7 @@ public class IdentityProviderLoaderTest {
     }
 
     @Test
-    public void loadBindOnlyLdapYml() throws IOException {
+    void loadBindOnlyLdapYml() throws IOException {
         final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
         final String yml = "  simple ldap:\n" +
                 "    type: BIND_ONLY_LDAP\n" +
@@ -86,7 +88,7 @@ public class IdentityProviderLoaderTest {
                 "      useSslClientAuthentication: false\n" +
                 "      bindPatternPrefix: somePrefix\n" +
                 "      bindPatternSuffix: someSuffix";
-        final File configFolder = rootProjectDir.newFolder("config");
+        final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "identity-providers.yml");
         Files.touch(identityProvidersFile);
 
@@ -97,8 +99,8 @@ public class IdentityProviderLoaderTest {
         verifySimpleLdap(bundle);
     }
 
-    @Test (expected = JsonToolsException.class)
-    public void loadIncorrectTypeForBoolean() throws IOException {
+    @Test
+    void loadIncorrectTypeForBoolean() throws IOException {
         final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
         final String json = "{\n" +
                 "  \"simple ldap\": {\n" +
@@ -118,14 +120,14 @@ public class IdentityProviderLoaderTest {
                 "    }\n" +
                 "  }\n" +
                 "}\n";
-        final File configFolder = rootProjectDir.newFolder("config");
+        final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "identity-providers.json");
         Files.touch(identityProvidersFile);
 
         Mockito.when(fileUtils.getInputStream(Mockito.any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes(Charset.forName("UTF-8"))));
 
         final Bundle bundle = new Bundle();
-        identityProviderLoader.load(bundle, rootProjectDir.getRoot());
+        Assertions.assertThrows(JsonToolsException.class, () -> identityProviderLoader.load(bundle, rootProjectDir.getRoot()));
     }
 
     private void verifySimpleLdap(Bundle bundle) {
