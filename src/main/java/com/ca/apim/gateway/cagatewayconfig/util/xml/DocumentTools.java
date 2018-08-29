@@ -138,8 +138,8 @@ public class DocumentTools {
      * Search in the children of the element specified a single element with the name specified .
      *
      * @param entityItemElement element to search into
-     * @param elementName element name to search
-     * @param optional if not found returns null instead of throwing exception
+     * @param elementName       element name to search
+     * @param optional          if not found returns null instead of throwing exception
      * @return a single element found
      * @throws DependencyBundleLoadException if multiple found or invalid node type found (not element)
      */
@@ -147,15 +147,15 @@ public class DocumentTools {
         final NodeList childNodes = entityItemElement.getChildNodes();
         Node foundNode = null;
         for (int i = 0; i < childNodes.getLength(); i++) {
-            if(elementName.equals(childNodes.item(i).getNodeName())){
-                if(foundNode == null) {
+            if (elementName.equals(childNodes.item(i).getNodeName())) {
+                if (foundNode == null) {
                     foundNode = childNodes.item(i);
                 } else {
                     throw new DependencyBundleLoadException("Multiple " + elementName + " elements found");
                 }
             }
         }
-        if (foundNode == null){
+        if (foundNode == null) {
             if (optional) {
                 return null;
             }
@@ -173,7 +173,7 @@ public class DocumentTools {
      * Search in the children of the element specified a single element with the name specified and returns its text content.
      *
      * @param entityItemElement element to search into
-     * @param elementName element name to search
+     * @param elementName       element name to search
      * @return text content from a single element found, null if no element found
      */
     public static String getSingleChildElementTextContent(final Element entityItemElement, final String elementName) {
@@ -188,7 +188,7 @@ public class DocumentTools {
      * Search in the children of the element specified all elements with the name specified and returns text contents from all of them.
      *
      * @param entityItemElement element to search into
-     * @param elementName element name to search
+     * @param elementName       element name to search
      * @return list of contents from elements found, empty if not found any
      */
     public static List<String> getChildElementsTextContents(final Element entityItemElement, final String elementName) {
@@ -199,7 +199,7 @@ public class DocumentTools {
      * Search in the children of the element specified all elements with the name specified .
      *
      * @param entityItemElement element to search into
-     * @param elementName element name to search
+     * @param elementName       element name to search
      * @return list of elements found, empty if not found any
      */
     public static List<Element> getChildElements(final Element entityItemElement, final String elementName) {
@@ -211,7 +211,7 @@ public class DocumentTools {
         final NodeList childNodes = entityItemElement.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             final Node child = childNodes.item(i);
-            if (elementName.equals(child.getNodeName()) && child.getNodeType() == ELEMENT_NODE){
+            if (elementName.equals(child.getNodeName()) && child.getNodeType() == ELEMENT_NODE) {
                 elements.add((Element) child);
             }
         }

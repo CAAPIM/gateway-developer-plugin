@@ -63,7 +63,7 @@ public class BuilderUtils {
         }
 
         if (!Objects.equals(propertiesElement.getNodeName(), PROPERTIES)) {
-            throw new DependencyBundleLoadException("Current node is not l7:Properties node, it is " + propertiesElement.getNodeName());
+            throw new DependencyBundleLoadException("Current node is not " + PROPERTIES + " node, it is " + propertiesElement.getNodeName());
         }
 
         final List<Element> properties = getChildElements(propertiesElement, PROPERTY);
