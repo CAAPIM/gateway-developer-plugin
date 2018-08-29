@@ -39,7 +39,7 @@ dependencies {
     compile 'org.jetbrains:annotations:16.0.2'
     compile 'org.apache.httpcomponents:httpclient:4.5.5'
     compile 'commons-io:commons-io:+'
-    compile 'commons-lang:commons-lang:+'
+    compile 'org.apache.commons:commons-lang3:+'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 
@@ -75,4 +75,8 @@ test {
         events "passed", "skipped", "failed"
         exceptionFormat "full"
     }
+}
+
+wrapper {
+    gradleVersion = '4.7'
 }

@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import org.w3c.dom.Element;
@@ -15,30 +14,34 @@ import org.w3c.dom.NodeList;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class PolicyBackedServiceLoader implements EntityLoader {
-    @Override
-    public Entity load(Element element) {
-        final Element policyBackedService = EntityLoaderHelper.getSingleChildElement(EntityLoaderHelper.getSingleChildElement(element, "l7:Resource"), "l7:PolicyBackedService");
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
-        Element nameElement = EntityLoaderHelper.getSingleChildElement(policyBackedService, "l7:Name");
+public class PolicyBackedServiceLoader implements EntityLoader<PolicyBackedServiceEntity> {
+
+    @Override
+    public PolicyBackedServiceEntity load(Element element) {
+        final Element policyBackedService = getSingleChildElement(getSingleChildElement(element, RESOURCE), POLICY_BACKED_SERVICE);
+
+        Element nameElement = getSingleChildElement(policyBackedService, NAME);
         final String name = nameElement.getTextContent();
-        Element interfaceNameElement = EntityLoaderHelper.getSingleChildElement(policyBackedService, "l7:InterfaceName");
+        Element interfaceNameElement = getSingleChildElement(policyBackedService, INTERFACE_NAME);
         final String interfaceName = interfaceNameElement.getTextContent();
 
-        return new PolicyBackedServiceEntity(name, policyBackedService.getAttribute("id"), interfaceName, buildOperationsMap(policyBackedService));
+        return new PolicyBackedServiceEntity(name, policyBackedService.getAttribute(ATTRIBUTE_ID), interfaceName, buildOperationsMap(policyBackedService));
     }
 
     private Map<String, String> buildOperationsMap(Element policyBackedService) {
         Map<String, String> operations = new TreeMap<>();
 
-        Element policyBackedServiceOperationsElement = EntityLoaderHelper.getSingleChildElement(policyBackedService, "l7:PolicyBackedServiceOperations");
-        NodeList policyBackedServiceOperationNodeList = policyBackedServiceOperationsElement.getElementsByTagName("l7:PolicyBackedServiceOperation");
+        Element policyBackedServiceOperationsElement = getSingleChildElement(policyBackedService, POLICY_BACKED_SERVICE_OPERATIONS);
+        NodeList policyBackedServiceOperationNodeList = policyBackedServiceOperationsElement.getElementsByTagName(POLICY_BACKED_SERVICE_OPERATION);
         for (int i = 0; i < policyBackedServiceOperationNodeList.getLength(); i++) {
             if (!(policyBackedServiceOperationNodeList.item(i) instanceof Element)) {
                 throw new WriteException("Unexpected Policy Backed Service Operation node: " + policyBackedServiceOperationsElement.getClass());
             }
-            Element policyIdElement = EntityLoaderHelper.getSingleChildElement((Element) policyBackedServiceOperationNodeList.item(i), "l7:PolicyId");
-            Element operationNameElement = EntityLoaderHelper.getSingleChildElement((Element) policyBackedServiceOperationNodeList.item(i), "l7:OperationName");
+            Element policyIdElement = getSingleChildElement((Element) policyBackedServiceOperationNodeList.item(i), POLICY_ID);
+            Element operationNameElement = getSingleChildElement((Element) policyBackedServiceOperationNodeList.item(i), OPERATION_NAME);
             operations.put(operationNameElement.getTextContent(), policyIdElement.getTextContent());
         }
 

@@ -6,17 +6,19 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import org.w3c.dom.Element;
 
-public class ClusterPropertyLoader implements EntityLoader {
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
+
+public class ClusterPropertyLoader implements EntityLoader<ClusterProperty> {
     @Override
-    public Entity load(Element element) {
-        final Element xml = EntityLoaderHelper.getSingleChildElement(EntityLoaderHelper.getSingleChildElement(element, "l7:Resource"), "l7:ClusterProperty");
-        final String name = EntityLoaderHelper.getSingleChildElement(xml, "l7:Name").getTextContent();
-        final String value = EntityLoaderHelper.getSingleChildElement(xml, "l7:Value").getTextContent();
-        final String id = xml.getAttribute("id");
+    public ClusterProperty load(Element element) {
+        final Element xml = getSingleChildElement(getSingleChildElement(element, RESOURCE), CLUSTER_PROPERTY);
+        final String name = getSingleChildElement(xml, NAME).getTextContent();
+        final String value = getSingleChildElement(xml, VALUE).getTextContent();
+        final String id = xml.getAttribute(ATTRIBUTE_ID);
         return new ClusterProperty(name, value, id);
     }
 }

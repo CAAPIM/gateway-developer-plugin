@@ -5,7 +5,6 @@
  */
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.ClientAuthentication;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.ListenPortEntityTlsSettings;
@@ -14,32 +13,24 @@ import org.w3c.dom.Element;
 import java.util.List;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.ClientAuthentication.fromType;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper.*;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper.mapPropertiesElements;
+import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.*;
 
-public class ListenPortLoader implements EntityLoader {
-
-    private static final String ELEMENT_LISTEN_PORT = "l7:ListenPort";
-    private static final String ELEMENT_PROTOCOL = "l7:Protocol";
-    private static final String ELEMENT_PORT = "l7:Port";
-    private static final String ELEMENT_TARGET_SERVICE_REFERENCE = "l7:TargetServiceReference";
-    private static final String ELEMENT_ENABLED_FEATURES = "l7:EnabledFeatures";
-    private static final String ELEMENT_TLS_SETTINGS = "l7:TlsSettings";
-    private static final String ELEMENT_TLS_CLIENT_AUTHENTICATION = "l7:ClientAuthentication";
-    private static final String ELEMENT_TLS_ENABLED_VERSIONS = "l7:EnabledVersions";
-    private static final String ELEMENT_TLS_ENABLED_CIPHER_SUITES = "l7:EnabledCipherSuites";
+public class ListenPortLoader implements EntityLoader<ListenPortEntity> {
 
     @Override
-    public Entity load(Element element) {
-        final Element listenPort = getSingleChildElement(getSingleChildElement(element, ELEMENT_RESOURCE), ELEMENT_LISTEN_PORT);
+    public ListenPortEntity load(Element element) {
+        final Element listenPort = getSingleChildElement(getSingleChildElement(element, RESOURCE), LISTEN_PORT);
 
-        final String name = getSingleChildElementTextContent(listenPort, ELEMENT_NAME);
-        final String protocol = getSingleChildElement(listenPort, ELEMENT_PROTOCOL).getTextContent();
-        final int port = Integer.parseInt(getSingleChildElement(listenPort, ELEMENT_PORT).getTextContent());
-        final List<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPort, ELEMENT_ENABLED_FEATURES), ELEMENT_STRING_VALUE);
-        final ListenPortEntityTlsSettings tlsSettings = buildTlsSettings(getSingleChildElement(listenPort, ELEMENT_TLS_SETTINGS, true));
-        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPort, ELEMENT_PROPERTIES, true));
-        final String targetServiceReference = getSingleChildElementAttribute(listenPort, ELEMENT_TARGET_SERVICE_REFERENCE, "id");
+        final String name = getSingleChildElementTextContent(listenPort, NAME);
+        final String protocol = getSingleChildElement(listenPort, PROTOCOL).getTextContent();
+        final int port = Integer.parseInt(getSingleChildElement(listenPort, PORT).getTextContent());
+        final List<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPort, ENABLED_FEATURES), STRING_VALUE);
+        final ListenPortEntityTlsSettings tlsSettings = buildTlsSettings(getSingleChildElement(listenPort, TLS_SETTINGS, true));
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPort, PROPERTIES, true));
+        final String targetServiceReference = getSingleChildElementAttribute(listenPort, TARGET_SERVICE_REFERENCE, ATTRIBUTE_ID);
 
         return new ListenPortEntity.Builder()
                 .id(listenPort.getAttribute("id"))
@@ -58,10 +49,10 @@ public class ListenPortLoader implements EntityLoader {
             return null;
         }
 
-        final ClientAuthentication clientAuthentication = fromType(getSingleChildElementTextContent(tlsSettingsElement, ELEMENT_TLS_CLIENT_AUTHENTICATION));
-        final List<String> enabledVersions = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ELEMENT_TLS_ENABLED_VERSIONS), ELEMENT_STRING_VALUE);
-        final List<String> enabledCipherSuites = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ELEMENT_TLS_ENABLED_CIPHER_SUITES, true), ELEMENT_STRING_VALUE);
-        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(tlsSettingsElement, ELEMENT_PROPERTIES, true));
+        final ClientAuthentication clientAuthentication = fromType(getSingleChildElementTextContent(tlsSettingsElement, CLIENT_AUTHENTICATION));
+        final List<String> enabledVersions = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ENABLED_VERSIONS), STRING_VALUE);
+        final List<String> enabledCipherSuites = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ENABLED_CIPHER_SUITES, true), STRING_VALUE);
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(tlsSettingsElement, PROPERTIES, true));
 
         return new ListenPortEntityTlsSettings(clientAuthentication, enabledVersions, enabledCipherSuites, properties);
     }

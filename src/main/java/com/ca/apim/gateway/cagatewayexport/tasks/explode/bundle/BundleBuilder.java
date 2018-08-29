@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.*;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderRegistry;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -20,6 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
+import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class BundleBuilder {
     private static final Logger LOGGER = Logger.getLogger(BundleBuilder.class.getName());
@@ -33,18 +36,18 @@ public class BundleBuilder {
     }
 
     public void buildBundle(final Element bundleElement) {
-        final NodeList nodeList = bundleElement.getElementsByTagName("l7:Item");
+        final NodeList nodeList = bundleElement.getElementsByTagName(ITEM);
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
 
-            if (node.getNodeType() == Node.ELEMENT_NODE) {
+            if (node.getNodeType() == ELEMENT_NODE) {
                 handleItem((Element) node);
             }
         }
         FolderTree folderTree = new FolderTree(bundle.getEntities(Folder.class).values());
         bundle.setFolderTree(folderTree);
 
-        bundle.setDependencies(buildDependencies(EntityLoaderHelper.getSingleChildElement(EntityLoaderHelper.getSingleChildElement(bundleElement, "l7:DependencyGraph"), "l7:Dependencies")));
+        bundle.setDependencies(buildDependencies(getSingleChildElement(getSingleChildElement(bundleElement, DEPENDENCY_GRAPH), DEPENDENCIES)));
     }
 
     private Map<Dependency, List<Dependency>> buildDependencies(Element dependenciesElement) {
@@ -52,7 +55,7 @@ public class BundleBuilder {
         NodeList bundleDependencies = dependenciesElement.getChildNodes();
         for (int i = 0; i < bundleDependencies.getLength(); i++) {
             Node dependencyNode = bundleDependencies.item(i);
-            if (dependencyNode.getNodeType() == Node.ELEMENT_NODE) {
+            if (dependencyNode.getNodeType() == ELEMENT_NODE) {
                 Dependency dependency = buildDependency((Element) dependencyNode);
                 if (dependency != null) {
                     List<Dependency> dependencyList = getDependenciesFromNode((Element) dependencyNode);
@@ -65,14 +68,14 @@ public class BundleBuilder {
 
     private List<Dependency> getDependenciesFromNode(Element dependencyNode) {
         List<Dependency> dependencyList = new ArrayList<>();
-        final NodeList dependencyDependenciesNodeList = dependencyNode.getElementsByTagName("l7:Dependencies");
+        final NodeList dependencyDependenciesNodeList = dependencyNode.getElementsByTagName(DEPENDENCIES);
         for (int k = 0; k < dependencyDependenciesNodeList.getLength(); k++) {
             Node dependencyDependenciesNode = dependencyDependenciesNodeList.item(k);
-            if (dependencyDependenciesNode.getNodeType() == Node.ELEMENT_NODE) {
+            if (dependencyDependenciesNode.getNodeType() == ELEMENT_NODE) {
                 NodeList dependencyDependencies = dependencyDependenciesNode.getChildNodes();
                 for (int j = 0; j < dependencyDependencies.getLength(); j++) {
                     Node dependencyDependencyNode = dependencyDependencies.item(j);
-                    if (dependencyDependencyNode.getNodeType() == Node.ELEMENT_NODE) {
+                    if (dependencyDependencyNode.getNodeType() == ELEMENT_NODE) {
                         Dependency dependencyDependency = buildDependency((Element) dependencyDependencyNode);
                         if (dependencyDependency != null) {
                             dependencyList.add(dependencyDependency);
@@ -85,8 +88,8 @@ public class BundleBuilder {
     }
 
     private Dependency buildDependency(Element dependencyElement) {
-        final String id = EntityLoaderHelper.getSingleChildElement(dependencyElement, "l7:Id").getTextContent();
-        final String type = EntityLoaderHelper.getSingleChildElement(dependencyElement, "l7:Type").getTextContent();
+        final String id = getSingleChildElement(dependencyElement, ID).getTextContent();
+        final String type = getSingleChildElement(dependencyElement, TYPE).getTextContent();
 
         Class<? extends Entity> typeClass = convertType(type);
         if (typeClass != null) {
@@ -122,7 +125,7 @@ public class BundleBuilder {
     }
 
     private void handleItem(final Element element) {
-        final String type = EntityLoaderHelper.getSingleChildElement(element, "l7:Type").getTextContent();
+        final String type = getSingleChildElement(element, TYPE).getTextContent();
         final EntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
         if (entityLoader != null) {
             final Entity entity = entityLoader.load(element);
