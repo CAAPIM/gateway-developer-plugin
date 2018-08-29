@@ -75,6 +75,10 @@ public class ListenPort {
 
     public static class ListenPortTlsSettings {
 
+        public static final String TLSV1 = "TLSv1";
+        public static final String TLSV11 = "TLSv1.1";
+        public static final String TLSV12 = "TLSv1.2";
+
         private ClientAuthentication clientAuthentication;
         private List<String> enabledVersions;
         private List<String> enabledCipherSuites;
@@ -119,7 +123,7 @@ public class ListenPort {
 
         private String type;
 
-        private ClientAuthentication(String type) {
+        ClientAuthentication(String type) {
             this.type = type;
         }
 

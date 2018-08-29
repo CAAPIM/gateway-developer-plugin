@@ -11,7 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Element;
 
 import java.util.*;
@@ -21,6 +21,7 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.*;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ClientAuthentication.OPTIONAL;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.Feature.*;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEntityBuilder.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.*;
@@ -28,12 +29,12 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
  */
-public class ListenPortEntityBuilderTest {
+class ListenPortEntityBuilderTest {
 
     private static final int TEST_HTTP_PORT = 12345;
     private static final String TEST_HTTP_PORT_NAME = "Test HTTP Port 12345";
@@ -41,20 +42,20 @@ public class ListenPortEntityBuilderTest {
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
 
     @Test
-    public void buildFromEmptyBundle_expectOnlyDefaultPorts() {
+    void buildFromEmptyBundle_expectOnlyDefaultPorts() {
         ListenPortEntityBuilder builder = new ListenPortEntityBuilder(INSTANCE.getDocumentBuilder().newDocument(), ID_GENERATOR);
         final Bundle bundle = new Bundle();
         final List<Entity> listenPortEntities = builder.build(bundle);
 
         // only two defaults
-        assertEquals("No ports specified but the bundle contains more than the default 2", 2, listenPortEntities.size());
+        assertEquals(2, listenPortEntities.size(), "Expecting only the 2 default ports");
 
         // check 8080 and 8443
         checkExpectedPorts(listenPortEntities, HTTP_DEFAULT_PORT, HTTPS_DEFAULT_PORT);
     }
 
     @Test
-    public void buildWithCustomPort_expectCustomAndDefaults() {
+    void buildWithCustomPort_expectCustomAndDefaults() {
         ListenPortEntityBuilder builder = new ListenPortEntityBuilder(INSTANCE.getDocumentBuilder().newDocument(), ID_GENERATOR);
         final Bundle bundle = new Bundle();
         addPortToBundle(bundle, buildPort());
@@ -62,31 +63,31 @@ public class ListenPortEntityBuilderTest {
         final List<Entity> listenPortEntities = builder.build(bundle);
 
         // two defaults and custom one
-        assertEquals("More than 3 expected ports", 3, listenPortEntities.size());
+        assertEquals(3, listenPortEntities.size(),"More than 3 expected ports");
 
         // check
         checkExpectedPorts(listenPortEntities, HTTP_DEFAULT_PORT, HTTPS_DEFAULT_PORT, TEST_HTTP_PORT);
     }
 
-    @Test(expected = EntityBuilderException.class)
-    public void buildWithCustomPortReferencingService_expectedException() {
+    @Test
+    void buildWithCustomPortReferencingService_expectedException() {
         ListenPortEntityBuilder builder = new ListenPortEntityBuilder(INSTANCE.getDocumentBuilder().newDocument(), ID_GENERATOR);
         final Bundle bundle = new Bundle();
         addPortToBundle(bundle, buildPortWithServiceRef());
 
-        builder.build(bundle);
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle));
     }
 
     @Test
-    public void checkDefaultPortsAreCreated() {
+    void checkDefaultPortsAreCreated() {
         final Map<String, ListenPort> defaultListenPorts = createDefaultListenPorts();
 
-        assertNotNull("Missing default HTTP", defaultListenPorts.get(DEFAULT_HTTP_8080));
-        assertNotNull("Missing default HTTPS", defaultListenPorts.get(DEFAULT_HTTPS_8443));
+        assertNotNull(defaultListenPorts.get(DEFAULT_HTTP_8080), "Missing default HTTP");
+        assertNotNull(defaultListenPorts.get(DEFAULT_HTTPS_8443), "Missing default HTTPS");
     }
 
     @Test
-    public void checkDefaultHttpPortConfiguration() {
+    void checkDefaultHttpPortConfiguration() {
         ListenPort defaultHttp = createDefaultHttp();
         assertEquals(HTTP_DEFAULT_PORT.intValue(), defaultHttp.getPort());
         assertEquals(PROTOCOL_HTTP, defaultHttp.getProtocol());
@@ -99,7 +100,7 @@ public class ListenPortEntityBuilderTest {
     }
 
     @Test
-    public void checkDefaultHttpsPortConfiguration() {
+    void checkDefaultHttpsPortConfiguration() {
         ListenPort defaultHttps = createDefaultHttps();
         assertEquals(HTTPS_DEFAULT_PORT.intValue(), defaultHttps.getPort());
         assertEquals(PROTOCOL_HTTPS, defaultHttps.getProtocol());
@@ -119,7 +120,7 @@ public class ListenPortEntityBuilderTest {
     }
 
     @Test
-    public void checkListenPortXmlElements() {
+    void checkListenPortXmlElements() {
         ListenPortEntityBuilder builder = new ListenPortEntityBuilder(INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
 
         Service service = new Service();
@@ -137,7 +138,7 @@ public class ListenPortEntityBuilderTest {
 
         final Element xml = entity.getXml();
         // check if we have the correct amount of elements
-        assertNotNull(xml.getAttribute(ID));
+        assertNotNull(xml.getAttribute(ATTRIBUTE_ID));
         assertNotNull(getSingleChildElement(xml, NAME));
         assertNotNull(getSingleChildElement(xml, ENABLED));
         assertNotNull(getSingleChildElement(xml, PROTOCOL));
@@ -155,13 +156,13 @@ public class ListenPortEntityBuilderTest {
         assertNotNull(getSingleChildElement(xml, PROPERTIES));
 
         // then check contents
-        assertEquals(entity.getId(), xml.getAttribute(ID));
+        assertEquals(entity.getId(), xml.getAttribute(ATTRIBUTE_ID));
         assertEquals(TEST_HTTP_PORT_NAME, getSingleChildElementTextContent(xml, NAME));
         assertEquals(TRUE.toString(), getSingleChildElementTextContent(xml, ENABLED));
         assertEquals(listenPort.getProtocol(), getSingleChildElementTextContent(xml, PROTOCOL));
         assertEquals(Integer.toString(listenPort.getPort()), getSingleChildElementTextContent(xml, PORT));
         assertTrue(getChildElementsTextContents(getSingleChildElement(xml, ENABLED_FEATURES), STRING_VALUE).containsAll(listenPort.getEnabledFeatures()));
-        assertEquals(service.getId(), getSingleChildElement(xml, TARGET_SERVICE_REFERENCE).getAttribute(ID));
+        assertEquals(service.getId(), getSingleChildElement(xml, TARGET_SERVICE_REFERENCE).getAttribute(ATTRIBUTE_ID));
         assertEquals(tlsSettings.getClientAuthentication().getType(), getSingleChildElementTextContent(getSingleChildElement(xml, TLS_SETTINGS), CLIENT_AUTHENTICATION));
         assertTrue(tlsSettings.getEnabledVersions().containsAll(getChildElementsTextContents(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), ENABLED_VERSIONS), STRING_VALUE)));
         assertTrue(tlsSettings.getEnabledCipherSuites().containsAll(getChildElementsTextContents(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), ENABLED_CIPHER_SUITES), STRING_VALUE)));
@@ -169,25 +170,11 @@ public class ListenPortEntityBuilderTest {
         assertPropertiesContent(listenPort.getProperties(), mapPropertiesElements(getSingleChildElement(xml, PROPERTIES)));
     }
 
-    private static void assertPropertiesContent(Map<String, Object> expected, Map<String, Object> actual) {
-        assertNotNull(expected);
-        assertNotNull(actual);
-        assertEquals(expected.size(), actual.size());
-
-        expected.forEach((key, value) -> {
-            assertNotNull(actual.get(key));
-            assertEquals(value, actual.get(key));
-            actual.remove(key);
-        });
-
-        assertTrue(actual.isEmpty());
-    }
-
     private static void checkExpectedPorts(List<Entity> listenPortEntities, Integer... expectedPorts) {
         List<Integer> expectedList = new ArrayList<>(asList(expectedPorts));
         listenPortEntities.forEach(e -> expectedList.remove((Object) parseInt(getSingleChildElementTextContent(e.getXml(), PORT))));
 
-        assertTrue("Expected ports were not present in the bundle xml: " + Arrays.toString(expectedList.toArray()), expectedList.isEmpty());
+        assertTrue(expectedList.isEmpty(), () -> "Expected ports were not present in the bundle xml: " + Arrays.toString(expectedList.toArray()));
     }
 
     private static void addPortToBundle(Bundle bundle, ListenPort port) {
