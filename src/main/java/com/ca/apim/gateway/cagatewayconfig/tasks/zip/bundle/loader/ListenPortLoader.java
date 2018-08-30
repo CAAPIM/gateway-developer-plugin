@@ -28,11 +28,11 @@ public class ListenPortLoader implements BundleEntityLoader {
     public void load(final Bundle bundle, final Element element) {
         final Element listenPortElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), LISTEN_PORT);
 
-        final String name = getSingleChildElement(listenPortElement, NAME).getTextContent();
-        final String protocol = getSingleChildElement(listenPortElement, PROTOCOL).getTextContent();
-        final Integer port = parseInt(getSingleChildElement(listenPortElement, PORT).getTextContent());
+        final String name = getSingleChildElementTextContent(listenPortElement, NAME);
+        final String protocol = getSingleChildElementTextContent(listenPortElement, PROTOCOL);
+        final Integer port = parseInt(getSingleChildElementTextContent(listenPortElement, PORT));
         final List<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPortElement, ENABLED_FEATURES), STRING_VALUE);
-        final String targetServiceReference = getTargetServiceReference(listenPortElement);
+        final String targetServiceReference = getSingleChildElementTextContent(listenPortElement, TARGET_SERVICE_REFERENCE);
         final ListenPortTlsSettings tlsSettings = getTlsSettings(listenPortElement);
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPortElement, PROPERTIES, true));
 
@@ -47,14 +47,6 @@ public class ListenPortLoader implements BundleEntityLoader {
         bundle.getListenPorts().put(name, listenPort);
     }
 
-    private String getTargetServiceReference(final Element listenPortElement) {
-        Element targetServiceReference = getSingleChildElement(listenPortElement, TARGET_SERVICE_REFERENCE);
-        if (targetServiceReference == null) {
-            return null;
-        }
-        return targetServiceReference.getTextContent();
-    }
-
     private ListenPortTlsSettings getTlsSettings(final Element listenPortElement) {
         Element tlsSettingsElement = getSingleChildElement(listenPortElement, TLS_SETTINGS);
         if (tlsSettingsElement == null) {
@@ -62,10 +54,18 @@ public class ListenPortLoader implements BundleEntityLoader {
         }
 
         ListenPortTlsSettings tlsSettings = new ListenPortTlsSettings();
-        tlsSettings.setClientAuthentication(fromType(getSingleChildElementTextContent(tlsSettingsElement, CLIENT_AUTHENTICATION)));
-        tlsSettings.setEnabledCipherSuites(getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ENABLED_VERSIONS, true), STRING_VALUE));
-        tlsSettings.setEnabledVersions(getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ENABLED_CIPHER_SUITES, true), STRING_VALUE));
-        tlsSettings.setProperties(mapPropertiesElements(getSingleChildElement(tlsSettingsElement, PROPERTIES, true)));
+
+        String clientAuthentication = getSingleChildElementTextContent(tlsSettingsElement, CLIENT_AUTHENTICATION);
+        tlsSettings.setClientAuthentication(fromType(clientAuthentication));
+
+        Element enabledCipherSuites = getSingleChildElement(tlsSettingsElement, ENABLED_CIPHER_SUITES, true);
+        tlsSettings.setEnabledCipherSuites(getChildElementsTextContents(enabledCipherSuites, STRING_VALUE));
+
+        Element enabledVersions = getSingleChildElement(tlsSettingsElement, ENABLED_VERSIONS, true);
+        tlsSettings.setEnabledVersions(getChildElementsTextContents(enabledVersions, STRING_VALUE));
+
+        Element properties = getSingleChildElement(tlsSettingsElement, PROPERTIES, true);
+        tlsSettings.setProperties(mapPropertiesElements(properties));
 
         return tlsSettings;
     }

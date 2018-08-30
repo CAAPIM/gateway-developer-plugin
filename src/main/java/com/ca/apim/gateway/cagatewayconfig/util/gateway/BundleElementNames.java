@@ -12,6 +12,7 @@ public class BundleElementNames {
 
     // Attributes
     public static final String ATTRIBUTE_ID = "id";
+    public static final String ATTRIBUTE_KEY = "key";
 
     // Common Elements
     public static final String NAME = "l7:Name";

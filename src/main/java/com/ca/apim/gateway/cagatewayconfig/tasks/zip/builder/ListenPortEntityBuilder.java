@@ -109,7 +109,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         Element listenPortElement = document.createElement(LISTEN_PORT);
 
         String id = idGenerator.generate();
-        listenPortElement.setAttribute("id", id);
+        listenPortElement.setAttribute(ATTRIBUTE_ID, id);
         listenPortElement.appendChild(createElementWithTextContent(document, NAME, name));
         listenPortElement.appendChild(createElementWithTextContent(document, ENABLED, TRUE.toString())); // people should not bootstrap a disabled listen port.
         listenPortElement.appendChild(createElementWithTextContent(document, PROTOCOL, listenPort.getProtocol()));
@@ -124,7 +124,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
             if (service == null) {
                 throw new EntityBuilderException("Could not find service binded to listen port " + name + ". Service Path: " + listenPort.getTargetServiceReference());
             }
-            listenPortElement.appendChild(createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, "id", service.getId()));
+            listenPortElement.appendChild(createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, ATTRIBUTE_ID, service.getId()));
         }
 
         if (listenPort.getTlsSettings() != null) {

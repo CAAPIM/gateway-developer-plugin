@@ -31,7 +31,7 @@ public class BuilderUtils {
         Element propertiesElement = document.createElement(PROPERTIES);
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             Element propertyElement = document.createElement(PROPERTY);
-            propertyElement.setAttribute("key", entry.getKey());
+            propertyElement.setAttribute(ATTRIBUTE_KEY, entry.getKey());
             String elementType = STRING_VALUE;
 
             if (Integer.class.isAssignableFrom(entry.getValue().getClass())) {
