@@ -67,8 +67,8 @@ public class BuilderUtils {
         }
 
         final List<Element> properties = getChildElements(propertiesElement, PROPERTY);
-        return properties.stream().collect(toMap(s -> s.getAttribute("key"), o -> {
-            final String propKey = o.getAttribute("key");
+        return properties.stream().collect(toMap(s -> s.getAttribute(ATTRIBUTE_KEY), o -> {
+            final String propKey = o.getAttribute(ATTRIBUTE_KEY);
             final NodeList childNodes = o.getChildNodes();
 
             for (int i = 0; i < childNodes.getLength(); i++) {
