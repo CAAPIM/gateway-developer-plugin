@@ -52,11 +52,11 @@ public class WriterHelper {
         File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
 
-        File listenPortsFile = new File(configFolder, fileName);
+        File configFile = new File(configFolder, fileName);
 
-        ObjectWriter yamlWriter = jsonTools.getObjectWriter(YAML);
-        try (OutputStream fileStream = Files.newOutputStream(listenPortsFile.toPath())) {
-            yamlWriter.writeValue(fileStream, beans);
+        ObjectWriter objectWriter = jsonTools.getObjectWriter();
+        try (OutputStream fileStream = Files.newOutputStream(configFile.toPath())) {
+            objectWriter.writeValue(fileStream, beans);
         } catch (IOException e) {
             throw new WriteException("Exception writing " + fileName + " config file", e);
         }

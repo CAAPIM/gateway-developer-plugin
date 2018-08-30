@@ -15,13 +15,21 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JsonTools {
     public static final JsonTools INSTANCE = new JsonTools();
+    private static final Logger LOGGER = Logger.getLogger(JsonTools.class.getName());
 
-    public static final String JSON = "json";
-    public static final String YAML = "yaml";
+    private static final String JSON = "json";
+    private static final String YAML = "yaml";
+    private static final String JSON_FILE_EXTENSION = ".json";
+    private static final String YAML_FILE_EXTENSION = ".yml";
+
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
+    private String outputType = YAML;
+    private String fileExtension = YAML_FILE_EXTENSION;
 
     public JsonTools() {
         objectMapperMap.put(JSON, buildObjectMapper(new JsonFactory()));
@@ -36,8 +44,8 @@ public class JsonTools {
         return objectMapper;
     }
 
-    public ObjectWriter getObjectWriter(final String type) {
-        return getObjectMapper(type).writer().withDefaultPrettyPrinter();
+    public ObjectWriter getObjectWriter() {
+        return getObjectMapper(outputType).writer().withDefaultPrettyPrinter();
     }
 
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {
@@ -53,5 +61,21 @@ public class JsonTools {
             });
         }
         return objectMapper;
+    }
+
+    public void setOutputType(String outputType) {
+        if (JSON.equalsIgnoreCase(outputType)) {
+            this.outputType = JSON;
+            fileExtension = JSON_FILE_EXTENSION;
+        } else if (YAML.equalsIgnoreCase(outputType)) {
+            this.outputType = YAML;
+            fileExtension = YAML_FILE_EXTENSION;
+        } else {
+            LOGGER.log(Level.WARNING, "Output type specified is not YAML nor JSON. Using YAML as the default output.");
+        }
+    }
+
+    public String getFileExtension() {
+        return fileExtension;
     }
 }

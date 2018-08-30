@@ -18,6 +18,7 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.options.Option;
 
 import javax.inject.Inject;
 
@@ -62,6 +63,11 @@ public class ExplodeBundleTask extends DefaultTask {
     @OutputDirectory
     public DirectoryProperty getExportDir() {
         return exportDir;
+    }
+
+    @Option(option = "outputType", description = "The output type of the configuration files. Either 'yaml' or 'json'.")
+    public void setOutputType(String format) {
+        jsonTools.setOutputType(format);
     }
 
     @TaskAction
