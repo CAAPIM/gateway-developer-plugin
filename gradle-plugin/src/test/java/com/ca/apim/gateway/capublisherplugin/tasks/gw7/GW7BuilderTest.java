@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig.tasks.gw7;
+package com.ca.apim.gateway.capublisherplugin.tasks.gw7;
 
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.GW7Builder;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;

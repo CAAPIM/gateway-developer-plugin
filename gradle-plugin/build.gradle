@@ -14,6 +14,8 @@ project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
 dependencies {
     compile gradleApi()
     compile project(':config-builder')
+    compile 'org.apache.commons:commons-compress:+'
+
     testCompile gradleTestKit()
 }
 
