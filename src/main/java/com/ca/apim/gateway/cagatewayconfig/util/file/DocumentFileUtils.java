@@ -53,7 +53,7 @@ public final class DocumentFileUtils {
         }
     }
 
-    private void printXML(final Element node, final OutputStream outStream) {
+    public void printXML(final Element node, final OutputStream outStream) {
         final Transformer transformer = documentTools.getTransformer();
         final OutputStreamWriter writer;
         try {

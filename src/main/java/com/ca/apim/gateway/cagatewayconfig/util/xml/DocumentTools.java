@@ -30,6 +30,13 @@ import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang.StringUtils.EMPTY;
+import static org.w3c.dom.Node.ELEMENT_NODE;
 
 /**
  * Tools used to parse and process XML documents
@@ -123,7 +130,20 @@ public class DocumentTools {
         }
     }
 
-    public Element getSingleChildElement(final Element entityItemElement, final String elementName) {
+    public static Element getSingleChildElement(final Element entityItemElement, final String elementName) {
+        return getSingleChildElement(entityItemElement, elementName, false);
+    }
+
+    /**
+     * Search in the children of the element specified a single element with the name specified .
+     *
+     * @param entityItemElement element to search into
+     * @param elementName       element name to search
+     * @param optional          if not found returns null instead of throwing exception
+     * @return a single element found
+     * @throws DependencyBundleLoadException if multiple found or invalid node type found (not element)
+     */
+    public static Element getSingleChildElement(final Element entityItemElement, final String elementName, boolean optional) {
         final NodeList childNodes = entityItemElement.getChildNodes();
         Node foundNode = null;
         for (int i = 0; i < childNodes.getLength(); i++) {
@@ -136,13 +156,67 @@ public class DocumentTools {
             }
         }
         if (foundNode == null) {
+            if (optional) {
+                return null;
+            }
+
             throw new DependencyBundleLoadException(elementName + " element not found");
         }
-        if (foundNode.getNodeType() == Node.ELEMENT_NODE) {
+        if (foundNode.getNodeType() == ELEMENT_NODE) {
             return (Element) foundNode;
         } else {
             throw new DependencyBundleLoadException("Unexpected " + elementName + " node discovered: " + foundNode.toString());
         }
+    }
+
+    /**
+     * Search in the children of the element specified a single element with the name specified and returns its text content.
+     *
+     * @param entityItemElement element to search into
+     * @param elementName       element name to search
+     * @return text content from a single element found, null if no element found
+     */
+    public static String getSingleChildElementTextContent(final Element entityItemElement, final String elementName) {
+        final Element element = getSingleChildElement(entityItemElement, elementName, true);
+        if (element == null) {
+            return null;
+        }
+        return element.getTextContent();
+    }
+
+    /**
+     * Search in the children of the element specified all elements with the name specified and returns text contents from all of them.
+     *
+     * @param entityItemElement element to search into
+     * @param elementName       element name to search
+     * @return list of contents from elements found, empty if not found any
+     */
+    public static List<String> getChildElementsTextContents(final Element entityItemElement, final String elementName) {
+        return getChildElements(entityItemElement, elementName).stream().map(Element::getTextContent).collect(toList());
+    }
+
+    /**
+     * Search in the children of the element specified all elements with the name specified .
+     *
+     * @param entityItemElement element to search into
+     * @param elementName       element name to search
+     * @return list of elements found, empty if not found any
+     */
+    public static List<Element> getChildElements(final Element entityItemElement, final String elementName) {
+        if (entityItemElement == null) {
+            return emptyList();
+        }
+
+        final List<Element> elements = new ArrayList<>();
+        final NodeList childNodes = entityItemElement.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            final Node child = childNodes.item(i);
+            if (elementName.equals(child.getNodeName()) && child.getNodeType() == ELEMENT_NODE) {
+                elements.add((Element) child);
+            }
+        }
+
+        return elements;
     }
 
     /**
@@ -172,9 +246,15 @@ public class DocumentTools {
         }
     }
 
-    public static Element createElement(final Document document, final String tag, final String value) {
-        Element element = document.createElement(tag);
-        element.setTextContent(value);
+    public static Element createElementWithTextContent(final Document document, final String elementName, final Object textContent) {
+        Element element = document.createElement(elementName);
+        element.setTextContent(textContent != null ? textContent.toString() : EMPTY);
+        return element;
+    }
+
+    public static Element createElementWithAttribute(final Document document, final String elementName, final String attributeName, final String attributeValue) {
+        Element element = document.createElement(elementName);
+        element.setAttribute(attributeName, attributeValue);
         return element;
     }
 }

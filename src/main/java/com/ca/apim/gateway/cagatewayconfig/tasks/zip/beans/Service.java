@@ -10,9 +10,18 @@ import java.util.Map;
 import java.util.Set;
 
 public class Service {
+    private String id;
     private String url;
     private Set<String> httpMethods;
     private Map<String,String> properties;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getUrl() {
         return url;
