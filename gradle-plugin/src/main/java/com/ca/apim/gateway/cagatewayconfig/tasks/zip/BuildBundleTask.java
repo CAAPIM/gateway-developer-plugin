@@ -38,18 +38,14 @@ public class BuildBundleTask extends DefaultTask {
      */
     @Inject
     public BuildBundleTask() {
-        this(DocumentTools.INSTANCE, DocumentFileUtils.INSTANCE, FileUtils.INSTANCE, JsonTools.INSTANCE);
-    }
-
-    private BuildBundleTask(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, FileUtils fileUtils, final JsonTools jsonTools) {
         into = newOutputDirectory();
         from = newInputDirectory();
         dependencies = getProject().files();
 
-        this.documentTools = documentTools;
-        this.documentFileUtils = documentFileUtils;
-        this.jsonTools = jsonTools;
-        this.fileUtils = fileUtils;
+        this.documentTools = DocumentTools.INSTANCE;
+        this.documentFileUtils = DocumentFileUtils.INSTANCE;
+        this.jsonTools = JsonTools.INSTANCE;
+        this.fileUtils = FileUtils.INSTANCE;
     }
 
     @InputDirectory

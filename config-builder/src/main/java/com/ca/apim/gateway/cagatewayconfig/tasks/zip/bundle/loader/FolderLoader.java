@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Element;
 
 import java.nio.file.Path;
@@ -16,18 +15,15 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.getSingleChildElement;
+
 public class FolderLoader implements BundleEntityLoader {
     private static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
-    private final DocumentTools documentTools;
-
-    FolderLoader(DocumentTools documentTools) {
-        this.documentTools = documentTools;
-    }
 
     @Override
     public void load(Bundle bundle, Element element) {
-        final Element folderElement = documentTools.getSingleChildElement(documentTools.getSingleChildElement(element, "l7:Resource"), "l7:Folder");
-        final String name = documentTools.getSingleChildElement(folderElement, "l7:Name").getTextContent();
+        final Element folderElement = getSingleChildElement(getSingleChildElement(element, "l7:Resource"), "l7:Folder");
+        final String name = getSingleChildElement(folderElement, "l7:Name").getTextContent();
         final String id = folderElement.getAttribute("id");
         final String parentFolderID = folderElement.getAttribute("folderId");
 

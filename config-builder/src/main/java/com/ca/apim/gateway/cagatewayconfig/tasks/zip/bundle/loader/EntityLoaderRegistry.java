@@ -18,8 +18,8 @@ public class EntityLoaderRegistry {
 
     public EntityLoaderRegistry(DocumentTools documentTools) {
         entityLoaders = new HashMap<>();
-        entityLoaders.put("POLICY", new PolicyLoader(documentTools));
-        entityLoaders.put("FOLDER", new FolderLoader(documentTools));
+        entityLoaders.put("POLICY", new PolicyLoader());
+        entityLoaders.put("FOLDER", new FolderLoader());
         entityLoaders.put("ENCAPSULATED_ASSERTION", new EncassLoader(documentTools));
         entityLoaders.put(ListenPort.TYPE, new ListenPortLoader());
     }

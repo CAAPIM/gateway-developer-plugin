@@ -21,6 +21,8 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.getSingleChildElement;
+
 public class DependencyBundleLoader {
     private static final Logger LOGGER = Logger.getLogger(DependencyBundleLoader.class.getName());
 
@@ -55,7 +57,7 @@ public class DependencyBundleLoader {
     }
 
     private void handleItem(Bundle bundle, final Element element) {
-        final String type = documentTools.getSingleChildElement(element, "l7:Type").getTextContent();
+        final String type = getSingleChildElement(element, "l7:Type").getTextContent();
         final BundleEntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
         if (entityLoader != null) {
             entityLoader.load(bundle, element);

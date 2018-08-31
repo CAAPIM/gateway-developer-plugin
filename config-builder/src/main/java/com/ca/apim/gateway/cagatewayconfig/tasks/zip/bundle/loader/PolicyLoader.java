@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Element;
 
 import java.nio.file.Paths;
@@ -18,22 +17,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.getSingleChildElement;
+
 public class PolicyLoader implements BundleEntityLoader {
     private static final Logger LOGGER = Logger.getLogger(PolicyLoader.class.getName());
 
-    private final DocumentTools documentTools;
-
-    PolicyLoader(DocumentTools documentTools) {
-        this.documentTools = documentTools;
-    }
-
     @Override
     public void load(Bundle bundle, Element element) {
-        final Element policyElement = documentTools.getSingleChildElement(documentTools.getSingleChildElement(element, "l7:Resource"), "l7:Policy");
+        final Element policyElement = getSingleChildElement(getSingleChildElement(element, "l7:Resource"), "l7:Policy");
         final String guid = policyElement.getAttribute("guid");
 
-        final Element policyDetails = documentTools.getSingleChildElement(policyElement, "l7:PolicyDetail");
-        Element policyTypeElement = documentTools.getSingleChildElement(policyDetails, "l7:PolicyType");
+        final Element policyDetails = getSingleChildElement(policyElement, "l7:PolicyDetail");
+        Element policyTypeElement = getSingleChildElement(policyDetails, "l7:PolicyType");
         if (!("Include".equals(policyTypeElement.getTextContent()) || "Service Operation".equals(policyTypeElement.getTextContent()))) {
             LOGGER.log(Level.WARNING, "Skipping unsupported PolicyType: {0}", policyTypeElement.getTextContent());
             return;
@@ -41,7 +36,7 @@ public class PolicyLoader implements BundleEntityLoader {
 
         final String id = policyDetails.getAttribute("id");
         final String folderId = policyDetails.getAttribute("folderId");
-        Element nameElement = documentTools.getSingleChildElement(policyDetails, "l7:Name");
+        Element nameElement = getSingleChildElement(policyDetails, "l7:Name");
         final String name = nameElement.getTextContent();
 
         Folder parentFolder = getFolder(bundle, folderId);
