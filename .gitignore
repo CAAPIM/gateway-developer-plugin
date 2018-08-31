@@ -5,7 +5,7 @@
 # Root files to ignore
 /.idea/
 /.gradle/
-/build/
+build/
 /out/
 .DS_Store
 /lib/*.jar

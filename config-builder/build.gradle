@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+dependencies {
+    compile 'org.jetbrains:annotations:16.0.2'
+    compile 'commons-io:commons-io:+'
+    compile 'commons-lang:commons-lang:+'
+    compile 'org.apache.commons:commons-compress:+'
+    compile 'org.apache.commons:commons-collections4:+'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
+}
