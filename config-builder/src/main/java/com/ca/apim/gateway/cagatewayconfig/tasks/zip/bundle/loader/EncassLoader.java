@@ -9,27 +9,25 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+
 public class EncassLoader implements BundleEntityLoader {
 
-    private final DocumentTools documentTools;
-
-    EncassLoader(DocumentTools documentTools) {
-        this.documentTools = documentTools;
-    }
+    EncassLoader() { }
 
     @Override
     public void load(Bundle bundle, Element element) {
-        final Element encassElement = documentTools.getSingleChildElement(documentTools.getSingleChildElement(element, "l7:Resource"), "l7:EncapsulatedAssertion");
+        final Element encassElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), ENCAPSULATED_ASSERTION);
 
-        final Element policyReference = documentTools.getSingleChildElement(encassElement, "l7:PolicyReference");
-        final String policyId = policyReference.getAttribute("id");
-        Element guidElement = documentTools.getSingleChildElement(encassElement, "l7:Guid");
+        final Element policyReference = getSingleChildElement(encassElement, POLICY_REFERENCE);
+        final String policyId = policyReference.getAttribute(ATTRIBUTE_ID);
+        Element guidElement = getSingleChildElement(encassElement, GUID);
         final String guid = guidElement.getTextContent();
 
         Encass encass = new Encass();

@@ -44,6 +44,10 @@ public class JsonTools {
         return objectMapper;
     }
 
+    public <T> T parseDocumentFileFromConfigDir(final File rootDir, final String fileName, TypeReference<T> typeMapping) {
+        return parseDocumentFile(new File(rootDir, "config"), fileName, typeMapping);
+    }
+
     public <T> T parseDocumentFile(final File directory, final String fileName, TypeReference<T> typeMapping) {
         final File jsonFile = new File(directory, fileName + ".json");
         final File ymlFile = new File(directory, fileName + ".yml");

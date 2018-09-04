@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ServiceLoader implements EntityLoader {
+
+    private static final String FILE_NAME = "services";
     private static final TypeReference<HashMap<String, Service>> servicesMapTypeMapping = new TypeReference<HashMap<String, Service>>() {
     };
     private final JsonTools jsonTools;
@@ -26,7 +28,7 @@ public class ServiceLoader implements EntityLoader {
 
     @Override
     public void load(final Bundle bundle, final File rootDir) {
-        final Map<String, Service> services = jsonTools.parseDocumentFile(new File(rootDir, "config"), "services", servicesMapTypeMapping);
+        final Map<String, Service> services = jsonTools.parseDocumentFileFromConfigDir(rootDir, FILE_NAME, servicesMapTypeMapping);
         if (services != null) {
             bundle.putAllServices(services);
         }

@@ -17,6 +17,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CLUSTER_PROPERTY_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.MappingProperties.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.NAME;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+
 public class ClusterPropertyEntityBuilder implements EntityBuilder {
     private final Document document;
     private final IdGenerator idGenerator;
@@ -32,17 +41,17 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
                         buildClusterPropertyEntity(propertyEntry.getKey(), propertyEntry.getValue())
                 ),
                 bundle.getEnvironmentProperties().entrySet().stream()
-                        .filter(propertyEntry -> propertyEntry.getKey().startsWith("gateway."))
+                        .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
                         .map(propertyEntry ->
-                                buildEnvironmentPropertyEntity("ENV." + propertyEntry.getKey().substring(8))
+                                buildEnvironmentPropertyEntity(PREFIX_ENV + propertyEntry.getKey().substring(8))
                         )
         ).collect(Collectors.toList());
     }
 
     private Entity buildClusterPropertyEntity(String name, String value) {
         String id = idGenerator.generate();
-        Entity entity = new Entity("CLUSTER_PROPERTY", name, id, buildClusterPropertyElement(name, id, value, document));
-        entity.setMappingProperty(Entity.MAPPING_PROPERTY_MAP_BY, "name");
+        Entity entity = new Entity(CLUSTER_PROPERTY_TYPE, name, id, buildClusterPropertyElement(name, id, value, document));
+        entity.setMappingProperty(MAP_BY, MappingProperties.NAME);
         return entity;
     }
 
@@ -51,26 +60,21 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
     }
 
     static Element buildClusterPropertyElement(String name, String id, String value, Document document, Map<String,String> valueAttributes) {
-        Element clusterPropertyElement = document.createElement("l7:ClusterProperty");
+        Element clusterPropertyElement = createElementWithAttribute(document, CLUSTER_PROPERTY, ATTRIBUTE_ID, id);
 
-        clusterPropertyElement.setAttribute("id", id);
+        clusterPropertyElement.appendChild(createElementWithTextContent(document, NAME, name));
 
-        Element nameElement = document.createElement("l7:Name");
-        nameElement.setTextContent(name);
-        clusterPropertyElement.appendChild(nameElement);
-
-        Element valueElement = document.createElement("l7:Value");
+        Element valueElement = createElementWithTextContent(document, VALUE, value);
         valueAttributes.forEach(valueElement::setAttribute);
-        valueElement.setTextContent(value);
         clusterPropertyElement.appendChild(valueElement);
         return clusterPropertyElement;
     }
 
     private Entity buildEnvironmentPropertyEntity(String name) {
-        Entity entity = new Entity("CLUSTER_PROPERTY", name, idGenerator.generate(), null);
-        entity.setMappingProperty(Entity.MAPPING_PROPERTY_MAP_BY, "name");
-        entity.setMappingProperty(Entity.MAPPING_PROPERTY_MAP_TO, name);
-        entity.setMappingProperty(Entity.MAPPING_PROPERTY_FAIL_ON_NEW, true);
+        Entity entity = new Entity(CLUSTER_PROPERTY_TYPE, name, idGenerator.generate(), null);
+        entity.setMappingProperty(MAP_BY, NAME);
+        entity.setMappingProperty(MAP_TO, name);
+        entity.setMappingProperty(FAIL_ON_NEW, true);
         return entity;
     }
 }

@@ -16,9 +16,12 @@ import java.util.Map;
 import java.util.Properties;
 
 public class StaticPropertiesLoader implements EntityLoader {
+
+    private static final String FILE_PATH = "config/static.properties";
+
     @Override
     public void load(Bundle bundle, File rootDir) {
-        File staticPropertiesFile = new File(rootDir, "config/static.properties");
+        File staticPropertiesFile = new File(rootDir, FILE_PATH);
         if (staticPropertiesFile.exists()) {
             Properties properties = new Properties();
             try (FileInputStream inStream = new FileInputStream(staticPropertiesFile)) {

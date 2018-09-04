@@ -12,7 +12,6 @@ import static java.util.Arrays.stream;
 
 public class ListenPort {
 
-    public static final String TYPE = "SSG_CONNECTOR";
     public static final String PROTOCOL_HTTP = "HTTP";
     public static final String PROTOCOL_HTTPS = "HTTPS";
     public static final Integer HTTP_DEFAULT_PORT = 8080;

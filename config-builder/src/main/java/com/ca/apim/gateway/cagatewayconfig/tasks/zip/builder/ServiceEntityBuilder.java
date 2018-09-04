@@ -11,12 +11,18 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
+import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SERVICE_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 public class ServiceEntityBuilder implements EntityBuilder {
     private final Document document;
@@ -36,60 +42,50 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildServiceEntity(Bundle bundle, String policyPath, Service service) {
-        Element serviceDetailElement = document.createElement("l7:ServiceDetail");
-
         Policy policy = bundle.getPolicies().get(policyPath);
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + policyPath);
         }
         String id = idGenerator.generate();
         service.setId(id);
-        serviceDetailElement.setAttribute("id", id);
-        serviceDetailElement.setAttribute("folderId", policy.getParentFolder().getId());
-        Element nameElement = document.createElement("l7:Name");
-        nameElement.setTextContent(policy.getName());
-        serviceDetailElement.appendChild(nameElement);
 
-        Element enabledElement = document.createElement("l7:Enabled");
-        enabledElement.setTextContent("true");
-        serviceDetailElement.appendChild(enabledElement);
+        Element serviceDetailElement = createElementWithAttributes(document, SERVICE_DETAIL, ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_FOLDER_ID, policy.getParentFolder().getId()));
+        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, policy.getName()));
+        serviceDetailElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));
         serviceDetailElement.appendChild(buildServiceMappings(service));
 
         if (service.getProperties() != null) {
-            serviceDetailElement.appendChild(BuilderUtils.buildPropertiesElement(
-                    service.getProperties().entrySet().stream().collect(Collectors.toMap(p -> "property." + p.getKey(), p -> p.getKey().startsWith("ENV.") ? "SERVICE_PROPERTY_" + p.getKey() :  p.getValue())), document));
+            buildAndAppendPropertiesElement(service.getProperties()
+                            .entrySet()
+                            .stream()
+                            .collect(Collectors
+                                    .toMap(p -> "property." + p.getKey(), p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + p.getKey() : p.getValue())),
+                    document, serviceDetailElement);
         }
 
-        Element serviceElement = document.createElement("l7:Service");
-        serviceElement.setAttribute("id", id);
+        Element serviceElement = createElementWithAttribute(document, SERVICE, ATTRIBUTE_ID, id);
         serviceElement.appendChild(serviceDetailElement);
 
-        Element resourcesElement = document.createElement("l7:Resources");
-
-        Element resourceSetElement = document.createElement("l7:ResourceSet");
-        resourceSetElement.setAttribute("tag", "policy");
-
-        Element resourceElement = document.createElement("l7:Resource");
-        resourceElement.setAttribute("type", "policy");
-
+        Element resourcesElement = document.createElement(RESOURCES);
+        Element resourceSetElement = createElementWithAttribute(document, RESOURCE_SET, "tag", "policy");
+        Element resourceElement = createElementWithAttribute(document, RESOURCE, "type", "policy");
         resourceElement.setTextContent(documentFileUtils.elementToString(policy.getPolicyDocument()));
 
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
         serviceElement.appendChild(resourcesElement);
-        return new Entity("SERVICE", policy.getName(), id, serviceElement);
+        return new Entity(SERVICE_TYPE, policy.getName(), id, serviceElement);
     }
 
     private Element buildServiceMappings(Service service) {
-        Element serviceMappingsElement = document.createElement("l7:ServiceMappings");
-        Element httpMappingElement = document.createElement("l7:HttpMapping");
+        Element serviceMappingsElement = document.createElement(SERVICE_MAPPINGS);
+        Element httpMappingElement = document.createElement(HTTP_MAPPING);
         serviceMappingsElement.appendChild(httpMappingElement);
-        Element urlPatternElement = document.createElement("l7:UrlPattern");
-        urlPatternElement.setTextContent(service.getUrl());
-        httpMappingElement.appendChild(urlPatternElement);
-        Element verbsElement = document.createElement("l7:Verbs");
+
+        httpMappingElement.appendChild(createElementWithTextContent(document, URL_PATTERN, service.getUrl()));
+        Element verbsElement = document.createElement(VERBS);
         service.getHttpMethods().forEach(method -> {
-            Element verb = document.createElement("l7:Verb");
+            Element verb = document.createElement(VERB);
             verb.setTextContent(method);
             verbsElement.appendChild(verb);
         });

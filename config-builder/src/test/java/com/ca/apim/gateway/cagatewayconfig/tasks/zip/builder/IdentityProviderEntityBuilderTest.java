@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -101,12 +102,12 @@ class IdentityProviderEntityBuilderTest {
         assertNotNull(identityProviderEntity.getId());
         final Element identityProviderEntityXml = identityProviderEntity.getXml();
         assertEquals("l7:IdentityProvider", identityProviderEntityXml.getTagName());
-        final Element identityProviderNameXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, "l7:Name");
+        final Element identityProviderNameXml = getSingleElement(identityProviderEntityXml, "l7:Name");
         assertEquals("simple ldap config", identityProviderNameXml.getTextContent());
-        final Element identityProviderTypeXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, "l7:IdentityProviderType");
+        final Element identityProviderTypeXml = getSingleElement(identityProviderEntityXml, "l7:IdentityProviderType");
         assertEquals(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP.getValue(), identityProviderTypeXml.getTextContent());
 
-        final Element idProviderProperties = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, "l7:Properties");
+        final Element idProviderProperties = getSingleElement(identityProviderEntityXml, "l7:Properties");
         final NodeList propertyList = idProviderProperties.getElementsByTagName("l7:Property");
         assertEquals(2, propertyList.getLength());
         Node property1 = propertyList.item(0);
@@ -117,20 +118,20 @@ class IdentityProviderEntityBuilderTest {
         }
         assertEquals("property.key1", property1.getAttributes().getNamedItem("key").getTextContent());
         assertEquals("property.key2", property2.getAttributes().getNamedItem("key").getTextContent());
-        assertEquals("value1", DocumentTools.INSTANCE.getSingleElement((Element) property1, "l7:StringValue").getTextContent());
-        assertEquals("value2", DocumentTools.INSTANCE.getSingleElement((Element) property2, "l7:StringValue").getTextContent());
+        assertEquals("value1", getSingleElement((Element) property1, "l7:StringValue").getTextContent());
+        assertEquals("value2", getSingleElement((Element) property2, "l7:StringValue").getTextContent());
 
-        final Element bindOnlyLdapIdentityProviderDetailXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, "l7:BindOnlyLdapIdentityProviderDetail");
-        final Element serverUrls = DocumentTools.INSTANCE.getSingleElement(bindOnlyLdapIdentityProviderDetailXml, "l7:ServerUrls");
+        final Element bindOnlyLdapIdentityProviderDetailXml = getSingleElement(identityProviderEntityXml, "l7:BindOnlyLdapIdentityProviderDetail");
+        final Element serverUrls = getSingleElement(bindOnlyLdapIdentityProviderDetailXml, "l7:ServerUrls");
         final NodeList serverList = serverUrls.getElementsByTagName("l7:StringValue");
         assertEquals(2, serverList.getLength());
         assertEquals("http://ldap:port", serverList.item(0).getTextContent());
         assertEquals("http://ldap:port2", serverList.item(1).getTextContent());
-        final Element useSslClientAuthXml = DocumentTools.INSTANCE.getSingleElement(bindOnlyLdapIdentityProviderDetailXml, "l7:UseSslClientAuthentication");
+        final Element useSslClientAuthXml = getSingleElement(bindOnlyLdapIdentityProviderDetailXml, "l7:UseSslClientAuthentication");
         assertFalse(Boolean.parseBoolean(useSslClientAuthXml.getTextContent()));
-        final Element bindPatternPrefix = DocumentTools.INSTANCE.getSingleElement(bindOnlyLdapIdentityProviderDetailXml, "l7:BindPatternPrefix");
+        final Element bindPatternPrefix = getSingleElement(bindOnlyLdapIdentityProviderDetailXml, "l7:BindPatternPrefix");
         assertEquals("testpre", bindPatternPrefix.getTextContent());
-        final Element bindPatternSuffix = DocumentTools.INSTANCE.getSingleElement(bindOnlyLdapIdentityProviderDetailXml, "l7:BindPatternSuffix");
+        final Element bindPatternSuffix = getSingleElement(bindOnlyLdapIdentityProviderDetailXml, "l7:BindPatternSuffix");
         assertEquals("testsuf", bindPatternSuffix.getTextContent());
     }
 

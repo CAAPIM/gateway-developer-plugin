@@ -17,19 +17,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EncassLoader implements EntityLoader {
+
+    private static final String FILE_NAME = "encass";
     private static final TypeReference<HashMap<String, Encass>> encassMapTypeMapping = new TypeReference<HashMap<String, Encass>>() {
     };
+
     private final JsonTools jsonTools;
     private final IdGenerator idGenerator;
 
-    public EncassLoader(JsonTools jsonTools, IdGenerator idGenerator) {
+    EncassLoader(JsonTools jsonTools, IdGenerator idGenerator) {
         this.jsonTools = jsonTools;
         this.idGenerator = idGenerator;
     }
 
     @Override
     public void load(final Bundle bundle, final File rootDir) {
-        final Map<String, Encass> encasses = jsonTools.parseDocumentFile(new File(rootDir, "config"), "encass", encassMapTypeMapping);
+        final Map<String, Encass> encasses = jsonTools.parseDocumentFileFromConfigDir(rootDir, FILE_NAME, encassMapTypeMapping);
         if (encasses != null) {
             encasses.values().forEach(encass -> encass.setGuid(idGenerator.generateGuid()));
             bundle.putAllEncasses(encasses);

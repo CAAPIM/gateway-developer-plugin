@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -17,11 +18,20 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+
 public class EncassEntityBuilder implements EntityBuilder {
+
+    private static final String PALETTE_FOLDER = "paletteFolder";
+    private static final String INTERNAL_ASSERTIONS = "internalAssertions";
+
     private final Document document;
     private final IdGenerator idGenerator;
 
-    public EncassEntityBuilder(Document document, IdGenerator idGenerator) {
+    EncassEntityBuilder(Document document, IdGenerator idGenerator) {
         this.document = document;
         this.idGenerator = idGenerator;
     }
@@ -33,84 +43,54 @@ public class EncassEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildEncassEntity(Bundle bundle, String policyPath, Encass encass) {
-        Element encassAssertionElement = document.createElement("l7:EncapsulatedAssertion");
-
         Policy policy = bundle.getPolicies().get(policyPath);
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + policyPath);
         }
+        final String name = policy.getName();
+
+        Element encassAssertionElement = document.createElement(ENCAPSULATED_ASSERTION);
 
         String id = idGenerator.generate();
-        encassAssertionElement.setAttribute("id", id);
-
-        Element nameElement = document.createElement("l7:Name");
-        final String name;
-        name = policy.getName();
-
-        nameElement.setTextContent(name);
-
-        encassAssertionElement.appendChild(nameElement);
-
-        Element guidElement = document.createElement("l7:Guid");
-        guidElement.setTextContent(encass.getGuid());
-        encassAssertionElement.appendChild(guidElement);
-
-        Element policyReferenceElement = document.createElement("l7:PolicyReference");
-        policyReferenceElement.setAttribute("id", policy.getId());
-        encassAssertionElement.appendChild(policyReferenceElement);
-
+        encassAssertionElement.setAttribute(ATTRIBUTE_ID, id);
+        encassAssertionElement.appendChild(createElementWithTextContent(document, NAME, name));
+        encassAssertionElement.appendChild(createElementWithTextContent(document, GUID, encass.getGuid()));
+        encassAssertionElement.appendChild(createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policy.getId()));
         encassAssertionElement.appendChild(buildArguments(encass));
         encassAssertionElement.appendChild(buildResults(encass));
+        buildAndAppendPropertiesElement(ImmutableMap.of(PALETTE_FOLDER, INTERNAL_ASSERTIONS), document, encassAssertionElement);
 
-        Element propertiesElement = document.createElement("l7:Properties");
-        encassAssertionElement.appendChild(propertiesElement);
-        Element propertyElement = document.createElement("l7:Property");
-        propertiesElement.appendChild(propertyElement);
-        propertyElement.setAttribute("key", "paletteFolder");
-        Element stringValueElement = document.createElement("l7:StringValue");
-        propertyElement.appendChild(stringValueElement);
-        stringValueElement.setTextContent("internalAssertions");
-
-        return new Entity("ENCAPSULATED_ASSERTION", name, id, encassAssertionElement);
+        return new Entity(ENCAPSULATED_ASSERTION_TYPE, name, id, encassAssertionElement);
     }
 
     private Element buildResults(Encass encass) {
-        Element encapsulatedResultsElement = document.createElement("l7:EncapsulatedResults");
+        Element encapsulatedResultsElement = document.createElement(ENCAPSULATED_RESULTS);
         if (encass.getResults() != null) {
-            encass.getResults().forEach(param -> {
-                Element encapsulatedAssertionResultElement = document.createElement("l7:EncapsulatedAssertionResult");
-                Element resultNameElement = document.createElement("l7:ResultName");
-                resultNameElement.setTextContent(param.getName());
-                encapsulatedAssertionResultElement.appendChild(resultNameElement);
-                Element resultTypeElement = document.createElement("l7:ResultType");
-                resultTypeElement.setTextContent(param.getType());
-                encapsulatedAssertionResultElement.appendChild(resultTypeElement);
-                encapsulatedResultsElement.appendChild(encapsulatedAssertionResultElement);
-            });
+            encass.getResults().forEach(param -> encapsulatedResultsElement.appendChild(
+                    createElementWithChildren(
+                            document,
+                            ENCAPSULATED_ASSERTION_RESULT,
+                            createElementWithTextContent(document, RESULT_NAME, param.getName()),
+                            createElementWithTextContent(document, RESULT_TYPE, param.getType())
+                    )));
         }
         return encapsulatedResultsElement;
     }
 
     private Element buildArguments(Encass encass) {
-        Element encapsulatedArgumentsElement = document.createElement("l7:EncapsulatedArguments");
+        Element encapsulatedArgumentsElement = document.createElement(ENCAPSULATED_ARGUMENTS);
         if (encass.getArguments() != null) {
             AtomicInteger ordinal = new AtomicInteger(1);
-            encass.getArguments().forEach(param -> {
-                Element encapsulatedAssertionArgumentElement = document.createElement("l7:EncapsulatedAssertionArgument");
-                Element ordinalElement = document.createElement("l7:Ordinal");
-                ordinalElement.setTextContent(String.valueOf(ordinal.getAndIncrement()));
-                encapsulatedAssertionArgumentElement.appendChild(ordinalElement);
-                Element argumentNameElement = document.createElement("l7:ArgumentName");
-                argumentNameElement.setTextContent(param.getName());
-                encapsulatedAssertionArgumentElement.appendChild(argumentNameElement);
-                Element argumentTypeElement = document.createElement("l7:ArgumentType");
-                argumentTypeElement.setTextContent(param.getType());
-                encapsulatedAssertionArgumentElement.appendChild(argumentTypeElement);
-                Element guiPromptElement = document.createElement("l7:GuiPrompt");
-                guiPromptElement.setTextContent("true");
-                encapsulatedAssertionArgumentElement.appendChild(guiPromptElement);
-                encapsulatedArgumentsElement.appendChild(encapsulatedAssertionArgumentElement);
-            });
+            encass.getArguments().forEach(param -> encapsulatedArgumentsElement.appendChild(
+                    createElementWithChildren(
+                            document,
+                            ENCAPSULATED_ASSERTION_ARGUMENT,
+                            createElementWithTextContent(document, ORDINAL, String.valueOf(ordinal.getAndIncrement())),
+                            createElementWithTextContent(document, ARGUMENT_NAME, param.getName()),
+                            createElementWithTextContent(document, ARGUMENT_TYPE, param.getType()),
+                            createElementWithTextContent(document, GUI_PROMPT, Boolean.TRUE.toString())
+                    )
+            ));
         }
         return encapsulatedArgumentsElement;
     }

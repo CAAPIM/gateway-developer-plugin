@@ -35,7 +35,7 @@ class CAGatewayDeveloperTest {
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("build")
+                .withArguments("build", "--stacktrace")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build();
@@ -64,7 +64,7 @@ class CAGatewayDeveloperTest {
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("build")
+                .withArguments("build", "--stacktrace")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build();
