@@ -21,6 +21,7 @@ subprojects {
     apply plugin: 'idea'
     apply plugin: 'jacoco'
     apply plugin: "com.srcclr.gradle"
+    apply plugin: 'maven-publish'
 
     group 'com.ca.apim.gateway'
     version = rootProject.version
