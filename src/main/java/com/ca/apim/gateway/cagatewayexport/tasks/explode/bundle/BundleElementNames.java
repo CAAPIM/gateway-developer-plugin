@@ -83,6 +83,16 @@ public class BundleElementNames {
     public static final String ENABLED_VERSIONS = "l7:EnabledVersions";
     public static final String ENABLED_CIPHER_SUITES = "l7:EnabledCipherSuites";
 
+    // Identity Provider Elements
+    public static final String ID_PROV = "l7:IdentityProvider";
+    public static final String ID_PROV_TYPE = "l7:IdentityProviderType";
+    public static final String EXTENSION = "l7:Extension";
+    public static final String SERVER_URLS = "l7:ServerUrls";
+    public static final String BIND_ONLY_ID_PROV_DETAIL = "l7:BindOnlyLdapIdentityProviderDetail";
+    public static final String USE_SSL_CLIENT_AUTH = "l7:UseSslClientAuthentication";
+    public static final String BIND_PATTERN_PREFIX = "l7:BindPatternPrefix";
+    public static final String BIND_PATTERN_SUFFIX = "l7:BindPatternSuffix";
+
     private BundleElementNames() {
         //
     }

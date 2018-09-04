@@ -22,6 +22,7 @@ public class EntityLoaderRegistry {
         entityLoaders.put("ENCAPSULATED_ASSERTION", new EncassLoader());
         entityLoaders.put("CLUSTER_PROPERTY", new ClusterPropertyLoader());
         entityLoaders.put("SSG_CONNECTOR", new ListenPortLoader());
+        entityLoaders.put("ID_PROVIDER_CONFIG", new IdentityProviderLoader());
     }
 
     public EntityLoader getLoader(String type) {

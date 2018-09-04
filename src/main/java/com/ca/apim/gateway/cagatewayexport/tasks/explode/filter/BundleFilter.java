@@ -43,6 +43,9 @@ public class BundleFilter {
         //filter pbs
         filterPBS(filteredBundle.getEntities(PolicyEntity.class), bundle.getEntities(PolicyBackedServiceEntity.class).values()).forEach(filteredBundle::addEntity);
 
+        //filter IDP
+        filterIDP(bundle.getEntities(IdentityProviderEntity.class).values()).forEach(filteredBundle::addEntity);
+
         //filter cluster property
         filterStaticProperties(bundle.getEntities(ClusterProperty.class).values(), bundle.getDependencies(), filteredBundle).forEach(filteredBundle::addEntity);
 
@@ -54,6 +57,10 @@ public class BundleFilter {
         FolderTree folderTree = new FolderTree(filteredBundle.getEntities(Folder.class).values());
         filteredBundle.setFolderTree(folderTree);
         return filteredBundle;
+    }
+
+    private List<IdentityProviderEntity> filterIDP(Collection<IdentityProviderEntity> values) {
+        return values.stream().filter(idp -> !IdentityProviderEntity.INTERNAL_IDP_ID.equals(idp.getId())).collect(Collectors.toList());
     }
 
     private List<ClusterProperty> filterStaticProperties(Collection<ClusterProperty> clusterProperties, Map<Dependency, List<Dependency>> dependencies, Bundle filteredBundle) {

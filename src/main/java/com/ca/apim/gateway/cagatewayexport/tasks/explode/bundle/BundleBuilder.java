@@ -115,6 +115,8 @@ public class BundleBuilder {
                 return ClusterProperty.class;
             case "SSG_CONNECTOR":
                 return ListenPortEntity.class;
+            case "ID_PROVIDER_CONFIG":
+                return IdentityProviderEntity.class;
             default:
                 return null;
         }
