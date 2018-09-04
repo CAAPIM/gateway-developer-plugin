@@ -4,12 +4,8 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 plugins {
-    id 'com.gradle.plugin-publish' version "0.9.10"
-    id 'org.sonarqube' version "2.6.2"
-    id 'com.srcclr.gradle' version "3.0.0"
-    id 'java-gradle-plugin'
-    id 'maven-publish'
-    id 'jacoco'
+    id "org.sonarqube" version "2.6.2"
+    id "com.srcclr.gradle" version "3.0.3" apply false
 }
 
 description = 'The gateway-developer-plugin enables developing gateway configuration.'
@@ -20,62 +16,50 @@ tag {
     }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'jacoco'
+    apply plugin: "com.srcclr.gradle"
+    apply plugin: 'maven-publish'
 
-project.ext.'gradle.publish.key' = System.env.GRADLE_PUBLISH_KEY
-project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
+    group 'com.ca.apim.gateway'
+    version = rootProject.version
 
-repositories {
-    mavenCentral()
-}
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
-test {
-    useJUnitPlatform()
-}
+    repositories {
+        mavenCentral()
+    }
 
-dependencies {
-    compile gradleApi()
-    compile 'org.jetbrains:annotations:16.0.2'
-    compile 'commons-io:commons-io:+'
-    compile 'commons-lang:commons-lang:+'
-    compile 'org.apache.commons:commons-compress:+'
-    compile 'org.apache.commons:commons-collections4:+'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
+    test {
+        useJUnitPlatform()
+    }
 
+    dependencies {
+        testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
+        testCompile("io.github.glytching:junit-extensions:2.2.0")
+        testCompile 'org.mockito:mockito-junit-jupiter:2.19.0'
+        testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
+        testCompile 'org.testcontainers:testcontainers:1.4.3'
+    }
 
-    testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
-    testCompile("io.github.glytching:junit-extensions:2.2.0")
-    testCompile 'org.mockito:mockito-junit-jupiter:2.19.0'
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
-    testCompile gradleTestKit()
-    testCompile 'org.testcontainers:testcontainers:1.4.3'
-}
+    //runs tests in parallel
+    tasks.withType(Test) {
+        maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-pluginBundle {
-    website = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
-    vcsUrl = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
-
-    plugins {
-        greetingsPlugin {
-            id = 'com.ca.apim.gateway.gateway-developer-plugin'
-            displayName = 'CA API Gateway Developer Gradle Plugin'
-            description = 'The Gateway developer plugin can be used to develop Gateway configuration'
-            tags = ['ca api gateway','building']
+    test {
+        testLogging {
+            events "passed", "skipped", "failed"
+            exceptionFormat "full"
         }
     }
-}
 
-test {
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat "full"
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
     }
 }
 

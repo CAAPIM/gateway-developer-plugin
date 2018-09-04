@@ -19,3 +19,4 @@ buildscript {
 
 apply plugin: 'net.vivin.gradle-semantic-build-versioning'
 
+include 'config-builder', 'gradle-plugin'
