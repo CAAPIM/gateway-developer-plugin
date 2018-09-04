@@ -15,6 +15,8 @@ import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,16 +28,19 @@ import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Ide
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.IdentityProviderType.fromType;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.*;
 
+@Singleton
 public class IdentityProviderWriter implements EntityWriter {
     private static final String IDENTITY_PROVIDERS_FILE = "identity-providers.yml";
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
-    public IdentityProviderWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    @Inject
+    IdentityProviderWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void write(Bundle bundle, File rootFolder) {
         Map<String, IdentityProvider> identityProviderBeans = bundle.getEntities(IdentityProviderEntity.class)

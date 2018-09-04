@@ -9,10 +9,14 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
+
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
+@Singleton
 public class ClusterPropertyLoader implements EntityLoader<ClusterProperty> {
+
     @Override
     public ClusterProperty load(Element element) {
         final Element xml = getSingleChildElement(getSingleChildElement(element, RESOURCE), CLUSTER_PROPERTY);
@@ -20,5 +24,10 @@ public class ClusterPropertyLoader implements EntityLoader<ClusterProperty> {
         final String value = getSingleChildElement(xml, VALUE).getTextContent();
         final String id = xml.getAttribute(ATTRIBUTE_ID);
         return new ClusterProperty(name, value, id);
+    }
+
+    @Override
+    public Class<ClusterProperty> entityClass() {
+        return ClusterProperty.class;
     }
 }

@@ -15,6 +15,8 @@ import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.jetbrains.annotations.NotNull;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -22,10 +24,12 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Singleton
 public class EncassWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
+    @Inject
     EncassWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;

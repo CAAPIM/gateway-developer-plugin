@@ -56,10 +56,9 @@ class CAGatewayExportTest {
         String bundle = FileUtils.readFileToString(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("bundles/environment-properties-test.bundle")).toURI()), Charset.defaultCharset());
         FileUtils.writeStringToFile(bundleFile, bundle, Charset.defaultCharset());
 
-
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("explode")
+                .withArguments("explode", "--stacktrace")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build();

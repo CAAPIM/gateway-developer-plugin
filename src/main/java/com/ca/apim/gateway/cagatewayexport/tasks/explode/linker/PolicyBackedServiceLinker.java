@@ -11,9 +11,11 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 
+import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Singleton
 public class PolicyBackedServiceLinker implements EntityLinker<PolicyBackedServiceEntity> {
 
     @Override

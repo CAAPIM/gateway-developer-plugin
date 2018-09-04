@@ -10,10 +10,12 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
 
+import javax.inject.Singleton;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@Singleton
 public class ClusterPropertyLinker implements EntitiesLinker {
     @Override
     public void link(Bundle filteredBundle, Bundle bundle) {

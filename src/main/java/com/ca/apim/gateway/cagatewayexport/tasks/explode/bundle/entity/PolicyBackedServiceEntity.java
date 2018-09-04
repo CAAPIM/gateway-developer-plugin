@@ -8,8 +8,10 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 
+import javax.inject.Named;
 import java.util.Map;
 
+@Named("POLICY_BACKED_SERVICE")
 public class PolicyBackedServiceEntity implements Entity {
     private final String name;
     private final String id;

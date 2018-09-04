@@ -9,6 +9,9 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import org.w3c.dom.Element;
 
+import javax.inject.Named;
+
+@Named("POLICY")
 public class PolicyEntity implements Entity {
     private final String name;
     private final String id;

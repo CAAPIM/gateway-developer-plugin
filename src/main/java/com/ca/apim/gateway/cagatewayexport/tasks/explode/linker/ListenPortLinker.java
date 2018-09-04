@@ -10,11 +10,14 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 
+import javax.inject.Singleton;
+
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.ServiceLinker.getServicePath;
 
 /**
  * Linker for ListenPort and TargetService.
  */
+@Singleton
 public class ListenPortLinker implements EntityLinker<ListenPortEntity> {
 
     @Override

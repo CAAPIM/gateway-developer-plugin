@@ -9,10 +9,12 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import org.w3c.dom.Element;
 
+import javax.inject.Named;
 import java.util.Map;
 
 import static java.util.Arrays.stream;
 
+@Named("ID_PROVIDER_CONFIG")
 public class IdentityProviderEntity implements Entity {
     public static final String INTERNAL_IDP_ID = "0000000000000000fffffffffffffffe";
     private final String name;
