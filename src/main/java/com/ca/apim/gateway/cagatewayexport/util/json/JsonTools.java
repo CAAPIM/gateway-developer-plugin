@@ -22,10 +22,10 @@ public class JsonTools {
     public static final JsonTools INSTANCE = new JsonTools();
     private static final Logger LOGGER = Logger.getLogger(JsonTools.class.getName());
 
-    private static final String JSON = "json";
-    private static final String YAML = "yaml";
-    private static final String JSON_FILE_EXTENSION = ".json";
-    private static final String YAML_FILE_EXTENSION = ".yml";
+    public static final String JSON = "json";
+    public static final String YAML = "yaml";
+    public static final String JSON_FILE_EXTENSION = ".json";
+    public static final String YAML_FILE_EXTENSION = ".yml";
 
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
     private String outputType = YAML;
@@ -71,6 +71,10 @@ public class JsonTools {
             this.outputType = YAML;
             fileExtension = YAML_FILE_EXTENSION;
         } else {
+            //Junit bug where if the previous test sets outputType to JSON,
+            //JSON is the recognized default for all other tests, unless setOutputType is called with YAML
+            this.outputType = YAML;
+            fileExtension = YAML_FILE_EXTENSION;
             LOGGER.log(Level.WARNING, "Output type specified is not YAML nor JSON. Using YAML as the default output.");
         }
     }

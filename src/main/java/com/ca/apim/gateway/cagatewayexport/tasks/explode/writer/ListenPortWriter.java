@@ -42,7 +42,7 @@ public class ListenPortWriter implements EntityWriter {
                 .stream()
                 .collect(toMap(ListenPortEntity::getName, this::getListenPortBean));
 
-        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, listenPortBeans, LISTEN_PORTS_FILE + jsonTools.getFileExtension());
+        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, listenPortBeans, LISTEN_PORTS_FILE);
     }
 
     private ListenPort getListenPortBean(ListenPortEntity listenPortEntity) {

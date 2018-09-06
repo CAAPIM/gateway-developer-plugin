@@ -43,7 +43,7 @@ public class ServiceWriter implements EntityWriter {
                 .stream()
                 .collect(Collectors.toMap(ServiceEntity::getPath, this::getServiceBean));
 
-        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, serviceBeans, SERVICES_FILE + jsonTools.getFileExtension());
+        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, serviceBeans, SERVICES_FILE);
     }
 
     @NotNull

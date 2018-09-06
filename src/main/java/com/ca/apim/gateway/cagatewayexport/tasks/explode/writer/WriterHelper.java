@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayexport.util.json.JsonTools.YAML;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
@@ -52,7 +51,7 @@ public class WriterHelper {
         File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
 
-        File configFile = new File(configFolder, fileName);
+        File configFile = new File(configFolder, fileName + jsonTools.getFileExtension());
 
         ObjectWriter objectWriter = jsonTools.getObjectWriter();
         try (OutputStream fileStream = Files.newOutputStream(configFile.toPath())) {

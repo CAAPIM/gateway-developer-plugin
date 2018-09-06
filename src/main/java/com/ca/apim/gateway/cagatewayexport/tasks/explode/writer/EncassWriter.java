@@ -35,7 +35,7 @@ public class EncassWriter implements EntityWriter {
                 .stream()
                 .collect(Collectors.toMap(EncassEntity::getPath, this::getEncassBean));
 
-        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE + jsonTools.getFileExtension());
+        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE);
     }
 
     @NotNull

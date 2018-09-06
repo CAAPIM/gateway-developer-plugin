@@ -34,7 +34,7 @@ public class PolicyBackedServiceWriter implements EntityWriter {
                 .stream()
                 .collect(Collectors.toMap(PolicyBackedServiceEntity::getName, this::getPolicyBackedServiceBean));
 
-        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, policyBackedServiceBeans, POLICY_BACKED_SERVICES_FILE + jsonTools.getFileExtension());
+        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, policyBackedServiceBeans, POLICY_BACKED_SERVICES_FILE);
     }
 
     private PolicyBackedService getPolicyBackedServiceBean(PolicyBackedServiceEntity policyBackedServiceEntity) {
