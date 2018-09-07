@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
 import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
+import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
@@ -55,7 +56,7 @@ public class ExplodeBundleTask extends DefaultTask {
 
     @Option(option = "outputType", description = "The output type of the configuration files. Either 'yaml' or 'json'.")
     public void setOutputType(String format) {
-        jsonTools.setOutputType(format);
+        JsonTools.INSTANCE.setOutputType(format);
     }
 
     @TaskAction

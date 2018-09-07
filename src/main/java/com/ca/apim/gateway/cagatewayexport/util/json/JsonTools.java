@@ -28,12 +28,14 @@ public class JsonTools {
     public static final String YAML_FILE_EXTENSION = ".yml";
 
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
-    private String outputType = YAML;
-    private String fileExtension = YAML_FILE_EXTENSION;
+    private String outputType;
+    private String fileExtension;
 
     public JsonTools() {
         objectMapperMap.put(JSON, buildObjectMapper(new JsonFactory()));
         objectMapperMap.put(YAML, buildObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)));
+        outputType = YAML;
+        fileExtension = YAML_FILE_EXTENSION;
     }
 
     public ObjectMapper getObjectMapper(final String type) {
@@ -71,10 +73,6 @@ public class JsonTools {
             this.outputType = YAML;
             fileExtension = YAML_FILE_EXTENSION;
         } else {
-            //Junit bug where if the previous test sets outputType to JSON,
-            //JSON is the recognized default for all other tests, unless setOutputType is called with YAML
-            this.outputType = YAML;
-            fileExtension = YAML_FILE_EXTENSION;
             LOGGER.log(Level.WARNING, "Output type specified is not YAML nor JSON. Using YAML as the default output.");
         }
     }
