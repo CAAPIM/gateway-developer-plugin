@@ -15,6 +15,8 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.ListenPort
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +25,7 @@ import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHel
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.copyMap;
 import static java.util.stream.Collectors.toMap;
 
+@Singleton
 public class ListenPortWriter implements EntityWriter {
 
     private static final String LISTEN_PORTS_FILE = "listen-ports";
@@ -30,6 +33,7 @@ public class ListenPortWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
+    @Inject
     public ListenPortWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;

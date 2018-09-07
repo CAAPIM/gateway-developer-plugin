@@ -8,8 +8,10 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 
+import javax.inject.Named;
 import java.util.List;
 
+@Named("ENCAPSULATED_ASSERTION")
 public class EncassEntity implements Entity {
     private final String name;
     private final String id;

@@ -7,6 +7,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 
+import javax.inject.Named;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableList;
 
+@Named("SSG_CONNECTOR")
 public class ListenPortEntity implements Entity {
 
     public static final List<Integer> DEFAULT_PORTS = unmodifiableList(asList(8080, 8443, 9443, 2124));

@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.util.xml;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilderException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -24,6 +25,20 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 public class DocumentUtils {
 
     private DocumentUtils() {
+    }
+
+    /**
+     * Generate dom Element from a XML String.
+     *
+     * @param documentTools DocumentTools instance used for parsing
+     * @param string xml String
+     * @return Xml Element
+     * @throws DocumentParseException if any errors
+     */
+    public static Element stringToXML(DocumentTools documentTools, String string) throws DocumentParseException {
+        Document document = documentTools.parse(string);
+        documentTools.cleanup(document);
+        return document.getDocumentElement();
     }
 
     /**

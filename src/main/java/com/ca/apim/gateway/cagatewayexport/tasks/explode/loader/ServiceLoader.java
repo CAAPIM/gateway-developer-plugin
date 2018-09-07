@@ -9,9 +9,12 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
+
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
+@Singleton
 public class ServiceLoader implements EntityLoader<ServiceEntity> {
 
     @Override
@@ -29,5 +32,10 @@ public class ServiceLoader implements EntityLoader<ServiceEntity> {
         final Element resource = getSingleChildElement(resourceSet, RESOURCE);
         final String servicePolicyString = resource.getTextContent();
         return new ServiceEntity(name, id, folderId, serviceDetails, servicePolicyString);
+    }
+
+    @Override
+    public Class<ServiceEntity> entityClass() {
+        return ServiceEntity.class;
     }
 }

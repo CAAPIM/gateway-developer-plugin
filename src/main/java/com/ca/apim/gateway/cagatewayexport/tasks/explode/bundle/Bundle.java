@@ -32,9 +32,9 @@ public class Bundle {
         });
     }
 
+    @SuppressWarnings("unchecked")
     public <E extends Entity> Map<String, E> getEntities(Class<E> entityType) {
         try {
-            //noinspection unchecked
             return (Map<String, E>) entities.getOrDefault(entityType, Collections.emptyMap());
         } catch (ClassCastException e) {
             throw new BundleBuilderException("Unable to cast entities properly");

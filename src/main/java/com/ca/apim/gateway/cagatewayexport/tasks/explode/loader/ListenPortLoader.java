@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPor
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.ListenPortEntityTlsSettings;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Li
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.*;
 
+@Singleton
 public class ListenPortLoader implements EntityLoader<ListenPortEntity> {
 
     @Override
@@ -55,5 +57,10 @@ public class ListenPortLoader implements EntityLoader<ListenPortEntity> {
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(tlsSettingsElement, PROPERTIES, true));
 
         return new ListenPortEntityTlsSettings(clientAuthentication, enabledVersions, enabledCipherSuites, properties);
+    }
+
+    @Override
+    public Class<ListenPortEntity> entityClass() {
+        return ListenPortEntity.class;
     }
 }

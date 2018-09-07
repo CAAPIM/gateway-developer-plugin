@@ -9,12 +9,14 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
+@Singleton
 public class PolicyLoader implements EntityLoader<PolicyEntity> {
     private static final Logger LOGGER = Logger.getLogger(PolicyLoader.class.getName());
 
@@ -40,5 +42,10 @@ public class PolicyLoader implements EntityLoader<PolicyEntity> {
         final Element resource = getSingleChildElement(resourceSet, RESOURCE);
         final String policyString = resource.getTextContent();
         return new PolicyEntity(name, id, guid, folderId, policy, policyString);
+    }
+
+    @Override
+    public Class<PolicyEntity> entityClass() {
+        return PolicyEntity.class;
     }
 }

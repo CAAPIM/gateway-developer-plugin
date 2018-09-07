@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
-public final class EntityLoaderHelper {
+final class EntityLoaderHelper {
 
     private EntityLoaderHelper() {
     }

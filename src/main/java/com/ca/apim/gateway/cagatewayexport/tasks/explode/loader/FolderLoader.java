@@ -9,9 +9,12 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
+
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
+@Singleton
 public class FolderLoader implements EntityLoader<Folder> {
 
     @Override
@@ -21,5 +24,10 @@ public class FolderLoader implements EntityLoader<Folder> {
         final String id = folder.getAttribute(ATTRIBUTE_ID);
         final String parentFolderID = folder.getAttribute(ATTRIBUTE_FOLDER_ID);
         return new Folder(name, id, parentFolderID);
+    }
+
+    @Override
+    public Class<Folder> entityClass() {
+        return Folder.class;
     }
 }

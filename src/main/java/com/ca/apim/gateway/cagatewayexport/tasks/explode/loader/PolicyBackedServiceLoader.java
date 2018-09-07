@@ -11,12 +11,14 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import javax.inject.Singleton;
 import java.util.Map;
 import java.util.TreeMap;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
+@Singleton
 public class PolicyBackedServiceLoader implements EntityLoader<PolicyBackedServiceEntity> {
 
     @Override
@@ -46,5 +48,10 @@ public class PolicyBackedServiceLoader implements EntityLoader<PolicyBackedServi
         }
 
         return operations;
+    }
+
+    @Override
+    public Class<PolicyBackedServiceEntity> entityClass() {
+        return PolicyBackedServiceEntity.class;
     }
 }

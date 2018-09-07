@@ -8,11 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,15 +22,9 @@ import java.util.Map;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
-public class WriterHelper {
+class WriterHelper {
 
     private WriterHelper() {
-    }
-
-    public static Element stringToXML(DocumentTools documentTools, String string) throws DocumentParseException {
-        Document document = documentTools.parse(string);
-        documentTools.cleanup(document);
-        return document.getDocumentElement();
     }
 
     /**
@@ -47,7 +37,7 @@ public class WriterHelper {
      * @param fileName name of the file
      * @param <B> type of bean
      */
-    public static <B> void writeFile(File rootFolder, DocumentFileUtils documentFileUtils, JsonTools jsonTools, Map<String, B> beans, String fileName) {
+    static <B> void writeFile(File rootFolder, DocumentFileUtils documentFileUtils, JsonTools jsonTools, Map<String, B> beans, String fileName) {
         File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
 
@@ -68,7 +58,7 @@ public class WriterHelper {
      * @return empty list if originalList is null, otherwise new arraylist with the contents.
      * @param <B> type of bean
      */
-    public static <B> List<B> copyList(List<B> originalList) {
+    static <B> List<B> copyList(List<B> originalList) {
         if (originalList == null) {
             return emptyList();
         }
@@ -84,7 +74,7 @@ public class WriterHelper {
      * @param <K> type of key
      * @param <V> type of value
      */
-    public static <K, V> Map<K, V> copyMap(Map<K, V> originalMap) {
+    static <K, V> Map<K, V> copyMap(Map<K, V> originalMap) {
         if (originalMap == null) {
             return emptyMap();
         }

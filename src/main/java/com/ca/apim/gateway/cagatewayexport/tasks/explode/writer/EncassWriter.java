@@ -14,15 +14,19 @@ import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import org.jetbrains.annotations.NotNull;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Singleton
 public class EncassWriter implements EntityWriter {
     private static final String ENCASS_FILE = "encass";
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
+    @Inject
     EncassWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;

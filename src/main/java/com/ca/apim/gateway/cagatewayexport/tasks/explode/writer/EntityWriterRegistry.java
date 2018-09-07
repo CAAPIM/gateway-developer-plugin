@@ -6,31 +6,24 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
-
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Set;
 
+import static java.util.Collections.unmodifiableCollection;
+
+@Singleton
 public class EntityWriterRegistry {
 
-    private final Collection<EntityWriter> entityLoaders;
+    private final Collection<EntityWriter> entityWriters;
 
-    public EntityWriterRegistry(final DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
-        final Collection<EntityWriter> loadersCollection = new HashSet<>();
-        loadersCollection.add(new PolicyWriter(documentFileUtils));
-        loadersCollection.add(new ServiceWriter(documentFileUtils, jsonTools));
-        loadersCollection.add(new EncassWriter(documentFileUtils, jsonTools));
-        loadersCollection.add(new StaticPropertiesWriter(documentFileUtils));
-        loadersCollection.add(new EnvironmentPropertiesWriter(documentFileUtils));
-        loadersCollection.add(new PolicyBackedServiceWriter(documentFileUtils, jsonTools));
-        loadersCollection.add(new ListenPortWriter(documentFileUtils, jsonTools));
-
-        this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
+    @Inject
+    public EntityWriterRegistry(final Set<EntityWriter> writers) {
+        this.entityWriters = unmodifiableCollection(writers);
     }
 
     public Collection<EntityWriter> getEntityWriters() {
-        return entityLoaders;
+        return entityWriters;
     }
 }

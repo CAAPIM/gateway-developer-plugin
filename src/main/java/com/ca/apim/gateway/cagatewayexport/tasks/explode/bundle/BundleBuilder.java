@@ -6,13 +6,17 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.*;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EntityTypeRegistry;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderRegistry;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,28 +30,31 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class BundleBuilder {
     private static final Logger LOGGER = Logger.getLogger(BundleBuilder.class.getName());
-    private final Bundle bundle;
     private final EntityLoaderRegistry entityLoaderRegistry;
+    private final EntityTypeRegistry entityTypeRegistry;
 
-    public BundleBuilder() {
-        bundle = new Bundle();
-        this.entityLoaderRegistry = new EntityLoaderRegistry();
-
+    @Inject
+    public BundleBuilder(final EntityLoaderRegistry entityLoaderRegistry, final EntityTypeRegistry entityTypeRegistry) {
+        this.entityLoaderRegistry = entityLoaderRegistry;
+        this.entityTypeRegistry = entityTypeRegistry;
     }
 
-    public void buildBundle(final Element bundleElement) {
+    public Bundle buildBundle(final Element bundleElement) {
+        Bundle bundle = new Bundle();
+
         final NodeList nodeList = bundleElement.getElementsByTagName(ITEM);
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
 
             if (node.getNodeType() == ELEMENT_NODE) {
-                handleItem((Element) node);
+                handleItem((Element) node, bundle);
             }
         }
         FolderTree folderTree = new FolderTree(bundle.getEntities(Folder.class).values());
         bundle.setFolderTree(folderTree);
-
         bundle.setDependencies(buildDependencies(getSingleChildElement(getSingleChildElement(bundleElement, DEPENDENCY_GRAPH), DEPENDENCIES)));
+
+        return bundle;
     }
 
     private Map<Dependency, List<Dependency>> buildDependencies(Element dependenciesElement) {
@@ -91,40 +98,15 @@ public class BundleBuilder {
         final String id = getSingleChildElement(dependencyElement, ID).getTextContent();
         final String type = getSingleChildElement(dependencyElement, TYPE).getTextContent();
 
-        Class<? extends Entity> typeClass = convertType(type);
+        Class<? extends Entity> typeClass = entityTypeRegistry.getEntityClass(type);
         if (typeClass != null) {
             return new Dependency(id, typeClass);
-        } else {
-            return null;
         }
+
+        return null;
     }
 
-    private Class<? extends Entity> convertType(String type) {
-        switch (type) {
-            case "SERVICE":
-                return ServiceEntity.class;
-            case "POLICY":
-                return PolicyEntity.class;
-            case "POLICY_BACKED_SERVICE":
-                return PolicyBackedServiceEntity.class;
-            case "FOLDER":
-                return Folder.class;
-            case "ENCAPSULATED_ASSERTION":
-                return EncassEntity.class;
-            case "CLUSTER_PROPERTY":
-                return ClusterProperty.class;
-            case "SSG_CONNECTOR":
-                return ListenPortEntity.class;
-            default:
-                return null;
-        }
-    }
-
-    public Bundle getBundle() {
-        return bundle;
-    }
-
-    private void handleItem(final Element element) {
+    private void handleItem(final Element element, final Bundle bundle) {
         final String type = getSingleChildElement(element, TYPE).getTextContent();
         final EntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
         if (entityLoader != null) {

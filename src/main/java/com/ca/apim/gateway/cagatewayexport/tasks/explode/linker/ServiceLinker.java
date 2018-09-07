@@ -11,13 +11,15 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Environme
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -25,10 +27,12 @@ import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleEle
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty.Type.SERVICE;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
+@Singleton
 public class ServiceLinker implements EntityLinker<ServiceEntity> {
     private final DocumentTools documentTools;
     private final PolicyXMLSimplifier policyXMLSimplifier;
 
+    @Inject
     ServiceLinker(DocumentTools documentTools) {
         this.documentTools = documentTools;
         this.policyXMLSimplifier = PolicyXMLSimplifier.INSTANCE;
@@ -42,7 +46,7 @@ public class ServiceLinker implements EntityLinker<ServiceEntity> {
     @Override
     public void link(ServiceEntity service, Bundle bundle, Bundle targetBundle) {
         try {
-            Element policyElement = WriterHelper.stringToXML(documentTools, service.getPolicy());
+            Element policyElement = DocumentUtils.stringToXML(documentTools, service.getPolicy());
             policyXMLSimplifier.simplifyPolicyXML(policyElement, bundle, targetBundle);
             service.setPolicyXML(policyElement);
         } catch (DocumentParseException e) {

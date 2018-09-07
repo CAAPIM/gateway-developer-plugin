@@ -8,6 +8,9 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 
+import javax.inject.Named;
+
+@Named("FOLDER")
 public class Folder implements Entity {
     private final String name;
     private final String id;

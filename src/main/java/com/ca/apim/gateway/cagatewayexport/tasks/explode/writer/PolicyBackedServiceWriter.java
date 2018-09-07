@@ -13,15 +13,19 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.PolicyBack
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Singleton
 public class PolicyBackedServiceWriter implements EntityWriter {
     private static final String POLICY_BACKED_SERVICES_FILE = "policy-backed-services";
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
+    @Inject
     PolicyBackedServiceWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;

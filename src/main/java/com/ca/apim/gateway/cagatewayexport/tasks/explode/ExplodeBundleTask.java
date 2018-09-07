@@ -6,10 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
-import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
+import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
@@ -23,9 +21,6 @@ import org.gradle.api.tasks.options.Option;
 import javax.inject.Inject;
 
 public class ExplodeBundleTask extends DefaultTask {
-    private final DocumentFileUtils documentFileUtils;
-    private final JsonTools jsonTools;
-    private DocumentTools documentTools;
 
     private Property<String> folderPath;
     private RegularFileProperty inputBundleFile;
@@ -33,13 +28,6 @@ public class ExplodeBundleTask extends DefaultTask {
 
     @Inject
     public ExplodeBundleTask() {
-        this(DocumentTools.INSTANCE, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
-    }
-
-    private ExplodeBundleTask(final DocumentTools documentTools, final DocumentFileUtils documentFileUtils, final JsonTools jsonTools) {
-        this.documentTools = documentTools;
-        this.documentFileUtils = documentFileUtils;
-        this.jsonTools = jsonTools;
         folderPath = getProject().getObjects().property(String.class);
         inputBundleFile = newInputFile();
         exportDir = newOutputDirectory();
@@ -72,7 +60,7 @@ public class ExplodeBundleTask extends DefaultTask {
 
     @TaskAction
     public void perform() throws DocumentParseException {
-        ExplodeBundle explodeBundle = new ExplodeBundle(documentTools, documentFileUtils, jsonTools);
+        ExplodeBundle explodeBundle = ExportPluginModule.getInjector().getInstance(ExplodeBundle.class);
         explodeBundle.explodeBundle(folderPath.getOrElse("/"), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
     }
 }

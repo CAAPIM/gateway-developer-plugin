@@ -40,6 +40,8 @@ dependencies {
     compile 'org.apache.httpcomponents:httpclient:4.5.5'
     compile 'commons-io:commons-io:+'
     compile 'org.apache.commons:commons-lang3:+'
+    compile 'org.reflections:reflections:+'
+    compile 'com.google.inject:guice:+'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 

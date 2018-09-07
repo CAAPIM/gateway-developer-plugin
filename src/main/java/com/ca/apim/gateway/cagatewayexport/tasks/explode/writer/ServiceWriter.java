@@ -15,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,12 +27,14 @@ import java.util.stream.Collectors;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
+@Singleton
 public class ServiceWriter implements EntityWriter {
 
     private static final String SERVICES_FILE = "services";
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
+    @Inject
     ServiceWriter(DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         this.documentFileUtils = documentFileUtils;
         this.jsonTools = jsonTools;

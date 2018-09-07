@@ -13,13 +13,17 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEn
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;
 
+@Singleton
 public class PolicyWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
 
+    @Inject
     PolicyWriter(DocumentFileUtils documentFileUtils) {
         this.documentFileUtils = documentFileUtils;
     }

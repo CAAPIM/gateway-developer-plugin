@@ -44,6 +44,7 @@ class CAGatewayExportTest {
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
+                .withArguments("explode", "--stacktrace")
                 .withArguments(EXPLODE_TASK)
                 .withPluginClasspath()
                 .withDebug(true)

@@ -6,25 +6,33 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.annotations.VisibleForTesting;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Collections.unmodifiableMap;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
+@Singleton
 public class EntityLoaderRegistry {
 
     private final Map<String, EntityLoader> entityLoaders;
 
-    public EntityLoaderRegistry() {
-        entityLoaders = new HashMap<>();
-        entityLoaders.put("SERVICE", new ServiceLoader());
-        entityLoaders.put("POLICY", new PolicyLoader());
-        entityLoaders.put("POLICY_BACKED_SERVICE", new PolicyBackedServiceLoader());
-        entityLoaders.put("FOLDER", new FolderLoader());
-        entityLoaders.put("ENCAPSULATED_ASSERTION", new EncassLoader());
-        entityLoaders.put("CLUSTER_PROPERTY", new ClusterPropertyLoader());
-        entityLoaders.put("SSG_CONNECTOR", new ListenPortLoader());
+    @Inject
+    public EntityLoaderRegistry(final Set<EntityLoader> loaders) {
+        entityLoaders = unmodifiableMap(loaders.stream().collect(toMap(EntityLoader::entityType, identity())));
     }
 
     public EntityLoader getLoader(String type) {
         return entityLoaders.get(type);
+    }
+
+    @VisibleForTesting
+    public Map<String, EntityLoader> getEntityLoaders() {
+        return entityLoaders;
     }
 }
