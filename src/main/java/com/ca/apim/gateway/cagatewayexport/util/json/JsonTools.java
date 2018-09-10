@@ -73,7 +73,9 @@ public class JsonTools {
             this.outputType = YAML;
             fileExtension = YAML_FILE_EXTENSION;
         } else {
-            LOGGER.log(Level.WARNING, "Output type specified is not YAML nor JSON. Using YAML as the default output.");
+            LOGGER.log(Level.WARNING,
+                    "Output type specified is not YAML nor JSON. Using {0} as the output type.",
+                    new String[] {this.outputType});
         }
     }
 
