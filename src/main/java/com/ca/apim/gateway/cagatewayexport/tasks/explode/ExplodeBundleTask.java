@@ -32,6 +32,7 @@ public class ExplodeBundleTask extends DefaultTask {
         folderPath = getProject().getObjects().property(String.class);
         inputBundleFile = newInputFile();
         exportDir = newOutputDirectory();
+        JsonTools.INSTANCE.setOutputType(JsonTools.YAML);
     }
 
     /**
