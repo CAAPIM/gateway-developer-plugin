@@ -11,6 +11,7 @@ build/
 /lib/*.jar
 /gradle.properties
 /*.iml
+out/
 
 # Comment this out so that it is not accidentally committed.
 /license.xml
