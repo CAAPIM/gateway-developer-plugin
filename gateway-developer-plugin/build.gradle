@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 plugins {
-    id 'com.gradle.plugin-publish' version "0.9.10"
+    id 'com.gradle.plugin-publish' version "0.10.0"
     id 'java-gradle-plugin'
     id 'maven-publish'
 }
@@ -42,15 +42,32 @@ jar {
     from(project(':config-builder').sourceSets.main.output)
 }
 
-pluginBundle {
-    website = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
-    vcsUrl = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
-
+gradlePlugin {
     plugins {
         gatewayPlugin {
             id = 'com.ca.apim.gateway.gateway-developer-plugin'
+            implementationClass = 'com.ca.apim.gateway.cagatewayconfig.CAGatewayDeveloper'
+        }
+        gatewayPluginBase {
+            id = 'com.ca.apim.gateway.gateway-developer-plugin-base'
+            implementationClass = 'com.ca.apim.gateway.cagatewayconfig.CAGatewayDeveloperBase'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
+    vcsUrl = 'https://github.com/ca-api-gateway/gateway-developer-plugin.git'
+
+    plugins {
+        gatewayPlugin {
             displayName = 'CA API Gateway Developer Gradle Plugin'
             description = 'The Gateway developer plugin can be used to develop Gateway configuration'
+            tags = ['ca api gateway', 'building']
+        }
+        gatewayPluginBase {
+            displayName = 'CA API Gateway Developer Base Gradle Plugin'
+            description = 'The Gateway developer plugin can be used to develop Custom Gateway configuration'
             tags = ['ca api gateway', 'building']
         }
     }
