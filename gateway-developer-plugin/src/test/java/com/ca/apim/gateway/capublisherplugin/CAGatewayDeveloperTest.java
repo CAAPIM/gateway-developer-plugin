@@ -35,7 +35,7 @@ class CAGatewayDeveloperTest {
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("build", "--stacktrace")
+                .withArguments("build", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build();
@@ -64,7 +64,7 @@ class CAGatewayDeveloperTest {
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("build", "--stacktrace")
+                .withArguments("build", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build();

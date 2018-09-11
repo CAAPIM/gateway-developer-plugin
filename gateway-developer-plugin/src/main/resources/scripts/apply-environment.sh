@@ -21,6 +21,9 @@
 #            &lt;L7p:VariableToSet stringValue="ENV.local.env.var"/&gt;
 #        &lt;/L7p:SetVariable&gt;
 
+# Call the apply-environment application
+"$JAVA_HOME/bin/java" -classpath "apply-environment/*" com.ca.apim.gateway.cagatewayconfig.Main
+
 # Get the DETEMPLATIZE_VAR_PREFIX to use. Defaults to BUNDLE_TEMPLATE_
 DETEMPLATIZE_VAR_PREFIX=${DETEMPLATIZE_VAR_PREFIX:-ENV.}
 # This is the folder containing the files .bundle to templatize

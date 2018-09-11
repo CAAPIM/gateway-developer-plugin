@@ -7,39 +7,20 @@ plugins {
     id 'com.gradle.plugin-publish' version "0.10.0"
     id 'java-gradle-plugin'
     id 'maven-publish'
+    id 'maven'
 }
 
 project.ext.'gradle.publish.key' = System.env.GRADLE_PUBLISH_KEY
 project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
 
-configurations {
-    // This is needed to add dependencies to the plugin under test metadata. See: https://discuss.gradle.org/t/how-to-make-gradle-testkit-depend-on-output-jar-rather-than-just-classes/18940/2
-    // Without this the gradle plugin test class path will be missing dependent projects who's classes get bundled into the jar
-    gradlePluginTestDependencies
-}
-
 dependencies {
     compile gradleApi()
-    //Only add the dependencies of the config builder and set the config builder to compile only. We will merge its class files into the final jar
-    compileOnly project(':config-builder')
-    compile project(':config-builder').configurations.compile
+
+    compile project(':config-builder')
 
     compile 'org.apache.commons:commons-compress:+'
 
     testCompile gradleTestKit()
-
-    //this is needed to add the config builder to the gradle plugin test class path. Specifically into the gateway-developer-plugin/build/pluginUnderTestMetadata/plugin-under-test-metadata.properties file
-    gradlePluginTestDependencies project(':config-builder')
-}
-
-pluginUnderTestMetadata {
-    // Add to the gradle plugin test class path
-    pluginClasspath += configurations.gradlePluginTestDependencies
-}
-
-// Add the classes from the config-builder project to this jar. This makes it so that the config builder jar doesn't need to get published.
-jar {
-    from(project(':config-builder').sourceSets.main.output)
 }
 
 gradlePlugin {
@@ -72,3 +53,27 @@ pluginBundle {
         }
     }
 }
+
+// This is needed for unit tests in order to test the environment creator app
+configurations {
+    testApplication
+    testConfig
+}
+uploadTestApplication {
+    configuration = project(':environment-creator-application').configurations.runtime
+    repositories {
+        mavenDeployer {
+            repository(url: "file://$project.buildDir/test-mvn-repo")
+        }
+    }
+}
+uploadTestConfig {
+    configuration = project(':config-builder').configurations.runtime
+    repositories {
+        mavenDeployer {
+            repository(url: "file://$project.buildDir/test-mvn-repo")
+        }
+    }
+}
+
+test.dependsOn 'uploadTestApplication', 'uploadTestConfig'

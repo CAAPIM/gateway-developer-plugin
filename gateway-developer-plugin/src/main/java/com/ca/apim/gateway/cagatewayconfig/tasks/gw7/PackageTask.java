@@ -24,9 +24,9 @@ import javax.inject.Inject;
 public class PackageTask extends DefaultTask {
 
     private ConfigurableFileCollection dependencyBundles;
+    private ConfigurableFileCollection containerApplicationDependencies;
     private RegularFileProperty into;
     private RegularFileProperty bundle;
-    private RegularFileProperty environmentBundle;
 
     private final FileUtils fileUtils;
     private final GW7Builder gw7Builder;
@@ -42,8 +42,8 @@ public class PackageTask extends DefaultTask {
     PackageTask(final FileUtils fileUtils, GW7Builder gw7Builder) {
         into = newOutputFile();
         bundle = newInputFile();
-        environmentBundle = newInputFile();
         dependencyBundles = getProject().files();
+        containerApplicationDependencies = getProject().files();
 
         this.fileUtils = fileUtils;
         this.gw7Builder = gw7Builder;
@@ -54,14 +54,14 @@ public class PackageTask extends DefaultTask {
         return bundle;
     }
 
-    @InputFile
-    public RegularFileProperty getEnvironmentBundle() {
-        return environmentBundle;
-    }
-
     @InputFiles
     public ConfigurableFileCollection getDependencyBundles() {
         return dependencyBundles;
+    }
+
+    @InputFiles
+    public ConfigurableFileCollection getContainerApplicationDependencies() {
+        return containerApplicationDependencies;
     }
 
     @OutputFile
@@ -72,6 +72,6 @@ public class PackageTask extends DefaultTask {
     @TaskAction
     public void perform() {
         Packager packager = new Packager(fileUtils, gw7Builder);
-        packager.buildPackage(into.getAsFile().get(), bundle.getAsFile().get(), getEnvironmentBundle().getAsFile().get(), dependencyBundles.getFiles());
+        packager.buildPackage(into.getAsFile().get(), bundle.getAsFile().get(), dependencyBundles.getFiles(), containerApplicationDependencies.getFiles());
     }
 }
