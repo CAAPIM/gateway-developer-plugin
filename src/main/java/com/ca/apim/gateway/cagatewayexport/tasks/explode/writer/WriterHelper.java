@@ -19,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayexport.util.json.JsonTools.YAML;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
@@ -42,11 +41,11 @@ class WriterHelper {
         File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
 
-        File listenPortsFile = new File(configFolder, fileName);
+        File configFile = new File(configFolder, fileName + jsonTools.getFileExtension());
 
-        ObjectWriter yamlWriter = jsonTools.getObjectWriter(YAML);
-        try (OutputStream fileStream = Files.newOutputStream(listenPortsFile.toPath())) {
-            yamlWriter.writeValue(fileStream, beans);
+        ObjectWriter objectWriter = jsonTools.getObjectWriter();
+        try (OutputStream fileStream = Files.newOutputStream(configFile.toPath())) {
+            objectWriter.writeValue(fileStream, beans);
         } catch (IOException e) {
             throw new WriteException("Exception writing " + fileName + " config file", e);
         }

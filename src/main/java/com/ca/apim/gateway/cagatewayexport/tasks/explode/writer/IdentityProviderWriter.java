@@ -30,7 +30,7 @@ import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.*;
 
 @Singleton
 public class IdentityProviderWriter implements EntityWriter {
-    private static final String IDENTITY_PROVIDERS_FILE = "identity-providers.yml";
+    private static final String IDENTITY_PROVIDERS_FILE = "identity-providers";
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 

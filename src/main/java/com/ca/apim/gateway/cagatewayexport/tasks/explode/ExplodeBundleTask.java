@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
 import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
+import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
@@ -16,6 +17,7 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.options.Option;
 
 import javax.inject.Inject;
 
@@ -30,6 +32,7 @@ public class ExplodeBundleTask extends DefaultTask {
         folderPath = getProject().getObjects().property(String.class);
         inputBundleFile = newInputFile();
         exportDir = newOutputDirectory();
+        JsonTools.INSTANCE.setOutputType(JsonTools.YAML);
     }
 
     /**
@@ -50,6 +53,11 @@ public class ExplodeBundleTask extends DefaultTask {
     @OutputDirectory
     public DirectoryProperty getExportDir() {
         return exportDir;
+    }
+
+    @Option(option = "outputType", description = "The output type of the configuration files. Either 'yaml' or 'json'.")
+    public void setOutputType(String format) {
+        JsonTools.INSTANCE.setOutputType(format);
     }
 
     @TaskAction

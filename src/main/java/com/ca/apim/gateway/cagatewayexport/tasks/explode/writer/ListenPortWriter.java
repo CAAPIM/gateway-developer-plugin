@@ -28,7 +28,7 @@ import static java.util.stream.Collectors.toMap;
 @Singleton
 public class ListenPortWriter implements EntityWriter {
 
-    public static final String LISTEN_PORTS_FILE = "listen-ports.yml";
+    private static final String LISTEN_PORTS_FILE = "listen-ports";
 
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
@@ -41,7 +41,10 @@ public class ListenPortWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, ListenPort> listenPortBeans = bundle.getEntities(ListenPortEntity.class).values().stream().collect(toMap(ListenPortEntity::getName, this::getListenPortBean));
+        Map<String, ListenPort> listenPortBeans = bundle.getEntities(ListenPortEntity.class)
+                .values()
+                .stream()
+                .collect(toMap(ListenPortEntity::getName, this::getListenPortBean));
 
         WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, listenPortBeans, LISTEN_PORTS_FILE);
     }

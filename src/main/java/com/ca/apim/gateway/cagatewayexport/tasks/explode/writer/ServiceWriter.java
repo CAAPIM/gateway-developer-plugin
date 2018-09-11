@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEn
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -19,9 +18,6 @@ import org.w3c.dom.NodeList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,6 +30,7 @@ import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSing
 @Singleton
 public class ServiceWriter implements EntityWriter {
 
+    private static final String SERVICES_FILE = "services";
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
@@ -45,21 +42,12 @@ public class ServiceWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        File configFolder = new File(rootFolder, "config");
-        documentFileUtils.createFolder(configFolder.toPath());
+        Map<String, Service> serviceBeans = bundle.getEntities(ServiceEntity.class)
+                .values()
+                .stream()
+                .collect(Collectors.toMap(ServiceEntity::getPath, this::getServiceBean));
 
-        Map<String, ServiceEntity> services = bundle.getEntities(ServiceEntity.class);
-
-        Map<String, Service> serviceBeans = services.values().stream().collect(Collectors.toMap(ServiceEntity::getPath, this::getServiceBean));
-
-        File servicesFile = new File(configFolder, "services.yml");
-
-        ObjectWriter yamlWriter = jsonTools.getObjectWriter(JsonTools.YAML);
-        try (OutputStream fileStream = Files.newOutputStream(servicesFile.toPath())) {
-            yamlWriter.writeValue(fileStream, serviceBeans);
-        } catch (IOException e) {
-            throw new WriteException("Exception writing services config file", e);
-        }
+        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, serviceBeans, SERVICES_FILE);
     }
 
     @NotNull

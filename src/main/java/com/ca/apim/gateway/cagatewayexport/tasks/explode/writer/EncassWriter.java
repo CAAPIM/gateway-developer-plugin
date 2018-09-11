@@ -12,20 +12,17 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Encass;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.EncassParam;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
 public class EncassWriter implements EntityWriter {
+    private static final String ENCASS_FILE = "encass";
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
@@ -37,21 +34,12 @@ public class EncassWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        File configFolder = new File(rootFolder, "config");
-        documentFileUtils.createFolder(configFolder.toPath());
+        Map<String, Encass> encassBeans = bundle.getEntities(EncassEntity.class)
+                .values()
+                .stream()
+                .collect(Collectors.toMap(EncassEntity::getPath, this::getEncassBean));
 
-        Map<String, EncassEntity> encasses = bundle.getEntities(EncassEntity.class);
-
-        Map<String, Encass> encassBeans = encasses.values().stream().collect(Collectors.toMap(EncassEntity::getPath, this::getEncassBean));
-
-        File servicesFile = new File(configFolder, "encass.yml");
-
-        ObjectWriter yamlWriter = jsonTools.getObjectWriter(JsonTools.YAML);
-        try (OutputStream fileStream = Files.newOutputStream(servicesFile.toPath())) {
-            yamlWriter.writeValue(fileStream, encassBeans);
-        } catch (IOException e) {
-            throw new WriteException("Exception writing encasses config file", e);
-        }
+        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE);
     }
 
     @NotNull

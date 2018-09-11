@@ -12,19 +12,16 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.PolicyBack
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.PolicyBackedServiceOperation;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
 public class PolicyBackedServiceWriter implements EntityWriter {
+    private static final String POLICY_BACKED_SERVICES_FILE = "policy-backed-services";
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
@@ -36,21 +33,12 @@ public class PolicyBackedServiceWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        File configFolder = new File(rootFolder, "config");
-        documentFileUtils.createFolder(configFolder.toPath());
+        Map<String, PolicyBackedService> policyBackedServiceBeans = bundle.getEntities(PolicyBackedServiceEntity.class)
+                .values()
+                .stream()
+                .collect(Collectors.toMap(PolicyBackedServiceEntity::getName, this::getPolicyBackedServiceBean));
 
-        Map<String, PolicyBackedServiceEntity> policyBackedServiceEntityMap = bundle.getEntities(PolicyBackedServiceEntity.class);
-
-        Map<String, PolicyBackedService> policyBackedServiceBeans = policyBackedServiceEntityMap.values().stream().collect(Collectors.toMap(PolicyBackedServiceEntity::getName, this::getPolicyBackedServiceBean));
-
-        File servicesFile = new File(configFolder, "policy-backed-services.yml");
-
-        ObjectWriter yamlWriter = jsonTools.getObjectWriter(JsonTools.YAML);
-        try (OutputStream fileStream = Files.newOutputStream(servicesFile.toPath())) {
-            yamlWriter.writeValue(fileStream, policyBackedServiceBeans);
-        } catch (IOException e) {
-            throw new WriteException("Exception writing policy backed services config file", e);
-        }
+        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, policyBackedServiceBeans, POLICY_BACKED_SERVICES_FILE);
     }
 
     private PolicyBackedService getPolicyBackedServiceBean(PolicyBackedServiceEntity policyBackedServiceEntity) {
