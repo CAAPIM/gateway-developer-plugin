@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.BindOnlyLdapIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.FederatedIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
@@ -136,12 +137,68 @@ class IdentityProviderLoaderTest {
         Assertions.assertThrows(JsonToolsException.class, () -> identityProviderLoader.load(bundle, rootProjectDir.getRoot()));
     }
 
+    @Test
+    void loadFedIdWithMultipleCertRefs() throws IOException {
+        final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
+        final String yml = "fed ID:\n" +
+                "  type: FEDERATED\n" +
+                "  properties:\n" +
+                "    certificateValidation: Validate\n" +
+                "    enableCredentialType.saml: true\n" +
+                "    enableCredentialType.x509: true\n" +
+                "  identityProviderDetail:\n" +
+                "    certificateReferences:\n" +
+                "    - 355cd79a5fc6a2a508c45e6e875ce5ab\n" +
+                "    - 355cd79a5fc6a2a508c45e6e875ce628";
+        final File configFolder = rootProjectDir.createDirectory("config");
+        final File identityProvidersFile = new File(configFolder, "identity-providers.yml");
+        Files.touch(identityProvidersFile);
+
+        Mockito.when(fileUtils.getInputStream(Mockito.any(File.class))).thenReturn(new ByteArrayInputStream(yml.getBytes(Charset.forName("UTF-8"))));
+
+        final Bundle bundle = new Bundle();
+        identityProviderLoader.load(bundle, rootProjectDir.getRoot());
+
+        assertEquals(1, bundle.getIdentityProviders().size());
+        final IdentityProvider identityProvider = bundle.getIdentityProviders().get("fed ID");
+        assertEquals(3, identityProvider.getProperties().size());
+        assertEquals(IdentityProvider.Type.FEDERATED, identityProvider.getType());
+        assertTrue(identityProvider.getIdentityProviderDetail() instanceof FederatedIdentityProviderDetail);
+
+        final FederatedIdentityProviderDetail identityProviderDetail = (FederatedIdentityProviderDetail) identityProvider.getIdentityProviderDetail();
+        assertEquals(2, identityProviderDetail.getCertificateReferences().size());
+    }
+
+    @Test
+    void loadFedIdWithNoCertRefs() throws IOException {
+        final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
+        final String yml = "fed_no_cert:\n" +
+                "  type: \"FEDERATED\"\n" +
+                "  properties:\n" +
+                "    enableCredentialType.saml: false\n" +
+                "    enableCredentialType.x509: true";
+        final File configFolder = rootProjectDir.createDirectory("config");
+        final File identityProvidersFile = new File(configFolder, "identity-providers.yml");
+        Files.touch(identityProvidersFile);
+
+        Mockito.when(fileUtils.getInputStream(Mockito.any(File.class))).thenReturn(new ByteArrayInputStream(yml.getBytes(Charset.forName("UTF-8"))));
+
+        final Bundle bundle = new Bundle();
+        identityProviderLoader.load(bundle, rootProjectDir.getRoot());
+
+        assertEquals(1, bundle.getIdentityProviders().size());
+        final IdentityProvider identityProvider = bundle.getIdentityProviders().get("fed_no_cert");
+        assertEquals(2, identityProvider.getProperties().size());
+        assertEquals(IdentityProvider.Type.FEDERATED, identityProvider.getType());
+        assertNull(identityProvider.getIdentityProviderDetail());
+    }
+
     private void verifySimpleLdap(Bundle bundle) {
         assertEquals(1, bundle.getIdentityProviders().size());
 
         final IdentityProvider identityProvider = bundle.getIdentityProviders().get("simple ldap");
-        assertTrue("Two items in properties", identityProvider.getProperties().size() == 2);
-        assertTrue("Type is BIND_ONLY_LDAP", identityProvider.getType() == IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
+        assertEquals("Two items in properties", 2, identityProvider.getProperties().size());
+        assertEquals("Type is BIND_ONLY_LDAP", IdentityProvider.Type.BIND_ONLY_LDAP, identityProvider.getType());
         assertTrue("IdentityProviderDetail deserialized to BindOnlyLdapIdentityProviderDetail", identityProvider.getIdentityProviderDetail() instanceof BindOnlyLdapIdentityProviderDetail);
 
         final BindOnlyLdapIdentityProviderDetail identityProviderDetail = (BindOnlyLdapIdentityProviderDetail) identityProvider.getIdentityProviderDetail();

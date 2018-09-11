@@ -13,6 +13,8 @@ public class BundleElementNames {
     // Attributes
     public static final String ATTRIBUTE_ID = "id";
     public static final String ATTRIBUTE_KEY = "key";
+    public static final String ATTRIBUTE_RESOURCE_URI= "resourceUri";
+
 
     // Common Elements
     public static final String NAME = "l7:Name";
@@ -23,6 +25,7 @@ public class BundleElementNames {
     public static final String BOOLEAN_VALUE = "l7:BooleanValue";
     public static final String STRING_VALUE = "l7:StringValue";
     public static final String RESOURCE = "l7:Resource";
+    public static final String REFERENCE = "l7:Reference";
 
     // Listen Port Elements
     public static final String LISTEN_PORT = "l7:ListenPort";
@@ -35,6 +38,18 @@ public class BundleElementNames {
     public static final String CLIENT_AUTHENTICATION = "l7:ClientAuthentication";
     public static final String ENABLED_VERSIONS = "l7:EnabledVersions";
     public static final String ENABLED_CIPHER_SUITES = "l7:EnabledCipherSuites";
+
+    // Identity Provider Elements
+    public static final String ID_PROV = "l7:IdentityProvider";
+    public static final String ID_PROV_TYPE = "l7:IdentityProviderType";
+    public static final String EXTENSION = "l7:Extension";
+    public static final String SERVER_URLS = "l7:ServerUrls";
+    public static final String BIND_ONLY_ID_PROV_DETAIL = "l7:BindOnlyLdapIdentityProviderDetail";
+    public static final String FEDERATED_ID_PROV_DETAIL = "l7:FederatedIdentityProviderDetail";
+    public static final String CERTIFICATE_REFERENCES = "l7:CertificateReferences";
+    public static final String USE_SSL_CLIENT_AUTH = "l7:UseSslClientAuthentication";
+    public static final String BIND_PATTERN_PREFIX = "l7:BindPatternPrefix";
+    public static final String BIND_PATTERN_SUFFIX = "l7:BindPatternSuffix";
 
     private BundleElementNames() {
         //

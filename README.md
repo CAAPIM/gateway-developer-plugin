@@ -36,6 +36,7 @@ EncapsulatedAssertion | Yes |
 ClusterProperty | Yes |
 Policy Backed Service | Yes |
 Listen Port | Yes | 
+Identity Provider | Yes |
  
 
 ## Expected Source Directory Organization

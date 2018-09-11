@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * Created by chaoy01 on 2018-08-17.
  */
 @JsonTypeName("BIND_ONLY_LDAP")
-public class BindOnlyLdapIdentityProviderDetail extends IdentityProviderDetail {
+public class BindOnlyLdapIdentityProviderDetail extends LdapIdentityProviderDetail {
 
     private String bindPatternPrefix;
     private String bindPatternSuffix;

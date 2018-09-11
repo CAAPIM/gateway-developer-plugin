@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Map;
 
 public class IdentityProvider {
-    public enum IdentityProviderType {
+    public enum Type {
         INTERNAL("Internal"),
         LDAP("LDAP"),
         FEDERATED("Federated"),
@@ -20,7 +20,7 @@ public class IdentityProvider {
         POLICY_BACKED("Policy-backed");
 
         private String value;
-        IdentityProviderType(String value) {
+        Type(String value) {
             this.value = value;
         }
         public String getValue() {
@@ -28,29 +28,30 @@ public class IdentityProvider {
         }
     }
 
-    private IdentityProviderType type;
-    private Map<String,String> properties;
+    private Type type;
+    private Map<String, Object> properties;
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes( {
             @JsonSubTypes.Type(value=BindOnlyLdapIdentityProviderDetail.class, name="BIND_ONLY_LDAP"),
-            @JsonSubTypes.Type(value=LdapIdentityProviderDetail.class, name="LDAP")
+            @JsonSubTypes.Type(value=FullLdapIdentityProviderDetail.class, name="LDAP"),
+            @JsonSubTypes.Type(value=FederatedIdentityProviderDetail.class, name="FEDERATED")
     })
     private IdentityProviderDetail identityProviderDetail;
 
-    public IdentityProviderType getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(IdentityProviderType type) {
+    public void setType(Type type) {
         this.type = type;
     }
 
-    public Map<String,String> getProperties() {
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String,String> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
 

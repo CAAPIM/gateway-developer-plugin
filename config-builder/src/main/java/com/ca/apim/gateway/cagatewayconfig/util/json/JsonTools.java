@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayconfig.util.json;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -20,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.fasterxml.jackson.databind.DeserializationFeature.*;
 
 public class JsonTools {
     private static final Logger LOGGER = Logger.getLogger(JsonTools.class.getName());
@@ -78,7 +79,8 @@ public class JsonTools {
 
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {
         ObjectMapper objectMapper = new ObjectMapper(jf);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false);
         return objectMapper;
     }
 }
