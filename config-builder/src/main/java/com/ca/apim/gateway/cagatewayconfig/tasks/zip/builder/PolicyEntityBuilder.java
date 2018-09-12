@@ -30,7 +30,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
-import static com.google.common.base.MoreObjects.firstNonNull;
 
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
@@ -232,9 +231,9 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyDetailElement.appendChild(createElementWithTextContent(document, NAME, policy.getName()));
 
         PolicyTags policyTags = getPolicyTags(policy, bundle);
-        if (policyTags != null) {
-            policyDetailElement.appendChild(createElementWithTextContent(document, POLICY_TYPE, firstNonNull(policyTags.type, POLICY_TYPE_INCLUDE)));
+        policyDetailElement.appendChild(createElementWithTextContent(document, POLICY_TYPE, policyTags == null ? POLICY_TYPE_INCLUDE : policyTags.type));
 
+        if (policyTags != null) {
             buildAndAppendPropertiesElement(
                     ImmutableMap.of(TAG, policyTags.tag, SUBTAG, policyTags.subtag),
                     document,
