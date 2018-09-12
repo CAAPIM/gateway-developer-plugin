@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -37,11 +38,14 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
 
     private Entity buildPBSEntity(Bundle bundle, String name, PolicyBackedService policyBackedService) {
         String id = idGenerator.generate();
-        Element policyBackedServiceElement = createElementWithAttribute(document, POLICY_BACKED_SERVICE, ATTRIBUTE_ID, id);
-
-        policyBackedServiceElement.appendChild(createElementWithTextContent(document, NAME, name));
-        policyBackedServiceElement.appendChild(createElementWithTextContent(document, INTERFACE_NAME, policyBackedService.getInterfaceName()));
-        policyBackedServiceElement.appendChild(buildOperations(policyBackedService, bundle));
+        Element policyBackedServiceElement = createElementWithAttributesAndChildren(
+                document,
+                POLICY_BACKED_SERVICE,
+                ImmutableMap.of(ATTRIBUTE_ID, id),
+                createElementWithTextContent(document, NAME, name),
+                createElementWithTextContent(document, INTERFACE_NAME, policyBackedService.getInterfaceName()),
+                buildOperations(policyBackedService, bundle)
+        );
 
         return new Entity(POLICY_BACKED_SERVICE_TYPE, name, id, policyBackedServiceElement);
     }

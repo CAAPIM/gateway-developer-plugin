@@ -151,9 +151,16 @@ public class DocumentUtils {
         return element;
     }
 
-    public static Element createElementWithChildren(final Document document, final String elementName, final Element... child) {
+    public static Element createElementWithChildren(final Document document, final String elementName, final Element... children) {
         Element element = document.createElement(elementName);
-        Stream.of(child).forEach(element::appendChild);
+        Stream.of(children).forEach(element::appendChild);
+        return element;
+    }
+
+    public static Element createElementWithAttributesAndChildren(final Document document, final String elementName, final Map<String, String> attributes, final Element... children) {
+        Element element = document.createElement(elementName);
+        attributes.forEach(element::setAttribute);
+        Stream.of(children).forEach(element::appendChild);
         return element;
     }
 }

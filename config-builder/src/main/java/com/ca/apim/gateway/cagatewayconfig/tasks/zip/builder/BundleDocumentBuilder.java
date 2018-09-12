@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
+import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -14,9 +15,8 @@ import java.util.List;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.MappingActions.NEW_OR_EXISTING;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithChildren;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 public class BundleDocumentBuilder {
 
@@ -48,24 +48,21 @@ public class BundleDocumentBuilder {
     }
 
     private Element buildEntityMapping(final Entity entity, final Document document) {
-        final Element mapping = document.createElement(MAPPING);
-        mapping.setAttribute(ATTRIBUTE_ACTION, NEW_OR_EXISTING);
-        mapping.setAttribute(ATTRIBUTE_SRCID, entity.getId());
-        mapping.setAttribute(ATTRIBUTE_TYPE, entity.getType());
+        final Element mapping = createElementWithAttributes(document, MAPPING, ImmutableMap.of(ATTRIBUTE_ACTION, NEW_OR_EXISTING, ATTRIBUTE_SRCID, entity.getId(), ATTRIBUTE_TYPE, entity.getType()));
         buildAndAppendPropertiesElement(entity.getMappingProperties(), document, mapping);
 
         return mapping;
     }
 
     private Element buildEntityItem(final Entity entity, final Document document) {
-        final Element item = document.createElement(ITEM);
-
-        item.appendChild(createElementWithTextContent(document, NAME, entity.getName()));
-        item.appendChild(createElementWithTextContent(document, ID, entity.getId()));
-        item.appendChild(createElementWithTextContent(document, TYPE, entity.getType()));
-        item.appendChild(createElementWithChildren(document, RESOURCE, entity.getXml()));
-
-        return item;
+        return createElementWithChildren(
+                document,
+                ITEM,
+                createElementWithTextContent(document, NAME, entity.getName()),
+                createElementWithTextContent(document, ID, entity.getId()),
+                createElementWithTextContent(document, TYPE, entity.getType()),
+                createElementWithChildren(document, RESOURCE, entity.getXml())
+        );
     }
 
     void addEntities(List<Entity> entitiesToAdd) {

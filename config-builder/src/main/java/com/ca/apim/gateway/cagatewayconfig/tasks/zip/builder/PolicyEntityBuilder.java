@@ -222,16 +222,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildPolicyEntity(Policy policy, Bundle bundle) {
-        Element policyDetailElement = document.createElement(POLICY_DETAIL);
-
         String id = policy.getId();
-        policyDetailElement.setAttribute(ATTRIBUTE_ID, id);
-        policyDetailElement.setAttribute(ATTRIBUTE_GUID, policy.getGuid());
-        policyDetailElement.setAttribute(ATTRIBUTE_FOLDER_ID, policy.getParentFolder().getId());
-        policyDetailElement.appendChild(createElementWithTextContent(document, NAME, policy.getName()));
-
         PolicyTags policyTags = getPolicyTags(policy, bundle);
-        policyDetailElement.appendChild(createElementWithTextContent(document, POLICY_TYPE, policyTags == null ? POLICY_TYPE_INCLUDE : policyTags.type));
+
+        Element policyDetailElement = createElementWithAttributesAndChildren(
+                document,
+                POLICY_DETAIL,
+                ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_GUID, policy.getGuid(), ATTRIBUTE_FOLDER_ID, policy.getParentFolder().getId()),
+                createElementWithTextContent(document, NAME, policy.getName()),
+                createElementWithTextContent(document, POLICY_TYPE, policyTags == null ? POLICY_TYPE_INCLUDE : policyTags.type)
+        );
 
         if (policyTags != null) {
             buildAndAppendPropertiesElement(
@@ -241,7 +241,11 @@ public class PolicyEntityBuilder implements EntityBuilder {
             );
         }
 
-        Element policyElement = createElementWithAttributes(document, BundleElementNames.POLICY, ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_GUID, policy.getGuid()));
+        Element policyElement = createElementWithAttributes(
+                document,
+                BundleElementNames.POLICY,
+                ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_GUID, policy.getGuid())
+        );
         policyElement.appendChild(policyDetailElement);
 
         Element resourcesElement = document.createElement(RESOURCES);

@@ -48,16 +48,19 @@ public class EncassEntityBuilder implements EntityBuilder {
             throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + policyPath);
         }
         final String name = policy.getName();
+        final String id = idGenerator.generate();
 
-        Element encassAssertionElement = document.createElement(ENCAPSULATED_ASSERTION);
+        Element encassAssertionElement = createElementWithAttributesAndChildren(
+                document,
+                ENCAPSULATED_ASSERTION,
+                ImmutableMap.of(ATTRIBUTE_ID, id),
+                createElementWithTextContent(document, NAME, name),
+                createElementWithTextContent(document, GUID, encass.getGuid()),
+                createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policy.getId()),
+                buildArguments(encass),
+                buildResults(encass)
+        );
 
-        String id = idGenerator.generate();
-        encassAssertionElement.setAttribute(ATTRIBUTE_ID, id);
-        encassAssertionElement.appendChild(createElementWithTextContent(document, NAME, name));
-        encassAssertionElement.appendChild(createElementWithTextContent(document, GUID, encass.getGuid()));
-        encassAssertionElement.appendChild(createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policy.getId()));
-        encassAssertionElement.appendChild(buildArguments(encass));
-        encassAssertionElement.appendChild(buildResults(encass));
         buildAndAppendPropertiesElement(ImmutableMap.of(PALETTE_FOLDER, INTERNAL_ASSERTIONS), document, encassAssertionElement);
 
         return new Entity(ENCAPSULATED_ASSERTION_TYPE, name, id, encassAssertionElement);

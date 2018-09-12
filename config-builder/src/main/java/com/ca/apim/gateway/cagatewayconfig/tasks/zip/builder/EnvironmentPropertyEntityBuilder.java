@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ClusterPropertyEntityBuilder.buildClusterPropertyElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CLUSTER_PROPERTY_TYPE;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.MappingProperties.MAP_BY;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.MappingProperties.NAME;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_BY;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 

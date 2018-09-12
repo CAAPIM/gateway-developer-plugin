@@ -104,29 +104,6 @@ public class BundleElementNames {
     public static final String BIND_PATTERN_PREFIX = "l7:BindPatternPrefix";
     public static final String BIND_PATTERN_SUFFIX = "l7:BindPatternSuffix";
 
-    public static class MappingActions {
-
-        public static final String NEW_OR_EXISTING = "NewOrExisting";
-        public static final String NEW_OR_UPDATE = "NewOrUpdate";
-        public static final String ALWAYS_CREATE_NEW = "AlwaysCreateNew";
-        public static final String IGNORE = "Ignore";
-        public static final String DELETE = "Delete";
-
-        private MappingActions() {}
-    }
-
-    public static class MappingProperties {
-
-        public static final String NAME = "name";
-
-        public static final String MAP_BY = "MapBy";
-        public static final String MAP_TO = "MapTo";
-        public static final String FAIL_ON_NEW = "FailOnNew";
-        public static final String FAIL_ON_EXISTING = "FailOnExisting";
-
-        private MappingProperties() {}
-    }
-
     private BundleElementNames() {
         //
     }

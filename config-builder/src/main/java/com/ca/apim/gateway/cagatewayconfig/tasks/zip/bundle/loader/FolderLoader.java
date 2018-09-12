@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 public class FolderLoader implements BundleEntityLoader {
     private static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
@@ -24,7 +25,7 @@ public class FolderLoader implements BundleEntityLoader {
     @Override
     public void load(Bundle bundle, Element element) {
         final Element folderElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), FOLDER);
-        final String name = getSingleChildElement(folderElement, NAME).getTextContent();
+        final String name = getSingleChildElementTextContent(folderElement, NAME);
         final String id = folderElement.getAttribute(ATTRIBUTE_ID);
         final String parentFolderID = folderElement.getAttribute(ATTRIBUTE_FOLDER_ID);
 
