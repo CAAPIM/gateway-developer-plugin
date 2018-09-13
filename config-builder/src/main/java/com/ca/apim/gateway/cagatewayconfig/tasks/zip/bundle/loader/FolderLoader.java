@@ -15,17 +15,19 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 public class FolderLoader implements BundleEntityLoader {
     private static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
 
     @Override
     public void load(Bundle bundle, Element element) {
-        final Element folderElement = getSingleChildElement(getSingleChildElement(element, "l7:Resource"), "l7:Folder");
-        final String name = getSingleChildElement(folderElement, "l7:Name").getTextContent();
-        final String id = folderElement.getAttribute("id");
-        final String parentFolderID = folderElement.getAttribute("folderId");
+        final Element folderElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), FOLDER);
+        final String name = getSingleChildElementTextContent(folderElement, NAME);
+        final String id = folderElement.getAttribute(ATTRIBUTE_ID);
+        final String parentFolderID = folderElement.getAttribute(ATTRIBUTE_FOLDER_ID);
 
         final Folder parentFolder;
         if (ROOT_FOLDER_ID.equals(id)) {

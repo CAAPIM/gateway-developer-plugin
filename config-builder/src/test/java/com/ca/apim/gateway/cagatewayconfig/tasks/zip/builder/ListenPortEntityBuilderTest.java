@@ -24,7 +24,8 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEn
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.INSTANCE;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.lang.Boolean.TRUE;
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;

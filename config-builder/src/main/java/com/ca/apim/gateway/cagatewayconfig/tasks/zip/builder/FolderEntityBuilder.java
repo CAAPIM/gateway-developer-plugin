@@ -16,27 +16,30 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+
 public class FolderEntityBuilder implements EntityBuilder {
     private static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
     private static final String ROOT_FOLDER_NAME = "Root Node";
     private final IdGenerator idGenerator;
     private final Document document;
 
-    public FolderEntityBuilder(Document document, IdGenerator idGenerator) {
+    FolderEntityBuilder(Document document, IdGenerator idGenerator) {
         this.document = document;
         this.idGenerator = idGenerator;
     }
 
-    public Entity buildFolderEntity(String name, String id, String parentFolderId) {
-        Element folder = document.createElement("l7:Folder");
-        folder.setAttribute("id", id);
+    private Entity buildFolderEntity(String name, String id, String parentFolderId) {
+        Element folder = createElementWithAttribute(document, FOLDER, ATTRIBUTE_ID, id);
+
         if (parentFolderId != null) {
-            folder.setAttribute("folderId", parentFolderId);
+            folder.setAttribute(ATTRIBUTE_FOLDER_ID, parentFolderId);
         }
-        Element folderName = document.createElement("l7:Name");
-        folderName.appendChild(document.createTextNode(name));
-        folder.appendChild(folderName);
-        return new Entity("FOLDER", name, id, folder);
+        folder.appendChild(createElementWithTextContent(document, NAME, name));
+        return new Entity(FOLDER_TYPE, name, id, folder);
     }
 
     public List<Entity> build(Bundle bundle) {

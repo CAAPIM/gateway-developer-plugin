@@ -16,6 +16,7 @@ import java.util.Map;
 
 public class ListenPortLoader implements EntityLoader {
 
+    private static final String FILE_NAME = "listen-ports";
     private static final TypeReference<HashMap<String, ListenPort>> listenPortTypeMapping = new TypeReference<HashMap<String, ListenPort>>() {
     };
     private final JsonTools jsonTools;
@@ -26,9 +27,9 @@ public class ListenPortLoader implements EntityLoader {
 
     @Override
     public void load(Bundle bundle, File rootDir) {
-        final Map<String, ListenPort> listenPorts = jsonTools.parseDocumentFile(
-                new File(rootDir, "config"),
-                "listen-ports",
+        final Map<String, ListenPort> listenPorts = jsonTools.parseDocumentFileFromConfigDir(
+                rootDir,
+                FILE_NAME,
                 listenPortTypeMapping);
         if (listenPorts != null) {
             bundle.putAllListenPorts(listenPorts);

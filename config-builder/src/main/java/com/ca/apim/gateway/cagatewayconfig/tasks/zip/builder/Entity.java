@@ -12,10 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Entity {
-    public static final String MAPPING_PROPERTY_MAP_BY = "MapBy";
-    public static final String MAPPING_PROPERTY_MAP_TO = "MapTo";
-    public static final String MAPPING_PROPERTY_FAIL_ON_NEW = "FailOnNew";
-    public static final String MAPPING_PROPERTY_FAIL_ON_EXISTING = "FailOnExisting";
 
     private String type;
     private String id;

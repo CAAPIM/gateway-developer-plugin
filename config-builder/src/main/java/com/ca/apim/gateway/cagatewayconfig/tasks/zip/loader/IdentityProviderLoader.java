@@ -19,6 +19,8 @@ import java.util.Map;
  * Created by chaoy01 on 2018-08-16.
  */
 public class IdentityProviderLoader implements EntityLoader {
+
+    private static final String FILE_NAME = "identity-providers";
     private static final TypeReference<HashMap<String, IdentityProvider>> identityProviderTypeMapping = new TypeReference<HashMap<String, IdentityProvider>>() {
     };
     private final JsonTools jsonTools;
@@ -29,9 +31,9 @@ public class IdentityProviderLoader implements EntityLoader {
 
     @Override
     public void load(Bundle bundle, File rootDir) {
-        final Map<String, IdentityProvider> identityProviders = jsonTools.parseDocumentFile(
-                new File(rootDir, "config"),
-                "identity-providers",
+        final Map<String, IdentityProvider> identityProviders = jsonTools.parseDocumentFileFromConfigDir(
+                rootDir,
+                FILE_NAME,
                 identityProviderTypeMapping);
         if (identityProviders != null) {
             bundle.putAllIdentityProviders(identityProviders);

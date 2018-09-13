@@ -10,14 +10,19 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.BindOnlyLdapIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ID_PROVIDER_CONFIG_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_PROPERTY;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
 public class IdentityProviderEntityBuilder implements EntityBuilder {
     private final Document document;
@@ -35,19 +40,18 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildIdentityProviderEntity(String name, IdentityProvider identityProvider) {
-        final Element identityProviderElement = document.createElement("l7:IdentityProvider");
         final String id = idGenerator.generate();
-        identityProviderElement.setAttribute("id", id);
-        identityProviderElement.appendChild(DocumentTools.createElementWithTextContent(document, "l7:Name", name));
-        identityProviderElement.appendChild(DocumentTools.createElementWithTextContent(document, "l7:IdentityProviderType", identityProvider.getType().getValue()));
+        final Element identityProviderElement = createElementWithAttribute(document, ID_PROV, ATTRIBUTE_ID, id);
+        identityProviderElement.appendChild(createElementWithTextContent(document, NAME, name));
+        identityProviderElement.appendChild(createElementWithTextContent(document, ID_PROV_TYPE, identityProvider.getType().getValue()));
 
         switch(identityProvider.getType()) {
             case BIND_ONLY_LDAP:
                 if (identityProvider.getProperties() != null) {
-                    identityProviderElement.appendChild(BuilderUtils.buildPropertiesElement(
-                            identityProvider.getProperties().entrySet()
+                    buildAndAppendPropertiesElement(identityProvider.getProperties().entrySet()
                                     .stream()
-                                    .collect(Collectors.toMap(stringStringEntry -> "property." + stringStringEntry.getKey(), Map.Entry::getValue)), document));
+                                    .collect(Collectors.toMap(stringStringEntry -> PREFIX_PROPERTY + stringStringEntry.getKey(), Map.Entry::getValue)),
+                            document, identityProviderElement);
                 }
                 identityProviderElement.appendChild(buildBindOnlyLdapIPDetails(identityProvider));
                 break;
@@ -59,7 +63,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
                 throw new EntityBuilderException("Please Specify the Identity Provider Type as one of: 'BIND_ONLY_LDAP'");
         }
 
-        return new Entity("ID_PROVIDER_CONFIG", name, id, identityProviderElement);
+        return new Entity(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
     }
 
     private Element buildBindOnlyLdapIPDetails(IdentityProvider identityProvider) {
@@ -67,36 +71,36 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
         if (identityProviderDetail == null) {
             throw new EntityBuilderException("Identity Provider Detail must be specified for BIND_ONLY_LDAP");
         }
-        final Element extensionElement = document.createElement("l7:Extension");
-        final Element bindOnlyLdapIdentityProviderDetailElement = document.createElement("l7:BindOnlyLdapIdentityProviderDetail");
+        final Element extensionElement = document.createElement(EXTENSION);
+        final Element bindOnlyLdapIdentityProviderDetailElement = document.createElement(BIND_ONLY_ID_PROV_DETAIL);
         extensionElement.appendChild(bindOnlyLdapIdentityProviderDetailElement);
-        final Element serverUrlsElement = document.createElement("l7:ServerUrls");
+        final Element serverUrlsElement = document.createElement(SERVER_URLS);
         bindOnlyLdapIdentityProviderDetailElement.appendChild(serverUrlsElement);
         final List<String> serverUrls = identityProviderDetail.getServerUrls();
         if (serverUrls == null || serverUrls.isEmpty()) {
             throw new EntityBuilderException("serverUrls must be a list of urls.");
         }
         identityProviderDetail.getServerUrls().forEach(url ->
-            serverUrlsElement.appendChild(DocumentTools.createElementWithTextContent(document, "l7:StringValue", url))
+            serverUrlsElement.appendChild(createElementWithTextContent(document, STRING_VALUE, url))
         );
         bindOnlyLdapIdentityProviderDetailElement.appendChild(
-                DocumentTools.createElementWithTextContent(
+                createElementWithTextContent(
                         document,
-                        "l7:UseSslClientAuthentication",
+                        USE_SSL_CLIENT_AUTH,
                         String.valueOf(identityProviderDetail.isUseSslClientAuthentication())
                 )
         );
         bindOnlyLdapIdentityProviderDetailElement.appendChild(
-                DocumentTools.createElementWithTextContent(
+                createElementWithTextContent(
                         document,
-                        "l7:BindPatternPrefix",
+                        BIND_PATTERN_PREFIX,
                         identityProviderDetail.getBindPatternPrefix()
                 )
         );
         bindOnlyLdapIdentityProviderDetailElement.appendChild(
-                DocumentTools.createElementWithTextContent(
+                createElementWithTextContent(
                         document,
-                        "l7:BindPatternSuffix",
+                        BIND_PATTERN_SUFFIX,
                         identityProviderDetail.getBindPatternSuffix()
                 )
         );

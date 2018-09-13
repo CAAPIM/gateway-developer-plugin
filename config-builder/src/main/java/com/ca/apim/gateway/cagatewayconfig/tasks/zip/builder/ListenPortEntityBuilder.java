@@ -25,16 +25,16 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.Cli
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.Feature.*;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.*;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ListenPortTlsSettings.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.LISTEN_PORT_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.createElementWithAttribute;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.createElementWithTextContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.collections4.MapUtils.isNotEmpty;
 import static org.apache.commons.collections4.MapUtils.unmodifiableMap;
 
 /**
@@ -83,6 +83,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
             "TLS_RSA_WITH_AES_128_CBC_SHA"));
     static final List<String> TLS_VERSIONS = asList(TLSV1, TLSV11, TLSV12);
     private static final Map<String, ListenPort> DEFAULT_PORTS = unmodifiableMap(createDefaultListenPorts());
+    private static final String USES_TLS = "usesTLS";
 
     private final Document document;
     private final IdGenerator idGenerator;
@@ -143,18 +144,14 @@ public class ListenPortEntityBuilder implements EntityBuilder {
                 tlsSettingsElement.appendChild(enabledCipherSuites);
             }
 
-            if (isNotEmpty(tlsSettings.getProperties())) {
-                tlsSettingsElement.appendChild(buildPropertiesElement(tlsSettings.getProperties(), document));
-            }
+            buildAndAppendPropertiesElement(tlsSettings.getProperties(), document, tlsSettingsElement);
 
             listenPortElement.appendChild(tlsSettingsElement);
         }
 
-        if (isNotEmpty(listenPort.getProperties())) {
-            listenPortElement.appendChild(buildPropertiesElement(listenPort.getProperties(), document));
-        }
+        buildAndAppendPropertiesElement(listenPort.getProperties(), document, listenPortElement);
 
-        return new Entity(TYPE, name, id, listenPortElement);
+        return new Entity(LISTEN_PORT_TYPE, name, id, listenPortElement);
     }
 
     // visibility for unit testing
@@ -181,7 +178,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         defaultHttps.getTlsSettings().setEnabledVersions(TLS_VERSIONS);
         defaultHttps.getTlsSettings().setEnabledCipherSuites(DEFAULT_RECOMMENDED_CIPHERS);
         defaultHttps.getTlsSettings().setProperties(new HashMap<>());
-        defaultHttps.getTlsSettings().getProperties().put("usesTLS", TRUE);
+        defaultHttps.getTlsSettings().getProperties().put(USES_TLS, TRUE);
         return defaultHttps;
     }
 

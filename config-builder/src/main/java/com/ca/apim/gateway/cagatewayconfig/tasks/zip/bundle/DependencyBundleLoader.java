@@ -21,7 +21,9 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.ITEM;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 public class DependencyBundleLoader {
     private static final Logger LOGGER = Logger.getLogger(DependencyBundleLoader.class.getName());
@@ -31,7 +33,7 @@ public class DependencyBundleLoader {
 
     public DependencyBundleLoader(final DocumentTools documentTools) {
         this.documentTools = documentTools;
-        this.entityLoaderRegistry = new EntityLoaderRegistry(documentTools);
+        this.entityLoaderRegistry = new EntityLoaderRegistry();
     }
 
     public Bundle load(File dependencyBundlePath) {
@@ -44,7 +46,7 @@ public class DependencyBundleLoader {
             throw new DependencyBundleLoadException("Could not parse dependency bundle: " + e.getMessage(), e);
         }
 
-        final NodeList nodeList = bundleDocument.getElementsByTagName("l7:Item");
+        final NodeList nodeList = bundleDocument.getElementsByTagName(ITEM);
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
 
@@ -57,7 +59,7 @@ public class DependencyBundleLoader {
     }
 
     private void handleItem(Bundle bundle, final Element element) {
-        final String type = getSingleChildElement(element, "l7:Type").getTextContent();
+        final String type = getSingleChildElement(element, TYPE).getTextContent();
         final BundleEntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
         if (entityLoader != null) {
             entityLoader.load(bundle, element);

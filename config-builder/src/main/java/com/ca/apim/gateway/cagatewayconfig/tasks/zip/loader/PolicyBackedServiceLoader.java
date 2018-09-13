@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PolicyBackedServiceLoader implements EntityLoader {
+
+    private static final String FILE_NAME = "policy-backed-services";
     private static final TypeReference<HashMap<String, PolicyBackedService>> policyBackedServiceMapTypeMapping = new TypeReference<HashMap<String, PolicyBackedService>>() {
     };
     private final JsonTools jsonTools;
@@ -26,7 +28,7 @@ public class PolicyBackedServiceLoader implements EntityLoader {
 
     @Override
     public void load(final Bundle bundle, final File rootDir) {
-        final Map<String, PolicyBackedService> policyBackedServices = jsonTools.parseDocumentFile(new File(rootDir, "config"), "policy-backed-services", policyBackedServiceMapTypeMapping);
+        final Map<String, PolicyBackedService> policyBackedServices = jsonTools.parseDocumentFileFromConfigDir(rootDir, FILE_NAME, policyBackedServiceMapTypeMapping);
         if (policyBackedServices != null) {
             bundle.putAllPolicyBackedServices(policyBackedServices);
         }
