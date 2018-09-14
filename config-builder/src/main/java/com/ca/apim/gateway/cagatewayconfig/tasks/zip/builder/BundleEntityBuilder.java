@@ -24,6 +24,7 @@ public class BundleEntityBuilder {
     private final PolicyBackedServiceEntityBuilder policyBackedServiceEntityBuilder;
     private final IdentityProviderEntityBuilder identityProviderEntityBuilder;
     private final ListenPortEntityBuilder listenPortEntityBuilder;
+    private final StoredPasswordEntityBuilder storedPasswordEntityBuilder;
 
     public BundleEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document, IdGenerator idGenerator) {
         this.document = document;
@@ -35,6 +36,7 @@ public class BundleEntityBuilder {
         policyBackedServiceEntityBuilder = new PolicyBackedServiceEntityBuilder(document, idGenerator);
         identityProviderEntityBuilder = new IdentityProviderEntityBuilder(document, idGenerator);
         listenPortEntityBuilder = new ListenPortEntityBuilder(document, idGenerator);
+        storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(document, idGenerator);
     }
 
     public Element build(Bundle bundle) {
@@ -47,6 +49,7 @@ public class BundleEntityBuilder {
         bundleDocumentBuilder.addEntities(policyBackedServiceEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(identityProviderEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(listenPortEntityBuilder.build(bundle));
+        bundleDocumentBuilder.addEntities(storedPasswordEntityBuilder.build(bundle));
 
         return bundleDocumentBuilder.build();
     }
