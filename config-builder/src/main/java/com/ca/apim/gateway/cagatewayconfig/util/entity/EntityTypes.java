@@ -22,6 +22,7 @@ public class EntityTypes {
     public static final String ID_PROVIDER_CONFIG_TYPE = "ID_PROVIDER_CONFIG";
     public static final String STORED_PASSWORD_TYPE = "SECURE_PASSWORD";
     public static final String JDBC_CONNECTION = "JDBC_CONNECTION";
+    public static final String TRUSTED_CERT_TYPE = "TRUSTED_CERT";
 
     private EntityTypes() { }
 }

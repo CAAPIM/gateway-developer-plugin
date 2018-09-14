@@ -39,6 +39,7 @@ public class BundleEntityBuilder {
         listenPortEntityBuilder = new ListenPortEntityBuilder(document, idGenerator);
         storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(document, idGenerator);
         jdbcConnectionEntityBuilder = new JdbcConnectionEntityBuilder(document, idGenerator);
+        trustedCertEntityBuilder = new TrustedCertEntityBuilder(document, idGenerator);
     }
 
     public Element build(Bundle bundle) {
@@ -53,6 +54,7 @@ public class BundleEntityBuilder {
         bundleDocumentBuilder.addEntities(listenPortEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(storedPasswordEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(jdbcConnectionEntityBuilder.build(bundle));
+        bundleDocumentBuilder.addEntities(trustedCertEntityBuilder.build(bundle));
 
         return bundleDocumentBuilder.build();
     }

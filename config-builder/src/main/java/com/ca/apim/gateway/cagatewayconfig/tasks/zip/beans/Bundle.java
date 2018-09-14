@@ -122,4 +122,12 @@ public class Bundle {
     public void setDependencies(@NotNull Set<Bundle> dependencies) {
         this.dependencies = dependencies;
     }
+
+    public Map<String, TrustedCert> getTrustedCerts() {
+        return trustedCerts;
+    }
+
+    public void putAllTrustedCerts(@NotNull Map<String, TrustedCert> trustedCerts) {
+        this.trustedCerts.putAll(trustedCerts);
+    }
 }

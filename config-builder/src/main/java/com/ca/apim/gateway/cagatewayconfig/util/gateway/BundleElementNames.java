@@ -121,6 +121,14 @@ public class BundleElementNames {
     public static final String JDBC_URL = "l7:JdbcUrl";
     public static final String CONNECTION_PROPERTIES = "l7:ConnectionProperties";
 
+    //Trusted Cert Elements
+    public static final String TRUSTED_CERT = "l7:TrustedCertificate";
+    public static final String CERT_DATA = "l7:CertificateData";
+    public static final String ISSUER_NAME = "l7:IssuerName";
+    public static final String SERIAL_NUMBER = "l7:SerialNumber";
+    public static final String SUBJECT_NAME = "l7:SubjectName";
+    public static final String ENCODED = "l7:Encoded";
+
     private BundleElementNames() {
         //
     }
