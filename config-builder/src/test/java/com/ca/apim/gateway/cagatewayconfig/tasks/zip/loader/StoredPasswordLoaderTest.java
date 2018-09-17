@@ -59,6 +59,15 @@ class StoredPasswordLoaderTest {
     }
 
     @Test
+    void tryLoadNonexistentFile() {
+        StoredPasswordsLoader loader = new StoredPasswordsLoader(fileUtils);
+
+        final Bundle bundle = new Bundle();
+        loader.load(bundle, rootProjectDir.getRoot());
+        assertTrue(bundle.getStoredPasswords().isEmpty());
+    }
+
+    @Test
     void loadFileWithSpecifiedPasswords() throws IOException {
         final Bundle bundle = loadPasswords("Password1=pwd1\nPassword2=pwd2\ngateway=7layer");
 
