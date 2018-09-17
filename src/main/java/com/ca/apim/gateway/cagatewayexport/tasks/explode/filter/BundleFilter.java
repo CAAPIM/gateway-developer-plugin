@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.*;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity.Type;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -52,11 +53,18 @@ public class BundleFilter {
         // filter listen ports
         filterListenPorts(bundle.getEntities(ListenPortEntity.class).values()).forEach(filteredBundle::addEntity);
 
+        // filter stored passwords
+        filterStoredPasswords(bundle.getEntities(StoredPasswordEntity.class).values()).forEach(filteredBundle::addEntity);
+
         filterParentFolders(folderPath, bundle.getFolderTree()).forEach(filteredBundle::addEntity);
 
         FolderTree folderTree = new FolderTree(filteredBundle.getEntities(Folder.class).values());
         filteredBundle.setFolderTree(folderTree);
         return filteredBundle;
+    }
+
+    private List<StoredPasswordEntity> filterStoredPasswords(Collection<StoredPasswordEntity> values) {
+        return values.stream().filter(e -> e.isType(Type.PASSWORD)).collect(Collectors.toList());
     }
 
     private List<IdentityProviderEntity> filterIDP(Collection<IdentityProviderEntity> values) {

@@ -7,10 +7,13 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilderException;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,9 +25,12 @@ import static java.lang.Long.parseLong;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
+import static org.apache.commons.lang3.time.DateUtils.parseDateStrictly;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
 final class EntityLoaderHelper {
+
+    private static final String DATE_VALUE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     private EntityLoaderHelper() {
     }
@@ -67,8 +73,18 @@ final class EntityLoaderHelper {
             case BOOLEAN_VALUE: return toBoolean(valueElement.getTextContent());
             case INT_VALUE: return parseInt(valueElement.getTextContent());
             case LONG_VALUE: return parseLong(valueElement.getTextContent());
+            case DATE_VALUE: return parseDateFromString(key, valueElement.getTextContent());
             default:
                 throw new BundleBuilderException("Type of property " + key + " is " + valueElement.getNodeName() + " which is not yet supported");
+        }
+    }
+
+    @NotNull
+    private static Date parseDateFromString(final String key, final String dateAsString) {
+        try {
+            return parseDateStrictly(dateAsString, DATE_VALUE_PATTERN);
+        } catch (ParseException e) {
+            throw new BundleBuilderException("Unable to parse date property (" + key + ") value: " + dateAsString);
         }
     }
 }

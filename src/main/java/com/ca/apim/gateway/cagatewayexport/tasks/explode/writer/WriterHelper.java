@@ -7,17 +7,16 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -25,6 +24,27 @@ import static java.util.Collections.emptyMap;
 class WriterHelper {
 
     private WriterHelper() {
+    }
+
+    /**
+     * Write {@link Properties} map to config folder into rootFolder specified, using specified filename.
+     *
+     * @param rootFolder root folder
+     * @param documentFileUtils file utility
+     * @param properties Properties to be written
+     * @param fileName name of the file
+     */
+    static void writePropertiesFile(File rootFolder, DocumentFileUtils documentFileUtils, Properties properties, String fileName) {
+        File configFolder = new File(rootFolder, "config");
+        documentFileUtils.createFolder(configFolder.toPath());
+
+        File propertiesFile = new File(configFolder, fileName + ".properties");
+
+        try (OutputStream outputStream = new StripFirstLineStream(new FileOutputStream(propertiesFile))) {
+            properties.store(outputStream, null);
+        } catch (IOException e) {
+            throw new WriteException("Could not create " + fileName + " properties file: " + e.getMessage(), e);
+        }
     }
 
     /**

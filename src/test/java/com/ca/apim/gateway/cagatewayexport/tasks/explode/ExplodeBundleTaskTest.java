@@ -93,7 +93,7 @@ class ExplodeBundleTaskTest {
         File[] files = configDir.listFiles();
         Arrays.stream(files)
                 //Every config file except properties files should be the outputType specified
-                .filter(file -> !file.getName().equals("static.properties") && !file.getName().equals("env.properties"))
+                .filter(file -> !file.getName().endsWith(".properties"))
                 .collect(Collectors.toList())
                 .forEach(file -> assertEquals(file.getName().substring(file.getName().length() - fileExtension.length()), fileExtension));
     }

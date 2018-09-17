@@ -35,7 +35,7 @@ public class ListenPortLoader implements EntityLoader<ListenPortEntity> {
         final String targetServiceReference = getSingleChildElementAttribute(listenPort, TARGET_SERVICE_REFERENCE, ATTRIBUTE_ID);
 
         return new ListenPortEntity.Builder()
-                .id(listenPort.getAttribute("id"))
+                .id(listenPort.getAttribute(ATTRIBUTE_ID))
                 .name(name)
                 .protocol(protocol)
                 .port(port)

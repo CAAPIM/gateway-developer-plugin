@@ -19,6 +19,7 @@ public class BundleElementNames {
     public static final String LONG_VALUE = "l7:LongValue";
     public static final String BOOLEAN_VALUE = "l7:BooleanValue";
     public static final String STRING_VALUE = "l7:StringValue";
+    public static final String DATE_VALUE = "l7:DateValue";
     public static final String RESOURCE = "l7:Resource";
     public static final String RESOURCES = "l7:Resources";
     public static final String RESOURCE_SET = "l7:ResourceSet";
@@ -92,6 +93,10 @@ public class BundleElementNames {
     public static final String USE_SSL_CLIENT_AUTH = "l7:UseSslClientAuthentication";
     public static final String BIND_PATTERN_PREFIX = "l7:BindPatternPrefix";
     public static final String BIND_PATTERN_SUFFIX = "l7:BindPatternSuffix";
+
+    // Stored Passwords
+    @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
+    public static final String STORED_PASSWD = "l7:StoredPassword";
 
     private BundleElementNames() {
         //
