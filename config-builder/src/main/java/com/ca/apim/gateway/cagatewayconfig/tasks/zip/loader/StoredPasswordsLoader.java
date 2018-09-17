@@ -16,6 +16,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
+@SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
 public class StoredPasswordsLoader extends PropertiesLoaderBase {
 
     private static final String STORED_PASSWORDS_PROPERTIES = "config/stored-passwords.properties";
