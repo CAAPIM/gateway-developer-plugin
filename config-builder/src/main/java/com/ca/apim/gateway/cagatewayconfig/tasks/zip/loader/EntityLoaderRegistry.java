@@ -31,6 +31,7 @@ public class EntityLoaderRegistry {
         loadersCollection.add(new StoredPasswordsLoader(fileUtils));
 	loadersCollection.add(new JdbcConnectionLoader(jsonTools));
 	loadersCollection.add(new TrustedCertLoader(jsonTools));
+	loadersCollection.add(new CertificatesLoader());
 
         this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
     }

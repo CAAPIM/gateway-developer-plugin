@@ -11,6 +11,8 @@ import java.util.Map;
 
 public class TrustedCert {
 
+    private String url;
+    private String file;
     private Map<String, Object> properties;
     private CertificateData certificateData;
 
@@ -19,6 +21,22 @@ public class TrustedCert {
     public TrustedCert(Map<String, Object> properties, CertificateData certificateData) {
         this.properties = properties;
         this.certificateData = certificateData;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getFile() {
+        return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
     }
 
     public void setProperties(Map<String, Object> properties) {

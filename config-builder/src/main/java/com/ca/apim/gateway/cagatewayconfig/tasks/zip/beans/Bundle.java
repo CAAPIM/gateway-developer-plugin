@@ -25,6 +25,8 @@ public class Bundle {
     private final Map<String, ListenPort> listenPorts = new HashMap<>();
     private final Map<String, StoredPassword> storedPasswords = new HashMap<>();
     private final Map<String, JdbcConnection> jdbcConnections = new HashMap<>();	
+    private final Map<String, TrustedCert> trustedCerts = new HashMap<>();
+    private final Map<String, String> certificateFiles = new HashMap<>();
     private Set<Bundle> dependencies;
 
     public Map<String, Service> getServices() {
@@ -129,5 +131,13 @@ public class Bundle {
 
     public void putAllTrustedCerts(@NotNull Map<String, TrustedCert> trustedCerts) {
         this.trustedCerts.putAll(trustedCerts);
+    }
+
+    public Map<String, String> getCertificateFiles() {
+        return certificateFiles;
+    }
+
+    public void putAllCertificateFiles(Map<String, String> certificateFiles) {
+        this.certificateFiles.putAll(certificateFiles);
     }
 }

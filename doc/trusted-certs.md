@@ -2,7 +2,40 @@
 This is a file containing the trusted certificates that are available in the gateway.
 The trusted certs configuration file is expected to be in the `config` directory. It should be either `trusted-certs.yml` or `trusted-certs.json`.
 
-An example `trusted-certs.yml` file would look like:
+## Different ways to load a trusted certificate
+1. Using an url.
+```yaml
+  trusted-certs-demo:
+    properties:
+      verifyHostname: false
+      trustedForSsl: true
+      trustedAsSamlAttestingEntity: false
+      trustAnchor: true
+      revocationCheckingEnabled: true
+      trustedForSigningClientCerts: true
+      trustedForSigningServerCerts: true
+      trustedAsSamlIssuer: false
+    url: https://www.google.ca
+```
+2. Specifying a file. The certificate file is expected to be in the `config/certificates` directory.
+```yaml
+  trusted-certs-demo:
+    properties:
+      verifyHostname: false
+      trustedForSsl: true
+      trustedAsSamlAttestingEntity: false
+      trustAnchor: true
+      revocationCheckingEnabled: true
+      trustedForSigningClientCerts: true
+      trustedForSigningServerCerts: true
+      trustedAsSamlIssuer: false
+    file: testCert.pem
+```
+3. Specifying the certificateData field and filling out:
+ - the issuer name
+ - serial number
+ - subject name
+ - and encoded data which is the binary data of the cert in base64 encoding.
 ```yaml
   trusted-certs-demo:
     properties:
@@ -23,10 +56,6 @@ An example `trusted-certs.yml` file would look like:
 The above example will create one trusted certificate:
 * with name: `trusted-certs-demo`
 * with various properties about the certificate such as usage for Signing Client and Server certificates
-* with issuer name: `"CN%3Dgateway-dev"`
-* with serial number: `7738683622989879330`
-* with subjectName: `"CN%3Dgateway-dev"`
-* encoded data is the binary data of the cert which is base64 encoded
           
 The same JSON representation would look like:
 ```json
