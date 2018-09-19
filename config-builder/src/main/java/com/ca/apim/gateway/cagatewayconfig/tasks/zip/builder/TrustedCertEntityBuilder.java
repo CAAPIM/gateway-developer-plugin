@@ -18,6 +18,7 @@ import org.w3c.dom.Element;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URL;
 import java.security.cert.*;
 import java.util.Base64;
@@ -60,7 +61,6 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         buildAndAppendPropertiesElement(trustedCert.getProperties(), document, trustedCertElem);
 
         return new Entity(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
-
     }
 
     private Element buildCertData(TrustedCert trustedCert, Map<String, String> certificateFiles) {
@@ -70,13 +70,11 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
             return buildCertDataFromFile(certificateFiles.get(trustedCert.getFile()));
         } else if (trustedCert.getCertificateData() != null) {
             CertificateData certData = trustedCert.getCertificateData();
-            return createElementWithChildren(
-                    document,
-                    CERT_DATA,
-                    createElementWithTextContent(document, ISSUER_NAME, certData.getIssuerName()),
-                    createElementWithTextContent(document, SERIAL_NUMBER, certData.getSerialNumber()),
-                    createElementWithTextContent(document, SUBJECT_NAME, certData.getSubjectName()),
-                    createElementWithTextContent(document, ENCODED, certData.getEncodedData())
+            return createCertDataElementFromCert(
+                    certData.getIssuerName(),
+                    certData.getSerialNumber(),
+                    certData.getSubjectName(),
+                    certData.getEncodedData()
             );
         } else {
             throw new EntityBuilderException("Trusted Cert must be loaded from a valid url, from a file, or using certificateData reference.");
@@ -85,13 +83,18 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
 
     private Element buildCertDataFromFile(String certFileLocation) {
         if (StringUtils.isEmpty(certFileLocation)) {
-            throw new EntityBuilderException("The certificate file location specified does not exist.");
+            throw new EntityBuilderException("The certificate file location is not specified.");
         }
 
         try (FileInputStream is = new FileInputStream(certFileLocation)) {
             CertificateFactory certFact = CertificateFactory.getInstance("X.509");
             X509Certificate cert = (X509Certificate) certFact.generateCertificate(is);
-            return createCertDataElementFromCert(cert);
+            return createCertDataElementFromCert(
+                    cert.getIssuerDN().getName(),
+                    cert.getSerialNumber(),
+                    cert.getSubjectDN().getName(),
+                    Base64.getEncoder().encodeToString(cert.getEncoded())
+            );
         } catch (IOException e) {
             throw new EntityBuilderException("The certificate file location specified does not exist.");
         } catch (CertificateException e) {
@@ -110,7 +113,12 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
                 //Just add leaf cert if a chain is presented
                 if (certs[0] instanceof X509Certificate) {
                     final X509Certificate cert = (X509Certificate) certs[0];
-                    return createCertDataElementFromCert(cert);
+                    return createCertDataElementFromCert(
+                            cert.getIssuerDN().getName(),
+                            cert.getSerialNumber(),
+                            cert.getSubjectDN().getName(),
+                            Base64.getEncoder().encodeToString(cert.getEncoded())
+                    );
                 } else {
                     throw new EntityBuilderException("Certificate from url is not in X.509 format.");
                 }
@@ -125,14 +133,14 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Element createCertDataElementFromCert(X509Certificate cert) throws CertificateEncodingException {
+    private Element createCertDataElementFromCert(String issuerName, BigInteger serialNumber, String subjectName, String encodedData) {
         return createElementWithChildren(
                 document,
                 CERT_DATA,
-                createElementWithTextContent(document, ISSUER_NAME, cert.getIssuerDN().getName()),
-                createElementWithTextContent(document, SERIAL_NUMBER, cert.getSerialNumber()),
-                createElementWithTextContent(document, SUBJECT_NAME, cert.getSubjectDN().getName()),
-                createElementWithTextContent(document, ENCODED, Base64.getEncoder().encodeToString(cert.getEncoded()))
+                createElementWithTextContent(document, ISSUER_NAME, issuerName),
+                createElementWithTextContent(document, SERIAL_NUMBER, serialNumber),
+                createElementWithTextContent(document, SUBJECT_NAME, subjectName),
+                createElementWithTextContent(document, ENCODED, encodedData)
         );
     }
 }
