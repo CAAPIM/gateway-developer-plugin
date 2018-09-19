@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class EnvironmentPropertiesLoader extends PropertiesLoaderBase {
 
-    public static final String ENV_PROPERTIES = "config/env.properties";
+    private static final String ENV_PROPERTIES = "config/env.properties";
 
     EnvironmentPropertiesLoader(FileUtils fileUtils) {
         super(fileUtils);
