@@ -3,7 +3,7 @@ This is a file containing the trusted certificates that are available in the gat
 The trusted certs configuration file is expected to be in the `config` directory. It should be either `trusted-certs.yml` or `trusted-certs.json`.
 
 ## Different ways to load a trusted certificate
-1. Using an url.
+1. Using an url. Currently only loads the leaf certificate if a certificate chain is present.
 ```yaml
   trusted-certs-demo:
     properties:
@@ -17,7 +17,7 @@ The trusted certs configuration file is expected to be in the `config` directory
       trustedAsSamlIssuer: false
     url: https://www.google.ca
 ```
-2. Specifying a file. The certificate file is expected to be in the `config/certificates` directory.
+2. Specifying a file. The certificate file is expected to be in the `config/certificates` directory. Each certificate file can only contain one certificate. Certificate chains will be supported in the future.
 ```yaml
   trusted-certs-demo:
     properties:
