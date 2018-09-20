@@ -14,35 +14,34 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class ConnectionUtils {
 
     /**
-    * SSLSocketFactory used to retrieve certificates even if they are not in the trust store, to avoid SSL handshake exceptions upon socket connection.
-    * @return the sslSocketFactory that with
+    * SSLSocketFactory used to retrieve certificates even if they are not in the trust store,
+     * to avoid SSL handshake exceptions upon socket connection. This socket factory should only be used to read cert
+     * information, and should not be used for persistent TLS connections.
+    * @return the sslSocketFactory that accepts all connections.
      */
     public static SSLSocketFactory createAcceptAllSocketFactory() {
         try {
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, new TrustManager[]{new X509TrustManager() {
-                private X509Certificate[] accepted;
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+            sslContext.init(null,
+                    new TrustManager[]{new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
+                        }
 
-                @Override
-                public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                    throw new UnsupportedOperationException();
-                }
+                        @Override
+                        @SuppressWarnings("squid:S4424") //this should only be used to obtain cert information upon SSL handshake
+                        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
+                        }
 
-                @Override
-                public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                    accepted = x509Certificates;
-                }
-
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return accepted;
-                }
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
             }}, null);
             return sslContext.getSocketFactory();
         } catch (NoSuchAlgorithmException | KeyManagementException e) {

@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.CertificateData;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -107,33 +108,41 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
     }
 
     private Element buildCertDataFromUrl(String name) {
-        try {
-            final URL url = new URL(name);
-            int port = url.getPort() == -1 ? url.getDefaultPort() : url.getPort();
-            try (SSLSocket socket = (SSLSocket) acceptAllSocketFactory.createSocket(url.getHost(), port)) {
-                socket.startHandshake();
-                Certificate[] certs = socket.getSession().getPeerCertificates();
-                if (certs.length > 0) {
-                    //Just add leaf cert if a chain is presented
-                    if (certs[0] instanceof X509Certificate) {
-                        final X509Certificate cert = (X509Certificate) certs[0];
-                        return createCertDataElementFromCert(
-                                cert.getIssuerDN().getName(),
-                                cert.getSerialNumber(),
-                                cert.getSubjectDN().getName(),
-                                Base64.getEncoder().encodeToString(cert.getEncoded())
-                        );
-                    } else {
-                        throw new EntityBuilderException("Certificate from url is not in X.509 format.");
-                    }
+        final URL url = getUrl(name);
+        final int port = url.getPort() == -1 ? url.getDefaultPort() : url.getPort();
+        try (SSLSocket socket = (SSLSocket) acceptAllSocketFactory.createSocket(url.getHost(), port)) {
+            socket.startHandshake();
+            Certificate[] certs = socket.getSession().getPeerCertificates();
+            if (certs.length > 0) {
+                //Just add leaf cert if a chain is presented
+                if (certs[0] instanceof X509Certificate) {
+                    final X509Certificate cert = (X509Certificate) certs[0];
+                    return createCertDataElementFromCert(
+                            cert.getIssuerDN().getName(),
+                            cert.getSerialNumber(),
+                            cert.getSubjectDN().getName(),
+                            Base64.getEncoder().encodeToString(cert.getEncoded())
+                    );
+                } else {
+                    throw new EntityBuilderException("Certificate from url is not in X.509 format.");
                 }
-                throw new EntityBuilderException("No certificates were found in the given url.");
-            } catch (IOException | CertificateEncodingException e) {
-                throw new EntityBuilderException(e.getMessage());
             }
+            throw new EntityBuilderException("No certificates were found in the given url.");
+        }
+         catch (IOException | CertificateEncodingException e) {
+            throw new EntityBuilderException(e.getMessage());
+        }
+    }
+
+    @NotNull
+    private URL getUrl(String name) {
+        final URL url;
+        try {
+            url = new URL(name);
         } catch (MalformedURLException e) {
             throw new EntityBuilderException("The url specified is malformed: " + e.getMessage(), e);
         }
+        return url;
     }
 
     private Element createCertDataElementFromCert(String issuerName, BigInteger serialNumber, String subjectName, String encodedData) {
