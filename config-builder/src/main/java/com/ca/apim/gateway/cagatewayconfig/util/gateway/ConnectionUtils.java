@@ -30,12 +30,15 @@ public class ConnectionUtils {
             sslContext.init(null,
                     new TrustManager[]{new X509TrustManager() {
                         @Override
+                        @SuppressWarnings("squid:S4424")
                         public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
+                            //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
                         }
 
                         @Override
-                        @SuppressWarnings("squid:S4424") //this should only be used to obtain cert information upon SSL handshake
+                        @SuppressWarnings("squid:S4424")
                         public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
+                            //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
                         }
 
                         @Override
