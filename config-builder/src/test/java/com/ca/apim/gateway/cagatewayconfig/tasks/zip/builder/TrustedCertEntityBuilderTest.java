@@ -13,135 +13,149 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.w3c.dom.Element;
 
-import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.File;
+import java.io.FileInputStream;
 import java.math.BigInteger;
-import java.net.URL;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.TRUSTED_CERT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.ConnectionUtils.createAcceptAllSocketFactory;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TrustedCertEntityBuilderTest {
+
+    private static final String URL_NAME = "https://www.ca.com";
+    private static final String CERT_NAME = "multi-cert";
+    private X509Certificate testCert;
+
+    @BeforeAll
+    void setUp() throws Exception {
+        final File trustedCertLocation = new File(getClass().getClassLoader().getResource(CERT_NAME + ".pem").getFile());
+        try (FileInputStream is = new FileInputStream(trustedCertLocation)) {
+            CertificateFactory certFact = CertificateFactory.getInstance("X.509");
+            testCert = (X509Certificate) certFact.generateCertificate(is);
+        }
+    }
 
     @Test
     void buildNoTrustedCerts() {
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), createAcceptAllSocketFactory());
         final Bundle bundle = new Bundle();
         final List<Entity> trustedCertEntities = builder.build(bundle);
         assertEquals(0, trustedCertEntities.size());
     }
 
     @Test
+    void buildTrustedCertFromNonExistentFile() {
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), null);
+
+        final Bundle bundle = new Bundle();
+        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
+        bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
+        // No certs to load from
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle));
+    }
+
+    @Test
     void buildTrustedCertFromUrl() throws Exception {
-        //Set up Cert data
-        final String GOOGLE_URL = "https://google.ca";
-        URL url = new URL(GOOGLE_URL);
-        HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-        conn.connect();
-        X509Certificate googleCert = (X509Certificate) conn.getServerCertificates()[0];
+        //Set up mock socket factory
+        SSLSocketFactory sf = mock(SSLSocketFactory.class);
+        SSLSocket socket = mock(SSLSocket.class);
+        SSLSession sslSession = mock(SSLSession.class);
+        when(sf.createSocket(anyString(), anyInt())).thenReturn(socket);
+        when(socket.getSession()).thenReturn(sslSession);
+        when(sslSession.getPeerCertificates()).thenReturn(new X509Certificate[]{testCert});
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), sf);
 
         final Bundle bundle = new Bundle();
-        final TrustedCert trustedCert = new TrustedCert();
-        trustedCert.setProperties(ImmutableMap.of("key1", "value1", "key2", "value2"));
-        trustedCert.setUrl(GOOGLE_URL);
-
-        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert", trustedCert));
+        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
+        bundle.putAllTrustedCerts(ImmutableMap.of(URL_NAME, trustedCert));
 
         final List<Entity> trustedCerts = builder.build(bundle);
         assertEquals(1, trustedCerts.size());
 
-        final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts);
-
+        final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, true);
         verifyProperties(trustedCertEntityXml);
-
-        final Element certDataXml = getSingleElement(trustedCertEntityXml, CERT_DATA);
-        assertEquals(googleCert.getIssuerDN().getName(), getSingleChildElementTextContent(certDataXml, ISSUER_NAME));
-        assertEquals(googleCert.getSerialNumber(), new BigInteger(getSingleChildElementTextContent(certDataXml, SERIAL_NUMBER)));
-        assertEquals(googleCert.getSubjectDN().getName(), getSingleChildElementTextContent(certDataXml, SUBJECT_NAME));
-        assertEquals(Base64.getEncoder().encodeToString(googleCert.getEncoded()), getSingleChildElementTextContent(certDataXml, ENCODED));
+        verifyCertDetails(trustedCertEntityXml);
     }
 
     @Test
-    void buildTrustedCertUsingPem() throws DocumentParseException {
-        final String trustedCertLocation = new File(getClass().getClassLoader().getResource("multi-cert.pem").getFile()).getPath();
+    void buildTrustedCertUsingPem() throws Exception {
+        final File trustedCertLocation = new File(getClass().getClassLoader().getResource(CERT_NAME + ".pem").getFile());
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
-
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), null);
         final Bundle bundle = new Bundle();
-        final TrustedCert trustedCert = new TrustedCert();
-        trustedCert.setFile("multi-cert.pem");
-        trustedCert.setProperties(ImmutableMap.of("key1", "value1", "key2", "value2"));
-
-        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert", trustedCert));
-        bundle.putAllCertificateFiles(ImmutableMap.of("multi-cert.pem", trustedCertLocation));
+        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
+        bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
+        bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, trustedCertLocation));
 
         final List<Entity> trustedCerts = builder.build(bundle);
         assertEquals(1, trustedCerts.size());
 
-        final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts);
-
+        final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, false);
         verifyProperties(trustedCertEntityXml);
-
-        verifyMultiCertDetails(trustedCertEntityXml);
+        verifyCertDetails(trustedCertEntityXml);
     }
 
     @Test
-    void buildTrustedCertUsingDer() throws DocumentParseException {
-        final String trustedCertLocation = new File(getClass().getClassLoader().getResource("multi-cert.der").getFile()).getPath();
+    void buildTrustedCertUsingDer() throws Exception {
+        final File trustedCertLocation = new File(getClass().getClassLoader().getResource(CERT_NAME + ".der").getFile());
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
-
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), null);
         final Bundle bundle = new Bundle();
-        final TrustedCert trustedCert = new TrustedCert();
-        trustedCert.setFile("multi-cert.pem");
-        trustedCert.setProperties(ImmutableMap.of("key1", "value1", "key2", "value2"));
-
-        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert", trustedCert));
-        bundle.putAllCertificateFiles(ImmutableMap.of("multi-cert.pem", trustedCertLocation));
+        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
+        bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
+        bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, trustedCertLocation));
 
         final List<Entity> trustedCerts = builder.build(bundle);
         assertEquals(1, trustedCerts.size());
 
-        final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts);
+        final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, false);
 
         verifyProperties(trustedCertEntityXml);
-
-        verifyMultiCertDetails(trustedCertEntityXml);
+        verifyCertDetails(trustedCertEntityXml);
     }
 
     @Test
-    void buildTrustedCertUsingCertData() throws DocumentParseException {
+    void buildTrustedCertUsingCertData() throws Exception {
         final String EXPECT_ISSUER = "issuer";
         final BigInteger EXPECT_BIG_INT = new BigInteger("1234");
         final String EXPECT_SUB_NAME = "subName";
         final String EXPECT_DATA = "data";
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
-
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), null);
         final Bundle bundle = new Bundle();
         final CertificateData certData = new CertificateData(EXPECT_ISSUER, EXPECT_BIG_INT, EXPECT_SUB_NAME, EXPECT_DATA);
-        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of("key1", "value1", "key2", "value2"), certData);
-
-        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert", trustedCert));
+        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), certData);
+        bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
 
         final List<Entity> trustedCerts = builder.build(bundle);
         assertEquals(1, trustedCerts.size());
 
-        final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts);
+        final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, false);
 
         verifyProperties(trustedCertEntityXml);
 
@@ -155,31 +169,50 @@ public class TrustedCertEntityBuilderTest {
     private void verifyProperties(Element trustedCertEntityXml) throws DocumentParseException {
         final Element trustedCertProps = getSingleElement(trustedCertEntityXml, PROPERTIES);
         final List<Element> propertyList = getChildElements(trustedCertProps, PROPERTY);
-        assertEquals(2, propertyList.size());
-        final Element property1 = propertyList.get(0);
-        final Element property2 = propertyList.get(1);
-        assertEquals("key1", property1.getAttributes().getNamedItem(ATTRIBUTE_KEY).getTextContent());
-        assertEquals("key2", property2.getAttributes().getNamedItem(ATTRIBUTE_KEY).getTextContent());
-        assertEquals("value1", getSingleChildElementTextContent(property1, STRING_VALUE));
-        assertEquals("value2", getSingleChildElementTextContent(property2, STRING_VALUE));
+        assertEquals(8, propertyList.size());
+        List<String> availableProps = new ArrayList<>();
+        Collections.addAll(availableProps,
+                TRUST_ANCHOR,
+                TRUSTED_AS_SAML_ATTESTING_ENTITY,
+                TRUSTED_FOR_SSL,
+                TRUSTED_SIGNING_SERVER_CERTS,
+                TRUSTING_SIGNING_CLIENT_CERTS,
+                VERIFY_HOSTNAME,
+                REVOCATION_CHECKING_ENABLED,
+                TRUSTED_AS_SAML_ISSUER
+        );
+
+        propertyList.forEach(e ->  {
+            String propKey = e.getAttributes().getNamedItem(ATTRIBUTE_KEY).getTextContent();
+            assertTrue(availableProps.contains(propKey));
+            if (propKey.equals(VERIFY_HOSTNAME)) {
+                //only set this one property to true before verifying
+                assertTrue(Boolean.parseBoolean(getSingleChildElementTextContent(e, BOOLEAN_VALUE)));
+            } else {
+                assertFalse(Boolean.parseBoolean(getSingleChildElementTextContent(e, BOOLEAN_VALUE)));
+
+            }
+            availableProps.remove(e.getAttributes().getNamedItem(ATTRIBUTE_KEY).getTextContent());
+        });
+        assertEquals(0, availableProps.size());
     }
 
-    private void verifyMultiCertDetails(Element trustedCertEntityXml) throws DocumentParseException {
+    private void verifyCertDetails(Element trustedCertEntityXml) throws DocumentParseException, CertificateEncodingException {
         final Element certDataXml = getSingleElement(trustedCertEntityXml, CERT_DATA);
-        assertEquals("C=UK, ST=Dublin, L=Dublin, O=CA Issuers Inc, OU=Issuers, CN=Simple Issuer 01, STREET=Culloden Street", getSingleChildElementTextContent(certDataXml, ISSUER_NAME));
-        assertEquals(new BigInteger("7414677490662590507"), new BigInteger(getSingleChildElementTextContent(certDataXml, SERIAL_NUMBER)));
-        assertEquals("C=UK, ST=Dublin, L=Dublin, O=CA Issuers Inc, OU=Issuers, CN=Simple Issuer 01, STREET=Culloden Street", getSingleChildElementTextContent(certDataXml, SUBJECT_NAME));
-        assertEquals("MIIDADCCAmmgAwIBAgIIZuY55KMHSCswDQYJKoZIhvcNAQELBQAwgY8xGDAWBgNVBAkMD0N1bGxvZGVuIFN0cmVldDEZMBcGA1UEAwwQU2ltcGxlIElzc3VlciAwMTEQMA4GA1UECwwHSXNzdWVyczEXMBUGA1UECgwOQ0EgSXNzdWVycyBJbmMxDzANBgNVBAcMBkR1YmxpbjEPMA0GA1UECAwGRHVibGluMQswCQYDVQQGEwJVSzAeFw0xODA5MDYyMjUzMzdaFw0yNDAxMjIyMDA2NTVaMIGPMRgwFgYDVQQJDA9DdWxsb2RlbiBTdHJlZXQxGTAXBgNVBAMMEFNpbXBsZSBJc3N1ZXIgMDExEDAOBgNVBAsMB0lzc3VlcnMxFzAVBgNVBAoMDkNBIElzc3VlcnMgSW5jMQ8wDQYDVQQHDAZEdWJsaW4xDzANBgNVBAgMBkR1YmxpbjELMAkGA1UEBhMCVUswgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAIlFlR/yMwcVY6/VSpqa+/YSdJWBUvj+f8NbS1uebkBpSdUIBAK9VS6uP6m3kpzhCk42RdDU2qnEhnbVEwWYteY7SSBDra7bCxXkpnyjBdPf1igc0NHbjd283XXl6Tj4sOe2iArmc/OEE8oMu5m4UdZN8kTZVkPQ9SxuzJrnnIa5AgMBAAGjYzBhMB0GA1UdDgQWBBT0PCQYvL+gH3b33igNZh54P779VDAPBgNVHRMBAf8EBTADAQH/MB8GA1UdIwQYMBaAFPQ8JBi8v6AfdvfeKA1mHng/vv1UMA4GA1UdDwEB/wQEAwIBhjANBgkqhkiG9w0BAQsFAAOBgQA4alW2LSJaqm/cFUU2WpUfhwTTJ79Y3F866HHgrbc1Yh1MndWkeghpFXejw4nH8xt3XNFEp7BpCuoSdIIVHjABem1rtxYoV6eZ4UuefWTlFmVdma1VOBn7ZpfylrGMY8AQFs0JRHojBbEa3duilVoDEV3hC9eDL2LF5XeBlPFxrw==", getSingleChildElementTextContent(certDataXml, ENCODED));
+        assertEquals(testCert.getIssuerDN().getName(), getSingleChildElementTextContent(certDataXml, ISSUER_NAME));
+        assertEquals(testCert.getSerialNumber(), new BigInteger(getSingleChildElementTextContent(certDataXml, SERIAL_NUMBER)));
+        assertEquals(testCert.getSubjectDN().getName(), getSingleChildElementTextContent(certDataXml, SUBJECT_NAME));
+        assertEquals(Base64.getEncoder().encodeToString(testCert.getEncoded()), getSingleChildElementTextContent(certDataXml, ENCODED));
     }
 
     @NotNull
-    private Element verifyTrustedCertElement(List<Entity> trustedCerts) {
+    private Element verifyTrustedCertElement(List<Entity> trustedCerts, boolean isUrl) {
         final Entity trustedCertEntity = trustedCerts.get(0);
         assertEquals(TRUSTED_CERT_TYPE, trustedCertEntity.getType());
         assertNotNull(trustedCertEntity.getId());
         final Element trustedCertEntityXml = trustedCertEntity.getXml();
         assertEquals(TRUSTED_CERT, trustedCertEntityXml.getTagName());
-        assertEquals("fake-cert", getSingleChildElementTextContent(trustedCertEntityXml, NAME));
+        assertEquals(isUrl? URL_NAME : CERT_NAME, getSingleChildElementTextContent(trustedCertEntityXml, NAME));
         return trustedCertEntityXml;
     }
 

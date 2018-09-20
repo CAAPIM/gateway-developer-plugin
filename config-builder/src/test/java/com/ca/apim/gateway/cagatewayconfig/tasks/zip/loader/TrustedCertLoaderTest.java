@@ -24,7 +24,6 @@ import org.testcontainers.shaded.com.google.common.io.Files;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
 
 import static org.junit.Assert.assertEquals;
@@ -44,12 +43,36 @@ public class TrustedCertLoaderTest {
     }
 
     @Test
-    void loadTrustedCertJson() throws IOException {
+    void loadTrustedCertUrlYml() throws IOException {
+        final TrustedCertLoader trustedCertLoader = new TrustedCertLoader(jsonTools);
+        final String json = "https://ca.com:\n" +
+                "    verifyHostname: false\n" +
+                "    trustedForSsl: true\n" +
+                "    trustedAsSamlAttestingEntity: false\n" +
+                "    trustAnchor: true\n" +
+                "    revocationCheckingEnabled: true\n" +
+                "    trustedForSigningClientCerts: true\n" +
+                "    trustedForSigningServerCerts: true\n" +
+                "    trustedAsSamlIssuer: false\n";
+        final File configFolder = rootProjectDir.createDirectory("config");
+        final File identityProvidersFile = new File(configFolder, "trusted-certs.yml");
+        Files.touch(identityProvidersFile);
+
+        Mockito.when(fileUtils.getInputStream(Mockito.any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes(Charset.forName("UTF-8"))));
+
+        final Bundle bundle = new Bundle();
+        trustedCertLoader.load(bundle, rootProjectDir.getRoot());
+        assertEquals(1, bundle.getTrustedCerts().size());
+        final TrustedCert trustedCert = bundle.getTrustedCerts().get("https://ca.com");
+        assertEquals(8, trustedCert.createProperties().size());
+    }
+
+    @Test
+    void loadTrustedCertUrlJson() throws IOException {
         final TrustedCertLoader trustedCertLoader = new TrustedCertLoader(jsonTools);
         final String json = "{\n" +
-                "  \"fake-cert\" : {\n" +
-                "    \"properties\" : {\n" +
-                "      \"verifyHostname\" : true,\n" +
+                "  \"https://ca.com\" : {\n" +
+                "      \"verifyHostname\" : false,\n" +
                 "      \"trustedForSsl\" : true,\n" +
                 "      \"trustedAsSamlAttestingEntity\" : false,\n" +
                 "      \"trustAnchor\" : true,\n" +
@@ -57,13 +80,6 @@ public class TrustedCertLoaderTest {
                 "      \"trustedForSigningClientCerts\" : true,\n" +
                 "      \"trustedForSigningServerCerts\" : true,\n" +
                 "      \"trustedAsSamlIssuer\" : false\n" +
-                "    },\n" +
-                "    \"certificateData\" : {\n" +
-                "      \"issuerName\" : \"CN%3Dfake-cert\",\n" +
-                "      \"serialNumber\" : 12642552833600226867,\n" +
-                "      \"subjectName\" : \"CN%3Dfake-cert-sn\",\n" +
-                "      \"encodedData\" : \"somedata\"\n" +
-                "    }\n" +
                 "  }\n" +
                 "}";
         final File configFolder = rootProjectDir.createDirectory("config");
@@ -75,27 +91,22 @@ public class TrustedCertLoaderTest {
         final Bundle bundle = new Bundle();
         trustedCertLoader.load(bundle, rootProjectDir.getRoot());
         assertEquals(1, bundle.getTrustedCerts().size());
-        verifyFakeCert(bundle);
+        final TrustedCert trustedCert = bundle.getTrustedCerts().get("https://ca.com");
+        assertEquals(8, trustedCert.createProperties().size());
     }
 
     @Test
     void loadTrustedCertYml() throws IOException {
         final TrustedCertLoader trustedCertLoader = new TrustedCertLoader(jsonTools);
         final String yml = "fake-cert:\n" +
-                "  properties:\n" +
-                "    verifyHostname: true\n" +
+                "    verifyHostname: false\n" +
                 "    trustedForSsl: true\n" +
                 "    trustedAsSamlAttestingEntity: false\n" +
                 "    trustAnchor: true\n" +
                 "    revocationCheckingEnabled: true\n" +
                 "    trustedForSigningClientCerts: true\n" +
                 "    trustedForSigningServerCerts: true\n" +
-                "    trustedAsSamlIssuer: false\n" +
-                "  certificateData:\n" +
-                "    issuerName: \"CN%3Dfake-cert\"\n" +
-                "    serialNumber: 12642552833600226867\n" +
-                "    subjectName: \"CN%3Dfake-cert-sn\"\n" +
-                "    encodedData: \"somedata\"";
+                "    trustedAsSamlIssuer: false";
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "trusted-certs.yml");
         Files.touch(identityProvidersFile);
@@ -105,17 +116,8 @@ public class TrustedCertLoaderTest {
         final Bundle bundle = new Bundle();
         trustedCertLoader.load(bundle, rootProjectDir.getRoot());
         assertEquals(1, bundle.getTrustedCerts().size());
-        verifyFakeCert(bundle);
-    }
-
-    private void verifyFakeCert(Bundle bundle) {
         final TrustedCert trustedCert = bundle.getTrustedCerts().get("fake-cert");
-        assertEquals(8, trustedCert.getProperties().size());
-        TrustedCert.CertificateData certData = trustedCert.getCertificateData();
-        assertEquals("CN%3Dfake-cert", certData.getIssuerName());
-        assertEquals(new BigInteger("12642552833600226867"), certData.getSerialNumber());
-        assertEquals("CN%3Dfake-cert-sn", certData.getSubjectName());
-        assertEquals("somedata", certData.getEncodedData());
+        assertEquals(8, trustedCert.createProperties().size());
     }
 
 }

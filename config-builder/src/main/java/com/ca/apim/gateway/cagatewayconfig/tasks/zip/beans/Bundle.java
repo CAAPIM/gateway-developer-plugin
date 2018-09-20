@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +27,7 @@ public class Bundle {
     private final Map<String, StoredPassword> storedPasswords = new HashMap<>();
     private final Map<String, JdbcConnection> jdbcConnections = new HashMap<>();	
     private final Map<String, TrustedCert> trustedCerts = new HashMap<>();
-    private final Map<String, String> certificateFiles = new HashMap<>();
+    private final Map<String, File> certificateFiles = new HashMap<>();
     private Set<Bundle> dependencies;
 
     public Map<String, Service> getServices() {
@@ -133,11 +134,11 @@ public class Bundle {
         this.trustedCerts.putAll(trustedCerts);
     }
 
-    public Map<String, String> getCertificateFiles() {
+    public Map<String, File> getCertificateFiles() {
         return certificateFiles;
     }
 
-    public void putAllCertificateFiles(Map<String, String> certificateFiles) {
+    public void putAllCertificateFiles(Map<String, File> certificateFiles) {
         this.certificateFiles.putAll(certificateFiles);
     }
 }

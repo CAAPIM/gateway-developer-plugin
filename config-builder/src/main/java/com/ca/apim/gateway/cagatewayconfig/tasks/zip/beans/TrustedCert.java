@@ -6,49 +6,55 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.math.BigInteger;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
+import static java.lang.Boolean.parseBoolean;
+
 public class TrustedCert {
 
-    private String url;
-    private String file;
-    private Map<String, Object> properties;
+    private boolean verifyHostname;
+    private boolean trustedForSsl;
+    private boolean trustedAsSamlAttestingEntity;
+    private boolean trustAnchor;
+    private boolean revocationCheckingEnabled;
+    private boolean trustedForSigningClientCerts;
+    private boolean trustedForSigningServerCerts;
+    private boolean trustedAsSamlIssuer;
     private CertificateData certificateData;
 
     public TrustedCert() {}
 
     public TrustedCert(Map<String, Object> properties, CertificateData certificateData) {
-        this.properties = properties;
+        verifyHostname = extractBoolean(properties, VERIFY_HOSTNAME);
+        trustedForSsl = extractBoolean(properties, TRUSTED_FOR_SSL);
+        trustedAsSamlAttestingEntity = extractBoolean(properties, TRUSTED_AS_SAML_ATTESTING_ENTITY);
+        trustAnchor = extractBoolean(properties, TRUST_ANCHOR);
+        revocationCheckingEnabled = extractBoolean(properties, REVOCATION_CHECKING_ENABLED);
+        trustedForSigningClientCerts = extractBoolean(properties, TRUSTING_SIGNING_CLIENT_CERTS);
+        trustedForSigningServerCerts = extractBoolean(properties, TRUSTED_SIGNING_SERVER_CERTS);
+        trustedAsSamlIssuer = extractBoolean(properties, TRUSTED_AS_SAML_ISSUER);
         this.certificateData = certificateData;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getFile() {
-        return file;
-    }
-
-    public void setFile(String file) {
-        this.file = file;
-    }
-
-    public void setProperties(Map<String, Object> properties) {
-        this.properties = properties;
+    public Map<String, Object> createProperties() {
+        return ImmutableMap.<String, Object>builder()
+                .put(VERIFY_HOSTNAME, verifyHostname)
+                .put(TRUSTED_FOR_SSL, trustedForSsl)
+                .put(TRUSTED_AS_SAML_ATTESTING_ENTITY, trustedAsSamlAttestingEntity)
+                .put(TRUST_ANCHOR, trustAnchor)
+                .put(REVOCATION_CHECKING_ENABLED, revocationCheckingEnabled)
+                .put(TRUSTING_SIGNING_CLIENT_CERTS, trustedForSigningClientCerts)
+                .put(TRUSTED_SIGNING_SERVER_CERTS, trustedForSigningServerCerts)
+                .put(TRUSTED_AS_SAML_ISSUER, trustedAsSamlIssuer)
+                .build();
     }
 
     public void setCertificateData(CertificateData certificateData) {
         this.certificateData = certificateData;
-    }
-
-    public Map<String, Object> getProperties() {
-        return properties;
     }
 
     public CertificateData getCertificateData() {
@@ -87,4 +93,7 @@ public class TrustedCert {
         }
     }
 
+    private boolean extractBoolean(Map<String, Object> properties, String keyName) {
+        return properties.get(keyName) != null && parseBoolean(properties.get(keyName).toString());
+    }
 }

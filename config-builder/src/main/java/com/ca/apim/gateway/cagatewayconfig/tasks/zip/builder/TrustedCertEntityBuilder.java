@@ -11,14 +11,15 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.CertificateData;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.*;
 import java.util.Base64;
@@ -36,10 +37,12 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 public class TrustedCertEntityBuilder implements EntityBuilder {
     private final Document document;
     private final IdGenerator idGenerator;
+    private final SSLSocketFactory acceptAllSocketFactory;
 
-    TrustedCertEntityBuilder(Document document, IdGenerator idGenerator) {
+    TrustedCertEntityBuilder(Document document, IdGenerator idGenerator, SSLSocketFactory acceptAllSocketFactory) {
         this.document = document;
         this.idGenerator = idGenerator;
+        this.acceptAllSocketFactory = acceptAllSocketFactory;
     }
 
     @Override
@@ -49,27 +52,27 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         ).collect(Collectors.toList());
     }
 
-    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, String> certificateFiles) {
+    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, File> certificateFiles) {
         final String id = idGenerator.generate();
         final Element trustedCertElem = createElementWithAttributesAndChildren(
                 document,
                 TRUSTED_CERT,
                 ImmutableMap.of(ATTRIBUTE_ID, id),
                 createElementWithTextContent(document, NAME, name),
-                buildCertData(trustedCert, certificateFiles)
+                buildCertData(name, trustedCert, certificateFiles)
         );
-        buildAndAppendPropertiesElement(trustedCert.getProperties(), document, trustedCertElem);
+        buildAndAppendPropertiesElement(trustedCert.createProperties(), document, trustedCertElem);
 
         return new Entity(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
     }
 
-    private Element buildCertData(TrustedCert trustedCert, Map<String, String> certificateFiles) {
-        if (StringUtils.isNotEmpty(trustedCert.getUrl())) {
-            return buildCertDataFromUrl(trustedCert);
-        } else if (StringUtils.isNotEmpty(trustedCert.getFile())) {
-            return buildCertDataFromFile(certificateFiles.get(trustedCert.getFile()));
+    private Element buildCertData(String name, TrustedCert trustedCert, Map<String, File> certificateFiles) {
+        if (name.startsWith("https://")) {
+            return buildCertDataFromUrl(name);
+        } else if (certificateFiles.get(name) != null) {
+            return buildCertDataFromFile(certificateFiles.get(name));
         } else if (trustedCert.getCertificateData() != null) {
-            CertificateData certData = trustedCert.getCertificateData();
+            final CertificateData certData = trustedCert.getCertificateData();
             return createCertDataElementFromCert(
                     certData.getIssuerName(),
                     certData.getSerialNumber(),
@@ -77,12 +80,13 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
                     certData.getEncodedData()
             );
         } else {
-            throw new EntityBuilderException("Trusted Cert must be loaded from a valid url, from a file, or using certificateData reference.");
+            throw new EntityBuilderException("Trusted Cert must be loaded from a specified url," +
+                    " or from a certificate file that has the same name as the Trusted Cert.");
         }
     }
 
-    private Element buildCertDataFromFile(String certFileLocation) {
-        if (StringUtils.isEmpty(certFileLocation)) {
+    private Element buildCertDataFromFile(File certFileLocation) {
+        if (!certFileLocation.exists()) {
             throw new EntityBuilderException("The certificate file location is not specified.");
         }
 
@@ -102,34 +106,33 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Element buildCertDataFromUrl(TrustedCert trustedCert) {
-        HttpsURLConnection conn = null;
+    private Element buildCertDataFromUrl(String name) {
         try {
-            URL url = new URL(trustedCert.getUrl());
-            conn = (HttpsURLConnection) url.openConnection();
-            conn.connect();
-            Certificate[] certs = conn.getServerCertificates();
-            if (certs.length > 0) {
-                //Just add leaf cert if a chain is presented
-                if (certs[0] instanceof X509Certificate) {
-                    final X509Certificate cert = (X509Certificate) certs[0];
-                    return createCertDataElementFromCert(
-                            cert.getIssuerDN().getName(),
-                            cert.getSerialNumber(),
-                            cert.getSubjectDN().getName(),
-                            Base64.getEncoder().encodeToString(cert.getEncoded())
-                    );
-                } else {
-                    throw new EntityBuilderException("Certificate from url is not in X.509 format.");
+            final URL url = new URL(name);
+            int port = url.getPort() == -1 ? url.getDefaultPort() : url.getPort();
+            try (SSLSocket socket = (SSLSocket) acceptAllSocketFactory.createSocket(url.getHost(), port)) {
+                socket.startHandshake();
+                Certificate[] certs = socket.getSession().getPeerCertificates();
+                if (certs.length > 0) {
+                    //Just add leaf cert if a chain is presented
+                    if (certs[0] instanceof X509Certificate) {
+                        final X509Certificate cert = (X509Certificate) certs[0];
+                        return createCertDataElementFromCert(
+                                cert.getIssuerDN().getName(),
+                                cert.getSerialNumber(),
+                                cert.getSubjectDN().getName(),
+                                Base64.getEncoder().encodeToString(cert.getEncoded())
+                        );
+                    } else {
+                        throw new EntityBuilderException("Certificate from url is not in X.509 format.");
+                    }
                 }
+                throw new EntityBuilderException("No certificates were found in the given url.");
+            } catch (IOException | CertificateEncodingException e) {
+                throw new EntityBuilderException(e.getMessage());
             }
-            throw new EntityBuilderException("No certificates were found in the given url.");
-        } catch (IOException | CertificateEncodingException e) {
-            throw new EntityBuilderException(e.getMessage());
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
+        } catch (MalformedURLException e) {
+            throw new EntityBuilderException("The url specified is malformed: " + e.getMessage(), e);
         }
     }
 

@@ -13,6 +13,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Loads the certificates specified in the 'config/certificates' directory. Certificates in this directory must end with
+ * .der, .pem, .crt, or .cer.
+ */
 public class CertificatesLoader implements EntityLoader {
     @Override
     public void load(Bundle bundle, File rootDir) {
@@ -20,10 +24,10 @@ public class CertificatesLoader implements EntityLoader {
         if (certificatesDir.exists()) {
             final String[] certs = certificatesDir.list();
             if (certs != null && certs.length > 0) {
-                Map<String, String> map = new HashMap<>();
+                final Map<String, File> map = new HashMap<>();
                 Arrays.stream(certs).forEach(cert -> {
                     if (checkCertFormat(cert)) {
-                        map.put(cert, certificatesDir.getPath() + "/" + cert);
+                        map.put(cert.substring(0, cert.length()-4), new File(certificatesDir, cert));
                     } else {
                         throw new BundleLoadException(cert + " must be a valid certificate extension.");
                     }
