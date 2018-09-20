@@ -19,6 +19,8 @@ public class EntityTypes {
     public static final String SERVICE_TYPE = "SERVICE";
     public static final String POLICY_TYPE = "POLICY";
     public static final String ID_PROVIDER_CONFIG_TYPE = "ID_PROVIDER_CONFIG";
+    @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
+    public static final String STORED_PASSWORD_TYPE = "SECURE_PASSWORD";
 
     private EntityTypes() { }
 }

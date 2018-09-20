@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 /**
  * Utility class to hold element names used in gateway bundles.
  */
+@SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
 public class BundleElementNames {
 
     // Attributes
@@ -103,6 +104,10 @@ public class BundleElementNames {
     public static final String USE_SSL_CLIENT_AUTH = "l7:UseSslClientAuthentication";
     public static final String BIND_PATTERN_PREFIX = "l7:BindPatternPrefix";
     public static final String BIND_PATTERN_SUFFIX = "l7:BindPatternSuffix";
+
+    // Stored Passwords
+    public static final String STORED_PASSWD = "l7:StoredPassword";
+    public static final String PASSWORD = "l7:Password";
 
     private BundleElementNames() {
         //

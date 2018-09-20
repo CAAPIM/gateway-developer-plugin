@@ -23,11 +23,12 @@ public class EntityLoaderRegistry {
         loadersCollection.add(new ServiceLoader(jsonTools));
         loadersCollection.add(new EncassLoader(jsonTools, idGenerator));
         loadersCollection.add(new PolicyAndFolderLoader(fileUtils, idGenerator));
-        loadersCollection.add(new StaticPropertiesLoader());
-        loadersCollection.add(new EnvironmentPropertiesLoader());
+        loadersCollection.add(new StaticPropertiesLoader(fileUtils));
+        loadersCollection.add(new EnvironmentPropertiesLoader(fileUtils));
         loadersCollection.add(new PolicyBackedServiceLoader(jsonTools));
         loadersCollection.add(new IdentityProviderLoader(jsonTools));
         loadersCollection.add(new ListenPortLoader(jsonTools));
+        loadersCollection.add(new StoredPasswordsLoader(fileUtils));
 
         this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
     }

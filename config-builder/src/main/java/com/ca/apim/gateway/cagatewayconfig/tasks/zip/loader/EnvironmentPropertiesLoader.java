@@ -7,28 +7,25 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
-public class EnvironmentPropertiesLoader implements EntityLoader {
+public class EnvironmentPropertiesLoader extends PropertiesLoaderBase {
+
+    private static final String ENV_PROPERTIES = "config/env.properties";
+
+    EnvironmentPropertiesLoader(FileUtils fileUtils) {
+        super(fileUtils);
+    }
+
     @Override
-    public void load(Bundle bundle, File rootDir) {
-        File staticPropertiesFile = new File(rootDir, "config/env.properties");
-        if (staticPropertiesFile.exists()) {
-            Properties properties = new Properties();
-            try (FileInputStream inStream = new FileInputStream(staticPropertiesFile)) {
-                properties.load(inStream);
-            } catch (IOException e) {
-                throw new BundleLoadException("Could not load static properties: " + e.getMessage(), e);
-            }
-            Map<String, String> map = new HashMap<>();
-            properties.forEach((k, v) -> map.put(k.toString(), v.toString()));
-            bundle.putAllEnvironmentProperties(map);
-        }
+    protected String getFilePath() {
+        return ENV_PROPERTIES;
+    }
+
+    @Override
+    protected void putToBundle(Bundle bundle, Map<String, String> properties) {
+        bundle.putAllEnvironmentProperties(properties);
     }
 }
