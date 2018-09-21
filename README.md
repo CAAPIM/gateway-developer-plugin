@@ -49,6 +49,7 @@ EncapsulatedAssertion | Yes |
 ClusterProperty | Yes |
 Policy Backed Service | Yes |
 Listen Port | Yes |
+Trusted Cert | Yes |
 
 ## Customizing the Default Plugin Configuration
 You can customize the source solution directory location and the location to put the built bundle file by setting the `GatewaySourceConfig`. For example:

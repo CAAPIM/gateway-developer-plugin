@@ -53,6 +53,9 @@ public class BundleFilter {
         // filter listen ports
         filterListenPorts(bundle.getEntities(ListenPortEntity.class).values()).forEach(filteredBundle::addEntity);
 
+        // filter trusted certs
+        bundle.getEntities(TrustedCertEntity.class).values().forEach(filteredBundle::addEntity);
+
         // filter stored passwords
         filterStoredPasswords(bundle.getEntities(StoredPasswordEntity.class).values()).forEach(filteredBundle::addEntity);
 

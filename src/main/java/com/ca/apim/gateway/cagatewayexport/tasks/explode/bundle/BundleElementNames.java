@@ -98,6 +98,11 @@ public class BundleElementNames {
     @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
     public static final String STORED_PASSWD = "l7:StoredPassword";
 
+    //Trusted Cert Elements
+    public static final String TRUSTED_CERT = "l7:TrustedCertificate";
+    public static final String CERT_DATA = "l7:CertificateData";
+    public static final String ENCODED = "l7:Encoded";
+
     private BundleElementNames() {
         //
     }
