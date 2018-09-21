@@ -167,8 +167,8 @@ class ListenPortEntityBuilderTest {
         assertEquals(tlsSettings.getClientAuthentication().getType(), getSingleChildElementTextContent(getSingleChildElement(xml, TLS_SETTINGS), CLIENT_AUTHENTICATION));
         assertTrue(tlsSettings.getEnabledVersions().containsAll(getChildElementsTextContents(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), ENABLED_VERSIONS), STRING_VALUE)));
         assertTrue(tlsSettings.getEnabledCipherSuites().containsAll(getChildElementsTextContents(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), ENABLED_CIPHER_SUITES), STRING_VALUE)));
-        assertPropertiesContent(tlsSettings.getProperties(), mapPropertiesElements(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), PROPERTIES)));
-        assertPropertiesContent(listenPort.getProperties(), mapPropertiesElements(getSingleChildElement(xml, PROPERTIES)));
+        assertPropertiesContent(tlsSettings.getProperties(), mapPropertiesElements(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), PROPERTIES), PROPERTIES));
+        assertPropertiesContent(listenPort.getProperties(), mapPropertiesElements(getSingleChildElement(xml, PROPERTIES), PROPERTIES));
     }
 
     private static void checkExpectedPorts(List<Entity> listenPortEntities, Integer... expectedPorts) {

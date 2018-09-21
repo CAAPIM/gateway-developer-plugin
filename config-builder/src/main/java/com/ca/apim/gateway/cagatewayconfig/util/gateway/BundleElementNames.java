@@ -121,7 +121,6 @@ public class BundleElementNames {
     public static final String JDBC_URL = "l7:JdbcUrl";
     public static final String CONNECTION_PROPERTIES = "l7:ConnectionProperties";
 
-
     private BundleElementNames() {
         //
     }

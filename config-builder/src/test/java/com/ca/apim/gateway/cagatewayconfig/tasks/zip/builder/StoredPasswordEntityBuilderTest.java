@@ -90,7 +90,7 @@ class StoredPasswordEntityBuilderTest {
 
         Element properties = getSingleChildElement(xml, PROPERTIES);
         assertNotNull(properties);
-        assertPropertiesContent(pwd.getProperties(), mapPropertiesElements(properties));
+        assertPropertiesContent(pwd.getProperties(), mapPropertiesElements(properties, PROPERTIES));
     }
 
     private static StoredPassword buildStoredPassword(String name) {

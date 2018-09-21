@@ -84,7 +84,7 @@ class JdbcConnectionEntityBuilderTest {
         assertNotNull(getSingleChildElement(xml, PROPERTIES));
         assertPropertiesContent(
                 properties,
-                mapPropertiesElements(getSingleChildElement(xml, PROPERTIES))
+                mapPropertiesElements(getSingleChildElement(xml, PROPERTIES), PROPERTIES)
         );
         Element extension = getSingleChildElement(xml, EXTENSION);
         assertNotNull(extension);
@@ -98,7 +98,7 @@ class JdbcConnectionEntityBuilderTest {
                         PROPERTY_USER, GATEWAY_USER,
                         PROPERTY_PASSWORD, "${secpass." + PASSWORD_REF + ".plaintext}"
                 ),
-                mapPropertiesElements(getSingleChildElement(extension, CONNECTION_PROPERTIES))
+                mapPropertiesElements(getSingleChildElement(extension, CONNECTION_PROPERTIES), CONNECTION_PROPERTIES)
         );
     }
 

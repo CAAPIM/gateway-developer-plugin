@@ -34,6 +34,9 @@ public class JdbcConnectionLoader implements EntityLoader {
                 JDBC_CONNECTIONS,
                 jdbcMapTypeMapping
         );
-        bundle.putAllJdbcConnections(jdbcConections);
+
+        if (jdbcConections != null){
+            bundle.putAllJdbcConnections(jdbcConections);
+        }
     }
 }

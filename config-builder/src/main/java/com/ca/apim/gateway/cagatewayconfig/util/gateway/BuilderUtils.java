@@ -16,6 +16,7 @@ import org.w3c.dom.NodeList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElements;
@@ -76,12 +77,17 @@ public class BuilderUtils {
      * Map a l7:Properties element values into a Map of key-value objects.
      *
      * @param propertiesElement properties element of bundle (l7:Properties)
+     * @param propertiesElementName name of the node expected
      * @return map of properties found into element, empty if null or no properties
-     * @throws DependencyBundleLoadException if node is not l7:Properties, if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
+     * @throws DependencyBundleLoadException if node is not 'propertiesElementName', if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
      */
-    public static Map<String, Object> mapPropertiesElements(final Element propertiesElement) {
+    public static Map<String, Object> mapPropertiesElements(final Element propertiesElement, final String propertiesElementName) {
         if (propertiesElement == null) {
             return emptyMap();
+        }
+
+        if (!Objects.equals(propertiesElement.getNodeName(), propertiesElementName)) {
+            throw new DependencyBundleLoadException("Current node is not " + propertiesElementName + " node, it is " + propertiesElement.getNodeName());
         }
 
         final List<Element> properties = getChildElements(propertiesElement, PROPERTY);

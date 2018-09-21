@@ -34,7 +34,7 @@ public class ListenPortLoader implements BundleEntityLoader {
         final List<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPortElement, ENABLED_FEATURES), STRING_VALUE);
         final String targetServiceReference = getSingleChildElementTextContent(listenPortElement, TARGET_SERVICE_REFERENCE);
         final ListenPortTlsSettings tlsSettings = getTlsSettings(listenPortElement);
-        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPortElement, PROPERTIES, true));
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPortElement, PROPERTIES, true), PROPERTIES);
 
         ListenPort listenPort = new ListenPort();
         listenPort.setProtocol(protocol);
@@ -65,7 +65,7 @@ public class ListenPortLoader implements BundleEntityLoader {
         tlsSettings.setEnabledVersions(getChildElementsTextContents(enabledVersions, STRING_VALUE));
 
         Element properties = getSingleChildElement(tlsSettingsElement, PROPERTIES, true);
-        tlsSettings.setProperties(mapPropertiesElements(properties));
+        tlsSettings.setProperties(mapPropertiesElements(properties, PROPERTIES));
 
         return tlsSettings;
     }
