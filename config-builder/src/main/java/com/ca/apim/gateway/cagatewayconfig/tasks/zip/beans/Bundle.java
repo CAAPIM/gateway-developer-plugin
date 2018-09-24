@@ -138,7 +138,7 @@ public class Bundle {
         return certificateFiles;
     }
 
-    public void putAllCertificateFiles(Map<String, File> certificateFiles) {
+    public void putAllCertificateFiles(@NotNull Map<String, File> certificateFiles) {
         this.certificateFiles.putAll(certificateFiles);
     }
 }
