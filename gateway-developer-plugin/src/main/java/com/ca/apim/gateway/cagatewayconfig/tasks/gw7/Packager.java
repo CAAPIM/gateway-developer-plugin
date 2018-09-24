@@ -47,7 +47,7 @@ class Packager {
         Set<GW7Builder.PackageFile> packageFiles = Stream.of(
                 //apply-environment.sh script
                 Stream.<GW7Builder.PackageFile>builder()
-                        .add(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh", applyEnvBytes.length, () -> new ByteArrayInputStream(applyEnvBytes)))
+                        .add(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh", applyEnvBytes.length, () -> new ByteArrayInputStream(applyEnvBytes), true))
                         .build(),
                 Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/" + bundle.getName(), bundle.length(), () -> fileUtils.getInputStream(bundle))),
                 dependencyBundles.stream().map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + f.getName(), f.length(), () -> fileUtils.getInputStream(f))),
