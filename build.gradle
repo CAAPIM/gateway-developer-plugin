@@ -96,6 +96,11 @@ subprojects {
             name = project.name
             licenses = ['MIT']
             vcsUrl = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
+            version {
+                name = version
+                released  = new Date()
+                vcsTag = 'release/' + version
+            }
         }
     }
 }
