@@ -10,6 +10,8 @@ plugins {
     id 'maven'
 }
 
+description = 'The gateway-developer-plugin enables developing gateway configuration.'
+
 project.ext.'gradle.publish.key' = System.env.GRADLE_PUBLISH_KEY
 project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
 
@@ -18,7 +20,7 @@ dependencies {
 
     compile project(':config-builder')
 
-    compile 'org.apache.commons:commons-compress:+'
+    compile 'org.apache.commons:commons-compress:1.18'
 
     testCompile gradleTestKit()
 }
