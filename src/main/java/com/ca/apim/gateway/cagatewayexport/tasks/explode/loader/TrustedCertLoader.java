@@ -22,7 +22,7 @@ public class TrustedCertLoader implements EntityLoader<TrustedCertEntity> {
     @Override
     public TrustedCertEntity load(Element element) {
         final Element trustedCertElem = getSingleChildElement(getSingleChildElement(element, RESOURCE), TRUSTED_CERT);
-        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(trustedCertElem, PROPERTIES, true));
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(trustedCertElem, PROPERTIES, true), PROPERTIES);
 
         return new TrustedCertEntity.Builder()
                 .id(trustedCertElem.getAttribute(ATTRIBUTE_ID))

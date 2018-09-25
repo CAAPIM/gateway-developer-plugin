@@ -9,9 +9,10 @@ package com.ca.apim.gateway.cagatewayexport.util.properties;
 /**
  * Constants related to properties.
  */
+@SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public class PropertyConstants {
 
-    //Trusted Cert property constants
+    // Trusted Cert property constants
     public static final String VERIFY_HOSTNAME = "verifyHostname";
     public static final String TRUSTED_FOR_SSL = "trustedForSsl";
     public static final String TRUSTED_AS_SAML_ATTESTING_ENTITY = "trustedAsSamlAttestingEntity";
@@ -20,6 +21,12 @@ public class PropertyConstants {
     public static final String TRUSTING_SIGNING_CLIENT_CERTS = "trustedForSigningClientCerts";
     public static final String TRUSTED_SIGNING_SERVER_CERTS = "trustedForSigningServerCerts";
     public static final String TRUSTED_AS_SAML_ISSUER = "trustedAsSamlIssuer";
+
+    // JDBC connection properties
+    public static final String PROPERTY_USER = "user";
+    public static final String PROPERTY_PASSWORD = "password";
+    public static final String PROPERTY_MIN_POOL_SIZE = "minimumPoolSize";
+    public static final String PROPERTY_MAX_POOL_SIZE = "maximumPoolSize";
 
     private PropertyConstants(){}
 }

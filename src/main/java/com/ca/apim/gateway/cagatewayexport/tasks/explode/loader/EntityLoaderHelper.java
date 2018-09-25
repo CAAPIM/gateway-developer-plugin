@@ -39,21 +39,22 @@ final class EntityLoaderHelper {
      * Map a l7:Properties element values into a Map of key-value objects.
      *
      * @param propertiesElement properties element of bundle (l7:Properties)
+     * @param propertiesElementName Name of the properties element to be validated
      * @return map of properties found into element, empty if null or no properties
      * @throws BundleBuilderException if node is not l7:Properties, if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
      */
-    static Map<String, Object> mapPropertiesElements(final Element propertiesElement) {
+    static Map<String, Object> mapPropertiesElements(final Element propertiesElement, final String propertiesElementName) {
         if (propertiesElement == null) {
             return emptyMap();
         }
 
-        if (!Objects.equals(propertiesElement.getNodeName(), PROPERTIES)) {
+        if (!Objects.equals(propertiesElement.getNodeName(), propertiesElementName)) {
             throw new BundleBuilderException("Current node is not l7:Properties node, it is " + propertiesElement.getNodeName());
         }
 
         final List<Element> properties = getChildElements(propertiesElement, PROPERTY);
-        return properties.stream().collect(toMap(s -> s.getAttribute("key"), o -> {
-            final String propKey = o.getAttribute("key");
+        return properties.stream().collect(toMap(s -> s.getAttribute(ATTRIBUTE_KEY), o -> {
+            final String propKey = o.getAttribute(ATTRIBUTE_KEY);
             final NodeList childNodes = o.getChildNodes();
 
             for (int i = 0; i < childNodes.getLength(); i++) {
@@ -71,6 +72,7 @@ final class EntityLoaderHelper {
         switch (valueElement.getNodeName()) {
             case STRING_VALUE: return valueElement.getTextContent();
             case BOOLEAN_VALUE: return toBoolean(valueElement.getTextContent());
+            case INTEGER_VALUE:
             case INT_VALUE: return parseInt(valueElement.getTextContent());
             case LONG_VALUE: return parseLong(valueElement.getTextContent());
             case DATE_VALUE: return parseDateFromString(key, valueElement.getTextContent());

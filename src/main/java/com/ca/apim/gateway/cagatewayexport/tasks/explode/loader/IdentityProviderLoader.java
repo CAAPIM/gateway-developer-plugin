@@ -27,7 +27,7 @@ public class IdentityProviderLoader implements EntityLoader<IdentityProviderEnti
     public IdentityProviderEntity load(Element element) {
         final Element identityProvider = getSingleChildElement(getSingleChildElement(element, RESOURCE), ID_PROV);
         final String name = getSingleChildElementTextContent(identityProvider, NAME);
-        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(identityProvider, PROPERTIES, true));
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(identityProvider, PROPERTIES, true), PROPERTIES);
         final IdentityProviderType type = fromType(getSingleChildElementTextContent(identityProvider, ID_PROV_TYPE));
 
         switch (type) {

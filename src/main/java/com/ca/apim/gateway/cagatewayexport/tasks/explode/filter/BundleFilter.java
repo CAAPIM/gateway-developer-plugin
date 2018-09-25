@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.*;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity.Type;
 
@@ -48,7 +49,10 @@ public class BundleFilter {
         filterIDP(bundle.getEntities(IdentityProviderEntity.class).values()).forEach(filteredBundle::addEntity);
 
         //filter cluster property
-        filterStaticProperties(bundle.getEntities(ClusterProperty.class).values(), bundle.getDependencies(), filteredBundle).forEach(filteredBundle::addEntity);
+        filterStaticProperties(
+                bundle.getEntities(ClusterProperty.class).values(),
+                filterDependencies(ClusterProperty.class, bundle.getDependencies(), filteredBundle)
+        ).forEach(filteredBundle::addEntity);
 
         // filter listen ports
         filterListenPorts(bundle.getEntities(ListenPortEntity.class).values()).forEach(filteredBundle::addEntity);
@@ -58,6 +62,12 @@ public class BundleFilter {
 
         // filter stored passwords
         filterStoredPasswords(bundle.getEntities(StoredPasswordEntity.class).values()).forEach(filteredBundle::addEntity);
+
+        // filtering jdbc connections using only the ones defined as policy dependencies
+        filterJdbcConnections(
+                bundle.getEntities(JdbcConnectionEntity.class).values(),
+                filterDependencies(JdbcConnectionEntity.class, bundle.getDependencies(), filteredBundle)
+        ).forEach(filteredBundle::addEntity);
 
         filterParentFolders(folderPath, bundle.getFolderTree()).forEach(filteredBundle::addEntity);
 
@@ -74,12 +84,7 @@ public class BundleFilter {
         return values.stream().filter(idp -> !IdentityProviderEntity.INTERNAL_IDP_ID.equals(idp.getId())).collect(Collectors.toList());
     }
 
-    private List<ClusterProperty> filterStaticProperties(Collection<ClusterProperty> clusterProperties, Map<Dependency, List<Dependency>> dependencies, Bundle filteredBundle) {
-        Set<Dependency> filteredDependencies = dependencies.entrySet().stream()
-                .filter(e -> filteredBundle.getEntities(e.getKey().getType()).get(e.getKey().getId()) != null)
-                .flatMap(e -> e.getValue().stream())
-                .filter(d -> d.getType() == ClusterProperty.class)
-                .collect(Collectors.toSet());
+    private List<ClusterProperty> filterStaticProperties(Collection<ClusterProperty> clusterProperties, Set<Dependency> filteredDependencies) {
         return clusterProperties.stream()
                 .filter(c -> filteredDependencies.contains(new Dependency(c.getId(), ClusterProperty.class)))
                 .collect(Collectors.toList());
@@ -117,5 +122,19 @@ public class BundleFilter {
 
     private List<ListenPortEntity> filterListenPorts(Collection<ListenPortEntity> listenPorts) {
         return listenPorts.stream().filter(l -> !DEFAULT_PORTS.contains(l.getPort())).collect(Collectors.toList());
+    }
+
+    private List<JdbcConnectionEntity> filterJdbcConnections(Collection<JdbcConnectionEntity> jdbcConnections, Set<Dependency> filteredDependencies) {
+        return jdbcConnections.stream()
+                .filter(c -> filteredDependencies.contains(new Dependency(c.getId(), JdbcConnectionEntity.class)))
+                .collect(Collectors.toList());
+    }
+
+    private static <E extends Entity> Set<Dependency> filterDependencies(Class<E> dependencyType, Map<Dependency, List<Dependency>> dependencies, Bundle filteredBundle) {
+        return dependencies.entrySet().stream()
+                .filter(e -> filteredBundle.getEntities(e.getKey().getType()).get(e.getKey().getId()) != null)
+                .flatMap(e -> e.getValue().stream())
+                .filter(d -> d.getType() == dependencyType)
+                .collect(Collectors.toSet());
     }
 }

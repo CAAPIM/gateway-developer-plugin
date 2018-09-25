@@ -8,7 +8,13 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 /**
  * Utility class to hold element names used in gateway bundles.
  */
+@SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public class BundleElementNames {
+
+    public static final String ATTRIBUTE_ID = "id";
+    public static final String ATTRIBUTE_FOLDER_ID = "folderId";
+    public static final String ATTRIBUTE_GUID = "guid";
+    public static final String ATTRIBUTE_KEY = "key";
 
     // Common Elements
     public static final String NAME = "l7:Name";
@@ -16,6 +22,7 @@ public class BundleElementNames {
     public static final String PROPERTIES = "l7:Properties";
     public static final String PROPERTY = "l7:Property";
     public static final String INT_VALUE = "l7:IntValue";
+    public static final String INTEGER_VALUE = "l7:IntegerValue";
     public static final String LONG_VALUE = "l7:LongValue";
     public static final String BOOLEAN_VALUE = "l7:BooleanValue";
     public static final String STRING_VALUE = "l7:StringValue";
@@ -29,8 +36,7 @@ public class BundleElementNames {
     public static final String DEPENDENCIES = "l7:Dependencies";
     public static final String DEPENDENCY_GRAPH = "l7:DependencyGraph";
     public static final String GUID = "l7:Guid";
-    public static final String ATTRIBUTE_ID = "id";
-    public static final String ATTRIBUTE_FOLDER_ID = "folderId";
+    public static final String EXTENSION = "l7:Extension";
 
     // Service
     public static final String SERVICE = "l7:Service";
@@ -43,7 +49,6 @@ public class BundleElementNames {
 
     // Policy
     public static final String POLICY = "l7:Policy";
-    public static final String ATTRIBUTE_GUID = "guid";
     public static final String POLICY_DETAIL = "l7:PolicyDetail";
     public static final String POLICY_TYPE = "l7:PolicyType";
 
@@ -87,7 +92,6 @@ public class BundleElementNames {
     // Identity Provider Elements
     public static final String ID_PROV = "l7:IdentityProvider";
     public static final String ID_PROV_TYPE = "l7:IdentityProviderType";
-    public static final String EXTENSION = "l7:Extension";
     public static final String SERVER_URLS = "l7:ServerUrls";
     public static final String BIND_ONLY_ID_PROV_DETAIL = "l7:BindOnlyLdapIdentityProviderDetail";
     public static final String USE_SSL_CLIENT_AUTH = "l7:UseSslClientAuthentication";
@@ -95,13 +99,18 @@ public class BundleElementNames {
     public static final String BIND_PATTERN_SUFFIX = "l7:BindPatternSuffix";
 
     // Stored Passwords
-    @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
     public static final String STORED_PASSWD = "l7:StoredPassword";
 
     //Trusted Cert Elements
     public static final String TRUSTED_CERT = "l7:TrustedCertificate";
     public static final String CERT_DATA = "l7:CertificateData";
     public static final String ENCODED = "l7:Encoded";
+
+    // Jdbc Connection
+    public static final String JDBC_CONNECTION = "l7:JDBCConnection";
+    public static final String DRIVER_CLASS = "l7:DriverClass";
+    public static final String JDBC_URL = "l7:JdbcUrl";
+    public static final String CONNECTION_PROPERTIES = "l7:ConnectionProperties";
 
     private BundleElementNames() {
         //

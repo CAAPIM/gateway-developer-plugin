@@ -26,7 +26,7 @@ public class StoredPasswordLoader implements EntityLoader<StoredPasswordEntity> 
         final Element storedPass = getSingleChildElement(getSingleChildElement(element, RESOURCE), STORED_PASSWD);
 
         final String name = getSingleChildElementTextContent(storedPass, NAME);
-        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(storedPass, PROPERTIES, true));
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(storedPass, PROPERTIES, true), PROPERTIES);
 
         return new StoredPasswordEntity
                 .Builder()
