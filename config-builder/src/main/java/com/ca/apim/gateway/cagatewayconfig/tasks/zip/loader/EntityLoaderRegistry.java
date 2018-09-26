@@ -29,6 +29,7 @@ public class EntityLoaderRegistry {
         loadersCollection.add(new IdentityProviderLoader(jsonTools));
         loadersCollection.add(new ListenPortLoader(jsonTools));
         loadersCollection.add(new StoredPasswordsLoader(fileUtils));
+	    loadersCollection.add(new JdbcConnectionLoader(jsonTools));
 
         this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
     }

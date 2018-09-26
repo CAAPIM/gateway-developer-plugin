@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,13 +24,14 @@ public class Bundle {
     private final Map<String, IdentityProvider> identityProviders = new HashMap<>();
     private final Map<String, ListenPort> listenPorts = new HashMap<>();
     private final Map<String, StoredPassword> storedPasswords = new HashMap<>();
+    private final Map<String, JdbcConnection> jdbcConnections = new HashMap<>();	
     private Set<Bundle> dependencies;
 
     public Map<String, Service> getServices() {
         return services;
     }
 
-    public void putAllServices(Map<String, Service> services) {
+    public void putAllServices(@NotNull Map<String, Service> services) {
         this.services.putAll(services);
     }
 
@@ -37,11 +39,11 @@ public class Bundle {
         return policies;
     }
 
-    public void putAllPolicies(Map<String, Policy> policies) {
+    public void putAllPolicies(@NotNull Map<String, Policy> policies) {
         this.policies.putAll(policies);
     }
 
-    public void putAllFolders(Map<String, Folder> folders) {
+    public void putAllFolders(@NotNull Map<String, Folder> folders) {
         this.folders.putAll(folders);
     }
 
@@ -49,7 +51,7 @@ public class Bundle {
         return folders;
     }
 
-    public void putAllEncasses(Map<String, Encass> encasses) {
+    public void putAllEncasses(@NotNull Map<String, Encass> encasses) {
         this.encasses.putAll(encasses);
     }
 
@@ -57,7 +59,7 @@ public class Bundle {
         return encasses;
     }
 
-    public void putAllStaticProperties(Map<String, String> properties) {
+    public void putAllStaticProperties(@NotNull Map<String, String> properties) {
         this.staticProperties.putAll(properties);
     }
 
@@ -65,7 +67,7 @@ public class Bundle {
         return staticProperties;
     }
 
-    public void putAllEnvironmentProperties(Map<String, String> properties) {
+    public void putAllEnvironmentProperties(@NotNull Map<String, String> properties) {
         this.environmentProperties.putAll(properties);
     }
 
@@ -73,7 +75,7 @@ public class Bundle {
         return environmentProperties;
     }
 
-    public void putAllPolicyBackedServices(Map<String, PolicyBackedService> policyBackedServices) {
+    public void putAllPolicyBackedServices(@NotNull Map<String, PolicyBackedService> policyBackedServices) {
         this.policyBackedServices.putAll(policyBackedServices);
     }
 
@@ -85,7 +87,7 @@ public class Bundle {
         return identityProviders;
     }
 
-    public void putAllIdentityProviders(Map<String, IdentityProvider> identityProviders) {
+    public void putAllIdentityProviders(@NotNull Map<String, IdentityProvider> identityProviders) {
         this.identityProviders.putAll(identityProviders);
     }
 
@@ -93,7 +95,7 @@ public class Bundle {
         return listenPorts;
     }
 
-    public void putAllListenPorts(Map<String, ListenPort> listenPorts) {
+    public void putAllListenPorts(@NotNull Map<String, ListenPort> listenPorts) {
         this.listenPorts.putAll(listenPorts);
     }
 
@@ -101,15 +103,23 @@ public class Bundle {
         return storedPasswords;
     }
 
-    public void putAllStoredPasswords(Map<String, StoredPassword> storedPasswords) {
+    public void putAllStoredPasswords(@NotNull Map<String, StoredPassword> storedPasswords) {
         this.storedPasswords.putAll(storedPasswords);
+    }
+
+    public Map<String, JdbcConnection> getJdbcConnections() {
+        return jdbcConnections;
+    }
+
+    public void putAllJdbcConnections(@NotNull Map<String, JdbcConnection> jdbcConnections) {
+        this.jdbcConnections.putAll(jdbcConnections);
     }
 
     public Set<Bundle> getDependencies() {
         return dependencies;
     }
 
-    public void setDependencies(Set<Bundle> dependencies) {
+    public void setDependencies(@NotNull Set<Bundle> dependencies) {
         this.dependencies = dependencies;
     }
 }

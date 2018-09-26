@@ -37,9 +37,18 @@ public class BuilderUtils {
         elementToAppendInto.appendChild(buildPropertiesElement(properties, document));
     }
 
-    static Element buildPropertiesElement(final Map<String, Object> properties, final Document document) {
-        Element propertiesElement = document.createElement(PROPERTIES);
+    public static Element buildPropertiesElement(final Map<String, Object> properties, final Document document) {
+        return buildPropertiesElement(properties, document, PROPERTIES);
+    }
+
+    public static Element buildPropertiesElement(final Map<String, Object> properties, final Document document, final String propertiesElementName) {
+        Element propertiesElement = document.createElement(propertiesElementName);
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            // skip property if null value
+            if (entry.getValue() == null) {
+                continue;
+            }
+
             Element propertyElement = document.createElement(PROPERTY);
             propertyElement.setAttribute(ATTRIBUTE_KEY, entry.getKey());
             String elementType;
@@ -68,16 +77,17 @@ public class BuilderUtils {
      * Map a l7:Properties element values into a Map of key-value objects.
      *
      * @param propertiesElement properties element of bundle (l7:Properties)
+     * @param propertiesElementName name of the node expected
      * @return map of properties found into element, empty if null or no properties
-     * @throws DependencyBundleLoadException if node is not l7:Properties, if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
+     * @throws DependencyBundleLoadException if node is not 'propertiesElementName', if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
      */
-    public static Map<String, Object> mapPropertiesElements(final Element propertiesElement) {
+    public static Map<String, Object> mapPropertiesElements(final Element propertiesElement, final String propertiesElementName) {
         if (propertiesElement == null) {
             return emptyMap();
         }
 
-        if (!Objects.equals(propertiesElement.getNodeName(), PROPERTIES)) {
-            throw new DependencyBundleLoadException("Current node is not " + PROPERTIES + " node, it is " + propertiesElement.getNodeName());
+        if (!Objects.equals(propertiesElement.getNodeName(), propertiesElementName)) {
+            throw new DependencyBundleLoadException("Current node is not " + propertiesElementName + " node, it is " + propertiesElement.getNodeName());
         }
 
         final List<Element> properties = getChildElements(propertiesElement, PROPERTY);

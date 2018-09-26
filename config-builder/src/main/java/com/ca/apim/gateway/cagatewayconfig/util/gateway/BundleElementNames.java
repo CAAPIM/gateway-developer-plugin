@@ -19,11 +19,17 @@ public class BundleElementNames {
     public static final String ATTRIBUTE_TYPE = "type";
     public static final String ATTRIBUTE_FOLDER_ID = "folderId";
 
+    // Property names
+    public static final String PROPERTY_USER = "user";
+    public static final String PROPERTY_PASSWORD = "password";
+    public static final String PROPERTY_MIN_POOL_SIZE = "minimumPoolSize";
+    public static final String PROPERTY_MAX_POOL_SIZE = "maximumPoolSize";
+
     // Common Elements
     public static final String NAME = "l7:Name";
     public static final String PROPERTIES = "l7:Properties";
     public static final String PROPERTY = "l7:Property";
-    public static final String INT_VALUE = "l7:IntValue";
+    public static final String INT_VALUE = "l7:IntegerValue";
     public static final String LONG_VALUE = "l7:LongValue";
     public static final String BOOLEAN_VALUE = "l7:BooleanValue";
     public static final String STRING_VALUE = "l7:StringValue";
@@ -108,6 +114,12 @@ public class BundleElementNames {
     // Stored Passwords
     public static final String STORED_PASSWD = "l7:StoredPassword";
     public static final String PASSWORD = "l7:Password";
+
+    // JDBC Connections
+    public static final String JDBC_CONNECTION = "l7:JDBCConnection";
+    public static final String DRIVER_CLASS = "l7:DriverClass";
+    public static final String JDBC_URL = "l7:JdbcUrl";
+    public static final String CONNECTION_PROPERTIES = "l7:ConnectionProperties";
 
     private BundleElementNames() {
         //

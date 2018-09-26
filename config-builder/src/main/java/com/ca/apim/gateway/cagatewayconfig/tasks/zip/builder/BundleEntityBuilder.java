@@ -25,6 +25,7 @@ public class BundleEntityBuilder {
     private final IdentityProviderEntityBuilder identityProviderEntityBuilder;
     private final ListenPortEntityBuilder listenPortEntityBuilder;
     private final StoredPasswordEntityBuilder storedPasswordEntityBuilder;
+    private final JdbcConnectionEntityBuilder jdbcConnectionEntityBuilder;
 
     public BundleEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document, IdGenerator idGenerator) {
         this.document = document;
@@ -37,6 +38,7 @@ public class BundleEntityBuilder {
         identityProviderEntityBuilder = new IdentityProviderEntityBuilder(document, idGenerator);
         listenPortEntityBuilder = new ListenPortEntityBuilder(document, idGenerator);
         storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(document, idGenerator);
+        jdbcConnectionEntityBuilder = new JdbcConnectionEntityBuilder(document, idGenerator);
     }
 
     public Element build(Bundle bundle) {
@@ -50,6 +52,7 @@ public class BundleEntityBuilder {
         bundleDocumentBuilder.addEntities(identityProviderEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(listenPortEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(storedPasswordEntityBuilder.build(bundle));
+        bundleDocumentBuilder.addEntities(jdbcConnectionEntityBuilder.build(bundle));
 
         return bundleDocumentBuilder.build();
     }
