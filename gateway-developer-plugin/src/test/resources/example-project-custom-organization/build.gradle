@@ -11,6 +11,13 @@ plugins {
 group 'com.ca'
 version '1.2.3-SNAPSHOT'
 
+repositories {
+    maven {
+        url "file:///" + project.property('jarDir')
+    }
+    mavenCentral()
+}
+
 GatewaySourceConfig {
     solutionDir = new File("export/gateway/solution")
     builtBundleDir = new File("dist")

@@ -4,12 +4,14 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
+description = 'Core library used to create bundles and apply for the CA API Gateway'
+
 dependencies {
     compile 'org.jetbrains:annotations:16.0.2'
-    compile 'commons-io:commons-io:+'
-    compile 'commons-lang:commons-lang:+'
-    compile 'org.apache.commons:commons-collections4:+'
-    compile 'com.google.guava:guava:+'
+    compile 'commons-io:commons-io:2.6'
+    compile 'commons-lang:commons-lang:2.6'
+    compile 'org.apache.commons:commons-collections4:4.2'
+    compile 'com.google.guava:guava:26.0-jre'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 }

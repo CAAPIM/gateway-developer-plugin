@@ -48,6 +48,7 @@ public abstract class PropertiesLoaderBase implements EntityLoader {
     /**
      * Put the loaded properties into the bundle.
      *
+     * @param bundle The bundle to load properties into
      * @param properties map of properties
      */
     protected abstract void putToBundle(Bundle bundle, Map<String, String> properties);

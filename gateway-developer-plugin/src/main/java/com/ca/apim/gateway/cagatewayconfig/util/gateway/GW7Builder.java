@@ -52,11 +52,18 @@ public class GW7Builder {
     public static final GW7Builder INSTANCE = new GW7Builder();
 
     public void buildPackage(OutputStream gw7FileOutputStream, Set<PackageFile> packageFiles) {
-        try (TarArchiveOutputStream taos = new TarArchiveOutputStream(new GzipCompressorOutputStream(gw7FileOutputStream))) {
+        try (TarArchiveOutputStream taos = getTarOutputStream(gw7FileOutputStream)) {
             writeFiles(taos, packageFiles);
         } catch (IOException e) {
             throw new PackageBuildException("Error building GW7 Package: " + e.getMessage(), e);
         }
+    }
+
+    private TarArchiveOutputStream getTarOutputStream(OutputStream gw7FileOutputStream) throws IOException {
+        TarArchiveOutputStream tarArchiveOutputStream = new TarArchiveOutputStream(new GzipCompressorOutputStream(gw7FileOutputStream));
+        //This enables longer file paths within the tar
+        tarArchiveOutputStream.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+        return tarArchiveOutputStream;
     }
 
     private void writeFiles(TarArchiveOutputStream taos, Set<PackageFile> packageFiles) {
@@ -64,6 +71,9 @@ public class GW7Builder {
             try (InputStream inputStream = file.fileStreamSupplier.get()) {
                 TarArchiveEntry tarEntry = new TarArchiveEntry(file.filePath);
                 tarEntry.setSize(file.fileSize);
+                if (file.executable) {
+                    tarEntry.setMode(365);
+                }
                 taos.putArchiveEntry(tarEntry);
                 IOUtils.copy(inputStream, taos);
                 taos.closeArchiveEntry();
@@ -77,11 +87,17 @@ public class GW7Builder {
         private final String filePath;
         private final long fileSize;
         private final Supplier<InputStream> fileStreamSupplier;
+        private final boolean executable;
 
         public PackageFile(String filePath, long fileSize, Supplier<InputStream> fileStreamSupplier) {
+            this(filePath, fileSize, fileStreamSupplier, false);
+        }
+
+        public PackageFile(String filePath, long fileSize, Supplier<InputStream> fileStreamSupplier, boolean executable) {
             this.filePath = filePath;
             this.fileSize = fileSize;
             this.fileStreamSupplier = fileStreamSupplier;
+            this.executable = executable;
         }
     }
 }

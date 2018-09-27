@@ -39,31 +39,35 @@ class Packager {
      *
      * @param gw7File           the file to output the gw7 package to
      * @param bundle            The bundle file for this solution
-     * @param envBundle         The environment bundle for this solution
      * @param dependencyBundles Dependency bundles to put into the package. These will have their names prefixed so that they get loaded first
      */
-    void buildPackage(File gw7File, File bundle, File envBundle, Set<File> dependencyBundles) {
-        byte[] applyEnvBytes = getApplyEnvironmentScriptBytes();
+    void buildPackage(File gw7File, File bundle, Set<File> dependencyBundles, Set<File> containerApplicationDependencies) {
+        byte[] applyEnvBytes = getResourceBytes("/scripts/apply-environment.sh");
+
+        Set<GW7Builder.PackageFile> packageFiles = Stream.of(
+                //apply-environment.sh script
+                Stream.<GW7Builder.PackageFile>builder()
+                        .add(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh", applyEnvBytes.length, () -> new ByteArrayInputStream(applyEnvBytes), true))
+                        .build(),
+                Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/" + bundle.getName(), bundle.length(), () -> fileUtils.getInputStream(bundle))),
+                dependencyBundles.stream().map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + f.getName(), f.length(), () -> fileUtils.getInputStream(f))),
+                containerApplicationDependencies.stream().map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment/" + f.getName(), f.length(), () -> fileUtils.getInputStream(f)))
+        )
+                .flatMap(Function.identity())
+                .collect(Collectors.toSet());
 
         gw7Builder.buildPackage(fileUtils.getOutputStream(gw7File),
-                Stream.of(
-                        //apply-environment.sh script
-                        Stream.<GW7Builder.PackageFile>builder()
-                                .add(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh", applyEnvBytes.length, () -> new ByteArrayInputStream(applyEnvBytes)))
-                                .build(),
-                        Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/" + bundle.getName(), bundle.length(), () -> fileUtils.getInputStream(bundle))),
-                        Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + envBundle.getName(), envBundle.length(), () -> fileUtils.getInputStream(envBundle))),
-                        dependencyBundles.stream().map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + f.getName(), f.length(), () -> fileUtils.getInputStream(f)))
-                )
-                        .flatMap(Function.identity())
-                        .collect(Collectors.toSet()));
+                packageFiles);
     }
 
-    private byte[] getApplyEnvironmentScriptBytes() {
-        try (InputStream applyEnvStream = getClass().getResourceAsStream("/scripts/apply-environment.sh")) {
+    private byte[] getResourceBytes(String resourcePath) {
+        try (InputStream applyEnvStream = getClass().getResourceAsStream(resourcePath)) {
+            if (applyEnvStream == null) {
+                throw new PackageBuildException("Error loading " + resourcePath + " bytes. Could not find the resource.");
+            }
             return IOUtils.toByteArray(applyEnvStream);
         } catch (IOException e) {
-            throw new PackageBuildException("Error loading apply-environment.sh script bytes: " + e.getMessage(), e);
+            throw new PackageBuildException("Error loading " + resourcePath + " bytes: " + e.getMessage(), e);
         }
     }
 }
