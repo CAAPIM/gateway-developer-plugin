@@ -18,6 +18,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.*;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -31,6 +33,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
+@Singleton
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
 
@@ -39,27 +42,32 @@ public class PolicyEntityBuilder implements EntityBuilder {
     private static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
     private static final String TAG = "tag";
     private static final String SUBTAG = "subtag";
-    public static final String TYPE = "type";
-    public static final String POLICY = "policy";
-    public static final String POLICY_TYPE_INCLUDE = "Include";
+    private static final String TYPE = "type";
+    private static final String POLICY = "policy";
+    private static final String POLICY_TYPE_INCLUDE = "Include";
+    private static final Integer ORDER = 200;
 
-    private final Document document;
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
 
-    PolicyEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document) {
+    @Inject
+    PolicyEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools) {
         this.documentFileUtils = documentFileUtils;
         this.documentTools = documentTools;
-        this.document = document;
     }
 
-    public List<Entity> build(Bundle bundle) {
-        bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle));
+    public List<Entity> build(Bundle bundle, Document document) {
+        bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle, document));
 
         List<Policy> orderedPolicies = new LinkedList<>();
         bundle.getPolicies().forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
 
-        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle)).collect(Collectors.toList());
+        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle, document)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER;
     }
 
     private void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
@@ -76,13 +84,13 @@ public class PolicyEntityBuilder implements EntityBuilder {
         orderedPolicies.add(policy);
     }
 
-    private void preparePolicy(Policy policy, Bundle bundle) {
+    private void preparePolicy(Policy policy, Bundle bundle, Document bundleDocument) {
         Document policyDocument = stringToXML(policy.getPolicyXML());
         Element policyElement = policyDocument.getDocumentElement();
 
         prepareAssertion(policyElement, INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
         prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(bundle, policyDocument, assertionElement));
-        prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement));
+        prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement, bundleDocument));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
         policy.setPolicyDocument(policyElement);
@@ -92,7 +100,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareBase64Element(policyDocument, assertionElement, RESPONSE_BODY, BASE_64_RESPONSE_BODY);
     }
 
-    private void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
+    private void prepareSetVariableAssertion(Document policyDocument, Element assertionElement, Document bundleDocument) {
         Element nameElement;
         try {
             nameElement = getSingleElement(assertionElement, VARIABLE_TO_SET);
@@ -103,7 +111,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String variableName = nameElement.getAttribute(STRING_VALUE);
         if(variableName.startsWith(PREFIX_ENV)){
             assertionElement.insertBefore(
-                    createElementWithAttribute(document, BASE_64_EXPRESSION, ENV_PARAM_NAME, variableName),
+                    createElementWithAttribute(bundleDocument, BASE_64_EXPRESSION, ENV_PARAM_NAME, variableName),
                     assertionElement.getFirstChild()
             );
         } else {
@@ -221,7 +229,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Entity buildPolicyEntity(Policy policy, Bundle bundle) {
+    private Entity buildPolicyEntity(Policy policy, Bundle bundle, Document document) {
         String id = policy.getId();
         PolicyTags policyTags = getPolicyTags(policy, bundle);
 

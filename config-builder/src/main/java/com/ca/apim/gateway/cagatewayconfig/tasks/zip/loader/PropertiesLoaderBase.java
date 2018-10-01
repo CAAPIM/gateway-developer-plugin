@@ -20,7 +20,7 @@ public abstract class PropertiesLoaderBase implements EntityLoader {
 
     private FileUtils fileUtils;
 
-    protected PropertiesLoaderBase(final FileUtils fileUtils) {
+    PropertiesLoaderBase(final FileUtils fileUtils) {
         this.fileUtils = fileUtils;
     }
 

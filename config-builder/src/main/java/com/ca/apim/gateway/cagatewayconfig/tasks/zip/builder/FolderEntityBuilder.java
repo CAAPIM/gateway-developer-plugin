@@ -12,6 +12,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,18 +23,20 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
+@Singleton
 public class FolderEntityBuilder implements EntityBuilder {
+
     private static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
     private static final String ROOT_FOLDER_NAME = "Root Node";
+    private static final Integer ORDER = 100;
     private final IdGenerator idGenerator;
-    private final Document document;
 
-    FolderEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    FolderEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
-    private Entity buildFolderEntity(String name, String id, String parentFolderId) {
+    private Entity buildFolderEntity(String name, String id, String parentFolderId, Document document) {
         Element folder = createElementWithAttribute(document, FOLDER, ATTRIBUTE_ID, id);
 
         if (parentFolderId != null) {
@@ -42,7 +46,7 @@ public class FolderEntityBuilder implements EntityBuilder {
         return new Entity(FOLDER_TYPE, name, id, folder);
     }
 
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, Document document) {
 
         Map<Folder, Collection<Folder>> folderChildrenMap = new HashMap<>();
 
@@ -61,9 +65,14 @@ public class FolderEntityBuilder implements EntityBuilder {
                 f.setId(idGenerator.generate());
             }
             String parentFolderId = f.getParentFolder() != null ? f.getParentFolder().getId() : null;
-            return buildFolderEntity(f.getName(), f.getId(), parentFolderId);
+            return buildFolderEntity(f.getName(), f.getId(), parentFolderId, document);
         })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER;
     }
 
     private Stream<Folder> expand(final Folder folder, Map<Folder, Collection<Folder>> folderChildrenMap) {

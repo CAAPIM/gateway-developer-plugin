@@ -9,28 +9,34 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
-public class PolicyBackedServiceLoader implements EntityLoader {
+@Singleton
+public class PolicyBackedServiceLoader extends EntityLoaderBase<PolicyBackedService> {
 
     private static final String FILE_NAME = "policy-backed-services";
-    private static final TypeReference<HashMap<String, PolicyBackedService>> policyBackedServiceMapTypeMapping = new TypeReference<HashMap<String, PolicyBackedService>>() {
-    };
-    private final JsonTools jsonTools;
 
-    public PolicyBackedServiceLoader(JsonTools jsonTools) {
-        this.jsonTools = jsonTools;
+    @Inject
+    PolicyBackedServiceLoader(JsonTools jsonTools) {
+        super(jsonTools);
     }
 
     @Override
-    public void load(final Bundle bundle, final File rootDir) {
-        final Map<String, PolicyBackedService> policyBackedServices = jsonTools.parseDocumentFileFromConfigDir(rootDir, FILE_NAME, policyBackedServiceMapTypeMapping);
-        if (policyBackedServices != null) {
-            bundle.putAllPolicyBackedServices(policyBackedServices);
-        }
+    protected Class<PolicyBackedService> getBeanClass() {
+        return PolicyBackedService.class;
+    }
+
+    @Override
+    protected String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    protected void putToBundle(Bundle bundle, @NotNull Map<String, PolicyBackedService> entitiesMap) {
+        bundle.putAllPolicyBackedServices(entitiesMap);
     }
 }

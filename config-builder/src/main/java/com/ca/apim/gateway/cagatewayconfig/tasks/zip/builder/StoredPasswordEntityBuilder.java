@@ -12,6 +12,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.STORED_PASSWORD_TYPE;
@@ -21,22 +23,23 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 import static java.util.stream.Collectors.toList;
 
+@Singleton
 public class StoredPasswordEntityBuilder implements EntityBuilder {
 
-    private final Document document;
+    private static final Integer ORDER = 900;
     private final IdGenerator idGenerator;
 
-    StoredPasswordEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    StoredPasswordEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
     @Override
-    public List<Entity> build(Bundle bundle) {
-        return bundle.getStoredPasswords().entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), e.getValue())).collect(toList());
+    public List<Entity> build(Bundle bundle, Document document) {
+        return bundle.getStoredPasswords().entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), e.getValue(), document)).collect(toList());
     }
 
-    Entity buildStoredPasswordEntity(String name, StoredPassword storedPassword) {
+    private Entity buildStoredPasswordEntity(String name, StoredPassword storedPassword, Document document) {
         String id = idGenerator.generate();
 
         Element storedPasswordElement = createElementWithAttribute(document, STORED_PASSWD, ATTRIBUTE_ID, id);
@@ -46,5 +49,10 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
         buildAndAppendPropertiesElement(storedPassword.getProperties(), document, storedPasswordElement);
 
         return new Entity(STORED_PASSWORD_TYPE, name, id, storedPasswordElement);
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER;
     }
 }

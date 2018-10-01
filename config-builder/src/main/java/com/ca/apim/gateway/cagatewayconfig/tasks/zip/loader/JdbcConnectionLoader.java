@@ -9,34 +9,34 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
-public class JdbcConnectionLoader implements EntityLoader {
+@Singleton
+public class JdbcConnectionLoader extends EntityLoaderBase<JdbcConnection> {
 
     private static final String JDBC_CONNECTIONS = "jdbc-connections";
-    private static final TypeReference<HashMap<String, JdbcConnection>> jdbcMapTypeMapping = new TypeReference<HashMap<String, JdbcConnection>>() {
-    };
 
-    private final JsonTools jsonTools;
-
+    @Inject
     JdbcConnectionLoader(JsonTools jsonTools) {
-        this.jsonTools = jsonTools;
+        super(jsonTools);
     }
 
     @Override
-    public void load(final Bundle bundle, final File rootDir) {
-        final Map<String, JdbcConnection> jdbcConections = jsonTools.parseDocumentFileFromConfigDir(
-                rootDir,
-                JDBC_CONNECTIONS,
-                jdbcMapTypeMapping
-        );
+    protected Class<JdbcConnection> getBeanClass() {
+        return JdbcConnection.class;
+    }
 
-        if (jdbcConections != null){
-            bundle.putAllJdbcConnections(jdbcConections);
-        }
+    @Override
+    protected String getFileName() {
+        return JDBC_CONNECTIONS;
+    }
+
+    @Override
+    protected void putToBundle(Bundle bundle, @NotNull Map<String, JdbcConnection> entitiesMap) {
+        bundle.putAllJdbcConnections(entitiesMap);
     }
 }

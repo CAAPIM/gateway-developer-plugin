@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang.mutable.MutableBoolean;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -20,7 +21,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertie
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.STORED_PASSWORD_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.INSTANCE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static org.apache.commons.lang.StringUtils.reverse;
@@ -34,21 +34,21 @@ class StoredPasswordEntityBuilderTest {
 
     @Test
     void buildFromEmptyBundle_noPasswords() {
-        StoredPasswordEntityBuilder builder = new StoredPasswordEntityBuilder(INSTANCE.getDocumentBuilder().newDocument(), ID_GENERATOR);
-        final List<Entity> entities = builder.build(new Bundle());
+        StoredPasswordEntityBuilder builder = new StoredPasswordEntityBuilder(ID_GENERATOR);
+        final List<Entity> entities = builder.build(new Bundle(), DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertTrue(entities.isEmpty());
     }
 
     @Test
     void buildBundleWithPasswords() {
-        StoredPasswordEntityBuilder builder = new StoredPasswordEntityBuilder(INSTANCE.getDocumentBuilder().newDocument(), ID_GENERATOR);
+        StoredPasswordEntityBuilder builder = new StoredPasswordEntityBuilder(ID_GENERATOR);
         StoredPassword pwd1 = buildStoredPassword(PWD_1);
         StoredPassword pwd2 = buildStoredPassword(PWD_2);
         Bundle bundle = new Bundle();
         bundle.putAllStoredPasswords(ImmutableMap.of(PWD_1, pwd1, PWD_2, pwd2));
 
-        final List<Entity> entities = builder.build(bundle);
+        final List<Entity> entities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
         assertEquals(2, entities.size());

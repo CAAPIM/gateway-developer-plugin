@@ -8,8 +8,10 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -19,7 +21,8 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
-public class FolderLoader implements BundleEntityLoader {
+@Singleton
+public class FolderLoader implements BundleDependencyLoader {
     private static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
 
     @Override
@@ -55,5 +58,10 @@ public class FolderLoader implements BundleEntityLoader {
         if (folder.getParentFolder() == null || ROOT_FOLDER_ID.equals(folder.getParentFolder().getId()))
             return Paths.get(folder.getName());
         return getPath(folder.getParentFolder()).resolve(folder.getName());
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.FOLDER_TYPE;
     }
 }

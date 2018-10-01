@@ -7,58 +7,40 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.ConnectionUtils.createAcceptAllSocketFactory;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
+import static java.util.Collections.unmodifiableSet;
+
+@Singleton
 public class BundleEntityBuilder {
 
-    private final FolderEntityBuilder folderEntityBuilder;
-    private final Document document;
-    private final ServiceEntityBuilder serviceEntityBuilder;
-    private final PolicyEntityBuilder policyEntityBuilder;
-    private final EncassEntityBuilder encassEntityBuilder;
-    private final ClusterPropertyEntityBuilder clusterPropertyEntityBuilder;
-    private final PolicyBackedServiceEntityBuilder policyBackedServiceEntityBuilder;
-    private final IdentityProviderEntityBuilder identityProviderEntityBuilder;
-    private final ListenPortEntityBuilder listenPortEntityBuilder;
-    private final StoredPasswordEntityBuilder storedPasswordEntityBuilder;
-    private final JdbcConnectionEntityBuilder jdbcConnectionEntityBuilder;
-    private final TrustedCertEntityBuilder trustedCertEntityBuilder;
+    private final Set<EntityBuilder> entityBuilders;
+    private final BundleDocumentBuilder bundleDocumentBuilder;
 
-    public BundleEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document, IdGenerator idGenerator) {
-        this.document = document;
-        folderEntityBuilder = new FolderEntityBuilder(document, idGenerator);
-        serviceEntityBuilder = new ServiceEntityBuilder(documentFileUtils, document, idGenerator);
-        encassEntityBuilder = new EncassEntityBuilder(document, idGenerator);
-        policyEntityBuilder = new PolicyEntityBuilder(documentFileUtils, documentTools, document);
-        clusterPropertyEntityBuilder = new ClusterPropertyEntityBuilder(document, idGenerator);
-        policyBackedServiceEntityBuilder = new PolicyBackedServiceEntityBuilder(document, idGenerator);
-        identityProviderEntityBuilder = new IdentityProviderEntityBuilder(document, idGenerator);
-        listenPortEntityBuilder = new ListenPortEntityBuilder(document, idGenerator);
-        storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(document, idGenerator);
-        jdbcConnectionEntityBuilder = new JdbcConnectionEntityBuilder(document, idGenerator);
-        trustedCertEntityBuilder = new TrustedCertEntityBuilder(document, idGenerator, createAcceptAllSocketFactory());
+    @Inject
+    BundleEntityBuilder(final Set<EntityBuilder> entityBuilders, final BundleDocumentBuilder bundleDocumentBuilder) {
+        this.entityBuilders = unmodifiableSet(new TreeSet<>(entityBuilders));
+        this.bundleDocumentBuilder = bundleDocumentBuilder;
     }
 
-    public Element build(Bundle bundle) {
-        BundleDocumentBuilder bundleDocumentBuilder = new BundleDocumentBuilder(document);
-        bundleDocumentBuilder.addEntities(folderEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(policyEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(encassEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(serviceEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(clusterPropertyEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(policyBackedServiceEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(identityProviderEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(listenPortEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(storedPasswordEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(jdbcConnectionEntityBuilder.build(bundle));
-        bundleDocumentBuilder.addEntities(trustedCertEntityBuilder.build(bundle));
+    public Element build(Bundle bundle, Document document) {
+        List<Entity> entities = new ArrayList<>();
+        entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, document)));
 
-        return bundleDocumentBuilder.build();
+        return bundleDocumentBuilder.build(document, entities);
+    }
+
+    @VisibleForTesting
+    public Set<EntityBuilder> getEntityBuilders() {
+        return entityBuilders;
     }
 }

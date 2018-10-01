@@ -9,12 +9,16 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
+@Singleton
 public class StaticPropertiesLoader extends PropertiesLoaderBase {
 
     private static final String STATIC_PROPERTIES = "config/static.properties";
 
+    @Inject
     StaticPropertiesLoader(FileUtils fileUtils) {
         super(fileUtils);
     }

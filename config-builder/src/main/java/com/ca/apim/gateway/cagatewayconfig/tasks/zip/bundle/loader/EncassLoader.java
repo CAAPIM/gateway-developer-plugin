@@ -9,17 +9,18 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
-public class EncassLoader implements BundleEntityLoader {
-
-    EncassLoader() { }
+@Singleton
+public class EncassLoader implements BundleDependencyLoader {
 
     @Override
     public void load(Bundle bundle, Element element) {
@@ -45,5 +46,10 @@ public class EncassLoader implements BundleEntityLoader {
             throw new DependencyBundleLoadException("Invalid dependency bundle. Found multiple policies with id: " + policyId);
         }
         return policyList.get(0).getPath();
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
     }
 }

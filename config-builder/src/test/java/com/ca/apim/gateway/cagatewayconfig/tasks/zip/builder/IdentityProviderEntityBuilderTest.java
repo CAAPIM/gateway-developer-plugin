@@ -32,27 +32,27 @@ class IdentityProviderEntityBuilderTest {
 
     @Test
     void buildNoIdentityProviders() {
-        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final Bundle bundle = new Bundle();
-        final List<Entity> identityProviderEntities = builder.build(bundle);
+        final List<Entity> identityProviderEntities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(0, identityProviderEntities.size());
     }
 
     @Test
     void buildBindOnlyIPWithoutIPDetail() {
-        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final Bundle bundle = new Bundle();
         final IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("simple ldap config", identityProvider);
         }});
-        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle));
+        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
     void buildBindOnlyIPWithMissingDetails() {
-        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final Bundle bundle = new Bundle();
         final IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
@@ -67,12 +67,12 @@ class IdentityProviderEntityBuilderTest {
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("simple ldap config", identityProvider);
         }});
-        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle));
+        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
     void buildOneBindOnlyIP() throws DocumentParseException {
-        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
 
         final Bundle bundle = new Bundle();
 
@@ -94,7 +94,7 @@ class IdentityProviderEntityBuilderTest {
             put("simple ldap config", identityProvider);
         }});
 
-        final List<Entity> identityProviders = builder.build(bundle);
+        final List<Entity> identityProviders = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, identityProviders.size());
 
         final Entity identityProviderEntity = identityProviders.get(0);

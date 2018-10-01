@@ -9,8 +9,10 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +23,8 @@ import java.util.stream.Collectors;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
-public class PolicyLoader implements BundleEntityLoader {
+@Singleton
+public class PolicyLoader implements BundleDependencyLoader {
 
     private static final Logger LOGGER = Logger.getLogger(PolicyLoader.class.getName());
     private static final String SERVICE_OPERATION = "Service Operation";
@@ -69,5 +72,10 @@ public class PolicyLoader implements BundleEntityLoader {
             throw new DependencyBundleLoadException("Invalid dependency bundle. Found multiple folders with id: " + folderId);
         }
         return folderList.get(0);
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.POLICY_TYPE;
     }
 }

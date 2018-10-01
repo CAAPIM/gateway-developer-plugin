@@ -7,24 +7,25 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class EnvironmentBundleBuilder {
 
-    private final Document document;
     private final EnvironmentPropertyEntityBuilder environmentPropertyEntityBuilder;
+    private final BundleDocumentBuilder bundleDocumentBuilder;
 
-    public EnvironmentBundleBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
-        environmentPropertyEntityBuilder = new EnvironmentPropertyEntityBuilder(document, idGenerator);
+    @Inject
+    EnvironmentBundleBuilder(final EnvironmentPropertyEntityBuilder environmentPropertyEntityBuilder, final BundleDocumentBuilder bundleDocumentBuilder) {
+        this.environmentPropertyEntityBuilder = environmentPropertyEntityBuilder;
+        this.bundleDocumentBuilder = bundleDocumentBuilder;
     }
 
-    public Element build(Bundle bundle) {
-        BundleDocumentBuilder bundleDocumentBuilder = new BundleDocumentBuilder(document);
-        bundleDocumentBuilder.addEntities(environmentPropertyEntityBuilder.build(bundle));
-
-        return bundleDocumentBuilder.build();
+    public Element build(final Bundle bundle, final Document document) {
+        return bundleDocumentBuilder.build(document, environmentPropertyEntityBuilder.build(bundle, document));
     }
 }

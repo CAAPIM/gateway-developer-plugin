@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.LinkedList;
+import javax.inject.Singleton;
 import java.util.List;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
@@ -18,27 +18,21 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
+@Singleton
 public class BundleDocumentBuilder {
 
-    private final List<Entity> entities = new LinkedList<>();
-    private final Document document;
-
-    BundleDocumentBuilder(final Document document) {
-        this.document = document;
-    }
-
-    public Element build() {
+    public Element build(Document document, List<Entity> entities) {
         final Element references = document.createElement(REFERENCES);
         final Element mappings = document.createElement(MAPPINGS);
 
         final Element bundle = createElementWithChildren(document, BUNDLE, references, mappings);
 
-        entities.forEach(e -> addEntity(references, mappings, e));
+        entities.forEach(e -> addEntity(references, mappings, e, document));
         bundle.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
         return bundle;
     }
 
-    private void addEntity(final Element references, final Element mappings, final Entity entity) {
+    private void addEntity(final Element references, final Element mappings, final Entity entity, final Document document) {
         if (entity.getXml() != null) {
             final Element entityItem = buildEntityItem(entity, document);
             references.appendChild(entityItem);
@@ -63,9 +57,5 @@ public class BundleDocumentBuilder {
                 createElementWithTextContent(document, TYPE, entity.getType()),
                 createElementWithChildren(document, RESOURCE, entity.getXml())
         );
-    }
-
-    void addEntities(List<Entity> entitiesToAdd) {
-        entities.addAll(entitiesToAdd);
     }
 }

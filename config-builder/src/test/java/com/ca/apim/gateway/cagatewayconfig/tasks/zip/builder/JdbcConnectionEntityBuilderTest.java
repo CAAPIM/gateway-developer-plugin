@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
@@ -20,7 +21,6 @@ import java.util.Map;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.INSTANCE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static java.util.Collections.emptyMap;
@@ -37,19 +37,19 @@ class JdbcConnectionEntityBuilderTest {
 
     @Test
     void buildFromEmptyBundle_noConnections() {
-        JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(INSTANCE.getDocumentBuilder().newDocument(), ID_GENERATOR);
-        final List<Entity> entities = builder.build(new Bundle());
+        JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
+        final List<Entity> entities = builder.build(new Bundle(), DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertTrue(entities.isEmpty());
     }
 
     @Test
     void buildWithConnection_checkBundleContainsConnection() {
-        JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(INSTANCE.getDocumentBuilder().newDocument(), ID_GENERATOR);
+        JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
         bundle.putAllJdbcConnections(ImmutableMap.of(TEST_JDBC_CONNECTION, buildJdbcConnection(emptyMap())));
 
-        final List<Entity> entities = builder.build(bundle);
+        final List<Entity> entities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
         assertEquals(1, entities.size());
@@ -66,8 +66,8 @@ class JdbcConnectionEntityBuilderTest {
     }
 
     private static void buildAndCheckJdbcConnection(Map<String, Object> properties) {
-        JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(INSTANCE.getDocumentBuilder().newDocument(), ID_GENERATOR);
-        final Entity entity = builder.buildEntity(TEST_JDBC_CONNECTION, buildJdbcConnection(properties));
+        JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
+        final Entity entity = builder.buildEntity(TEST_JDBC_CONNECTION, buildJdbcConnection(properties), DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertNotNull(entity);
         assertEquals(TEST_JDBC_CONNECTION, entity.getName());

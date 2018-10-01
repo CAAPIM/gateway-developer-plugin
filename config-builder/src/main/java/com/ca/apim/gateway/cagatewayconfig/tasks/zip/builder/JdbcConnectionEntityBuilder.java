@@ -15,6 +15,8 @@ import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,26 +29,27 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
+@Singleton
 public class JdbcConnectionEntityBuilder implements EntityBuilder {
 
     private static final String STORED_PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
+    private static final Integer ORDER = 1000;
 
-    private final Document document;
     private final IdGenerator idGenerator;
 
-    JdbcConnectionEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    JdbcConnectionEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, Document document) {
         return bundle.getJdbcConnections().entrySet().stream().map(e ->
-                buildEntity(e.getKey(), e.getValue())
+                buildEntity(e.getKey(), e.getValue(), document)
         ).collect(Collectors.toList());
     }
 
     @VisibleForTesting
-    Entity buildEntity(String name, JdbcConnection jdbc) {
+    Entity buildEntity(String name, JdbcConnection jdbc, Document document) {
         String id = idGenerator.generate();
         Element jdbcElement = createElementWithAttributesAndChildren(
                 document,
@@ -74,6 +77,11 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
         ));
 
         return new Entity(EntityTypes.JDBC_CONNECTION, name, id, jdbcElement);
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER;
     }
 
 }
