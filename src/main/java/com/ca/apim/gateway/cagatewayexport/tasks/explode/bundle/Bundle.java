@@ -9,10 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Bundle {
     private Map<Class<? extends Entity>, Map<String, Entity>> entities = new HashMap<>();
@@ -22,7 +19,7 @@ public class Bundle {
     public void addEntity(final Entity entity) {
         entities.compute(entity.getClass(), (k, v) -> {
             if (v == null) {
-                Map<String, Entity> entitiesOfType = new HashMap<>();
+                Map<String, Entity> entitiesOfType = new LinkedHashMap<>();
                 entitiesOfType.put(entity.getId(), entity);
                 return entitiesOfType;
             } else {

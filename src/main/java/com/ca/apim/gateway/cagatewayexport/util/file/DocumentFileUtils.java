@@ -50,7 +50,7 @@ public final class DocumentFileUtils {
             try {
                 Files.createDirectory(folderPath);
             } catch (IOException e) {
-                throw new WriteException("Exception creating folder: " + folderPath);
+                throw new WriteException("Exception creating folder: " + folderPath, e);
             }
         } else if (!folderPath.toFile().isDirectory()) {
             throw new WriteException("Wanted to create folder but found a file: " + folderPath);

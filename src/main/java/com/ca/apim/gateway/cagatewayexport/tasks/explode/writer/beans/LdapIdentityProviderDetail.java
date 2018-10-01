@@ -6,5 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("LDAP")
 public class LdapIdentityProviderDetail extends IdentityProviderDetail{
 }

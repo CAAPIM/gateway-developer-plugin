@@ -6,18 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
-import java.util.List;
+import java.util.Set;
 
 public abstract class IdentityProviderDetail {
 
-    private List<String> serverUrls;
+    private Set<String> serverUrls;
     private boolean useSslClientAuthentication;
 
-    public List<String> getServerUrls() {
+    public Set<String> getServerUrls() {
         return serverUrls;
     }
 
-    public void setServerUrls(List<String> serverUrls) {
+    public void setServerUrls(Set<String> serverUrls) {
         this.serverUrls = serverUrls;
     }
 

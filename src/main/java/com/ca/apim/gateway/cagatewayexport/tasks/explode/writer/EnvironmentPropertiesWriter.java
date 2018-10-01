@@ -10,20 +10,20 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writePropertiesFile;
+
 @Singleton
 public class EnvironmentPropertiesWriter implements EntityWriter {
+
+    private static final String FILE_NAME = "env";
     private final DocumentFileUtils documentFileUtils;
 
     @Inject
@@ -33,9 +33,6 @@ public class EnvironmentPropertiesWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        File configFolder = new File(rootFolder, "config");
-        documentFileUtils.createFolder(configFolder.toPath());
-
         Map<String, EnvironmentProperty> environmentProperty = bundle.getEntities(EnvironmentProperty.class);
 
         Properties properties = new Properties();
@@ -53,12 +50,6 @@ public class EnvironmentPropertiesWriter implements EntityWriter {
                     }
                 }, EnvironmentProperty::getValue)));
 
-        File servicesFile = new File(configFolder, "env.properties");
-
-        try (OutputStream outputStream = new StripFirstLineStream(new FileOutputStream(servicesFile))) {
-            properties.store(outputStream, null);
-        } catch (IOException e) {
-            throw new WriteException("Could not create static properties file: " + e.getMessage(), e);
-        }
+        writePropertiesFile(rootFolder, documentFileUtils, properties, FILE_NAME);
     }
 }

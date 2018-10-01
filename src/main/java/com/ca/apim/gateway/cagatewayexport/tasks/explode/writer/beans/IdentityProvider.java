@@ -7,6 +7,9 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.util.Map;
 
 import static java.util.Arrays.stream;
@@ -14,16 +17,22 @@ import static java.util.Arrays.stream;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class IdentityProvider {
 
-    private IdentityProviderType idProviderType;
+    private IdentityProviderType type;
     private Map<String, Object> properties;
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
+    @JsonSubTypes( {
+            @JsonSubTypes.Type(value=BindOnlyLdapIdentityProviderDetail.class, name="BIND_ONLY_LDAP"),
+            @JsonSubTypes.Type(value=LdapIdentityProviderDetail.class, name="LDAP")
+    })
     private IdentityProviderDetail identityProviderDetail;
 
-    public IdentityProviderType getIdProviderType() {
-        return idProviderType;
+    public IdentityProviderType getType() {
+        return type;
     }
 
-    public void setIdProviderType(IdentityProviderType idProviderType) {
-        this.idProviderType = idProviderType;
+    public void setType(IdentityProviderType type) {
+        this.type = type;
     }
 
     public Map<String, Object> getProperties() {

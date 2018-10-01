@@ -18,13 +18,11 @@ import org.w3c.dom.NodeList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
@@ -47,7 +45,7 @@ public class ServiceWriter implements EntityWriter {
                 .stream()
                 .collect(Collectors.toMap(ServiceEntity::getPath, this::getServiceBean));
 
-        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, serviceBeans, SERVICES_FILE);
+        writeFile(rootFolder, documentFileUtils, jsonTools, serviceBeans, SERVICES_FILE, Service.class);
     }
 
     @NotNull

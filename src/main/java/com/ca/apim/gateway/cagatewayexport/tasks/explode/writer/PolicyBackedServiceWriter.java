@@ -19,6 +19,9 @@ import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
+import static java.util.stream.Collectors.toSet;
+
 @Singleton
 public class PolicyBackedServiceWriter implements EntityWriter {
     private static final String POLICY_BACKED_SERVICES_FILE = "policy-backed-services";
@@ -38,13 +41,13 @@ public class PolicyBackedServiceWriter implements EntityWriter {
                 .stream()
                 .collect(Collectors.toMap(PolicyBackedServiceEntity::getName, this::getPolicyBackedServiceBean));
 
-        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, policyBackedServiceBeans, POLICY_BACKED_SERVICES_FILE);
+        writeFile(rootFolder, documentFileUtils, jsonTools, policyBackedServiceBeans, POLICY_BACKED_SERVICES_FILE, PolicyBackedService.class);
     }
 
     private PolicyBackedService getPolicyBackedServiceBean(PolicyBackedServiceEntity policyBackedServiceEntity) {
         PolicyBackedService policyBackedServiceBean = new PolicyBackedService();
         policyBackedServiceBean.setInterfaceName(policyBackedServiceEntity.getInterfaceName());
-        policyBackedServiceBean.setOperations(policyBackedServiceEntity.getOperations().entrySet().stream().map(e -> new PolicyBackedServiceOperation(e.getKey(), e.getValue())).collect(Collectors.toList()));
+        policyBackedServiceBean.setOperations(policyBackedServiceEntity.getOperations().entrySet().stream().map(e -> new PolicyBackedServiceOperation(e.getKey(), e.getValue())).collect(toSet()));
         return policyBackedServiceBean;
     }
 }

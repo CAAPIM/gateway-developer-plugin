@@ -14,9 +14,10 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
 /**
@@ -172,7 +173,7 @@ public class DocumentUtils {
      * @param elementName element name to search
      * @return list of contents from elements found, empty if not found any
      */
-    public static List<String> getChildElementsTextContents(final Element entityItemElement, final String elementName) {
-        return getChildElements(entityItemElement, elementName).stream().map(Element::getTextContent).collect(toList());
+    public static Set<String> getChildElementsTextContents(final Element entityItemElement, final String elementName) {
+        return getChildElements(entityItemElement, elementName).stream().map(Element::getTextContent).collect(toSet());
     }
 }

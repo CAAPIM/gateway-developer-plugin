@@ -6,6 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("BIND_ONLY_LDAP")
 public class BindOnlyLdapIdentityProviderDetail extends IdentityProviderDetail {
 
     private String bindPatternPrefix;

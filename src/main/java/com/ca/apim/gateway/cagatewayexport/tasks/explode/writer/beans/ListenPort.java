@@ -8,8 +8,8 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
@@ -21,7 +21,7 @@ public class ListenPort {
 
     private String protocol;
     private int port;
-    private List<String> enabledFeatures;
+    private Set<String> enabledFeatures;
     private ListenPortTlsSettings tlsSettings;
     private Map<String, Object> properties;
     private String targetServiceReference;
@@ -42,11 +42,11 @@ public class ListenPort {
         this.port = port;
     }
 
-    public List<String> getEnabledFeatures() {
+    public Set<String> getEnabledFeatures() {
         return enabledFeatures;
     }
 
-    public void setEnabledFeatures(List<String> enabledFeatures) {
+    public void setEnabledFeatures(Set<String> enabledFeatures) {
         this.enabledFeatures = enabledFeatures;
     }
 
@@ -78,8 +78,8 @@ public class ListenPort {
     public static class ListenPortTlsSettings {
 
         private ClientAuthentication clientAuthentication;
-        private List<String> enabledVersions;
-        private List<String> enabledCipherSuites;
+        private Set<String> enabledVersions;
+        private Set<String> enabledCipherSuites;
         private Map<String, Object> properties;
 
         public ClientAuthentication getClientAuthentication() {
@@ -90,19 +90,19 @@ public class ListenPort {
             this.clientAuthentication = clientAuthentication;
         }
 
-        public List<String> getEnabledVersions() {
+        public Set<String> getEnabledVersions() {
             return enabledVersions;
         }
 
-        public void setEnabledVersions(List<String> enabledVersions) {
+        public void setEnabledVersions(Set<String> enabledVersions) {
             this.enabledVersions = enabledVersions;
         }
 
-        public List<String> getEnabledCipherSuites() {
+        public Set<String> getEnabledCipherSuites() {
             return enabledCipherSuites;
         }
 
-        public void setEnabledCipherSuites(List<String> enabledCipherSuites) {
+        public void setEnabledCipherSuites(Set<String> enabledCipherSuites) {
             this.enabledCipherSuites = enabledCipherSuites;
         }
 

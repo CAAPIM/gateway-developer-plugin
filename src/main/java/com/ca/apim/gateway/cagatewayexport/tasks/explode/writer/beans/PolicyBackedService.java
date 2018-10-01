@@ -6,12 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
-import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public class PolicyBackedService {
     private String interfaceName;
-    private List<PolicyBackedServiceOperation> operations;
+    private Set<PolicyBackedServiceOperation> operations;
 
     public String getInterfaceName() {
         return interfaceName;
@@ -21,11 +21,11 @@ public class PolicyBackedService {
         this.interfaceName = interfaceName;
     }
 
-    public List<PolicyBackedServiceOperation> getOperations() {
+    public Set<PolicyBackedServiceOperation> getOperations() {
         return operations;
     }
 
-    public void setOperations(List<PolicyBackedServiceOperation> operations) {
+    public void setOperations(Set<PolicyBackedServiceOperation> operations) {
         this.operations = operations;
     }
 }

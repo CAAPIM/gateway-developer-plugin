@@ -10,13 +10,14 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_DOC_START_MARKER;
 
 public class JsonTools {
     public static final JsonTools INSTANCE = new JsonTools();
@@ -33,17 +34,21 @@ public class JsonTools {
 
     public JsonTools() {
         objectMapperMap.put(JSON, buildObjectMapper(new JsonFactory()));
-        objectMapperMap.put(YAML, buildObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)));
+        objectMapperMap.put(YAML, buildObjectMapper(new YAMLFactory().disable(WRITE_DOC_START_MARKER)));
         outputType = YAML;
         fileExtension = YAML_FILE_EXTENSION;
     }
 
-    public ObjectMapper getObjectMapper(final String type) {
+    private ObjectMapper getObjectMapper(final String type) {
         ObjectMapper objectMapper = objectMapperMap.get(type);
         if (objectMapper == null) {
             throw new IllegalArgumentException("Unknown object mapper for type: " + type);
         }
         return objectMapper;
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return getObjectMapper(outputType);
     }
 
     public ObjectWriter getObjectWriter() {

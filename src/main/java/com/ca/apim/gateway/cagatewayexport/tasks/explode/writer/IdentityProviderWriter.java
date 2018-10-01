@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.copyMap;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.*;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.IdentityProviderType;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.IdentityProviderType.fromType;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.*;
 
@@ -48,13 +48,13 @@ public class IdentityProviderWriter implements EntityWriter {
                 .stream()
                 .collect(Collectors.toMap(IdentityProviderEntity::getName, this::getIdentityProviderBean));
 
-        writeFile(rootFolder, documentFileUtils, jsonTools, identityProviderBeans, IDENTITY_PROVIDERS_FILE);
+        writeFile(rootFolder, documentFileUtils, jsonTools, identityProviderBeans, IDENTITY_PROVIDERS_FILE, IdentityProvider.class);
     }
 
     private IdentityProvider getIdentityProviderBean(final IdentityProviderEntity identityProviderEntity) {
         final IdentityProvider idProvider = new IdentityProvider();
         final IdentityProviderType type = fromType(identityProviderEntity.getIdProviderType().getType());
-        idProvider.setIdProviderType(type);
+        idProvider.setType(type);
         idProvider.setProperties(copyMap(identityProviderEntity.getProperties()));
 
         switch (type) {

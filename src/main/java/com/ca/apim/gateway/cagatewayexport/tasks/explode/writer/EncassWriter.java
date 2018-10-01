@@ -20,6 +20,8 @@ import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
+
 @Singleton
 public class EncassWriter implements EntityWriter {
     private static final String ENCASS_FILE = "encass";
@@ -39,14 +41,14 @@ public class EncassWriter implements EntityWriter {
                 .stream()
                 .collect(Collectors.toMap(EncassEntity::getPath, this::getEncassBean));
 
-        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE);
+        writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE, Encass.class);
     }
 
     @NotNull
     private Encass getEncassBean(EncassEntity encassEntity) {
         Encass encassBean = new Encass();
-        encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toList()));
-        encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toList()));
+        encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toSet()));
+        encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toSet()));
         return encassBean;
     }
 }

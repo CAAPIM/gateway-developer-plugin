@@ -41,7 +41,7 @@ public class JdbcConnectionWriter implements EntityWriter {
                 .stream()
                 .collect(toMap(JdbcConnectionEntity::getName, this::getJdbcConnectionBean));
 
-        writeFile(rootFolder, documentFileUtils, jsonTools, jdbcConnections, JDBC_CONNECTIONS_FILE);
+        writeFile(rootFolder, documentFileUtils, jsonTools, jdbcConnections, JDBC_CONNECTIONS_FILE, JdbcConnection.class);
     }
 
     private JdbcConnection getJdbcConnectionBean(JdbcConnectionEntity entity) {

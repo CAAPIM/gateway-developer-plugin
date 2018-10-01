@@ -47,7 +47,7 @@ public class TrustedCertWriter implements EntityWriter {
                 .stream()
                 .collect(Collectors.toMap(TrustedCertEntity::getName, (v -> getTrustedCertBean(v, rootFolder))));
 
-        writeFile(rootFolder, documentFileUtils, jsonTools, trustedCertBeans, TRUSTED_CERTS_FILE);
+        writeFile(rootFolder, documentFileUtils, jsonTools, trustedCertBeans, TRUSTED_CERTS_FILE, TrustedCert.class);
     }
 
     private TrustedCert getTrustedCertBean(final TrustedCertEntity trustedCertEntity, File rootFolder) {

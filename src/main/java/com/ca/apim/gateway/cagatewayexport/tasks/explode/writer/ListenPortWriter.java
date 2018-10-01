@@ -21,8 +21,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.copyList;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.copyMap;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.*;
 import static java.util.stream.Collectors.toMap;
 
 @Singleton
@@ -46,7 +45,7 @@ public class ListenPortWriter implements EntityWriter {
                 .stream()
                 .collect(toMap(ListenPortEntity::getName, this::getListenPortBean));
 
-        WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, listenPortBeans, LISTEN_PORTS_FILE);
+        writeFile(rootFolder, documentFileUtils, jsonTools, listenPortBeans, LISTEN_PORTS_FILE, ListenPort.class);
     }
 
     private ListenPort getListenPortBean(ListenPortEntity listenPortEntity) {
@@ -68,8 +67,8 @@ public class ListenPortWriter implements EntityWriter {
 
         ListenPortTlsSettings tlsSettings = new ListenPortTlsSettings();
         tlsSettings.setClientAuthentication(ClientAuthentication.valueOf(tlsSettingsEntity.getClientAuthentication().name()));
-        tlsSettings.setEnabledCipherSuites(copyList(tlsSettingsEntity.getEnabledCipherSuites()));
-        tlsSettings.setEnabledVersions(copyList(tlsSettingsEntity.getEnabledVersions()));
+        tlsSettings.setEnabledCipherSuites(copySet(tlsSettingsEntity.getEnabledCipherSuites()));
+        tlsSettings.setEnabledVersions(copySet(tlsSettingsEntity.getEnabledVersions()));
         tlsSettings.setProperties(copyMap(tlsSettingsEntity.getProperties()));
 
         return tlsSettings;

@@ -6,26 +6,26 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
-import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public class Encass {
-    private List<EncassParam> arguments;
-    private List<EncassParam> results;
+    private Set<EncassParam> arguments;
+    private Set<EncassParam> results;
 
-    public List<EncassParam> getArguments() {
+    public Set<EncassParam> getArguments() {
         return arguments;
     }
 
-    public void setArguments(List<EncassParam> arguments) {
+    public void setArguments(Set<EncassParam> arguments) {
         this.arguments = arguments;
     }
 
-    public List<EncassParam> getResults() {
+    public Set<EncassParam> getResults() {
         return results;
     }
 
-    public void setResults(List<EncassParam> results) {
+    public void setResults(Set<EncassParam> results) {
         this.results = results;
     }
 }

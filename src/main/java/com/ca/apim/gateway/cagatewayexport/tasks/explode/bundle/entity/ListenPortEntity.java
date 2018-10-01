@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import javax.inject.Named;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -24,7 +25,7 @@ public class ListenPortEntity implements Entity {
     private final String name;
     private final String protocol;
     private final int port;
-    private final List<String> enabledFeatures;
+    private final Set<String> enabledFeatures;
     private final ListenPortEntityTlsSettings tlsSettings;
     private final Map<String, Object> properties;
     private String targetServiceReference;
@@ -56,7 +57,7 @@ public class ListenPortEntity implements Entity {
         return port;
     }
 
-    public List<String> getEnabledFeatures() {
+    public Set<String> getEnabledFeatures() {
         return enabledFeatures;
     }
 
@@ -82,7 +83,7 @@ public class ListenPortEntity implements Entity {
         private String name;
         private String protocol;
         private int port;
-        private List<String> enabledFeatures;
+        private Set<String> enabledFeatures;
         private ListenPortEntityTlsSettings tlsSettings;
         private Map<String, Object> properties;
         private String targetServiceReference;
@@ -107,7 +108,7 @@ public class ListenPortEntity implements Entity {
             return this;
         }
 
-        public Builder enabledFeatures(List<String> enabledFeatures) {
+        public Builder enabledFeatures(Set<String> enabledFeatures) {
             this.enabledFeatures = enabledFeatures;
             return this;
         }
@@ -135,11 +136,11 @@ public class ListenPortEntity implements Entity {
     public static class ListenPortEntityTlsSettings {
 
         private final ClientAuthentication clientAuthentication;
-        private final List<String> enabledVersions;
-        private final List<String> enabledCipherSuites;
+        private final Set<String> enabledVersions;
+        private final Set<String> enabledCipherSuites;
         private final Map<String, Object> properties;
 
-        public ListenPortEntityTlsSettings(ClientAuthentication clientAuthentication, List<String> enabledVersions, List<String> enabledCipherSuites, Map<String, Object> properties) {
+        public ListenPortEntityTlsSettings(ClientAuthentication clientAuthentication, Set<String> enabledVersions, Set<String> enabledCipherSuites, Map<String, Object> properties) {
             this.clientAuthentication = clientAuthentication;
             this.enabledVersions = enabledVersions;
             this.enabledCipherSuites = enabledCipherSuites;
@@ -150,11 +151,11 @@ public class ListenPortEntity implements Entity {
             return clientAuthentication;
         }
 
-        public List<String> getEnabledVersions() {
+        public Set<String> getEnabledVersions() {
             return enabledVersions;
         }
 
-        public List<String> getEnabledCipherSuites() {
+        public Set<String> getEnabledCipherSuites() {
             return enabledCipherSuites;
         }
 
@@ -169,7 +170,7 @@ public class ListenPortEntity implements Entity {
 
         private String type;
 
-        private ClientAuthentication(String type) {
+        ClientAuthentication(String type) {
             this.type = type;
         }
 

@@ -11,8 +11,8 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPor
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.ClientAuthentication.fromType;
@@ -29,7 +29,7 @@ public class ListenPortLoader implements EntityLoader<ListenPortEntity> {
         final String name = getSingleChildElementTextContent(listenPort, NAME);
         final String protocol = getSingleChildElement(listenPort, PROTOCOL).getTextContent();
         final int port = Integer.parseInt(getSingleChildElement(listenPort, PORT).getTextContent());
-        final List<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPort, ENABLED_FEATURES), STRING_VALUE);
+        final Set<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPort, ENABLED_FEATURES), STRING_VALUE);
         final ListenPortEntityTlsSettings tlsSettings = buildTlsSettings(getSingleChildElement(listenPort, TLS_SETTINGS, true));
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPort, PROPERTIES, true), PROPERTIES);
         final String targetServiceReference = getSingleChildElementAttribute(listenPort, TARGET_SERVICE_REFERENCE, ATTRIBUTE_ID);
@@ -52,8 +52,8 @@ public class ListenPortLoader implements EntityLoader<ListenPortEntity> {
         }
 
         final ClientAuthentication clientAuthentication = fromType(getSingleChildElementTextContent(tlsSettingsElement, CLIENT_AUTHENTICATION));
-        final List<String> enabledVersions = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ENABLED_VERSIONS), STRING_VALUE);
-        final List<String> enabledCipherSuites = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ENABLED_CIPHER_SUITES, true), STRING_VALUE);
+        final Set<String> enabledVersions = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ENABLED_VERSIONS), STRING_VALUE);
+        final Set<String> enabledCipherSuites = getChildElementsTextContents(getSingleChildElement(tlsSettingsElement, ENABLED_CIPHER_SUITES, true), STRING_VALUE);
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(tlsSettingsElement, PROPERTIES, true), PROPERTIES);
 
         return new ListenPortEntityTlsSettings(clientAuthentication, enabledVersions, enabledCipherSuites, properties);

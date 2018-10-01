@@ -33,6 +33,7 @@ public class ExplodeBundleTask extends DefaultTask {
         inputBundleFile = newInputFile();
         exportDir = newOutputDirectory();
         JsonTools.INSTANCE.setOutputType(JsonTools.YAML);
+        getOutputs().upToDateWhen(t -> false);
     }
 
     /**
