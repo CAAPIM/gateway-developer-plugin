@@ -27,6 +27,7 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.Cli
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.Feature.*;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.*;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ListenPortTlsSettings.*;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.LISTEN_PORT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -97,17 +98,26 @@ public class ListenPortEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public List<Entity> build(Bundle bundle, Document document) {
-        final Stream<Entry<String, ListenPort>> userPorts = bundle.getListenPorts().entrySet().stream();
-        final Stream<Entry<String, ListenPort>> defaultPorts = DEFAULT_PORTS.entrySet().stream();
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        switch (bundleType) {
+            case DEPLOYMENT:
+                final Stream<Entry<String, ListenPort>> userPorts = bundle.getListenPorts().entrySet().stream();
+                final Stream<Entry<String, ListenPort>> defaultPorts = DEFAULT_PORTS.entrySet().stream().filter(p -> bundle.getListenPorts().values().stream().noneMatch(up -> up.getPort() == p.getValue().getPort()));
 
-        return concat(userPorts, defaultPorts).map(listenPortEntry ->
-                buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document)
-        ).collect(toList());
+                return concat(userPorts, defaultPorts).map(listenPortEntry ->
+                        buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document)
+                ).collect(toList());
+            case ENVIRONMENT:
+                return bundle.getListenPorts().entrySet().stream().map(listenPortEntry ->
+                        buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document)
+                ).collect(toList());
+            default:
+                throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
     }
 
     // also visible for testing
-    Entity buildListenPortEntity(Bundle bundle, String name, ListenPort listenPort, Document document) {
+    Entity buildListenPortEntity(Bundle bundle, String name, ListenPort listenPort) {
         Element listenPortElement = document.createElement(LISTEN_PORT);
 
         String id = idGenerator.generate();
@@ -154,7 +164,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
 
         buildAndAppendPropertiesElement(listenPort.getProperties(), document, listenPortElement);
 
-        return new Entity(LISTEN_PORT_TYPE, name, id, listenPortElement);
+        return getEntityWithNameMapping(LISTEN_PORT_TYPE, name, id, listenPortElement);
     }
 
     // visibility for unit testing

@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.BundleEntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EnvironmentBundleBuilder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.DependencyBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoaderRegistry;
@@ -31,7 +31,6 @@ class BundleBuilder {
     private final DocumentFileUtils documentFileUtils;
     private final EntityLoaderRegistry entityLoaderRegistry;
     private final BundleEntityBuilder bundleEntityBuilder;
-    private final EnvironmentBundleBuilder environmentBundleBuilder;
     private final DependencyBundleLoader dependencyBundleLoader;
     private final DocumentTools documentTools;
 
@@ -40,13 +39,11 @@ class BundleBuilder {
                   final DocumentFileUtils documentFileUtils,
                   final EntityLoaderRegistry entityLoaderRegistry,
                   final BundleEntityBuilder bundleEntityBuilder,
-                  final EnvironmentBundleBuilder environmentBundleBuilder,
                   final DependencyBundleLoader dependencyBundleLoader) {
         this.documentFileUtils = documentFileUtils;
         this.documentTools = documentTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
         this.bundleEntityBuilder = bundleEntityBuilder;
-        this.environmentBundleBuilder = environmentBundleBuilder;
         this.dependencyBundleLoader = dependencyBundleLoader;
     }
 
@@ -67,12 +64,8 @@ class BundleBuilder {
         bundle.setDependencies(dependencyBundles);
 
         //Zip
-        Element bundleElement = bundleEntityBuilder.build(bundle, document);
+        Element bundleElement = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document);
         documentFileUtils.createFile(bundleElement, new File(outputDir, name + ".req.bundle").toPath());
-
-        Element environmentElement = environmentBundleBuilder.build(bundle, document);
-        documentFileUtils.createFile(environmentElement, new File(outputDir, "_" + name + "-env.req.bundle").toPath());
-
     }
 
 

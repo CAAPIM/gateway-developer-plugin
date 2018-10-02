@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithOnlyMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ID_PROVIDER_CONFIG_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -37,10 +39,20 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle, Document document) {
-        return bundle.getIdentityProviders().entrySet().stream().map(identityProviderEntry ->
-                buildIdentityProviderEntity(identityProviderEntry.getKey(), identityProviderEntry.getValue(), document)
-        ).collect(Collectors.toList());
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        switch (bundleType) {
+            case DEPLOYMENT:
+                return bundle.getIdentityProviders().entrySet().stream()
+                        .map(
+                                identityProviderEntry -> getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, identityProviderEntry.getKey(), idGenerator.generate())
+                        ).collect(Collectors.toList());
+            case ENVIRONMENT:
+                return bundle.getIdentityProviders().entrySet().stream().map(identityProviderEntry ->
+                        buildIdentityProviderEntity(identityProviderEntry.getKey(), identityProviderEntry.getValue(), document)
+                ).collect(Collectors.toList());
+            default:
+                throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
     }
 
     private Entity buildIdentityProviderEntity(String name, IdentityProvider identityProvider, Document document) {
@@ -49,7 +61,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
         identityProviderElement.appendChild(createElementWithTextContent(document, NAME, name));
         identityProviderElement.appendChild(createElementWithTextContent(document, ID_PROV_TYPE, identityProvider.getType().getValue()));
 
-        switch(identityProvider.getType()) {
+        switch (identityProvider.getType()) {
             case BIND_ONLY_LDAP:
                 if (identityProvider.getProperties() != null) {
                     buildAndAppendPropertiesElement(identityProvider.getProperties().entrySet()
@@ -67,7 +79,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
                 throw new EntityBuilderException("Please Specify the Identity Provider Type as one of: 'BIND_ONLY_LDAP'");
         }
 
-        return new Entity(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
+        return getEntityWithNameMapping(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
     }
 
     private Element buildBindOnlyLdapIPDetails(IdentityProvider identityProvider, Document document) {
@@ -85,7 +97,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             throw new EntityBuilderException("serverUrls must be a list of urls.");
         }
         identityProviderDetail.getServerUrls().forEach(url ->
-            serverUrlsElement.appendChild(createElementWithTextContent(document, STRING_VALUE, url))
+                serverUrlsElement.appendChild(createElementWithTextContent(document, STRING_VALUE, url))
         );
         bindOnlyLdapIdentityProviderDetailElement.appendChild(
                 createElementWithTextContent(

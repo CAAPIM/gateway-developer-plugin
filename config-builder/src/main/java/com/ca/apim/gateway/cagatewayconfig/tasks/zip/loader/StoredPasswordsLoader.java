@@ -39,7 +39,7 @@ public class StoredPasswordsLoader extends PropertiesLoaderBase {
         bundle.putAllStoredPasswords(properties.entrySet().stream().map(e -> buildStoredPassword(e.getKey(), e.getValue())).collect(toMap(StoredPassword::getName, identity())));
     }
 
-    private StoredPassword buildStoredPassword(String name, String password) {
+    public static StoredPassword buildStoredPassword(String name, String password) {
         if (isEmpty(password)) {
             throw new BundleLoadException("Stored passwords file contains an empty password: " + name);
         }

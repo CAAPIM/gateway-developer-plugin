@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
@@ -43,17 +44,25 @@ public class FolderEntityBuilder implements EntityBuilder {
             folder.setAttribute(ATTRIBUTE_FOLDER_ID, parentFolderId);
         }
         folder.appendChild(createElementWithTextContent(document, NAME, name));
-        return new Entity(FOLDER_TYPE, name, id, folder);
+        Entity entity = new Entity(FOLDER_TYPE, name, id, folder);
+
+        //Set the root folder mapping to new or existing
+        if (parentFolderId == null) {
+            entity.setMappingAction(NEW_OR_EXISTING);
+        }
+        return entity;
     }
 
-    public List<Entity> build(Bundle bundle, Document document) {
-
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        if (bundle.getFolders().isEmpty()) {
+            return Collections.emptyList();
+        }
         Map<Folder, Collection<Folder>> folderChildrenMap = new HashMap<>();
 
         bundle.getFolders().values().forEach(folder -> addFolder(folder, folderChildrenMap));
 
         Folder rootFolder = bundle.getFolders().get("");
-        if(rootFolder == null) {
+        if (rootFolder == null) {
             throw new EntityBuilderException("Could not locate root folder.");
         }
         rootFolder.setId(ROOT_FOLDER_ID);

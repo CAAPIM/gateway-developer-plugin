@@ -34,7 +34,7 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle, Document document) {
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         return bundle.getPolicyBackedServices().entrySet().stream().map(pbsEntry ->
                 buildPBSEntity(bundle, pbsEntry.getKey(), pbsEntry.getValue(), document)
         ).collect(Collectors.toList());

@@ -35,7 +35,7 @@ public class ServiceEntityBuilderTest {
 
         Bundle bundle = new Bundle();
 
-        List<Entity> serviceEntities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        List<Entity> serviceEntities = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         Assert.assertEquals(0, serviceEntities.size());
     }
@@ -57,7 +57,7 @@ public class ServiceEntityBuilderTest {
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("/my/policy/path", service);
         }});
-        builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class ServiceEntityBuilderTest {
             put("/my/policy.xml", service);
         }});
 
-        List<Entity> services = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        List<Entity> services = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         Assert.assertEquals(1, services.size());
 

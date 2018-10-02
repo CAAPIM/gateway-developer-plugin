@@ -56,7 +56,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         this.documentTools = documentTools;
     }
 
-    public List<Entity> build(Bundle bundle, Document document) {
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle, document));
 
         List<Policy> orderedPolicies = new LinkedList<>();

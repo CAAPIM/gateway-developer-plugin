@@ -39,7 +39,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle, Document document) {
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         return bundle.getServices().entrySet().stream().map(serviceEntry ->
                 buildServiceEntity(bundle, serviceEntry.getKey(), serviceEntry.getValue(), document)
         ).collect(Collectors.toList());

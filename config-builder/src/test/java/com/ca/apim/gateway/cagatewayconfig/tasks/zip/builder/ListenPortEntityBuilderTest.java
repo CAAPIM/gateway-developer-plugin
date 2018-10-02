@@ -46,7 +46,7 @@ class ListenPortEntityBuilderTest {
     void buildFromEmptyBundle_expectOnlyDefaultPorts() {
         ListenPortEntityBuilder builder = new ListenPortEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        final List<Entity> listenPortEntities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> listenPortEntities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         // only two defaults
         assertEquals(2, listenPortEntities.size(), "Expecting only the 2 default ports");
@@ -61,7 +61,7 @@ class ListenPortEntityBuilderTest {
         final Bundle bundle = new Bundle();
         addPortToBundle(bundle, buildPort());
 
-        final List<Entity> listenPortEntities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> listenPortEntities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         // two defaults and custom one
         assertEquals(3, listenPortEntities.size(),"More than 3 expected ports");
@@ -76,7 +76,7 @@ class ListenPortEntityBuilderTest {
         final Bundle bundle = new Bundle();
         addPortToBundle(bundle, buildPortWithServiceRef());
 
-        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test

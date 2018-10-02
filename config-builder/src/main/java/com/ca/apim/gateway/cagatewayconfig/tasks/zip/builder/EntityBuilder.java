@@ -14,7 +14,11 @@ import java.util.List;
 
 public interface EntityBuilder extends Comparable<EntityBuilder> {
 
-    List<Entity> build(Bundle bundle, Document document);
+    List<Entity> build(Bundle bundle, BundleType bundleType, Document document);
+
+    enum BundleType {
+        ENVIRONMENT, DEPLOYMENT
+    }
 
     /**
      * @return the position of the entity produced by this builder in the bundle file, has to be non null and not conflicting
