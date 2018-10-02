@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,7 +18,9 @@ import java.util.Map;
  * Loads the certificates specified in the 'config/certificates' directory. Certificates in this directory must end with
  * .der, .pem, .crt, or .cer.
  */
+@Singleton
 public class CertificatesLoader implements EntityLoader {
+
     @Override
     public void load(Bundle bundle, File rootDir) {
         final File certificatesDir = new File(rootDir, "config/certificates");

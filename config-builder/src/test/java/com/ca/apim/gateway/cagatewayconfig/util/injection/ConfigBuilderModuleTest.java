@@ -23,8 +23,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeSet;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,6 +49,7 @@ class ConfigBuilderModuleTest {
         assertEquals(DocumentFileUtils.INSTANCE, injector.getInstance(DocumentFileUtils.class), "DocumentFileUtils is not the default");
         assertEquals(FileUtils.INSTANCE, injector.getInstance(FileUtils.class), "FileUtils is not the default");
         assertNotNull(injector.getInstance(IdGenerator.class), "IdGenerator is not available");
+        assertNotNull(injector.getInstance(SSLSocketFactory.class), "SSLSocketFactory is not available");
     }
 
     @Test

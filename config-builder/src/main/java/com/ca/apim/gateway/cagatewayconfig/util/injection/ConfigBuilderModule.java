@@ -25,8 +25,10 @@ import com.google.inject.Injector;
 import com.google.inject.multibindings.Multibinder;
 import org.reflections.Reflections;
 
+import javax.net.ssl.SSLSocketFactory;
 import java.lang.reflect.Modifier;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.ConnectionUtils.createAcceptAllSocketFactory;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 import static java.util.Optional.ofNullable;
@@ -56,6 +58,7 @@ public class ConfigBuilderModule extends AbstractModule {
         bind(DocumentFileUtils.class).toInstance(DocumentFileUtils.INSTANCE);
         bind(FileUtils.class).toInstance(FileUtils.INSTANCE);
         bind(IdGenerator.class).toInstance(new IdGenerator());
+        bind(SSLSocketFactory.class).toInstance(createAcceptAllSocketFactory());
 
         // bind all entity builders to the module
         Multibinder<EntityBuilder> buildersBinder = newSetBinder(binder(), EntityBuilder.class);

@@ -27,24 +27,24 @@ import java.math.BigInteger;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.*;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.CertificateData;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.TRUSTED_CERT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.ConnectionUtils.createAcceptAllSocketFactory;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElements;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class TrustedCertEntityBuilderTest {
+class TrustedCertEntityBuilderTest {
 
     private static final String URL_NAME = "https://www.ca.com";
     private static final String CERT_NAME = "multi-cert";
@@ -61,21 +61,21 @@ public class TrustedCertEntityBuilderTest {
 
     @Test
     void buildNoTrustedCerts() {
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), createAcceptAllSocketFactory());
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), createAcceptAllSocketFactory());
         final Bundle bundle = new Bundle();
-        final List<Entity> trustedCertEntities = builder.build(bundle);
+        final List<Entity> trustedCertEntities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(0, trustedCertEntities.size());
     }
 
     @Test
     void buildTrustedCertFromNonExistentFile() {
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), null);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null);
 
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
         // No certs to load from
-        assertThrows(EntityBuilderException.class, () -> builder.build(bundle));
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
@@ -88,13 +88,13 @@ public class TrustedCertEntityBuilderTest {
         when(socket.getSession()).thenReturn(sslSession);
         when(sslSession.getPeerCertificates()).thenReturn(new X509Certificate[]{testCert});
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), sf);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), sf);
 
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(URL_NAME, trustedCert));
 
-        final List<Entity> trustedCerts = builder.build(bundle);
+        final List<Entity> trustedCerts = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
 
         final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, true);
@@ -106,13 +106,13 @@ public class TrustedCertEntityBuilderTest {
     void buildTrustedCertUsingPem() throws Exception {
         final File trustedCertLocation = new File(getClass().getClassLoader().getResource(CERT_NAME + ".pem").getFile());
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), null);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null);
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
         bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, trustedCertLocation));
 
-        final List<Entity> trustedCerts = builder.build(bundle);
+        final List<Entity> trustedCerts = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
 
         final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, false);
@@ -124,13 +124,13 @@ public class TrustedCertEntityBuilderTest {
     void buildTrustedCertUsingDer() throws Exception {
         final File trustedCertLocation = new File(getClass().getClassLoader().getResource(CERT_NAME + ".der").getFile());
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), null);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null);
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
         bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, trustedCertLocation));
 
-        final List<Entity> trustedCerts = builder.build(bundle);
+        final List<Entity> trustedCerts = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
 
         final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, false);
@@ -146,13 +146,13 @@ public class TrustedCertEntityBuilderTest {
         final String EXPECT_SUB_NAME = "subName";
         final String EXPECT_DATA = "data";
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator(), null);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null);
         final Bundle bundle = new Bundle();
         final CertificateData certData = new CertificateData(EXPECT_ISSUER, EXPECT_BIG_INT, EXPECT_SUB_NAME, EXPECT_DATA);
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), certData);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
 
-        final List<Entity> trustedCerts = builder.build(bundle);
+        final List<Entity> trustedCerts = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
 
         final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, false);
