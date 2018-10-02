@@ -24,7 +24,7 @@ public class TrustedCertLoader implements BundleEntityLoader {
     public void load(Bundle bundle, Element element) {
         final Element trustedCertElem = getSingleChildElement(getSingleChildElement(element, RESOURCE), TRUSTED_CERT);
         final String name = getSingleChildElementTextContent(trustedCertElem, NAME);
-        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(trustedCertElem, PROPERTIES, true));
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(trustedCertElem, PROPERTIES, true), PROPERTIES);
 
         bundle.getTrustedCerts().put(name, new TrustedCert(properties, getCertData(trustedCertElem)));
     }
