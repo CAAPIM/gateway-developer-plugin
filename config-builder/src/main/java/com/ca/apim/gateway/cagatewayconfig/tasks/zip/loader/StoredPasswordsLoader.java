@@ -40,10 +40,6 @@ public class StoredPasswordsLoader extends PropertiesLoaderBase {
     }
 
     public static StoredPassword buildStoredPassword(String name, String password) {
-        if (isEmpty(password)) {
-            throw new BundleLoadException("Stored passwords file contains an empty password: " + name);
-        }
-
         StoredPassword storedPassword = new StoredPassword();
         storedPassword.setName(name);
         storedPassword.setPassword(password);

@@ -54,8 +54,8 @@ class StoredPasswordLoaderTest {
     }
 
     @Test
-    void loadFileWithBlankPasswords() {
-        assertThrows(BundleLoadException.class, () -> loadPasswords("TestPassword="));
+    void loadFileWithBlankPasswords() throws IOException {
+        loadPasswords("TestPassword=");
     }
 
     @Test

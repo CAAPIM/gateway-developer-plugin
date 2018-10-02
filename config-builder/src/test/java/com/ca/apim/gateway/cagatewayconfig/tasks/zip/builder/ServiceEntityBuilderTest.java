@@ -14,8 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -26,6 +25,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ServiceEntityBuilderTest {
 
@@ -37,10 +39,10 @@ public class ServiceEntityBuilderTest {
 
         List<Entity> serviceEntities = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
-        Assert.assertEquals(0, serviceEntities.size());
+        assertEquals(0, serviceEntities.size());
     }
 
-    @Test(expected = EntityBuilderException.class)
+    @Test
     public void buildServicesWithoutPolicy() {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
 
@@ -57,7 +59,7 @@ public class ServiceEntityBuilderTest {
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("/my/policy/path", service);
         }});
-        builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
@@ -99,47 +101,47 @@ public class ServiceEntityBuilderTest {
 
         List<Entity> services = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
-        Assert.assertEquals(1, services.size());
+        assertEquals(1, services.size());
 
         Entity serviceEntity = services.get(0);
 
-        Assert.assertEquals("SERVICE", serviceEntity.getType());
-        Assert.assertNotNull(serviceEntity.getId());
+        assertEquals("SERVICE", serviceEntity.getType());
+        assertNotNull(serviceEntity.getId());
         Element serviceEntityXml = serviceEntity.getXml();
-        Assert.assertEquals("l7:Service", serviceEntityXml.getTagName());
+        assertEquals("l7:Service", serviceEntityXml.getTagName());
         Element serviceDetails = getSingleElement(serviceEntityXml, "l7:ServiceDetail");
         Element serviceName = getSingleElement(serviceDetails, "l7:Name");
-        Assert.assertEquals(policy.getName(), serviceName.getTextContent());
+        assertEquals(policy.getName(), serviceName.getTextContent());
 
         Element serviceMappings = getSingleElement(serviceDetails, "l7:ServiceMappings");
         Element serviceHttpMappings = getSingleElement(serviceMappings, "l7:HttpMapping");
         Element serviceUrlPattern = getSingleElement(serviceHttpMappings, "l7:UrlPattern");
-        Assert.assertEquals(service.getUrl(), serviceUrlPattern.getTextContent());
+        assertEquals(service.getUrl(), serviceUrlPattern.getTextContent());
 
         Element serviceHttpVerbs = getSingleElement(serviceHttpMappings, "l7:Verbs");
         NodeList verbList = serviceHttpVerbs.getElementsByTagName("l7:Verb");
-        Assert.assertEquals(2, verbList.getLength());
-        Assert.assertEquals("POST", verbList.item(0).getTextContent());
-        Assert.assertEquals("GET", verbList.item(1).getTextContent());
+        assertEquals(2, verbList.getLength());
+        assertEquals("POST", verbList.item(0).getTextContent());
+        assertEquals("GET", verbList.item(1).getTextContent());
 
         Element serviceProperties = getSingleElement(serviceDetails, "l7:Properties");
         NodeList propertyList = serviceProperties.getElementsByTagName("l7:Property");
-        Assert.assertEquals(2, propertyList.getLength());
+        assertEquals(2, propertyList.getLength());
         Node property1 = propertyList.item(0);
         Node property2 = propertyList.item(1);
         if (!"property.key1".equals(property1.getAttributes().getNamedItem("key").getTextContent())) {
             property2 = propertyList.item(0);
             property1 = propertyList.item(1);
         }
-        Assert.assertEquals("property.key1", property1.getAttributes().getNamedItem("key").getTextContent());
-        Assert.assertEquals("property.ENV.key.environment", property2.getAttributes().getNamedItem("key").getTextContent());
-        Assert.assertEquals("value1", getSingleElement((Element) property1, "l7:StringValue").getTextContent());
-        Assert.assertEquals("SERVICE_PROPERTY_ENV.key.environment", getSingleElement((Element) property2, "l7:StringValue").getTextContent());
+        assertEquals("property.key1", property1.getAttributes().getNamedItem("key").getTextContent());
+        assertEquals("property.ENV.key.environment", property2.getAttributes().getNamedItem("key").getTextContent());
+        assertEquals("value1", getSingleElement((Element) property1, "l7:StringValue").getTextContent());
+        assertEquals("SERVICE_PROPERTY_ENV.key.environment", getSingleElement((Element) property2, "l7:StringValue").getTextContent());
 
         Element serviceResources = getSingleElement(serviceEntityXml, "l7:Resources");
         Element serviceResourceSet = getSingleElement(serviceResources, "l7:ResourceSet");
         Element serviceResource = getSingleElement(serviceResourceSet, "l7:Resource");
-        Assert.assertEquals("policy", serviceResource.getAttributes().getNamedItem("type").getTextContent());
-        Assert.assertNotNull(serviceResource.getTextContent());
+        assertEquals("policy", serviceResource.getAttributes().getNamedItem("type").getTextContent());
+        assertNotNull(serviceResource.getTextContent());
     }
 }
