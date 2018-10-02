@@ -92,6 +92,22 @@ class EnvironmentCreatorApplicationTest {
                         "      \"EnableCancelTimeout\" : \"true\"\n" +
                         "    }\n" +
                         "  }")
+                .put("ENV.TRUSTED_CERTIFICATE.my-cert", "{\n" +
+                        "      \"verifyHostname\" : false,\n" +
+                        "      \"trustedForSsl\" : true,\n" +
+                        "      \"trustedAsSamlAttestingEntity\" : false,\n" +
+                        "      \"trustAnchor\" : true,\n" +
+                        "      \"revocationCheckingEnabled\" : true,\n" +
+                        "      \"trustedForSigningClientCerts\" : true,\n" +
+                        "      \"trustedForSigningServerCerts\" : true,\n" +
+                        "      \"trustedAsSamlIssuer\" : false,\n" +
+                        "      \"certificateData\" : {\n" +
+                        "           \"issuerName\" : \"my-cert\",\n" +
+                        "           \"serialNumber\" : \"123\",\n" +
+                        "           \"subjectName\" : \"my-cert\",\n" +
+                        "           \"encodedData\" : \"my-cert-data\"\n" +
+                        "      }\n" +
+                        "  }")
                 .put("ENV.PASSWORD.my_password", "my_secret_password")
                 .put("ENV.myEnvironmentVariable", "my-service-property-value")
                 .put("ENV.anotherEnvVar", "context-variable-value")
@@ -114,6 +130,9 @@ class EnvironmentCreatorApplicationTest {
 
         assertEquals(1, environmentBundle.getJdbcConnections().size());
         assertNotNull(environmentBundle.getJdbcConnections().get("my-jdbc"));
+
+        assertEquals(1, environmentBundle.getTrustedCerts().size());
+        assertNotNull(environmentBundle.getTrustedCerts().get("my-cert"));
 
         assertEquals(1, environmentBundle.getStoredPasswords().size());
         assertNotNull(environmentBundle.getStoredPasswords().get("my_password"));

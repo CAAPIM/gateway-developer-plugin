@@ -1,9 +1,6 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.StoredPasswordsLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
@@ -36,6 +33,10 @@ public class EnvironmentBundleBuilder {
             JdbcConnection jdbcConnection = jsonTools.readStream(IOUtils.toInputStream(value, Charset.defaultCharset()), JsonTools.JSON, new TypeReference<JdbcConnection>() {
             });
             bundle.getJdbcConnections().put(key.substring("ENV.JDBC_CONNECTION.".length()), jdbcConnection);
+        } else if (key.startsWith("ENV.TRUSTED_CERTIFICATE.")) {
+            TrustedCert trustedCert = jsonTools.readStream(IOUtils.toInputStream(value, Charset.defaultCharset()), JsonTools.JSON, new TypeReference<TrustedCert>() {
+            });
+            bundle.getTrustedCerts().put(key.substring("ENV.TRUSTED_CERTIFICATE.".length()), trustedCert);
         } else if (key.startsWith("ENV.PASSWORD.")) {
             StoredPassword password = StoredPasswordsLoader.buildStoredPassword(key.substring("ENV.PASSWORD.".length()), value);
             bundle.getStoredPasswords().put(password.getName(), password);

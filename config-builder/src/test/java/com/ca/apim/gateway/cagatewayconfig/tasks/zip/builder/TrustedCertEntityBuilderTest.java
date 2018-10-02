@@ -63,7 +63,7 @@ class TrustedCertEntityBuilderTest {
     void buildNoTrustedCerts() {
         final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), createAcceptAllSocketFactory());
         final Bundle bundle = new Bundle();
-        final List<Entity> trustedCertEntities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> trustedCertEntities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(0, trustedCertEntities.size());
     }
 
@@ -75,7 +75,7 @@ class TrustedCertEntityBuilderTest {
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
         // No certs to load from
-        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
@@ -94,7 +94,7 @@ class TrustedCertEntityBuilderTest {
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(URL_NAME, trustedCert));
 
-        final List<Entity> trustedCerts = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> trustedCerts = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
 
         final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, true);
@@ -112,7 +112,7 @@ class TrustedCertEntityBuilderTest {
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
         bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, trustedCertLocation));
 
-        final List<Entity> trustedCerts = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> trustedCerts = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
 
         final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, false);
@@ -130,7 +130,7 @@ class TrustedCertEntityBuilderTest {
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
         bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, trustedCertLocation));
 
-        final List<Entity> trustedCerts = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> trustedCerts = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
 
         final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, false);
@@ -152,7 +152,7 @@ class TrustedCertEntityBuilderTest {
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), certData);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
 
-        final List<Entity> trustedCerts = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> trustedCerts = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
 
         final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, false);

@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithOnlyMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.TRUSTED_CERT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -51,10 +53,20 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public List<Entity> build(Bundle bundle, Document document) {
-        return bundle.getTrustedCerts().entrySet().stream().map(trustedCertEntry ->
-                buildTrustedCertEntity(trustedCertEntry.getKey(), trustedCertEntry.getValue(), bundle.getCertificateFiles(), document)
-        ).collect(Collectors.toList());
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        switch (bundleType) {
+            case DEPLOYMENT:
+                return bundle.getTrustedCerts().entrySet().stream()
+                        .map(
+                                trustedCertEntry -> getEntityWithOnlyMapping(TRUSTED_CERT_TYPE, trustedCertEntry.getKey(), idGenerator.generate())
+                        ).collect(Collectors.toList());
+            case ENVIRONMENT:
+                return bundle.getTrustedCerts().entrySet().stream().map(trustedCertEntry ->
+                        buildTrustedCertEntity(trustedCertEntry.getKey(), trustedCertEntry.getValue(), bundle.getCertificateFiles(), document)
+                ).collect(Collectors.toList());
+            default:
+                throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
     }
 
     private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
@@ -68,7 +80,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         );
         buildAndAppendPropertiesElement(trustedCert.createProperties(), document, trustedCertElem);
 
-        return new Entity(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
+        return getEntityWithNameMapping(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
     }
 
     private Element buildCertData(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
