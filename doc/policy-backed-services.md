@@ -29,3 +29,6 @@ The same JSON representation would look like:
   }
 }
 ```
+
+# Environment
+Policy Backed Services cannot be created using environment properties.

@@ -54,3 +54,28 @@ The same JSON representation would look like:
   }
 }
 ```
+
+# Environment
+Certificate configuration is environment configuration. It is not added to a deployment bundle and must be specified as environment.
+In order to do so you can set an environment property with the name: `ENV.CERTIFICATE.<name>` where `<name>` is the name of the Certificate.
+
+## Examples
+```
+ENV.CERTIFICATE.my-cert='{
+                           "verifyHostname" : false,
+                           "trustedForSsl" : true,
+                           "trustedAsSamlAttestingEntity" : false,
+                           "trustAnchor" : true,
+                           "revocationCheckingEnabled" : true,
+                           "trustedForSigningClientCerts" : true,
+                           "trustedForSigningServerCerts" : true,
+                           "trustedAsSamlIssuer" : false,
+                           "certificateData" : {
+                             "issuerName" : "my-cert",
+                             "serialNumber" : "123",
+                             "subjectName" : "my-cert",
+                             "encodedData" : "my-cert-data"
+                           }
+                         }'
+```
+This will create a certificate called `my-cert`.

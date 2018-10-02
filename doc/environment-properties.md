@@ -12,7 +12,7 @@ An example `env.properties` file might look like:
 ```
 
 ## Using Environment Properties
-Writing Policy for Gateway is easy (once you get the hang of ot), however writing policy that is easy to deploy into different environments can be tricky. This section talks about how to use and reference environment variables within policy so that your policy is simple to deploy to multiple environments.
+Writing Policy for Gateway is easy (once you get the hang of it), however writing policy that is easy to deploy into different environments can be tricky. This section talks about how to use and reference environment variables within policy so that your policy is simple to deploy to multiple environments.
 
 ### Places Environment is Referenced
 The Gateway can require many different types of environment configurations. For example:
@@ -185,3 +185,13 @@ In order to protect a backend or monetize an API you will need to apply a rate l
      </L7p:RateLimit>
      ```
       ![Use a Service Property](images/environment-properties/user-service-properties-env.png "Use a Service Property")
+
+## Providing Environment Property Values to Gateways
+In order to provide values for environment properties to Gateways you can set environment properties on the Gateway Container.
+
+### Examples
+To set a global (cluster) property named `my-api-url` to `http://example.com` set an environment parameter `ENV.PROPERTY.my-api-url=http://example.com` 
+
+To set a service property named `fast-mode` to `true` set an environment parameter `ENV.SERVICE_PROPERTY.fast-mode=true` 
+
+To set a context variable named `rate-limit` to `1000` set an environment parameter `ENV.CONTEXT_PROPERTY.rate-limit=1000` 

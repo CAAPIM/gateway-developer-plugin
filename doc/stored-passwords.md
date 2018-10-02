@@ -9,3 +9,13 @@ An example `stored-passwords.properties` file might look like:
 ```
 
 Currently, only simple passwords are supported. No support for passwords stored as private keys.
+
+# Environment
+Passwords are environment configuration. They are not added to a deployment bundle and must be specified as environment.
+In order to do so you can set an environment property with the name: `ENV.PASSWORD.<name>` where `<name>` is the name of the password.
+
+## Examples
+```
+ENV.PASSWORD.db-password=my-pass
+```
+This will create an password called `db-password`.
