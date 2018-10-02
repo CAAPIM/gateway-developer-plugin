@@ -13,6 +13,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.ConnectionUtils.createAcceptAllSocketFactory;
+
 public class BundleEntityBuilder {
 
     private final FolderEntityBuilder folderEntityBuilder;
@@ -26,6 +28,7 @@ public class BundleEntityBuilder {
     private final ListenPortEntityBuilder listenPortEntityBuilder;
     private final StoredPasswordEntityBuilder storedPasswordEntityBuilder;
     private final JdbcConnectionEntityBuilder jdbcConnectionEntityBuilder;
+    private final TrustedCertEntityBuilder trustedCertEntityBuilder;
 
     public BundleEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document, IdGenerator idGenerator) {
         this.document = document;
@@ -39,6 +42,7 @@ public class BundleEntityBuilder {
         listenPortEntityBuilder = new ListenPortEntityBuilder(document, idGenerator);
         storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(document, idGenerator);
         jdbcConnectionEntityBuilder = new JdbcConnectionEntityBuilder(document, idGenerator);
+        trustedCertEntityBuilder = new TrustedCertEntityBuilder(document, idGenerator, createAcceptAllSocketFactory());
     }
 
     public Element build(Bundle bundle) {
@@ -53,6 +57,7 @@ public class BundleEntityBuilder {
         bundleDocumentBuilder.addEntities(listenPortEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(storedPasswordEntityBuilder.build(bundle));
         bundleDocumentBuilder.addEntities(jdbcConnectionEntityBuilder.build(bundle));
+        bundleDocumentBuilder.addEntities(trustedCertEntityBuilder.build(bundle));
 
         return bundleDocumentBuilder.build();
     }

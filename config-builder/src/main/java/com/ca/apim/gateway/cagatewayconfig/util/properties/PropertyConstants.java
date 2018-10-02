@@ -15,5 +15,15 @@ public class PropertyConstants {
     public static final String PREFIX_ENV = "ENV.";
     public static final String PREFIX_PROPERTY = "property.";
 
+    //Trusted Cert property constants
+    public static final String VERIFY_HOSTNAME = "verifyHostname";
+    public static final String TRUSTED_FOR_SSL = "trustedForSsl";
+    public static final String TRUSTED_AS_SAML_ATTESTING_ENTITY = "trustedAsSamlAttestingEntity";
+    public static final String TRUST_ANCHOR = "trustAnchor";
+    public static final String REVOCATION_CHECKING_ENABLED = "revocationCheckingEnabled";
+    public static final String TRUSTING_SIGNING_CLIENT_CERTS = "trustedForSigningClientCerts";
+    public static final String TRUSTED_SIGNING_SERVER_CERTS = "trustedForSigningServerCerts";
+    public static final String TRUSTED_AS_SAML_ISSUER = "trustedAsSamlIssuer";
+
     private PropertyConstants() { }
 }

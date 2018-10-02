@@ -38,6 +38,7 @@ Policy Backed Service | Yes |
 Listen Port | Yes | 
 Stored Passwords | Yes | 
 JDBC Connections | Yes |  
+Trusted Certificates | Yes |
 
 ## Expected Source Directory Organization
 The Gateway solution directory (`src/main/Gateway` by default) expects the following organization:
@@ -52,6 +53,7 @@ The Gateway solution directory (`src/main/Gateway` by default) expects the follo
     * [env.properties - Environment Properties Configuration](doc/environment-properties.md#environment-properties-configuration)
     * [stored-passwords.properties - Stored Passwords Configuration](doc/stored-passwords.md#stored-passwords-configuration)
     * [jdbc-connections.yml- JDBC Connections Configuration](doc/jdbc-connections.md#jdbc-connections-configuration)
+    * [trusted-certs.yml - Trusted Certificates Configuration](doc/trusted-certs.md#trusted-certificates-configuration)
   * `policy`
     * The policy folder contains the different policies that are available. It can contain may subdirectories to help organize the policy.
 

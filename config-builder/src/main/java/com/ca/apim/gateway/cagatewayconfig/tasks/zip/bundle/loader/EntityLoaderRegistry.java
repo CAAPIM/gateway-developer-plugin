@@ -21,6 +21,7 @@ public class EntityLoaderRegistry {
         entityLoaders.put(FOLDER_TYPE, new FolderLoader());
         entityLoaders.put(ENCAPSULATED_ASSERTION_TYPE, new EncassLoader());
         entityLoaders.put(LISTEN_PORT_TYPE, new ListenPortLoader());
+        entityLoaders.put(TRUSTED_CERT_TYPE, new TrustedCertLoader());
     }
 
     public BundleEntityLoader getLoader(String type) {
