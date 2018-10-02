@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -19,6 +20,7 @@ import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Level;
@@ -58,17 +60,9 @@ public class EnvironmentCreatorApplication {
     void run() {
         //create bundle from environment
         EnvironmentBundleBuilder environmentBundleBuilder = new EnvironmentBundleBuilder(environmentProperties);
+        Bundle environmentBundle = environmentBundleBuilder.getBundle();
 
-        // detempatize bundle deployment bundles
-        File templatizedFolder = new File(templatizedBundleFolderPath);
-        File[] templatizedBundles = templatizedFolder.listFiles((dir, name) -> name.endsWith(".bundle"));
-        if (templatizedBundles != null) {
-            Arrays.asList(templatizedBundles)
-                    .forEach(templatizedBundle ->
-                            detemplatizeBundleFile(environmentBundleBuilder.getBundle().getEnvironmentProperties(), templatizedBundle, new File(bootstrapBundleFolderPath, templatizedBundle.getName())));
-        }
-
-        //TODO: check deployment bundles to validated that all required environment is provided.
+        processDeploymentBundles(environmentBundle);
 
         // write the Environment bundle
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
@@ -76,25 +70,37 @@ public class EnvironmentCreatorApplication {
 
         BundleEntityBuilder bundleEntityBuilder = new BundleEntityBuilder(documentFileUtils, documentTools, document, idGenerator);
 
-        Element bundleElement = bundleEntityBuilder.build(environmentBundleBuilder.getBundle(), EntityBuilder.BundleType.ENVIRONMENT);
+        Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT);
         documentFileUtils.createFile(bundleElement, new File(bootstrapBundleFolderPath, "_env.req.bundle").toPath());
     }
 
-    private static void detemplatizeBundleFile(Map<String, String> properties, File bundleFile, File targetBundleFile) {
-        logger.log(Level.FINE, () -> "Detemplatizing bundle: " + bundleFile.getAbsolutePath());
-        String bundleString;
-        try {
-            bundleString = new String(Files.readAllBytes(bundleFile.toPath()));
-        } catch (IOException e) {
-            throw new BundleDetemplatizeException("Could not read bundle file for detemplatization: " + bundleFile, e);
-        }
+    private void processDeploymentBundles(Bundle environmentBundle) {
+        File templatizedFolder = new File(templatizedBundleFolderPath);
+        File[] templatizedBundles = templatizedFolder.listFiles((dir, name) -> name.endsWith(".bundle"));
+        if (templatizedBundles != null) {
+            BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+            BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(environmentBundle.getEnvironmentProperties());
+            Arrays.asList(templatizedBundles)
+                    .forEach(templatizedBundle -> {
+                        logger.log(Level.FINE, () -> "Processing deployment bundle: " + templatizedBundle);
+                        String bundleString;
+                        try {
+                            bundleString = new String(Files.readAllBytes(templatizedBundle.toPath()));
+                        } catch (IOException e) {
+                            throw new BundleDetemplatizeException("Could not read bundle file: " + templatizedBundle, e);
+                        }
 
-        CharSequence detemplatizedBundle = new BundleDetemplatizer(properties).detemplatizeBundleString(bundleString);
-
-        try {
-            Files.write(targetBundleFile.toPath(), detemplatizedBundle.toString().getBytes());
-        } catch (IOException e) {
-            throw new BundleDetemplatizeException("Could not write detemplatized bundle to: " + targetBundleFile, e);
+                        // detempatize deployment bundles
+                        CharSequence detemplatizedBundle = bundleDetemplatizer.detemplatizeBundleString(bundleString);
+                        Path bootstrapBundleFilePath = new File(bootstrapBundleFolderPath, templatizedBundle.getName()).toPath();
+                        try {
+                            Files.write(bootstrapBundleFilePath, detemplatizedBundle.toString().getBytes());
+                        } catch (IOException e) {
+                            throw new BundleDetemplatizeException("Could not write detemplatized bundle to: " + bootstrapBundleFilePath, e);
+                        }
+                        // check deployment bundles to validated that all required environment is provided.
+                        bundleEnvironmentValidator.validateEnvironmentProvided(templatizedBundle.getName(), bundleString);
+                    });
         }
     }
 }
