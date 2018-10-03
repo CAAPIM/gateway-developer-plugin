@@ -28,6 +28,8 @@ public class BundleEntityBuilder {
 
     @Inject
     BundleEntityBuilder(final Set<EntityBuilder> entityBuilders, final BundleDocumentBuilder bundleDocumentBuilder) {
+        // treeset is needed here to sort the builders in the proper order to get a correct bundle builded
+        // Ordering is necessary for the bundle, for the gateway to load it properly.
         this.entityBuilders = unmodifiableSet(new TreeSet<>(entityBuilders));
         this.bundleDocumentBuilder = bundleDocumentBuilder;
     }
