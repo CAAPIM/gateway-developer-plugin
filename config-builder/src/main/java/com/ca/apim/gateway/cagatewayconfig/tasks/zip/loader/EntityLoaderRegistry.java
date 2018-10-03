@@ -6,34 +6,20 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Set;
 
+@Singleton
 public class EntityLoaderRegistry {
 
     private final Collection<EntityLoader> entityLoaders;
 
-    public EntityLoaderRegistry(FileUtils fileUtils, JsonTools jsonTools, IdGenerator idGenerator) {
-        final Collection<EntityLoader> loadersCollection = new HashSet<>();
-        loadersCollection.add(new ServiceLoader(jsonTools));
-        loadersCollection.add(new EncassLoader(jsonTools, idGenerator));
-        loadersCollection.add(new PolicyAndFolderLoader(fileUtils, idGenerator));
-        loadersCollection.add(new StaticPropertiesLoader(fileUtils));
-        loadersCollection.add(new EnvironmentPropertiesLoader(fileUtils));
-        loadersCollection.add(new PolicyBackedServiceLoader(jsonTools));
-        loadersCollection.add(new IdentityProviderLoader(jsonTools));
-        loadersCollection.add(new ListenPortLoader(jsonTools));
-        loadersCollection.add(new StoredPasswordsLoader(fileUtils));
-	loadersCollection.add(new JdbcConnectionLoader(jsonTools));
-	loadersCollection.add(new TrustedCertLoader(jsonTools));
-	loadersCollection.add(new CertificatesLoader());
-
-        this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
+    @Inject
+    EntityLoaderRegistry(final Set<EntityLoader> loaders) {
+        this.entityLoaders = Collections.unmodifiableCollection(loaders);
     }
 
     public Collection<EntityLoader> getEntityLoaders() {

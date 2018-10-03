@@ -9,30 +9,34 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
-public class TrustedCertLoader implements EntityLoader {
-    private static final String FILE_NAME = "trusted-certs";
-    private static final TypeReference<HashMap<String, TrustedCert>> trustedCertTypeMapping = new TypeReference<HashMap<String, TrustedCert>>() {
-    };
-    private final JsonTools jsonTools;
+@Singleton
+public class TrustedCertLoader extends EntityLoaderBase<TrustedCert> {
 
-    public TrustedCertLoader(JsonTools jsonTools) {
-        this.jsonTools = jsonTools;
+    private static final String FILE_NAME = "trusted-certs";
+
+    @Inject
+    TrustedCertLoader(JsonTools jsonTools) {
+        super(jsonTools);
     }
 
     @Override
-    public void load(Bundle bundle, File rootDir) {
-        final Map<String, TrustedCert> trustedCerts = jsonTools.parseDocumentFileFromConfigDir(
-                rootDir,
-                FILE_NAME,
-                trustedCertTypeMapping);
-        if (trustedCerts != null) {
-            bundle.putAllTrustedCerts(trustedCerts);
-        }
+    protected Class<TrustedCert> getBeanClass() {
+        return TrustedCert.class;
+    }
+
+    @Override
+    protected String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    protected void putToBundle(Bundle bundle, @NotNull Map<String, TrustedCert> entitiesMap) {
+        bundle.putAllTrustedCerts(entitiesMap);
     }
 }

@@ -31,18 +31,18 @@ public class ServiceEntityBuilderTest {
 
     @Test
     public void buildNoServices() {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
 
-        List<Entity> serviceEntities = builder.build(bundle);
+        List<Entity> serviceEntities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         Assert.assertEquals(0, serviceEntities.size());
     }
 
     @Test(expected = EntityBuilderException.class)
     public void buildServicesWithoutPolicy() {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
 
@@ -57,12 +57,12 @@ public class ServiceEntityBuilderTest {
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("/my/policy/path", service);
         }});
-        builder.build(bundle);
+        builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
     }
 
     @Test
     public void buildOneServices() throws DocumentParseException {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
 
@@ -97,7 +97,7 @@ public class ServiceEntityBuilderTest {
             put("/my/policy.xml", service);
         }});
 
-        List<Entity> services = builder.build(bundle);
+        List<Entity> services = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         Assert.assertEquals(1, services.size());
 

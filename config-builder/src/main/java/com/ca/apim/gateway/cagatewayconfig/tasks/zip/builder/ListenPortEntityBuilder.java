@@ -14,6 +14,8 @@ import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +42,7 @@ import static org.apache.commons.collections4.MapUtils.unmodifiableMap;
 /**
  * Builder for Listen ports
  */
+@Singleton
 public class ListenPortEntityBuilder implements EntityBuilder {
 
     static final String DEFAULT_HTTP_8080 = "Default HTTP (8080)";
@@ -84,27 +87,27 @@ public class ListenPortEntityBuilder implements EntityBuilder {
     static final List<String> TLS_VERSIONS = asList(TLSV1, TLSV11, TLSV12);
     private static final Map<String, ListenPort> DEFAULT_PORTS = unmodifiableMap(createDefaultListenPorts());
     private static final String USES_TLS = "usesTLS";
+    private static final Integer ORDER = 800;
 
-    private final Document document;
     private final IdGenerator idGenerator;
 
-    ListenPortEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    ListenPortEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
     @Override
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, Document document) {
         final Stream<Entry<String, ListenPort>> userPorts = bundle.getListenPorts().entrySet().stream();
         final Stream<Entry<String, ListenPort>> defaultPorts = DEFAULT_PORTS.entrySet().stream();
 
         return concat(userPorts, defaultPorts).map(listenPortEntry ->
-                buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue())
+                buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document)
         ).collect(toList());
     }
 
     // also visible for testing
-    Entity buildListenPortEntity(Bundle bundle, String name, ListenPort listenPort) {
+    Entity buildListenPortEntity(Bundle bundle, String name, ListenPort listenPort, Document document) {
         Element listenPortElement = document.createElement(LISTEN_PORT);
 
         String id = idGenerator.generate();
@@ -196,5 +199,9 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         return defaultHttp;
     }
 
+    @Override
+    public Integer getOrder() {
+        return ORDER;
+    }
 
 }

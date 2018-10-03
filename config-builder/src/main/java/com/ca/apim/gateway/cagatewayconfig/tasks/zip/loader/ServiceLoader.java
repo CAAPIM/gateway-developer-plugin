@@ -9,28 +9,34 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
-public class ServiceLoader implements EntityLoader {
+@Singleton
+public class ServiceLoader extends EntityLoaderBase<Service> {
 
     private static final String FILE_NAME = "services";
-    private static final TypeReference<HashMap<String, Service>> servicesMapTypeMapping = new TypeReference<HashMap<String, Service>>() {
-    };
-    private final JsonTools jsonTools;
 
-    public ServiceLoader(JsonTools jsonTools) {
-        this.jsonTools = jsonTools;
+    @Inject
+    ServiceLoader(JsonTools jsonTools) {
+        super(jsonTools);
     }
 
     @Override
-    public void load(final Bundle bundle, final File rootDir) {
-        final Map<String, Service> services = jsonTools.parseDocumentFileFromConfigDir(rootDir, FILE_NAME, servicesMapTypeMapping);
-        if (services != null) {
-            bundle.putAllServices(services);
-        }
+    protected Class<Service> getBeanClass() {
+        return Service.class;
+    }
+
+    @Override
+    protected String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    protected void putToBundle(Bundle bundle, @NotNull Map<String, Service> entitiesMap) {
+        bundle.putAllServices(entitiesMap);
     }
 }

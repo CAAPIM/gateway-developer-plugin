@@ -12,6 +12,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -27,19 +29,21 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
+@Singleton
 public class ClusterPropertyEntityBuilder implements EntityBuilder {
-    private final Document document;
+
+    private static final Integer ORDER = 500;
     private final IdGenerator idGenerator;
 
-    ClusterPropertyEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    ClusterPropertyEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, Document document) {
         return Stream.concat(
                 bundle.getStaticProperties().entrySet().stream().map(propertyEntry ->
-                        buildClusterPropertyEntity(propertyEntry.getKey(), propertyEntry.getValue())
+                        buildClusterPropertyEntity(propertyEntry.getKey(), propertyEntry.getValue(), document)
                 ),
                 bundle.getEnvironmentProperties().entrySet().stream()
                         .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
@@ -49,7 +53,12 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         ).collect(Collectors.toList());
     }
 
-    private Entity buildClusterPropertyEntity(String name, String value) {
+    @Override
+    public Integer getOrder() {
+        return ORDER;
+    }
+
+    private Entity buildClusterPropertyEntity(String name, String value, Document document) {
         String id = idGenerator.generate();
         Entity entity = new Entity(CLUSTER_PROPERTY_TYPE, name, id, buildClusterPropertyElement(name, id, value, document));
         entity.setMappingProperty(MAP_BY, MappingProperties.NAME);

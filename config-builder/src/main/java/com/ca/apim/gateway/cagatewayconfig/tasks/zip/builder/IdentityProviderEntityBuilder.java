@@ -13,6 +13,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,22 +26,24 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
+@Singleton
 public class IdentityProviderEntityBuilder implements EntityBuilder {
-    private final Document document;
+
+    private static final Integer ORDER = 700;
     private final IdGenerator idGenerator;
 
-    IdentityProviderEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    IdentityProviderEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, Document document) {
         return bundle.getIdentityProviders().entrySet().stream().map(identityProviderEntry ->
-                buildIdentityProviderEntity(identityProviderEntry.getKey(), identityProviderEntry.getValue())
+                buildIdentityProviderEntity(identityProviderEntry.getKey(), identityProviderEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
-    private Entity buildIdentityProviderEntity(String name, IdentityProvider identityProvider) {
+    private Entity buildIdentityProviderEntity(String name, IdentityProvider identityProvider, Document document) {
         final String id = idGenerator.generate();
         final Element identityProviderElement = createElementWithAttribute(document, ID_PROV, ATTRIBUTE_ID, id);
         identityProviderElement.appendChild(createElementWithTextContent(document, NAME, name));
@@ -53,7 +57,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
                                     .collect(Collectors.toMap(stringStringEntry -> PREFIX_PROPERTY + stringStringEntry.getKey(), Map.Entry::getValue)),
                             document, identityProviderElement);
                 }
-                identityProviderElement.appendChild(buildBindOnlyLdapIPDetails(identityProvider));
+                identityProviderElement.appendChild(buildBindOnlyLdapIPDetails(identityProvider, document));
                 break;
             case LDAP:
             case INTERNAL:
@@ -66,7 +70,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
         return new Entity(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
     }
 
-    private Element buildBindOnlyLdapIPDetails(IdentityProvider identityProvider) {
+    private Element buildBindOnlyLdapIPDetails(IdentityProvider identityProvider, Document document) {
         final BindOnlyLdapIdentityProviderDetail identityProviderDetail = (BindOnlyLdapIdentityProviderDetail) identityProvider.getIdentityProviderDetail();
         if (identityProviderDetail == null) {
             throw new EntityBuilderException("Identity Provider Detail must be specified for BIND_ONLY_LDAP");
@@ -106,5 +110,10 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
         );
 
         return extensionElement;
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER;
     }
 }

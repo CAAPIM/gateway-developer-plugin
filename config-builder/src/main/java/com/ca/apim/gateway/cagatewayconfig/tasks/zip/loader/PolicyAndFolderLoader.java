@@ -13,16 +13,20 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+@Singleton
 public class PolicyAndFolderLoader implements EntityLoader {
 
     private final FileUtils fileUtils;
     private final IdGenerator idGenerator;
 
-    public PolicyAndFolderLoader(FileUtils fileUtils, IdGenerator idGenerator) {
+    @Inject
+    PolicyAndFolderLoader(FileUtils fileUtils, IdGenerator idGenerator) {
         this.fileUtils = fileUtils;
         this.idGenerator = idGenerator;
     }

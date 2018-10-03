@@ -15,7 +15,10 @@ import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.net.ssl.*;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -31,54 +34,56 @@ import java.util.stream.Collectors;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.TRUSTED_CERT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributesAndChildren;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithChildren;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
+@Singleton
 public class TrustedCertEntityBuilder implements EntityBuilder {
-    private final Document document;
+
+    private static final Integer ORDER = 1100;
+
     private final IdGenerator idGenerator;
     private final SSLSocketFactory acceptAllSocketFactory;
 
-    TrustedCertEntityBuilder(Document document, IdGenerator idGenerator, SSLSocketFactory acceptAllSocketFactory) {
-        this.document = document;
+    @Inject
+    TrustedCertEntityBuilder(IdGenerator idGenerator, SSLSocketFactory acceptAllSocketFactory) {
         this.idGenerator = idGenerator;
         this.acceptAllSocketFactory = acceptAllSocketFactory;
     }
 
     @Override
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, Document document) {
         return bundle.getTrustedCerts().entrySet().stream().map(trustedCertEntry ->
-                buildTrustedCertEntity(trustedCertEntry.getKey(), trustedCertEntry.getValue(), bundle.getCertificateFiles())
+                buildTrustedCertEntity(trustedCertEntry.getKey(), trustedCertEntry.getValue(), bundle.getCertificateFiles(), document)
         ).collect(Collectors.toList());
     }
 
-    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, File> certificateFiles) {
+    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
         final String id = idGenerator.generate();
         final Element trustedCertElem = createElementWithAttributesAndChildren(
                 document,
                 TRUSTED_CERT,
                 ImmutableMap.of(ATTRIBUTE_ID, id),
                 createElementWithTextContent(document, NAME, name),
-                buildCertData(name, trustedCert, certificateFiles)
+                buildCertData(name, trustedCert, certificateFiles, document)
         );
         buildAndAppendPropertiesElement(trustedCert.createProperties(), document, trustedCertElem);
 
         return new Entity(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
     }
 
-    private Element buildCertData(String name, TrustedCert trustedCert, Map<String, File> certificateFiles) {
+    private Element buildCertData(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
         if (name.startsWith("https://")) {
-            return buildCertDataFromUrl(name);
+            return buildCertDataFromUrl(name, document);
         } else if (certificateFiles.get(name) != null) {
-            return buildCertDataFromFile(certificateFiles.get(name));
+            return buildCertDataFromFile(certificateFiles.get(name), document);
         } else if (trustedCert.getCertificateData() != null) {
             final CertificateData certData = trustedCert.getCertificateData();
             return createCertDataElementFromCert(
                     certData.getIssuerName(),
                     certData.getSerialNumber(),
                     certData.getSubjectName(),
-                    certData.getEncodedData()
+                    certData.getEncodedData(),
+                    document
             );
         } else {
             throw new EntityBuilderException("Trusted Cert must be loaded from a specified url," +
@@ -86,7 +91,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Element buildCertDataFromFile(File certFileLocation) {
+    private Element buildCertDataFromFile(File certFileLocation, Document document) {
         if (!certFileLocation.exists()) {
             throw new EntityBuilderException("The certificate file location is not specified.");
         }
@@ -98,7 +103,8 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
                     cert.getIssuerDN().getName(),
                     cert.getSerialNumber(),
                     cert.getSubjectDN().getName(),
-                    Base64.getEncoder().encodeToString(cert.getEncoded())
+                    Base64.getEncoder().encodeToString(cert.getEncoded()),
+                    document
             );
         } catch (IOException e) {
             throw new EntityBuilderException("The certificate file location specified does not exist.");
@@ -107,7 +113,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Element buildCertDataFromUrl(String name) {
+    private Element buildCertDataFromUrl(String name, Document document) {
         final URL url = getUrl(name);
         final int port = url.getPort() == -1 ? url.getDefaultPort() : url.getPort();
         try (SSLSocket socket = (SSLSocket) acceptAllSocketFactory.createSocket(url.getHost(), port)) {
@@ -121,7 +127,8 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
                             cert.getIssuerDN().getName(),
                             cert.getSerialNumber(),
                             cert.getSubjectDN().getName(),
-                            Base64.getEncoder().encodeToString(cert.getEncoded())
+                            Base64.getEncoder().encodeToString(cert.getEncoded()),
+                            document
                     );
                 } else {
                     throw new EntityBuilderException("Certificate from url is not in X.509 format.");
@@ -145,7 +152,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         return url;
     }
 
-    private Element createCertDataElementFromCert(String issuerName, BigInteger serialNumber, String subjectName, String encodedData) {
+    private Element createCertDataElementFromCert(String issuerName, BigInteger serialNumber, String subjectName, String encodedData, Document document) {
         return createElementWithChildren(
                 document,
                 CERT_DATA,
@@ -154,5 +161,10 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
                 createElementWithTextContent(document, SUBJECT_NAME, subjectName),
                 createElementWithTextContent(document, ENCODED, encodedData)
         );
+    }
+
+    @Override
+    public @NotNull Integer getOrder() {
+        return ORDER;
     }
 }

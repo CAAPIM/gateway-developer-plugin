@@ -9,6 +9,9 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import org.w3c.dom.Element;
 
-public interface BundleEntityLoader {
+public interface BundleDependencyLoader {
+
     void load(final Bundle bundle, final Element element);
+
+    String getEntityType();
 }

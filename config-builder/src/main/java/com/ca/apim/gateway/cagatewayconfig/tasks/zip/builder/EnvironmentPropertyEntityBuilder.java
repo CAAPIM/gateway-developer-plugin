@@ -10,6 +10,8 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,27 +23,27 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 
-public class EnvironmentPropertyEntityBuilder implements EntityBuilder {
+@Singleton
+public class EnvironmentPropertyEntityBuilder {
 
     private static final String ENV = "env";
 
-    private final Document document;
     private final IdGenerator idGenerator;
 
-    EnvironmentPropertyEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    EnvironmentPropertyEntityBuilder(final IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, Document document) {
         return bundle.getEnvironmentProperties().entrySet().stream()
                 .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
                 .map(propertyEntry ->
-                        buildEnvironmentPropertyEntity(propertyEntry.getKey().substring(8))
+                        buildEnvironmentPropertyEntity(propertyEntry.getKey().substring(8), document)
                 ).collect(Collectors.toList());
     }
 
-    private Entity buildEnvironmentPropertyEntity(String name) {
+    private Entity buildEnvironmentPropertyEntity(String name, Document document) {
         String id = idGenerator.generate();
         HashMap<String, String> valueAttributes = new HashMap<>();
         valueAttributes.put(ENV, Boolean.TRUE.toString());

@@ -10,6 +10,8 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
 import static java.util.function.Function.identity;
@@ -17,10 +19,12 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 @SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
+@Singleton
 public class StoredPasswordsLoader extends PropertiesLoaderBase {
 
     private static final String STORED_PASSWORDS_PROPERTIES = "config/stored-passwords.properties";
 
+    @Inject
     StoredPasswordsLoader(FileUtils fileUtils) {
         super(fileUtils);
     }

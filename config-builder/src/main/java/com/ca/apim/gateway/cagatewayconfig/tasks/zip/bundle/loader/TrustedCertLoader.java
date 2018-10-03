@@ -8,18 +8,22 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.math.BigInteger;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.*;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.CertificateData;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
-public class TrustedCertLoader implements BundleEntityLoader {
+@Singleton
+public class TrustedCertLoader implements BundleDependencyLoader {
+
     @Override
     public void load(Bundle bundle, Element element) {
         final Element trustedCertElem = getSingleChildElement(getSingleChildElement(element, RESOURCE), TRUSTED_CERT);
@@ -43,5 +47,10 @@ public class TrustedCertLoader implements BundleEntityLoader {
             );
         }
         throw new DependencyBundleLoadException("Serial number of Trusted Cert must not be empty.");
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.TRUSTED_CERT_TYPE;
     }
 }

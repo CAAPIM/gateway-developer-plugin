@@ -10,32 +10,37 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
-public class EncassLoader implements EntityLoader {
+@Singleton
+public class EncassLoader extends EntityLoaderBase<Encass> {
 
     private static final String FILE_NAME = "encass";
-    private static final TypeReference<HashMap<String, Encass>> encassMapTypeMapping = new TypeReference<HashMap<String, Encass>>() {
-    };
-
-    private final JsonTools jsonTools;
     private final IdGenerator idGenerator;
 
-    EncassLoader(JsonTools jsonTools, IdGenerator idGenerator) {
-        this.jsonTools = jsonTools;
+    @Inject
+    EncassLoader(final JsonTools jsonTools, final IdGenerator idGenerator) {
+        super(jsonTools);
         this.idGenerator = idGenerator;
     }
 
     @Override
-    public void load(final Bundle bundle, final File rootDir) {
-        final Map<String, Encass> encasses = jsonTools.parseDocumentFileFromConfigDir(rootDir, FILE_NAME, encassMapTypeMapping);
-        if (encasses != null) {
-            encasses.values().forEach(encass -> encass.setGuid(idGenerator.generateGuid()));
-            bundle.putAllEncasses(encasses);
-        }
+    protected Class<Encass> getBeanClass() {
+        return Encass.class;
+    }
+
+    @Override
+    protected String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    protected void putToBundle(final Bundle bundle, @NotNull final Map<String, Encass> entitiesMap) {
+        entitiesMap.values().forEach(encass -> encass.setGuid(idGenerator.generateGuid()));
+        bundle.putAllEncasses(entitiesMap);
     }
 }

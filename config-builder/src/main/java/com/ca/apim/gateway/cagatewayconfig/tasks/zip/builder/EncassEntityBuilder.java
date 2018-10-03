@@ -14,6 +14,8 @@ import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -23,26 +25,32 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buil
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
+@Singleton
 public class EncassEntityBuilder implements EntityBuilder {
 
     private static final String PALETTE_FOLDER = "paletteFolder";
     private static final String INTERNAL_ASSERTIONS = "internalAssertions";
+    private static final int ORDER = 300;
 
-    private final Document document;
     private final IdGenerator idGenerator;
 
-    EncassEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    EncassEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, Document document) {
         return bundle.getEncasses().entrySet().stream().map(encassEntry ->
-                buildEncassEntity(bundle, encassEntry.getKey(), encassEntry.getValue())
+                buildEncassEntity(bundle, encassEntry.getKey(), encassEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
-    private Entity buildEncassEntity(Bundle bundle, String policyPath, Encass encass) {
+    @Override
+    public Integer getOrder() {
+        return ORDER;
+    }
+
+    private Entity buildEncassEntity(Bundle bundle, String policyPath, Encass encass, Document document) {
         Policy policy = bundle.getPolicies().get(policyPath);
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + policyPath);
@@ -57,8 +65,8 @@ public class EncassEntityBuilder implements EntityBuilder {
                 createElementWithTextContent(document, NAME, name),
                 createElementWithTextContent(document, GUID, encass.getGuid()),
                 createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policy.getId()),
-                buildArguments(encass),
-                buildResults(encass)
+                buildArguments(encass, document),
+                buildResults(encass, document)
         );
 
         buildAndAppendPropertiesElement(ImmutableMap.of(PALETTE_FOLDER, INTERNAL_ASSERTIONS), document, encassAssertionElement);
@@ -66,7 +74,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         return new Entity(ENCAPSULATED_ASSERTION_TYPE, name, id, encassAssertionElement);
     }
 
-    private Element buildResults(Encass encass) {
+    private Element buildResults(Encass encass, Document document) {
         Element encapsulatedResultsElement = document.createElement(ENCAPSULATED_RESULTS);
         if (encass.getResults() != null) {
             encass.getResults().forEach(param -> encapsulatedResultsElement.appendChild(
@@ -80,7 +88,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         return encapsulatedResultsElement;
     }
 
-    private Element buildArguments(Encass encass) {
+    private Element buildArguments(Encass encass, Document document) {
         Element encapsulatedArgumentsElement = document.createElement(ENCAPSULATED_ARGUMENTS);
         if (encass.getArguments() != null) {
             AtomicInteger ordinal = new AtomicInteger(1);

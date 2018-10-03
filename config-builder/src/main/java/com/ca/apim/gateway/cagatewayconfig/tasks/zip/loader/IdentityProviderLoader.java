@@ -9,34 +9,37 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
 /**
  * Created by chaoy01 on 2018-08-16.
  */
-public class IdentityProviderLoader implements EntityLoader {
+@Singleton
+public class IdentityProviderLoader extends EntityLoaderBase<IdentityProvider> {
 
     private static final String FILE_NAME = "identity-providers";
-    private static final TypeReference<HashMap<String, IdentityProvider>> identityProviderTypeMapping = new TypeReference<HashMap<String, IdentityProvider>>() {
-    };
-    private final JsonTools jsonTools;
 
-    public IdentityProviderLoader(JsonTools jsonTools) {
-        this.jsonTools = jsonTools;
+    @Inject
+    IdentityProviderLoader(JsonTools jsonTools) {
+        super(jsonTools);
     }
 
     @Override
-    public void load(Bundle bundle, File rootDir) {
-        final Map<String, IdentityProvider> identityProviders = jsonTools.parseDocumentFileFromConfigDir(
-                rootDir,
-                FILE_NAME,
-                identityProviderTypeMapping);
-        if (identityProviders != null) {
-            bundle.putAllIdentityProviders(identityProviders);
-        }
+    protected Class<IdentityProvider> getBeanClass() {
+        return IdentityProvider.class;
+    }
+
+    @Override
+    protected String getFileName() {
+        return FILE_NAME;
+    }
+
+    @Override
+    protected void putToBundle(Bundle bundle, @NotNull Map<String, IdentityProvider> entitiesMap) {
+        bundle.putAllIdentityProviders(entitiesMap);
     }
 }
