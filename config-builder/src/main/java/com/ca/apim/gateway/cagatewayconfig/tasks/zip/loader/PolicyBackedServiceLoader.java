@@ -39,4 +39,9 @@ public class PolicyBackedServiceLoader extends EntityLoaderBase<PolicyBackedServ
     protected void putToBundle(Bundle bundle, @NotNull Map<String, PolicyBackedService> entitiesMap) {
         bundle.putAllPolicyBackedServices(entitiesMap);
     }
+
+    @Override
+    public String getEntityType() {
+        return "POLICY_BACKED_SERVICE";
+    }
 }

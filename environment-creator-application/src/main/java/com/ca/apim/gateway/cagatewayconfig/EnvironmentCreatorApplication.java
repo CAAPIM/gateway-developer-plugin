@@ -9,8 +9,9 @@ package com.ca.apim.gateway.cagatewayconfig;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Document;
@@ -33,7 +34,6 @@ public class EnvironmentCreatorApplication {
     private final String bootstrapBundleFolderPath;
     private DocumentFileUtils documentFileUtils = DocumentFileUtils.INSTANCE;
     private DocumentTools documentTools = DocumentTools.INSTANCE;
-    private IdGenerator idGenerator = new IdGenerator();
 
     /**
      * This application will build an environment bundle and detemplatize deployment bundles with environment configurations.
@@ -59,7 +59,8 @@ public class EnvironmentCreatorApplication {
     @VisibleForTesting
     void run() {
         //create bundle from environment
-        EnvironmentBundleBuilder environmentBundleBuilder = new EnvironmentBundleBuilder(environmentProperties);
+        EntityLoaderRegistry entityLoaderRegistry = ConfigBuilderModule.getInjector().getInstance(EntityLoaderRegistry.class);
+        EnvironmentBundleBuilder environmentBundleBuilder = new EnvironmentBundleBuilder(environmentProperties, entityLoaderRegistry);
         Bundle environmentBundle = environmentBundleBuilder.getBundle();
 
         processDeploymentBundles(environmentBundle);
@@ -68,9 +69,9 @@ public class EnvironmentCreatorApplication {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        BundleEntityBuilder bundleEntityBuilder = new BundleEntityBuilder(documentFileUtils, documentTools, document, idGenerator);
+        BundleEntityBuilder bundleEntityBuilder = ConfigBuilderModule.getInjector().getInstance(BundleEntityBuilder.class);
 
-        Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT);
+        Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
         documentFileUtils.createFile(bundleElement, new File(bootstrapBundleFolderPath, "_env.req.bundle").toPath());
     }
 

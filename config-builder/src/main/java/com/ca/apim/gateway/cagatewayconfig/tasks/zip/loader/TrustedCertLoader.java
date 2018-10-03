@@ -39,4 +39,9 @@ public class TrustedCertLoader extends EntityLoaderBase<TrustedCert> {
     protected void putToBundle(Bundle bundle, @NotNull Map<String, TrustedCert> entitiesMap) {
         bundle.putAllTrustedCerts(entitiesMap);
     }
+
+    @Override
+    public String getEntityType() {
+        return "CERTIFICATE";
+    }
 }

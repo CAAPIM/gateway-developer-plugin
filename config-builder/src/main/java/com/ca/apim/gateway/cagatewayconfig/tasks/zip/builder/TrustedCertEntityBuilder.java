@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.CertificateData;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -19,9 +20,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -69,7 +69,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
+    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
         final String id = idGenerator.generate();
         final Element trustedCertElem = createElementWithAttributesAndChildren(
                 document,
@@ -83,7 +83,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         return getEntityWithNameMapping(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
     }
 
-    private Element buildCertData(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
+    private Element buildCertData(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
         if (name.startsWith("https://")) {
             return buildCertDataFromUrl(name, document);
         } else if (certificateFiles.get(name) != null) {
@@ -103,12 +103,8 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Element buildCertDataFromFile(File certFileLocation, Document document) {
-        if (!certFileLocation.exists()) {
-            throw new EntityBuilderException("The certificate file location is not specified.");
-        }
-
-        try (FileInputStream is = new FileInputStream(certFileLocation)) {
+    private Element buildCertDataFromFile(SupplierWithIO<InputStream> certFileLocation, Document document) {
+        try (InputStream is = certFileLocation.getWithIO()) {
             CertificateFactory certFact = CertificateFactory.getInstance("X.509");
             X509Certificate cert = (X509Certificate) certFact.generateCertificate(is);
             return createCertDataElementFromCert(

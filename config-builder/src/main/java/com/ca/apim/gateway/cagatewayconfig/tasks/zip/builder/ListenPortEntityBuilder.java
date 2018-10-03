@@ -117,7 +117,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
     }
 
     // also visible for testing
-    Entity buildListenPortEntity(Bundle bundle, String name, ListenPort listenPort) {
+    Entity buildListenPortEntity(Bundle bundle, String name, ListenPort listenPort, Document document) {
         Element listenPortElement = document.createElement(LISTEN_PORT);
 
         String id = idGenerator.generate();

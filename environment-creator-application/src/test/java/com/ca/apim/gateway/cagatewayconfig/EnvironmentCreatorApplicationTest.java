@@ -2,7 +2,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.DependencyBundleLoader;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.google.common.collect.ImmutableMap;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
@@ -92,7 +92,7 @@ class EnvironmentCreatorApplicationTest {
                         "      \"EnableCancelTimeout\" : \"true\"\n" +
                         "    }\n" +
                         "  }")
-                .put("ENV.TRUSTED_CERTIFICATE.my-cert", "{\n" +
+                .put("ENV.CERTIFICATE.my-cert", "{\n" +
                         "      \"verifyHostname\" : false,\n" +
                         "      \"trustedForSsl\" : true,\n" +
                         "      \"trustedAsSamlAttestingEntity\" : false,\n" +
@@ -109,8 +109,8 @@ class EnvironmentCreatorApplicationTest {
                         "      }\n" +
                         "  }")
                 .put("ENV.PASSWORD.my_password", "my_secret_password")
-                .put("ENV.myEnvironmentVariable", "my-service-property-value")
-                .put("ENV.anotherEnvVar", "context-variable-value")
+                .put("ENV.PROPERTY.myEnvironmentVariable", "my-service-property-value")
+                .put("ENV.PROPERTY.anotherEnvVar", "context-variable-value")
                 .build();
 
         new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath()).run();
@@ -119,7 +119,7 @@ class EnvironmentCreatorApplicationTest {
         assertTrue(environmentBundleFile.exists());
         System.out.println(new String(Files.readAllBytes(environmentBundleFile.toPath())));
 
-        DependencyBundleLoader bundleLoader = new DependencyBundleLoader(DocumentTools.INSTANCE);
+        DependencyBundleLoader bundleLoader = ConfigBuilderModule.getInjector().getInstance(DependencyBundleLoader.class);
         Bundle environmentBundle = bundleLoader.load(environmentBundleFile);
 
         assertEquals(1, environmentBundle.getIdentityProviders().size());

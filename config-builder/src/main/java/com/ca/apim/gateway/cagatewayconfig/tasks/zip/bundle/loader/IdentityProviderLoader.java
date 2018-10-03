@@ -8,8 +8,10 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
@@ -18,8 +20,8 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static java.util.Arrays.stream;
 
-
-public class IdentityProviderLoader implements BundleEntityLoader {
+@Singleton
+public class IdentityProviderLoader implements BundleDependencyLoader {
 
     IdentityProviderLoader() {
     }
@@ -37,5 +39,10 @@ public class IdentityProviderLoader implements BundleEntityLoader {
         identityProvider.setProperties(properties);
         identityProvider.setType(type);
         bundle.getIdentityProviders().put(name, identityProvider);
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.ID_PROVIDER_CONFIG_TYPE;
     }
 }

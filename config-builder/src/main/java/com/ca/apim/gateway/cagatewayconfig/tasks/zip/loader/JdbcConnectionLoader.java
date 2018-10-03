@@ -39,4 +39,9 @@ public class JdbcConnectionLoader extends EntityLoaderBase<JdbcConnection> {
     protected void putToBundle(Bundle bundle, @NotNull Map<String, JdbcConnection> entitiesMap) {
         bundle.putAllJdbcConnections(entitiesMap);
     }
+
+    @Override
+    public String getEntityType() {
+        return "JDBC_CONNECTION";
+    }
 }

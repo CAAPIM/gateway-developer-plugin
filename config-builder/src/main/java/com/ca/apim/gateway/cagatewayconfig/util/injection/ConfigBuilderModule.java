@@ -8,8 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.util.injection;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EnvironmentBundleBuilder;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EnvironmentPropertyEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.BundleDependencyLoader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoader;
@@ -65,8 +63,6 @@ public class ConfigBuilderModule extends AbstractModule {
         reflections.getSubTypesOf(EntityBuilder.class).forEach(l -> buildersBinder.addBinding().to(l));
 
         bind(BundleEntityBuilder.class);
-        bind(EnvironmentPropertyEntityBuilder.class);
-        bind(EnvironmentBundleBuilder.class);
 
         // bind all bundle dependency loaders to the module
         Multibinder<BundleDependencyLoader> depLoadersBinder = newSetBinder(binder(), BundleDependencyLoader.class);

@@ -8,16 +8,19 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
-public class StoredPasswordLoader implements BundleEntityLoader {
+@Singleton
+public class StoredPasswordLoader implements BundleDependencyLoader {
 
     @Override
     public void load(final Bundle bundle, final Element element) {
@@ -31,5 +34,10 @@ public class StoredPasswordLoader implements BundleEntityLoader {
         password.setProperties(properties);
 
         bundle.getStoredPasswords().put(name, password);
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.STORED_PASSWORD_TYPE;
     }
 }

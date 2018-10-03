@@ -49,6 +49,11 @@ public class PolicyAndFolderLoader implements EntityLoader {
         bundle.putAllFolders(folders);
     }
 
+    @Override
+    public void load(Bundle bundle, String name, String value) {
+        throw new BundleLoadException("Cannot load an individual policy");
+    }
+
     private void loadPolicies(final File currentDir, final File rootDir, Folder parentFolder, final Map<String, Policy> policies, Map<String, Folder> folders) {
         Folder folder = loadFolder(currentDir, rootDir, parentFolder);
         folders.put(folder.getPath(), folder);
@@ -97,5 +102,10 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
     String getPath(final File policy, final File policyRootDir) {
         return policyRootDir.toURI().relativize(policy.toURI()).getPath();
+    }
+
+    @Override
+    public String getEntityType() {
+        return "POLICY";
     }
 }

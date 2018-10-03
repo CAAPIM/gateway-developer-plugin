@@ -110,7 +110,7 @@ class TrustedCertEntityBuilderTest {
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
-        bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, trustedCertLocation));
+        bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, () -> new FileInputStream(trustedCertLocation)));
 
         final List<Entity> trustedCerts = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
@@ -128,7 +128,7 @@ class TrustedCertEntityBuilderTest {
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
-        bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, trustedCertLocation));
+        bundle.putAllCertificateFiles(ImmutableMap.of(CERT_NAME, () -> new FileInputStream(trustedCertLocation)));
 
         final List<Entity> trustedCerts = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, trustedCerts.size());
