@@ -22,6 +22,10 @@ public class TrustedCert {
     private boolean trustedForSigningServerCerts;
     private boolean trustedAsSamlIssuer;
 
+    public TrustedCert() {
+        // required for jackson
+    }
+
     public TrustedCert(Map<String, Object> properties) {
         verifyHostname = extractBoolean(properties, VERIFY_HOSTNAME);
         trustedForSsl = extractBoolean(properties, TRUSTED_FOR_SSL);
