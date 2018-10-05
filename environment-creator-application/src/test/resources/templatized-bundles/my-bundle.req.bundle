@@ -1,3 +1,9 @@
+<!--
+  ~ Copyright (c) 2018 CA. All rights reserved.
+  ~ This software may be modified and distributed under the terms
+  ~ of the MIT license.  See the LICENSE file for details.
+  -->
+
 <l7:Bundle xmlns:l7="http://ns.l7tech.com/2010/04/gateway-management">
     <l7:References>
         <l7:Item>
@@ -29,12 +35,12 @@
                     <l7:Resources>
                         <l7:ResourceSet tag="policy">
                             <l7:Resource type="policy">&lt;wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:L7p="http://www.layer7tech.com/ws/policy"&gt;
-    &lt;wsp:All wsp:Usage="Required"&gt;
-        &lt;L7p:SetVariable&gt;
-            &lt;L7p:Base64Expression ENV_PARAM_NAME="ENV.anotherEnvVar"/&gt;
-            &lt;L7p:VariableToSet stringValue="ENV.anotherEnvVar"/&gt;
-        &lt;/L7p:SetVariable&gt;
-    &lt;/wsp:All&gt;
+                                &lt;wsp:All wsp:Usage="Required"&gt;
+                                &lt;L7p:SetVariable&gt;
+                                &lt;L7p:Base64Expression ENV_PARAM_NAME="ENV.anotherEnvVar"/&gt;
+                                &lt;L7p:VariableToSet stringValue="ENV.anotherEnvVar"/&gt;
+                                &lt;/L7p:SetVariable&gt;
+                                &lt;/wsp:All&gt;
 &lt;/wsp:Policy&gt;
 </l7:Resource>
                         </l7:ResourceSet>

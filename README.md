@@ -55,7 +55,7 @@ The plugin adds the following tasks:
 This builds a Gateway configuration bundle from the source located in `src/main/Gateway`. This bundle can be used as a dependency bundle for another gateway solution. The built bundle is available in: `build/gateway/bundle`
 
 ### package-gw7
-This builds a Gateway deployment package from the source located in `src/main/Gateway`. The deployment package will also contain any dependent bundles as well as instructions on how to apply environment configuration tot he bundles. The built deployment package is available in: `build/gateway`
+This builds a Gateway deployment package from the source located in `src/main/Gateway`. The deployment package will also contain any dependent bundles as well as instructions on how to apply environment configuration to the bundles. The built deployment package is available in: `build/gateway`
 
 ## Expected Source Directory Organization
 The Gateway solution directory (`src/main/Gateway` by default) expects the following organization:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018. All rights reserved.
+ * Copyright (c) 2018 CA. All rights reserved.
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  */
@@ -41,7 +41,8 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TrustedCertEntityBuilderTest {

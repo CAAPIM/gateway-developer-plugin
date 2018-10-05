@@ -1,12 +1,16 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import org.w3c.dom.Element;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.FAIL_ON_NEW;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_BY;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_TO;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.*;
 
 class EntityBuilderHelper {
 

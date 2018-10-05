@@ -17,4 +17,5 @@ dependencies {
     compile 'org.apache.commons:commons-collections4:4.2'
     compile 'org.jetbrains:annotations:16.0.2'
     compile 'org.reflections:reflections:0.9.11'
+    runtime 'org.slf4j:slf4j-simple:1.7.25'
 }
