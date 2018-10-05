@@ -34,9 +34,9 @@ public class BundleEntityBuilder {
         this.bundleDocumentBuilder = bundleDocumentBuilder;
     }
 
-    public Element build(Bundle bundle, Document document) {
+    public Element build(Bundle bundle, EntityBuilder.BundleType bundleType, Document document) {
         List<Entity> entities = new ArrayList<>();
-        entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, document)));
+        entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
 
         return bundleDocumentBuilder.build(document, entities);
     }

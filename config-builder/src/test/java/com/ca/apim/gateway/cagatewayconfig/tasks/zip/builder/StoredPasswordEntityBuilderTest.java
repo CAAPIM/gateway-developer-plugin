@@ -35,7 +35,7 @@ class StoredPasswordEntityBuilderTest {
     @Test
     void buildFromEmptyBundle_noPasswords() {
         StoredPasswordEntityBuilder builder = new StoredPasswordEntityBuilder(ID_GENERATOR);
-        final List<Entity> entities = builder.build(new Bundle(), DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(new Bundle(), EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertTrue(entities.isEmpty());
     }
@@ -48,7 +48,7 @@ class StoredPasswordEntityBuilderTest {
         Bundle bundle = new Bundle();
         bundle.putAllStoredPasswords(ImmutableMap.of(PWD_1, pwd1, PWD_2, pwd2));
 
-        final List<Entity> entities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
         assertEquals(2, entities.size());

@@ -10,35 +10,52 @@ In order to use this plugin add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.5.0"
+    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.6.+"
+}
+
+repositories {
+    // This is needed in order to get dependencies for the environment 
+    // creator application that is bundled in the gw7 file.
+    mavenCentral()
 }
 ```
 
-After this is added run `gradle build` in order to build a bundle from a gateway solution located in `src/main/Gateway`.
+After this is added run `./gradlew build` in order to build a bundle and deployment package from a gateway solution located in `src/main/Gateway`.
+The build will result in a deployment bundle and a deployment package in `build/gateway`
 
-## Using the Gateway Developer Plugin
-> Note: This plugin is still in an Beta stage
+## What gets built
+### Deployment Bundle
+The deployment bundle is a bundle that contains the policies and other deployment artifact in the `src/main/Gateway`. 
+This bundle can be referred to a a dependency in other solutions.
 
+### Deployment Package
+The deployment package is a gw7 file that contains the deployment bundle as well as all it's dependencies. 
+This can be deployed to a Gateway to add this solution to the Gateway. 
+Note that only one deployment package can be deployed to a gateway.
+
+### Hierarchy of Artifacts
+In order to better understand the relationship between different files and artifacts consider the following comparison to Java:
+
+* `Policy` file **≈** `java` file
+  * The policy files that are found in `src/main/Gateway/policy` folder are akin to java files. Policy files are the code that tells the gateway what to do when processing a massage. Policy files can refer to other policy files using `<L7p:Include>` or `<L7p:Encapsulated>`.
+* `Item` xml within *bundle* xml **≈** `class` file
+  * When you run `./gradlew build` the *policy* files get *compiled* into `<l7:Item>` sections in a *bundle*. These sections in a *bundle* are akin to `class` files. They are *compiled* versions of the *policy* files that are *linked* to the other *policies* that they refer to.
+* `bundle` file **≈** `jar` file
+  * A `bundle` file is akin to a `jar` file. It is a single file that contains all the compiled *policy* files. It can be deployed to a Gateway but it will not run unless you also deploy all of the dependent *bundles*.
+* `gw7` file **≈** `fat jar` file
+  * A `fat jar` is a *jar* file that also contains all the dependent *jars*. Similarly, a `gw7` file is a single file that contains the built *bundle* as well as all the *bundles* that it depends on. It is meant to be a single file that can be deployed to a Gateway in order to completely configure it.
+
+## Dealing with Environment Configuration
+For more information on environment see [applying-environment.md](doc/applying-environment.md).
+
+## Gateway Developer Plugin additional Tasks
 The plugin adds the following tasks:
 
 ### build-bundle
-This build a Gateway configuration bundle from the source located in `src/main/Gateway`. This bundle can be used as a bootstrap bundle for a container Gateway. The built bundle is available in: `build/gateway/bundle`
+This builds a Gateway configuration bundle from the source located in `src/main/Gateway`. This bundle can be used as a dependency bundle for another gateway solution. The built bundle is available in: `build/gateway/bundle`
 
-## Currently Supported Entities
-This plugin currently supports these entities:
-
-Entity | Supported | Description
---- | --- | ---
-Folder | Yes | 
-Service | Yes | 
-Policy | Yes |
-EncapsulatedAssertion | Yes |
-ClusterProperty | Yes |
-Policy Backed Service | Yes |
-Listen Port | Yes | 
-Stored Passwords | Yes | 
-JDBC Connections | Yes |  
-Trusted Certificates | Yes |
+### package-gw7
+This builds a Gateway deployment package from the source located in `src/main/Gateway`. The deployment package will also contain any dependent bundles as well as instructions on how to apply environment configuration to the bundles. The built deployment package is available in: `build/gateway`
 
 ## Expected Source Directory Organization
 The Gateway solution directory (`src/main/Gateway` by default) expects the following organization:
@@ -85,9 +102,13 @@ Versioning is done using the [gradle-semantic-build-versioning](https://github.c
 Every time a pull request is merged into `master` the patch version will be updated. For example, if the current version is `1.3.2` the next pull request merged into master will cause the version to be updated to `1.3.3`.
 In order to update the major or minor version put either `[major]` or `[minor]` into the commit message.
 
-### publish to local
+## Publish to Local
 You can also publish the plugin to your local maven repository by running:
-```gradle publishToMavenLocal```
+```./gradlew publishToMavenLocal```
+
+## Publishing
+The plugin is published to Bintray: [ca-api-gateway/gateway-developer-plugin](https://bintray.com/ca-api-gateway/gateway-developer-plugin). This then gets promoted to jCenter and Maven Central. 
+For more details look at the [build.gradle](build.gradle) and [.travis.yml](/.travis.yml) files.
 
 ## How You Can Contribute
 Contributions are welcome and much appreciated. To learn more, see the [Contribution Guidelines][contributing].

@@ -17,6 +17,7 @@ public class Entity {
     private String id;
     private Element xml;
     private String name;
+    private String mappingAction;
     private Map<String, Object> mappingProperties = new HashMap<>();
 
     public Entity(String type, String name, String id, Element xml) {
@@ -64,5 +65,13 @@ public class Entity {
 
     public void setMappingProperty(String key, Object value) {
         mappingProperties.put(key, value);
+    }
+
+    public String getMappingAction() {
+        return mappingAction;
+    }
+
+    public void setMappingAction(String mappingAction) {
+        this.mappingAction = mappingAction;
     }
 }

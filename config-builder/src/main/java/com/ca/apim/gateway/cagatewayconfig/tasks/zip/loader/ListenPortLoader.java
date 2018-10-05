@@ -38,4 +38,9 @@ public class ListenPortLoader extends EntityLoaderBase<ListenPort> {
     protected void putToBundle(Bundle bundle, @NotNull Map<String, ListenPort> entitiesMap) {
         bundle.putAllListenPorts(entitiesMap);
     }
+
+    @Override
+    public String getEntityType() {
+        return "LISTEN_PORT";
+    }
 }

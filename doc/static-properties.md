@@ -10,3 +10,6 @@ An example `static.properties` file might look like:
      "value":"0"\
     }
 ```
+
+# Environment
+Static Properties cannot be created using environment properties. Use [Environment Properties](environment-properties.md) instead

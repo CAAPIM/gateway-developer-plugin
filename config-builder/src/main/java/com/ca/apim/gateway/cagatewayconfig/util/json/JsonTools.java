@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,10 +29,11 @@ public class JsonTools {
     private static final Logger LOGGER = Logger.getLogger(JsonTools.class.getName());
     public static final JsonTools INSTANCE = new JsonTools(FileUtils.INSTANCE);
 
-    private static final String JSON = "json";
-    private static final String YAML = "yaml";
+    public static final String JSON = "json";
+    public static final String YAML = "yaml";
     private static final String JSON_EXTENSION = "json";
-    private static final String YAML_EXTENSION = "yml";
+    private static final String YML_EXTENSION = "yml";
+    private static final String YAML_EXTENSION = "yaml";
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
     private final FileUtils fileUtils;
 
@@ -52,12 +54,15 @@ public class JsonTools {
     public File getDocumentFileFromConfigDir(final File rootDir, final String fileName) {
         final File directory = new File(rootDir, "config");
         final File jsonFile = new File(directory, fileName + "." + JSON_EXTENSION);
-        final File ymlFile = new File(directory, fileName + "." + YAML_EXTENSION);
+        final File yamlFile = new File(directory, fileName + "." + YAML_EXTENSION);
+        final File ymlFile = new File(directory, fileName + "." + YML_EXTENSION);
 
-        if (jsonFile.exists() && ymlFile.exists()) {
+        if (jsonFile.exists() && yamlFile.exists() && ymlFile.exists()) {
             throw new JsonToolsException("Can have either a " + fileName + ".json or a " + fileName + ".yml not both.");
         } else if (jsonFile.isFile()) {
             return jsonFile;
+        } else if (yamlFile.isFile()) {
+            return yamlFile;
         } else if (ymlFile.isFile()) {
             return ymlFile;
         }
@@ -69,8 +74,16 @@ public class JsonTools {
 
     public <T> T readDocumentFile(final File file, final JavaType entityMapType) {
         final String type = getTypeFromFile(file);
-        final ObjectMapper objectMapper = getObjectMapper(type);
         try (InputStream stream = fileUtils.getInputStream(file)) {
+            return readStream(stream, type, entityMapType);
+        } catch (IOException e) {
+            throw new JsonToolsException("Could not parse configuration file for type: " + entityMapType.getGenericSignature() + " Message:" + e.getMessage(), e);
+        }
+    }
+
+    public <T> T readStream(final InputStream stream, final String type, final JavaType entityMapType) {
+        final ObjectMapper objectMapper = getObjectMapper(type);
+        try {
             return objectMapper.readValue(stream, entityMapType);
         } catch (IOException e) {
             throw new JsonToolsException("Could not parse configuration file for type: " + entityMapType.getGenericSignature() + " Message:" + e.getMessage(), e);
@@ -79,19 +92,24 @@ public class JsonTools {
 
     @NotNull
     public String getTypeFromFile(File file) {
-        final String extension = getExtension(file.getName());
-        String type;
-        switch (extension) {
-            case JSON_EXTENSION:
-                type = JSON;
-                break;
-            case YAML_EXTENSION:
-                type = YAML;
-                break;
-            default:
-                throw new JsonToolsException("Invalid file: " + file.getName() + ". Expecting json or yaml file formats.");
+        String type = getTypeFromExtension(getExtension(file.getName()));
+        if(type == null) {
+            throw new JsonToolsException("Invalid file: " + file.getName() + ". Expecting json or yaml file formats.");
         }
         return type;
+    }
+
+    @Nullable
+    public String getTypeFromExtension(String extension) {
+        switch (extension) {
+            case JSON_EXTENSION:
+                return JSON;
+            case YML_EXTENSION:
+            case YAML_EXTENSION:
+                return YAML;
+            default:
+                return null;
+        }
     }
 
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {

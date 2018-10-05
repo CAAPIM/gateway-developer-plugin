@@ -38,7 +38,7 @@ class JdbcConnectionEntityBuilderTest {
     @Test
     void buildFromEmptyBundle_noConnections() {
         JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
-        final List<Entity> entities = builder.build(new Bundle(), DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(new Bundle(), EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertTrue(entities.isEmpty());
     }
@@ -49,7 +49,7 @@ class JdbcConnectionEntityBuilderTest {
         final Bundle bundle = new Bundle();
         bundle.putAllJdbcConnections(ImmutableMap.of(TEST_JDBC_CONNECTION, buildJdbcConnection(emptyMap())));
 
-        final List<Entity> entities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
         assertEquals(1, entities.size());

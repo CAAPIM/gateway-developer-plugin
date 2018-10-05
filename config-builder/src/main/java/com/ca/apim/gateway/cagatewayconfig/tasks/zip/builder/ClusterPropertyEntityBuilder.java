@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -20,10 +19,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithOnlyMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CLUSTER_PROPERTY_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.NAME;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.FAIL_ON_EXISTING;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
@@ -40,17 +40,30 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle, Document document) {
-        return Stream.concat(
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        Stream.Builder<Entity> streamBuilder = Stream.builder();
+        switch (bundleType) {
+            case DEPLOYMENT:
                 bundle.getStaticProperties().entrySet().stream().map(propertyEntry ->
                         buildClusterPropertyEntity(propertyEntry.getKey(), propertyEntry.getValue(), document)
-                ),
+                ).forEach(streamBuilder);
                 bundle.getEnvironmentProperties().entrySet().stream()
                         .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
                         .map(propertyEntry ->
-                                buildEnvironmentPropertyEntity(PREFIX_ENV + propertyEntry.getKey().substring(8))
-                        )
-        ).collect(Collectors.toList());
+                                getEntityWithOnlyMapping(CLUSTER_PROPERTY_TYPE, PREFIX_ENV + propertyEntry.getKey().substring(8), idGenerator.generate())
+                        ).forEach(streamBuilder);
+                break;
+            case ENVIRONMENT:
+                bundle.getEnvironmentProperties().entrySet().stream()
+                        .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
+                        .map(propertyEntry ->
+                                buildClusterPropertyEntity(PREFIX_ENV + propertyEntry.getKey().substring(8), propertyEntry.getValue(), document)
+                        ).forEach(streamBuilder);
+                break;
+            default:
+                throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
+        return streamBuilder.build().collect(Collectors.toList());
     }
 
     @Override
@@ -60,8 +73,8 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
 
     private Entity buildClusterPropertyEntity(String name, String value, Document document) {
         String id = idGenerator.generate();
-        Entity entity = new Entity(CLUSTER_PROPERTY_TYPE, name, id, buildClusterPropertyElement(name, id, value, document));
-        entity.setMappingProperty(MAP_BY, MappingProperties.NAME);
+        Entity entity = getEntityWithNameMapping(CLUSTER_PROPERTY_TYPE, name, id, buildClusterPropertyElement(name, id, value, document));
+        entity.setMappingProperty(FAIL_ON_EXISTING, true);
         return entity;
     }
 
@@ -69,7 +82,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         return buildClusterPropertyElement(name, id, value, document, Collections.emptyMap());
     }
 
-    static Element buildClusterPropertyElement(String name, String id, String value, Document document, Map<String,String> valueAttributes) {
+    private static Element buildClusterPropertyElement(String name, String id, String value, Document document, Map<String, String> valueAttributes) {
         Element clusterPropertyElement = createElementWithAttribute(document, CLUSTER_PROPERTY, ATTRIBUTE_ID, id);
 
         clusterPropertyElement.appendChild(createElementWithTextContent(document, NAME, name));
@@ -78,13 +91,5 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         valueAttributes.forEach(valueElement::setAttribute);
         clusterPropertyElement.appendChild(valueElement);
         return clusterPropertyElement;
-    }
-
-    private Entity buildEnvironmentPropertyEntity(String name) {
-        Entity entity = new Entity(CLUSTER_PROPERTY_TYPE, name, idGenerator.generate(), null);
-        entity.setMappingProperty(MAP_BY, NAME);
-        entity.setMappingProperty(MAP_TO, name);
-        entity.setMappingProperty(FAIL_ON_NEW, true);
-        return entity;
     }
 }

@@ -42,4 +42,9 @@ public class IdentityProviderLoader extends EntityLoaderBase<IdentityProvider> {
     protected void putToBundle(Bundle bundle, @NotNull Map<String, IdentityProvider> entitiesMap) {
         bundle.putAllIdentityProviders(entitiesMap);
     }
+
+    @Override
+    public String getEntityType() {
+        return "IDENTITY_PROVIDER";
+    }
 }

@@ -34,7 +34,7 @@ class IdentityProviderEntityBuilderTest {
     void buildNoIdentityProviders() {
         final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final Bundle bundle = new Bundle();
-        final List<Entity> identityProviderEntities = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> identityProviderEntities = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(0, identityProviderEntities.size());
     }
 
@@ -47,7 +47,7 @@ class IdentityProviderEntityBuilderTest {
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("simple ldap config", identityProvider);
         }});
-        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
@@ -67,7 +67,7 @@ class IdentityProviderEntityBuilderTest {
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("simple ldap config", identityProvider);
         }});
-        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
@@ -78,7 +78,7 @@ class IdentityProviderEntityBuilderTest {
 
         final IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
-        identityProvider.setProperties(new HashMap<String, String>() {{
+        identityProvider.setProperties(new HashMap<String, Object>() {{
             put("key1", "value1");
             put("key2", "value2");
         }});
@@ -94,7 +94,7 @@ class IdentityProviderEntityBuilderTest {
             put("simple ldap config", identityProvider);
         }});
 
-        final List<Entity> identityProviders = builder.build(bundle, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> identityProviders = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, identityProviders.size());
 
         final Entity identityProviderEntity = identityProviders.get(0);

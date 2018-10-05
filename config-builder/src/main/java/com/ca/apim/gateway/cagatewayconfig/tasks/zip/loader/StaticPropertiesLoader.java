@@ -32,4 +32,9 @@ public class StaticPropertiesLoader extends PropertiesLoaderBase {
     protected void putToBundle(Bundle bundle, Map<String, String> properties) {
         bundle.putAllStaticProperties(properties);
     }
+
+    @Override
+    public String getEntityType() {
+        return "STATIC_PROPERTY";
+    }
 }

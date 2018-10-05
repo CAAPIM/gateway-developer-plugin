@@ -16,7 +16,6 @@ import java.util.Map;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 @SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
 @Singleton
@@ -39,15 +38,16 @@ public class StoredPasswordsLoader extends PropertiesLoaderBase {
         bundle.putAllStoredPasswords(properties.entrySet().stream().map(e -> buildStoredPassword(e.getKey(), e.getValue())).collect(toMap(StoredPassword::getName, identity())));
     }
 
-    private StoredPassword buildStoredPassword(String name, String password) {
-        if (isEmpty(password)) {
-            throw new BundleLoadException("Stored passwords file contains an empty password: " + name);
-        }
-
+    public static StoredPassword buildStoredPassword(String name, String password) {
         StoredPassword storedPassword = new StoredPassword();
         storedPassword.setName(name);
         storedPassword.setPassword(password);
         storedPassword.addDefaultProperties();
         return storedPassword;
+    }
+
+    @Override
+    public String getEntityType() {
+        return "PASSWORD";
     }
 }

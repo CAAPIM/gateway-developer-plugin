@@ -32,4 +32,9 @@ public class EnvironmentPropertiesLoader extends PropertiesLoaderBase {
     protected void putToBundle(Bundle bundle, Map<String, String> properties) {
         bundle.putAllEnvironmentProperties(properties);
     }
+
+    @Override
+    public String getEntityType() {
+        return "PROPERTY";
+    }
 }

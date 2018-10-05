@@ -15,7 +15,7 @@ import java.util.List;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_UPDATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @Singleton
@@ -42,7 +42,7 @@ public class BundleDocumentBuilder {
     }
 
     private Element buildEntityMapping(final Entity entity, final Document document) {
-        final Element mapping = createElementWithAttributes(document, MAPPING, ImmutableMap.of(ATTRIBUTE_ACTION, NEW_OR_EXISTING, ATTRIBUTE_SRCID, entity.getId(), ATTRIBUTE_TYPE, entity.getType()));
+        final Element mapping = createElementWithAttributes(document, MAPPING, ImmutableMap.of(ATTRIBUTE_ACTION, entity.getMappingAction() == null ? NEW_OR_UPDATE : entity.getMappingAction(), ATTRIBUTE_SRCID, entity.getId(), ATTRIBUTE_TYPE, entity.getType()));
         buildAndAppendPropertiesElement(entity.getMappingProperties(), document, mapping);
 
         return mapping;

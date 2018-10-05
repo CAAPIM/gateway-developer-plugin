@@ -7,9 +7,14 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
+import org.apache.commons.io.IOUtils;
 
 import javax.inject.Singleton;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,10 +32,10 @@ public class CertificatesLoader implements EntityLoader {
         if (certificatesDir.exists()) {
             final String[] certs = certificatesDir.list();
             if (certs != null && certs.length > 0) {
-                final Map<String, File> map = new HashMap<>();
+                final Map<String, SupplierWithIO<InputStream>> map = new HashMap<>();
                 Arrays.stream(certs).forEach(cert -> {
                     if (checkCertFormat(cert)) {
-                        map.put(cert.substring(0, cert.length()-4), new File(certificatesDir, cert));
+                        map.put(cert.substring(0, cert.length() - 4), () -> new FileInputStream(new File(certificatesDir, cert)));
                     } else {
                         throw new BundleLoadException(cert + " must be a valid certificate extension.");
                     }
@@ -40,8 +45,22 @@ public class CertificatesLoader implements EntityLoader {
         }
     }
 
+    @Override
+    public void load(Bundle bundle, String name, String value) {
+        if (checkCertFormat(name)) {
+            bundle.getCertificateFiles().put(name.substring(0, name.length() - 4), () -> IOUtils.toInputStream(value, Charset.defaultCharset()));
+        } else {
+            throw new BundleLoadException(name + " must have a valid certificate extension.");
+        }
+    }
+
     private boolean checkCertFormat(String certFileName) {
         final String lowerCaseName = certFileName.toLowerCase();
         return lowerCaseName.endsWith(".der") || lowerCaseName.endsWith(".pem") || lowerCaseName.endsWith(".crt") || lowerCaseName.endsWith(".cer");
+    }
+
+    @Override
+    public String getEntityType() {
+        return "CERTIFICATE_FILE";
     }
 }

@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.google.common.collect.ImmutableMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +39,11 @@ public abstract class PropertiesLoaderBase implements EntityLoader {
             properties.forEach((k, v) -> map.put(k.toString(), v.toString()));
             this.putToBundle(bundle, map);
         }
+    }
+
+    @Override
+    public void load(Bundle bundle, String name, String value) {
+        putToBundle(bundle, ImmutableMap.<String, String>builder().put(name, value).build());
     }
 
     /**

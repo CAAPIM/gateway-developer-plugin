@@ -29,7 +29,7 @@ public class IdentityProvider {
     }
 
     private IdentityProviderType type;
-    private Map<String,String> properties;
+    private Map<String,Object> properties;
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes( {
@@ -46,11 +46,11 @@ public class IdentityProvider {
         this.type = type;
     }
 
-    public Map<String,String> getProperties() {
+    public Map<String,Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String,String> properties) {
+    public void setProperties(Map<String,Object> properties) {
         this.properties = properties;
     }
 

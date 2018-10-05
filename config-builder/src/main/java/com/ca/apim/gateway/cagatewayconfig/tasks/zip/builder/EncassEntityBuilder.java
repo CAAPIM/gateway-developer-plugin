@@ -39,7 +39,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle, Document document) {
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         return bundle.getEncasses().entrySet().stream().map(encassEntry ->
                 buildEncassEntity(bundle, encassEntry.getKey(), encassEntry.getValue(), document)
         ).collect(Collectors.toList());

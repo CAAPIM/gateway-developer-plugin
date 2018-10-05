@@ -39,4 +39,9 @@ public class ServiceLoader extends EntityLoaderBase<Service> {
     protected void putToBundle(Bundle bundle, @NotNull Map<String, Service> entitiesMap) {
         bundle.putAllServices(entitiesMap);
     }
+
+    @Override
+    public String getEntityType() {
+        return "SERVICE";
+    }
 }

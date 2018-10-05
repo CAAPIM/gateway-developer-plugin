@@ -7,7 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -15,6 +15,8 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.HashMap;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BuilderUtilsTest {
 
@@ -25,7 +27,7 @@ public class BuilderUtilsTest {
         }}, DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
 
         NodeList propertyNodes = properties.getElementsByTagName("l7:Property");
-        Assert.assertEquals(1, propertyNodes.getLength());
+        assertEquals(1, propertyNodes.getLength());
         for (int i = 0; i < propertyNodes.getLength(); i++) {
             Node property = propertyNodes.item(i);
             Node key = property.getAttributes().getNamedItem("key");
@@ -45,6 +47,6 @@ public class BuilderUtilsTest {
         Element properties = BuilderUtils.buildPropertiesElement(new HashMap<>(), DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
 
         NodeList propertyNodes = properties.getElementsByTagName("l7:Property");
-        Assert.assertEquals(0, propertyNodes.getLength());
+        assertEquals(0, propertyNodes.getLength());
     }
 }

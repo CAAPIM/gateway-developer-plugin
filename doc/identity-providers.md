@@ -52,3 +52,28 @@ The same JSON representation would look like:
   }
 }
 ```
+
+# Environment
+Identity provider configuration is environment configuration. It is not added to a deployment bundle and must be specified as environment.
+In order to do so you can set an environment property with the name: `ENV.IDENTITY_PROVIDER.<name>` where `<name>` is the name of the identity provider.
+
+## Examples
+```
+ENV.IDENTITY_PROVIDER.oauth='{
+                               "type" : "BIND_ONLY_LDAP",
+                               "properties": {
+                                 "key1":"value1",
+                                 "key2":"value2"
+                               },
+                               "identityProviderDetail" : {
+                                 "serverUrls": [
+                                   "ldap://host:port",
+                                   "ldap://host:port2"
+                                 ],
+                                 "useSslClientAuthentication":false,
+                                 "bindPatternPrefix": "somePrefix",
+                                 "bindPatternSuffix": "someSuffix"
+                               }
+                             }'
+```
+This will create an LDAP identity provider called `oauth`.

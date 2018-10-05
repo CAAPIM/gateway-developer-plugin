@@ -56,8 +56,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         this.documentTools = documentTools;
     }
 
-    public List<Entity> build(Bundle bundle, Document document) {
-        bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle, document));
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle));
 
         List<Policy> orderedPolicies = new LinkedList<>();
         bundle.getPolicies().forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
@@ -84,13 +84,13 @@ public class PolicyEntityBuilder implements EntityBuilder {
         orderedPolicies.add(policy);
     }
 
-    private void preparePolicy(Policy policy, Bundle bundle, Document bundleDocument) {
+    private void preparePolicy(Policy policy, Bundle bundle) {
         Document policyDocument = stringToXML(policy.getPolicyXML());
         Element policyElement = policyDocument.getDocumentElement();
 
         prepareAssertion(policyElement, INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
         prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(bundle, policyDocument, assertionElement));
-        prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement, bundleDocument));
+        prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
         policy.setPolicyDocument(policyElement);
@@ -100,7 +100,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareBase64Element(policyDocument, assertionElement, RESPONSE_BODY, BASE_64_RESPONSE_BODY);
     }
 
-    private void prepareSetVariableAssertion(Document policyDocument, Element assertionElement, Document bundleDocument) {
+    private void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
         Element nameElement;
         try {
             nameElement = getSingleElement(assertionElement, VARIABLE_TO_SET);
@@ -111,7 +111,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String variableName = nameElement.getAttribute(STRING_VALUE);
         if(variableName.startsWith(PREFIX_ENV)){
             assertionElement.insertBefore(
-                    createElementWithAttribute(bundleDocument, BASE_64_EXPRESSION, ENV_PARAM_NAME, variableName),
+                    createElementWithAttribute(policyDocument, BASE_64_EXPRESSION, ENV_PARAM_NAME, variableName),
                     assertionElement.getFirstChild()
             );
         } else {

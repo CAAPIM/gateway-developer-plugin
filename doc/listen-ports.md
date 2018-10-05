@@ -55,3 +55,28 @@ The same JSON representation would look like:
     }
 }
 ```
+
+# Environment
+Listen Port Configurations are part of a deployment bundle but they can also be specified via environment.
+In order configure a listen port using an environment property you can set an environment property with the name: `ENV.LISTEN_PORT.<name>` where `<name>` is the name of the Listen Port.
+
+## Examples
+```
+ENV.LISTEN_PORT.custom-https='{
+                                "protocol" : "HTTPS",
+                                "port" : 12345,
+                                "enabledFeatures" : [ "Published service message input" ],
+                                "tlsSettings" : {
+                                  "clientAuthentication" : "REQUIRED",
+                                  "enabledVersions" : [ "TLSv1.2" ],
+                                  "enabledCipherSuites" : [ "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384" ],
+                                  "properties" : {
+                                    "usesTLS" : true
+                                  }
+                                },
+                                "properties" : { 
+                                   "threadPoolSize" : "20"
+                                }
+                              }'
+```
+This will create a Listen Port called `custom-https`.

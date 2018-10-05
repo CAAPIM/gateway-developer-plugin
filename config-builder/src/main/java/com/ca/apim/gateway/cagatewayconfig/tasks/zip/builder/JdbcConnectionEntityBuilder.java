@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithOnlyMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -42,10 +44,19 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle, Document document) {
-        return bundle.getJdbcConnections().entrySet().stream().map(e ->
-                buildEntity(e.getKey(), e.getValue(), document)
-        ).collect(Collectors.toList());
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        switch (bundleType) {
+            case DEPLOYMENT:
+                return bundle.getJdbcConnections().entrySet().stream()
+                        .map(e -> getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, e.getKey(), idGenerator.generate()))
+                        .collect(Collectors.toList());
+            case ENVIRONMENT:
+                return bundle.getJdbcConnections().entrySet().stream().map(e ->
+                        buildEntity(e.getKey(), e.getValue(), document)
+                ).collect(Collectors.toList());
+            default:
+                throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
     }
 
     @VisibleForTesting
@@ -76,7 +87,7 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
                 buildPropertiesElement(connectionProperties, document, CONNECTION_PROPERTIES)
         ));
 
-        return new Entity(EntityTypes.JDBC_CONNECTION, name, id, jdbcElement);
+        return getEntityWithNameMapping(EntityTypes.JDBC_CONNECTION, name, id, jdbcElement);
     }
 
     @Override

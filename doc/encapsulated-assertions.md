@@ -48,3 +48,6 @@ The same JSON representation would look like:
   }
 }
 ```
+
+# Environment
+Encapsulated assertions cannot be created using environment properties.

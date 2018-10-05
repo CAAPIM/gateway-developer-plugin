@@ -15,7 +15,10 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithOnlyMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.STORED_PASSWORD_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -35,8 +38,17 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public List<Entity> build(Bundle bundle, Document document) {
-        return bundle.getStoredPasswords().entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), e.getValue(), document)).collect(toList());
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        switch (bundleType) {
+            case DEPLOYMENT:
+                return bundle.getStoredPasswords().entrySet().stream()
+                        .map(e -> getEntityWithOnlyMapping(STORED_PASSWORD_TYPE, e.getKey(), idGenerator.generate()))
+                        .collect(Collectors.toList());
+            case ENVIRONMENT:
+                return bundle.getStoredPasswords().entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), e.getValue(), document)).collect(toList());
+            default:
+                throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
     }
 
     private Entity buildStoredPasswordEntity(String name, StoredPassword storedPassword, Document document) {
@@ -48,7 +60,7 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
 
         buildAndAppendPropertiesElement(storedPassword.getProperties(), document, storedPasswordElement);
 
-        return new Entity(STORED_PASSWORD_TYPE, name, id, storedPasswordElement);
+        return getEntityWithNameMapping(STORED_PASSWORD_TYPE, name, id, storedPasswordElement);
     }
 
     @Override

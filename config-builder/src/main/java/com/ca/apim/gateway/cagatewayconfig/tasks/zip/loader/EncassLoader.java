@@ -43,4 +43,9 @@ public class EncassLoader extends EntityLoaderBase<Encass> {
         entitiesMap.values().forEach(encass -> encass.setGuid(idGenerator.generateGuid()));
         bundle.putAllEncasses(entitiesMap);
     }
+
+    @Override
+    public String getEntityType() {
+        return "ENCAPSULATED_ASSERTION";
+    }
 }
