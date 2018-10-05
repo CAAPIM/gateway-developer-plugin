@@ -48,4 +48,12 @@ public class FileUtils {
             throw new EntityBuilderException("Could not read file " + file.getPath(), e);
         }
     }
+
+    public void writeContent(byte[] content, final File file) {
+        try {
+            Files.write(file.toPath(), content);
+        } catch (IOException e) {
+            throw new EntityBuilderException("Could not write content to file " + file.getPath(), e);
+        }
+    }
 }

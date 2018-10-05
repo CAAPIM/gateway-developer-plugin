@@ -10,10 +10,20 @@ import java.io.File;
 
 public class PrivateKey {
 
+    private String alias;
     private String keystore;
     private String algorithm;
+    private String keyPassword;
     private KeyStoreType keyStoreType;
     private File privateKeyDirectory;
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 
     public String getKeystore() {
         return keystore;
@@ -37,6 +47,14 @@ public class PrivateKey {
 
     public void setKeyStoreType(KeyStoreType keyStoreType) {
         this.keyStoreType = keyStoreType;
+    }
+
+    public String getKeyPassword() {
+        return keyPassword;
+    }
+
+    public void setKeyPassword(String keyPassword) {
+        this.keyPassword = keyPassword;
     }
 
     public File getPrivateKeyDirectory() {

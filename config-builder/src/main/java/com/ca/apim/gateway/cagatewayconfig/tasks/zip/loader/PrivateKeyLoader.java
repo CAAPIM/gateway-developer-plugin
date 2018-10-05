@@ -34,6 +34,7 @@ public class PrivateKeyLoader extends EntityLoaderBase<PrivateKey> {
 
         // Set the private key keystore type and the certificate and key file directory
         bundle.getPrivateKeys().forEach((key, pk) -> {
+            pk.setAlias(key);
             pk.setKeyStoreType(KeyStoreType.fromName(pk.getKeystore()));
             pk.setPrivateKeyDirectory(new File(rootDir, "config/privateKeys/" + key));
         });

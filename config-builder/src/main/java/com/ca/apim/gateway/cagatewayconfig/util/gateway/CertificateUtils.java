@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -27,12 +28,9 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 public class CertificateUtils {
 
     public static Element buildCertDataFromFile(File certFileLocation, Document document, CertificateFactory certificateFactory) {
-        if (!certFileLocation.exists()) {
-            throw new EntityBuilderException("The certificate file location is not specified.");
-        }
+        X509Certificate cert = loadCertificateFromFile(certFileLocation, certificateFactory);
 
-        try (FileInputStream is = new FileInputStream(certFileLocation)) {
-            X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(is);
+        try {
             return createCertDataElementFromCert(
                     cert.getIssuerDN().getName(),
                     cert.getSerialNumber(),
@@ -40,11 +38,25 @@ public class CertificateUtils {
                     Base64.getEncoder().encodeToString(cert.getEncoded()),
                     document
             );
+        } catch (CertificateEncodingException e) {
+            throw new EntityBuilderException("Error generating certificate: ", e);
+        }
+    }
+
+    public static X509Certificate loadCertificateFromFile(File certFileLocation, CertificateFactory certificateFactory) {
+        if (!certFileLocation.exists()) {
+            throw new EntityBuilderException("The certificate file location is not specified.");
+        }
+
+        X509Certificate cert;
+        try (FileInputStream is = new FileInputStream(certFileLocation)) {
+            cert = (X509Certificate) certificateFactory.generateCertificate(is);
         } catch (IOException e) {
             throw new EntityBuilderException("The certificate file location specified does not exist.");
         } catch (CertificateException e) {
-            throw new EntityBuilderException("Error generating certificate: ", e);
+            throw new EntityBuilderException("Error generating certificate from file " + certFileLocation.toPath(), e);
         }
+        return cert;
     }
 
     public static Element createCertDataElementFromCert(String issuerName, BigInteger serialNumber, String subjectName, String encodedData, Document document) {

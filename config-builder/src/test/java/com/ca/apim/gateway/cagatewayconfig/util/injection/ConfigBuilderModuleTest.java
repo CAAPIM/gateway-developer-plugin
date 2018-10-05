@@ -15,6 +15,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
@@ -53,6 +54,7 @@ class ConfigBuilderModuleTest {
         assertNotNull(injector.getInstance(IdGenerator.class), "IdGenerator is not available");
         assertNotNull(injector.getInstance(SSLSocketFactory.class), "SSLSocketFactory is not available");
         assertNotNull(injector.getInstance(CertificateFactory.class), "CertificateFactory is not available");
+        assertNotNull(injector.getInstance(KeystoreHelper.class), "KeystoreHelper is not available");
     }
 
     @Test

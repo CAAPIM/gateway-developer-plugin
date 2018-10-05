@@ -33,18 +33,25 @@ class BundleBuilder {
     private final BundleEntityBuilder bundleEntityBuilder;
     private final DependencyBundleLoader dependencyBundleLoader;
     private final DocumentTools documentTools;
+    // FIXME remove when set keystore to be built in a proper place
+    private final KeystoreHelper keystoreHelper;
+    private final FileUtils fileUtils;
 
     @Inject
     BundleBuilder(final DocumentTools documentTools,
                   final DocumentFileUtils documentFileUtils,
                   final EntityLoaderRegistry entityLoaderRegistry,
                   final BundleEntityBuilder bundleEntityBuilder,
-                  final DependencyBundleLoader dependencyBundleLoader) {
+                  final DependencyBundleLoader dependencyBundleLoader
+                  final KeystoreHelper keystoreHelper,
+                  final FileUtils fileUtils) {
         this.documentFileUtils = documentFileUtils;
         this.documentTools = documentTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
         this.bundleEntityBuilder = bundleEntityBuilder;
         this.dependencyBundleLoader = dependencyBundleLoader;
+        this.keystoreHelper = keystoreHelper;
+        this.fileUtils = fileUtils;
     }
 
     void buildBundle(File rootDir, File outputDir, Set<File> dependencies, String name) {
@@ -66,8 +73,12 @@ class BundleBuilder {
         }
 
         //Zip
-        Element bundleElement = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document);
+        Element bundleElement = bundleEntityBuilder.build(bundle, document);
         documentFileUtils.createFile(bundleElement, new File(outputDir, name + ".req.bundle").toPath());
+
+	// Write Keystore
+        final byte[] keyStore = keystoreHelper.createKeyStore(bundle.getPrivateKeys().values());
+        fileUtils.writeContent(keyStore, new File(outputDir, "keystore.gwks"));
     }
 
 
