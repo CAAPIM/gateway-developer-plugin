@@ -19,6 +19,8 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class DocumentFileUtils {
     private static final Logger LOGGER = Logger.getLogger(DocumentFileUtils.class.getName());
 
@@ -45,7 +47,7 @@ public class DocumentFileUtils {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         printXML(element, byteArrayOutputStream);
         try {
-            return byteArrayOutputStream.toString("UTF-8");
+            return byteArrayOutputStream.toString(UTF_8.name());
         } catch (UnsupportedEncodingException e) {
             throw new DocumentFileUtilsException("Error writing xml: " + e.getMessage(), e);
         } finally {
@@ -53,17 +55,11 @@ public class DocumentFileUtils {
         }
     }
 
-    public void printXML(final Element node, final OutputStream outStream) {
+    private void printXML(final Element node, final OutputStream outStream) {
         final Transformer transformer = documentTools.getTransformer();
-        final OutputStreamWriter writer;
+        final OutputStreamWriter writer = new OutputStreamWriter(outStream, UTF_8);
         try {
-            writer = new OutputStreamWriter(outStream, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new DocumentFileUtilsException("Unexpected exception creating output stream writer", e);
-        }
-        try {
-            transformer.transform(new DOMSource(node),
-                    new StreamResult(writer));
+            transformer.transform(new DOMSource(node), new StreamResult(writer));
         } catch (TransformerException e) {
             throw new DocumentFileUtilsException("Exception writing xml element to stream.", e);
         }

@@ -25,6 +25,7 @@ import org.reflections.Reflections;
 
 import javax.net.ssl.SSLSocketFactory;
 import java.lang.reflect.Modifier;
+import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,6 +52,7 @@ class ConfigBuilderModuleTest {
         assertEquals(FileUtils.INSTANCE, injector.getInstance(FileUtils.class), "FileUtils is not the default");
         assertNotNull(injector.getInstance(IdGenerator.class), "IdGenerator is not available");
         assertNotNull(injector.getInstance(SSLSocketFactory.class), "SSLSocketFactory is not available");
+        assertNotNull(injector.getInstance(CertificateFactory.class), "CertificateFactory is not available");
     }
 
     @Test

@@ -38,8 +38,12 @@ public class FileUtils {
     }
 
     public String getFileAsString(final File file) {
+        return new String(this.readFile(file));
+    }
+
+    public byte[] readFile(final File file) {
         try {
-            return new String(Files.readAllBytes(file.toPath()));
+            return Files.readAllBytes(file.toPath());
         } catch (IOException e) {
             throw new EntityBuilderException("Could not read file " + file.getPath(), e);
         }

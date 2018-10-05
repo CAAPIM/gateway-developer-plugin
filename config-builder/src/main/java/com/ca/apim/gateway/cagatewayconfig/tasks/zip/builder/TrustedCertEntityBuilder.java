@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 CA. All rights reserved.
+ * Copyright (c) 2018. All rights reserved.
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  */
@@ -10,7 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.CertificateData;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -20,8 +20,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,11 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithOnlyMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.TRUSTED_CERT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.buildCertDataFromFile;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.createCertDataElementFromCert;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @Singleton
@@ -45,11 +46,13 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
 
     private final IdGenerator idGenerator;
     private final SSLSocketFactory acceptAllSocketFactory;
+    private final CertificateFactory certFactory;
 
     @Inject
-    TrustedCertEntityBuilder(IdGenerator idGenerator, SSLSocketFactory acceptAllSocketFactory) {
+    TrustedCertEntityBuilder(IdGenerator idGenerator, SSLSocketFactory acceptAllSocketFactory, CertificateFactory certFactory) {
         this.idGenerator = idGenerator;
         this.acceptAllSocketFactory = acceptAllSocketFactory;
+        this.certFactory = certFactory;
     }
 
     @Override
@@ -69,7 +72,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
+    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
         final String id = idGenerator.generate();
         trustedCert.setId(id);
         final Element trustedCertElem = createElementWithAttributesAndChildren(
@@ -81,14 +84,14 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         );
         buildAndAppendPropertiesElement(trustedCert.createProperties(), document, trustedCertElem);
 
-        return getEntityWithNameMapping(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
+        return new Entity(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
     }
 
-    private Element buildCertData(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
+    private Element buildCertData(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
         if (name.startsWith("https://")) {
             return buildCertDataFromUrl(name, document);
         } else if (certificateFiles.get(name) != null) {
-            return buildCertDataFromFile(certificateFiles.get(name), document);
+            return buildCertDataFromFile(certificateFiles.get(name), document, certFactory);
         } else if (trustedCert.getCertificateData() != null) {
             final CertificateData certData = trustedCert.getCertificateData();
             return createCertDataElementFromCert(
@@ -101,24 +104,6 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         } else {
             throw new EntityBuilderException("Trusted Cert must be loaded from a specified url," +
                     " or from a certificate file that has the same name as the Trusted Cert.");
-        }
-    }
-
-    private Element buildCertDataFromFile(SupplierWithIO<InputStream> certFileLocation, Document document) {
-        try (InputStream is = certFileLocation.getWithIO()) {
-            CertificateFactory certFact = CertificateFactory.getInstance("X.509");
-            X509Certificate cert = (X509Certificate) certFact.generateCertificate(is);
-            return createCertDataElementFromCert(
-                    cert.getIssuerDN().getName(),
-                    cert.getSerialNumber(),
-                    cert.getSubjectDN().getName(),
-                    Base64.getEncoder().encodeToString(cert.getEncoded()),
-                    document
-            );
-        } catch (IOException e) {
-            throw new EntityBuilderException("The certificate file location specified does not exist.");
-        } catch (CertificateException e) {
-            throw new EntityBuilderException("Error generating certificate: ", e);
         }
     }
 
@@ -159,17 +144,6 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
             throw new EntityBuilderException("The url specified is malformed: " + e.getMessage(), e);
         }
         return url;
-    }
-
-    private Element createCertDataElementFromCert(String issuerName, BigInteger serialNumber, String subjectName, String encodedData, Document document) {
-        return createElementWithChildren(
-                document,
-                CERT_DATA,
-                createElementWithTextContent(document, ISSUER_NAME, issuerName),
-                createElementWithTextContent(document, SERIAL_NUMBER, serialNumber),
-                createElementWithTextContent(document, SUBJECT_NAME, subjectName),
-                createElementWithTextContent(document, ENCODED, encodedData)
-        );
     }
 
     @Override
