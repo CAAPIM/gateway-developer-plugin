@@ -125,6 +125,11 @@ public class KeystoreHelper {
                 .orElse(new File[0]);
         sort(certificateFiles, comparing(File::getName));
 
-        return stream(certificateFiles).map(f -> loadCertificateFromFile(f, certificateFactory)).toArray(Certificate[]::new);
+        return stream(certificateFiles)
+                .map(f -> loadCertificateFromFile(
+                        () -> Files.newInputStream(f.toPath()),
+                        certificateFactory)
+                )
+                .toArray(Certificate[]::new);
     }
 }

@@ -10,7 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.CertificateData;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -20,24 +20,28 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.cert.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithOnlyMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.TRUSTED_CERT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.buildCertDataFromFile;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.createCertDataElementFromCert;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributesAndChildren;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
 @Singleton
 public class TrustedCertEntityBuilder implements EntityBuilder {
@@ -72,7 +76,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
+    private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
         final String id = idGenerator.generate();
         trustedCert.setId(id);
         final Element trustedCertElem = createElementWithAttributesAndChildren(
@@ -84,10 +88,10 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         );
         buildAndAppendPropertiesElement(trustedCert.createProperties(), document, trustedCertElem);
 
-        return new Entity(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
+        return getEntityWithNameMapping(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
     }
 
-    private Element buildCertData(String name, TrustedCert trustedCert, Map<String, File> certificateFiles, Document document) {
+    private Element buildCertData(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
         if (name.startsWith("https://")) {
             return buildCertDataFromUrl(name, document);
         } else if (certificateFiles.get(name) != null) {

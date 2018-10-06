@@ -17,6 +17,8 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.PRIVATE_KEY_TYPE;
+
 @Singleton
 public class PrivateKeyLoader extends EntityLoaderBase<PrivateKey> {
 
@@ -38,6 +40,11 @@ public class PrivateKeyLoader extends EntityLoaderBase<PrivateKey> {
             pk.setKeyStoreType(KeyStoreType.fromName(pk.getKeystore()));
             pk.setPrivateKeyDirectory(new File(rootDir, "config/privateKeys/" + key));
         });
+    }
+
+    @Override
+    public String getEntityType() {
+        return PRIVATE_KEY_TYPE;
     }
 
     @Override

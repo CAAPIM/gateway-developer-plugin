@@ -13,6 +13,8 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.DependencyBundleLoad
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,7 +44,7 @@ class BundleBuilder {
                   final DocumentFileUtils documentFileUtils,
                   final EntityLoaderRegistry entityLoaderRegistry,
                   final BundleEntityBuilder bundleEntityBuilder,
-                  final DependencyBundleLoader dependencyBundleLoader
+                  final DependencyBundleLoader dependencyBundleLoader,
                   final KeystoreHelper keystoreHelper,
                   final FileUtils fileUtils) {
         this.documentFileUtils = documentFileUtils;
@@ -73,10 +75,10 @@ class BundleBuilder {
         }
 
         //Zip
-        Element bundleElement = bundleEntityBuilder.build(bundle, document);
+        Element bundleElement = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document);
         documentFileUtils.createFile(bundleElement, new File(outputDir, name + ".req.bundle").toPath());
 
-	// Write Keystore
+	    // Write Keystore
         final byte[] keyStore = keystoreHelper.createKeyStore(bundle.getPrivateKeys().values());
         fileUtils.writeContent(keyStore, new File(outputDir, "keystore.gwks"));
     }

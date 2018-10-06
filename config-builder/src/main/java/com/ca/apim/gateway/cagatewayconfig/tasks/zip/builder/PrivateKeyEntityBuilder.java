@@ -8,8 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
-import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -18,13 +16,17 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
+import java.nio.file.Files;
 import java.security.cert.CertificateFactory;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithOnlyMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.PRIVATE_KEY_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.buildCertDataFromFile;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributes;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithChildren;
 import static java.util.Arrays.sort;
@@ -44,8 +46,17 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public List<Entity> build(Bundle bundle, Document document) {
-        return bundle.getPrivateKeys().entrySet().stream().map(e -> buildPrivateKeyEntity(e.getKey(), e.getValue(), document)).collect(toList());
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        switch (bundleType) {
+            case DEPLOYMENT:
+                return bundle.getPrivateKeys().entrySet().stream()
+                        .map(e -> getEntityWithOnlyMapping(PRIVATE_KEY_TYPE, e.getKey(), e.getValue().getKeyStoreType().generateKeyId(e.getKey())))
+                        .collect(Collectors.toList());
+            case ENVIRONMENT:
+                return bundle.getPrivateKeys().entrySet().stream().map(e -> buildPrivateKeyEntity(e.getKey(), e.getValue(), document)).collect(toList());
+            default:
+                throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
     }
 
     private Entity buildPrivateKeyEntity(String alias, PrivateKey privateKey, Document document) {
@@ -69,7 +80,7 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
                 .orElse(new File[0]);
         sort(certificateFiles, comparing(File::getName));
         final Element[] certificates = Stream.of(certificateFiles)
-                .map(f -> CertificateUtils.buildCertDataFromFile(f, document, certificateFactory)).toArray(Element[]::new);
+                .map(f -> buildCertDataFromFile(() -> Files.newInputStream(f.toPath()), document, certificateFactory)).toArray(Element[]::new);
         privateKeyElem.appendChild(createElementWithChildren(document, CERTIFICATE_CHAIN, certificates));
     }
 
