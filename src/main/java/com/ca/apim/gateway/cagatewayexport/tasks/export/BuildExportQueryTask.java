@@ -33,6 +33,7 @@ public class BuildExportQueryTask extends DefaultTask {
     public void perform() {
         exportQuery.set("?encassAsPolicyDependency=true" +
                 "&includeDependencies=true" +
-                "&all=true");
+                "&all=true" +
+                "&encryptSecrets=true");
     }
 }

@@ -57,6 +57,23 @@ public final class DocumentFileUtils {
         }
     }
 
+    /**
+     * Create all folder in this path. Does not fail if any of them already exist.
+     *
+     * @param folderPath Path representing all folders that should be created.
+     */
+    public synchronized void createFolders(Path folderPath) {
+        if (!folderPath.toFile().exists()) {
+            try {
+                Files.createDirectories(folderPath);
+            } catch (IOException e) {
+                throw new WriteException("Exception creating folder(s): " + folderPath, e);
+            }
+        } else if (!folderPath.toFile().isDirectory()) {
+            throw new WriteException("Wanted to create folder but found a file: " + folderPath);
+        }
+    }
+
     private void printXML(final Element node, final OutputStream outStream, boolean addNamespace) {
         if (addNamespace) {
             node.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");

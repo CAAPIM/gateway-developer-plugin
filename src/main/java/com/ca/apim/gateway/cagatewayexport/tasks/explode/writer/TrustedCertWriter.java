@@ -10,15 +10,12 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.TrustedCertEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayexport.util.gateway.CertificateUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -26,10 +23,8 @@ import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHel
 
 @Singleton
 public class TrustedCertWriter implements EntityWriter {
+
     private static final String TRUSTED_CERTS_FILE = "trusted-certs";
-    private static final String PEM_CERT_BEGIN_MARKER = "-----BEGIN CERTIFICATE-----";
-    private static final String PEM_CERT_END_MARKER = "-----END CERTIFICATE-----";
-    private static final String LINE_SEPERATOR = System.lineSeparator();
     private final DocumentFileUtils documentFileUtils;
     private final JsonTools jsonTools;
 
@@ -62,17 +57,6 @@ public class TrustedCertWriter implements EntityWriter {
         final File certFolder = new File(configFolder, "certificates");
         documentFileUtils.createFolder(certFolder.toPath());
 
-        final String formattedData = trustedCertEntity.getEncodedData().replaceAll("(.{64})", "$1" + LINE_SEPERATOR);
-
-        File certFile = new File(certFolder, trustedCertEntity.getName() + ".pem");
-        try (OutputStream fileStream = Files.newOutputStream(certFile.toPath())) {
-            fileStream.write(PEM_CERT_BEGIN_MARKER.getBytes(StandardCharsets.UTF_8));
-            fileStream.write(LINE_SEPERATOR.getBytes(StandardCharsets.UTF_8));
-            fileStream.write(formattedData.getBytes(StandardCharsets.UTF_8));
-            fileStream.write(LINE_SEPERATOR.getBytes(StandardCharsets.UTF_8));
-            fileStream.write(PEM_CERT_END_MARKER.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new WriteException("Exception writing " + trustedCertEntity.getName() + ".pem", e);
-        }
+        CertificateUtils.writeCertificateData(certFolder, trustedCertEntity.getName(), trustedCertEntity.getEncodedData());
     }
 }

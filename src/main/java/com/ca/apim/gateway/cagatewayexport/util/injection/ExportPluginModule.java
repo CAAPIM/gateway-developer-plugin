@@ -34,7 +34,7 @@ import static java.util.Optional.ofNullable;
  */
 public class ExportPluginModule extends AbstractModule {
 
-    public static final String BASE_PACKAGE = "com.ca.apim.gateway.cagatewayexport";
+    private static final String BASE_PACKAGE = "com.ca.apim.gateway.cagatewayexport";
     private static Injector injector;
 
     private ExportPluginModule() {

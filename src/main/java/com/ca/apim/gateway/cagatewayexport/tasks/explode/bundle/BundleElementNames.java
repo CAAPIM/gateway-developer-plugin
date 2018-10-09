@@ -15,6 +15,8 @@ public class BundleElementNames {
     public static final String ATTRIBUTE_FOLDER_ID = "folderId";
     public static final String ATTRIBUTE_GUID = "guid";
     public static final String ATTRIBUTE_KEY = "key";
+    public static final String ATTRIBUTE_ALIAS = "alias";
+    public static final String ATTRIBUTE_KEYSTORE_ID = "keystoreId";
 
     // Common Elements
     public static final String NAME = "l7:Name";
@@ -111,6 +113,10 @@ public class BundleElementNames {
     public static final String DRIVER_CLASS = "l7:DriverClass";
     public static final String JDBC_URL = "l7:JdbcUrl";
     public static final String CONNECTION_PROPERTIES = "l7:ConnectionProperties";
+
+    // Private Key
+    public static final String PRIVATE_KEY = "l7:PrivateKey";
+    public static final String CERTIFICATE_CHAIN = "l7:CertificateChain";
 
     private BundleElementNames() {
         //

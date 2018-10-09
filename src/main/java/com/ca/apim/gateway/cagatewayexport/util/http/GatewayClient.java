@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayexport.util.http;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.export.ExportTask;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
@@ -27,11 +26,20 @@ import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static java.nio.charset.Charset.defaultCharset;
+import static java.util.Base64.getEncoder;
+import static org.apache.commons.lang3.RandomStringUtils.random;
+
 public class GatewayClient {
-    private static final Logger LOGGER = Logger.getLogger(ExportTask.class.getName());
+
+    @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
+    private static final String KEY_PASSPHRASE_HEADER = "L7-key-passphrase";
+    private static final Logger LOGGER = Logger.getLogger(GatewayClient.class.getName());
+    private static final SecureRandom RANDOM = new SecureRandom();
     public static final GatewayClient INSTANCE = new GatewayClient();
 
     /**
@@ -74,8 +82,14 @@ public class GatewayClient {
      */
     public InputStream makeAPICall(final HttpClient client, final String uri) {
         final HttpResponse response;
+        final HttpGet httpGet = new HttpGet(uri);
+
+        // Generate a random passphrase with any type of char and using a secure random generator, in order to encrypt the secrets.
+        final String encodedPassphrase = random(64, 0, 0, true, true, null, RANDOM);
+        httpGet.addHeader(KEY_PASSPHRASE_HEADER, getEncoder().encodeToString(encodedPassphrase.getBytes(defaultCharset())));
+
         try {
-            response = client.execute(new HttpGet(uri));
+            response = client.execute(httpGet);
         } catch (IOException e) {
             throw new GatewayClientException("Could not make an API Call to: " + uri, e);
         }

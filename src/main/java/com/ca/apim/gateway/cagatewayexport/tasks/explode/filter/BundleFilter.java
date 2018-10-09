@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.DEFAULT_PORTS;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PrivateKeyEntity.SSL_DEFAULT_PRIVATE_KEY;
 
 public class BundleFilter {
     private final Bundle bundle;
@@ -68,6 +69,9 @@ public class BundleFilter {
                 bundle.getEntities(JdbcConnectionEntity.class).values(),
                 filterDependencies(JdbcConnectionEntity.class, bundle.getDependencies(), filteredBundle)
         ).forEach(filteredBundle::addEntity);
+
+        // filter private keys removing the default SSL one
+        bundle.getEntities(PrivateKeyEntity.class).values().stream().filter(p -> !p.getName().equals(SSL_DEFAULT_PRIVATE_KEY)).forEach(filteredBundle::addEntity);
 
         filterParentFolders(folderPath, bundle.getFolderTree()).forEach(filteredBundle::addEntity);
 
