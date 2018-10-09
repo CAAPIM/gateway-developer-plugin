@@ -48,7 +48,7 @@ public class ListenPortLoader implements BundleDependencyLoader {
     }
 
     private ListenPortTlsSettings getTlsSettings(final Element listenPortElement) {
-        Element tlsSettingsElement = getSingleChildElement(listenPortElement, TLS_SETTINGS);
+        Element tlsSettingsElement = getSingleChildElement(listenPortElement, TLS_SETTINGS, true);
         if (tlsSettingsElement == null) {
             return null;
         }

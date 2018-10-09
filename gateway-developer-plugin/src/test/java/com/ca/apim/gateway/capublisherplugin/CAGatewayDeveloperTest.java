@@ -45,15 +45,7 @@ class CAGatewayDeveloperTest {
         Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        Assert.assertTrue(buildDir.isDirectory());
-        File buildGatewayDir = new File(buildDir, "gateway");
-        Assert.assertTrue(buildGatewayDir.isDirectory());
-        File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
-        Assert.assertTrue(buildGatewayBundlesDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayBundlesDir, projectFolder + projectVersion + ".req.bundle");
-        Assert.assertTrue(builtBundleFile.isFile());
-        File gw7PackageFile = new File(buildGatewayDir, projectFolder + projectVersion + ".gw7");
-        Assert.assertTrue(gw7PackageFile.isFile());
+        validateBuildDir(projectFolder, buildDir);
     }
 
     @Test
@@ -77,5 +69,39 @@ class CAGatewayDeveloperTest {
         Assert.assertTrue(buildGatewayDir.isDirectory());
         File builtBundleFile = new File(buildGatewayDir, projectFolder + projectVersion + ".req.bundle");
         Assert.assertTrue(builtBundleFile.isFile());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testMultiProject(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "multi-project";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-a:build")).getOutcome());
+        Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-b:build")).getOutcome());
+
+        validateBuildDir("project-a", new File(new File(testProjectDir, "project-a"), "build"));
+        validateBuildDir("project-b", new File(new File(testProjectDir, "project-b"), "build"));
+    }
+
+    private void validateBuildDir(String projectName, File buildDir) {
+        Assert.assertTrue(buildDir.isDirectory());
+        File buildGatewayDir = new File(buildDir, "gateway");
+        Assert.assertTrue(buildGatewayDir.isDirectory());
+        File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
+        Assert.assertTrue(buildGatewayBundlesDir.isDirectory());
+        File builtBundleFile = new File(buildGatewayBundlesDir, projectName + projectVersion + ".req.bundle");
+        Assert.assertTrue(builtBundleFile.isFile());
+        File gw7PackageFile = new File(buildGatewayDir, projectName + projectVersion + ".gw7");
+        Assert.assertTrue(gw7PackageFile.isFile());
     }
 }
