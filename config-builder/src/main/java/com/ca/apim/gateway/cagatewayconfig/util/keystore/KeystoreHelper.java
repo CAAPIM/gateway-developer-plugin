@@ -76,6 +76,11 @@ public class KeystoreHelper {
 
     @VisibleForTesting
     byte[] createKeyStore(Collection<PrivateKey> privateKeys) {
+        // if no private Keys specified do nothing
+        if (privateKeys.isEmpty()) {
+            return null;
+        }
+
         KeyStore ks = createKeyStoreInstance(privateKeys);
 
         // transform it to byte array so it can be written properly anywhere

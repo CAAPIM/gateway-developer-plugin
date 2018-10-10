@@ -61,17 +61,11 @@ class KeystoreHelperTest {
     }
 
     @Test
-    void createEmptyKeyStore() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    void createEmptyKeyStore() {
         KeystoreHelper keystoreHelper = new KeystoreHelper();
         final byte[] keyStore = keystoreHelper.createKeyStore(emptyList());
 
-        assertNotNull(keyStore);
-        assertTrue(keyStore.length > 0);
-
-        KeyStore ks = getInstance("PKCS12");
-        ks.load(new ByteArrayInputStream(keyStore), keystoreHelper.getKeystorePassword());
-
-        assertEquals(0, ks.size());
+        assertNull(keyStore);
     }
 
     @Test
@@ -115,7 +109,7 @@ class KeystoreHelperTest {
                 return "GW";
             }
         };
-        assertThrows(KeyStoreCreationException.class, () -> keystoreHelper.createKeyStore(emptyList()));
+        assertThrows(KeyStoreCreationException.class, () -> keystoreHelper.createKeyStore(singletonList(createPrivateKey("testInvalid"))));
     }
 
     @Test

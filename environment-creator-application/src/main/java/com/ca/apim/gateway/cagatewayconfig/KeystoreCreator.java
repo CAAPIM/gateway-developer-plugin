@@ -19,35 +19,42 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.closeQuietly;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 class KeystoreCreator {
 
     private static FileUtils fileUtils = FileUtils.INSTANCE;
 
-    private KeystoreCreator() {}
+    private KeystoreCreator() {
+    }
 
     static void createKeyStoreIfNecessary(Map<String, String> environmentProperties, String keyStoreDirPath) {
-        // write keystore if directory is specified
+        // write keystore if directory is specified and exists
         String privateKeyFilesDirectory = environmentProperties.get(KeystoreHelper.ENV_VAR_KEYSTORE_PATH);
-        if (isNotEmpty(privateKeyFilesDirectory) && Paths.get(privateKeyFilesDirectory).toFile().exists()) {
-            KeystoreHelper keystoreHelper = ConfigBuilderModule.getInjector().getInstance(KeystoreHelper.class);
-            final byte[] keyStore = keystoreHelper.createKeyStoreFromEnvironment(privateKeyFilesDirectory, environmentProperties);
+        if (isEmpty(privateKeyFilesDirectory) || !Paths.get(privateKeyFilesDirectory).toFile().exists()) {
+            return;
+        }
 
-            final File keyStoreDirectory = new File(keyStoreDirPath);
-            final boolean createdDirs = keyStoreDirectory.mkdirs();
-            if (!createdDirs) {
-                throw new KeyStoreCreationException("Could not create directory '" + keyStoreDirPath + "' for KeyStore");
-            }
+        KeystoreHelper keystoreHelper = ConfigBuilderModule.getInjector().getInstance(KeystoreHelper.class);
+        final byte[] keyStore = keystoreHelper.createKeyStoreFromEnvironment(privateKeyFilesDirectory, environmentProperties);
+        // no keys
+        if (keyStore == null) {
+            return;
+        }
 
-            OutputStream stream = fileUtils.getOutputStream(new File(keyStoreDirectory, "keystore.gwks"));
-            try {
-                IOUtils.write(keyStore, stream);
-            } catch (IOException e) {
-                throw new KeyStoreCreationException("Unexpected error writing key store", e);
-            } finally {
-                closeQuietly(stream);
-            }
+        final File keyStoreDirectory = new File(keyStoreDirPath);
+        final boolean createdDirs = keyStoreDirectory.mkdirs();
+        if (!createdDirs) {
+            throw new KeyStoreCreationException("Could not create directory '" + keyStoreDirPath + "' for KeyStore");
+        }
+
+        OutputStream stream = fileUtils.getOutputStream(new File(keyStoreDirectory, "keystore.gwks"));
+        try {
+            IOUtils.write(keyStore, stream);
+        } catch (IOException e) {
+            throw new KeyStoreCreationException("Unexpected error writing key store", e);
+        } finally {
+            closeQuietly(stream);
         }
     }
 }
