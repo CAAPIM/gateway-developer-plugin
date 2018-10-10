@@ -8,9 +8,12 @@ package com.ca.apim.gateway.cagatewayconfig.util.json;
 
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +23,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.fasterxml.jackson.databind.DeserializationFeature.*;
+import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public class JsonTools {
     private static final Logger LOGGER = Logger.getLogger(JsonTools.class.getName());
@@ -28,6 +31,9 @@ public class JsonTools {
 
     public static final String JSON = "json";
     public static final String YAML = "yaml";
+    private static final String JSON_EXTENSION = "json";
+    private static final String YML_EXTENSION = "yml";
+    private static final String YAML_EXTENSION = "yaml";
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
     private final FileUtils fileUtils;
 
@@ -45,42 +51,70 @@ public class JsonTools {
         return objectMapper;
     }
 
-    public <T> T parseDocumentFile(final File directory, final String fileName, TypeReference<T> typeMapping) {
-        final File jsonFile = new File(directory, fileName + ".json");
-        final File ymlFile = new File(directory, fileName + ".yml");
+    public File getDocumentFileFromConfigDir(final File rootDir, final String fileName) {
+        final File directory = new File(rootDir, "config");
+        final File jsonFile = new File(directory, fileName + "." + JSON_EXTENSION);
+        final File yamlFile = new File(directory, fileName + "." + YAML_EXTENSION);
+        final File ymlFile = new File(directory, fileName + "." + YML_EXTENSION);
 
-        final String type;
-        final InputStream inputStream;
-        if (jsonFile.exists() && ymlFile.exists()) {
+        if (jsonFile.exists() && yamlFile.exists() && ymlFile.exists()) {
             throw new JsonToolsException("Can have either a " + fileName + ".json or a " + fileName + ".yml not both.");
         } else if (jsonFile.isFile()) {
-            type = JsonTools.JSON;
-            inputStream = fileUtils.getInputStream(jsonFile);
+            return jsonFile;
+        } else if (yamlFile.isFile()) {
+            return yamlFile;
         } else if (ymlFile.isFile()) {
-            type = JsonTools.YAML;
-            inputStream = fileUtils.getInputStream(ymlFile);
-        } else {
-            LOGGER.log(Level.FINE, "Did not find a {0} configuration file. Not loading any.", fileName);
-            // no services to bundle
-            return null;
+            return ymlFile;
         }
 
-        return readDocumentFile(inputStream, type, typeMapping);
+        LOGGER.log(Level.FINE, "Did not find a {0} configuration file. Not loading any.", fileName);
+        // no services to bundle
+        return null;
     }
 
-    public <T> T readDocumentFile(final InputStream encassStream, final String type, TypeReference<T> typeMapping) {
+    public <T> T readDocumentFile(final File file, final JavaType entityMapType) {
+        final String type = getTypeFromFile(file);
+        try (InputStream stream = fileUtils.getInputStream(file)) {
+            return readStream(stream, type, entityMapType);
+        } catch (IOException e) {
+            throw new JsonToolsException("Could not parse configuration file for type: " + entityMapType.getGenericSignature() + " Message:" + e.getMessage(), e);
+        }
+    }
+
+    public <T> T readStream(final InputStream stream, final String type, final JavaType entityMapType) {
         final ObjectMapper objectMapper = getObjectMapper(type);
         try {
-            return objectMapper.readValue(encassStream, typeMapping);
+            return objectMapper.readValue(stream, entityMapType);
         } catch (IOException e) {
-            throw new JsonToolsException("Could not parse configuration file for type: " + typeMapping.getType().getTypeName() + " Message:" + e.getMessage(), e);
+            throw new JsonToolsException("Could not parse configuration file for type: " + entityMapType.getGenericSignature() + " Message:" + e.getMessage(), e);
+        }
+    }
+
+    @NotNull
+    public String getTypeFromFile(File file) {
+        String type = getTypeFromExtension(getExtension(file.getName()));
+        if(type == null) {
+            throw new JsonToolsException("Invalid file: " + file.getName() + ". Expecting json or yaml file formats.");
+        }
+        return type;
+    }
+
+    @Nullable
+    public String getTypeFromExtension(String extension) {
+        switch (extension) {
+            case JSON_EXTENSION:
+                return JSON;
+            case YML_EXTENSION:
+            case YAML_EXTENSION:
+                return YAML;
+            default:
+                return null;
         }
     }
 
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {
         ObjectMapper objectMapper = new ObjectMapper(jf);
-        objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.configure(FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return objectMapper;
     }
 }

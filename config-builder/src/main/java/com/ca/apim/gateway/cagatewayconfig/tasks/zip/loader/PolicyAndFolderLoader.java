@@ -13,16 +13,20 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+@Singleton
 public class PolicyAndFolderLoader implements EntityLoader {
 
     private final FileUtils fileUtils;
     private final IdGenerator idGenerator;
 
-    public PolicyAndFolderLoader(FileUtils fileUtils, IdGenerator idGenerator) {
+    @Inject
+    PolicyAndFolderLoader(FileUtils fileUtils, IdGenerator idGenerator) {
         this.fileUtils = fileUtils;
         this.idGenerator = idGenerator;
     }
@@ -43,6 +47,11 @@ public class PolicyAndFolderLoader implements EntityLoader {
         loadPolicies(policyRootDir, policyRootDir, null, policies, folders);
         bundle.putAllPolicies(policies);
         bundle.putAllFolders(folders);
+    }
+
+    @Override
+    public void load(Bundle bundle, String name, String value) {
+        throw new BundleLoadException("Cannot load an individual policy");
     }
 
     private void loadPolicies(final File currentDir, final File rootDir, Folder parentFolder, final Map<String, Policy> policies, Map<String, Folder> folders) {
@@ -93,5 +102,10 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
     String getPath(final File policy, final File policyRootDir) {
         return policyRootDir.toURI().relativize(policy.toURI()).getPath();
+    }
+
+    @Override
+    public String getEntityType() {
+        return "POLICY";
     }
 }

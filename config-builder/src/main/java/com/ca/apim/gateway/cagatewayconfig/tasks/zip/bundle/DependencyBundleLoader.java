@@ -7,9 +7,9 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.BundleEntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.BundleDependencyLoader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyBundleLoadException;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
@@ -17,21 +17,27 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.ITEM;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
+@Singleton
 public class DependencyBundleLoader {
     private static final Logger LOGGER = Logger.getLogger(DependencyBundleLoader.class.getName());
 
     private final DocumentTools documentTools;
-    private final EntityLoaderRegistry entityLoaderRegistry;
+    private final DependencyLoaderRegistry entityLoaderRegistry;
 
-    public DependencyBundleLoader(final DocumentTools documentTools) {
+    @Inject
+    DependencyBundleLoader(final DocumentTools documentTools, final DependencyLoaderRegistry entityLoaderRegistry) {
         this.documentTools = documentTools;
-        this.entityLoaderRegistry = new EntityLoaderRegistry(documentTools);
+        this.entityLoaderRegistry = entityLoaderRegistry;
     }
 
     public Bundle load(File dependencyBundlePath) {
@@ -44,7 +50,7 @@ public class DependencyBundleLoader {
             throw new DependencyBundleLoadException("Could not parse dependency bundle: " + e.getMessage(), e);
         }
 
-        final NodeList nodeList = bundleDocument.getElementsByTagName("l7:Item");
+        final NodeList nodeList = bundleDocument.getElementsByTagName(ITEM);
         for (int i = 0; i < nodeList.getLength(); i++) {
             final Node node = nodeList.item(i);
 
@@ -57,8 +63,8 @@ public class DependencyBundleLoader {
     }
 
     private void handleItem(Bundle bundle, final Element element) {
-        final String type = getSingleChildElement(element, "l7:Type").getTextContent();
-        final BundleEntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
+        final String type = getSingleChildElement(element, TYPE).getTextContent();
+        final BundleDependencyLoader entityLoader = entityLoaderRegistry.getLoader(type);
         if (entityLoader != null) {
             entityLoader.load(bundle, element);
         } else {

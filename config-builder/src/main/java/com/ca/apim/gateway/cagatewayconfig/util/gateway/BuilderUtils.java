@@ -6,7 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyBundleLoadException;
+import org.apache.commons.collections4.MapUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -17,7 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.getChildElements;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElements;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 import static java.util.Collections.emptyMap;
@@ -27,19 +29,40 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class BuilderUtils {
 
+    public static void buildAndAppendPropertiesElement(final Map<String, Object> properties, final Document document, final Element elementToAppendInto) {
+        if (MapUtils.isEmpty(properties)) {
+            return;
+        }
+
+        elementToAppendInto.appendChild(buildPropertiesElement(properties, document));
+    }
+
     public static Element buildPropertiesElement(final Map<String, Object> properties, final Document document) {
-        Element propertiesElement = document.createElement(PROPERTIES);
+        return buildPropertiesElement(properties, document, PROPERTIES);
+    }
+
+    public static Element buildPropertiesElement(final Map<String, Object> properties, final Document document, final String propertiesElementName) {
+        Element propertiesElement = document.createElement(propertiesElementName);
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            // skip property if null value
+            if (entry.getValue() == null) {
+                continue;
+            }
+
             Element propertyElement = document.createElement(PROPERTY);
             propertyElement.setAttribute(ATTRIBUTE_KEY, entry.getKey());
-            String elementType = STRING_VALUE;
+            String elementType;
 
-            if (Integer.class.isAssignableFrom(entry.getValue().getClass())) {
+            if (String.class.isAssignableFrom(entry.getValue().getClass())) {
+                elementType = STRING_VALUE;
+            } else if (Integer.class.isAssignableFrom(entry.getValue().getClass())) {
                 elementType = INT_VALUE;
             } else if (Long.class.isAssignableFrom(entry.getValue().getClass())) {
                 elementType = LONG_VALUE;
             } else if (Boolean.class.isAssignableFrom(entry.getValue().getClass())) {
                 elementType = BOOLEAN_VALUE;
+            } else {
+                throw new EntityBuilderException("Could not create property (" + entry.getKey() + ") for value type: " + entry.getValue().getClass().getTypeName());
             }
 
             Element valueElement = document.createElement(elementType);
@@ -54,16 +77,17 @@ public class BuilderUtils {
      * Map a l7:Properties element values into a Map of key-value objects.
      *
      * @param propertiesElement properties element of bundle (l7:Properties)
+     * @param propertiesElementName name of the node expected
      * @return map of properties found into element, empty if null or no properties
-     * @throws DependencyBundleLoadException if node is not l7:Properties, if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
+     * @throws DependencyBundleLoadException if node is not 'propertiesElementName', if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
      */
-    public static Map<String, Object> mapPropertiesElements(final Element propertiesElement) {
+    public static Map<String, Object> mapPropertiesElements(final Element propertiesElement, final String propertiesElementName) {
         if (propertiesElement == null) {
             return emptyMap();
         }
 
-        if (!Objects.equals(propertiesElement.getNodeName(), PROPERTIES)) {
-            throw new DependencyBundleLoadException("Current node is not " + PROPERTIES + " node, it is " + propertiesElement.getNodeName());
+        if (!Objects.equals(propertiesElement.getNodeName(), propertiesElementName)) {
+            throw new DependencyBundleLoadException("Current node is not " + propertiesElementName + " node, it is " + propertiesElement.getNodeName());
         }
 
         final List<Element> properties = getChildElements(propertiesElement, PROPERTY);

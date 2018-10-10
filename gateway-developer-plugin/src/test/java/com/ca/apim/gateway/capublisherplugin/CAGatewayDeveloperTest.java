@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 class CAGatewayDeveloperTest {
     private static final Logger LOGGER = Logger.getLogger(CAGatewayDeveloperTest.class.getName());
+    private final String projectVersion = "-1.2.3-SNAPSHOT";
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
@@ -35,7 +36,7 @@ class CAGatewayDeveloperTest {
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("build")
+                .withArguments("build", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build();
@@ -49,9 +50,9 @@ class CAGatewayDeveloperTest {
         Assert.assertTrue(buildGatewayDir.isDirectory());
         File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
         Assert.assertTrue(buildGatewayBundlesDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayBundlesDir, projectFolder + ".req.bundle");
+        File builtBundleFile = new File(buildGatewayBundlesDir, projectFolder + projectVersion + ".req.bundle");
         Assert.assertTrue(builtBundleFile.isFile());
-        File gw7PackageFile = new File(buildGatewayDir, projectFolder + ".gw7");
+        File gw7PackageFile = new File(buildGatewayDir, projectFolder + projectVersion + ".gw7");
         Assert.assertTrue(gw7PackageFile.isFile());
     }
 
@@ -64,7 +65,7 @@ class CAGatewayDeveloperTest {
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("build")
+                .withArguments("build", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build();
@@ -74,7 +75,7 @@ class CAGatewayDeveloperTest {
 
         File buildGatewayDir = new File(testProjectDir, "dist");
         Assert.assertTrue(buildGatewayDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayDir, "example-project-custom-organization.req.bundle");
+        File builtBundleFile = new File(buildGatewayDir, projectFolder + projectVersion + ".req.bundle");
         Assert.assertTrue(builtBundleFile.isFile());
     }
 }

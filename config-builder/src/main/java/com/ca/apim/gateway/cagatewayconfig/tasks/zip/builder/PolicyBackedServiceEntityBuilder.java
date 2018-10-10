@@ -10,48 +10,52 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.POLICY_BACKED_SERVICE_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+
+@Singleton
 public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
-    private final Document document;
+
+    private static final Integer ORDER = 600;
     private final IdGenerator idGenerator;
 
-    public PolicyBackedServiceEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    PolicyBackedServiceEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         return bundle.getPolicyBackedServices().entrySet().stream().map(pbsEntry ->
-                buildPBSEntity(bundle, pbsEntry.getKey(), pbsEntry.getValue())
+                buildPBSEntity(bundle, pbsEntry.getKey(), pbsEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
-    private Entity buildPBSEntity(Bundle bundle, String name, PolicyBackedService policyBackedService) {
-        Element policyBackedServiceElement = document.createElement("l7:PolicyBackedService");
-
+    private Entity buildPBSEntity(Bundle bundle, String name, PolicyBackedService policyBackedService, Document document) {
         String id = idGenerator.generate();
-        policyBackedServiceElement.setAttribute("id", id);
+        Element policyBackedServiceElement = createElementWithAttributesAndChildren(
+                document,
+                POLICY_BACKED_SERVICE,
+                ImmutableMap.of(ATTRIBUTE_ID, id),
+                createElementWithTextContent(document, NAME, name),
+                createElementWithTextContent(document, INTERFACE_NAME, policyBackedService.getInterfaceName()),
+                buildOperations(policyBackedService, bundle, document)
+        );
 
-        Element nameElement = document.createElement("l7:Name");
-        nameElement.setTextContent(name);
-        policyBackedServiceElement.appendChild(nameElement);
-
-        Element interfaceNameElement = document.createElement("l7:InterfaceName");
-        interfaceNameElement.setTextContent(policyBackedService.getInterfaceName());
-        policyBackedServiceElement.appendChild(interfaceNameElement);
-
-        policyBackedServiceElement.appendChild(buildOperations(policyBackedService, bundle));
-
-        return new Entity("POLICY_BACKED_SERVICE", name, id, policyBackedServiceElement);
+        return new Entity(POLICY_BACKED_SERVICE_TYPE, name, id, policyBackedServiceElement);
     }
 
-    private Element buildOperations(PolicyBackedService policyBackedService, Bundle bundle) {
-        Element policyBackedServiceOperationsElement = document.createElement("l7:PolicyBackedServiceOperations");
+    private Element buildOperations(PolicyBackedService policyBackedService, Bundle bundle, Document document) {
+        Element policyBackedServiceOperationsElement = document.createElement(POLICY_BACKED_SERVICE_OPERATIONS);
         if (policyBackedService.getOperations() != null) {
             policyBackedService.getOperations().forEach(operation -> {
                 Policy policy = bundle.getPolicies().get(operation.getPolicy());
@@ -59,16 +63,21 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
                     throw new EntityBuilderException("Could not find policy for policy backed service. Policy Path: " + operation.getPolicy());
                 }
 
-                Element policyBackedServiceOperationElement = document.createElement("l7:PolicyBackedServiceOperation");
-                Element policyIdElement = document.createElement("l7:PolicyId");
-                policyIdElement.setTextContent(String.valueOf(policy.getId()));
-                policyBackedServiceOperationElement.appendChild(policyIdElement);
-                Element operationNameElement = document.createElement("l7:OperationName");
-                operationNameElement.setTextContent(operation.getOperationName());
-                policyBackedServiceOperationElement.appendChild(operationNameElement);
-                policyBackedServiceOperationsElement.appendChild(policyBackedServiceOperationElement);
+                policyBackedServiceOperationsElement.appendChild(
+                        createElementWithChildren(
+                                document,
+                                POLICY_BACKED_SERVICE_OPERATION,
+                                createElementWithTextContent(document, POLICY_ID, policy.getId()),
+                                createElementWithTextContent(document, OPERATION_NAME, operation.getOperationName())
+                        )
+                );
             });
         }
         return policyBackedServiceOperationsElement;
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER;
     }
 }

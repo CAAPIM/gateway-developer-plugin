@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,30 +34,30 @@ class IdentityProviderEntityBuilderTest {
 
     @Test
     void buildNoIdentityProviders() {
-        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final Bundle bundle = new Bundle();
-        final List<Entity> identityProviderEntities = builder.build(bundle);
+        final List<Entity> identityProviderEntities = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(0, identityProviderEntities.size());
     }
 
     @Test
     void buildBindOnlyIPWithoutIPDetail() {
-        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final Bundle bundle = new Bundle();
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProvider.Type.BIND_ONLY_LDAP);
+        identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("simple ldap config", identityProvider);
         }});
-        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle));
+        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
     void buildBindOnlyIPWithMissingDetails() {
-        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final Bundle bundle = new Bundle();
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProvider.Type.BIND_ONLY_LDAP);
+        identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
 
         //omit the serverUrls
         final BindOnlyLdapIdentityProviderDetail identityProviderDetail = new BindOnlyLdapIdentityProviderDetail();
@@ -68,17 +69,17 @@ class IdentityProviderEntityBuilderTest {
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("simple ldap config", identityProvider);
         }});
-        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle));
+        Assertions.assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
     void buildOneBindOnlyIP() throws DocumentParseException {
-        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new IdGenerator());
+        final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
 
         final Bundle bundle = new Bundle();
 
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProvider.Type.BIND_ONLY_LDAP);
+        identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
         identityProvider.setProperties(new HashMap<String, Object>() {{
             put("key1", "value1");
             put("key2", "value2");
@@ -95,7 +96,7 @@ class IdentityProviderEntityBuilderTest {
             put("simple ldap config", identityProvider);
         }});
 
-        final List<Entity> identityProviders = builder.build(bundle);
+        final List<Entity> identityProviders = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, identityProviders.size());
 
         final Entity identityProviderEntity = identityProviders.get(0);
@@ -103,12 +104,12 @@ class IdentityProviderEntityBuilderTest {
         assertNotNull(identityProviderEntity.getId());
         final Element identityProviderEntityXml = identityProviderEntity.getXml();
         assertEquals(ID_PROV, identityProviderEntityXml.getTagName());
-        final Element identityProviderNameXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, NAME);
+        final Element identityProviderNameXml = getSingleElement(identityProviderEntityXml, NAME);
         assertEquals("simple ldap config", identityProviderNameXml.getTextContent());
-        final Element identityProviderTypeXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, ID_PROV_TYPE);
-        assertEquals(IdentityProvider.Type.BIND_ONLY_LDAP.getValue(), identityProviderTypeXml.getTextContent());
+        final Element identityProviderTypeXml = getSingleElement(identityProviderEntityXml, ID_PROV_TYPE);
+        assertEquals(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP.getValue(), identityProviderTypeXml.getTextContent());
 
-        final Element idProviderProperties = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, PROPERTIES);
+        final Element idProviderProperties = getSingleElement(identityProviderEntityXml, PROPERTIES);
         final NodeList propertyList = idProviderProperties.getElementsByTagName(PROPERTY);
         assertEquals(2, propertyList.getLength());
         Node property1 = propertyList.item(0);
@@ -122,17 +123,17 @@ class IdentityProviderEntityBuilderTest {
         assertEquals("value1", DocumentTools.INSTANCE.getSingleElement((Element) property1, STRING_VALUE).getTextContent());
         assertEquals("value2", DocumentTools.INSTANCE.getSingleElement((Element) property2, STRING_VALUE).getTextContent());
 
-        final Element bindOnlyLdapIdentityProviderDetailXml = DocumentTools.INSTANCE.getSingleElement(identityProviderEntityXml, BIND_ONLY_ID_PROV_DETAIL);
-        final Element serverUrls = DocumentTools.INSTANCE.getSingleElement(bindOnlyLdapIdentityProviderDetailXml, SERVER_URLS);
-        final List<String> serverList = DocumentTools.getChildElementsTextContents(serverUrls, STRING_VALUE);
-        assertEquals(2, serverList.size());
-        assertEquals("http://ldap:port", serverList.get(0));
-        assertEquals("http://ldap:port2", serverList.get(1));
-        final Element useSslClientAuthXml = DocumentTools.INSTANCE.getSingleElement(bindOnlyLdapIdentityProviderDetailXml, USE_SSL_CLIENT_AUTH);
+        final Element bindOnlyLdapIdentityProviderDetailXml = getSingleElement(identityProviderEntityXml, BIND_ONLY_ID_PROV_DETAIL);
+        final Element serverUrls = getSingleElement(bindOnlyLdapIdentityProviderDetailXml, SERVER_URLS);
+        final NodeList serverList = serverUrls.getElementsByTagName(STRING_VALUE);
+        assertEquals(2, serverList.getLength());
+        assertEquals("http://ldap:port", serverList.item(0).getTextContent());
+        assertEquals("http://ldap:port2", serverList.item(1).getTextContent());
+        final Element useSslClientAuthXml = getSingleElement(bindOnlyLdapIdentityProviderDetailXml, USE_SSL_CLIENT_AUTH);
         assertFalse(Boolean.parseBoolean(useSslClientAuthXml.getTextContent()));
-        final Element bindPatternPrefix = DocumentTools.INSTANCE.getSingleElement(bindOnlyLdapIdentityProviderDetailXml, BIND_PATTERN_PREFIX);
+        final Element bindPatternPrefix = getSingleElement(bindOnlyLdapIdentityProviderDetailXml, BIND_PATTERN_PREFIX);
         assertEquals("testpre", bindPatternPrefix.getTextContent());
-        final Element bindPatternSuffix = DocumentTools.INSTANCE.getSingleElement(bindOnlyLdapIdentityProviderDetailXml, BIND_PATTERN_SUFFIX);
+        final Element bindPatternSuffix = getSingleElement(bindOnlyLdapIdentityProviderDetailXml, BIND_PATTERN_SUFFIX);
         assertEquals("testsuf", bindPatternSuffix.getTextContent());
     }
 

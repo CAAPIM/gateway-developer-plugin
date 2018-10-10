@@ -1,0 +1,10 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+description = 'This applications can be used to apply environment configurations to a CA API Gateway Container'
+
+dependencies {
+    compile project(':config-builder')
+}

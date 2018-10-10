@@ -7,28 +7,34 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.HashMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
-import java.util.Properties;
 
-public class StaticPropertiesLoader implements EntityLoader {
+@Singleton
+public class StaticPropertiesLoader extends PropertiesLoaderBase {
+
+    private static final String STATIC_PROPERTIES = "config/static.properties";
+
+    @Inject
+    StaticPropertiesLoader(FileUtils fileUtils) {
+        super(fileUtils);
+    }
+
     @Override
-    public void load(Bundle bundle, File rootDir) {
-        File staticPropertiesFile = new File(rootDir, "config/static.properties");
-        if (staticPropertiesFile.exists()) {
-            Properties properties = new Properties();
-            try (FileInputStream inStream = new FileInputStream(staticPropertiesFile)) {
-                properties.load(inStream);
-            } catch (IOException e) {
-                throw new BundleLoadException("Could not load static properties: " + e.getMessage(), e);
-            }
-            Map<String, String> map = new HashMap<>();
-            properties.forEach((k, v) -> map.put(k.toString(), v.toString()));
-            bundle.putAllStaticProperties(map);
-        }
+    public String getFilePath() {
+        return STATIC_PROPERTIES;
+    }
+
+    @Override
+    protected void putToBundle(Bundle bundle, Map<String, String> properties) {
+        bundle.putAllStaticProperties(properties);
+    }
+
+    @Override
+    public String getEntityType() {
+        return "STATIC_PROPERTY";
     }
 }

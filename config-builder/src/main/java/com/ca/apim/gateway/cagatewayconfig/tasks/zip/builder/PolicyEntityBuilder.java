@@ -10,11 +10,16 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.*;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -22,29 +27,47 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+
+@Singleton
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
 
     private static final String STRING_VALUE = "stringValue";
     private static final String POLICY_PATH = "policyPath";
+    private static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
+    private static final String TAG = "tag";
+    private static final String SUBTAG = "subtag";
+    private static final String TYPE = "type";
+    private static final String POLICY = "policy";
+    private static final String POLICY_TYPE_INCLUDE = "Include";
+    private static final Integer ORDER = 200;
 
-    private final Document document;
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
 
-    PolicyEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools, Document document) {
+    @Inject
+    PolicyEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools) {
         this.documentFileUtils = documentFileUtils;
         this.documentTools = documentTools;
-        this.document = document;
     }
 
-    public List<Entity> build(Bundle bundle) {
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle));
 
         List<Policy> orderedPolicies = new LinkedList<>();
         bundle.getPolicies().forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
 
-        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle)).collect(Collectors.toList());
+        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle, document)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER;
     }
 
     private void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
@@ -65,61 +88,50 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Document policyDocument = stringToXML(policy.getPolicyXML());
         Element policyElement = policyDocument.getDocumentElement();
 
-        prepareAssertion(policyElement, "L7p:Include", assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
-        prepareAssertion(policyElement, "L7p:Encapsulated", assertionElement -> prepareEncapsulatedAssertion(bundle, policyDocument, assertionElement));
-        prepareAssertion(policyElement, "L7p:SetVariable", assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement));
-        prepareAssertion(policyElement, "L7p:HardcodedResponse", assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
+        prepareAssertion(policyElement, INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
+        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(bundle, policyDocument, assertionElement));
+        prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement));
+        prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
         policy.setPolicyDocument(policyElement);
     }
 
     private void prepareHardcodedResponseAssertion(Document policyDocument, Element assertionElement) {
-        Element responseBodyElement;
-        try {
-            responseBodyElement = documentTools.getSingleElement(assertionElement, "L7p:ResponseBody");
-        } catch (DocumentParseException e) {
-            LOGGER.log(Level.FINE, "Did not find 'Expression' tag for SetVariableAssertion. Not generating Base64ed version");
-            return;
-        }
-
-        String expression = getCDataOrText(responseBodyElement);
-        String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
-        Element base64ResponseElement = policyDocument.createElement("L7p:Base64ResponseBody");
-        base64ResponseElement.setAttribute(STRING_VALUE, encoded);
-        assertionElement.insertBefore(base64ResponseElement, responseBodyElement);
-        assertionElement.removeChild(responseBodyElement);
+        prepareBase64Element(policyDocument, assertionElement, RESPONSE_BODY, BASE_64_RESPONSE_BODY);
     }
 
     private void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
         Element nameElement;
         try {
-            nameElement = documentTools.getSingleElement(assertionElement, "L7p:VariableToSet");
+            nameElement = getSingleElement(assertionElement, VARIABLE_TO_SET);
         } catch (DocumentParseException e) {
             throw new EntityBuilderException("Could not find VariableToSet element in a SetVariable Assertion.");
         }
 
         String variableName = nameElement.getAttribute(STRING_VALUE);
-        if(variableName.startsWith("ENV.")){
-            Element base64ExpressionElement = policyDocument.createElement("L7p:Base64Expression");
-            base64ExpressionElement.setAttribute("ENV_PARAM_NAME", variableName);
-            assertionElement.insertBefore(base64ExpressionElement, assertionElement.getFirstChild());
+        if(variableName.startsWith(PREFIX_ENV)){
+            assertionElement.insertBefore(
+                    createElementWithAttribute(policyDocument, BASE_64_EXPRESSION, ENV_PARAM_NAME, variableName),
+                    assertionElement.getFirstChild()
+            );
         } else {
-
-            Element expressionElement;
-            try {
-                expressionElement = documentTools.getSingleElement(assertionElement, "L7p:Expression");
-            } catch (DocumentParseException e) {
-                LOGGER.log(Level.FINE, "Did not find 'Expression' tag for SetVariableAssertion. Not generating Base64ed version");
-                return;
-            }
-
-            String expression = getCDataOrText(expressionElement);
-            String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
-            Element base64ExpressionElement = policyDocument.createElement("L7p:Base64Expression");
-            base64ExpressionElement.setAttribute(STRING_VALUE, encoded);
-            assertionElement.insertBefore(base64ExpressionElement, expressionElement);
-            assertionElement.removeChild(expressionElement);
+            prepareBase64Element(policyDocument, assertionElement, EXPRESSION, BASE_64_EXPRESSION);
         }
+    }
+
+    private void prepareBase64Element(Document policyDocument, Element assertionElement, String elementName, String base64ElementName) {
+        Element element;
+        try {
+            element = getSingleElement(assertionElement, elementName);
+        } catch (DocumentParseException e) {
+            LOGGER.log(Level.FINE, "Did not find '" + elementName + "' tag for SetVariableAssertion. Not generating Base64ed version");
+            return;
+        }
+
+        String expression = getCDataOrText(element);
+        String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
+        assertionElement.insertBefore(createElementWithAttribute(policyDocument, base64ElementName, STRING_VALUE, encoded), element);
+        assertionElement.removeChild(element);
     }
 
     private String getCDataOrText(Element element) {
@@ -155,8 +167,12 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
         final String guid = referenceEncass.get().getGuid();
 
-        Element encapsulatedAssertionConfigNameElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigName");
-        encapsulatedAssertionConfigNameElement.setAttribute(STRING_VALUE, policyPath);
+        Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
+                policyDocument,
+                ENCAPSULATED_ASSERTION_CONFIG_NAME,
+                STRING_VALUE,
+                policyPath
+        );
         Node firstChild = encapsulatedAssertionElement.getFirstChild();
         if (firstChild != null) {
             encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigNameElement, firstChild);
@@ -164,8 +180,12 @@ public class PolicyEntityBuilder implements EntityBuilder {
             encapsulatedAssertionElement.appendChild(encapsulatedAssertionConfigNameElement);
         }
 
-        Element encapsulatedAssertionConfigGuidElement = policyDocument.createElement("L7p:EncapsulatedAssertionConfigGuid");
-        encapsulatedAssertionConfigGuidElement.setAttribute(STRING_VALUE, guid);
+        Element encapsulatedAssertionConfigGuidElement = createElementWithAttribute(
+                policyDocument,
+                ENCAPSULATED_ASSERTION_CONFIG_GUID,
+                STRING_VALUE,
+                guid
+        );
         encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
 
         ((Element) encapsulatedAssertionElement).removeAttribute(POLICY_PATH);
@@ -174,7 +194,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     private void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
         Element policyGuidElement;
         try {
-            policyGuidElement = documentTools.getSingleElement(includeAssertionElement, "L7p:PolicyGuid");
+            policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
         } catch (DocumentParseException e) {
             throw new EntityBuilderException("Could not find PolicyGuid element in Include Assertion", e);
         }
@@ -209,60 +229,42 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Entity buildPolicyEntity(Policy policy, Bundle bundle) {
-        Element policyDetailElement = document.createElement("l7:PolicyDetail");
-
+    private Entity buildPolicyEntity(Policy policy, Bundle bundle, Document document) {
         String id = policy.getId();
-        policyDetailElement.setAttribute("id", id);
-        policyDetailElement.setAttribute("guid", policy.getGuid());
-        policyDetailElement.setAttribute("folderId", policy.getParentFolder().getId());
-        Element nameElement = document.createElement("l7:Name");
-        nameElement.setTextContent(policy.getName());
-        policyDetailElement.appendChild(nameElement);
-
         PolicyTags policyTags = getPolicyTags(policy, bundle);
 
-        Element policyTypeElement = document.createElement("l7:PolicyType");
-        policyTypeElement.setTextContent(policyTags == null ? "Include" : policyTags.type);
-        policyDetailElement.appendChild(policyTypeElement);
+        Element policyDetailElement = createElementWithAttributesAndChildren(
+                document,
+                POLICY_DETAIL,
+                ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_GUID, policy.getGuid(), ATTRIBUTE_FOLDER_ID, policy.getParentFolder().getId()),
+                createElementWithTextContent(document, NAME, policy.getName()),
+                createElementWithTextContent(document, POLICY_TYPE, policyTags == null ? POLICY_TYPE_INCLUDE : policyTags.type)
+        );
 
         if (policyTags != null) {
-            Element propertiesElement = document.createElement("l7:Properties");
-            policyDetailElement.appendChild(propertiesElement);
-            Element propertyTagElement = document.createElement("l7:Property");
-            propertiesElement.appendChild(propertyTagElement);
-            propertyTagElement.setAttribute("key", "tag");
-            Element tagStringValueElement = document.createElement("l7:StringValue");
-            propertyTagElement.appendChild(tagStringValueElement);
-            tagStringValueElement.setTextContent(policyTags.tag);
-
-            Element propertySubTagElement = document.createElement("l7:Property");
-            propertiesElement.appendChild(propertySubTagElement);
-            propertySubTagElement.setAttribute("key", "subtag");
-            Element subTagStringValueElement = document.createElement("l7:StringValue");
-            propertySubTagElement.appendChild(subTagStringValueElement);
-            subTagStringValueElement.setTextContent(policyTags.subtag);
+            buildAndAppendPropertiesElement(
+                    ImmutableMap.of(TAG, policyTags.tag, SUBTAG, policyTags.subtag),
+                    document,
+                    policyDetailElement
+            );
         }
 
-        Element policyElement = document.createElement("l7:Policy");
-        policyElement.setAttribute("id", id);
-        policyElement.setAttribute("guid", policy.getGuid());
+        Element policyElement = createElementWithAttributes(
+                document,
+                BundleElementNames.POLICY,
+                ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_GUID, policy.getGuid())
+        );
         policyElement.appendChild(policyDetailElement);
 
-        Element resourcesElement = document.createElement("l7:Resources");
-
-        Element resourceSetElement = document.createElement("l7:ResourceSet");
-        resourceSetElement.setAttribute("tag", "policy");
-
-        Element resourceElement = document.createElement("l7:Resource");
-        resourceElement.setAttribute("type", "policy");
-
+        Element resourcesElement = document.createElement(RESOURCES);
+        Element resourceSetElement = createElementWithAttribute(document, RESOURCE_SET, TAG, POLICY);
+        Element resourceElement = createElementWithAttribute(document, RESOURCE, TYPE, POLICY);
         resourceElement.setTextContent(documentFileUtils.elementToString(policy.getPolicyDocument()));
 
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
-        return new Entity("POLICY", policy.getName(), id, policyElement);
+        return new Entity(EntityTypes.POLICY_TYPE, policy.getName(), id, policyElement);
     }
 
     private PolicyTags getPolicyTags(Policy policy, Bundle bundle) {

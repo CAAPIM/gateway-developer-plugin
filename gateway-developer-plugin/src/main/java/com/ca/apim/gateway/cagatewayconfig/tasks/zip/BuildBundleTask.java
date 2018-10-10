@@ -6,10 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip;
 
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
@@ -25,10 +22,6 @@ import javax.inject.Inject;
  */
 public class BuildBundleTask extends DefaultTask {
 
-    private final DocumentFileUtils documentFileUtils;
-    private final DocumentTools documentTools;
-    private final JsonTools jsonTools;
-    private final FileUtils fileUtils;
     private DirectoryProperty from;
     private DirectoryProperty into;
     private ConfigurableFileCollection dependencies;
@@ -41,11 +34,6 @@ public class BuildBundleTask extends DefaultTask {
         into = newOutputDirectory();
         from = newInputDirectory();
         dependencies = getProject().files();
-
-        this.documentTools = DocumentTools.INSTANCE;
-        this.documentFileUtils = DocumentFileUtils.INSTANCE;
-        this.jsonTools = JsonTools.INSTANCE;
-        this.fileUtils = FileUtils.INSTANCE;
     }
 
     @InputDirectory
@@ -65,7 +53,7 @@ public class BuildBundleTask extends DefaultTask {
 
     @TaskAction
     public void perform() {
-        BundleBuilder bundleBuilder = new BundleBuilder(documentTools, documentFileUtils, fileUtils, jsonTools);
-        bundleBuilder.buildBundle(from.getAsFile().get(), into.getAsFile().get(), dependencies.getFiles(), getProject().getName());
+        BundleBuilder bundleBuilder = ConfigBuilderModule.getInjector().getInstance(BundleBuilder.class);
+        bundleBuilder.buildBundle(from.getAsFile().get(), into.getAsFile().get(), dependencies.getFiles(), getProject().getName() + '-' + getProject().getVersion());
     }
 }

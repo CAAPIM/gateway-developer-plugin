@@ -12,4 +12,7 @@ import java.io.File;
 
 public interface EntityLoader {
     void load(Bundle bundle, File rootDir);
+    void load(Bundle bundle, String name, String value);
+
+    String getEntityType();
 }

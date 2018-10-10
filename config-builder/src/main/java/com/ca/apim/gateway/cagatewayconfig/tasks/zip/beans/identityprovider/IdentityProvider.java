@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Map;
 
 public class IdentityProvider {
-    public enum Type {
+    public enum IdentityProviderType {
         INTERNAL("Internal"),
         LDAP("LDAP"),
         FEDERATED("Federated"),
@@ -20,7 +20,7 @@ public class IdentityProvider {
         POLICY_BACKED("Policy-backed");
 
         private String value;
-        Type(String value) {
+        IdentityProviderType(String value) {
             this.value = value;
         }
         public String getValue() {
@@ -28,8 +28,8 @@ public class IdentityProvider {
         }
     }
 
-    private Type type;
-    private Map<String, Object> properties;
+    private IdentityProviderType type;
+    private Map<String,Object> properties;
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes( {
@@ -39,19 +39,19 @@ public class IdentityProvider {
     })
     private IdentityProviderDetail identityProviderDetail;
 
-    public Type getType() {
+    public IdentityProviderType getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(IdentityProviderType type) {
         this.type = type;
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<String,Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, Object> properties) {
+    public void setProperties(Map<String,Object> properties) {
         this.properties = properties;
     }
 

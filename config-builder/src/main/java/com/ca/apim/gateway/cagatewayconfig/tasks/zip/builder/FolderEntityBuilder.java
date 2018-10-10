@@ -12,41 +12,57 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+
+@Singleton
 public class FolderEntityBuilder implements EntityBuilder {
+
     private static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
     private static final String ROOT_FOLDER_NAME = "Root Node";
+    private static final Integer ORDER = 100;
     private final IdGenerator idGenerator;
-    private final Document document;
 
-    public FolderEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    FolderEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
-    public Entity buildFolderEntity(String name, String id, String parentFolderId) {
-        Element folder = document.createElement("l7:Folder");
-        folder.setAttribute("id", id);
+    private Entity buildFolderEntity(String name, String id, String parentFolderId, Document document) {
+        Element folder = createElementWithAttribute(document, FOLDER, ATTRIBUTE_ID, id);
+
         if (parentFolderId != null) {
-            folder.setAttribute("folderId", parentFolderId);
+            folder.setAttribute(ATTRIBUTE_FOLDER_ID, parentFolderId);
         }
-        Element folderName = document.createElement("l7:Name");
-        folderName.appendChild(document.createTextNode(name));
-        folder.appendChild(folderName);
-        return new Entity("FOLDER", name, id, folder);
+        folder.appendChild(createElementWithTextContent(document, NAME, name));
+        Entity entity = new Entity(FOLDER_TYPE, name, id, folder);
+
+        //Set the root folder mapping to new or existing
+        if (parentFolderId == null) {
+            entity.setMappingAction(NEW_OR_EXISTING);
+        }
+        return entity;
     }
 
-    public List<Entity> build(Bundle bundle) {
-
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        if (bundle.getFolders().isEmpty()) {
+            return Collections.emptyList();
+        }
         Map<Folder, Collection<Folder>> folderChildrenMap = new HashMap<>();
 
         bundle.getFolders().values().forEach(folder -> addFolder(folder, folderChildrenMap));
 
         Folder rootFolder = bundle.getFolders().get("");
-        if(rootFolder == null) {
+        if (rootFolder == null) {
             throw new EntityBuilderException("Could not locate root folder.");
         }
         rootFolder.setId(ROOT_FOLDER_ID);
@@ -58,9 +74,14 @@ public class FolderEntityBuilder implements EntityBuilder {
                 f.setId(idGenerator.generate());
             }
             String parentFolderId = f.getParentFolder() != null ? f.getParentFolder().getId() : null;
-            return buildFolderEntity(f.getName(), f.getId(), parentFolderId);
+            return buildFolderEntity(f.getName(), f.getId(), parentFolderId, document);
         })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER;
     }
 
     private Stream<Folder> expand(final Folder folder, Map<Folder, Collection<Folder>> folderChildrenMap) {

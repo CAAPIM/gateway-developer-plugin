@@ -11,45 +11,68 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.Bind
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.FederatedIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithOnlyMapping;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ID_PROVIDER_CONFIG_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_PROPERTY;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
+@Singleton
 public class IdentityProviderEntityBuilder implements EntityBuilder {
+
+    private static final Integer ORDER = 700;
     private static final String TRUSTED_CERT_URI = "http://ns.l7tech.com/2010/04/gateway-management/trustedCertificates";
     private final Document document;
     private final IdGenerator idGenerator;
 
-    IdentityProviderEntityBuilder(Document document, IdGenerator idGenerator) {
-        this.document = document;
+    @Inject
+    IdentityProviderEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle) {
-        return bundle.getIdentityProviders().entrySet().stream().map(identityProviderEntry ->
-                buildIdentityProviderEntity(identityProviderEntry.getKey(), identityProviderEntry.getValue())
-        ).collect(Collectors.toList());
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        switch (bundleType) {
+            case DEPLOYMENT:
+                return bundle.getIdentityProviders().entrySet().stream()
+                        .map(
+                                identityProviderEntry -> getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, identityProviderEntry.getKey(), idGenerator.generate())
+                        ).collect(Collectors.toList());
+            case ENVIRONMENT:
+                return bundle.getIdentityProviders().entrySet().stream().map(identityProviderEntry ->
+                        buildIdentityProviderEntity(identityProviderEntry.getKey(), identityProviderEntry.getValue(), document)
+                ).collect(Collectors.toList());
+            default:
+                throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
     }
 
-    private Entity buildIdentityProviderEntity(String name, IdentityProvider identityProvider) {
-        final Element identityProviderElement = document.createElement(ID_PROV);
+    private Entity buildIdentityProviderEntity(String name, IdentityProvider identityProvider, Document document) {
         final String id = idGenerator.generate();
-        identityProviderElement.setAttribute(ATTRIBUTE_ID, id);
-        identityProviderElement.appendChild(DocumentTools.createElementWithTextContent(document, NAME, name));
-        identityProviderElement.appendChild(DocumentTools.createElementWithTextContent(document, ID_PROV_TYPE, identityProvider.getType().getValue()));
-        if (identityProvider.getProperties() != null) {
-            identityProviderElement.appendChild(BuilderUtils.buildPropertiesElement(identityProvider.getProperties(), document));
-        }
+        final Element identityProviderElement = createElementWithAttribute(document, ID_PROV, ATTRIBUTE_ID, id);
+        identityProviderElement.appendChild(createElementWithTextContent(document, NAME, name));
+        identityProviderElement.appendChild(createElementWithTextContent(document, ID_PROV_TYPE, identityProvider.getType().getValue()));
 
-        switch(identityProvider.getType()) {
+        switch (identityProvider.getType()) {
             case BIND_ONLY_LDAP:
-                identityProviderElement.appendChild(buildBindOnlyLdapIPDetails(identityProvider));
+                if (identityProvider.getProperties() != null) {
+                    buildAndAppendPropertiesElement(identityProvider.getProperties().entrySet()
+                                    .stream()
+                                    .collect(Collectors.toMap(stringStringEntry -> PREFIX_PROPERTY + stringStringEntry.getKey(), Map.Entry::getValue)),
+                            document, identityProviderElement);
+                }
+                identityProviderElement.appendChild(buildBindOnlyLdapIPDetails(identityProvider, document));
                 break;
             case LDAP:
             case INTERNAL:
@@ -64,7 +87,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
                 throw new EntityBuilderException("Please Specify the Identity Provider Type as one of: 'BIND_ONLY_LDAP'");
         }
 
-        return new Entity("ID_PROVIDER_CONFIG", name, id, identityProviderElement);
+        return getEntityWithNameMapping(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
     }
 
     private Element buildFedIdProviderDetails(FederatedIdentityProviderDetail identityProviderDetail) {
@@ -102,24 +125,24 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             throw new EntityBuilderException("Server Urls must not be empty.");
         }
         serverUrls.forEach(url ->
-            serverUrlsElement.appendChild(DocumentTools.createElementWithTextContent(document, STRING_VALUE, url))
+                serverUrlsElement.appendChild(createElementWithTextContent(document, STRING_VALUE, url))
         );
         bindOnlyLdapIdentityProviderDetailElement.appendChild(
-                DocumentTools.createElementWithTextContent(
+                createElementWithTextContent(
                         document,
                         USE_SSL_CLIENT_AUTH,
                         String.valueOf(identityProviderDetail.isUseSslClientAuthentication())
                 )
         );
         bindOnlyLdapIdentityProviderDetailElement.appendChild(
-                DocumentTools.createElementWithTextContent(
+                createElementWithTextContent(
                         document,
                         BIND_PATTERN_PREFIX,
                         identityProviderDetail.getBindPatternPrefix()
                 )
         );
         bindOnlyLdapIdentityProviderDetailElement.appendChild(
-                DocumentTools.createElementWithTextContent(
+                createElementWithTextContent(
                         document,
                         BIND_PATTERN_SUFFIX,
                         identityProviderDetail.getBindPatternSuffix()
@@ -127,5 +150,10 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
         );
 
         return extensionElement;
+    }
+
+    @Override
+    public Integer getOrder() {
+        return ORDER;
     }
 }

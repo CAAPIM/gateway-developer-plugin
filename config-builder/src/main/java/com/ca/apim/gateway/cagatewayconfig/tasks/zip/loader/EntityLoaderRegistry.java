@@ -6,33 +6,30 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+import static java.util.Collections.unmodifiableMap;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
+@Singleton
 public class EntityLoaderRegistry {
 
-    private final Collection<EntityLoader> entityLoaders;
+    private final Map<String, EntityLoader> entityLoaders;
 
-    public EntityLoaderRegistry(FileUtils fileUtils, JsonTools jsonTools, IdGenerator idGenerator) {
-        final Collection<EntityLoader> loadersCollection = new HashSet<>();
-        loadersCollection.add(new ServiceLoader(jsonTools));
-        loadersCollection.add(new EncassLoader(jsonTools, idGenerator));
-        loadersCollection.add(new PolicyAndFolderLoader(fileUtils, idGenerator));
-        loadersCollection.add(new StaticPropertiesLoader());
-        loadersCollection.add(new EnvironmentPropertiesLoader());
-        loadersCollection.add(new PolicyBackedServiceLoader(jsonTools));
-        loadersCollection.add(new IdentityProviderLoader(jsonTools));
-        loadersCollection.add(new ListenPortLoader(jsonTools));
-
-        this.entityLoaders = Collections.unmodifiableCollection(loadersCollection);
+    @Inject
+    EntityLoaderRegistry(final Set<EntityLoader> loaders) {
+        this.entityLoaders = unmodifiableMap(loaders.stream().collect(toMap(EntityLoader::getEntityType, identity())));
+    }
+    public EntityLoader getLoader(String type) {
+        return entityLoaders.get(type);
     }
 
     public Collection<EntityLoader> getEntityLoaders() {
-        return entityLoaders;
+        return entityLoaders.values();
     }
 }

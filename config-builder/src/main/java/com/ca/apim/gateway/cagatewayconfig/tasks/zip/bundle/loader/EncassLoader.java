@@ -9,27 +9,26 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EncassLoader implements BundleEntityLoader {
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
-    private final DocumentTools documentTools;
-
-    EncassLoader(DocumentTools documentTools) {
-        this.documentTools = documentTools;
-    }
+@Singleton
+public class EncassLoader implements BundleDependencyLoader {
 
     @Override
     public void load(Bundle bundle, Element element) {
-        final Element encassElement = documentTools.getSingleChildElement(documentTools.getSingleChildElement(element, "l7:Resource"), "l7:EncapsulatedAssertion");
+        final Element encassElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), ENCAPSULATED_ASSERTION);
 
-        final Element policyReference = documentTools.getSingleChildElement(encassElement, "l7:PolicyReference");
-        final String policyId = policyReference.getAttribute("id");
-        Element guidElement = documentTools.getSingleChildElement(encassElement, "l7:Guid");
+        final Element policyReference = getSingleChildElement(encassElement, POLICY_REFERENCE);
+        final String policyId = policyReference.getAttribute(ATTRIBUTE_ID);
+        Element guidElement = getSingleChildElement(encassElement, GUID);
         final String guid = guidElement.getTextContent();
 
         Encass encass = new Encass();
@@ -47,5 +46,10 @@ public class EncassLoader implements BundleEntityLoader {
             throw new DependencyBundleLoadException("Invalid dependency bundle. Found multiple policies with id: " + policyId);
         }
         return policyList.get(0).getPath();
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
     }
 }

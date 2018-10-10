@@ -10,6 +10,8 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.gw7.PackageTask;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.BuildBundleTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.RegularFile;
+import org.gradle.api.internal.provider.DefaultProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -20,6 +22,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     private static final String BUNDLE_FILE_EXTENSION = "bundle";
     private static final String BUILT_BUNDLE_DIRECTORY = "bundle";
     private static final String GATEWAY_BUILD_DIRECTORY = "gateway";
+    private static final String ENV_APPLICATION_CONFIGURATION = "environment-creator-application";
 
     @Override
     public void apply(@NotNull final Project project) {
@@ -35,6 +38,13 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         //Add bundle configuration
         project.getConfigurations().create(BUNDLE_CONFIGURATION);
 
+        // This is the configuration for the apply environment application that gets bundled within .gw7 packages.
+        project.getConfigurations().create(ENV_APPLICATION_CONFIGURATION);
+
+        //Attempt to use the same version of the environment creator application as this plugin.
+        String version = this.getClass().getPackage().getImplementationVersion();
+        project.getDependencies().add(ENV_APPLICATION_CONFIGURATION, "com.ca.apim.gateway:environment-creator-application:" + (version != null ? version : "+"));
+
         // Create build-bundle task
         final BuildBundleTask buildBundleTask = project.getTasks().create("build-bundle", BuildBundleTask.class, t -> {
             t.getFrom().set(pluginConfig.getSolutionDir());
@@ -45,10 +55,10 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Create package task
         final PackageTask packageGW7Task = project.getTasks().create("package-gw7", PackageTask.class, t -> {
             t.dependsOn(buildBundleTask);
-            t.getInto().set(new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), project.getName() + ".gw7"));
-            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(project.getName() + ".req.bundle"));
-            t.getEnvironmentBundle().set(pluginConfig.getBuiltBundleDir().file("_" + project.getName() + "-env.req.bundle"));
+            t.getInto().set(new DefaultProvider<RegularFile>(() -> () -> new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), project.getName() + '-' + project.getVersion() + ".gw7")));
+            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> project.getName() + '-' + project.getVersion() + ".req.bundle")));
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
+            t.getContainerApplicationDependencies().setFrom(project.getConfigurations().getByName(ENV_APPLICATION_CONFIGURATION));
         });
 
         // add build-bundle to the default build task

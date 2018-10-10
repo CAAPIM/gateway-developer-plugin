@@ -12,15 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Entity {
-    public static final String MAPPING_PROPERTY_MAP_BY = "MapBy";
-    public static final String MAPPING_PROPERTY_MAP_TO = "MapTo";
-    public static final String MAPPING_PROPERTY_FAIL_ON_NEW = "FailOnNew";
-    public static final String MAPPING_PROPERTY_FAIL_ON_EXISTING = "FailOnExisting";
 
     private String type;
     private String id;
     private Element xml;
     private String name;
+    private String mappingAction;
     private Map<String, Object> mappingProperties = new HashMap<>();
 
     public Entity(String type, String name, String id, Element xml) {
@@ -68,5 +65,13 @@ public class Entity {
 
     public void setMappingProperty(String key, Object value) {
         mappingProperties.put(key, value);
+    }
+
+    public String getMappingAction() {
+        return mappingAction;
+    }
+
+    public void setMappingAction(String mappingAction) {
+        this.mappingAction = mappingAction;
     }
 }

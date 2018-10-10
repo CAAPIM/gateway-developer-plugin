@@ -15,6 +15,10 @@ repositories {
     flatDir {
         dirs "lib"
     }
+    maven {
+        url "file:///" + project.property('jarDir')
+    }
+    mavenCentral()
 }
 
 dependencies {
