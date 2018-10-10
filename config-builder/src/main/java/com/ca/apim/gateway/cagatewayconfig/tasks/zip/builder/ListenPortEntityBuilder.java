@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ClientAuthentication.OPTIONAL;
@@ -31,6 +30,7 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilde
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.LISTEN_PORT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 import static java.lang.Boolean.TRUE;
@@ -101,12 +101,16 @@ public class ListenPortEntityBuilder implements EntityBuilder {
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                final Stream<Entry<String, ListenPort>> userPorts = bundle.getListenPorts().entrySet().stream();
-                final Stream<Entry<String, ListenPort>> defaultPorts = DEFAULT_PORTS.entrySet().stream().filter(p -> bundle.getListenPorts().values().stream().noneMatch(up -> up.getPort() == p.getValue().getPort()));
+                final Stream<Entity> userPorts = bundle.getListenPorts().entrySet().stream()
+                        .map(listenPortEntry -> buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document));
+                final Stream<Entity> defaultPorts = DEFAULT_PORTS.entrySet().stream().filter(p -> bundle.getListenPorts().values().stream().noneMatch(up -> up.getPort() == p.getValue().getPort()))
+                        .map(listenPortEntry -> {
+                            Entity entity = buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document);
+                            entity.setMappingAction(NEW_OR_EXISTING);
+                            return entity;
+                        });
 
-                return concat(userPorts, defaultPorts).map(listenPortEntry ->
-                        buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document)
-                ).collect(toList());
+                return concat(userPorts, defaultPorts).collect(toList());
             case ENVIRONMENT:
                 return bundle.getListenPorts().entrySet().stream().map(listenPortEntry ->
                         buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document)
