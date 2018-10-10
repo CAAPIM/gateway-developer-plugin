@@ -37,7 +37,7 @@ class EnvironmentCreatorApplicationTest {
 
         ImmutableMap<String, String> environmentProperties = ImmutableMap.of();
 
-        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath()).run();
+        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keystoreFolderPath).run();
 
         File environmentBundle = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
 
@@ -119,7 +119,7 @@ class EnvironmentCreatorApplicationTest {
                 .put("ENV.PROPERTY.anotherEnvVar", "context-variable-value")
                 .build();
 
-        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath()).run();
+        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keystoreFolderPath).run();
 
         File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
         assertTrue(environmentBundleFile.exists());
