@@ -78,7 +78,7 @@ public class KeystoreHelper {
     byte[] createKeyStore(Collection<PrivateKey> privateKeys) {
         // if no private Keys specified do nothing
         if (privateKeys.isEmpty()) {
-            return null;
+            return new byte[0];
         }
 
         KeyStore ks = createKeyStoreInstance(privateKeys);

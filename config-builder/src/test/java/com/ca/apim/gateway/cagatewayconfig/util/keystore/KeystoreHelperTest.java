@@ -65,7 +65,8 @@ class KeystoreHelperTest {
         KeystoreHelper keystoreHelper = new KeystoreHelper();
         final byte[] keyStore = keystoreHelper.createKeyStore(emptyList());
 
-        assertNull(keyStore);
+        assertNotNull(keyStore);
+        assertEquals(0, keyStore.length);
     }
 
     @Test

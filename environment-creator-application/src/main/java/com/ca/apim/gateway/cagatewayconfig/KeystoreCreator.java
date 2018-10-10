@@ -38,7 +38,7 @@ class KeystoreCreator {
         KeystoreHelper keystoreHelper = ConfigBuilderModule.getInjector().getInstance(KeystoreHelper.class);
         final byte[] keyStore = keystoreHelper.createKeyStoreFromEnvironment(privateKeyFilesDirectory, environmentProperties);
         // no keys
-        if (keyStore == null) {
+        if (keyStore.length == 0) {
             return;
         }
 
