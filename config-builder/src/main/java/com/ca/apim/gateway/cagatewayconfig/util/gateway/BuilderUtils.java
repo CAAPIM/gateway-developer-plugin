@@ -17,7 +17,6 @@ import org.w3c.dom.NodeList;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -57,7 +56,7 @@ public class BuilderUtils {
     }
 
     @NotNull
-    public static Element createPropertyElement(Document document, String key, Object value) {
+    private static Element createPropertyElement(Document document, String key, Object value) {
         Element propertyElement = document.createElement(PROPERTY);
         propertyElement.setAttribute(ATTRIBUTE_KEY, key);
         String elementType;

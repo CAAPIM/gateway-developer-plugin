@@ -30,18 +30,7 @@ public class CertificateUtils {
 
     public static Element buildCertDataFromFile(SupplierWithIO<InputStream> certFileLocation, Document document, CertificateFactory certificateFactory) {
         X509Certificate cert = loadCertificateFromFile(certFileLocation, certificateFactory);
-
-        try {
-            return createCertDataElementFromCert(
-                    cert.getIssuerDN().getName(),
-                    cert.getSerialNumber(),
-                    cert.getSubjectDN().getName(),
-                    Base64.getEncoder().encodeToString(cert.getEncoded()),
-                    document
-            );
-        } catch (CertificateEncodingException e) {
-            throw new EntityBuilderException("Error generating certificate: ", e);
-        }
+        return createCertDataElementFromCert(cert, document);
     }
 
     public static X509Certificate loadCertificateFromFile(SupplierWithIO<InputStream> certFileLocation, CertificateFactory certificateFactory) {
@@ -54,6 +43,20 @@ public class CertificateUtils {
             throw new EntityBuilderException("Error generating certificate from file", e);
         }
         return cert;
+    }
+
+    public static Element createCertDataElementFromCert(X509Certificate cert, Document document) {
+        try {
+            return createCertDataElementFromCert(
+                    cert.getIssuerDN().getName(),
+                    cert.getSerialNumber(),
+                    cert.getSubjectDN().getName(),
+                    Base64.getEncoder().encodeToString(cert.getEncoded()),
+                    document
+            );
+        } catch (CertificateEncodingException e) {
+            throw new EntityBuilderException("Error generating certificate: ", e);
+        }
     }
 
     public static Element createCertDataElementFromCert(String issuerName, BigInteger serialNumber, String subjectName, String encodedData, Document document) {

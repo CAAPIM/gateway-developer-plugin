@@ -16,13 +16,11 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.closeQuietly;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class DocumentFileUtils {
-    private static final Logger LOGGER = Logger.getLogger(DocumentFileUtils.class.getName());
 
     public static final DocumentFileUtils INSTANCE = new DocumentFileUtils(DocumentTools.INSTANCE);
     private final DocumentTools documentTools;
@@ -62,24 +60,6 @@ public class DocumentFileUtils {
             transformer.transform(new DOMSource(node), new StreamResult(writer));
         } catch (TransformerException e) {
             throw new DocumentFileUtilsException("Exception writing xml element to stream.", e);
-        }
-    }
-
-
-    /**
-     * Close a {@link java.io.Closeable} without throwing any exceptions.
-     *
-     * @param closeable the object to close.
-     */
-    private static void closeQuietly(java.io.Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (IOException ioe) {
-                LOGGER.log(Level.INFO, "IO error when closing closeable '" + ioe.getMessage() + "'");
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Unexpected error when closing object", e);
-            }
         }
     }
 }

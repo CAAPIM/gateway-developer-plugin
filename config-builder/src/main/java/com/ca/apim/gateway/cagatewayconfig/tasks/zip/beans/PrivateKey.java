@@ -6,8 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-import java.io.File;
+import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 
+import java.io.InputStream;
+
+@SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
 public class PrivateKey {
 
     private String alias;
@@ -15,7 +18,7 @@ public class PrivateKey {
     private String algorithm;
     private String keyPassword;
     private KeyStoreType keyStoreType;
-    private File privateKeyDirectory;
+    private SupplierWithIO<InputStream> privateKeyFile;
 
     public String getAlias() {
         return alias;
@@ -57,11 +60,11 @@ public class PrivateKey {
         this.keyPassword = keyPassword;
     }
 
-    public File getPrivateKeyDirectory() {
-        return privateKeyDirectory;
+    public SupplierWithIO<InputStream> getPrivateKeyFile() {
+        return privateKeyFile;
     }
 
-    public void setPrivateKeyDirectory(File privateKeyDirectory) {
-        this.privateKeyDirectory = privateKeyDirectory;
+    public void setPrivateKeyFile(SupplierWithIO privateKeyFile) {
+        this.privateKeyFile = privateKeyFile;
     }
 }
