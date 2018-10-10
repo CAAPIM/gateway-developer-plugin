@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.gw7.PackageTask;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.BuildBundleTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.internal.provider.DefaultProvider;
 import org.jetbrains.annotations.NotNull;
@@ -36,8 +37,9 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Set Defaults
         project.afterEvaluate(p -> setDefaults(pluginConfig, project));
 
-        //Add bundle configuration
-        project.getConfigurations().create(BUNDLE_CONFIGURATION);
+        //Add bundle configuration to the default configuration. This was transitive dependencies can be retrieved.
+        Configuration bundleConfiguration = project.getConfigurations().create(BUNDLE_CONFIGURATION);
+        project.getConfigurations().getByName("default").extendsFrom(bundleConfiguration);
 
         // This is the configuration for the apply environment application that gets bundled within .gw7 packages.
         project.getConfigurations().create(ENV_APPLICATION_CONFIGURATION);

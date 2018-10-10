@@ -8,6 +8,8 @@ package com.ca.apim.gateway.capublisherplugin;
 
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
 import org.gradle.internal.impldep.org.junit.Assert;
 import org.gradle.testkit.runner.BuildResult;
@@ -17,11 +19,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CAGatewayDeveloperTest {
     private static final Logger LOGGER = Logger.getLogger(CAGatewayDeveloperTest.class.getName());
@@ -91,6 +99,21 @@ class CAGatewayDeveloperTest {
 
         validateBuildDir("project-a", new File(new File(testProjectDir, "project-a"), "build"));
         validateBuildDir("project-b", new File(new File(testProjectDir, "project-b"), "build"));
+        validateBuildDir("project-c", new File(new File(testProjectDir, "project-c"), "build"));
+        validateBuildDir("project-d", new File(new File(testProjectDir, "project-d"), "build"));
+
+        File projectC_GW7 = new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "project-c" + projectVersion + ".gw7");
+
+        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(projectC_GW7)));
+        TarArchiveEntry entry;
+        Set<String> entries = new HashSet<>();
+        while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
+            entries.add(entry.getName());
+        }
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_0_project-b-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-d-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-a-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-c-1.2.3-SNAPSHOT.req.bundle"));
     }
 
     private void validateBuildDir(String projectName, File buildDir) {

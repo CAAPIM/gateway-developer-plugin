@@ -17,6 +17,7 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
+import java.util.LinkedList;
 
 /**
  * The BuildBundle task will take local source files and create a bundle document that can be bootstrapped into a gateway container
@@ -72,6 +73,6 @@ public class PackageTask extends DefaultTask {
     @TaskAction
     public void perform() {
         Packager packager = new Packager(fileUtils, gw7Builder);
-        packager.buildPackage(into.getAsFile().get(), bundle.getAsFile().get(), dependencyBundles.getFiles(), containerApplicationDependencies.getFiles());
+        packager.buildPackage(into.getAsFile().get(), bundle.getAsFile().get(), new LinkedList<>(dependencyBundles.getAsFileTree().getFiles()), containerApplicationDependencies.getFiles());
     }
 }
