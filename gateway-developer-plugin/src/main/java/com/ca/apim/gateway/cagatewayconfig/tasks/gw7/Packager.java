@@ -14,10 +14,15 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * The Packages build a gw7 package that contains an apply environment script and enables templatized
@@ -41,16 +46,22 @@ class Packager {
      * @param bundle            The bundle file for this solution
      * @param dependencyBundles Dependency bundles to put into the package. These will have their names prefixed so that they get loaded first
      */
-    void buildPackage(File gw7File, File bundle, Set<File> dependencyBundles, Set<File> containerApplicationDependencies) {
+    void buildPackage(File gw7File, File bundle, LinkedList<File> dependencyBundles, Set<File> containerApplicationDependencies) {
         byte[] applyEnvBytes = getResourceBytes("/scripts/apply-environment.sh");
 
+        AtomicInteger dependencyBundleCounter = new AtomicInteger(0);
+        int numBundles = dependencyBundles.size() + 1;
         Set<GW7Builder.PackageFile> packageFiles = Stream.of(
+                // adds dependency bundles
+                StreamSupport.stream(Spliterators.spliteratorUnknownSize(dependencyBundles.descendingIterator(), Spliterator.ORDERED), false) // reverses the order of the dependencyBundles
+                        .map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundleCounter.getAndIncrement()) + "_" + f.getName(), f.length(), () -> fileUtils.getInputStream(f))),
+                //adds the deployment bundle
+                Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundles.size()) + "_" + bundle.getName(), bundle.length(), () -> fileUtils.getInputStream(bundle))),
                 //apply-environment.sh script
                 Stream.<GW7Builder.PackageFile>builder()
                         .add(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh", applyEnvBytes.length, () -> new ByteArrayInputStream(applyEnvBytes), true))
                         .build(),
-                Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/" + bundle.getName(), bundle.length(), () -> fileUtils.getInputStream(bundle))),
-                dependencyBundles.stream().map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + f.getName(), f.length(), () -> fileUtils.getInputStream(f))),
+                //adds the apply environment jars
                 containerApplicationDependencies.stream().map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment/" + f.getName(), f.length(), () -> fileUtils.getInputStream(f)))
         )
                 .flatMap(Function.identity())
@@ -58,6 +69,12 @@ class Packager {
 
         gw7Builder.buildPackage(fileUtils.getOutputStream(gw7File),
                 packageFiles);
+    }
+
+    private String getFileCounter(int numBundles, int currentBundleNumber) {
+        int paddingLevel = numBundles / 10;
+        String format = "%0" + numBundles / 10 + "d";
+        return paddingLevel > 0 ? String.format(format, currentBundleNumber) : String.valueOf(currentBundleNumber);
     }
 
     private byte[] getResourceBytes(String resourcePath) {
