@@ -82,7 +82,7 @@ pluginBundle {
             description = 'The Gateway export plugin can be used to export Gateway configuration from a CA API Gateway'
             tags = ['ca api gateway', 'building']
         }
-        gatewayPluginBase {
+        gatewayExportPluginBase {
             displayName = 'CA API Gateway Export Base Gradle Plugin'
             description = 'The Gateway export plugin can be used to export Gateway configuration from a CA API Gateway'
             tags = ['ca api gateway', 'building']
