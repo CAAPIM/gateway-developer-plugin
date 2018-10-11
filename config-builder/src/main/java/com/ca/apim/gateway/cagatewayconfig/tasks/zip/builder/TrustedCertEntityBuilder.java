@@ -71,6 +71,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
 
     private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
         final String id = idGenerator.generate();
+        trustedCert.setId(id);
         final Element trustedCertElem = createElementWithAttributesAndChildren(
                 document,
                 TRUSTED_CERT,

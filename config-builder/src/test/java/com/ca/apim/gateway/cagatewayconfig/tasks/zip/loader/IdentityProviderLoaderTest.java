@@ -148,8 +148,8 @@ class IdentityProviderLoaderTest {
                 "    enableCredentialType.x509: true\n" +
                 "  identityProviderDetail:\n" +
                 "    certificateReferences:\n" +
-                "    - 355cd79a5fc6a2a508c45e6e875ce5ab\n" +
-                "    - 355cd79a5fc6a2a508c45e6e875ce628";
+                "    - cert1\n" +
+                "    - cert2";
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "identity-providers.yml");
         Files.touch(identityProvidersFile);
@@ -162,7 +162,7 @@ class IdentityProviderLoaderTest {
         assertEquals(1, bundle.getIdentityProviders().size());
         final IdentityProvider identityProvider = bundle.getIdentityProviders().get("fed ID");
         assertEquals(3, identityProvider.getProperties().size());
-        assertEquals(IdentityProvider.Type.FEDERATED, identityProvider.getType());
+        assertEquals(IdentityProvider.IdentityProviderType.FEDERATED, identityProvider.getType());
         assertTrue(identityProvider.getIdentityProviderDetail() instanceof FederatedIdentityProviderDetail);
 
         final FederatedIdentityProviderDetail identityProviderDetail = (FederatedIdentityProviderDetail) identityProvider.getIdentityProviderDetail();
@@ -189,7 +189,7 @@ class IdentityProviderLoaderTest {
         assertEquals(1, bundle.getIdentityProviders().size());
         final IdentityProvider identityProvider = bundle.getIdentityProviders().get("fed_no_cert");
         assertEquals(2, identityProvider.getProperties().size());
-        assertEquals(IdentityProvider.Type.FEDERATED, identityProvider.getType());
+        assertEquals(IdentityProvider.IdentityProviderType.FEDERATED, identityProvider.getType());
         assertNull(identityProvider.getIdentityProviderDetail());
     }
 
@@ -198,7 +198,7 @@ class IdentityProviderLoaderTest {
 
         final IdentityProvider identityProvider = bundle.getIdentityProviders().get("simple ldap");
         assertEquals("Two items in properties", 2, identityProvider.getProperties().size());
-        assertEquals("Type is BIND_ONLY_LDAP", IdentityProvider.Type.BIND_ONLY_LDAP, identityProvider.getType());
+        assertEquals("Type is BIND_ONLY_LDAP", IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP, identityProvider.getType());
         assertTrue("IdentityProviderDetail deserialized to BindOnlyLdapIdentityProviderDetail", identityProvider.getIdentityProviderDetail() instanceof BindOnlyLdapIdentityProviderDetail);
 
         final BindOnlyLdapIdentityProviderDetail identityProviderDetail = (BindOnlyLdapIdentityProviderDetail) identityProvider.getIdentityProviderDetail();
