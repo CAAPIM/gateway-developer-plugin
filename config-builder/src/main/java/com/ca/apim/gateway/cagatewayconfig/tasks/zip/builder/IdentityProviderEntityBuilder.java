@@ -103,7 +103,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
                 TRUSTED_CERT_URI);
         federatedIdProviderDetailElem.appendChild(certReferencesElem);
         final List<String> certReferences = identityProviderDetail.getCertificateReferences();
-        if (certReferences == null || certReferences.isEmpty()) {
+        if (CollectionUtils.isEmpty(certReferences)) {
             throw new EntityBuilderException("Certificate References must not be empty.");
         }
         final Map<String, TrustedCert> trustedCertMap = bundle.getTrustedCerts();
