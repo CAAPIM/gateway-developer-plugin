@@ -72,7 +72,7 @@ public class EnvironmentCreatorApplication {
         BundleEntityBuilder bundleEntityBuilder = ConfigBuilderModule.getInjector().getInstance(BundleEntityBuilder.class);
 
         Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
-        documentFileUtils.createFile(bundleElement, new File(bootstrapBundleFolderPath, "_env.req.bundle").toPath());
+        documentFileUtils.createFile(bundleElement, new File(bootstrapBundleFolderPath, "_0_env.req.bundle").toPath());
     }
 
     private void processDeploymentBundles(Bundle environmentBundle) {

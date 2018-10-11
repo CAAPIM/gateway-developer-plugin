@@ -49,14 +49,14 @@ class Packager {
     void buildPackage(File gw7File, File bundle, LinkedList<File> dependencyBundles, Set<File> containerApplicationDependencies) {
         byte[] applyEnvBytes = getResourceBytes("/scripts/apply-environment.sh");
 
-        AtomicInteger dependencyBundleCounter = new AtomicInteger(0);
-        int numBundles = dependencyBundles.size() + 1;
+        AtomicInteger dependencyBundleCounter = new AtomicInteger(1);
+        int numBundles = dependencyBundles.size() + 2;
         Set<GW7Builder.PackageFile> packageFiles = Stream.of(
                 // adds dependency bundles
                 StreamSupport.stream(Spliterators.spliteratorUnknownSize(dependencyBundles.descendingIterator(), Spliterator.ORDERED), false) // reverses the order of the dependencyBundles
                         .map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundleCounter.getAndIncrement()) + "_" + f.getName(), f.length(), () -> fileUtils.getInputStream(f))),
                 //adds the deployment bundle
-                Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundles.size()) + "_" + bundle.getName(), bundle.length(), () -> fileUtils.getInputStream(bundle))),
+                Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundles.size() + 1) + "_" + bundle.getName(), bundle.length(), () -> fileUtils.getInputStream(bundle))),
                 //apply-environment.sh script
                 Stream.<GW7Builder.PackageFile>builder()
                         .add(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh", applyEnvBytes.length, () -> new ByteArrayInputStream(applyEnvBytes), true))

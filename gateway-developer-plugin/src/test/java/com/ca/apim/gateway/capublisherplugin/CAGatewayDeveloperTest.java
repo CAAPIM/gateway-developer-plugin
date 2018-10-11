@@ -110,10 +110,10 @@ class CAGatewayDeveloperTest {
         while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
             entries.add(entry.getName());
         }
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_0_project-b-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-d-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-a-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-c-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-b-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-d-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-a-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_4_project-c-1.2.3-SNAPSHOT.req.bundle"));
     }
 
     private void validateBuildDir(String projectName, File buildDir) {
