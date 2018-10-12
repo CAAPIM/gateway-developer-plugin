@@ -14,10 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.File;
 import java.util.Map;
-
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.PRIVATE_KEY_TYPE;
 
 @Singleton
 public class PrivateKeyLoader extends EntityLoaderBase<PrivateKey> {
@@ -30,20 +27,8 @@ public class PrivateKeyLoader extends EntityLoaderBase<PrivateKey> {
     }
 
     @Override
-    public void load(Bundle bundle, File rootDir) {
-        // load private key file by standard way
-        super.load(bundle, rootDir);
-
-        // Set the private key keystore type and the certificate and key file directory
-        bundle.getPrivateKeys().forEach((key, pk) -> {
-            pk.setAlias(key);
-            pk.setKeyStoreType(KeyStoreType.fromName(pk.getKeystore()));
-        });
-    }
-
-    @Override
     public String getEntityType() {
-        return PRIVATE_KEY_TYPE;
+        return "PRIVATE_KEY";
     }
 
     @Override
@@ -58,6 +43,12 @@ public class PrivateKeyLoader extends EntityLoaderBase<PrivateKey> {
 
     @Override
     protected void putToBundle(Bundle bundle, @NotNull Map<String, PrivateKey> entitiesMap) {
-        bundle.putAllPrivateKeys(entitiesMap);
+        // Set the private key keystore type
+        entitiesMap.forEach((key, pk) -> {
+            pk.setAlias(key);
+            pk.setKeyStoreType(KeyStoreType.fromName(pk.getKeystore()));
+
+            bundle.getPrivateKeys().put(key, pk);
+        });
     }
 }

@@ -32,6 +32,7 @@ class EnvironmentCreatorApplicationTest {
         File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "no-bundles");
         File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
         File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
+
         assertTrue(testDetemplatizedBundlesFolder.mkdirs());
 
         FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("no-bundles")).toURI()), testTemplatizedBundlesFolder);
@@ -51,6 +52,7 @@ class EnvironmentCreatorApplicationTest {
         File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "templatized-bundles");
         File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
         File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
+
         assertTrue(testDetemplatizedBundlesFolder.mkdirs());
 
         FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templatized-bundles")).toURI()), testTemplatizedBundlesFolder);

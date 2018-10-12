@@ -90,6 +90,11 @@ public class BundleEnvironmentValidator {
                     throw new MissingEnvironmentException("Missing environment value for Trusted Certificate: " + name);
                 }
                 break;
+            case EntityTypes.PRIVATE_KEY_TYPE:
+                if (bundle.getPrivateKeys().get(name) == null) {
+                    throw new MissingEnvironmentException("Missing environment value for Private Key: " + name);
+                }
+                break;
             default:
                 throw new MissingEnvironmentException("Missing environment value for " + type + ": " + name);
         }

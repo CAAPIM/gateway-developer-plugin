@@ -64,7 +64,7 @@ public class PrivateKey {
         return privateKeyFile;
     }
 
-    public void setPrivateKeyFile(SupplierWithIO privateKeyFile) {
+    public void setPrivateKeyFile(SupplierWithIO<InputStream> privateKeyFile) {
         this.privateKeyFile = privateKeyFile;
     }
 }

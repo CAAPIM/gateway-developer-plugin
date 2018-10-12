@@ -33,7 +33,7 @@ public class CertificateUtils {
         return createCertDataElementFromCert(cert, document);
     }
 
-    public static X509Certificate loadCertificateFromFile(SupplierWithIO<InputStream> certFileLocation, CertificateFactory certificateFactory) {
+    private static X509Certificate loadCertificateFromFile(SupplierWithIO<InputStream> certFileLocation, CertificateFactory certificateFactory) {
         X509Certificate cert;
         try (InputStream is = certFileLocation.getWithIO()) {
             cert = (X509Certificate) certificateFactory.generateCertificate(is);

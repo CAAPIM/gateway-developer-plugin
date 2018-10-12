@@ -15,31 +15,28 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.security.KeyStore.getInstance;
-import static java.util.stream.StreamSupport.stream;
 
 @Singleton
 @SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
 public class KeystoreHelper {
 
-    public static final String ENV_VAR_KEYSTORE_PATH = "ENV.KEYSTORE_PATH";
+    public static final String ENV_VAR_KEYSTORE_PATH = "ENV.PRIVATE_KEYS.PATH";
 
-    private static final String ENV_VAR_KEY_PASSWORD_FORMAT = "ENV.%s.PASSWORD";
+    private static final String ENV_VAR_KEY_PASSWORD_FORMAT = "ENV.PRIVATE_KEY_PASSWORD.%s";
     private static final SecureRandom RANDOM = new SecureRandom();
     private final char[] keystorePassword;
 
@@ -57,19 +54,19 @@ public class KeystoreHelper {
      * @return a byte array containing the keystore data
      */
     public byte[] createKeyStoreFromEnvironment(String keystorePath, Map<String, String> environmentProperties) {
-        final Path keystoreDir = Paths.get(keystorePath);
-        final List<PrivateKey> privateKeys = stream(keystoreDir.spliterator(), false)
-                .filter(p -> p.endsWith(".p12"))
-                .map(p -> createPrivateKeyFromEnvironment(p, environmentProperties))
+        final File[] keyFiles = firstNonNull(Paths.get(keystorePath).toFile().listFiles(), new File[0]);
+        final List<PrivateKey> privateKeys = Arrays.stream(keyFiles)
+                .filter(f -> f.getName().endsWith(".p12"))
+                .map(f -> createPrivateKeyFromEnvironment(f, environmentProperties))
                 .filter(p -> p.getKeyPassword() != null) // ignoring keys with unspecified passwords
                 .collect(Collectors.toList());
         return createKeyStore(privateKeys);
     }
 
-    private PrivateKey createPrivateKeyFromEnvironment(Path privateKeyFile, Map<String, String> environmentProperties) {
+    private PrivateKey createPrivateKeyFromEnvironment(File privateKeyFile, Map<String, String> environmentProperties) {
         PrivateKey privateKey = new PrivateKey();
-        privateKey.setAlias(FilenameUtils.getName(privateKeyFile.toFile().getName()));
-        privateKey.setPrivateKeyFile(() -> Files.newInputStream(privateKeyFile));
+        privateKey.setAlias(FilenameUtils.getBaseName(privateKeyFile.getName()));
+        privateKey.setPrivateKeyFile(() -> Files.newInputStream(privateKeyFile.toPath()));
         privateKey.setKeyPassword(environmentProperties.get(String.format(ENV_VAR_KEY_PASSWORD_FORMAT, privateKey.getAlias())));
         return privateKey;
     }
@@ -166,14 +163,13 @@ public class KeystoreHelper {
         }
     }
 
-    @VisibleForTesting
-    char[] getKeystorePassword() {
+    @NotNull
+    public char[] getKeystorePassword() {
         return keystorePassword;
     }
 
     @NotNull
-    @VisibleForTesting
-    String getKeyStoreType() {
+    public String getKeyStoreType() {
         return "PKCS12";
     }
 }

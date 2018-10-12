@@ -13,6 +13,7 @@ import java.util.stream.Stream;
  */
 public enum KeyStoreType {
 
+    GENERIC("00000000000000000000000000000000", "Generic"),
     PKCS12_SOFTWARE("00000000000000000000000000000002", "Software DB"),
     PKCS11_HARDWARE("00000000000000000000000000000001", "HSM"),
     LUNA_HARDWARE("00000000000000000000000000000003", "SafeNet HSM"),
@@ -39,6 +40,6 @@ public enum KeyStoreType {
     }
 
     public static KeyStoreType fromName(String name) {
-        return Stream.of(values()).filter(k -> name.equals(k.name)).findFirst().orElse(null);
+        return Stream.of(values()).filter(k -> k.name.equals(name)).findFirst().orElse(GENERIC);
     }
 }

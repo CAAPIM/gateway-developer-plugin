@@ -27,9 +27,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.KeystoreCreator.createKeyStoreIfNecessary;
+
 public class EnvironmentCreatorApplication {
 
     private static final Logger logger = Logger.getLogger(EnvironmentCreatorApplication.class.getName());
+
     private final Map<String, String> environmentProperties;
     private final String templatizedBundleFolderPath;
     private final String bootstrapBundleFolderPath;
@@ -43,6 +46,7 @@ public class EnvironmentCreatorApplication {
      * @param args You can customize the folders that environment comes from by passing arguments.
      *             The first argument is the folder containing templatized bundles.
      *             The second parameter is the folder that bootstrap bundles should go into
+     *             The third parameter is the folder that the keystore file if necessary should be placed
      */
     public static void main(String[] args) {
         // consider using commons-cli if adding more parameters
@@ -53,7 +57,10 @@ public class EnvironmentCreatorApplication {
         new EnvironmentCreatorApplication(System.getenv(), templatizedBundleFolderPath, bootstrapBundleFolderPath, keystoreFolderPath).run();
     }
 
-    EnvironmentCreatorApplication(Map<String, String> environmentProperties, String templatizedBundleFolderPath, String bootstrapBundleFolderPath, String keystoreFolderPath) {
+    EnvironmentCreatorApplication(Map<String, String> environmentProperties,
+                                  String templatizedBundleFolderPath,
+                                  String bootstrapBundleFolderPath,
+                                  String keystoreFolderPath) {
         this.environmentProperties = environmentProperties;
         this.templatizedBundleFolderPath = templatizedBundleFolderPath;
         this.bootstrapBundleFolderPath = bootstrapBundleFolderPath;
@@ -78,7 +85,7 @@ public class EnvironmentCreatorApplication {
         documentFileUtils.createFile(bundleElement, new File(bootstrapBundleFolderPath, "_0_env.req.bundle").toPath());
 
         // Create the KeyStore
-        KeystoreCreator.createKeyStoreIfNecessary(environmentProperties, keystoreFolderPath);
+        createKeyStoreIfNecessary(environmentProperties, keystoreFolderPath);
     }
 
     private void processDeploymentBundles(Bundle environmentBundle) {

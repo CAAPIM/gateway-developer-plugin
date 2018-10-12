@@ -106,7 +106,8 @@ class KeystoreHelperTest {
     void tryCreateKeyStoreInvalidKeyStoreType() {
         KeystoreHelper keystoreHelper = new KeystoreHelper() {
             @Override
-            @NotNull String getKeyStoreType() {
+            @NotNull
+            public String getKeyStoreType() {
                 return "GW";
             }
         };
