@@ -39,7 +39,7 @@ class EnvironmentCreatorApplicationTest {
 
         new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath()).run();
 
-        File environmentBundle = new File(testDetemplatizedBundlesFolder, "_env.req.bundle");
+        File environmentBundle = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
 
         assertTrue(environmentBundle.exists());
     }
@@ -121,7 +121,7 @@ class EnvironmentCreatorApplicationTest {
 
         new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath()).run();
 
-        File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_env.req.bundle");
+        File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
         assertTrue(environmentBundleFile.exists());
         System.out.println(new String(Files.readAllBytes(environmentBundleFile.toPath())));
 
