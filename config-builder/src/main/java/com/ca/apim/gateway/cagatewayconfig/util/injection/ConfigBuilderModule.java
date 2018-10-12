@@ -16,7 +16,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.AbstractModule;
@@ -65,7 +64,6 @@ public class ConfigBuilderModule extends AbstractModule {
         } catch (CertificateException e) {
             throw new IllegalStateException("Unable to load X509 Certificate Factory", e);
         }
-        bind(KeystoreHelper.class);
 
         // bind all entity builders to the module
         Multibinder<EntityBuilder> buildersBinder = newSetBinder(binder(), EntityBuilder.class);
