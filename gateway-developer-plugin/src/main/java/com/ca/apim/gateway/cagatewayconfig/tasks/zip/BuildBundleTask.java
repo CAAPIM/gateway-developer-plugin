@@ -10,10 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
-import org.gradle.api.tasks.InputDirectory;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 
@@ -37,6 +34,7 @@ public class BuildBundleTask extends DefaultTask {
     }
 
     @InputDirectory
+    @Optional
     public DirectoryProperty getFrom() {
         return from;
     }
@@ -54,6 +52,6 @@ public class BuildBundleTask extends DefaultTask {
     @TaskAction
     public void perform() {
         BundleBuilder bundleBuilder = ConfigBuilderModule.getInjector().getInstance(BundleBuilder.class);
-        bundleBuilder.buildBundle(from.getAsFile().get(), into.getAsFile().get(), dependencies.getFiles(), getProject().getName() + '-' + getProject().getVersion());
+        bundleBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(), dependencies.getFiles(), getProject().getName() + '-' + getProject().getVersion());
     }
 }
