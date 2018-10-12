@@ -33,7 +33,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 @Singleton
 public class IdentityProviderEntityBuilder implements EntityBuilder {
 
-    private static final Integer ORDER = 700;
+    private static final Integer ORDER = 1100;
     private static final String TRUSTED_CERT_URI = "http://ns.l7tech.com/2010/04/gateway-management/trustedCertificates";
     private final IdGenerator idGenerator;
 

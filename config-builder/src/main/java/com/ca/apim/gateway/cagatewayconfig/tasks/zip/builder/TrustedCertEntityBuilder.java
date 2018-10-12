@@ -41,7 +41,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 @Singleton
 public class TrustedCertEntityBuilder implements EntityBuilder {
 
-    private static final Integer ORDER = 1100;
+    private static final Integer ORDER = 700;
 
     private final IdGenerator idGenerator;
     private final SSLSocketFactory acceptAllSocketFactory;
