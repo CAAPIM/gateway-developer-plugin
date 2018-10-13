@@ -12,13 +12,9 @@ import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeyStoreCreationExcepti
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import org.apache.commons.io.IOUtils;
 
-import java.io.File;
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Properties;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.closeQuietly;
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -59,45 +55,26 @@ class KeystoreCreator {
             closeQuietly(stream);
         }
 
-        // Properties with the keystore configuration
-        // FIXME this is not being used yet
-        Properties extraJavaArgs = new Properties();
-        extraJavaArgs.put("com.l7tech.common.security.jceProviderEngine", "com.l7tech.security.prov.generic.GenericJceProviderEngine");
-        extraJavaArgs.put("com.l7tech.keystore.type", keystoreHelper.getKeyStoreType());
-        extraJavaArgs.put("com.l7tech.keystore.path", keyStoreFile.getAbsolutePath());
-        extraJavaArgs.put("com.l7tech.keystore.savePath", "EMPTY");
-        extraJavaArgs.put("com.l7tech.keystore.password", new String(keystoreHelper.getKeystorePassword()));
-
-        File keyStorePropertiesFile = new File(keyStoreDirectory, "keystore.properties");
-        stream = new StripFirstLineStream(fileUtils.getOutputStream(keyStorePropertiesFile));
-        try {
-            extraJavaArgs.store(stream, null);
-        } catch (IOException e) {
-            throw new KeyStoreCreationException("Unexpected error writing key store properties", e);
-        } finally {
-            closeQuietly(stream);
-        }
+        updateSystemPropertiesFile(keystoreHelper, keyStoreFile);
     }
 
-    /**
-     * This is used in order to remove the first line when printing the properties to an output stream
-     * that contains a date-timestamp. Inspired by https://stackoverflow.com/a/39043903/1108370
-     */
-    @SuppressWarnings("squid:S4349")
-    private static class StripFirstLineStream extends FilterOutputStream {
-        private boolean firstlineseen = false;
+    private static void updateSystemPropertiesFile(KeystoreHelper keystoreHelper, File keyStoreFile) {
+        File systemPropertiesFile = new File("/opt/SecureSpan/Gateway/node/default/etc/conf/system.properties");
 
-        StripFirstLineStream(final OutputStream out) {
-            super(out);
-        }
-
-        @Override
-        public void write(final int b) throws IOException {
-            if (firstlineseen) {
-                super.write(b);
-            } else if (b == '\n') {
-                firstlineseen = true;
-            }
+        try (FileWriter fileWriter = new FileWriter(systemPropertiesFile, true); BufferedWriter br = new BufferedWriter(fileWriter);) {
+            br.newLine();
+            br.write("# Properties to configure a file based Keystore");
+            br.write("com.l7tech.common.security.jceProviderEngineName=generic");
+            br.newLine();
+            br.write("com.l7tech.keystore.type=" + keystoreHelper.getKeyStoreType());
+            br.newLine();
+            br.write("com.l7tech.keystore.path=" + keyStoreFile.getAbsolutePath());
+            br.newLine();
+            br.write("com.l7tech.keystore.savePath=EMPTY");
+            br.newLine();
+            br.write("com.l7tech.keystore.password=" + new String(keystoreHelper.getKeystorePassword()));
+        } catch (IOException e) {
+            throw new KeyStoreCreationException("Unexpected error adding to system properties", e);
         }
     }
 }
