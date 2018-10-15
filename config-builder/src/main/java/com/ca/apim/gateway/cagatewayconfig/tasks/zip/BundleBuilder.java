@@ -57,12 +57,13 @@ class BundleBuilder {
             // Load the entities to build a deployment bundle
             final Collection<EntityLoader> entityLoaders = entityLoaderRegistry.getEntityLoaders();
             entityLoaders.parallelStream().forEach(e -> e.load(bundle, rootDir));
+
+            //Load Dependencies
+            // Improvements can be made here by doing this loading in a separate task and caching the intermediate results.
+            // That way the dependent bundles are not re-processed on every new build
+            final Set<Bundle> dependencyBundles = dependencies.stream().map(dependencyBundleLoader::load).collect(Collectors.toSet());
+            bundle.setDependencies(dependencyBundles);
         }
-        //Load Dependencies
-        // Improvements can be made here by doing this loading in a separate task and caching the intermediate results.
-        // That way the dependent bundles are not re-processed on every new build
-        final Set<Bundle> dependencyBundles = dependencies.stream().map(dependencyBundleLoader::load).collect(Collectors.toSet());
-        bundle.setDependencies(dependencyBundles);
 
         //Zip
         Element bundleElement = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document);
