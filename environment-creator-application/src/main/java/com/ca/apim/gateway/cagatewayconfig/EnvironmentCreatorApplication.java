@@ -33,6 +33,7 @@ import static com.ca.apim.gateway.cagatewayconfig.KeystoreCreator.createKeyStore
 public class EnvironmentCreatorApplication {
 
     private static final Logger logger = Logger.getLogger(EnvironmentCreatorApplication.class.getName());
+    @SuppressWarnings("squid:S1075") // this path is always fixed does not need to be customized.
     private static final String SYSTEM_PROPERTIES_PATH = "/opt/SecureSpan/Gateway/node/default/etc/conf/system.properties";
 
     private final Map<String, String> environmentProperties;
