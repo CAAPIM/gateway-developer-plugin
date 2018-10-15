@@ -9,6 +9,9 @@ addons:
 #  srcclr: true
 script:
   - ./gradlew sonarqube
+branches:
+  only:
+  - master
 deploy:
   provider: script
   script: ./gradlew printVersion tag -Prelease && git push "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git" --tags && ./gradlew publishPlugins bintrayUpload -Prelease
