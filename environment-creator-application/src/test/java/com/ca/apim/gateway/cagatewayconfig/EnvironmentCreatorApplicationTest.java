@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.DependencyBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.google.common.collect.ImmutableMap;
@@ -22,6 +23,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Objects;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEntityBuilder.DEFAULT_HTTPS_8443;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEntityBuilder.DEFAULT_HTTP_8080;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EnvironmentCreatorApplicationTest {
@@ -131,8 +134,10 @@ class EnvironmentCreatorApplicationTest {
         assertEquals(1, environmentBundle.getIdentityProviders().size());
         assertNotNull(environmentBundle.getIdentityProviders().get("simple ldap"));
 
-        assertEquals(1, environmentBundle.getListenPorts().size());
+        assertEquals(3, environmentBundle.getListenPorts().size());
         assertNotNull(environmentBundle.getListenPorts().get("Custom HTTPS Port"));
+        assertNotNull(environmentBundle.getListenPorts().get(DEFAULT_HTTP_8080));
+        assertNotNull(environmentBundle.getListenPorts().get(DEFAULT_HTTPS_8443));
 
         assertEquals(1, environmentBundle.getJdbcConnections().size());
         assertNotNull(environmentBundle.getJdbcConnections().get("my-jdbc"));

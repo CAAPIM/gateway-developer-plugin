@@ -43,10 +43,19 @@ class ListenPortEntityBuilderTest {
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
 
     @Test
-    void buildFromEmptyBundle_expectOnlyDefaultPorts() {
+    void buildFromEmptyDeploymentBundle() {
         ListenPortEntityBuilder builder = new ListenPortEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
         final List<Entity> listenPortEntities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        assertTrue(listenPortEntities.isEmpty());
+    }
+
+    @Test
+    void buildFromEmptyEnvironmentBundle() {
+        ListenPortEntityBuilder builder = new ListenPortEntityBuilder(ID_GENERATOR);
+        final Bundle bundle = new Bundle();
+        final List<Entity> listenPortEntities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         // only two defaults
         assertEquals(2, listenPortEntities.size(), "Expecting only the 2 default ports");
@@ -56,12 +65,28 @@ class ListenPortEntityBuilderTest {
     }
 
     @Test
-    void buildWithCustomPort_expectCustomAndDefaults() {
+    void buildWithCustomPortDeploymentBundle_expectCustomOnly() {
         ListenPortEntityBuilder builder = new ListenPortEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
         addPortToBundle(bundle, buildPort());
 
         final List<Entity> listenPortEntities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        // two defaults and custom one
+        assertEquals(1, listenPortEntities.size(),"More than 1 expected ports");
+
+        // check
+        checkExpectedPorts(listenPortEntities, TEST_HTTP_PORT);
+    }
+
+
+    @Test
+    void buildWithCustomPortEnvironmentBundle_expectCustomAndDefaults() {
+        ListenPortEntityBuilder builder = new ListenPortEntityBuilder(ID_GENERATOR);
+        final Bundle bundle = new Bundle();
+        addPortToBundle(bundle, buildPort());
+
+        final List<Entity> listenPortEntities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         // two defaults and custom one
         assertEquals(3, listenPortEntities.size(),"More than 3 expected ports");
