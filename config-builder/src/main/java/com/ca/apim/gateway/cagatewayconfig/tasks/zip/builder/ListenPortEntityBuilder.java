@@ -46,8 +46,8 @@ import static org.apache.commons.collections4.MapUtils.unmodifiableMap;
 @Singleton
 public class ListenPortEntityBuilder implements EntityBuilder {
 
-    static final String DEFAULT_HTTP_8080 = "Default HTTP (8080)";
-    static final String DEFAULT_HTTPS_8443 = "Default HTTPS (8443)";
+    public static final String DEFAULT_HTTP_8080 = "Default HTTP (8080)";
+    public static final String DEFAULT_HTTPS_8443 = "Default HTTPS (8443)";
     static final List<String> DEFAULT_RECOMMENDED_CIPHERS = Collections.unmodifiableList(asList(
             "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
             "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
@@ -101,20 +101,18 @@ public class ListenPortEntityBuilder implements EntityBuilder {
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                final Stream<Entity> userPorts = bundle.getListenPorts().entrySet().stream()
-                        .map(listenPortEntry -> buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document));
+                return bundle.getListenPorts().entrySet().stream()
+                        .map(listenPortEntry -> buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document)).collect(toList());
+            case ENVIRONMENT:
+                final Stream<Entity> userPorts = bundle.getListenPorts().entrySet().stream().map(listenPortEntry ->
+                        buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document));
                 final Stream<Entity> defaultPorts = DEFAULT_PORTS.entrySet().stream().filter(p -> bundle.getListenPorts().values().stream().noneMatch(up -> up.getPort() == p.getValue().getPort()))
                         .map(listenPortEntry -> {
                             Entity entity = buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document);
                             entity.setMappingAction(NEW_OR_EXISTING);
                             return entity;
                         });
-
                 return concat(userPorts, defaultPorts).collect(toList());
-            case ENVIRONMENT:
-                return bundle.getListenPorts().entrySet().stream().map(listenPortEntry ->
-                        buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document)
-                ).collect(toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
