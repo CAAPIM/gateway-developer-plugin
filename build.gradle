@@ -48,10 +48,10 @@ dependencies {
     compile gradleApi()
     compile 'org.jetbrains:annotations:16.0.2'
     compile 'org.apache.httpcomponents:httpclient:4.5.5'
-    compile 'commons-io:commons-io:+'
-    compile 'org.apache.commons:commons-lang3:+'
-    compile 'org.reflections:reflections:+'
-    compile 'com.google.inject:guice:+'
+    compile 'commons-io:commons-io:2.6'
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+    compile 'org.reflections:reflections:0.9.11'
+    compile 'com.google.inject:guice:4.2.1'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
 
