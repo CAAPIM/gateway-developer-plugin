@@ -19,7 +19,7 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class DocumentFileUtils {
+public class DocumentFileUtils {
     private static final Logger LOGGER = Logger.getLogger(DocumentFileUtils.class.getName());
 
     public static final DocumentFileUtils INSTANCE = new DocumentFileUtils(DocumentTools.INSTANCE);

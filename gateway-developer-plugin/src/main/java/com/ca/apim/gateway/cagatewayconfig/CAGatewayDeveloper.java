@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.BuildBundleTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.internal.provider.DefaultProvider;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +52,10 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Create build-bundle task
         final BuildBundleTask buildBundleTask = project.getTasks().create("build-bundle", BuildBundleTask.class, t -> {
             t.dependsOn(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
-            t.getFrom().set(pluginConfig.getSolutionDir());
+            t.getFrom().set(new DefaultProvider<>(() -> {
+                Directory dir = pluginConfig.getSolutionDir().get();
+                return dir.getAsFile().exists() ? dir : null;
+            }));
             t.getInto().set(pluginConfig.getBuiltBundleDir());
             t.getDependencies().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
