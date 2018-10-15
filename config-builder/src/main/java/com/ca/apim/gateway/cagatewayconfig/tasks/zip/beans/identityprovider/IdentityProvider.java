@@ -34,7 +34,8 @@ public class IdentityProvider {
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes( {
             @JsonSubTypes.Type(value=BindOnlyLdapIdentityProviderDetail.class, name="BIND_ONLY_LDAP"),
-            @JsonSubTypes.Type(value=LdapIdentityProviderDetail.class, name="LDAP")
+            @JsonSubTypes.Type(value=FullLdapIdentityProviderDetail.class, name="LDAP"),
+            @JsonSubTypes.Type(value=FederatedIdentityProviderDetail.class, name="FEDERATED")
     })
     private IdentityProviderDetail identityProviderDetail;
 

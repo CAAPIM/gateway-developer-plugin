@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public class JsonTools {
@@ -115,6 +116,11 @@ public class JsonTools {
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {
         ObjectMapper objectMapper = new ObjectMapper(jf);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        // identityProviderDetail is determined by type. In the case of Federated ID provider,
+        // if it does not have any references to certs, an identityProviderDetail is not generated. Normally this would
+        // throw JsonToolsException. See test case IdentityProviderLoaderTest#loadFedIdWithNoCertRefs()
+        objectMapper.configure(FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false);
         return objectMapper;
     }
 }

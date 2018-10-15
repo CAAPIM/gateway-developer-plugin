@@ -16,6 +16,7 @@ import static java.lang.Boolean.parseBoolean;
 
 public class TrustedCert {
 
+    private String id;
     private boolean verifyHostname;
     private boolean trustedForSsl;
     private boolean trustedAsSamlAttestingEntity;
@@ -59,6 +60,14 @@ public class TrustedCert {
 
     public CertificateData getCertificateData() {
         return certificateData;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public static class CertificateData {
