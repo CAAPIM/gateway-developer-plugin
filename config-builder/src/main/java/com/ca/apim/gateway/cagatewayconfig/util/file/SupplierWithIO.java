@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.util.file;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 @FunctionalInterface
 public interface SupplierWithIO<T> {

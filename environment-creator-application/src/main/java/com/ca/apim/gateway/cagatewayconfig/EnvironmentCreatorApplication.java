@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.BundleEntityBuilder
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
@@ -32,6 +33,7 @@ import static com.ca.apim.gateway.cagatewayconfig.KeystoreCreator.createKeyStore
 public class EnvironmentCreatorApplication {
 
     private static final Logger logger = Logger.getLogger(EnvironmentCreatorApplication.class.getName());
+    private static final String SYSTEM_PROPERTIES_PATH = "/opt/SecureSpan/Gateway/node/default/etc/conf/system.properties";
 
     private final Map<String, String> environmentProperties;
     private final String templatizedBundleFolderPath;
@@ -85,7 +87,7 @@ public class EnvironmentCreatorApplication {
         documentFileUtils.createFile(bundleElement, new File(bootstrapBundleFolderPath, "_0_env.req.bundle").toPath());
 
         // Create the KeyStore
-        createKeyStoreIfNecessary(environmentProperties, keystoreFolderPath);
+        createKeyStoreIfNecessary(keystoreFolderPath, environmentBundle.getPrivateKeys().values(), FileUtils.INSTANCE, SYSTEM_PROPERTIES_PATH);
     }
 
     private void processDeploymentBundles(Bundle environmentBundle) {

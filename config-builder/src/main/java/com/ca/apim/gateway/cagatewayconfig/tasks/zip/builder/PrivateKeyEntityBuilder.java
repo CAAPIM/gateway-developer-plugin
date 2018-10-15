@@ -8,18 +8,26 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.math.BigInteger;
+import java.io.File;
+import java.nio.file.Files;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.PRIVATE_KEY_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.createCertDataElementFromCert;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.FAIL_ON_NEW;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributes;
@@ -31,12 +39,19 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
 
     private static final Integer ORDER = 1200;
 
-    @Override
-    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return bundle.getPrivateKeys().entrySet().stream().map(e -> buildPrivateKeyEntity(e.getKey(), e.getValue(), document)).collect(toList());
+    private final KeystoreHelper keystoreHelper;
+
+    @Inject
+    PrivateKeyEntityBuilder(final KeystoreHelper keystoreHelper) {
+        this.keystoreHelper = keystoreHelper;
     }
 
-    private Entity buildPrivateKeyEntity(String alias, PrivateKey privateKey, Document document) {
+    @Override
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        return bundle.getPrivateKeys().entrySet().stream().map(e -> buildPrivateKeyEntity(bundle, e.getKey(), e.getValue(), document)).collect(toList());
+    }
+
+    private Entity buildPrivateKeyEntity(Bundle bundle, String alias, PrivateKey privateKey, Document document) {
         final String id = privateKey.getKeyStoreType().generateKeyId(alias);
         final Element privateKeyElem = createElementWithAttributes(
                 document,
@@ -46,8 +61,8 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
                         ATTRIBUTE_KEYSTORE_ID, privateKey.getKeyStoreType().getId(),
                         ATTRIBUTE_ALIAS, alias)
         );
-        // this needs to be added in order for the Gateway to be able to load the bundle with the certificate.
-        buildAndAppendCertificateChainElement(privateKeyElem, document);
+        buildAndAppendCertificateChainElement(bundle, privateKey, privateKeyElem, document);
+        buildAndAppendPropertiesElement(ImmutableMap.of(ATTRIBUTE_KEY_ALGORITHM, privateKey.getAlgorithm()), document, privateKeyElem);
 
         Entity entity = EntityBuilderHelper.getEntityWithNameMapping(PRIVATE_KEY_TYPE, alias, id, privateKeyElem);
         entity.setMappingAction(NEW_OR_EXISTING);
@@ -55,9 +70,18 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
         return entity;
     }
 
-    private void buildAndAppendCertificateChainElement(Element privateKeyElem, Document document) {
-        // Need to add certificate data here in order for the gateway to be able to load the bundle. The cert data will not be loaded
-        privateKeyElem.appendChild(createElementWithChildren(document, CERTIFICATE_CHAIN, CertificateUtils.createCertDataElementFromCert("", BigInteger.valueOf(0), "", "MIIBfTCCASegAwIBAgIJAPH69zKKw4ixMA0GCSqGSIb3DQEBBQUAMA8xDTALBgNVBAMTBHRlc3QwHhcNMTgxMDEzMDMyODI1WhcNMzgxMDA4MDMyODI1WjAPMQ0wCwYDVQQDEwR0ZXN0MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAIS+Vr8zPOBmSclkUtW/z0UXaMjhg7dix6IUZs+UoSiw/2GXfU2vc3renVAbn3AZaJEqnxgrcX4nldqt0WBIP4sCAwEAAaNmMGQwDgYDVR0PAQH/BAQDAgXgMBIGA1UdJQEB/wQIMAYGBFUdJQAwHQYDVR0OBBYEFN/aeDDEAB6MTxZhMhf/eJKnmaE5MB8GA1UdIwQYMBaAFN/aeDDEAB6MTxZhMhf/eJKnmaE5MA0GCSqGSIb3DQEBBQUAA0EAdolvh7bMX5ZMkM/yntJlBdzS8ukM/ULh8I11wKd6dDltyMuk9rOP0iEk1nsSFuFL0uQ4kIe12KyDwr8ns7VKvQ==", document)));
+    private void buildAndAppendCertificateChainElement(Bundle bundle, PrivateKey privateKey, Element privateKeyElem, Document document) {
+        File privateKeyFile = new File(bundle.getPrivateKeysDirectory() + File.separator + privateKey.getAlias() + ".p12");
+        if (!privateKeyFile.exists()) {
+            throw new EntityBuilderException("Private Key file for key '" + privateKey.getAlias() + "' not found in the private keys directory specified");
+        }
+        privateKey.setPrivateKeyFile(() -> Files.newInputStream(privateKeyFile.toPath()));
+        final KeyStore keyStore = keystoreHelper.loadKeyStore(privateKey);
+        final Certificate[] certificates = keystoreHelper.loadCertificatesForPrivateKey(privateKey, keyStore);
+
+        final Element[] certificatesElements = Stream.of(certificates)
+                .map(c -> createCertDataElementFromCert((X509Certificate) c, document)).toArray(Element[]::new);
+        privateKeyElem.appendChild(createElementWithChildren(document, CERTIFICATE_CHAIN, certificatesElements));
     }
 
     @Override

@@ -30,6 +30,7 @@ public class Bundle {
     private final Map<String, TrustedCert> trustedCerts = new HashMap<>();
     private final Map<String, PrivateKey> privateKeys = new HashMap<>();
     private final Map<String, SupplierWithIO<InputStream>> certificateFiles = new HashMap<>();
+    private String privateKeysDirectory;
     private Set<Bundle> dependencies;
 
     public Map<String, Service> getServices() {
@@ -150,5 +151,13 @@ public class Bundle {
 
     public void putAllCertificateFiles(@NotNull Map<String, SupplierWithIO<InputStream>> certificateFiles) {
         this.certificateFiles.putAll(certificateFiles);
+    }
+
+    public String getPrivateKeysDirectory() {
+        return privateKeysDirectory;
+    }
+
+    public void setPrivateKeysDirectory(String privateKeysDirectory) {
+        this.privateKeysDirectory = privateKeysDirectory;
     }
 }

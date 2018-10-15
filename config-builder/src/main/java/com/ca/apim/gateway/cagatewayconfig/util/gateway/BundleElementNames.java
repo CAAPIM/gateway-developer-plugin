@@ -21,6 +21,7 @@ public class BundleElementNames {
     public static final String ATTRIBUTE_FOLDER_ID = "folderId";
     public static final String ATTRIBUTE_ALIAS = "alias";
     public static final String ATTRIBUTE_KEYSTORE_ID = "keystoreId";
+    public static final String ATTRIBUTE_KEY_ALGORITHM = "keyAlgorithm";
 
     // Property names
     public static final String PROPERTY_USER = "user";
