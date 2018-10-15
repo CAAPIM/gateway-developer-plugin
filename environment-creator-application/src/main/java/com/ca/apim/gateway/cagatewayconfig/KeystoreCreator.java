@@ -53,13 +53,6 @@ class KeystoreCreator {
 
     static void updateSystemPropertiesFile(KeystoreHelper keystoreHelper, File keyStoreFile, String systemPropertiesPath) {
         File systemPropertiesFile = new File(systemPropertiesPath);
-        if (!systemPropertiesFile.exists()) {
-            try {
-                systemPropertiesFile.createNewFile();
-            } catch (IOException e) {
-                throw new KeyStoreCreationException("Error creating system.properties file", e);
-            }
-        }
 
         try (FileWriter fileWriter = new FileWriter(systemPropertiesFile, true);
              BufferedWriter br = new BufferedWriter(fileWriter)

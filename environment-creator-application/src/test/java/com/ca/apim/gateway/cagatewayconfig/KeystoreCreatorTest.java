@@ -45,11 +45,14 @@ class KeystoreCreatorTest {
     private FileUtils fileUtils;
 
     @BeforeEach
-    void setUp(final TemporaryFolder temporaryFolder) {
+    void setUp(final TemporaryFolder temporaryFolder) throws IOException {
         this.temporaryFolder = temporaryFolder;
 
         keystoreFile = new File(temporaryFolder.getRoot(), KEYSTORE_FILE_NAME);
         systemProperties = new File(temporaryFolder.getRoot(), "system.properties");
+        if (!systemProperties.createNewFile()) {
+            throw new RuntimeException("Could not create system.properties file");
+        }
     }
 
     @Test

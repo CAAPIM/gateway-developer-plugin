@@ -66,6 +66,7 @@ public class EnvironmentCreatorApplication {
         this.environmentProperties = environmentProperties;
         this.templatizedBundleFolderPath = templatizedBundleFolderPath;
         this.bootstrapBundleFolderPath = bootstrapBundleFolderPath;
+        this.keystoreFolderPath = keystoreFolderPath;
     }
 
     @VisibleForTesting
