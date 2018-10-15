@@ -25,7 +25,7 @@ public class DocumentFileUtils {
     public static final DocumentFileUtils INSTANCE = new DocumentFileUtils(DocumentTools.INSTANCE);
     private final DocumentTools documentTools;
 
-    public DocumentFileUtils(DocumentTools documentTools) {
+    private DocumentFileUtils(DocumentTools documentTools) {
         this.documentTools = documentTools;
     }
 
