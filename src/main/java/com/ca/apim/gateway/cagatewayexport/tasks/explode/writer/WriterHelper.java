@@ -39,6 +39,10 @@ class WriterHelper {
      * @param fileName name of the file
      */
     static void writePropertiesFile(File rootFolder, DocumentFileUtils documentFileUtils, Properties properties, String fileName) {
+        if (properties.isEmpty()) {
+            return;
+        }
+
         File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
 
@@ -81,6 +85,10 @@ class WriterHelper {
      * @param <B> type of bean
      */
     static <B> void writeFile(File rootFolder, DocumentFileUtils documentFileUtils, JsonTools jsonTools, Map<String, B> beans, String fileName, Class<B> beanClass) {
+        if (beans.isEmpty()) {
+            return;
+        }
+
         File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
         ObjectWriter objectWriter = jsonTools.getObjectWriter();
