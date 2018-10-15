@@ -9,11 +9,11 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.IdentityProviderEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.BindOnlyLdapIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.FederatedIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import org.jetbrains.annotations.NotNull;
-import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,12 +21,10 @@ import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.copyMap;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.IdentityProviderType;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.IdentityProviderType.fromType;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.*;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.*;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.Type.fromType;
 
 @Singleton
 public class IdentityProviderWriter implements EntityWriter {
@@ -53,50 +51,43 @@ public class IdentityProviderWriter implements EntityWriter {
 
     private IdentityProvider getIdentityProviderBean(final IdentityProviderEntity identityProviderEntity) {
         final IdentityProvider idProvider = new IdentityProvider();
-        final IdentityProviderType type = fromType(identityProviderEntity.getIdProviderType().getType());
+        final Type type = fromType(identityProviderEntity.getType().getValue());
         idProvider.setType(type);
         idProvider.setProperties(copyMap(identityProviderEntity.getProperties()));
 
         switch (type) {
             case BIND_ONLY_LDAP:
-                idProvider.setIdentityProviderDetail(
-                        getBindOnlyLdapIdentityProviderDetailBean(
-                                getSingleChildElement(
-                                        identityProviderEntity.getExtensionXml(),
-                                        BIND_ONLY_ID_PROV_DETAIL
-                                )
-                        )
-                );
+                idProvider.setIdentityProviderDetail(getBindOnlyLdapIdentityProviderDetailBean(
+                        (IdentityProviderEntity.BindOnlyLdapIdentityProviderDetail) identityProviderEntity.getIdentityProviderDetail()));
                 return idProvider;
             case LDAP:
             case INTERNAL:
             case POLICY_BACKED:
+                return null;
             case FEDERATED:
+                if (identityProviderEntity.getIdentityProviderDetail() != null) {
+                    idProvider.setIdentityProviderDetail(
+                            getFederatedIdentityProviderDetailBean((IdentityProviderEntity.FederatedIdentityProviderDetail) identityProviderEntity.getIdentityProviderDetail())
+                    );
+                }
+                return idProvider;
             default:
                 return null;
         }
     }
 
     @NotNull
-    private BindOnlyLdapIdentityProviderDetail getBindOnlyLdapIdentityProviderDetailBean(Element bindOnlyLdapIdentityProviderDetailXml) {
+    private FederatedIdentityProviderDetail getFederatedIdentityProviderDetailBean(final IdentityProviderEntity.FederatedIdentityProviderDetail identityProviderDetailEntity) {
+        return new FederatedIdentityProviderDetail(identityProviderDetailEntity.getCertificateReferences());
+    }
+
+    @NotNull
+    private BindOnlyLdapIdentityProviderDetail getBindOnlyLdapIdentityProviderDetailBean(IdentityProviderEntity.BindOnlyLdapIdentityProviderDetail identityProviderDetailEntity) {
         final BindOnlyLdapIdentityProviderDetail identityProviderDetail = new BindOnlyLdapIdentityProviderDetail();
-        // Configure the detail bean
-        identityProviderDetail.setServerUrls(
-                getChildElementsTextContents(
-                        getSingleChildElement(bindOnlyLdapIdentityProviderDetailXml, SERVER_URLS), STRING_VALUE
-                )
-        );
-        identityProviderDetail.setUseSslClientAuthentication(
-                Boolean.parseBoolean(
-                        getSingleChildElementTextContent(bindOnlyLdapIdentityProviderDetailXml, USE_SSL_CLIENT_AUTH)
-                )
-        );
-        identityProviderDetail.setBindPatternPrefix(
-                getSingleChildElementTextContent(bindOnlyLdapIdentityProviderDetailXml, BIND_PATTERN_PREFIX)
-        );
-        identityProviderDetail.setBindPatternSuffix(
-                getSingleChildElementTextContent(bindOnlyLdapIdentityProviderDetailXml, BIND_PATTERN_SUFFIX)
-        );
+        identityProviderDetail.setServerUrls(identityProviderDetailEntity.getServerUrls());
+        identityProviderDetail.setUseSslClientAuthentication(identityProviderDetailEntity.isUseSslClientAuthentication());
+        identityProviderDetail.setBindPatternPrefix(identityProviderDetailEntity.getBindPatternPrefix());
+        identityProviderDetail.setBindPatternSuffix(identityProviderDetailEntity.getBindPatternSuffix());
         return identityProviderDetail;
     }
 }

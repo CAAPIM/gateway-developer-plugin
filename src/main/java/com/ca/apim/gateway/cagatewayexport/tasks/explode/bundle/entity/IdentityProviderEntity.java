@@ -7,10 +7,10 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
-import org.w3c.dom.Element;
 
 import javax.inject.Named;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Arrays.stream;
 
@@ -19,16 +19,16 @@ public class IdentityProviderEntity implements Entity {
     public static final String INTERNAL_IDP_ID = "0000000000000000fffffffffffffffe";
     private final String name;
     private final String id;
-    private final IdentityProviderType idProviderType;
+    private final Type type;
     private final Map<String, Object> properties;
-    private final Element extensionXml;
+    private IdentityProviderDetail identityProviderDetail;
 
     private IdentityProviderEntity(Builder idProviderBuilder) {
         this.id = idProviderBuilder.id;
         this.name = idProviderBuilder.name;
-        this.idProviderType = idProviderBuilder.idProviderType;
+        this.type = idProviderBuilder.type;
         this.properties = idProviderBuilder.properties;
-        this.extensionXml = idProviderBuilder.extensionXml;
+        this.identityProviderDetail = idProviderBuilder.identityProviderDetail;
     }
 
     @Override
@@ -41,37 +41,41 @@ public class IdentityProviderEntity implements Entity {
         return name;
     }
 
-    public IdentityProviderType getIdProviderType() {
-        return idProviderType;
+    public Type getType() {
+        return type;
     }
 
     public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public Element getExtensionXml() {
-        return extensionXml;
+    public IdentityProviderDetail getIdentityProviderDetail() {
+        return identityProviderDetail;
+    }
+
+    public void setIdentityProviderDetail(IdentityProviderDetail identityProviderDetail) {
+        this.identityProviderDetail = identityProviderDetail;
     }
 
     public static class Builder {
         private String name;
         private String id;
-        private IdentityProviderType idProviderType;
+        private Type type;
         private Map<String, Object> properties;
-        private Element extensionXml;
+        private IdentityProviderDetail identityProviderDetail;
 
         public Builder name(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder idProviderType(IdentityProviderType idProviderType) {
-            this.idProviderType = idProviderType;
+        public Builder type(Type type) {
+            this.type = type;
             return this;
         }
 
-        public Builder extensionXml(Element extensionXml) {
-            this.extensionXml = extensionXml;
+        public Builder identityProviderDetail(IdentityProviderDetail identityProviderDetail) {
+            this.identityProviderDetail = identityProviderDetail;
             return this;
         }
 
@@ -81,7 +85,7 @@ public class IdentityProviderEntity implements Entity {
         }
 
         public Builder properties(Map<String, Object> properties) {
-            this.properties  = properties;
+            this.properties = properties;
             return this;
         }
 
@@ -90,25 +94,85 @@ public class IdentityProviderEntity implements Entity {
         }
     }
 
-    public enum IdentityProviderType {
+    private interface IdentityProviderDetail {
+
+    }
+
+    public abstract static class LdapIdentityProviderDetail implements IdentityProviderDetail {
+
+        private Set<String> serverUrls;
+        private boolean useSslClientAuthentication;
+
+        public Set<String> getServerUrls() {
+            return serverUrls;
+        }
+
+        public void setServerUrls(Set<String> serverUrls) {
+            this.serverUrls = serverUrls;
+        }
+
+        public boolean isUseSslClientAuthentication() {
+            return useSslClientAuthentication;
+        }
+
+        public void setUseSslClientAuthentication(boolean useSslClientAuthentication) {
+            this.useSslClientAuthentication = useSslClientAuthentication;
+        }
+    }
+
+    public static class FederatedIdentityProviderDetail implements IdentityProviderDetail {
+        private Set<String> certificateReferences;
+
+        public FederatedIdentityProviderDetail(final Set<String> certificateReferences) {
+            this.certificateReferences = certificateReferences;
+        }
+
+        public Set<String> getCertificateReferences() {
+            return certificateReferences;
+        }
+    }
+
+    public static class BindOnlyLdapIdentityProviderDetail extends LdapIdentityProviderDetail {
+
+        private String bindPatternPrefix;
+        private String bindPatternSuffix;
+
+        public String getBindPatternPrefix() {
+            return bindPatternPrefix;
+        }
+
+        public void setBindPatternPrefix(String bindPatternPrefix) {
+            this.bindPatternPrefix = bindPatternPrefix;
+        }
+
+        public String getBindPatternSuffix() {
+            return bindPatternSuffix;
+        }
+
+        public void setBindPatternSuffix(String bindPatternSuffix) {
+            this.bindPatternSuffix = bindPatternSuffix;
+        }
+    }
+
+    public enum Type {
         INTERNAL("Internal"),
         LDAP("LDAP"),
         FEDERATED("Federated"),
         BIND_ONLY_LDAP("Simple LDAP"),
         POLICY_BACKED("Policy-backed");
 
-        private String type;
+        private String value;
 
-        IdentityProviderType(String type) {
-            this.type = type;
+        Type(String value) {
+            this.value = value;
         }
 
-        public String getType() {
-            return this.type;
+        public String getValue() {
+            return this.value;
         }
 
-        public static IdentityProviderType fromType(String type) {
-            return stream(values()).filter(c -> c.type.equals(type)).findFirst().orElse(null);
+        public static Type fromType(String type) {
+            return stream(values()).filter(c -> c.value.equals(type)).findFirst().orElse(null);
         }
     }
 }

@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
-/**
- * Marker class for IdentityProviderDetail objects.
- */
-public interface IdentityProviderDetail {
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("LDAP")
+public class FullLdapIdentityProviderDetail extends LdapIdentityProviderDetail {
 }

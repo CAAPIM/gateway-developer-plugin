@@ -12,26 +12,28 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.Map;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.*;
 import static java.util.Arrays.stream;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class IdentityProvider {
 
-    private IdentityProviderType type;
+    private Type type;
     private Map<String, Object> properties;
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes( {
             @JsonSubTypes.Type(value=BindOnlyLdapIdentityProviderDetail.class, name="BIND_ONLY_LDAP"),
-            @JsonSubTypes.Type(value=LdapIdentityProviderDetail.class, name="LDAP")
+            @JsonSubTypes.Type(value=FullLdapIdentityProviderDetail.class, name="LDAP"),
+            @JsonSubTypes.Type(value=FederatedIdentityProviderDetail.class, name="FEDERATED")
     })
     private IdentityProviderDetail identityProviderDetail;
 
-    public IdentityProviderType getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(IdentityProviderType type) {
+    public void setType(Type type) {
         this.type = type;
     }
 
@@ -51,25 +53,25 @@ public class IdentityProvider {
         this.identityProviderDetail = identityProviderDetail;
     }
 
-    public enum IdentityProviderType {
+    public enum Type {
         INTERNAL("Internal"),
         LDAP("LDAP"),
         FEDERATED("Federated"),
         BIND_ONLY_LDAP("Simple LDAP"),
         POLICY_BACKED("Policy-backed");
 
-        private String type;
+        private String value;
 
-        IdentityProviderType(String type) {
-            this.type = type;
+        Type(String value) {
+            this.value = value;
         }
 
-        public String getType() {
-            return this.type;
+        public String getValue() {
+            return this.value;
         }
 
-        public static IdentityProviderType fromType(String type) {
-            return stream(values()).filter(c -> c.type.equals(type)).findFirst().orElse(null);
+        public static Type fromType(String type) {
+            return stream(values()).filter(c -> c.value.equals(type)).findFirst().orElse(null);
         }
     }
 }

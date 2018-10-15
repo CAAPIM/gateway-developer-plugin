@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_DOC_START_MARKER;
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
 public class JsonTools {
     public static final JsonTools INSTANCE = new JsonTools();
@@ -57,7 +58,7 @@ public class JsonTools {
 
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {
         ObjectMapper objectMapper = new ObjectMapper(jf);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
         if (jf instanceof YAMLFactory) {
             //make it so that null values get left as blanks rather then the string `null`
             objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<Object>() {

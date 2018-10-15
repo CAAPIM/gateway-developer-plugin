@@ -6,8 +6,26 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import java.util.Set;
 
-@JsonTypeName("LDAP")
-public class LdapIdentityProviderDetail extends IdentityProviderDetail{
+public abstract class LdapIdentityProviderDetail implements IdentityProviderDetail {
+
+    private Set<String> serverUrls;
+    private boolean useSslClientAuthentication;
+
+    public Set<String> getServerUrls() {
+        return serverUrls;
+    }
+
+    public void setServerUrls(Set<String> serverUrls) {
+        this.serverUrls = serverUrls;
+    }
+
+    public boolean isUseSslClientAuthentication() {
+        return useSslClientAuthentication;
+    }
+
+    public void setUseSslClientAuthentication(boolean useSslClientAuthentication) {
+        this.useSslClientAuthentication = useSslClientAuthentication;
+    }
 }
