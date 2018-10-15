@@ -11,35 +11,19 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.KeyStoreType;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
-import io.github.glytching.junit.extension.folder.TemporaryFolder;
-import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.Extensions;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools.INSTANCE;
-import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
-import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Extensions(@ExtendWith(TemporaryFolderExtension.class))
 class PrivateKeyEntityBuilderTest {
 
-    private File privateKeysDir;
     private KeystoreHelper keystoreHelper = new KeystoreHelper();
-
-    @BeforeEach
-    void setUp(final TemporaryFolder temporaryFolder) {
-        this.privateKeysDir = new File(temporaryFolder.getRoot(), "privateKeys");
-    }
 
     @Test
     void buildFromEmptyBundle_noKeys() {
@@ -50,10 +34,10 @@ class PrivateKeyEntityBuilderTest {
     }
 
     @Test
-    void build() throws IOException {
+    void build() {
         Bundle bundle = new Bundle();
-        bundle.setPrivateKeysDirectory(privateKeysDir.getPath());
-        bundle.putAllPrivateKeys(ImmutableMap.of("key1", createPrivateKey()));
+        bundle.getPrivateKeyFiles().put("test", () -> getClass().getClassLoader().getResource("test.p12").openStream());
+        bundle.putAllPrivateKeys(ImmutableMap.of("test", createPrivateKey()));
 
         PrivateKeyEntityBuilder builder = new PrivateKeyEntityBuilder(keystoreHelper);
         final List<Entity> entities = builder.build(bundle, ENVIRONMENT, INSTANCE.getDocumentBuilder().newDocument());
@@ -64,12 +48,12 @@ class PrivateKeyEntityBuilderTest {
 
         Entity entity = entities.get(0);
         assertEquals(EntityTypes.PRIVATE_KEY_TYPE, entity.getType());
-        assertEquals(KeyStoreType.GENERIC.generateKeyId("key1"), entity.getId());
-        assertEquals("key1", entity.getName());
+        assertEquals(KeyStoreType.GENERIC.generateKeyId("test"), entity.getId());
+        assertEquals("test", entity.getName());
     }
 
     @NotNull
-    private PrivateKey createPrivateKey() throws IOException {
+    private PrivateKey createPrivateKey() {
         PrivateKey privateKey = new PrivateKey();
         privateKey.setAlias("test");
         privateKey.setKeyStoreType(KeyStoreType.GENERIC);
@@ -77,7 +61,6 @@ class PrivateKeyEntityBuilderTest {
         privateKey.setAlgorithm("RSA");
         privateKey.setKeyPassword("");
 
-        writeByteArrayToFile(new File(this.privateKeysDir, "test.p12"), toByteArray(getClass().getClassLoader().getResource("test.p12")));
         return privateKey;
     }
 

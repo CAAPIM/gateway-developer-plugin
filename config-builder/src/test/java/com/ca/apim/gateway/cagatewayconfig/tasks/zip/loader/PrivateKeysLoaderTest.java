@@ -16,13 +16,14 @@ import org.junit.jupiter.api.extension.Extensions;
 
 import java.io.File;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Extensions(@ExtendWith(TemporaryFolderExtension.class))
-class PrivateKeysDirectoryLoaderTest {
+class PrivateKeysLoaderTest {
 
     private TemporaryFolder temporaryFolder;
-    private PrivateKeysDirectoryLoader loader = new PrivateKeysDirectoryLoader();
+    private PrivateKeysLoader loader = new PrivateKeysLoader();
 
     @BeforeEach
     void setUp(final TemporaryFolder temporaryFolder) {
@@ -37,29 +38,15 @@ class PrivateKeysDirectoryLoaderTest {
         Bundle bundle = new Bundle();
         loader.load(bundle, temporaryFolder.getRoot());
 
-        assertNotNull(bundle.getPrivateKeysDirectory());
-        assertEquals(directory.getPath(), bundle.getPrivateKeysDirectory());
+        assertTrue(bundle.getPrivateKeyFiles().isEmpty());
     }
 
     @Test
     void loadBasedOnRoot_nonExistingFolder() {
         Bundle bundle = new Bundle();
         loader.load(bundle, temporaryFolder.getRoot());
-        assertNull(bundle.getPrivateKeysDirectory());
-    }
 
-    @Test
-    void loadBasedOnRoot_twice() {
-        final File directory = new File(temporaryFolder.getRoot(), "config/privateKeys");
-        directory.mkdirs();
-
-        Bundle bundle = new Bundle();
-        loader.load(bundle, temporaryFolder.getRoot());
-
-        assertNotNull(bundle.getPrivateKeysDirectory());
-        assertEquals(directory.getPath(), bundle.getPrivateKeysDirectory());
-
-        assertThrows(BundleLoadException.class, () -> loader.load(bundle, temporaryFolder.getRoot()));
+        assertTrue(bundle.getPrivateKeyFiles().isEmpty());
     }
 
     @Test
@@ -70,27 +57,12 @@ class PrivateKeysDirectoryLoaderTest {
         Bundle bundle = new Bundle();
         loader.load(bundle, "path", directory.getPath());
 
-        assertNotNull(bundle.getPrivateKeysDirectory());
-        assertEquals(directory.getPath(), bundle.getPrivateKeysDirectory());
+        assertTrue(bundle.getPrivateKeyFiles().isEmpty());
     }
 
     @Test
     void loadBasedOnEnv_nonExistingFolder() {
         final File directory = new File(temporaryFolder.getRoot(), "privateKeys");
         assertThrows(BundleLoadException.class, () -> loader.load(new Bundle(), "path", directory.getPath()));
-    }
-
-    @Test
-    void loadBasedOnEnv_twice() {
-        final File directory = new File(temporaryFolder.getRoot(), "privateKeys");
-        directory.mkdirs();
-
-        Bundle bundle = new Bundle();
-        loader.load(bundle, "path", directory.getPath());
-
-        assertNotNull(bundle.getPrivateKeysDirectory());
-        assertEquals(directory.getPath(), bundle.getPrivateKeysDirectory());
-
-        assertThrows(BundleLoadException.class, () -> loader.load(bundle, "path", directory.getPath()));
     }
 }
