@@ -99,13 +99,13 @@ public class ListenPortEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        final Stream<Entity> userPorts = bundle.getListenPorts().entrySet().stream().map(listenPortEntry ->
+                buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document));
+
         switch (bundleType) {
             case DEPLOYMENT:
-                return bundle.getListenPorts().entrySet().stream()
-                        .map(listenPortEntry -> buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document)).collect(toList());
+                return userPorts.collect(toList());
             case ENVIRONMENT:
-                final Stream<Entity> userPorts = bundle.getListenPorts().entrySet().stream().map(listenPortEntry ->
-                        buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document));
                 final Stream<Entity> defaultPorts = DEFAULT_PORTS.entrySet().stream().filter(p -> bundle.getListenPorts().values().stream().noneMatch(up -> up.getPort() == p.getValue().getPort()))
                         .map(listenPortEntry -> {
                             Entity entity = buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document);
