@@ -40,6 +40,7 @@ public class EnvironmentCreatorApplication {
     private final String templatizedBundleFolderPath;
     private final String bootstrapBundleFolderPath;
     private final String keystoreFolderPath;
+    private final String privateKeyFolderPath;
     private DocumentFileUtils documentFileUtils = DocumentFileUtils.INSTANCE;
     private DocumentTools documentTools = DocumentTools.INSTANCE;
 
@@ -56,18 +57,21 @@ public class EnvironmentCreatorApplication {
         String templatizedBundleFolderPath = args.length > 0 ? args[0] : "/opt/docker/rc.d/bundle/templatized";
         String bootstrapBundleFolderPath = args.length > 1 ? args[1] : "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/bundle/";
         String keystoreFolderPath = args.length > 2 ? args[2] : "/opt/docker/rc.d/keystore";
+        String privateKeyFolderPath = args.length > 2 ? args[2] : "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/env/privateKeys";
 
-        new EnvironmentCreatorApplication(System.getenv(), templatizedBundleFolderPath, bootstrapBundleFolderPath, keystoreFolderPath).run();
+        new EnvironmentCreatorApplication(System.getenv(), templatizedBundleFolderPath, bootstrapBundleFolderPath, keystoreFolderPath, privateKeyFolderPath).run();
     }
 
     EnvironmentCreatorApplication(Map<String, String> environmentProperties,
                                   String templatizedBundleFolderPath,
                                   String bootstrapBundleFolderPath,
-                                  String keystoreFolderPath) {
+                                  String keystoreFolderPath,
+                                  String privateKeyFolderPath) {
         this.environmentProperties = environmentProperties;
         this.templatizedBundleFolderPath = templatizedBundleFolderPath;
         this.bootstrapBundleFolderPath = bootstrapBundleFolderPath;
         this.keystoreFolderPath = keystoreFolderPath;
+        this.privateKeyFolderPath = privateKeyFolderPath;
     }
 
     @VisibleForTesting
@@ -85,11 +89,11 @@ public class EnvironmentCreatorApplication {
 
         BundleEntityBuilder bundleEntityBuilder = ConfigBuilderModule.getInjector().getInstance(BundleEntityBuilder.class);
 
+        // Create the KeyStore
+        createKeyStoreIfNecessary(keystoreFolderPath, privateKeyFolderPath, environmentBundle.getPrivateKeys().values(), FileUtils.INSTANCE, SYSTEM_PROPERTIES_PATH);
+
         Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
         documentFileUtils.createFile(bundleElement, new File(bootstrapBundleFolderPath, "_0_env.req.bundle").toPath());
-
-        // Create the KeyStore
-        createKeyStoreIfNecessary(keystoreFolderPath, environmentBundle.getPrivateKeys().values(), FileUtils.INSTANCE, SYSTEM_PROPERTIES_PATH);
     }
 
     private void processDeploymentBundles(Bundle environmentBundle) {

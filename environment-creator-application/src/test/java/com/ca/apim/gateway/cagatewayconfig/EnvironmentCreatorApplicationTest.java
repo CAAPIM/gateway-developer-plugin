@@ -32,6 +32,7 @@ class EnvironmentCreatorApplicationTest {
         File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "no-bundles");
         File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
         File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
+        File privateKeyFolder = new File(temporaryFolder.getRoot(), "privateKeys");
 
         assertTrue(testDetemplatizedBundlesFolder.mkdirs());
 
@@ -39,7 +40,7 @@ class EnvironmentCreatorApplicationTest {
 
         ImmutableMap<String, String> environmentProperties = ImmutableMap.of();
 
-        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath()).run();
+        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath()).run();
 
         File environmentBundle = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
 
@@ -52,6 +53,7 @@ class EnvironmentCreatorApplicationTest {
         File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "templatized-bundles");
         File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
         File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
+        File privateKeyFolder = new File(temporaryFolder.getRoot(), "privateKeys");
 
         assertTrue(testDetemplatizedBundlesFolder.mkdirs());
 
@@ -123,7 +125,7 @@ class EnvironmentCreatorApplicationTest {
                 .put("ENV.PROPERTY.anotherEnvVar", "context-variable-value")
                 .build();
 
-        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath()).run();
+        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath()).run();
 
         File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
         assertTrue(environmentBundleFile.exists());
