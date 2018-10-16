@@ -46,10 +46,10 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return bundle.getPrivateKeys().entrySet().stream().map(e -> buildPrivateKeyEntity(bundle, e.getKey(), e.getValue(), document)).collect(toList());
+        return bundle.getPrivateKeys().entrySet().stream().map(e -> buildPrivateKeyEntity(e.getKey(), e.getValue(), document)).collect(toList());
     }
 
-    private Entity buildPrivateKeyEntity(Bundle bundle, String alias, PrivateKey privateKey, Document document) {
+    private Entity buildPrivateKeyEntity(String alias, PrivateKey privateKey, Document document) {
         final String id = privateKey.getKeyStoreType().generateKeyId(alias);
         final Element privateKeyElem = createElementWithAttributes(
                 document,
@@ -59,7 +59,7 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
                         ATTRIBUTE_KEYSTORE_ID, privateKey.getKeyStoreType().getId(),
                         ATTRIBUTE_ALIAS, alias)
         );
-        buildAndAppendCertificateChainElement(bundle, privateKey, privateKeyElem, document);
+        buildAndAppendCertificateChainElement(privateKey, privateKeyElem, document);
         buildAndAppendPropertiesElement(ImmutableMap.of(ATTRIBUTE_KEY_ALGORITHM, privateKey.getAlgorithm()), document, privateKeyElem);
 
         Entity entity = EntityBuilderHelper.getEntityWithNameMapping(PRIVATE_KEY_TYPE, alias, id, privateKeyElem);
@@ -68,7 +68,7 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
         return entity;
     }
 
-    private void buildAndAppendCertificateChainElement(Bundle bundle, PrivateKey privateKey, Element privateKeyElem, Document document) {
+    private void buildAndAppendCertificateChainElement(PrivateKey privateKey, Element privateKeyElem, Document document) {
         final KeyStore keyStore = keystoreHelper.loadKeyStore(privateKey);
         final Certificate[] certificates = keystoreHelper.loadCertificatesForPrivateKey(privateKey, keyStore);
 
