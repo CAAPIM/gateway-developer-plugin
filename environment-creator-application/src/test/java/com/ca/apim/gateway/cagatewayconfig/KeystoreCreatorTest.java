@@ -18,8 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +57,7 @@ class KeystoreCreatorTest {
 
     @Test
     void createKeystore_noKeys() {
-        KeystoreCreator.createKeyStoreIfNecessary(temporaryFolder.getRoot().getPath(), emptyList(), fileUtils, systemProperties.getPath());
+        KeystoreCreator.createKeyStoreIfNecessary(temporaryFolder.getRoot().getPath(), getClass().getClassLoader().getResource("privateKeys").getPath(), emptyList(), fileUtils, systemProperties.getPath());
         assertFalse(new File(temporaryFolder.getRoot(), KEYSTORE_FILE_NAME).exists());
     }
 
@@ -65,7 +65,7 @@ class KeystoreCreatorTest {
     void createKeystore_checkKeystoreFile() {
         when(fileUtils.getOutputStream(any(File.class))).thenCallRealMethod();
 
-        KeystoreCreator.createKeyStoreIfNecessary(temporaryFolder.getRoot().getPath(), singletonList(createPrivateKey()), fileUtils, systemProperties.getPath());
+        KeystoreCreator.createKeyStoreIfNecessary(temporaryFolder.getRoot().getPath(), getClass().getClassLoader().getResource("privateKeys").getPath(), singletonList(createPrivateKey()), fileUtils, systemProperties.getPath());
         // intention here is not to test the keystore contents, only if is created
         assertTrue(new File(temporaryFolder.getRoot(), KEYSTORE_FILE_NAME).exists());
     }
@@ -80,7 +80,7 @@ class KeystoreCreatorTest {
         });
 
         assertThrows(KeyStoreCreationException.class,
-                () -> KeystoreCreator.createKeyStoreIfNecessary(temporaryFolder.getRoot().getPath(), singletonList(createPrivateKey()), fileUtils, systemProperties.getPath()));
+                () -> KeystoreCreator.createKeyStoreIfNecessary(temporaryFolder.getRoot().getPath(), getClass().getClassLoader().getResource("privateKeys").getPath(), singletonList(createPrivateKey()), fileUtils, systemProperties.getPath()));
     }
 
     @Test
@@ -123,7 +123,6 @@ class KeystoreCreatorTest {
         privateKey.setKeystore(KeyStoreType.GENERIC.getName());
         privateKey.setAlgorithm("RSA");
         privateKey.setKeyPassword("");
-        privateKey.setPrivateKeyFile(() -> getClass().getClassLoader().getResourceAsStream("test.p12"));
         return privateKey;
     }
 }

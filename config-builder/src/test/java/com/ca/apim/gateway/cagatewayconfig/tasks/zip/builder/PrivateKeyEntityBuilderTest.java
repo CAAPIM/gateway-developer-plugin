@@ -36,7 +36,6 @@ class PrivateKeyEntityBuilderTest {
     @Test
     void build() {
         Bundle bundle = new Bundle();
-        bundle.getPrivateKeyFiles().put("test", () -> getClass().getClassLoader().getResource("test.p12").openStream());
         bundle.putAllPrivateKeys(ImmutableMap.of("test", createPrivateKey()));
 
         PrivateKeyEntityBuilder builder = new PrivateKeyEntityBuilder(keystoreHelper);
@@ -60,7 +59,7 @@ class PrivateKeyEntityBuilderTest {
         privateKey.setKeystore(KeyStoreType.GENERIC.getName());
         privateKey.setAlgorithm("RSA");
         privateKey.setKeyPassword("");
-
+        privateKey.setPrivateKeyFile(() -> getClass().getClassLoader().getResource("test.p12").openStream());
         return privateKey;
     }
 
