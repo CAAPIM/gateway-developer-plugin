@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
-import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,6 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -71,11 +69,6 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
     }
 
     private void buildAndAppendCertificateChainElement(Bundle bundle, PrivateKey privateKey, Element privateKeyElem, Document document) {
-        final SupplierWithIO<InputStream> contentSupplier = bundle.getPrivateKeyFiles().get(privateKey.getAlias());
-        if (contentSupplier == null) {
-            throw new EntityBuilderException("Private Key file for key '" + privateKey.getAlias() + "' not found in the private keys directory specified");
-        }
-        privateKey.setPrivateKeyFile(contentSupplier);
         final KeyStore keyStore = keystoreHelper.loadKeyStore(privateKey);
         final Certificate[] certificates = keystoreHelper.loadCertificatesForPrivateKey(privateKey, keyStore);
 

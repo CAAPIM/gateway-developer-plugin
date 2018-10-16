@@ -14,7 +14,11 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.File;
+import java.util.Collection;
 import java.util.Map;
+
+import static java.nio.file.Files.newInputStream;
 
 @Singleton
 public class PrivateKeyLoader extends EntityLoaderBase<PrivateKey> {
@@ -39,6 +43,28 @@ public class PrivateKeyLoader extends EntityLoaderBase<PrivateKey> {
     @Override
     protected String getFileName() {
         return FILE_NAME;
+    }
+
+    @Override
+    public void load(final Bundle bundle, final File rootDir) {
+        super.load(bundle, rootDir);
+        loadFromDirectory(bundle.getPrivateKeys().values(), new File(rootDir, "config/privateKeys"));
+    }
+
+    public static void loadFromDirectory(Collection<PrivateKey> privateKeys, File privateKeysDirectory) {
+        if (!privateKeys.isEmpty()) {
+            // load p12 file
+            if (!privateKeysDirectory.exists()) {
+                throw new BundleLoadException("Directory specified for private keys does not exist: " + privateKeysDirectory.getPath());
+            }
+            privateKeys.forEach(k -> {
+                File pk = new File(privateKeysDirectory, k.getAlias() + ".p12");
+                if (!pk.exists()) {
+                    throw new BundleLoadException("Private Key file for key '" + k.getAlias() + "' not found in the private keys directory specified: " + privateKeysDirectory.getPath());
+                }
+                k.setPrivateKeyFile(() -> newInputStream(pk.toPath()));
+            });
+        }
     }
 
     @Override

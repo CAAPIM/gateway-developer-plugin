@@ -18,8 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
@@ -28,20 +28,24 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
-@Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
+@Extensions({@ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class)})
 class PrivateKeyLoaderTest {
 
     private TemporaryFolder rootProjectDir;
     private JsonTools jsonTools;
     @Mock
     private FileUtils fileUtils;
+    private File keysDir;
 
     @BeforeEach
     void setUp(final TemporaryFolder temporaryFolder) {
         rootProjectDir = temporaryFolder;
         jsonTools = new JsonTools(fileUtils);
+
+        keysDir = new File(temporaryFolder.getRoot(), "config/privateKeys");
+        keysDir.mkdirs();
     }
 
     @Test
@@ -59,6 +63,7 @@ class PrivateKeyLoaderTest {
                 "  algorithm: \"RSA\"\n" +
                 "  keyPassword: \"\"\n" +
                 "\n";
+        createPrivateKeys("key1", "test", "key2");
         loadPrivateKeys(yaml, "yml", false);
     }
 
@@ -81,7 +86,14 @@ class PrivateKeyLoaderTest {
                 "    \"keyPassword\": \"\"\n" +
                 "  }\n" +
                 "}";
+        createPrivateKeys("key1", "test", "key2");
         loadPrivateKeys(json, "json", false);
+    }
+
+    private void createPrivateKeys(String... keys) throws IOException {
+        for (String k : keys) {
+            Files.touch(new File(keysDir, k + ".p12"));
+        }
     }
 
     @Test
@@ -152,6 +164,4 @@ class PrivateKeyLoaderTest {
         assertNotNull(key1.getKeyStoreType());
         assertEquals(KeyStoreType.PKCS12_SOFTWARE, key1.getKeyStoreType());
     }
-
-
 }

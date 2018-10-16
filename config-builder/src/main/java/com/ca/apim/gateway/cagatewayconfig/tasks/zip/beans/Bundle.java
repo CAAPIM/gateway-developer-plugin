@@ -26,11 +26,10 @@ public class Bundle {
     private final Map<String, IdentityProvider> identityProviders = new HashMap<>();
     private final Map<String, ListenPort> listenPorts = new HashMap<>();
     private final Map<String, StoredPassword> storedPasswords = new HashMap<>();
-    private final Map<String, JdbcConnection> jdbcConnections = new HashMap<>();	
+    private final Map<String, JdbcConnection> jdbcConnections = new HashMap<>();
     private final Map<String, TrustedCert> trustedCerts = new HashMap<>();
     private final Map<String, PrivateKey> privateKeys = new HashMap<>();
     private final Map<String, SupplierWithIO<InputStream>> certificateFiles = new HashMap<>();
-    private final Map<String, SupplierWithIO<InputStream>> privateKeyFiles = new HashMap<>();
     private Set<Bundle> dependencies;
 
     public Map<String, Service> getServices() {
@@ -151,13 +150,5 @@ public class Bundle {
 
     public void putAllCertificateFiles(@NotNull Map<String, SupplierWithIO<InputStream>> certificateFiles) {
         this.certificateFiles.putAll(certificateFiles);
-    }
-
-    public Map<String, SupplierWithIO<InputStream>> getPrivateKeyFiles() {
-        return privateKeyFiles;
-    }
-
-    public void putAllPrivateKeyFiles(@NotNull Map<String, SupplierWithIO<InputStream>> privateKeyFiles) {
-        this.privateKeyFiles.putAll(privateKeyFiles);
     }
 }
