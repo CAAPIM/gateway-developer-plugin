@@ -8,6 +8,8 @@ package com.ca.apim.gateway.cagatewayexport.util.injection;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EntityTypeRegistry;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoader;
@@ -63,6 +65,11 @@ public class ExportPluginModule extends AbstractModule {
             }
         });
         bind(EntityLinkerRegistry.class);
+
+        // bind the entity filters
+        Multibinder<EntityFilter> filtersBinder = newSetBinder(binder(), EntityFilter.class);
+        reflections.getSubTypesOf(EntityFilter.class).forEach(l -> filtersBinder.addBinding().to(l));
+        bind(EntityFilterRegistry.class);
 
         // bind the entity loaders
         Multibinder<EntityLoader> loadersBinder = newSetBinder(binder(), EntityLoader.class);

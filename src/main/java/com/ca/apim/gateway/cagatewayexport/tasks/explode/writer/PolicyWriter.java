@@ -53,6 +53,7 @@ public class PolicyWriter implements EntityWriter {
     private void writePolicy(Bundle bundle, File policyFolder, String folderId, String name, Element policy) {
         Folder folder = bundle.getFolderTree().getFolderById(folderId);
         Path folderPath = policyFolder.toPath().resolve(bundle.getFolderTree().getPath(folder));
+        documentFileUtils.createFolders(folderPath);
 
         Path policyPath = folderPath.resolve(name + ".xml");
         documentFileUtils.createFile(policy, policyPath, false);
