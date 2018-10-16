@@ -71,7 +71,7 @@ public class BundleFilter {
         ).forEach(filteredBundle::addEntity);
 
         // filter private keys removing the default SSL one
-        bundle.getEntities(PrivateKeyEntity.class).values().stream().filter(p -> !p.getName().equals(SSL_DEFAULT_PRIVATE_KEY)).forEach(filteredBundle::addEntity);
+        bundle.getEntities(PrivateKeyEntity.class).values().stream().filter(p -> !p.getName().equalsIgnoreCase(SSL_DEFAULT_PRIVATE_KEY)).forEach(filteredBundle::addEntity);
 
         filterParentFolders(folderPath, bundle.getFolderTree()).forEach(filteredBundle::addEntity);
 
