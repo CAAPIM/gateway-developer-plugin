@@ -57,7 +57,7 @@ public class EnvironmentCreatorApplication {
         String templatizedBundleFolderPath = args.length > 0 ? args[0] : "/opt/docker/rc.d/bundle/templatized";
         String bootstrapBundleFolderPath = args.length > 1 ? args[1] : "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/bundle/";
         String keystoreFolderPath = args.length > 2 ? args[2] : "/opt/docker/rc.d/keystore";
-        String privateKeyFolderPath = args.length > 2 ? args[2] : "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/env/privateKeys";
+        String privateKeyFolderPath = args.length > 3 ? args[3] : "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/env/privateKeys";
 
         new EnvironmentCreatorApplication(System.getenv(), templatizedBundleFolderPath, bootstrapBundleFolderPath, keystoreFolderPath, privateKeyFolderPath).run();
     }
