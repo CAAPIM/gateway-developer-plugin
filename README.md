@@ -37,23 +37,6 @@ This will export and explode the bundle to `src/main/gateway`. This can then be 
 ### clean-export
 This will delete everything in the `src/main/gateway` directory.
 
-## Currently Supported Entities
-This plugin currently supports these entities:
-
-Entity | Supported | Description
---- | --- | ---
-Folder | Yes | 
-Service | Yes | 
-Policy | Yes |
-EncapsulatedAssertion | Yes |
-ClusterProperty | Yes |
-Policy Backed Service | Yes |
-Listen Port | Yes |
-Stored Passwords | Yes |
-Trusted Cert | Yes |
-JDBC Connections | Yes |
-Identity Providers | Yes |
-
 ## Customizing the Default Plugin Configuration
 You can customize the source solution directory location and the location to put the built bundle file by setting the `GatewaySourceConfig`. For example:
 ```groovy
@@ -64,6 +47,33 @@ GatewayExportConfig {
 }
 ```
 The above will make the solution directort `export/gateway/solution`. It will put the raw bundle export file in `gateway/raw-bundle.bundle`. It will put the sanitized bundle file in `gateway/sanitized-bundle.bundle`.
+ 
+## Requiring Entities on Export
+You can require entities to export by adding them to the `GatewayExportConfig`. 
+For example, to force the export of:
+* listen ports with name `public-port` and `internal-access`
+* certificates: `finance`, `accounting`
+* JDBC Connection `app-db`
+
+Add the following to your `GatewayExportConfig`:
+ ```groovy
+ GatewayExportConfig {
+    exportEntities {
+        listenPorts = [ "public-port", "internal-access" ]
+        certificates = [ "finance", "accounting" ]
+        jdbcConnections = [ "app-db" ]
+    }
+ }
+ ```
+ 
+The following entities are available:
+* clusterProperties
+* identityProviders
+* jdbcConnections
+* listenPorts
+* privateKeys
+* passwords
+* certificates
  
 # Building the Plugin
 The build is done using gradle. To build the plugin run ```gradle build```. Once built it is available in the `build/libs` directory. 
