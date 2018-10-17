@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,7 +17,7 @@ class FolderFilterTest {
         FolderFilter folderFilter = new FolderFilter();
 
         Bundle filteredBundle = new Bundle();
-        List<Folder> childFolders = folderFilter.filter("/my/folder/path", FilterTestUtils.getBundle(), filteredBundle);
+        List<Folder> childFolders = folderFilter.filter("/my/folder/path", new FilterConfiguration(), FilterTestUtils.getBundle(), filteredBundle);
 
         assertTrue(childFolders.isEmpty());
     }
@@ -35,7 +36,7 @@ class FolderFilterTest {
         FolderFilter folderFilter = new FolderFilter();
 
         Bundle filteredBundle = new Bundle();
-        List<Folder> childFolders = folderFilter.filter("/my/folder", bundle, filteredBundle);
+        List<Folder> childFolders = folderFilter.filter("/my/folder", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(4, childFolders.size());
         assertTrue(childFolders.stream().anyMatch(f -> "folder".equals(f.getName())));

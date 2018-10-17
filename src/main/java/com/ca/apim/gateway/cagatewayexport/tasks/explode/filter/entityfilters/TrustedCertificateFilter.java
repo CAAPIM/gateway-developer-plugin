@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.TrustedCertEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,9 @@ public class TrustedCertificateFilter implements EntityFilter<TrustedCertEntity>
     }
 
     @Override
-    public List<TrustedCertEntity> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
-        return DependencyUtils.filterDependencies(TrustedCertEntity.class, bundle, filteredBundle);
+    public List<TrustedCertEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        List<TrustedCertEntity> certificates = DependencyUtils.filterDependencies(TrustedCertEntity.class, bundle, filteredBundle, e -> filterConfiguration.getCertificates().contains(e.getName()));
+        DependencyUtils.validateEntitiesInList(certificates, filterConfiguration.getCertificates(), "Certificate(s)");
+        return certificates;
     }
 }

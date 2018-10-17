@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PrivateKeyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,9 +29,21 @@ public class PrivateKeyFilter implements EntityFilter<PrivateKeyEntity> {
     }
 
     @Override
-    public List<PrivateKeyEntity> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
-        return DependencyUtils.filterDependencies(PrivateKeyEntity.class, bundle, filteredBundle).stream()
-                // filter out the default ssl key
-                .filter(p -> !p.getName().equalsIgnoreCase(SSL_DEFAULT_PRIVATE_KEY)).collect(Collectors.toList());
+    @SuppressWarnings("squid:S1157")
+    public List<PrivateKeyEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        Stream<PrivateKeyEntity> stream = DependencyUtils.filterDependencies(PrivateKeyEntity.class, bundle, filteredBundle, e -> filterConfiguration.getPrivateKeys().contains(e.getName())).stream();
+        if (!filterConfiguration.getPrivateKeys().contains(SSL_DEFAULT_PRIVATE_KEY.toUpperCase())) {
+            stream = stream
+                    // filter out the default ssl key
+                    .filter(p -> !p.getName().equals(SSL_DEFAULT_PRIVATE_KEY.toUpperCase()));
+        }
+        if (!filterConfiguration.getPrivateKeys().contains(SSL_DEFAULT_PRIVATE_KEY.toLowerCase())) {
+            stream = stream
+                    // filter out the default ssl key
+                    .filter(p -> !p.getName().equals(SSL_DEFAULT_PRIVATE_KEY.toLowerCase()));
+        }
+        List<PrivateKeyEntity> privateKeys = stream.collect(Collectors.toList());
+        DependencyUtils.validateEntitiesInList(privateKeys, filterConfiguration.getPrivateKeys(), "Private Key(s)");
+        return privateKeys;
     }
 }

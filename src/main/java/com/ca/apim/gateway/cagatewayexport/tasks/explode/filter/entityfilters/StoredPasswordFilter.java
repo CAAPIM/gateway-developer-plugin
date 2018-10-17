@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,9 +28,11 @@ public class StoredPasswordFilter implements EntityFilter<StoredPasswordEntity> 
     }
 
     @Override
-    public List<StoredPasswordEntity> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
-        return DependencyUtils.filterDependencies(StoredPasswordEntity.class, bundle, filteredBundle)
+    public List<StoredPasswordEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        List<StoredPasswordEntity> passwords = DependencyUtils.filterDependencies(StoredPasswordEntity.class, bundle, filteredBundle, e -> filterConfiguration.getPasswords().contains(e.getName()))
                 // currently only string password types are supported. PEM password support still needs to be added
                 .stream().filter(e -> e.isType(StoredPasswordEntity.Type.PASSWORD)).collect(Collectors.toList());
+        DependencyUtils.validateEntitiesInList(passwords, filterConfiguration.getPasswords(), "Password(s)");
+        return passwords;
     }
 }

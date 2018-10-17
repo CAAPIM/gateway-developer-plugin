@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.JdbcConnectionEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,9 @@ public class JDBCConnectionFilter implements EntityFilter<JdbcConnectionEntity> 
     }
 
     @Override
-    public List<JdbcConnectionEntity> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
-        return DependencyUtils.filterDependencies(JdbcConnectionEntity.class, bundle, filteredBundle);
+    public List<JdbcConnectionEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        List<JdbcConnectionEntity> jdbcConnections = DependencyUtils.filterDependencies(JdbcConnectionEntity.class, bundle, filteredBundle, e -> filterConfiguration.getJdbcConnections().contains(e.getName()));
+        DependencyUtils.validateEntitiesInList(jdbcConnections, filterConfiguration.getJdbcConnections(), "JDBC Connection(s)");
+        return jdbcConnections;
     }
 }

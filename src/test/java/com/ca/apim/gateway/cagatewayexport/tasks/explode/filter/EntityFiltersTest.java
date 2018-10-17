@@ -67,7 +67,7 @@ class EntityFiltersTest {
             return dependencies;
         }
 
-        public List<E> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
+        public List<E> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
             return Collections.emptyList();
         }
     }

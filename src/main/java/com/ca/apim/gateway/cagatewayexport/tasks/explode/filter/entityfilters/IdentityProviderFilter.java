@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.IdentityProviderEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,9 +27,15 @@ public class IdentityProviderFilter implements EntityFilter<IdentityProviderEnti
     }
 
     @Override
-    public List<IdentityProviderEntity> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
-        return DependencyUtils.filterDependencies(IdentityProviderEntity.class, bundle, filteredBundle).stream()
-                // filter out the internal identity provider
-                .filter(idp -> !IdentityProviderEntity.INTERNAL_IDP_ID.equals(idp.getId())).collect(Collectors.toList());
+    public List<IdentityProviderEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        Stream<IdentityProviderEntity> identityProviderEntityStream = DependencyUtils.filterDependencies(IdentityProviderEntity.class, bundle, filteredBundle, e -> filterConfiguration.getIdentityProviders().contains(e.getName())).stream();
+        if (!filterConfiguration.getIdentityProviders().contains(IdentityProviderEntity.INTERNAL_IDP_NAME)) {
+            identityProviderEntityStream = identityProviderEntityStream
+                    // filter out the internal identity provider
+                    .filter(idp -> !IdentityProviderEntity.INTERNAL_IDP_ID.equals(idp.getId()));
+        }
+        List<IdentityProviderEntity> identityProviders = identityProviderEntityStream.collect(Collectors.toList());
+        DependencyUtils.validateEntitiesInList(identityProviders, filterConfiguration.getIdentityProviders(), "Identity Provider(s)");
+        return identityProviders;
     }
 }

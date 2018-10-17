@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
@@ -23,7 +24,7 @@ class PolicyFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(Collections.emptyMap());
 
-        List<PolicyEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        List<PolicyEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, filteredEntities.size());
     }
@@ -48,7 +49,7 @@ class PolicyFilterTest {
         bundle.addEntity(new PolicyEntity("policy4", "4", "", "1", null, ""));
         bundle.addEntity(new PolicyEntity("policy5", "5", "", "4", null, ""));
 
-        List<PolicyEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        List<PolicyEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(3, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "policy1".equals(c.getName())));

@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
@@ -22,7 +23,7 @@ public class PolicyFilter implements EntityFilter<PolicyEntity> {
     }
 
     @Override
-    public List<PolicyEntity> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
+    public List<PolicyEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
         Map<String, Folder> folders = filteredBundle.getEntities(Folder.class);
         return bundle.getEntities(PolicyEntity.class).values().stream()
                 .filter(p -> folders.containsKey(p.getFolderId())).collect(Collectors.toList());

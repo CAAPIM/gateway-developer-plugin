@@ -1,11 +1,10 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Encass;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
@@ -13,7 +12,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EncassFilterTest {
     @Test
@@ -24,7 +24,7 @@ class EncassFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(Collections.emptyMap());
 
-        List<EncassEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        List<EncassEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, filteredEntities.size());
     }
@@ -45,7 +45,7 @@ class EncassFilterTest {
         bundle.addEntity(new EncassEntity("encass3", "3", "", "1", null, null ));
         bundle.addEntity(new EncassEntity("encass4", "4", "", "2", null, null ));
 
-        List<EncassEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        List<EncassEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(2, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "encass2".equals(c.getName())));

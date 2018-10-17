@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
@@ -22,7 +23,7 @@ public class FolderFilter implements EntityFilter<Folder> {
     }
 
     @Override
-    public List<Folder> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
+    public List<Folder> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
         return bundle.getFolderTree().stream()
                 // keep all folders that are children of the given folder path
                 .filter(f -> {

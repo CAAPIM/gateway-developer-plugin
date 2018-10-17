@@ -27,13 +27,14 @@ import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class CAGatewayExportTest {
     private static final Logger LOGGER = Logger.getLogger(CAGatewayExportTest.class.getName());
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
-    void testEnvironmentProperties(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+    void testExplode(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
         String projectFolder = "example-project";
         File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
         File buildGradleFile = new File(testProjectDir, "build.gradle");
@@ -49,6 +50,10 @@ class CAGatewayExportTest {
                 "    folderPath = '/environment-variable'\n" +
                 "    inputBundleFile = file('bundle.bundle')\n" +
                 "    exportDir = file('gateway')\n" +
+                "    exportEntities {\n" +
+                "        passwords = [ \"my-password\" ]\n" +
+                "        clusterProperties = [ \"that-property\" ]\n" +
+                "    }\n" +
                 "}";
 
         FileUtils.writeStringToFile(buildGradleFile, gradleBuild, Charset.defaultCharset());
@@ -78,5 +83,18 @@ class CAGatewayExportTest {
         assertTrue(environmentProperties.containsKey("local.env.var"));
         assertTrue(environmentProperties.containsKey("gateway.my-global-property"));
         assertTrue(environmentProperties.containsKey("gateway.another.global"));
+
+        Properties staticProperties = new Properties();
+        staticProperties.load(new FileReader(new File(configDir, "static.properties")));
+        assertTrue(staticProperties.containsKey("that-property"));
+        assertFalse(staticProperties.containsKey("this-property"));
+
+        File passwordsFile = new File(configDir, "stored-passwords.properties");
+        assertTrue(passwordsFile.exists());
+        Properties passwordProperties = new Properties();
+        passwordProperties.load(new FileReader(passwordsFile));
+        assertTrue(passwordProperties.containsKey("my-password"));
+        assertFalse(passwordProperties.containsKey("another-password"));
+        assertEquals(1, passwordProperties.size());
     }
 }

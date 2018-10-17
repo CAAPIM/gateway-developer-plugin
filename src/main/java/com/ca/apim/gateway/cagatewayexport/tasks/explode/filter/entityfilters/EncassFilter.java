@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
@@ -22,7 +23,7 @@ public class EncassFilter implements EntityFilter<EncassEntity> {
     }
 
     @Override
-    public List<EncassEntity> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
+    public List<EncassEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
         // get all policies from the filtered bundle
         Map<String, PolicyEntity> policies = filteredBundle.getEntities(PolicyEntity.class);
         return bundle.getEntities(EncassEntity.class).values().stream()

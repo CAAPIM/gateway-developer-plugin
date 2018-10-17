@@ -6,32 +6,35 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
+import com.ca.apim.gateway.cagatewayexport.GatewayExportEntities;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
+import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.options.Option;
 
 import javax.inject.Inject;
+import java.util.Collections;
 
 public class ExplodeBundleTask extends DefaultTask {
 
     private Property<String> folderPath;
     private RegularFileProperty inputBundleFile;
     private DirectoryProperty exportDir;
+    private GatewayExportEntities gatewayExportEntities;
 
     @Inject
     public ExplodeBundleTask() {
         folderPath = getProject().getObjects().property(String.class);
         inputBundleFile = newInputFile();
         exportDir = newOutputDirectory();
+        gatewayExportEntities = getProject().getObjects().newInstance(GatewayExportEntities.class, getProject());
         JsonTools.INSTANCE.setOutputType(JsonTools.YAML);
         getOutputs().upToDateWhen(t -> false);
     }
@@ -61,9 +64,27 @@ public class ExplodeBundleTask extends DefaultTask {
         JsonTools.INSTANCE.setOutputType(format);
     }
 
+    @Input
+    @Optional
+    public void exportEntities(Action<? super GatewayExportEntities> action) {
+        action.execute(gatewayExportEntities);
+    }
+
     @TaskAction
     public void perform() throws DocumentParseException {
         ExplodeBundle explodeBundle = ExportPluginModule.getInjector().getInstance(ExplodeBundle.class);
-        explodeBundle.explodeBundle(folderPath.getOrElse("/"), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
+        explodeBundle.explodeBundle(folderPath.getOrElse("/"), toFilterConfiguration(gatewayExportEntities), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
+    }
+
+    private FilterConfiguration toFilterConfiguration(GatewayExportEntities gatewayExportEntities) {
+        FilterConfiguration filterConfiguration = new FilterConfiguration();
+        filterConfiguration.getCertificates().addAll(gatewayExportEntities.getCertificates().getOrElse(Collections.emptySet()));
+        filterConfiguration.getClusterProperties().addAll(gatewayExportEntities.getClusterProperties().getOrElse(Collections.emptySet()));
+        filterConfiguration.getIdentityProviders().addAll(gatewayExportEntities.getIdentityProviders().getOrElse(Collections.emptySet()));
+        filterConfiguration.getJdbcConnections().addAll(gatewayExportEntities.getJdbcConnections().getOrElse(Collections.emptySet()));
+        filterConfiguration.getListenPorts().addAll(gatewayExportEntities.getListenPorts().getOrElse(Collections.emptySet()));
+        filterConfiguration.getPasswords().addAll(gatewayExportEntities.getPasswords().getOrElse(Collections.emptySet()));
+        filterConfiguration.getPrivateKeys().addAll(gatewayExportEntities.getPrivateKeys().getOrElse(Collections.emptySet()));
+        return filterConfiguration;
     }
 }

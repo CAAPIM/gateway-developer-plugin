@@ -2,18 +2,18 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.JdbcConnectionEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PolicyBackedServiceFilterTest {
     @Test
@@ -24,7 +24,7 @@ class PolicyBackedServiceFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(Collections.emptyMap());
 
-        List<PolicyBackedServiceEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        List<PolicyBackedServiceEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, filteredEntities.size());
     }
@@ -49,7 +49,7 @@ class PolicyBackedServiceFilterTest {
         bundle.addEntity(new PolicyBackedServiceEntity("pbs4", "4", "", Collections.emptyMap()));
 
 
-        List<PolicyBackedServiceEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        List<PolicyBackedServiceEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(2, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "pbs1".equals(c.getName())));

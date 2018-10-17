@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.BundleFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
@@ -36,7 +37,7 @@ public class ExplodeBundle {
         this.entityLinkerRegistry = entityLinkerRegistry;
     }
 
-    void explodeBundle(String folderPath, File bundleFile, File explodeDirectory) throws DocumentParseException {
+    void explodeBundle(String folderPath, FilterConfiguration filterConfiguration, File bundleFile, File explodeDirectory) throws DocumentParseException {
         final Document bundleDocument = documentTools.parse(bundleFile);
         documentTools.cleanup(bundleDocument);
 
@@ -46,7 +47,7 @@ public class ExplodeBundle {
 
         //filter out unwanted entities
         BundleFilter bundleFilter = ExportPluginModule.getInjector().getInstance(BundleFilter.class);
-        Bundle filteredBundle = bundleFilter.filter(folderPath, bundle);
+        Bundle filteredBundle = bundleFilter.filter(folderPath, filterConfiguration, bundle);
 
         //Link, simplify and process entities
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();

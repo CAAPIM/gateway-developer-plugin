@@ -1,7 +1,11 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.*;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.JdbcConnectionEntity;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
@@ -20,7 +24,7 @@ class JDBCConnectionFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(Collections.emptyMap());
 
-        List<JdbcConnectionEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        List<JdbcConnectionEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, filteredEntities.size());
     }
@@ -41,10 +45,23 @@ class JDBCConnectionFilterTest {
         bundle.addEntity(new JdbcConnectionEntity.Builder().name("jdbc3").id("3").build());
         bundle.addEntity(new JdbcConnectionEntity.Builder().name("jdbc4").id("4").build());
 
-        List<JdbcConnectionEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        FilterConfiguration filterConfiguration = new FilterConfiguration();
+        List<JdbcConnectionEntity> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(2, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "jdbc2".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "jdbc3".equals(c.getName())));
+
+        filterConfiguration.getJdbcConnections().add("jdbc1");
+        filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
+
+        assertEquals(3, filteredEntities.size());
+        assertTrue(filteredEntities.stream().anyMatch(c -> "jdbc2".equals(c.getName())));
+        assertTrue(filteredEntities.stream().anyMatch(c -> "jdbc3".equals(c.getName())));
+        assertTrue(filteredEntities.stream().anyMatch(c -> "jdbc1".equals(c.getName())));
+
+        filterConfiguration.getJdbcConnections().add("non-existing-entity");
+        EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
+        assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }
 }

@@ -2,9 +2,10 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.JdbcConnectionEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PrivateKeyEntity;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
@@ -23,7 +24,7 @@ class PrivateKeyFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(Collections.emptyMap());
 
-        List<PrivateKeyEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        List<PrivateKeyEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, filteredEntities.size());
     }
@@ -45,9 +46,23 @@ class PrivateKeyFilterTest {
         bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("pk4").setId("4").build());
         bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("ssl").setId("5").build());
 
-        List<PrivateKeyEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
+        FilterConfiguration filterConfiguration = new FilterConfiguration();
+        List<PrivateKeyEntity> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(1, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "pk3".equals(c.getName())));
+
+        filterConfiguration.getPrivateKeys().add("ssl");
+        filterConfiguration.getPrivateKeys().add("pk1");
+        filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
+
+        assertEquals(3, filteredEntities.size());
+        assertTrue(filteredEntities.stream().anyMatch(c -> "pk3".equals(c.getName())));
+        assertTrue(filteredEntities.stream().anyMatch(c -> "pk1".equals(c.getName())));
+        assertTrue(filteredEntities.stream().anyMatch(c -> "ssl".equals(c.getName())));
+
+        filterConfiguration.getPrivateKeys().add("non-existing-entity");
+        EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
+        assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }
 }

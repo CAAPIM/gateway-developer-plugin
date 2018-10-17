@@ -54,10 +54,11 @@ public interface EntityFilter<E extends Entity> extends Comparable<EntityFilter>
     /**
      * Filters entities in the bundle and returns the list of filtered entities. Filtered entities are entities that are meant to be kept.
      *
-     * @param folderPath     The folder path that will be filtered
-     * @param bundle         The bundle to filter entities from
-     * @param filteredBundle The filtered bundle containing already filtered entities.
+     * @param folderPath          The folder path that will be filtered
+     * @param filterConfiguration This is the filter configuration.
+     * @param bundle              The bundle to filter entities from
+     * @param filteredBundle      The filtered bundle containing already filtered entities.
      * @return The list of entities filtered from the bundle
      */
-    List<E> filter(String folderPath, Bundle bundle, Bundle filteredBundle);
+    List<E> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle);
 }

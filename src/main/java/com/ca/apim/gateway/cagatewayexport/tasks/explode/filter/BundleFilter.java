@@ -23,10 +23,10 @@ public class BundleFilter {
         this.filterRegistry = filterRegistry;
     }
 
-    public Bundle filter(String folderPath, Bundle bundle) {
+    public Bundle filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle) {
         Bundle filteredBundle = new Bundle();
         //for each entity filter, filter and then add the results to the filtered bundle
-        filterRegistry.getEntityFilters().forEach(ef -> ((List<? extends Entity>) ef.filter(folderPath, bundle, filteredBundle)).forEach(filteredBundle::addEntity));
+        filterRegistry.getEntityFilters().forEach(ef -> ((List<? extends Entity>) ef.filter(folderPath, filterConfiguration, bundle, filteredBundle)).forEach(filteredBundle::addEntity));
 
         // Add parent folders to the filtered Bundle
         FolderFilter.parentFolders(folderPath, bundle).forEach(filteredBundle::addEntity);

@@ -3,6 +3,8 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
+import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
@@ -10,8 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.DEFAULT_PORTS;
 
 @Singleton
 public class ListenPortFilter implements EntityFilter<ListenPortEntity> {
@@ -22,10 +22,12 @@ public class ListenPortFilter implements EntityFilter<ListenPortEntity> {
     }
 
     @Override
-    public List<ListenPortEntity> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
-        return bundle.getEntities(ListenPortEntity.class).values().stream()
+    public List<ListenPortEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        List<ListenPortEntity> listenPorts = bundle.getEntities(ListenPortEntity.class).values().stream()
                 // filter out the default listen ports
-                .filter(l -> !DEFAULT_PORTS.contains(l.getPort())).collect(Collectors.toList());
+                .filter(l -> filterConfiguration.getListenPorts().contains(l.getName())).collect(Collectors.toList());
+        DependencyUtils.validateEntitiesInList(listenPorts, filterConfiguration.getListenPorts(), "Listen Port(s)");
+        return listenPorts;
     }
 
 }

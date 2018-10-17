@@ -4,6 +4,8 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
@@ -23,7 +25,7 @@ class ClusterPropertyFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(Collections.emptyMap());
 
-        List<ClusterProperty> clusterProperties = filter.filter("/my/folder/path", bundle, filteredBundle);
+        List<ClusterProperty> clusterProperties = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, clusterProperties.size());
     }
@@ -44,11 +46,24 @@ class ClusterPropertyFilterTest {
         bundle.addEntity(new ClusterProperty("prop3", "3", "3"));
         bundle.addEntity(new ClusterProperty("prop4", "4", "4"));
 
-        List<ClusterProperty> clusterProperties = filter.filter("/my/folder/path", bundle, filteredBundle);
+        FilterConfiguration filterConfiguration = new FilterConfiguration();
+        List<ClusterProperty> clusterProperties = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(2, clusterProperties.size());
         assertTrue(clusterProperties.stream().anyMatch(c -> "prop2".equals(c.getName())));
         assertTrue(clusterProperties.stream().anyMatch(c -> "prop3".equals(c.getName())));
+
+        filterConfiguration.getClusterProperties().add("prop4");
+        clusterProperties = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
+
+        assertEquals(3, clusterProperties.size());
+        assertTrue(clusterProperties.stream().anyMatch(c -> "prop2".equals(c.getName())));
+        assertTrue(clusterProperties.stream().anyMatch(c -> "prop3".equals(c.getName())));
+        assertTrue(clusterProperties.stream().anyMatch(c -> "prop4".equals(c.getName())));
+
+        filterConfiguration.getClusterProperties().add("prop5");
+        EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
+        assertTrue(entityFilterException.getMessage().contains("prop5"));
     }
 
 }
