@@ -37,7 +37,7 @@ public interface EntityFilter<E extends Entity> extends Comparable<EntityFilter>
      * @param entityFilters The entity filters to scan for dependencies
      * @return true if the given entity filter is a dependency of the entity filters in the given collection. false otherwise
      */
-    static boolean isDependency(EntityFilter entityFilter, Collection<Class<EntityFilter<? extends Entity>>> entityFilters) {
+    static boolean isDependency(EntityFilter entityFilter, Collection<Class<? extends EntityFilter>> entityFilters) {
         return entityFilters.stream().anyMatch(e -> e.equals(entityFilter.getClass()) || isDependency(entityFilter, getEntityFilterFromClass(e).getDependencyEntityFilters()));
     }
 
@@ -47,7 +47,7 @@ public interface EntityFilter<E extends Entity> extends Comparable<EntityFilter>
      * @param filterClass The entity filter class
      * @return an instance of the entity filter
      */
-    static EntityFilter getEntityFilterFromClass(Class<EntityFilter<? extends Entity>> filterClass) {
+    static EntityFilter getEntityFilterFromClass(Class<? extends EntityFilter> filterClass) {
         return ExportPluginModule.getInjector().getInstance(filterClass);
     }
 
