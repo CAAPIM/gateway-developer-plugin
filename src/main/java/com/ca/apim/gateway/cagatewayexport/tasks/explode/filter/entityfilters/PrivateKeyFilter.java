@@ -31,6 +31,6 @@ public class PrivateKeyFilter implements EntityFilter<PrivateKeyEntity> {
     public List<PrivateKeyEntity> filter(String folderPath, Bundle bundle, Bundle filteredBundle) {
         return DependencyUtils.filterDependencies(PrivateKeyEntity.class, bundle, filteredBundle).stream()
                 // filter out the default ssl key
-                .filter(p -> !p.getName().equals(SSL_DEFAULT_PRIVATE_KEY)).collect(Collectors.toList());
+                .filter(p -> !p.getName().equalsIgnoreCase(SSL_DEFAULT_PRIVATE_KEY)).collect(Collectors.toList());
     }
 }

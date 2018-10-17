@@ -43,6 +43,7 @@ class PrivateKeyFilterTest {
         bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("SSL").setId("2").build());
         bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("pk3").setId("3").build());
         bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("pk4").setId("4").build());
+        bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("ssl").setId("5").build());
 
         List<PrivateKeyEntity> filteredEntities = filter.filter("/my/folder/path", bundle, filteredBundle);
 
