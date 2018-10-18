@@ -15,6 +15,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.*;
@@ -38,8 +39,9 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
 
-    private static final String STRING_VALUE = "stringValue";
-    private static final String POLICY_PATH = "policyPath";
+    static final String STRING_VALUE = "stringValue";
+    static final String BOOLEAN_VALUE = "booleanValue";
+    static final String POLICY_PATH = "policyPath";
     private static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
     private static final String TAG = "tag";
     private static final String SUBTAG = "subtag";
@@ -47,6 +49,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     private static final String POLICY = "policy";
     static final String POLICY_TYPE_INCLUDE = "Include";
     private static final Integer ORDER = 200;
+    static final String ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
@@ -90,7 +93,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Element policyElement = policyDocument.getDocumentElement();
 
         prepareAssertion(policyElement, INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
-        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(bundle, policyDocument, assertionElement));
+        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement));
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
@@ -110,7 +113,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
 
         String variableName = nameElement.getAttribute(STRING_VALUE);
-        if(variableName.startsWith(PREFIX_ENV)){
+        if (variableName.startsWith(PREFIX_ENV)) {
             assertionElement.insertBefore(
                     createElementWithAttribute(policyDocument, BASE_64_EXPRESSION, ENV_PARAM_NAME, variableName),
                     assertionElement.getFirstChild()
@@ -152,8 +155,20 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return content.toString();
     }
 
-    private void prepareEncapsulatedAssertion(Bundle bundle, Document policyDocument, Node encapsulatedAssertionElement) {
-        final String policyPath = ((Element) encapsulatedAssertionElement).getAttribute(POLICY_PATH);
+    @VisibleForTesting
+    static void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Node encapsulatedAssertionElement) {
+        if (((Element) encapsulatedAssertionElement).hasAttribute(POLICY_PATH)) {
+            final String policyPath = ((Element) encapsulatedAssertionElement).getAttribute(POLICY_PATH);
+            final String guid = findEncassReferencedGuid(policy, bundle, (Element) encapsulatedAssertionElement, policyPath);
+            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, policyPath, guid);
+        } else if (!isNoOpIfConfigMissing((Element) encapsulatedAssertionElement)) {
+            throw new EntityBuilderException("No policyPath specified for encass in policy: " + policy.getPath());
+        } else {
+            LOGGER.log(Level.FINE, "No policyPath specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
+        }
+    }
+
+    private static String findEncassReferencedGuid(Policy policy, Bundle bundle, Element encapsulatedAssertionElement, String policyPath) {
         LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", policyPath);
         final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(policyPath));
         if (referenceEncass.get() == null) {
@@ -163,16 +178,26 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 }
             });
         }
+        final String guid;
         if (referenceEncass.get() == null) {
-            throw new EntityBuilderException("Could not find referenced encass with path: " + policyPath);
+            if (isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
+                LOGGER.log(Level.FINE, "Could not find referenced encass with path: \"{0}\". In policy: \"{1}\". Since NoOp is true, this will be treated as a No Op.", new String[]{policyPath, policy.getPath()});
+                guid = ZERO_GUID;
+            } else {
+                throw new EntityBuilderException("Could not find referenced encass with path: '" + policyPath + "'. In policy: " + policy.getPath());
+            }
+        } else {
+            guid = referenceEncass.get().getGuid();
         }
-        final String guid = referenceEncass.get().getGuid();
+        return guid;
+    }
 
+    private static void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, String encassName, String encassGuid) {
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
                 policyDocument,
                 ENCAPSULATED_ASSERTION_CONFIG_NAME,
                 STRING_VALUE,
-                policyPath
+                encassName
         );
         Node firstChild = encapsulatedAssertionElement.getFirstChild();
         if (firstChild != null) {
@@ -185,11 +210,20 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 policyDocument,
                 ENCAPSULATED_ASSERTION_CONFIG_GUID,
                 STRING_VALUE,
-                guid
+                encassGuid
         );
         encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
 
         ((Element) encapsulatedAssertionElement).removeAttribute(POLICY_PATH);
+    }
+
+    private static boolean isNoOpIfConfigMissing(Element encapsulatedAssertionElement) {
+        Element noOpElement = getSingleChildElement(encapsulatedAssertionElement, NO_OP_IF_CONFIG_MISSING, true);
+        if (noOpElement == null) {
+            return false;
+        }
+        final String isNoOp = noOpElement.getAttribute(BOOLEAN_VALUE);
+        return Boolean.valueOf(isNoOp);
     }
 
     private void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
