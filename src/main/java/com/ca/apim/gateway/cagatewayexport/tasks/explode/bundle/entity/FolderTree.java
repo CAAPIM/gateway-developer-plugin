@@ -53,6 +53,10 @@ public class FolderTree {
         return Stream.of(rootFolder).flatMap(this::expand);
     }
 
+    public Folder getRootFolder() {
+        return rootFolder;
+    }
+
     private Stream<Folder> expand(final Folder folder) {
         return Stream.of(folder).flatMap(f -> Stream.concat(Stream.of(f), folderChildrenMap.getOrDefault(f.getId(), Collections.emptySet()).stream().flatMap(this::expand)));
     }
