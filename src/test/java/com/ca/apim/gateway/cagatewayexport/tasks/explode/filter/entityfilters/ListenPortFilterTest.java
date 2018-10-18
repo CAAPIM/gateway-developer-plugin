@@ -49,16 +49,20 @@ class ListenPortFilterTest {
         FilterConfiguration filterConfiguration = new FilterConfiguration();
         List<ListenPortEntity> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
-        assertEquals(0, filteredEntities.size());
+        assertEquals(2, filteredEntities.size());
+        assertTrue(filteredEntities.stream().anyMatch(c -> "lp2".equals(c.getName())));
+        assertTrue(filteredEntities.stream().anyMatch(c -> "lp3".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().put("listenPorts", new HashSet<>());
-        filterConfiguration.getEntityFilters().get("listenPorts").add("lp2");
+        filterConfiguration.getEntityFilters().put(filter.getFilterableEntityName(), new HashSet<>());
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("lp4");
         filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
-        assertEquals(1, filteredEntities.size());
+        assertEquals(3, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "lp2".equals(c.getName())));
+        assertTrue(filteredEntities.stream().anyMatch(c -> "lp3".equals(c.getName())));
+        assertTrue(filteredEntities.stream().anyMatch(c -> "lp4".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().get("listenPorts").add("non-existing-entity");
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("non-existing-entity");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }

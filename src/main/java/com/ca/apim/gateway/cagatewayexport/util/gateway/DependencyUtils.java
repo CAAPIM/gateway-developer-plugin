@@ -28,11 +28,11 @@ public class DependencyUtils {
     @NotNull
     public static <E extends Entity> List<E> filterDependencies(Class<E> dependentEntityType, Bundle bundle, Bundle filteredBundle, Predicate<E> includeEntity) {
         // Gets entities of the given type that are dependencies of entities in the filteredBundle
-        Set<Dependency> dependentClusterProperties = DependencyUtils.filterDependencies(dependentEntityType, bundle.getDependencies(), filteredBundle);
+        Set<Dependency> dependentEntities = DependencyUtils.filterDependencies(dependentEntityType, bundle.getDependencies(), filteredBundle);
 
         return bundle.getEntities(dependentEntityType).values().stream()
                 //keep only entities the are dependencies of entities in the filtered bundle
-                .filter(entity -> dependentClusterProperties.contains(new Dependency(entity.getId(), dependentEntityType)) || includeEntity.test(entity))
+                .filter(entity -> dependentEntities.contains(new Dependency(entity.getId(), dependentEntityType)) || includeEntity.test(entity))
                 .collect(Collectors.toList());
     }
 

@@ -53,8 +53,8 @@ class TrustedCertificateFilterTest {
         assertTrue(filteredEntities.stream().anyMatch(c -> "cert2".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "cert3".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().put("certificates", new HashSet<>());
-        filterConfiguration.getEntityFilters().get("certificates").add("cert1");
+        filterConfiguration.getEntityFilters().put(filter.getFilterableEntityName(), new HashSet<>());
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("cert1");
         filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(3, filteredEntities.size());
@@ -62,7 +62,7 @@ class TrustedCertificateFilterTest {
         assertTrue(filteredEntities.stream().anyMatch(c -> "cert3".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "cert1".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().get("certificates").add("non-existing-entity");
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("non-existing-entity");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }

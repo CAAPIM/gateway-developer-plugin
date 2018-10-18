@@ -53,8 +53,8 @@ class JDBCConnectionFilterTest {
         assertTrue(filteredEntities.stream().anyMatch(c -> "jdbc2".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "jdbc3".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().put("jdbcConnections", new HashSet<>());
-        filterConfiguration.getEntityFilters().get("jdbcConnections").add("jdbc1");
+        filterConfiguration.getEntityFilters().put(filter.getFilterableEntityName(), new HashSet<>());
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("jdbc1");
         filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(3, filteredEntities.size());
@@ -62,7 +62,7 @@ class JDBCConnectionFilterTest {
         assertTrue(filteredEntities.stream().anyMatch(c -> "jdbc3".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "jdbc1".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().get("jdbcConnections").add("non-existing-entity");
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("non-existing-entity");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }

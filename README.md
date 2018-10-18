@@ -74,6 +74,14 @@ The following entities are available:
 * privateKeys
 * passwords
 * certificates
+
+## Entities Not Exported
+There are some default entities that are not exported unless they are explicitly listed in the exportEntities:
+
+| Type          | Name          |
+| ------------- |-------------  |
+| Identity Provider | Internal Identity Provider |
+| Private Key      | *ssl* or *SSL*      |  
  
 # Building the Plugin
 The build is done using gradle. To build the plugin run ```gradle build```. Once built it is available in the `build/libs` directory. 

@@ -53,9 +53,9 @@ class IdentityProviderFilterTest {
         assertEquals(1, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "idp3".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().put("identityProviders", new HashSet<>());
-        filterConfiguration.getEntityFilters().get("identityProviders").add("idp4");
-        filterConfiguration.getEntityFilters().get("identityProviders").add("idp1");
+        filterConfiguration.getEntityFilters().put(filter.getFilterableEntityName(), new HashSet<>());
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("idp4");
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("idp1");
         filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(3, filteredEntities.size());
@@ -63,7 +63,7 @@ class IdentityProviderFilterTest {
         assertTrue(filteredEntities.stream().anyMatch(c -> "idp1".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "idp4".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().get("identityProviders").add("non-existing-entity");
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("non-existing-entity");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }

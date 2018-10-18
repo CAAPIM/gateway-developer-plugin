@@ -54,8 +54,8 @@ class ClusterPropertyFilterTest {
         assertTrue(clusterProperties.stream().anyMatch(c -> "prop2".equals(c.getName())));
         assertTrue(clusterProperties.stream().anyMatch(c -> "prop3".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().put("clusterProperties", new HashSet<>());
-        filterConfiguration.getEntityFilters().get("clusterProperties").add("prop4");
+        filterConfiguration.getEntityFilters().put(filter.getFilterableEntityName(), new HashSet<>());
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("prop4");
         clusterProperties = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(3, clusterProperties.size());
@@ -63,7 +63,7 @@ class ClusterPropertyFilterTest {
         assertTrue(clusterProperties.stream().anyMatch(c -> "prop3".equals(c.getName())));
         assertTrue(clusterProperties.stream().anyMatch(c -> "prop4".equals(c.getName())));
 
-        filterConfiguration.getEntityFilters().get("clusterProperties").add("prop5");
+        filterConfiguration.getEntityFilters().get(filter.getFilterableEntityName()).add("prop5");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("prop5"));
     }
