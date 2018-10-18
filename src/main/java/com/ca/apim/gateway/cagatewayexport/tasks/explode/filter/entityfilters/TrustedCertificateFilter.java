@@ -20,7 +20,7 @@ public class TrustedCertificateFilter implements EntityFilter<TrustedCertEntity>
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
             ServiceFilter.class).collect(Collectors.toSet());
-    private final String ENTITY_NAME = "certificates";
+    private static final String ENTITY_NAME = "certificates";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {

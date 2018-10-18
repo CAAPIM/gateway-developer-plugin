@@ -21,7 +21,7 @@ public class StoredPasswordFilter implements EntityFilter<StoredPasswordEntity> 
             PolicyFilter.class,
             ServiceFilter.class,
             JDBCConnectionFilter.class).collect(Collectors.toSet());
-    private final String ENTITY_NAME = "passwords";
+    private static final String ENTITY_NAME = "passwords";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {

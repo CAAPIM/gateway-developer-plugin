@@ -23,7 +23,7 @@ public class ClusterPropertyFilter implements EntityFilter<ClusterProperty> {
             PolicyBackedServiceFilter.class,
             PolicyFilter.class,
             ServiceFilter.class).collect(Collectors.toSet());
-    private final String ENTITY_NAME = "clusterProperties";
+    private static final String ENTITY_NAME = "clusterProperties";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Singleton
 public class ListenPortFilter implements EntityFilter<ListenPortEntity> {
 
-    private final String ENTITY_NAME = "listenPorts";
+    private static final String ENTITY_NAME = "listenPorts";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {

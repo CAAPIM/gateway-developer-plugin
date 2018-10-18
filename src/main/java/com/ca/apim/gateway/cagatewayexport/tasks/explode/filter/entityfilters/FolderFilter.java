@@ -40,6 +40,7 @@ public class FolderFilter implements EntityFilter<Folder> {
      * @param bundle     The bundle to find the parent folders in
      * @return The list of parent folders for the given folder path
      */
+    @SuppressWarnings("squid:S1075")
     public static List<Folder> parentFolders(String folderPath, Bundle bundle) {
         String folderPathWithSuffix = folderPath + "/";
         Stream<Folder> folderStream = bundle.getFolderTree().stream()

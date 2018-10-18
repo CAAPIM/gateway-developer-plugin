@@ -20,7 +20,7 @@ public class IdentityProviderFilter implements EntityFilter<IdentityProviderEnti
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
             ServiceFilter.class).collect(Collectors.toSet());
-    private final String ENTITY_NAME = "identityProviders";
+    private static final String ENTITY_NAME = "identityProviders";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {

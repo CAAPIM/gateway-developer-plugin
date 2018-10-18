@@ -22,7 +22,7 @@ public class PrivateKeyFilter implements EntityFilter<PrivateKeyEntity> {
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
             ServiceFilter.class).collect(Collectors.toSet());
-    private final String ENTITY_NAME = "privateKeys";
+    private static final String ENTITY_NAME = "privateKeys";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {

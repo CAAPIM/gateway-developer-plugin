@@ -20,7 +20,7 @@ public class JDBCConnectionFilter implements EntityFilter<JdbcConnectionEntity> 
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
             ServiceFilter.class).collect(Collectors.toSet());
-    private final String ENTITY_NAME = "jdbcConnections";
+    private static final String ENTITY_NAME = "jdbcConnections";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {
