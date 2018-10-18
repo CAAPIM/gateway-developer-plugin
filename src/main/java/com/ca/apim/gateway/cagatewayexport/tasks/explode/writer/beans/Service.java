@@ -11,9 +11,18 @@ import java.util.Set;
 
 @SuppressWarnings("unused")
 public class Service {
+    private String policy;
     private String url;
     private Set<String> httpMethods;
     private Map<String, String> properties;
+
+    public String getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(String policy) {
+        this.policy = policy;
+    }
 
     public String getUrl() {
         return url;
