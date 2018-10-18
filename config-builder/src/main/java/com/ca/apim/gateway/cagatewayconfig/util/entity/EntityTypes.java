@@ -24,6 +24,7 @@ public class EntityTypes {
     public static final String JDBC_CONNECTION = "JDBC_CONNECTION";
     public static final String TRUSTED_CERT_TYPE = "TRUSTED_CERT";
     public static final String PRIVATE_KEY_TYPE = "SSG_KEY_ENTRY";
+    public static final String CASSANDRA_CONNECTION_TYPE = "CASSANDRA_CONFIGURATION";
 
     private EntityTypes() { }
 }

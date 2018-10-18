@@ -95,6 +95,11 @@ public class BundleEnvironmentValidator {
                     throw new MissingEnvironmentException("Missing environment value for Private Key: " + name);
                 }
                 break;
+            case EntityTypes.CASSANDRA_CONNECTION_TYPE:
+                if (bundle.getCassandraConnections().get(name) == null) {
+                    throw new MissingEnvironmentException("Missing environment value for Cassandra Connection: " + name);
+                }
+                break;
             default:
                 throw new MissingEnvironmentException("Missing environment value for " + type + ": " + name);
         }

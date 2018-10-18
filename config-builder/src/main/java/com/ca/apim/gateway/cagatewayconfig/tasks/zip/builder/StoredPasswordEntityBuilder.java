@@ -53,6 +53,7 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
 
     private Entity buildStoredPasswordEntity(String name, StoredPassword storedPassword, Document document) {
         String id = idGenerator.generate();
+        storedPassword.setId(id);
 
         Element storedPasswordElement = createElementWithAttribute(document, STORED_PASSWD, ATTRIBUTE_ID, id);
         storedPasswordElement.appendChild(createElementWithTextContent(document, NAME, name));
