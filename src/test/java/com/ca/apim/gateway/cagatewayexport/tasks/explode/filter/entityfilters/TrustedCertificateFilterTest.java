@@ -11,6 +11,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,7 +53,8 @@ class TrustedCertificateFilterTest {
         assertTrue(filteredEntities.stream().anyMatch(c -> "cert2".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "cert3".equals(c.getName())));
 
-        filterConfiguration.getCertificates().add("cert1");
+        filterConfiguration.getEntityFilters().put("certificates", new HashSet<>());
+        filterConfiguration.getEntityFilters().get("certificates").add("cert1");
         filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(3, filteredEntities.size());
@@ -60,7 +62,7 @@ class TrustedCertificateFilterTest {
         assertTrue(filteredEntities.stream().anyMatch(c -> "cert3".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "cert1".equals(c.getName())));
 
-        filterConfiguration.getCertificates().add("non-existing-entity");
+        filterConfiguration.getEntityFilters().get("certificates").add("non-existing-entity");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }

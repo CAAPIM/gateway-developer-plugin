@@ -11,6 +11,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,8 +53,9 @@ class IdentityProviderFilterTest {
         assertEquals(1, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "idp3".equals(c.getName())));
 
-        filterConfiguration.getIdentityProviders().add("idp4");
-        filterConfiguration.getIdentityProviders().add("idp1");
+        filterConfiguration.getEntityFilters().put("identityProviders", new HashSet<>());
+        filterConfiguration.getEntityFilters().get("identityProviders").add("idp4");
+        filterConfiguration.getEntityFilters().get("identityProviders").add("idp1");
         filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(3, filteredEntities.size());
@@ -61,7 +63,7 @@ class IdentityProviderFilterTest {
         assertTrue(filteredEntities.stream().anyMatch(c -> "idp1".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "idp4".equals(c.getName())));
 
-        filterConfiguration.getIdentityProviders().add("non-existing-entity");
+        filterConfiguration.getEntityFilters().get("identityProviders").add("non-existing-entity");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }

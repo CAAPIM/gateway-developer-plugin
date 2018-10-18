@@ -53,7 +53,7 @@ public class CAGatewayExport implements Plugin<Project> {
             t.getFolderPath().set(gatewayConnectionProperties.getFolderPath());
             t.getInputBundleFile().set(pluginConfig.getSanitizedBundle());
             t.getExportDir().set(pluginConfig.getSolutionDir());
-            t.exportEntities(e -> e.setFrom(pluginConfig.getGatewayExportEntities()));
+            t.getExportEntities().set(pluginConfig.getExportEntities());
         });
         explodeBundleTask.dependsOn(sanitizeTask);
 

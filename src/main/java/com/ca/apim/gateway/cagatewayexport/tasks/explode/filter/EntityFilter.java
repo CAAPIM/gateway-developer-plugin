@@ -61,4 +61,13 @@ public interface EntityFilter<E extends Entity> extends Comparable<EntityFilter>
      * @return The list of entities filtered from the bundle
      */
     List<E> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle);
+
+    /**
+     * The filterable entity name. This is used to validate the filter configuration only container filterable configurations
+     *
+     * @return The name of the filterable entity. The empty string if it isn't fiterable from a filter configuration.
+     */
+    default String getFilterableEntityName() {
+        return "";
+    }
 }

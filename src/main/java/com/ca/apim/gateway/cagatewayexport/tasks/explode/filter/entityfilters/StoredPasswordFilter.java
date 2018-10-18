@@ -21,6 +21,7 @@ public class StoredPasswordFilter implements EntityFilter<StoredPasswordEntity> 
             PolicyFilter.class,
             ServiceFilter.class,
             JDBCConnectionFilter.class).collect(Collectors.toSet());
+    private final String ENTITY_NAME = "passwords";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {
@@ -29,10 +30,15 @@ public class StoredPasswordFilter implements EntityFilter<StoredPasswordEntity> 
 
     @Override
     public List<StoredPasswordEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
-        List<StoredPasswordEntity> passwords = DependencyUtils.filterDependencies(StoredPasswordEntity.class, bundle, filteredBundle, e -> filterConfiguration.getPasswords().contains(e.getName()))
+        List<StoredPasswordEntity> passwords = DependencyUtils.filterDependencies(StoredPasswordEntity.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()))
                 // currently only string password types are supported. PEM password support still needs to be added
                 .stream().filter(e -> e.isType(StoredPasswordEntity.Type.PASSWORD)).collect(Collectors.toList());
-        DependencyUtils.validateEntitiesInList(passwords, filterConfiguration.getPasswords(), "Password(s)");
+        DependencyUtils.validateEntitiesInList(passwords, filterConfiguration.getRequiredEntityNames(ENTITY_NAME), "Password(s)");
         return passwords;
+    }
+
+    @Override
+    public String getFilterableEntityName() {
+        return ENTITY_NAME;
     }
 }

@@ -20,6 +20,7 @@ public class JDBCConnectionFilter implements EntityFilter<JdbcConnectionEntity> 
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
             ServiceFilter.class).collect(Collectors.toSet());
+    private final String ENTITY_NAME = "jdbcConnections";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {
@@ -28,8 +29,13 @@ public class JDBCConnectionFilter implements EntityFilter<JdbcConnectionEntity> 
 
     @Override
     public List<JdbcConnectionEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
-        List<JdbcConnectionEntity> jdbcConnections = DependencyUtils.filterDependencies(JdbcConnectionEntity.class, bundle, filteredBundle, e -> filterConfiguration.getJdbcConnections().contains(e.getName()));
-        DependencyUtils.validateEntitiesInList(jdbcConnections, filterConfiguration.getJdbcConnections(), "JDBC Connection(s)");
+        List<JdbcConnectionEntity> jdbcConnections = DependencyUtils.filterDependencies(JdbcConnectionEntity.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()));
+        DependencyUtils.validateEntitiesInList(jdbcConnections, filterConfiguration.getRequiredEntityNames(ENTITY_NAME), "JDBC Connection(s)");
         return jdbcConnections;
+    }
+
+    @Override
+    public String getFilterableEntityName() {
+        return ENTITY_NAME;
     }
 }

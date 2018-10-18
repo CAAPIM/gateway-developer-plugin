@@ -11,6 +11,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,8 +53,9 @@ class PrivateKeyFilterTest {
         assertEquals(1, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "pk3".equals(c.getName())));
 
-        filterConfiguration.getPrivateKeys().add("ssl");
-        filterConfiguration.getPrivateKeys().add("pk1");
+        filterConfiguration.getEntityFilters().put("privateKeys", new HashSet<>());
+        filterConfiguration.getEntityFilters().get("privateKeys").add("ssl");
+        filterConfiguration.getEntityFilters().get("privateKeys").add("pk1");
         filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(3, filteredEntities.size());
@@ -61,7 +63,7 @@ class PrivateKeyFilterTest {
         assertTrue(filteredEntities.stream().anyMatch(c -> "pk1".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "ssl".equals(c.getName())));
 
-        filterConfiguration.getPrivateKeys().add("non-existing-entity");
+        filterConfiguration.getEntityFilters().get("privateKeys").add("non-existing-entity");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }

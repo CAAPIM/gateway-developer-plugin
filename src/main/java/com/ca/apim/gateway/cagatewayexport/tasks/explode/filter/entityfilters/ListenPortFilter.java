@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 @Singleton
 public class ListenPortFilter implements EntityFilter<ListenPortEntity> {
 
+    private final String ENTITY_NAME = "listenPorts";
+
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {
         return Collections.emptySet();
@@ -25,9 +27,13 @@ public class ListenPortFilter implements EntityFilter<ListenPortEntity> {
     public List<ListenPortEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
         List<ListenPortEntity> listenPorts = bundle.getEntities(ListenPortEntity.class).values().stream()
                 // filter out the default listen ports
-                .filter(l -> filterConfiguration.getListenPorts().contains(l.getName())).collect(Collectors.toList());
-        DependencyUtils.validateEntitiesInList(listenPorts, filterConfiguration.getListenPorts(), "Listen Port(s)");
+                .filter(l -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(l.getName())).collect(Collectors.toList());
+        DependencyUtils.validateEntitiesInList(listenPorts, filterConfiguration.getRequiredEntityNames(ENTITY_NAME), "Listen Port(s)");
         return listenPorts;
     }
 
+    @Override
+    public String getFilterableEntityName() {
+        return ENTITY_NAME;
+    }
 }

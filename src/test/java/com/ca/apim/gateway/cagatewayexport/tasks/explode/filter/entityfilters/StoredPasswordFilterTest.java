@@ -11,6 +11,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,14 +53,15 @@ class StoredPasswordFilterTest {
         assertEquals(1, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "password2".equals(c.getName())));
 
-        filterConfiguration.getPasswords().add("password4");
+        filterConfiguration.getEntityFilters().put("passwords", new HashSet<>());
+        filterConfiguration.getEntityFilters().get("passwords").add("password4");
         filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(2, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "password2".equals(c.getName())));
         assertTrue(filteredEntities.stream().anyMatch(c -> "password4".equals(c.getName())));
 
-        filterConfiguration.getPasswords().add("non-existing-entity");
+        filterConfiguration.getEntityFilters().get("passwords").add("non-existing-entity");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }

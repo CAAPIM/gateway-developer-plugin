@@ -11,6 +11,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,13 +51,14 @@ class ListenPortFilterTest {
 
         assertEquals(0, filteredEntities.size());
 
-        filterConfiguration.getListenPorts().add("lp2");
+        filterConfiguration.getEntityFilters().put("listenPorts", new HashSet<>());
+        filterConfiguration.getEntityFilters().get("listenPorts").add("lp2");
         filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(1, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "lp2".equals(c.getName())));
 
-        filterConfiguration.getListenPorts().add("non-existing-entity");
+        filterConfiguration.getEntityFilters().get("listenPorts").add("non-existing-entity");
         EntityFilterException entityFilterException = assertThrows(EntityFilterException.class, () -> filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle));
         assertTrue(entityFilterException.getMessage().contains("non-existing-entity"));
     }

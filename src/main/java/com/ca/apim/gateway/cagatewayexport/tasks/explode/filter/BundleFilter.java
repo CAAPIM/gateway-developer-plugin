@@ -24,6 +24,14 @@ public class BundleFilter {
     }
 
     public Bundle filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle) {
+        // Check that all the entity filters in the filter configuration have filters available for them
+        filterConfiguration.getEntityFilters().keySet().forEach(k -> {
+            boolean noFilters = filterRegistry.getEntityFilters().stream().noneMatch(f -> k.equals(f.getFilterableEntityName()));
+            if (noFilters) {
+                throw new IllegalArgumentException("Unknown entity type: " + k);
+            }
+        });
+
         Bundle filteredBundle = new Bundle();
         //for each entity filter, filter and then add the results to the filtered bundle
         filterRegistry.getEntityFilters().forEach(ef -> ((List<? extends Entity>) ef.filter(folderPath, filterConfiguration, bundle, filteredBundle)).forEach(filteredBundle::addEntity));

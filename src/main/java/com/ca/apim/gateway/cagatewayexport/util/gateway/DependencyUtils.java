@@ -6,10 +6,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependenc
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -67,7 +64,7 @@ public class DependencyUtils {
      * @param entityName  The name of the entity. Used in an exception message
      * @param <E>         The entity Type
      */
-    public static <E extends Entity> void validateEntitiesInList(List<E> entities, Set<String> entityNames, final String entityName) {
+    public static <E extends Entity> void validateEntitiesInList(List<E> entities, Collection<String> entityNames, final String entityName) {
         Set<String> missingEntities = new HashSet<>();
         entityNames.forEach(name -> {
             if (entities.stream().noneMatch(c -> name.equals(c.getName()))) {

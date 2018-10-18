@@ -6,12 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
-import com.ca.apim.gateway.cagatewayexport.GatewayExportEntities;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
-import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
@@ -20,21 +18,23 @@ import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.options.Option;
 
 import javax.inject.Inject;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 public class ExplodeBundleTask extends DefaultTask {
 
     private Property<String> folderPath;
     private RegularFileProperty inputBundleFile;
     private DirectoryProperty exportDir;
-    private GatewayExportEntities gatewayExportEntities;
+    private final Property<Map> exportEntities;
 
     @Inject
     public ExplodeBundleTask() {
         folderPath = getProject().getObjects().property(String.class);
         inputBundleFile = newInputFile();
         exportDir = newOutputDirectory();
-        gatewayExportEntities = getProject().getObjects().newInstance(GatewayExportEntities.class, getProject());
+        exportEntities = getProject().getObjects().property(Map.class);
         JsonTools.INSTANCE.setOutputType(JsonTools.YAML);
         getOutputs().upToDateWhen(t -> false);
     }
@@ -66,25 +66,41 @@ public class ExplodeBundleTask extends DefaultTask {
 
     @Input
     @Optional
-    public void exportEntities(Action<? super GatewayExportEntities> action) {
-        action.execute(gatewayExportEntities);
+    public Property<Map> getExportEntities() {
+        return exportEntities;
     }
 
     @TaskAction
     public void perform() throws DocumentParseException {
         ExplodeBundle explodeBundle = ExportPluginModule.getInjector().getInstance(ExplodeBundle.class);
-        explodeBundle.explodeBundle(folderPath.getOrElse("/"), toFilterConfiguration(gatewayExportEntities), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
+        checkExportEntities();
+        explodeBundle.explodeBundle(folderPath.getOrElse("/"), toFilterConfiguration(exportEntities.getOrElse(Collections.emptyMap())), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
     }
 
-    private FilterConfiguration toFilterConfiguration(GatewayExportEntities gatewayExportEntities) {
+    /**
+     * Checks that the export entities map is of the correct type. Should be {@code Map<String,Collection<String>> }
+     */
+    private void checkExportEntities() {
+        if (exportEntities.isPresent()) {
+            exportEntities.get().forEach((k, v) -> {
+                if (!String.class.isAssignableFrom(k.getClass())) {
+                    throw new IllegalArgumentException("Expected exportEntities map keys to all be Strings. Found type: '" + k.getClass() + "' for key: " + k);
+                }
+                if (!Collection.class.isAssignableFrom(v.getClass())) {
+                    throw new IllegalArgumentException("Expected exportEntities map values to all be Collections of Strings. Found type: '" + v.getClass() + "' for key: " + k);
+                }
+                ((Collection) v).forEach(s -> {
+                    if (!String.class.isAssignableFrom(s.getClass())) {
+                        throw new IllegalArgumentException("Expected exportEntities map values to all be Collections of Strings. Found type: '" + s.getClass() + "' in collection for key: '" + k + "'. It's value is: " + s);
+                    }
+                });
+            });
+        }
+    }
+
+    private FilterConfiguration toFilterConfiguration(Map<String, Collection<String>> gatewayExportEntities) {
         FilterConfiguration filterConfiguration = new FilterConfiguration();
-        filterConfiguration.getCertificates().addAll(gatewayExportEntities.getCertificates().getOrElse(Collections.emptySet()));
-        filterConfiguration.getClusterProperties().addAll(gatewayExportEntities.getClusterProperties().getOrElse(Collections.emptySet()));
-        filterConfiguration.getIdentityProviders().addAll(gatewayExportEntities.getIdentityProviders().getOrElse(Collections.emptySet()));
-        filterConfiguration.getJdbcConnections().addAll(gatewayExportEntities.getJdbcConnections().getOrElse(Collections.emptySet()));
-        filterConfiguration.getListenPorts().addAll(gatewayExportEntities.getListenPorts().getOrElse(Collections.emptySet()));
-        filterConfiguration.getPasswords().addAll(gatewayExportEntities.getPasswords().getOrElse(Collections.emptySet()));
-        filterConfiguration.getPrivateKeys().addAll(gatewayExportEntities.getPrivateKeys().getOrElse(Collections.emptySet()));
+        filterConfiguration.setEntityFilters(gatewayExportEntities);
         return filterConfiguration;
     }
 }

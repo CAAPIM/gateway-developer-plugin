@@ -58,11 +58,11 @@ For example, to force the export of:
 Add the following to your `GatewayExportConfig`:
  ```groovy
  GatewayExportConfig {
-    exportEntities {
-        listenPorts = [ "public-port", "internal-access" ]
-        certificates = [ "finance", "accounting" ]
-        jdbcConnections = [ "app-db" ]
-    }
+    exportEntities = [
+        listenPorts: [ "public-port", "internal-access" ],
+        certificates: [ "finance", "accounting" ],
+        jdbcConnections: [ "app-db" ]
+    ]
  }
  ```
  

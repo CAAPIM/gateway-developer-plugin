@@ -20,6 +20,7 @@ public class TrustedCertificateFilter implements EntityFilter<TrustedCertEntity>
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
             ServiceFilter.class).collect(Collectors.toSet());
+    private final String ENTITY_NAME = "certificates";
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {
@@ -28,8 +29,13 @@ public class TrustedCertificateFilter implements EntityFilter<TrustedCertEntity>
 
     @Override
     public List<TrustedCertEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
-        List<TrustedCertEntity> certificates = DependencyUtils.filterDependencies(TrustedCertEntity.class, bundle, filteredBundle, e -> filterConfiguration.getCertificates().contains(e.getName()));
-        DependencyUtils.validateEntitiesInList(certificates, filterConfiguration.getCertificates(), "Certificate(s)");
+        List<TrustedCertEntity> certificates = DependencyUtils.filterDependencies(TrustedCertEntity.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()));
+        DependencyUtils.validateEntitiesInList(certificates, filterConfiguration.getRequiredEntityNames(ENTITY_NAME), "Certificate(s)");
         return certificates;
+    }
+
+    @Override
+    public String getFilterableEntityName() {
+        return ENTITY_NAME;
     }
 }

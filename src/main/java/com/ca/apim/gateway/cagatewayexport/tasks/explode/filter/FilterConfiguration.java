@@ -1,43 +1,23 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FilterConfiguration {
 
-    private final Set<String> clusterProperties = new HashSet<>();
-    private final Set<String> identityProviders = new HashSet<>();
-    private final Set<String> jdbcConnections = new HashSet<>();
-    private final Set<String> listenPorts = new HashSet<>();
-    private final Set<String> privateKeys = new HashSet<>();
-    private final Set<String> passwords = new HashSet<>();
-    private final Set<String> certificates = new HashSet<>();
+    private Map<String, Collection<String>> entityFilters = new HashMap<>();
 
-    public Set<String> getClusterProperties() {
-        return clusterProperties;
+    public Collection<String> getRequiredEntityNames(String entityType) {
+        return entityFilters.getOrDefault(entityType, Collections.emptySet());
     }
 
-    public Set<String> getIdentityProviders() {
-        return identityProviders;
+    public Map<String, Collection<String>> getEntityFilters() {
+        return entityFilters;
     }
 
-    public Set<String> getJdbcConnections() {
-        return jdbcConnections;
-    }
-
-    public Set<String> getListenPorts() {
-        return listenPorts;
-    }
-
-    public Set<String> getPrivateKeys() {
-        return privateKeys;
-    }
-
-    public Set<String> getPasswords() {
-        return passwords;
-    }
-
-    public Set<String> getCertificates() {
-        return certificates;
+    public void setEntityFilters(Map<String, Collection<String>> entityFilters) {
+        this.entityFilters.putAll(entityFilters);
     }
 }
