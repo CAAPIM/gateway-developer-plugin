@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 CA. All rights reserved.
+ * Copyright (c) 2018. All rights reserved.
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  */
@@ -22,10 +22,12 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.cert.*;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,10 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilde
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.TRUSTED_CERT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.buildCertDataFromFile;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.createCertDataElementFromCert;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributesAndChildren;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
 @Singleton
 public class TrustedCertEntityBuilder implements EntityBuilder {
@@ -45,11 +50,13 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
 
     private final IdGenerator idGenerator;
     private final SSLSocketFactory acceptAllSocketFactory;
+    private final CertificateFactory certFactory;
 
     @Inject
-    TrustedCertEntityBuilder(IdGenerator idGenerator, SSLSocketFactory acceptAllSocketFactory) {
+    TrustedCertEntityBuilder(IdGenerator idGenerator, SSLSocketFactory acceptAllSocketFactory, CertificateFactory certFactory) {
         this.idGenerator = idGenerator;
         this.acceptAllSocketFactory = acceptAllSocketFactory;
+        this.certFactory = certFactory;
     }
 
     @Override
@@ -88,7 +95,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         if (name.startsWith("https://")) {
             return buildCertDataFromUrl(name, document);
         } else if (certificateFiles.get(name) != null) {
-            return buildCertDataFromFile(certificateFiles.get(name), document);
+            return buildCertDataFromFile(certificateFiles.get(name), document, certFactory);
         } else if (trustedCert.getCertificateData() != null) {
             final CertificateData certData = trustedCert.getCertificateData();
             return createCertDataElementFromCert(
@@ -101,24 +108,6 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         } else {
             throw new EntityBuilderException("Trusted Cert must be loaded from a specified url," +
                     " or from a certificate file that has the same name as the Trusted Cert.");
-        }
-    }
-
-    private Element buildCertDataFromFile(SupplierWithIO<InputStream> certFileLocation, Document document) {
-        try (InputStream is = certFileLocation.getWithIO()) {
-            CertificateFactory certFact = CertificateFactory.getInstance("X.509");
-            X509Certificate cert = (X509Certificate) certFact.generateCertificate(is);
-            return createCertDataElementFromCert(
-                    cert.getIssuerDN().getName(),
-                    cert.getSerialNumber(),
-                    cert.getSubjectDN().getName(),
-                    Base64.getEncoder().encodeToString(cert.getEncoded()),
-                    document
-            );
-        } catch (IOException e) {
-            throw new EntityBuilderException("The certificate file location specified does not exist.");
-        } catch (CertificateException e) {
-            throw new EntityBuilderException("Error generating certificate: ", e);
         }
     }
 
@@ -159,17 +148,6 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
             throw new EntityBuilderException("The url specified is malformed: " + e.getMessage(), e);
         }
         return url;
-    }
-
-    private Element createCertDataElementFromCert(String issuerName, BigInteger serialNumber, String subjectName, String encodedData, Document document) {
-        return createElementWithChildren(
-                document,
-                CERT_DATA,
-                createElementWithTextContent(document, ISSUER_NAME, issuerName),
-                createElementWithTextContent(document, SERIAL_NUMBER, serialNumber),
-                createElementWithTextContent(document, SUBJECT_NAME, subjectName),
-                createElementWithTextContent(document, ENCODED, encodedData)
-        );
     }
 
     @Override

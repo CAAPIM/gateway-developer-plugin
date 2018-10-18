@@ -19,6 +19,9 @@ public class BundleElementNames {
     public static final String ATTRIBUTE_SRCID = "srcId";
     public static final String ATTRIBUTE_TYPE = "type";
     public static final String ATTRIBUTE_FOLDER_ID = "folderId";
+    public static final String ATTRIBUTE_ALIAS = "alias";
+    public static final String ATTRIBUTE_KEYSTORE_ID = "keystoreId";
+    public static final String ATTRIBUTE_KEY_ALGORITHM = "keyAlgorithm";
 
     // Property names
     public static final String PROPERTY_USER = "user";
@@ -132,6 +135,10 @@ public class BundleElementNames {
     public static final String USE_SSL_CLIENT_AUTH = "l7:UseSslClientAuthentication";
     public static final String BIND_PATTERN_PREFIX = "l7:BindPatternPrefix";
     public static final String BIND_PATTERN_SUFFIX = "l7:BindPatternSuffix";
+
+    // Private Key
+    public static final String PRIVATE_KEY = "l7:PrivateKey";
+    public static final String CERTIFICATE_CHAIN = "l7:CertificateChain";
 
     private BundleElementNames() {
         //

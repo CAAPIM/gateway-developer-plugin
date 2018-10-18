@@ -49,20 +49,21 @@ class TrustedCertEntityBuilderTest {
 
     private static final String URL_NAME = "https://www.ca.com";
     private static final String CERT_NAME = "multi-cert";
+    private CertificateFactory certFact;
     private X509Certificate testCert;
 
     @BeforeAll
     void setUp() throws Exception {
+        certFact = CertificateFactory.getInstance("X.509");
         final File trustedCertLocation = new File(getClass().getClassLoader().getResource(CERT_NAME + ".pem").getFile());
         try (FileInputStream is = new FileInputStream(trustedCertLocation)) {
-            CertificateFactory certFact = CertificateFactory.getInstance("X.509");
             testCert = (X509Certificate) certFact.generateCertificate(is);
         }
     }
 
     @Test
     void buildNoTrustedCerts() {
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), createAcceptAllSocketFactory());
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), createAcceptAllSocketFactory(), certFact);
         final Bundle bundle = new Bundle();
         final List<Entity> trustedCertEntities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(0, trustedCertEntities.size());
@@ -70,7 +71,7 @@ class TrustedCertEntityBuilderTest {
 
     @Test
     void buildTrustedCertFromNonExistentFile() {
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null, certFact);
 
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
@@ -89,7 +90,7 @@ class TrustedCertEntityBuilderTest {
         when(socket.getSession()).thenReturn(sslSession);
         when(sslSession.getPeerCertificates()).thenReturn(new X509Certificate[]{testCert});
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), sf);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), sf, certFact);
 
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
@@ -107,7 +108,7 @@ class TrustedCertEntityBuilderTest {
     void buildTrustedCertUsingPem() throws Exception {
         final File trustedCertLocation = new File(getClass().getClassLoader().getResource(CERT_NAME + ".pem").getFile());
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null, certFact);
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
@@ -125,7 +126,7 @@ class TrustedCertEntityBuilderTest {
     void buildTrustedCertUsingDer() throws Exception {
         final File trustedCertLocation = new File(getClass().getClassLoader().getResource(CERT_NAME + ".der").getFile());
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null, certFact);
         final Bundle bundle = new Bundle();
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
@@ -147,7 +148,7 @@ class TrustedCertEntityBuilderTest {
         final String EXPECT_SUB_NAME = "subName";
         final String EXPECT_DATA = "data";
 
-        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null);
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null, certFact);
         final Bundle bundle = new Bundle();
         final CertificateData certData = new CertificateData(EXPECT_ISSUER, EXPECT_BIG_INT, EXPECT_SUB_NAME, EXPECT_DATA);
         final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), certData);

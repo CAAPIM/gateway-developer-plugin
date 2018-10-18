@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyBundleLoadException;
 import org.apache.commons.collections4.MapUtils;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -49,28 +50,33 @@ public class BuilderUtils {
                 continue;
             }
 
-            Element propertyElement = document.createElement(PROPERTY);
-            propertyElement.setAttribute(ATTRIBUTE_KEY, entry.getKey());
-            String elementType;
-
-            if (String.class.isAssignableFrom(entry.getValue().getClass())) {
-                elementType = STRING_VALUE;
-            } else if (Integer.class.isAssignableFrom(entry.getValue().getClass())) {
-                elementType = INT_VALUE;
-            } else if (Long.class.isAssignableFrom(entry.getValue().getClass())) {
-                elementType = LONG_VALUE;
-            } else if (Boolean.class.isAssignableFrom(entry.getValue().getClass())) {
-                elementType = BOOLEAN_VALUE;
-            } else {
-                throw new EntityBuilderException("Could not create property (" + entry.getKey() + ") for value type: " + entry.getValue().getClass().getTypeName());
-            }
-
-            Element valueElement = document.createElement(elementType);
-            valueElement.setTextContent(entry.getValue().toString());
-            propertyElement.appendChild(valueElement);
-            propertiesElement.appendChild(propertyElement);
+            propertiesElement.appendChild(createPropertyElement(document, entry.getKey(), entry.getValue()));
         }
         return propertiesElement;
+    }
+
+    @NotNull
+    private static Element createPropertyElement(Document document, String key, Object value) {
+        Element propertyElement = document.createElement(PROPERTY);
+        propertyElement.setAttribute(ATTRIBUTE_KEY, key);
+        String elementType;
+
+        if (String.class.isAssignableFrom(value.getClass())) {
+            elementType = STRING_VALUE;
+        } else if (Integer.class.isAssignableFrom(value.getClass())) {
+            elementType = INT_VALUE;
+        } else if (Long.class.isAssignableFrom(value.getClass())) {
+            elementType = LONG_VALUE;
+        } else if (Boolean.class.isAssignableFrom(value.getClass())) {
+            elementType = BOOLEAN_VALUE;
+        } else {
+            throw new EntityBuilderException("Could not create property (" + key + ") for value type: " + value.getClass().getTypeName());
+        }
+
+        Element valueElement = document.createElement(elementType);
+        valueElement.setTextContent(value.toString());
+        propertyElement.appendChild(valueElement);
+        return propertyElement;
     }
 
     /**
