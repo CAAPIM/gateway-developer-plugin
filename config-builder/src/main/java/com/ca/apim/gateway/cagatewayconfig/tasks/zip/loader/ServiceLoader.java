@@ -64,31 +64,20 @@ public class ServiceLoader extends EntityLoaderBase<Service> {
             throw new BundleLoadException("Expected directory but was file: " + policyRootDir);
         }
 
-        File[] policyDirChildren = policyRootDir.listFiles();
-        if (policyDirChildren == null) {
-            // no policies
-            throw new BundleLoadException("There should be a folder under the 'policy' folder which is the name of the project.");
-        }
-        List<File> files = stream(policyDirChildren).filter(File::isDirectory).collect(Collectors.toList());
-        if (files.size() != 1) {
-            //should only be one folder
-            throw new BundleLoadException("There should be a folder under the 'policy' folder which is the name of the project.");
-        }
         final Map<String, Folder> folderMap = bundle.getFolders();
         final Folder rootFolder = folderMap.computeIfAbsent(getPath(policyRootDir,policyRootDir), key -> loadFolder(policyRootDir, policyRootDir, null));
-        final Folder projectFolder = folderMap.computeIfAbsent(getPath(files.get(0),policyRootDir), key -> loadFolder(files.get(0), policyRootDir, rootFolder));
 
         final Map<String, Service> services = bundle.getServices();
         services.forEach((servicePath, service) -> {
             int lastFileSeparator = servicePath.lastIndexOf(File.separatorChar);
             if (lastFileSeparator == -1) {
-                //service is directly under the project dir
-                service.setParentFolder(projectFolder);
+                //service is directly under the root dir
+                service.setParentFolder(rootFolder);
             } else {
                 //service is in a folder, create folders if they don't already exist
                 String pathExcludingService = servicePath.substring(0, servicePath.lastIndexOf(File.separatorChar) + 1 );
-                createFolders(pathExcludingService, folderMap, projectFolder);
-                service.setParentFolder(folderMap.get(createPath(projectFolder, pathExcludingService)));
+                createFolders(pathExcludingService, folderMap, rootFolder);
+                service.setParentFolder(folderMap.get(pathExcludingService));
             }
         });
     }
@@ -98,9 +87,9 @@ public class ServiceLoader extends EntityLoaderBase<Service> {
      *
      * @param stringPath the path containing the service. ie: /a/b/c/service
      * @param folderMap The existing map of folders
-     * @param projectFolder The folder with the project name
+     * @param rootFolder The root folder
      */
-    private void createFolders(String stringPath, Map<String, Folder> folderMap, Folder projectFolder) {
+    private void createFolders(String stringPath, Map<String, Folder> folderMap, Folder rootFolder) {
         Path path = Paths.get(stringPath);
         List<Path> paths = new ArrayList<>();
         int i = 0;
@@ -109,21 +98,16 @@ public class ServiceLoader extends EntityLoaderBase<Service> {
         }
         for (final Path p : paths) {
             Folder parentFolder = p.getParent() == null ?
-                    projectFolder :
-                    folderMap.get(createPath(projectFolder, p.getParent().toString()));
-            folderMap.computeIfAbsent(createPath(projectFolder, p.toString()), key -> {
+                    rootFolder :
+                    folderMap.get(p.getParent().toString() + "/");
+            folderMap.computeIfAbsent(p.toString() + "/", key -> {
                 Folder f = new Folder();
                 f.setName(p.getFileName().toString());
-                f.setPath(createPath(projectFolder, p.toString()));
+                f.setPath(p.toString() + "/");
                 f.setParentFolder(parentFolder);
                 return f;
             });
         }
-    }
-
-    @NotNull
-    private String createPath(Folder projectPath, String path) {
-        return Paths.get(projectPath.getPath(), path).toString() + File.separator;
     }
 
     @Override

@@ -43,10 +43,8 @@ public class PolicyAndFolderLoader implements EntityLoader {
         }
 
         final Map<String, Policy> policies = new HashMap<>();
-        final Map<String, Folder> folders = new HashMap<>();
-        loadPolicies(policyRootDir, policyRootDir, null, policies, folders);
+        loadPolicies(policyRootDir, policyRootDir, null, policies, bundle.getFolders());
         bundle.putAllPolicies(policies);
-        bundle.putAllFolders(folders);
     }
 
     @Override

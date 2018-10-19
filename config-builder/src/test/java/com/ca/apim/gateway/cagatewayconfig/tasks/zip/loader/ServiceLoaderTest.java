@@ -7,12 +7,12 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +36,9 @@ class ServiceLoaderTest {
     @Mock
     private FileUtils fileUtils;
 
+    private final String SERVICE_NAME_1 = "projectName/example";
+    private final String SERVICE_NAME_2 = "projectName/v1/subfolder/example-project";
+
     @BeforeEach
     void before() {
         jsonTools = new JsonTools(fileUtils);
@@ -46,7 +49,7 @@ class ServiceLoaderTest {
     void loadJSON(TemporaryFolder temporaryFolder) throws IOException {
         ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
         String json = "{\n" +
-                "    \"example\": {\n" +
+                "    \"" + SERVICE_NAME_1 + "\": {\n" +
                 "        \"policy\": \"projectName/test\", \n" +
                 "        \"httpMethods\": [\n" +
                 "            \"GET\",\n" +
@@ -56,7 +59,7 @@ class ServiceLoaderTest {
                 "        ],\n" +
                 "        \"url\": \"/example\"\n" +
                 "    },\n" +
-                "    \"v1/subfolder/example-project\": {\n" +
+                "    \"" + SERVICE_NAME_2 + "\": {\n" +
                 "        \"policy\": \"projectName/test\", \n" +
                 "        \"httpMethods\": [\n" +
                 "            \"PUT\",\n" +
@@ -73,9 +76,7 @@ class ServiceLoaderTest {
         File servicesFile = new File(configFolder, "services.json");
         Files.touch(servicesFile);
 
-        File policyFolder = temporaryFolder.createDirectory("policy");
-        File a = new File(policyFolder, "projectName");
-        Assert.assertTrue(a.mkdir());
+        temporaryFolder.createDirectory("policy");
 
         Mockito.when(fileUtils.getInputStream(Mockito.any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes(Charset.forName("UTF-8"))));
 
@@ -92,7 +93,7 @@ class ServiceLoaderTest {
     @ExtendWith(TemporaryFolderExtension.class)
     void loadYAML(TemporaryFolder temporaryFolder) throws IOException {
         ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
-        String json = "example:\n" +
+        String json = SERVICE_NAME_1 + ":\n" +
                 "  policy: \"projectName/test\"\n" +
                 "  httpMethods:\n" +
                 "  - GET\n" +
@@ -100,7 +101,7 @@ class ServiceLoaderTest {
                 "  - PUT\n" +
                 "  - DELETE\n" +
                 "  url: \"/example\"\n" +
-                "v1/subfolder/example-project:\n" +
+                SERVICE_NAME_2 + ":\n" +
                 "  policy: \"projectName/test\"\n" +
                 "  httpMethods:\n" +
                 "  - PUT\n" +
@@ -113,9 +114,7 @@ class ServiceLoaderTest {
         File servicesFile = new File(configFolder, "services.yml");
         Files.touch(servicesFile);
 
-        File policyFolder = temporaryFolder.createDirectory("policy");
-        File a = new File(policyFolder, "projectName");
-        Assert.assertTrue(a.mkdir());
+        temporaryFolder.createDirectory("policy");
 
         Mockito.when(fileUtils.getInputStream(Mockito.any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes(Charset.forName("UTF-8"))));
 
@@ -189,20 +188,23 @@ class ServiceLoaderTest {
         assertTrue(bundle.getFolders().containsKey("projectName/v1/"));
         assertTrue(bundle.getFolders().containsKey("projectName/v1/subfolder/"));
 
-        assertEquals(2, bundle.getServices().size());
-        assertEquals("/example", bundle.getServices().get("example").getUrl());
-        assertEquals("/example-project", bundle.getServices().get("v1/subfolder/example-project").getUrl());
+        Service service1 = bundle.getServices().get(SERVICE_NAME_1);
+        Service service2 = bundle.getServices().get(SERVICE_NAME_2);
 
-        assertEquals(4, bundle.getServices().get("example").getHttpMethods().size());
-        assertTrue(bundle.getServices().get("example").getHttpMethods().contains("GET"));
-        assertTrue(bundle.getServices().get("example").getHttpMethods().contains("POST"));
-        assertTrue(bundle.getServices().get("example").getHttpMethods().contains("PUT"));
-        assertTrue(bundle.getServices().get("example").getHttpMethods().contains("DELETE"));
-        assertEquals(2, bundle.getServices().get("v1/subfolder/example-project").getHttpMethods().size());
-        assertTrue(bundle.getServices().get("v1/subfolder/example-project").getHttpMethods().contains("PUT"));
-        assertTrue(bundle.getServices().get("v1/subfolder/example-project").getHttpMethods().contains("DELETE"));
-        assertEquals(2, bundle.getServices().get("v1/subfolder/example-project").getProperties().keySet().size());
-        assertEquals("value", bundle.getServices().get("v1/subfolder/example-project").getProperties().get("key"));
-        assertEquals("value.1", bundle.getServices().get("v1/subfolder/example-project").getProperties().get("key.1"));
+        assertEquals(2, bundle.getServices().size());
+        assertEquals("/example", service1.getUrl());
+        assertEquals("/example-project", service2.getUrl());
+
+        assertEquals(4, service1.getHttpMethods().size());
+        assertTrue(service1.getHttpMethods().contains("GET"));
+        assertTrue(service1.getHttpMethods().contains("POST"));
+        assertTrue(service1.getHttpMethods().contains("PUT"));
+        assertTrue(service1.getHttpMethods().contains("DELETE"));
+        assertEquals(2, service2.getHttpMethods().size());
+        assertTrue(service2.getHttpMethods().contains("PUT"));
+        assertTrue(service2.getHttpMethods().contains("DELETE"));
+        assertEquals(2, service2.getProperties().keySet().size());
+        assertEquals("value", service2.getProperties().get("key"));
+        assertEquals("value.1", service2.getProperties().get("key.1"));
     }
 }
