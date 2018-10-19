@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
@@ -13,25 +14,27 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.options.Option;
 
 import javax.inject.Inject;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 public class ExplodeBundleTask extends DefaultTask {
 
     private Property<String> folderPath;
     private RegularFileProperty inputBundleFile;
     private DirectoryProperty exportDir;
+    private final Property<Map> exportEntities;
 
     @Inject
     public ExplodeBundleTask() {
         folderPath = getProject().getObjects().property(String.class);
         inputBundleFile = newInputFile();
         exportDir = newOutputDirectory();
+        exportEntities = getProject().getObjects().property(Map.class);
         JsonTools.INSTANCE.setOutputType(JsonTools.YAML);
         getOutputs().upToDateWhen(t -> false);
     }
@@ -61,9 +64,43 @@ public class ExplodeBundleTask extends DefaultTask {
         JsonTools.INSTANCE.setOutputType(format);
     }
 
+    @Input
+    @Optional
+    public Property<Map> getExportEntities() {
+        return exportEntities;
+    }
+
     @TaskAction
     public void perform() throws DocumentParseException {
         ExplodeBundle explodeBundle = ExportPluginModule.getInjector().getInstance(ExplodeBundle.class);
-        explodeBundle.explodeBundle(folderPath.getOrElse("/"), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
+        checkExportEntities();
+        explodeBundle.explodeBundle(folderPath.getOrElse("/"), toFilterConfiguration(exportEntities.getOrElse(Collections.emptyMap())), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
+    }
+
+    /**
+     * Checks that the export entities map is of the correct type. Should be {@code Map<String,Collection<String>> }
+     */
+    private void checkExportEntities() {
+        if (exportEntities.isPresent()) {
+            exportEntities.get().forEach((k, v) -> {
+                if (!String.class.isAssignableFrom(k.getClass())) {
+                    throw new IllegalArgumentException("Expected exportEntities map keys to all be Strings. Found type: '" + k.getClass() + "' for key: " + k);
+                }
+                if (!Collection.class.isAssignableFrom(v.getClass())) {
+                    throw new IllegalArgumentException("Expected exportEntities map values to all be Collections of Strings. Found type: '" + v.getClass() + "' for key: " + k);
+                }
+                ((Collection) v).forEach(s -> {
+                    if (!String.class.isAssignableFrom(s.getClass())) {
+                        throw new IllegalArgumentException("Expected exportEntities map values to all be Collections of Strings. Found type: '" + s.getClass() + "' in collection for key: '" + k + "'. It's value is: " + s);
+                    }
+                });
+            });
+        }
+    }
+
+    private FilterConfiguration toFilterConfiguration(Map<String, Collection<String>> gatewayExportEntities) {
+        FilterConfiguration filterConfiguration = new FilterConfiguration();
+        filterConfiguration.setEntityFilters(gatewayExportEntities);
+        return filterConfiguration;
     }
 }

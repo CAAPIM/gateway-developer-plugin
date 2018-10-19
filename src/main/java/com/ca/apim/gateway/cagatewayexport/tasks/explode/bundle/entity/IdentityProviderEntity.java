@@ -17,6 +17,7 @@ import static java.util.Arrays.stream;
 @Named("ID_PROVIDER_CONFIG")
 public class IdentityProviderEntity implements Entity {
     public static final String INTERNAL_IDP_ID = "0000000000000000fffffffffffffffe";
+    public static final String INTERNAL_IDP_NAME = "Internal Identity Provider";
     private final String name;
     private final String id;
     private final Type type;

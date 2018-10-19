@@ -60,6 +60,86 @@
             </l7:Resource>
         </l7:Item>
         <l7:Item>
+            <l7:Name>this-property</l7:Name>
+            <l7:Id>eb1489ba1ad08206f8736a13e7c12be7</l7:Id>
+            <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            <l7:Resource>
+                <l7:ClusterProperty id="eb1489ba1ad08206f8736a13e7c12be7">
+                    <l7:Name>this-property</l7:Name>
+                    <l7:Value>This is a global environment variable</l7:Value>
+                </l7:ClusterProperty>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>that-property</l7:Name>
+            <l7:Id>eb1489ba1bd08206f8736a13e7c12be7</l7:Id>
+            <l7:Type>CLUSTER_PROPERTY</l7:Type>
+            <l7:Resource>
+                <l7:ClusterProperty id="eb1489ba1bd08206f8736a13e7c12be7">
+                    <l7:Name>that-property</l7:Name>
+                    <l7:Value>This is a global environment variable</l7:Value>
+                </l7:ClusterProperty>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>my-password</l7:Name>
+            <l7:Id>23817331029fb400e343544ef9a22c10</l7:Id>
+            <l7:Type>SECURE_PASSWORD</l7:Type>
+            <l7:TimeStamp>2018-10-17T18:13:29.763Z</l7:TimeStamp>
+            <l7:Resource>
+                <l7:StoredPassword id="23817331029fb400e343544ef9a22c10" version="0">
+                    <l7:Name>my-password</l7:Name>
+                    <l7:Password
+                            bundleKey="$L7C2$1bead,PNAJ2yR3cny4etew1xVkDDQ5fIWvnQOJKTJ5Wl64cHY=$3DdRBVUhcQ9gU0ZWjCYplD/q4MYDkT3wqd5Tx9fJARxSgYRFtvPbZwOZr/I1Ltx5U9hQR6093BLqM6GDimntSuUY8i1nIXTzMJfjxMu64Kpx3N/O+PLljYqze9neUepm">
+                        $L7C2$1,/T/B6vUlyrk494BFBxmO5GXiWXLO8j1gPdBFfSYdX+E=$Ei4sKAHRLq3SHrctOVejMQC6XXuoz77bHzYaYO7PVY6lzcZ39/VnoCUuPxI23YEJB+WpxtkkfatEz034gymo2Q==
+                    </l7:Password>
+                    <l7:Properties>
+                        <l7:Property key="description">
+                            <l7:StringValue>my-password</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="lastUpdated">
+                            <l7:DateValue>2018-10-16T03:14:00.956Z</l7:DateValue>
+                        </l7:Property>
+                        <l7:Property key="type">
+                            <l7:StringValue>Password</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="usageFromVariable">
+                            <l7:BooleanValue>true</l7:BooleanValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:StoredPassword>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>another-password</l7:Name>
+            <l7:Id>33817331029fb400e343544ef9a22c10</l7:Id>
+            <l7:Type>SECURE_PASSWORD</l7:Type>
+            <l7:TimeStamp>2018-10-17T18:13:29.763Z</l7:TimeStamp>
+            <l7:Resource>
+                <l7:StoredPassword id="33817331029fb400e343544ef9a22c10" version="0">
+                    <l7:Name>another-password</l7:Name>
+                    <l7:Password
+                            bundleKey="$L7C2$1bead,PNAJ2yR3cny4etew1xVkDDQ5fIWvnQOJKTJ5Wl64cHY=$3DdRBVUhcQ9gU0ZWjCYplD/q4MYDkT3wqd5Tx9fJARxSgYRFtvPbZwOZr/I1Ltx5U9hQR6093BLqM6GDimntSuUY8i1nIXTzMJfjxMu64Kpx3N/O+PLljYqze9neUepm">
+                        $L7C2$1,/T/B6vUlyrk494BFBxmO5GXiWXLO8j1gPdBFfSYdX+E=$Ei4sKAHRLq3SHrctOVejMQC6XXuoz77bHzYaYO7PVY6lzcZ39/VnoCUuPxI23YEJB+WpxtkkfatEz034gymo2Q==
+                    </l7:Password>
+                    <l7:Properties>
+                        <l7:Property key="description">
+                            <l7:StringValue>my-password</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="lastUpdated">
+                            <l7:DateValue>2018-10-16T03:14:00.956Z</l7:DateValue>
+                        </l7:Property>
+                        <l7:Property key="type">
+                            <l7:StringValue>Password</l7:StringValue>
+                        </l7:Property>
+                        <l7:Property key="usageFromVariable">
+                            <l7:BooleanValue>true</l7:BooleanValue>
+                        </l7:Property>
+                    </l7:Properties>
+                </l7:StoredPassword>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
             <l7:Name>my-global-property</l7:Name>
             <l7:Id>eb1489ba1cd08206f8736a13e7c12be4</l7:Id>
             <l7:Type>CLUSTER_PROPERTY</l7:Type>

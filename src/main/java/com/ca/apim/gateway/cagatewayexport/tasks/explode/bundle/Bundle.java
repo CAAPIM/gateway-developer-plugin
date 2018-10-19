@@ -50,7 +50,7 @@ public class Bundle {
         return dependencies;
     }
 
-    void setDependencies(Map<Dependency, List<Dependency>> dependencies) {
+    public void setDependencies(Map<Dependency, List<Dependency>> dependencies) {
         this.dependencies = dependencies;
     }
 }
