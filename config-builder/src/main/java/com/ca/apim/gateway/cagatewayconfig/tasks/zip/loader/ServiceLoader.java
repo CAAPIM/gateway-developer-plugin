@@ -20,11 +20,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.PolicyAndFolderLoader.getPath;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.PolicyAndFolderLoader.loadFolder;
-import static java.util.Arrays.stream;
 
 @Singleton
 public class ServiceLoader extends EntityLoaderBase<Service> {
