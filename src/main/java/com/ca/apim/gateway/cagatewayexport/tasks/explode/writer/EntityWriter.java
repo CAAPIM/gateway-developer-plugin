@@ -12,4 +12,9 @@ import java.io.File;
 
 public interface EntityWriter {
     void write(Bundle bundle, File rootFolder);
+
+    default void write(String folderPath, Bundle bundle, File rootFolder) {
+        write(bundle, rootFolder);
+    }
+
 }
