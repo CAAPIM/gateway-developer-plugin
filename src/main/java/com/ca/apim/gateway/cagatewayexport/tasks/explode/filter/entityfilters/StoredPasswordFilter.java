@@ -20,7 +20,8 @@ public class StoredPasswordFilter implements EntityFilter<StoredPasswordEntity> 
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
             ServiceFilter.class,
-            JDBCConnectionFilter.class).collect(Collectors.toSet());
+            JDBCConnectionFilter.class,
+            CassandraConnectionFilter.class).collect(Collectors.toSet());
     private static final String ENTITY_NAME = "passwords";
 
     @Override

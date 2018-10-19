@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.util.xml;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilderException;
+import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -14,11 +15,15 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
 /**
@@ -189,5 +194,70 @@ public class DocumentUtils {
      */
     public static List<String> getChildElementsAttributeValues(final Element entityItemElement, final String elementName, final String attribute) {
         return getChildElements(entityItemElement, elementName).stream().map(e -> e.getAttribute(attribute)).collect(toList());
+    }
+
+    public static Element createElementWithTextContent(final Document document, final String elementName, final Object textContent) {
+        Element element = document.createElement(elementName);
+        element.setTextContent(textContent != null ? textContent.toString() : EMPTY);
+        return element;
+    }
+
+    public static Element createElementWithAttribute(final Document document, final String elementName, final String attributeName, final String attributeValue) {
+        return createElementWithAttributes(document, elementName, ImmutableMap.of(attributeName, attributeValue));
+    }
+
+    public static Element createElementWithAttributes(final Document document, final String elementName, final Map<String, String> attributes) {
+        Element element = document.createElement(elementName);
+        attributes.forEach(element::setAttribute);
+        return element;
+    }
+
+    public static Element createElementWithChildren(final Document document, final String elementName, final Element... children) {
+        Element element = document.createElement(elementName);
+        Stream.of(children).forEach(element::appendChild);
+        return element;
+    }
+
+    public static Element createElementWithAttributesAndChildren(final Document document, final String elementName, final Map<String, String> attributes, final Element... children) {
+        Element element = document.createElement(elementName);
+        attributes.forEach(element::setAttribute);
+        Stream.of(children).forEach(element::appendChild);
+        return element;
+    }
+
+    public static Element buildPropertiesElement(final Map<String, Object> properties, final Document document, final String propertiesElementName) {
+        Element propertiesElement = document.createElement(propertiesElementName);
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            // skip property if null value
+            if (entry.getValue() == null) {
+                continue;
+            }
+
+            propertiesElement.appendChild(createPropertyElement(document, entry.getKey(), entry.getValue()));
+        }
+        return propertiesElement;
+    }
+
+    private static Element createPropertyElement(Document document, String key, Object value) {
+        Element propertyElement = document.createElement(PROPERTY);
+        propertyElement.setAttribute(ATTRIBUTE_KEY, key);
+        String elementType;
+
+        if (String.class.isAssignableFrom(value.getClass())) {
+            elementType = STRING_VALUE;
+        } else if (Integer.class.isAssignableFrom(value.getClass())) {
+            elementType = INT_VALUE;
+        } else if (Long.class.isAssignableFrom(value.getClass())) {
+            elementType = LONG_VALUE;
+        } else if (Boolean.class.isAssignableFrom(value.getClass())) {
+            elementType = BOOLEAN_VALUE;
+        } else {
+            throw new DocumentToolsException("Could not create property (" + key + ") for value type: " + value.getClass().getTypeName());
+        }
+
+        Element valueElement = document.createElement(elementType);
+        valueElement.setTextContent(value.toString());
+        propertyElement.appendChild(valueElement);
+        return propertyElement;
     }
 }

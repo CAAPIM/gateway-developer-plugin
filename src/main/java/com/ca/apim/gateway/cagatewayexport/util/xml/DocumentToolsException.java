@@ -7,6 +7,11 @@
 package com.ca.apim.gateway.cagatewayexport.util.xml;
 
 public class DocumentToolsException extends RuntimeException {
+
+    public DocumentToolsException(String message) {
+        super(message);
+    }
+
     public DocumentToolsException(String message, Throwable cause) {
         super(message, cause);
     }

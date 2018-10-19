@@ -40,6 +40,7 @@ public class BundleElementNames {
     public static final String DEPENDENCY_GRAPH = "l7:DependencyGraph";
     public static final String GUID = "l7:Guid";
     public static final String EXTENSION = "l7:Extension";
+    public static final String PORT = "l7:Port";
 
     // Service
     public static final String SERVICE = "l7:Service";
@@ -84,7 +85,6 @@ public class BundleElementNames {
     // Listen Port Elements
     public static final String LISTEN_PORT = "l7:ListenPort";
     public static final String PROTOCOL = "l7:Protocol";
-    public static final String PORT = "l7:Port";
     public static final String ENABLED_FEATURES = "l7:EnabledFeatures";
     public static final String TARGET_SERVICE_REFERENCE = "l7:TargetServiceReference";
     public static final String TLS_SETTINGS = "l7:TlsSettings";
@@ -120,6 +120,17 @@ public class BundleElementNames {
     // Private Key
     public static final String PRIVATE_KEY = "l7:PrivateKey";
     public static final String CERTIFICATE_CHAIN = "l7:CertificateChain";
+
+    // Cassandra Connection
+    public static final String CASSANDRA_CONNECTION = "l7:CassandraConnection";
+    public static final String KEYSPACE = "l7:Keyspace";
+    public static final String CONTACT_POINT = "l7:ContactPoint";
+    public static final String USERNAME = "l7:Username";
+    public static final String PASSWORD_ID = "l7:PasswordId";
+    public static final String COMPRESSION = "l7:Compression";
+    public static final String SSL = "l7:Ssl";
+    public static final String TLS_CIPHERS = "l7:TlsCiphers";
+    public static final String ENABLED = "l7:Enabled";
 
     private BundleElementNames() {
         //
