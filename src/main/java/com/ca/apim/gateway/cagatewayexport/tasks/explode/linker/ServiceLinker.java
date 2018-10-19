@@ -69,12 +69,12 @@ public class ServiceLinker implements EntityLinker<ServiceEntity> {
      * Find the full path for a service entity.
      *
      * @param bundle the bundle
-     * @param serviceEntity the service entiy
+     * @param serviceEntity the service entity
      * @return the full path for the specified service
      */
     static String getServicePath(Bundle bundle, ServiceEntity serviceEntity) {
         Folder folder = bundle.getFolderTree().getFolderById(serviceEntity.getFolderId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return Paths.get(folderPath.toString(), serviceEntity.getName() + ".xml").toString();
+        return Paths.get(folderPath.toString(), serviceEntity.getName()).toString();
     }
 }

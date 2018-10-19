@@ -43,8 +43,7 @@ public class ServiceWriter implements EntityWriter {
         Map<String, Service> serviceBeans = bundle.getEntities(ServiceEntity.class)
                 .values()
                 .stream()
-                //TODO: omit the project name in path
-                .collect(Collectors.toMap(ServiceEntity::getPath, this::getServiceBean));
+                .collect(Collectors.toMap(serviceEntity -> serviceEntity.getPath().substring(serviceEntity.getPath().indexOf(File.separatorChar) + 1), this::getServiceBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, serviceBeans, SERVICES_FILE, Service.class);
     }
@@ -52,7 +51,7 @@ public class ServiceWriter implements EntityWriter {
     @NotNull
     private Service getServiceBean(ServiceEntity serviceEntity) {
         Service serviceBean = new Service();
-        serviceBean.setPolicy(serviceEntity.getPath());
+        serviceBean.setPolicy(serviceEntity.getPath() + ".xml");
         Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);
         Element httpMappingElement = getSingleChildElement(serviceMappingsElement, HTTP_MAPPING);
         Element urlPatternElement = getSingleChildElement(httpMappingElement, URL_PATTERN);
