@@ -40,10 +40,18 @@ public class ServiceWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
+        throw new UnsupportedOperationException("Please use the other write method.");
+    }
+
+    @Override
+    public void write(String folderPath, Bundle bundle, File rootFolder) {
         Map<String, Service> serviceBeans = bundle.getEntities(ServiceEntity.class)
                 .values()
                 .stream()
-                .collect(Collectors.toMap(serviceEntity -> serviceEntity.getPath().substring(serviceEntity.getPath().indexOf(File.separatorChar) + 1), this::getServiceBean));
+                .collect(Collectors.toMap(serviceEntity -> folderPath.equals("/") ?
+                                serviceEntity.getPath() :
+                                serviceEntity.getPath().replaceFirst("(" + folderPath.substring(1) + "/)", "" )
+                , this::getServiceBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, serviceBeans, SERVICES_FILE, Service.class);
     }
