@@ -55,8 +55,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
     }
 
     private void loadPolicies(final File currentDir, final File rootDir, Folder parentFolder, final Map<String, Policy> policies, Map<String, Folder> folders) {
-        Folder folder = loadFolder(currentDir, rootDir, parentFolder);
-        folders.put(folder.getPath(), folder);
+        Folder folder = folders.computeIfAbsent(getPath(currentDir, rootDir), key -> loadFolder(currentDir, rootDir, parentFolder));
         final File[] children = currentDir.listFiles();
         if (children != null) {
             for (final File child : children) {
@@ -70,7 +69,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
         }
     }
 
-    private Folder loadFolder(File folderFile, File rootDir, Folder parentFolder) {
+    static Folder loadFolder(File folderFile, File rootDir, Folder parentFolder) {
         Folder folder = new Folder();
         folder.setName(folderFile.getName());
         folder.setPath(getPath(folderFile, rootDir));
@@ -100,7 +99,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
         }
     }
 
-    String getPath(final File policy, final File policyRootDir) {
+    static String getPath(final File policy, final File policyRootDir) {
         return policyRootDir.toURI().relativize(policy.toURI()).getPath();
     }
 

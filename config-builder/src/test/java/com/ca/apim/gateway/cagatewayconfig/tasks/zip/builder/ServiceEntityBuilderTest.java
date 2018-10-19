@@ -73,8 +73,14 @@ public class ServiceEntityBuilderTest {
         parentFolder.setName("my");
         parentFolder.setPath("my");
 
+        Folder serviceParentFolder = new Folder();
+        serviceParentFolder.setId("test");
+        serviceParentFolder.setName("v1");
+        serviceParentFolder.setPath("my/v1");
+
         bundle.putAllFolders(new HashMap<String, Folder>() {{
             put(parentFolder.getPath(), parentFolder);
+            put(serviceParentFolder.getPath(), serviceParentFolder);
         }});
 
         Policy policy = new Policy();
@@ -90,13 +96,15 @@ public class ServiceEntityBuilderTest {
         Service service = new Service();
         service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
         service.setUrl("/my/service/url");
+        service.setPolicy("/my/policy.xml");
+        service.setParentFolder(serviceParentFolder);
         service.setProperties(new HashMap<String, String>() {{
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
 
         bundle.putAllServices(new HashMap<String, Service>() {{
-            put("/my/policy.xml", service);
+            put("/v1/service", service);
         }});
 
         List<Entity> services = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -111,7 +119,7 @@ public class ServiceEntityBuilderTest {
         assertEquals("l7:Service", serviceEntityXml.getTagName());
         Element serviceDetails = getSingleElement(serviceEntityXml, "l7:ServiceDetail");
         Element serviceName = getSingleElement(serviceDetails, "l7:Name");
-        assertEquals(policy.getName(), serviceName.getTextContent());
+        assertEquals("service", serviceName.getTextContent());
 
         Element serviceMappings = getSingleElement(serviceDetails, "l7:ServiceMappings");
         Element serviceHttpMappings = getSingleElement(serviceMappings, "l7:HttpMapping");
