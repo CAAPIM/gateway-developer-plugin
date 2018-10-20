@@ -48,7 +48,7 @@ subprojects {
 
     dependencies {
         testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
-        testCompile("io.github.glytching:junit-extensions:2.2.0")
+        testCompile("io.github.glytching:junit-extensions:2.3.0")
         testCompile 'org.mockito:mockito-junit-jupiter:2.19.0'
         testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
         testCompile 'org.testcontainers:testcontainers:1.4.3'

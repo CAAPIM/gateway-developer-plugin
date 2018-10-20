@@ -13,8 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileUtils {
+
+    private static final Logger LOGGER = Logger.getLogger(FileUtils.class.getName());
     public static final FileUtils INSTANCE = new FileUtils();
 
     public InputStream getInputStream(final File file) {
@@ -38,10 +42,31 @@ public class FileUtils {
     }
 
     public String getFileAsString(final File file) {
+        return new String(this.readFile(file));
+    }
+
+    private byte[] readFile(final File file) {
         try {
-            return new String(Files.readAllBytes(file.toPath()));
+            return Files.readAllBytes(file.toPath());
         } catch (IOException e) {
             throw new EntityBuilderException("Could not read file " + file.getPath(), e);
+        }
+    }
+
+    /**
+     * Close a {@link java.io.Closeable} without throwing any exceptions.
+     *
+     * @param closeable the object to close.
+     */
+    public static void closeQuietly(java.io.Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException ioe) {
+                LOGGER.log(Level.INFO, "IO error when closing closeable '" + ioe.getMessage() + "'");
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Unexpected error when closing object", e);
+            }
         }
     }
 }

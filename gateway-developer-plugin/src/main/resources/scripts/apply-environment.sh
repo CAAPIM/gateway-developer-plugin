@@ -8,5 +8,12 @@ then
     exit 1
 fi
 
+# Allow debugging of the env creator application
+DEBUG_OPTS=""
+if [ "$ENV_DEBUG" = "true" ]
+then
+    DEBUG_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=${ENV_DEBUG_PORT}"
+fi
+
 # Call the apply-environment application
-"$JAVA_HOME/bin/java" -classpath "/opt/docker/rc.d/apply-environment/*" com.ca.apim.gateway.cagatewayconfig.EnvironmentCreatorApplication
+"$JAVA_HOME/bin/java" ${DEBUG_OPTS} -classpath "/opt/docker/rc.d/apply-environment/*" com.ca.apim.gateway.cagatewayconfig.EnvironmentCreatorApplication

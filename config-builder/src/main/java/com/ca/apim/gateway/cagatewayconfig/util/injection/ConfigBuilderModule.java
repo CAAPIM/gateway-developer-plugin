@@ -25,6 +25,8 @@ import org.reflections.Reflections;
 
 import javax.net.ssl.SSLSocketFactory;
 import java.lang.reflect.Modifier;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.ConnectionUtils.createAcceptAllSocketFactory;
 import static com.google.inject.Guice.createInjector;
@@ -57,6 +59,11 @@ public class ConfigBuilderModule extends AbstractModule {
         bind(FileUtils.class).toInstance(FileUtils.INSTANCE);
         bind(IdGenerator.class).toInstance(new IdGenerator());
         bind(SSLSocketFactory.class).toInstance(createAcceptAllSocketFactory());
+        try {
+            bind(CertificateFactory.class).toInstance(CertificateFactory.getInstance("X.509"));
+        } catch (CertificateException e) {
+            throw new IllegalStateException("Unable to load X509 Certificate Factory", e);
+        }
 
         // bind all entity builders to the module
         Multibinder<EntityBuilder> buildersBinder = newSetBinder(binder(), EntityBuilder.class);
