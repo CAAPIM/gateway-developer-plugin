@@ -51,6 +51,7 @@ public class ServiceWriter implements EntityWriter {
     @NotNull
     private Service getServiceBean(ServiceEntity serviceEntity) {
         Service serviceBean = new Service();
+        serviceBean.setPolicy(serviceEntity.getPath() + ".xml");
         Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);
         Element httpMappingElement = getSingleChildElement(serviceMappingsElement, HTTP_MAPPING);
         Element urlPatternElement = getSingleChildElement(httpMappingElement, URL_PATTERN);
