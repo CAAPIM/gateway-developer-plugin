@@ -162,7 +162,9 @@ public class PolicyEntityBuilder implements EntityBuilder {
             final String guid = findEncassReferencedGuid(policy, bundle, (Element) encapsulatedAssertionElement, policyPath);
             updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, policyPath, guid);
         } else if (!isNoOpIfConfigMissing((Element) encapsulatedAssertionElement)) {
-            throw new EntityBuilderException("No policyPath specified for encass in policy: " + policy.getPath());
+            Element guidElement = getSingleChildElement((Element) encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
+            Element nameElement = getSingleChildElement((Element) encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
+            throw new EntityBuilderException("No policyPath specified for encass in policy: '" + policy.getPath() + "' GUID: '" + (guidElement != null ? guidElement.getAttribute(STRING_VALUE) : null) + "' Name: '" + (nameElement != null ? nameElement.getAttribute(STRING_VALUE) : null) + "'");
         } else {
             LOGGER.log(Level.FINE, "No policyPath specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
         }
@@ -173,7 +175,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(policyPath));
         if (referenceEncass.get() == null) {
             bundle.getDependencies().forEach(b -> {
-                if (!referenceEncass.compareAndSet(null, b.getEncasses().get(policyPath))) {
+                Encass encass = b.getEncasses().get(policyPath);
+                if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
                     throw new EntityBuilderException("Found multiple encasses in dependency bundles with policy path: " + policyPath);
                 }
             });
@@ -241,7 +244,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
             policy.getDependencies().add(includedPolicy.get());
         } else {
             bundle.getDependencies().forEach(b -> {
-                if (!includedPolicy.compareAndSet(null, b.getPolicies().get(policyPath))) {
+                Policy policyForPath = b.getPolicies().get(policyPath);
+                if (policyForPath != null && !includedPolicy.compareAndSet(null, policyForPath)) {
                     throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
                 }
             });

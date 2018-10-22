@@ -43,7 +43,9 @@ public class ServiceLoader extends EntityLoaderBase<Service> {
 
     @Override
     protected void putToBundle(Bundle bundle, @NotNull Map<String, Service> entitiesMap) {
-        bundle.putAllServices(entitiesMap);
+        Map<String, Service> parsedServices = new HashMap<>(entitiesMap.size());
+        entitiesMap.forEach((k, s) -> parsedServices.put(EncodeDecodeUtils.decodePath(k), s));
+        bundle.putAllServices(parsedServices);
     }
 
     @Override
