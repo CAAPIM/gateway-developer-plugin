@@ -29,6 +29,7 @@ public class Bundle {
     private final Map<String, JdbcConnection> jdbcConnections = new HashMap<>();
     private final Map<String, TrustedCert> trustedCerts = new HashMap<>();
     private final Map<String, PrivateKey> privateKeys = new HashMap<>();
+    private final Map<String, CassandraConnection> cassandraConnections = new HashMap<>();
     private final Map<String, SupplierWithIO<InputStream>> certificateFiles = new HashMap<>();
     private Set<Bundle> dependencies;
 
@@ -142,6 +143,14 @@ public class Bundle {
 
     public void putAllPrivateKeys(@NotNull Map<String, PrivateKey> privateKeys) {
         this.privateKeys.putAll(privateKeys);
+    }
+
+    public Map<String, CassandraConnection> getCassandraConnections() {
+        return cassandraConnections;
+    }
+
+    public void putAllCassandraConnections(@NotNull Map<String, CassandraConnection> cassandraConnections) {
+        this.cassandraConnections.putAll(cassandraConnections);
     }
 
     public Map<String, SupplierWithIO<InputStream>> getCertificateFiles() {

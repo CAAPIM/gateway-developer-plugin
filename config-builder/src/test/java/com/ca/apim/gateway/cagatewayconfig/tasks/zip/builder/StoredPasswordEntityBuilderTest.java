@@ -50,6 +50,10 @@ class StoredPasswordEntityBuilderTest {
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
+        // the builder set the id in order for other entities be able to link to the password using it.
+        assertNotNull(pwd1.getId());
+        assertNotNull(pwd2.getId());
+
         assertFalse(entities.isEmpty());
         assertEquals(2, entities.size());
 

@@ -140,6 +140,16 @@ public class BundleElementNames {
     public static final String PRIVATE_KEY = "l7:PrivateKey";
     public static final String CERTIFICATE_CHAIN = "l7:CertificateChain";
 
+    // Cassandra Connection
+    public static final String CASSANDRA_CONNECTION = "l7:CassandraConnection";
+    public static final String KEYSPACE = "l7:Keyspace";
+    public static final String CONTACT_POINT = "l7:ContactPoint";
+    public static final String USERNAME = "l7:Username";
+    public static final String PASSWORD_ID = "l7:PasswordId";
+    public static final String COMPRESSION = "l7:Compression";
+    public static final String SSL = "l7:Ssl";
+    public static final String TLS_CIPHERS = "l7:TlsCiphers";
+
     private BundleElementNames() {
         //
     }
