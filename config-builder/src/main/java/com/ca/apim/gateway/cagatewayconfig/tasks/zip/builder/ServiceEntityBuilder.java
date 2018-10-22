@@ -12,12 +12,12 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,8 +51,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildServiceEntity(Bundle bundle, String name, Service service, Document document) {
-        String processedName = name.lastIndexOf(File.separatorChar) == -1 ? name : name.substring(name.lastIndexOf(File.separatorChar) + 1);
+    private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
+        String processedName = FilenameUtils.getBaseName(servicePath);
         Policy policy = bundle.getPolicies().get(service.getPolicy());
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());

@@ -36,7 +36,7 @@ class ServiceLoaderTest {
     @Mock
     private FileUtils fileUtils;
 
-    private final String SERVICE_NAME_1 = "projectName/example";
+    private final String SERVICE_NAME_1 = "example";
     private final String SERVICE_NAME_2 = "projectName/v1/subfolder/example-project";
 
     @BeforeEach

@@ -16,6 +16,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.*;
 
 import javax.inject.Inject;
@@ -71,7 +72,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
-        if (orderedPolicies.contains(policy) || bundle.getServices().get(policy.getPath().substring(0, policy.getPath().lastIndexOf('.'))) != null) {
+        if (orderedPolicies.contains(policy) || bundle.getServices().get(FilenameUtils.removeExtension(policy.getPath())) != null) {
             //This is a service policy it should have already be handled by the service entity builder OR This policy has already been added to the policy list
             return;
         }

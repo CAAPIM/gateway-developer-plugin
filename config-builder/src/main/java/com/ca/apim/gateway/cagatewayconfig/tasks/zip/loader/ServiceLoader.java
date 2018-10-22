@@ -10,6 +10,8 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
@@ -60,13 +62,12 @@ public class ServiceLoader extends EntityLoaderBase<Service> {
 
         final Map<String, Service> services = bundle.getServices();
         services.forEach((servicePath, service) -> {
-            int lastFileSeparator = servicePath.lastIndexOf(File.separatorChar);
-            if (lastFileSeparator == -1) {
+            final String pathExcludingService = FilenameUtils.getFullPath(servicePath);
+            if (StringUtils.isEmpty(pathExcludingService)) {
                 //service is directly under the root dir
                 service.setParentFolder(rootFolder);
             } else {
                 //service is in a folder, create folders if they don't already exist
-                String pathExcludingService = servicePath.substring(0, servicePath.lastIndexOf(File.separatorChar) + 1 );
                 createFolders(pathExcludingService, folderMap, rootFolder);
                 service.setParentFolder(folderMap.get(pathExcludingService));
             }
