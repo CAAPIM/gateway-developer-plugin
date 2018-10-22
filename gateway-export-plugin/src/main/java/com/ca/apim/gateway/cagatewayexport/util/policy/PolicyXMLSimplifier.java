@@ -16,13 +16,15 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEnt
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -70,7 +72,7 @@ public class PolicyXMLSimplifier {
             return;
         }
         String base64Expression = base64ResponseBodyElement.getAttribute(STRING_VALUE);
-        byte[] decoded = Base64.getDecoder().decode(base64Expression);
+        byte[] decoded = base64Decode(base64Expression);
 
         Element expressionElement = element.getOwnerDocument().createElement(RESPONSE_BODY);
         expressionElement.appendChild(element.getOwnerDocument().createCDATASection(new String(decoded)));
@@ -78,10 +80,20 @@ public class PolicyXMLSimplifier {
         element.removeChild(base64ResponseBodyElement);
     }
 
-    private void simplifySetVariable(Element element, Bundle resultantBundle) throws DocumentParseException {
+    private static byte[] base64Decode(String base64Expression) {
+        try {
+            return Base64.decodeBase64(base64Expression.getBytes(StandardCharsets.UTF_8));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unable to decode: " + base64Expression, e);
+        }
+    }
+
+    @VisibleForTesting
+    static void simplifySetVariable(Element element, Bundle resultantBundle) throws DocumentParseException {
         Element base64ExpressionElement = getSingleElement(element, BASE_64_EXPRESSION);
         String base64Expression = base64ExpressionElement.getAttribute(STRING_VALUE);
-        byte[] decodedValue = Base64.getDecoder().decode(base64Expression);
+        byte[] decodedValue;
+        decodedValue = base64Decode(base64Expression);
 
         Element variableToSetElement = getSingleElement(element, VARIABLE_TO_SET);
         String variableName = variableToSetElement.getAttribute(STRING_VALUE);

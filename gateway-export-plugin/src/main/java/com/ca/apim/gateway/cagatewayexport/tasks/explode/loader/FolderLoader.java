@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
+import com.ca.apim.gateway.cagatewayexport.util.string.EncodeDecodeUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -21,9 +22,16 @@ public class FolderLoader implements EntityLoader<Folder> {
     public Folder load(final Element element) {
         final Element folder = getSingleChildElement(getSingleChildElement(element, RESOURCE), FOLDER);
         final String name = getSingleChildElement(folder, NAME).getTextContent();
+        validateFolderName(name);
         final String id = folder.getAttribute(ATTRIBUTE_ID);
         final String parentFolderID = folder.getAttribute(ATTRIBUTE_FOLDER_ID);
         return new Folder(name, id, parentFolderID);
+    }
+
+    private void validateFolderName(String name) {
+        if (EncodeDecodeUtils.containsInvalidCharacter(name)) {
+            throw new EntityLoaderException("Folder name contains invalid characters: " + name);
+        }
     }
 
     @Override

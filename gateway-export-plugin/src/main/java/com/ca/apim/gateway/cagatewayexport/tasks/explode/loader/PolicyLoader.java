@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayexport.util.string.EncodeDecodeUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -35,7 +36,7 @@ public class PolicyLoader implements EntityLoader<PolicyEntity> {
         final String id = policyDetails.getAttribute(ATTRIBUTE_ID);
         final String folderId = policyDetails.getAttribute(ATTRIBUTE_FOLDER_ID);
         Element nameElement = getSingleChildElement(policyDetails, NAME);
-        final String name = nameElement.getTextContent();
+        final String name = EncodeDecodeUtils.encodePath(nameElement.getTextContent());
 
         final Element resources = getSingleChildElement(policy, RESOURCES);
         final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
