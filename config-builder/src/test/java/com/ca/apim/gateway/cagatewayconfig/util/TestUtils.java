@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.Bundl
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
+import org.mockito.*;
 import org.w3c.dom.Document;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Map;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.*;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 /**
  * Utility methods for testing purposes.
@@ -31,7 +33,7 @@ public class TestUtils {
      * Assert contents of both maps are the same. Does not check ordering.
      *
      * @param expected expected map of elements
-     * @param actual   actual map of elements
+     * @param actual actual map of elements
      */
     public static void assertPropertiesContent(Map<String, Object> expected, Map<String, Object> actual) {
         assertNotNull(expected);
@@ -70,4 +72,5 @@ public class TestUtils {
             assertEquals(e.getName(), e.getMappingProperties().get(MAP_TO));
         });
     }
+
 }

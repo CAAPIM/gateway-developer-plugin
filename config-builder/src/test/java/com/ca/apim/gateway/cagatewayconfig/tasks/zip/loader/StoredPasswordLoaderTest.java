@@ -17,15 +17,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
 import org.mockito.*;
 import org.mockito.junit.jupiter.*;
+import org.mockito.stubbing.*;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword.fillDefaultProperties;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
+import static java.nio.file.Files.newInputStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -56,6 +59,25 @@ class StoredPasswordLoaderTest {
     @Test
     void loadFileWithBlankPasswords() throws IOException {
         loadPasswords("TestPassword=");
+    }
+
+    @Test
+    void loadFromEnvironment() {
+        StoredPasswordsLoader loader = new StoredPasswordsLoader(fileUtils);
+
+        final Bundle bundle = new Bundle();
+        loader.load(bundle, PASSWORD_1, "pwd1");
+
+        assertFalse(bundle.getStoredPasswords().isEmpty());
+        assertEquals(1, bundle.getStoredPasswords().size());
+
+        // pwd1
+        final StoredPassword password1 = bundle.getStoredPasswords().get(PASSWORD_1);
+        assertNotNull(password1);
+        assertEquals(PASSWORD_1, password1.getName());
+        assertEquals("pwd1", password1.getPassword());
+        assertFalse(password1.getProperties().isEmpty());
+        assertPropertiesContent(fillDefaultProperties(PASSWORD_1, new HashMap<>()), password1.getProperties());
     }
 
     @Test
@@ -97,6 +119,21 @@ class StoredPasswordLoaderTest {
         assertEquals("7layer", gateway.getPassword());
         assertFalse(gateway.getProperties().isEmpty());
         assertPropertiesContent(fillDefaultProperties(GATEWAY, new HashMap<>()), gateway.getProperties());
+    }
+
+    @Test
+    void tryLoadPasswordsFromNonexistentFile() throws IOException {
+        StoredPasswordsLoader loader = new StoredPasswordsLoader(fileUtils);
+        final File configFolder = rootProjectDir.createDirectory("config");
+        final File identityProvidersFile = new File(configFolder, "stored-passwords.properties");
+        Files.touch(identityProvidersFile);
+
+        InputStream stream = mock(InputStream.class);
+        when(stream.read(any(byte[].class))).thenThrow(IOException.class);
+        when(fileUtils.getInputStream(any(File.class))).thenReturn(stream);
+
+        final Bundle bundle = new Bundle();
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, rootProjectDir.getRoot()));
     }
 
     private Bundle loadPasswords(String content) throws IOException {

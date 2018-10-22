@@ -164,4 +164,64 @@ class PrivateKeyLoaderTest {
         assertNotNull(key1.getKeyStoreType());
         assertEquals(KeyStoreType.PKCS12_SOFTWARE, key1.getKeyStoreType());
     }
+
+    @Test
+    void loadNonexistingDirectory() throws IOException {
+        PrivateKeyLoader loader = new PrivateKeyLoader(jsonTools);
+        final File configFolder = rootProjectDir.createDirectory("config");
+        final File identityProvidersFile = new File(configFolder, "private-keys.json");
+        Files.touch(identityProvidersFile);
+
+        String json = "{\n" +
+                "  \"key1\": {\n" +
+                "    \"keystore\": \"Software DB\",\n" +
+                "    \"algorithm\": \"RSA\",\n" +
+                "    \"keyPassword\": \"\"\n" +
+                "  },\n" +
+                "  \"test\": {\n" +
+                "    \"keystore\": \"Software DB\",\n" +
+                "    \"algorithm\": \"EC\",\n" +
+                "    \"keyPassword\": \"\"\n" +
+                "  },\n" +
+                "  \"key2\": {\n" +
+                "    \"keystore\": \"Software DB\",\n" +
+                "    \"algorithm\": \"RSA\",\n" +
+                "    \"keyPassword\": \"\"\n" +
+                "  }\n" +
+                "}";
+        when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes()));
+
+        assertThrows(BundleLoadException.class, () -> loader.load(new Bundle(), rootProjectDir.getRoot()));
+    }
+
+    @Test
+    void loadMissingKeyFiles() throws IOException {
+        PrivateKeyLoader loader = new PrivateKeyLoader(jsonTools);
+        final File configFolder = rootProjectDir.createDirectory("config");
+        final File identityProvidersFile = new File(configFolder, "private-keys.json");
+        Files.touch(identityProvidersFile);
+
+        File keysDir = new File(config, "privateKeys");
+        keysDir.mkdir();
+
+        String json = "{\n" +
+                "  \"key1\": {\n" +
+                "    \"keystore\": \"Software DB\",\n" +
+                "    \"algorithm\": \"RSA\",\n" +
+                "    \"keyPassword\": \"\"\n" +
+                "  },\n" +
+                "  \"test\": {\n" +
+                "    \"keystore\": \"Software DB\",\n" +
+                "    \"algorithm\": \"EC\",\n" +
+                "    \"keyPassword\": \"\"\n" +
+                "  },\n" +
+                "  \"key2\": {\n" +
+                "    \"keystore\": \"Software DB\",\n" +
+                "    \"algorithm\": \"RSA\",\n" +
+                "    \"keyPassword\": \"\"\n" +
+                "  }\n" +
+                "}";
+        when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes()));
+        assertThrows(BundleLoadException.class, () -> loader.load(new Bundle(), rootProjectDir.getRoot()));
+    }
 }

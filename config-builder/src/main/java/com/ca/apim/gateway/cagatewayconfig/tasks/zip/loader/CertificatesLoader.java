@@ -15,9 +15,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Arrays.stream;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
 
 /**
  * Loads the certificates specified in the 'config/certificates' directory. Certificates in this directory must end with
@@ -33,9 +35,9 @@ public class CertificatesLoader implements EntityLoader {
             final String[] certs = certificatesDir.list();
             if (certs != null && certs.length > 0) {
                 final Map<String, SupplierWithIO<InputStream>> map = new HashMap<>();
-                Arrays.stream(certs).forEach(cert -> {
+                stream(certs).forEach(cert -> {
                     if (checkCertFormat(cert)) {
-                        map.put(cert.substring(0, cert.length() - 4), () -> new FileInputStream(new File(certificatesDir, cert)));
+                        map.put(getBaseName(cert), () -> new FileInputStream(new File(certificatesDir, cert)));
                     } else {
                         throw new BundleLoadException(cert + " must be a valid certificate extension.");
                     }
