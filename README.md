@@ -6,11 +6,12 @@
 The Gateway developer plugin can be used to develop Gateway configuration.
 
 # Usage
-In order to use this plugin add the following you your gradle file:
+In order to use this plugins add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.Gateway.Gateway-developer-plugin" version "0.6.+"
+    id "com.ca.apim.gateway.gateway-developer-plugin" version "0.6.+"
+    id "com.ca.apim.gateway.gateway-export-plugin" version "0.6.+"
 }
 
 repositories {
@@ -18,15 +19,22 @@ repositories {
     // creator application that is bundled in the gw7 file.
     mavenCentral()
 }
+
+// The Gateway Connection Config is needed by the gateway-export plugin in order to export from a gateway
+GatewayConnection {
+    url = 'https://<gateway-host>:8443/restman'
+    folderPath = '/my-solution-folder'
+}
 ```
 
-After this is added run `./gradlew build` in order to build a bundle and deployment package from a gateway solution located in `src/main/Gateway`.
-The build will result in a deployment bundle and a deployment package in `build/gateway`
+After this is added run `./gradlew build` in order to build a bundle and deployment package from a gateway solution located in `src/main/Gateway`. 
+The build will result in a deployment bundle and a deployment package in `build/gateway`.
+Run `gradle export` in order to export a gateway solution into `src/main/Gateway`.
 
 **[See more details on the usage of the plugin in the Wiki](https://github.com/ca-api-gateway/gateway-developer-plugin/wiki)**
 
 # Building the Plugin
-The build is done using gradle. To build the plugin run ```./gradlew build```. Once built it is available in the `build/libs` directory. 
+The build is done using gradle. To build the plugin run ```./gradlew build```.
 
 ## Versioning
 Versioning is done using the [gradle-semantic-build-versioning](https://github.com/vivin/gradle-semantic-build-versioning) plugin. 
@@ -34,8 +42,8 @@ Every time a pull request is merged into `master` the patch version will be upda
 In order to update the major or minor version put either `[major]` or `[minor]` into the commit message.
 
 ## Publish to Local
-You can also publish the plugin to your local maven repository by running:
-```./gradlew publishToMavenLocal```
+You can also publish the plugin to your local maven repository and print the published version by running:
+```./gradlew build publishToMavenLocal printVersion```
 
 ## Publishing
 The plugin is published to Bintray: [ca-api-gateway/gateway-developer-plugin](https://bintray.com/ca-api-gateway/gateway-developer-plugin). This then gets promoted to jCenter and Maven Central. 

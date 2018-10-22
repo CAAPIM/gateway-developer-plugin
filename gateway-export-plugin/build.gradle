@@ -1,0 +1,61 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+plugins {
+    id 'com.gradle.plugin-publish' version "0.10.0"
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'maven'
+}
+
+description = 'The gateway-export-plugin enables exporting from gateways into a format that is compatible with the gateway-developer-plugin.'
+
+project.ext.'gradle.publish.key' = System.env.GRADLE_PUBLISH_KEY
+project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
+
+dependencies {
+    compile gradleApi()
+    compile 'org.jetbrains:annotations:16.0.2'
+    compile 'org.apache.httpcomponents:httpclient:4.5.5'
+    compile 'commons-io:commons-io:2.6'
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+    compile 'org.reflections:reflections:0.9.11'
+    compile 'com.google.inject:guice:4.2.1'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
+
+    testCompile gradleTestKit()
+}
+
+gradlePlugin {
+    plugins {
+        gatewayExportPlugin {
+            id = 'com.ca.apim.gateway.gateway-export-plugin'
+            implementationClass = 'com.ca.apim.gateway.cagatewayexport.CAGatewayExport'
+        }
+        gatewayExportPluginBase {
+            id = 'com.ca.apim.gateway.gateway-export-plugin-base'
+            implementationClass = 'com.ca.apim.gateway.cagatewayexport.CAGatewayExportBase'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
+    vcsUrl = 'https://github.com/ca-api-gateway/gateway-developer-plugin.git'
+
+    plugins {
+        gatewayExportPlugin {
+            displayName = 'CA API Gateway Export Gradle Plugin'
+            description = 'The Gateway export plugin can be used to export Gateway configuration from a CA API Gateway'
+            tags = ['ca api gateway', 'building']
+        }
+        gatewayExportPluginBase {
+            displayName = 'CA API Gateway Export Base Gradle Plugin'
+            description = 'The Gateway export plugin can be used to export Gateway configuration from a CA API Gateway'
+            tags = ['ca api gateway', 'building']
+        }
+    }
+}
