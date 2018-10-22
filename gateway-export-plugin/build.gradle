@@ -1,0 +1,189 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+plugins {
+    id 'com.gradle.plugin-publish' version "0.10.0"
+    id 'java-gradle-plugin'
+    id "org.sonarqube" version "2.6.2"
+    id "com.srcclr.gradle" version "3.0.0"
+    id 'maven-publish'
+    id 'maven'
+    id 'jacoco'
+    id "com.jfrog.bintray" version "1.8.4"
+}
+
+description = 'The gateway-export-plugin enables exporting from gateways into a format that is compatible with the gateway-developer-plugin.'
+group 'com.ca.apim.gateway'
+tag {
+    message {
+        "version: ${version} build-date: " + new Date().format('yyyy-MM-dd\'T\'HH:mm:ss')
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+project.ext.'gradle.publish.key' = System.env.GRADLE_PUBLISH_KEY
+project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes(
+                "Implementation-Title": name,
+                "Implementation-Version": version)
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    compile gradleApi()
+    compile 'org.jetbrains:annotations:16.0.2'
+    compile 'org.apache.httpcomponents:httpclient:4.5.5'
+    compile 'commons-io:commons-io:2.6'
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+    compile 'org.reflections:reflections:0.9.11'
+    compile 'com.google.inject:guice:4.2.1'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.6'
+
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
+    testCompile("io.github.glytching:junit-extensions:2.3.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
+    testCompile 'org.mockito:mockito-core:2.16.0'
+    testCompile gradleTestKit()
+    testCompile 'org.testcontainers:testcontainers:1.4.3'
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+artifacts {
+    archives javadocJar, sourceJar
+}
+
+// Create the pom configuration:
+def pomConfig = {
+    scm {
+        url 'https://github.com/ca-api-gateway/gateway-export-plugin'
+    }
+
+    licenses {
+        license {
+            name 'MIT'
+            url 'https://github.com/ca-api-gateway/gateway-export-plugin/blob/master/LICENSE'
+        }
+    }
+
+    developers {
+        developer {
+            id 'apigatewayopensource'
+            name 'CA API Gateway Bot'
+            email 'API-Gateway-OpenSource@ca.com'
+        }
+    }
+}
+
+publishing {
+    publications {
+        BinTrayPublication(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', project.description)
+                root.appendNode('name', project.name)
+                root.appendNode('url', 'https://github.com/ca-api-gateway/gateway-export-plugin')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    publications = ['BinTrayPublication']
+    publish = true
+    pkg {
+        repo = 'gateway-developer-plugin'
+        userOrg = 'ca-api-gateway'
+        name = project.name
+        desc = project.description
+        licenses = ['MIT']
+        websiteUrl = 'https://github.com/ca-api-gateway/gateway-export-plugin'
+        issueTrackerUrl = 'https://waffle.io/ca-api-gateway/gateway-export-plugin'
+        vcsUrl = 'https://github.com/ca-api-gateway/gateway-export-plugin.git'
+        githubRepo = 'ca-api-gateway/gateway-export-plugin'
+        version {
+            name = version
+            released = new Date()
+            vcsTag = 'release/' + version
+            gpg {
+                sign = true
+            }
+            mavenCentralSync {
+                user = project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : System.getenv('OSS_USER') //OSS user token: mandatory
+                password = project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : System.getenv('OSS_PASSWORD') //OSS user password: mandatory
+            }
+        }
+    }
+}
+
+gradlePlugin {
+    plugins {
+        gatewayExportPlugin {
+            id = 'com.ca.apim.gateway.gateway-export-plugin'
+            implementationClass = 'com.ca.apim.gateway.cagatewayexport.CAGatewayExport'
+        }
+        gatewayExportPluginBase {
+            id = 'com.ca.apim.gateway.gateway-export-plugin-base'
+            implementationClass = 'com.ca.apim.gateway.cagatewayexport.CAGatewayExportBase'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/ca-api-gateway/gateway-export-plugin'
+    vcsUrl = 'https://github.com/ca-api-gateway/gateway-export-plugin.git'
+
+    plugins {
+        gatewayExportPlugin {
+            displayName = 'CA API Gateway Export Gradle Plugin'
+            description = 'The Gateway export plugin can be used to export Gateway configuration from a CA API Gateway'
+            tags = ['ca api gateway', 'building']
+        }
+        gatewayExportPluginBase {
+            displayName = 'CA API Gateway Export Base Gradle Plugin'
+            description = 'The Gateway export plugin can be used to export Gateway configuration from a CA API Gateway'
+            tags = ['ca api gateway', 'building']
+        }
+    }
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+wrapper {
+    gradleVersion = '4.7'
+}

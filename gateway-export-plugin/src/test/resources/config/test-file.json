@@ -1,0 +1,13 @@
+{
+  "Test" : {
+    "attributeString" : "Value",
+    "attributeNumber" : 123456,
+    "attributeList" : [ "GG", "BB", "CC" ],
+    "attributeSet" : [ "GG", "BB", "CC" ],
+    "attributeMap" : {
+      "TT" : "00",
+      "YY" : "11",
+      "ZZ" : "22"
+    }
+  }
+}
