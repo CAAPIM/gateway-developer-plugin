@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,18 +34,25 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
     @Override
     public void load(final Bundle bundle, final File rootDir) {
-        final File policyRootDir = new File(rootDir, "policy");
-
-        if (!policyRootDir.exists()) {
-            // no policies to bundle. Just return
-            return;
-        } else if (!policyRootDir.isDirectory()) {
-            throw new BundleLoadException("Expected directory but was file: " + policyRootDir);
-        }
+        final File policyRootDir = getPolicyRootDir(rootDir);
+        if (policyRootDir == null) return;
 
         final Map<String, Policy> policies = new HashMap<>();
         loadPolicies(policyRootDir, policyRootDir, null, policies, bundle.getFolders());
         bundle.putAllPolicies(policies);
+    }
+
+    @Nullable
+    static File getPolicyRootDir(File rootDir) {
+        final File policyRootDir = new File(rootDir, "policy");
+
+        if (!policyRootDir.exists()) {
+            // no policies to bundle. Just return
+            return null;
+        } else if (!policyRootDir.isDirectory()) {
+            throw new BundleLoadException("Expected directory but was file: " + policyRootDir);
+        }
+        return policyRootDir;
     }
 
     @Override
@@ -53,7 +61,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
     }
 
     private void loadPolicies(final File currentDir, final File rootDir, Folder parentFolder, final Map<String, Policy> policies, Map<String, Folder> folders) {
-        Folder folder = folders.computeIfAbsent(getPath(currentDir, rootDir), key -> loadFolder(currentDir, rootDir, parentFolder));
+        Folder folder = folders.computeIfAbsent(getPath(currentDir, rootDir), key -> createFolder(currentDir.getName(), key, parentFolder));
         final File[] children = currentDir.listFiles();
         if (children != null) {
             for (final File child : children) {
@@ -67,10 +75,10 @@ public class PolicyAndFolderLoader implements EntityLoader {
         }
     }
 
-    static Folder loadFolder(File folderFile, File rootDir, Folder parentFolder) {
+    static Folder createFolder(String folderName, String folderPath, Folder parentFolder) {
         Folder folder = new Folder();
-        folder.setName(folderFile.getName());
-        folder.setPath(getPath(folderFile, rootDir));
+        folder.setName(folderName);
+        folder.setPath(folderPath);
         folder.setParentFolder(parentFolder);
         return folder;
     }
