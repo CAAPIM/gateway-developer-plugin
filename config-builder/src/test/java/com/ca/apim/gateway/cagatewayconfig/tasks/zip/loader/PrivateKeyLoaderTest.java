@@ -37,15 +37,14 @@ class PrivateKeyLoaderTest {
     private JsonTools jsonTools;
     @Mock
     private FileUtils fileUtils;
-    private File keysDir;
+    private File config;
 
     @BeforeEach
     void setUp(final TemporaryFolder temporaryFolder) {
         rootProjectDir = temporaryFolder;
         jsonTools = new JsonTools(fileUtils);
 
-        keysDir = new File(temporaryFolder.getRoot(), "config/privateKeys");
-        keysDir.mkdirs();
+        config = temporaryFolder.createDirectory("config");
     }
 
     @Test
@@ -91,6 +90,8 @@ class PrivateKeyLoaderTest {
     }
 
     private void createPrivateKeys(String... keys) throws IOException {
+        File keysDir = new File(config, "privateKeys");
+        keysDir.mkdir();
         for (String k : keys) {
             Files.touch(new File(keysDir, k + ".p12"));
         }
@@ -138,9 +139,8 @@ class PrivateKeyLoaderTest {
 
     private void loadPrivateKeys(String content, String fileTyoe, boolean expectException) throws IOException {
         PrivateKeyLoader loader = new PrivateKeyLoader(jsonTools);
-        final File configFolder = rootProjectDir.createDirectory("config");
-        final File identityProvidersFile = new File(configFolder, "private-keys." + fileTyoe);
-        Files.touch(identityProvidersFile);
+        final File privateKeys = new File(config, "private-keys." + fileTyoe);
+        Files.touch(privateKeys);
 
         when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(content.getBytes()));
 
