@@ -71,7 +71,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
-        if (orderedPolicies.contains(policy) || bundle.getServices().get(policy.getPath()) != null) {
+        if (orderedPolicies.contains(policy) || bundle.getServices().get(policy.getPath().substring(0, policy.getPath().lastIndexOf('.'))) != null) {
             //This is a service policy it should have already be handled by the service entity builder OR This policy has already been added to the policy list
             return;
         }

@@ -24,7 +24,6 @@ import org.testcontainers.shaded.com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.PolicyAndFolderLoader.getPath;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,20 +31,6 @@ class PolicyAndFolderLoaderTest {
 
     @Mock
     private FileUtils fileUtils;
-
-    @Test
-    void getPolicyAsStringTest() {
-
-        File root = new File("a");
-        File a = new File(root, "a");
-        File b = new File(a, "b");
-        File c = new File(b, "c");
-        File policy = new File(c, "policy.xml");
-
-        String path = getPath(policy, root);
-
-        Assert.assertEquals("a/b/c/policy.xml", path);
-    }
 
     @Test
     void getPolicyNameTest() {

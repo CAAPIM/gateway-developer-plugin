@@ -12,13 +12,16 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.createFolder;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.getPath;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.getPolicyRootDir;
 
 @Singleton
 public class PolicyAndFolderLoader implements EntityLoader {
@@ -42,19 +45,6 @@ public class PolicyAndFolderLoader implements EntityLoader {
         bundle.putAllPolicies(policies);
     }
 
-    @Nullable
-    static File getPolicyRootDir(File rootDir) {
-        final File policyRootDir = new File(rootDir, "policy");
-
-        if (!policyRootDir.exists()) {
-            // no policies to bundle. Just return
-            return null;
-        } else if (!policyRootDir.isDirectory()) {
-            throw new BundleLoadException("Expected directory but was file: " + policyRootDir);
-        }
-        return policyRootDir;
-    }
-
     @Override
     public void load(Bundle bundle, String name, String value) {
         throw new BundleLoadException("Cannot load an individual policy");
@@ -73,14 +63,6 @@ public class PolicyAndFolderLoader implements EntityLoader {
                 }
             }
         }
-    }
-
-    static Folder createFolder(String folderName, String folderPath, Folder parentFolder) {
-        Folder folder = new Folder();
-        folder.setName(folderName);
-        folder.setPath(folderPath);
-        folder.setParentFolder(parentFolder);
-        return folder;
     }
 
     private Policy loadPolicy(final File policyFile, final File rootDir, Folder parentFolder) {
@@ -103,10 +85,6 @@ public class PolicyAndFolderLoader implements EntityLoader {
         } else {
             return fileName;
         }
-    }
-
-    static String getPath(final File policy, final File policyRootDir) {
-        return policyRootDir.toURI().relativize(policy.toURI()).getPath();
     }
 
     @Override

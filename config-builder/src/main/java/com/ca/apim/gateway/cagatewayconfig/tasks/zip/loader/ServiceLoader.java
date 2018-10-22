@@ -15,15 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.PolicyAndFolderLoader.getPath;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.PolicyAndFolderLoader.getPolicyRootDir;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.PolicyAndFolderLoader.createFolder;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.*;
 
 @Singleton
 public class ServiceLoader extends EntityLoaderBase<Service> {
@@ -77,31 +71,6 @@ public class ServiceLoader extends EntityLoaderBase<Service> {
                 service.setParentFolder(folderMap.get(pathExcludingService));
             }
         });
-    }
-
-    /**
-     * Creates all folders along a path if they do not already exist, and adds them to the folderMap.
-     *
-     * @param stringPath the folder path to the service.
-     * @param folderMap The existing map of folders
-     * @param rootFolder The root folder
-     */
-    private void createFolders(String stringPath, Map<String, Folder> folderMap, Folder rootFolder) {
-        Path path = Paths.get(stringPath);
-        List<Path> paths = new ArrayList<>();
-        int i = 0;
-        while (i < path.getNameCount()) {
-            paths.add(path.subpath(0 , ++i));
-        }
-        for (final Path p : paths) {
-            Folder parentFolder = p.getParent() == null ?
-                    rootFolder :
-                    folderMap.get(p.getParent().toString() + "/");
-            folderMap.computeIfAbsent(
-                    p.toString() + "/",
-                    key -> createFolder(p.getFileName().toString(), key, parentFolder)
-            );
-        }
     }
 
     @Override
