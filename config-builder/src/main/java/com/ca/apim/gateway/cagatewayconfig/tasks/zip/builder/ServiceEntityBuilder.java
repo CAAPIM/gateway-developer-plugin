@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -50,16 +51,17 @@ public class ServiceEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildServiceEntity(Bundle bundle, String policyPath, Service service, Document document) {
-        Policy policy = bundle.getPolicies().get(policyPath);
+    private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
+        String processedName = FilenameUtils.getBaseName(servicePath);
+        Policy policy = bundle.getPolicies().get(service.getPolicy());
         if (policy == null) {
-            throw new EntityBuilderException("Could not find policy for service. Policy Path: " + policyPath);
+            throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());
         }
         String id = idGenerator.generate();
         service.setId(id);
 
-        Element serviceDetailElement = createElementWithAttributes(document, SERVICE_DETAIL, ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_FOLDER_ID, policy.getParentFolder().getId()));
-        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, policy.getName()));
+        Element serviceDetailElement = createElementWithAttributes(document, SERVICE_DETAIL, ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_FOLDER_ID, service.getParentFolder().getId()));
+        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, processedName));
         serviceDetailElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));
         serviceDetailElement.appendChild(buildServiceMappings(service, document));
 
@@ -83,7 +85,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
         serviceElement.appendChild(resourcesElement);
-        return new Entity(SERVICE_TYPE, policy.getName(), id, serviceElement);
+        return new Entity(SERVICE_TYPE, processedName, id, serviceElement);
     }
 
     private Element buildServiceMappings(Service service, Document document) {

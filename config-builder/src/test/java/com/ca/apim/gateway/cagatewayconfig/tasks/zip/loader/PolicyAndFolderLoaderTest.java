@@ -33,22 +33,6 @@ class PolicyAndFolderLoaderTest {
     private FileUtils fileUtils;
 
     @Test
-    void getPolicyAsStringTest() {
-
-        File root = new File("a");
-        File a = new File(root, "a");
-        File b = new File(a, "b");
-        File c = new File(b, "c");
-        File policy = new File(c, "policy.xml");
-
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
-
-        String path = policyAndFolderLoader.getPath(policy, root);
-
-        Assert.assertEquals("a/b/c/policy.xml", path);
-    }
-
-    @Test
     void getPolicyNameTest() {
         PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
 

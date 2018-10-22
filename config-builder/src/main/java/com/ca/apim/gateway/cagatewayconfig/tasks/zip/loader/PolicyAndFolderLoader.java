@@ -19,6 +19,10 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.createFolder;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.getPath;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.getPolicyRootDir;
+
 @Singleton
 public class PolicyAndFolderLoader implements EntityLoader {
 
@@ -33,20 +37,12 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
     @Override
     public void load(final Bundle bundle, final File rootDir) {
-        final File policyRootDir = new File(rootDir, "policy");
-
-        if (!policyRootDir.exists()) {
-            // no policies to bundle. Just return
-            return;
-        } else if (!policyRootDir.isDirectory()) {
-            throw new BundleLoadException("Expected directory but was file: " + policyRootDir);
-        }
+        final File policyRootDir = getPolicyRootDir(rootDir);
+        if (policyRootDir == null) return;
 
         final Map<String, Policy> policies = new HashMap<>();
-        final Map<String, Folder> folders = new HashMap<>();
-        loadPolicies(policyRootDir, policyRootDir, null, policies, folders);
+        loadPolicies(policyRootDir, policyRootDir, null, policies, bundle.getFolders());
         bundle.putAllPolicies(policies);
-        bundle.putAllFolders(folders);
     }
 
     @Override
@@ -55,8 +51,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
     }
 
     private void loadPolicies(final File currentDir, final File rootDir, Folder parentFolder, final Map<String, Policy> policies, Map<String, Folder> folders) {
-        Folder folder = loadFolder(currentDir, rootDir, parentFolder);
-        folders.put(folder.getPath(), folder);
+        Folder folder = folders.computeIfAbsent(getPath(currentDir, rootDir), key -> createFolder(currentDir.getName(), key, parentFolder));
         final File[] children = currentDir.listFiles();
         if (children != null) {
             for (final File child : children) {
@@ -68,14 +63,6 @@ public class PolicyAndFolderLoader implements EntityLoader {
                 }
             }
         }
-    }
-
-    private Folder loadFolder(File folderFile, File rootDir, Folder parentFolder) {
-        Folder folder = new Folder();
-        folder.setName(folderFile.getName());
-        folder.setPath(getPath(folderFile, rootDir));
-        folder.setParentFolder(parentFolder);
-        return folder;
     }
 
     private Policy loadPolicy(final File policyFile, final File rootDir, Folder parentFolder) {
@@ -98,10 +85,6 @@ public class PolicyAndFolderLoader implements EntityLoader {
         } else {
             return fileName;
         }
-    }
-
-    String getPath(final File policy, final File policyRootDir) {
-        return policyRootDir.toURI().relativize(policy.toURI()).getPath();
     }
 
     @Override

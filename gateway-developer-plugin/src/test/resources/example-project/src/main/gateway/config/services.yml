@@ -1,11 +1,13 @@
-example project/example.xml:
+example project/example:
+  policy: "example project/example.xml"
   httpMethods:
-  - "GET"
-  - "POST"
-  - "PUT"
-  - "DELETE"
+  - GET
+  - POST
+  - PUT
+  - DELETE
   url: "/example"
-example project/example-project.xml:
+example project/example-project:
+  policy: "example project/example-project.xml"
   httpMethods:
   - POST
   - PUT

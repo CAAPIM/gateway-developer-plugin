@@ -14,12 +14,13 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Bundle {
     private final Map<String, Service> services = new HashMap<>();
     private final Map<String, Encass> encasses = new HashMap<>();
     private final Map<String, Policy> policies = new HashMap<>();
-    private final Map<String, Folder> folders = new HashMap<>();
+    private final Map<String, Folder> folders = new ConcurrentHashMap<>();
     private final Map<String, String> staticProperties = new HashMap<>();
     private final Map<String, String> environmentProperties = new HashMap<>();
     private final Map<String, PolicyBackedService> policyBackedServices = new HashMap<>();

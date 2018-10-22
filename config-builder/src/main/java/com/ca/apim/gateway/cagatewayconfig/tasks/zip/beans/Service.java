@@ -12,6 +12,8 @@ import java.util.Set;
 public class Service {
     private String id;
     private String url;
+    private String policy;
+    private Folder parentFolder;
     private Set<String> httpMethods;
     private Map<String,String> properties;
 
@@ -29,6 +31,22 @@ public class Service {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(String policy) {
+        this.policy = policy;
+    }
+
+    public Folder getParentFolder() {
+        return parentFolder;
+    }
+
+    public void setParentFolder(Folder parentFolder) {
+        this.parentFolder = parentFolder;
     }
 
     public Set<String> getHttpMethods() {
