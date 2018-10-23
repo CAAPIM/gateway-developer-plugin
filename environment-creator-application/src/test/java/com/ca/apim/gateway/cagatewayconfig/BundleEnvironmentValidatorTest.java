@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.Iden
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -210,7 +211,7 @@ class BundleEnvironmentValidatorTest {
     @Test
     void validateEnvironmentProvidedClusterProperty() {
         Bundle environmentBundle = new Bundle();
-        environmentBundle.getEnvironmentProperties().put("myProperty", "value");
+        environmentBundle.getEnvironmentProperties().put(PREFIX_GATEWAY + "myProperty", "value");
         BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
 
         bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +

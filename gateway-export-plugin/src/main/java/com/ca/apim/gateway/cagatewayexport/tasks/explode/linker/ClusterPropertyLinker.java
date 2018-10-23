@@ -22,10 +22,8 @@ public class ClusterPropertyLinker implements EntitiesLinker {
         Map<String, ClusterProperty> clusterPropertyMap = filteredBundle.getEntities(ClusterProperty.class);
         Set<String> idsToRemove = new HashSet<>();
         for (ClusterProperty clusterProperty : clusterPropertyMap.values()) {
-            if (clusterProperty.getName().startsWith("ENV.")) {
-                filteredBundle.addEntity(new EnvironmentProperty(clusterProperty.getName().substring(4), clusterProperty.getValue(), EnvironmentProperty.Type.GLOBAL));
-                idsToRemove.add(clusterProperty.getId());
-            }
+            filteredBundle.addEntity(new EnvironmentProperty(clusterProperty.getName(), clusterProperty.getValue(), EnvironmentProperty.Type.GLOBAL));
+            idsToRemove.add(clusterProperty.getId());
         }
         idsToRemove.forEach(clusterPropertyMap::remove);
     }

@@ -28,14 +28,14 @@ class ClusterPropertyLinkerTest {
 
         clusterPropertyLinker.link(bundle, null);
 
-        assertEquals(2, bundle.getEntities(ClusterProperty.class).size());
-        assertEquals(2, bundle.getEntities(EnvironmentProperty.class).size());
+        assertEquals(0, bundle.getEntities(ClusterProperty.class).size());
+        assertEquals(4, bundle.getEntities(EnvironmentProperty.class).size());
 
         assertTrue(bundle.getEntities(EnvironmentProperty.class).containsKey("GLOBAL:my.name"));
         assertEquals("my.name", bundle.getEntities(EnvironmentProperty.class).get("GLOBAL:my.name").getName());
         assertEquals(EnvironmentProperty.Type.GLOBAL, bundle.getEntities(EnvironmentProperty.class).get("GLOBAL:my.name").getType());
-        assertTrue(bundle.getEntities(EnvironmentProperty.class).containsKey("GLOBAL:hello"));
-        assertEquals("hello", bundle.getEntities(EnvironmentProperty.class).get("GLOBAL:hello").getName());
+        assertTrue(bundle.getEntities(EnvironmentProperty.class).containsKey("GLOBAL:ENV.hello"));
+        assertEquals("ENV.hello", bundle.getEntities(EnvironmentProperty.class).get("GLOBAL:ENV.hello").getName());
 
     }
 }

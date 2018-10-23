@@ -50,14 +50,14 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
                 bundle.getEnvironmentProperties().entrySet().stream()
                         .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
                         .map(propertyEntry ->
-                                getEntityWithOnlyMapping(CLUSTER_PROPERTY_TYPE, PREFIX_ENV + propertyEntry.getKey().substring(8), idGenerator.generate())
+                                getEntityWithOnlyMapping(CLUSTER_PROPERTY_TYPE, propertyEntry.getKey().substring(8), idGenerator.generate())
                         ).forEach(streamBuilder);
                 break;
             case ENVIRONMENT:
                 bundle.getEnvironmentProperties().entrySet().stream()
                         .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
                         .map(propertyEntry ->
-                                buildClusterPropertyEntity(PREFIX_ENV + propertyEntry.getKey().substring(8), propertyEntry.getValue(), document)
+                                buildClusterPropertyEntity(propertyEntry.getKey().substring(8), propertyEntry.getValue(), document)
                         ).forEach(streamBuilder);
                 break;
             default:
