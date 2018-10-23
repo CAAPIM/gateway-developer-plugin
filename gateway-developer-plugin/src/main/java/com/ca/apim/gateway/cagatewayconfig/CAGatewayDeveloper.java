@@ -75,7 +75,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 
         // add the built bundle to the default artifacts
         project.artifacts(artifactHandler -> artifactHandler
-                .add("default", new LazyPublishArtifact(packageGW7Task.getBundle()) {
+                .add("default", new LazyPublishArtifact(packageGW7Task.getBundle(), null) {
                             //We need to override this because gradle does not fully lazily load artifacts. Once we move to gradle 5 this will no longer be needed
                             @Override
                             public String getType() {
