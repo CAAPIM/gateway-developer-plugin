@@ -10,19 +10,26 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.Entity;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
-import org.mockito.*;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static java.security.Security.getAlgorithms;
 import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 /**
  * Utility methods for testing purposes.
@@ -58,19 +65,117 @@ public class TestUtils {
         assertNotNull(entities);
         assertEquals(expectedEntityNames.size(), entities.size());
         entities.forEach(e -> {
-            assertNotNull(e.getId());
-            assertNull(e.getXml());
-            assertNotNull(e.getName());
-            assertTrue(expectedEntityNames.contains(e.getName()));
-            assertEquals(MappingActions.NEW_OR_EXISTING, e.getMappingAction());
-            assertNotNull(e.getType());
-            assertEquals(entityType, e.getType());
-            assertNotNull(e.getMappingProperties());
-            assertFalse(e.getMappingProperties().isEmpty());
-            assertEquals(true, e.getMappingProperties().get(FAIL_ON_NEW));
-            assertEquals(MappingProperties.NAME, e.getMappingProperties().get(MAP_BY));
-            assertEquals(e.getName(), e.getMappingProperties().get(MAP_TO));
+            assertOnlyMappingEntity(entityType, expectedEntityNames, e);
         });
+    }
+
+    public static void assertOnlyMappingEntity(String entityType, List<String> expectedEntityNames, Entity e) {
+        assertNotNull(e.getId());
+        assertNull(e.getXml());
+        assertNotNull(e.getName());
+        assertTrue(expectedEntityNames.contains(e.getName()));
+        assertEquals(MappingActions.NEW_OR_EXISTING, e.getMappingAction());
+        assertNotNull(e.getType());
+        assertEquals(entityType, e.getType());
+        assertNotNull(e.getMappingProperties());
+        assertFalse(e.getMappingProperties().isEmpty());
+        assertEquals(true, e.getMappingProperties().get(FAIL_ON_NEW));
+        assertEquals(MappingProperties.NAME, e.getMappingProperties().get(MAP_BY));
+        assertEquals(e.getName(), e.getMappingProperties().get(MAP_TO));
+    }
+
+    public static Element createCassandraXml(Document document, boolean ciphers, boolean properties) {
+        Element cassandraElement = createElementWithAttributesAndChildren(
+                document,
+                CASSANDRA_CONNECTION,
+                ImmutableMap.of(ATTRIBUTE_ID, "id"),
+                createElementWithTextContent(document, NAME, "Test"),
+                createElementWithTextContent(document, KEYSPACE, "Test"),
+                createElementWithTextContent(document, CONTACT_POINT, "Test"),
+                createElementWithTextContent(document, PORT, 1234),
+                createElementWithTextContent(document, USERNAME, "Test"),
+                createElementWithTextContent(document, PASSWORD_ID, "password"),
+                createElementWithTextContent(document, COMPRESSION, "Test"),
+                createElementWithTextContent(document, SSL, true)
+        );
+        if (ciphers) {
+            cassandraElement.appendChild(createElementWithTextContent(document, TLS_CIPHERS, Joiner.on(",").join(getAlgorithms("Cipher"))));
+        }
+        if (properties) {
+            cassandraElement.appendChild(buildPropertiesElement(ImmutableMap.of("testProp", "testValue"), document, PROPERTIES));
+        }
+
+        return createElementWithChildren(
+                document,
+                ITEM,
+                createElementWithTextContent(document, ID, "id"),
+                createElementWithTextContent(document, TYPE, EntityTypes.CASSANDRA_CONNECTION_TYPE),
+                createElementWithChildren(
+                        document,
+                        RESOURCE,
+                        cassandraElement
+                )
+        );
+    }
+
+    public static Element createJdbcXml(Document document) {
+        Element jdbcElement = createElementWithAttributesAndChildren(
+                document,
+                JDBC_CONNECTION,
+                ImmutableMap.of(ATTRIBUTE_ID, "id"),
+                createElementWithTextContent(document, NAME, "Test"),
+                createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString())
+        );
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(PROPERTY_MIN_POOL_SIZE, 1);
+        properties.put(PROPERTY_MAX_POOL_SIZE, 2);
+        buildAndAppendPropertiesElement(properties, document, jdbcElement);
+
+        Map<String, Object> connectionProperties = new HashMap<>();
+        connectionProperties.put(PROPERTY_USER, "gateway");
+        connectionProperties.put(PROPERTY_PASSWORD, String.format("${secpass.%s.plaintext}", "gateway"));
+
+        jdbcElement.appendChild(createElementWithChildren(
+                document,
+                EXTENSION,
+                createElementWithTextContent(document, DRIVER_CLASS, "com.ca.driver.Driver"),
+                createElementWithTextContent(document, JDBC_URL, "jdbc://db:1234"),
+                buildPropertiesElement(connectionProperties, document, CONNECTION_PROPERTIES)
+        ));
+
+        return createElementWithChildren(
+                document,
+                ITEM,
+                createElementWithTextContent(document, ID, "id"),
+                createElementWithTextContent(document, TYPE, EntityTypes.JDBC_CONNECTION),
+                createElementWithChildren(
+                        document,
+                        RESOURCE,
+                        jdbcElement
+                )
+        );
+    }
+
+    public static Element createUnsupportedElement(Document document) {
+        Element jdbcElement = createElementWithAttributesAndChildren(
+                document,
+                "l7:Unsupported",
+                ImmutableMap.of(ATTRIBUTE_ID, "id"),
+                createElementWithTextContent(document, NAME, "Test")
+        );
+
+        return createElementWithChildren(
+                document,
+                ITEM,
+                createElementWithTextContent(document, ID, "id"),
+                createElementWithTextContent(document, TYPE, "UNSUPPORTED"),
+                createElementWithChildren(
+                        document,
+                        RESOURCE,
+                        jdbcElement
+                )
+        );
     }
 
 }

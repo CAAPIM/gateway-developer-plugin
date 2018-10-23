@@ -31,39 +31,23 @@ public class Entity {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public Element getXml() {
         return xml;
     }
 
-    public void setXml(Element xml) {
-        this.xml = xml;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Map<String, Object> getMappingProperties() {
         return mappingProperties;
     }
 
-    public void setMappingProperty(String key, Object value) {
+    void setMappingProperty(String key, Object value) {
         mappingProperties.put(key, value);
     }
 
@@ -71,7 +55,7 @@ public class Entity {
         return mappingAction;
     }
 
-    public void setMappingAction(String mappingAction) {
+    void setMappingAction(String mappingAction) {
         this.mappingAction = mappingAction;
     }
 }

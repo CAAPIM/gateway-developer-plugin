@@ -9,14 +9,18 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
@@ -114,4 +118,28 @@ class JdbcConnectionEntityBuilderTest {
         return jdbcConnection;
     }
 
+    @Test
+    void buildEmptyDeploymentBundle() {
+        TestUtils.testDeploymentBundleWithOnlyMapping(
+                new JdbcConnectionEntityBuilder(ID_GENERATOR),
+                new Bundle(),
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                EntityTypes.JDBC_CONNECTION,
+                Collections.emptyList()
+        );
+    }
+
+    @Test
+    void buildDeploymentBundle() {
+        final Bundle bundle = new Bundle();
+        bundle.putAllJdbcConnections(ImmutableMap.of(TEST_JDBC_CONNECTION, buildJdbcConnection(emptyMap())));
+
+        TestUtils.testDeploymentBundleWithOnlyMapping(
+                new JdbcConnectionEntityBuilder(ID_GENERATOR),
+                bundle,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                EntityTypes.JDBC_CONNECTION,
+                Stream.of(TEST_JDBC_CONNECTION).collect(Collectors.toList())
+        );
+    }
 }
