@@ -13,6 +13,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
+import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact;
 import org.gradle.api.internal.provider.DefaultProvider;
 import org.jetbrains.annotations.NotNull;
 
@@ -73,12 +74,20 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         project.afterEvaluate(p -> project.getTasks().getByPath("build").dependsOn(buildBundleTask, packageGW7Task));
 
         // add the built bundle to the default artifacts
-        project.artifacts(artifactHandler -> artifactHandler.add("default", pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, BUNDLE_REQUIRED_FILE_EXTENSION))), configurablePublishArtifact -> {
-            configurablePublishArtifact.builtBy(buildBundleTask);
-            configurablePublishArtifact.setExtension(BUNDLE_REQUIRED_FILE_EXTENSION);
-            configurablePublishArtifact.setName(project.getName() + '-' + project.getVersion());
-            configurablePublishArtifact.setType(BUNDLE_FILE_EXTENSION);
-        }));
+        project.artifacts(artifactHandler -> artifactHandler
+                .add("default", new LazyPublishArtifact(packageGW7Task.getBundle()) {
+                            //We need to override this because gradle does not fully lazily load artifacts. Once we move to gradle 5 this will no longer be needed
+                            @Override
+                            public String getType() {
+                                return BUNDLE_FILE_EXTENSION;
+                            }
+                        },
+                        configurablePublishArtifact -> {
+                            configurablePublishArtifact.builtBy(buildBundleTask);
+                            configurablePublishArtifact.setExtension(BUNDLE_REQUIRED_FILE_EXTENSION);
+                            configurablePublishArtifact.setName(project.getName() + '-' + project.getVersion());
+                            configurablePublishArtifact.setType(BUNDLE_FILE_EXTENSION);
+                        }));
     }
 
     @NotNull
