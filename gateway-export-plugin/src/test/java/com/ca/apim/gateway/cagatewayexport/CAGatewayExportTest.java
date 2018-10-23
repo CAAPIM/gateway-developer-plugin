@@ -86,10 +86,7 @@ class CAGatewayExportTest {
         assertTrue(environmentProperties.containsKey("gateway.ENV.my-global-property"));
         assertTrue(environmentProperties.containsKey("gateway.ENV.another.global"));
 
-//        Properties staticProperties = new Properties();
-//        staticProperties.load(new FileReader(new File(configDir, "static.properties")));
-//        assertTrue(staticProperties.containsKey("that-property"));
-//        assertFalse(staticProperties.containsKey("this-property"));
+        assertFalse(new File(configDir, "static.properties").exists());
 
         File passwordsFile = new File(configDir, "stored-passwords.properties");
         assertTrue(passwordsFile.exists());
