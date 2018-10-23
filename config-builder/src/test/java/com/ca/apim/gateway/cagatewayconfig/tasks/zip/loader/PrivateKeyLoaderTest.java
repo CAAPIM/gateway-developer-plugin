@@ -168,8 +168,7 @@ class PrivateKeyLoaderTest {
     @Test
     void loadNonexistingDirectory() throws IOException {
         PrivateKeyLoader loader = new PrivateKeyLoader(jsonTools);
-        final File configFolder = rootProjectDir.createDirectory("config");
-        final File identityProvidersFile = new File(configFolder, "private-keys.json");
+        final File identityProvidersFile = new File(config, "private-keys.json");
         Files.touch(identityProvidersFile);
 
         String json = "{\n" +
@@ -197,8 +196,7 @@ class PrivateKeyLoaderTest {
     @Test
     void loadMissingKeyFiles() throws IOException {
         PrivateKeyLoader loader = new PrivateKeyLoader(jsonTools);
-        final File configFolder = rootProjectDir.createDirectory("config");
-        final File identityProvidersFile = new File(configFolder, "private-keys.json");
+        final File identityProvidersFile = new File(config, "private-keys.json");
         Files.touch(identityProvidersFile);
 
         File keysDir = new File(config, "privateKeys");

@@ -48,7 +48,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
 
     public static final String DEFAULT_HTTP_8080 = "Default HTTP (8080)";
     public static final String DEFAULT_HTTPS_8443 = "Default HTTPS (8443)";
-    static final List<String> DEFAULT_RECOMMENDED_CIPHERS = Collections.unmodifiableList(asList(
+    public static final List<String> DEFAULT_RECOMMENDED_CIPHERS = Collections.unmodifiableList(asList(
             "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
             "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
             "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
@@ -85,7 +85,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
             "TLS_RSA_WITH_AES_128_GCM_SHA256",
             "TLS_RSA_WITH_AES_128_CBC_SHA256",
             "TLS_RSA_WITH_AES_128_CBC_SHA"));
-    static final List<String> TLS_VERSIONS = asList(TLSV1, TLSV11, TLSV12);
+    public static final List<String> TLS_VERSIONS = asList(TLSV1, TLSV11, TLSV12);
     private static final Map<String, ListenPort> DEFAULT_PORTS = unmodifiableMap(createDefaultListenPorts());
     private static final String USES_TLS = "usesTLS";
     private static final Integer ORDER = 800;

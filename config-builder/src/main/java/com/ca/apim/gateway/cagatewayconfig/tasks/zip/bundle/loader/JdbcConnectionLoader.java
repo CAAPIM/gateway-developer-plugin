@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -22,7 +23,9 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 @Singleton
 public class JdbcConnectionLoader implements BundleDependencyLoader {
 
-    JdbcConnectionLoader() {
+    @VisibleForTesting
+    public JdbcConnectionLoader() {
+        //
     }
 
     @Override

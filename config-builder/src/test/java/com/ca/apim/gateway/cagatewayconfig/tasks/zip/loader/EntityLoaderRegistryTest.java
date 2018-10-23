@@ -13,33 +13,36 @@ import java.io.File;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class EntityLoaderRegistryTest {
 
     @Test
     void getLoader() {
         EntityLoaderRegistry registry = new EntityLoaderRegistry(
-                Stream.of(new EntityLoader() {
-                    @Override
-                    public void load(Bundle bundle, File rootDir) {
-                        //
-                    }
-
-                    @Override
-                    public void load(Bundle bundle, String name, String value) {
-
-                    }
-
-                    @Override
-                    public String getEntityType() {
-                        return "ENTITY";
-                    }
-                }).collect(Collectors.toSet())
+                Stream.of(new TestEntityLoader()).collect(Collectors.toSet())
         );
 
         assertNotNull(registry.getEntityLoaders());
         assertNotNull(registry.getLoader("ENTITY"));
         assertNull(registry.getLoader("LOADER"));
+    }
+
+    public static class TestEntityLoader implements EntityLoader {
+        @Override
+        public void load(Bundle bundle, File rootDir) {
+            //
+        }
+
+        @Override
+        public void load(Bundle bundle, String name, String value) {
+
+        }
+
+        @Override
+        public String getEntityType() {
+            return "ENTITY";
+        }
     }
 }
