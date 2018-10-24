@@ -8,20 +8,15 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.ENVIRONMENT;

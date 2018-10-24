@@ -23,8 +23,8 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEntityBuilder.DEFAULT_RECOMMENDED_CIPHERS;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEntityBuilder.TLS_VERSIONS;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.DEFAULT_RECOMMENDED_CIPHERS;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.TLS_VERSIONS;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;

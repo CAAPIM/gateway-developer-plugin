@@ -8,7 +8,10 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 import java.util.List;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ListenPortTlsSettings.*;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Collections.unmodifiableList;
 
 public class ListenPort {
 
@@ -16,6 +19,46 @@ public class ListenPort {
     public static final String PROTOCOL_HTTPS = "HTTPS";
     public static final Integer HTTP_DEFAULT_PORT = 8080;
     public static final Integer HTTPS_DEFAULT_PORT = 8443;
+    public static final String DEFAULT_HTTP_8080 = "Default HTTP (8080)";
+    public static final String DEFAULT_HTTPS_8443 = "Default HTTPS (8443)";
+    public static final List<String> DEFAULT_RECOMMENDED_CIPHERS = unmodifiableList(asList(
+            "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+            "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384",
+            "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+            "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+            "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
+            "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
+            "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+            "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+            "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+            "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+            "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
+            "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+            "TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384",
+            "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384",
+            "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA",
+            "TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA",
+            "TLS_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_RSA_WITH_AES_256_CBC_SHA256",
+            "TLS_RSA_WITH_AES_256_CBC_SHA",
+            "TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256",
+            "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256",
+            "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA",
+            "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA",
+            "TLS_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_RSA_WITH_AES_128_CBC_SHA256",
+            "TLS_RSA_WITH_AES_128_CBC_SHA"));
+    public static final List<String> TLS_VERSIONS = unmodifiableList(asList(TLSV1, TLSV11, TLSV12));
 
     private String protocol;
     private int port;
