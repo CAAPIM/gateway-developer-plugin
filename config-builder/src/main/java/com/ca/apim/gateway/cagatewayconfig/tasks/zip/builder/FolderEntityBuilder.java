@@ -18,6 +18,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_ID;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
@@ -27,8 +29,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 @Singleton
 public class FolderEntityBuilder implements EntityBuilder {
 
-    static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
-    static final String ROOT_FOLDER_NAME = "Root Node";
     private static final Integer ORDER = 100;
     private final IdGenerator idGenerator;
 

@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
@@ -20,18 +19,13 @@ import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_ID;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.ENVIRONMENT;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.FolderEntityBuilder.ROOT_FOLDER_ID;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.FolderEntityBuilder.ROOT_FOLDER_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.OPERATION_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;

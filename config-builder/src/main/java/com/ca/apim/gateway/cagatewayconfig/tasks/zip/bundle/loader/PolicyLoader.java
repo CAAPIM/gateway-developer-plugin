@@ -27,7 +27,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 public class PolicyLoader implements BundleDependencyLoader {
 
     private static final Logger LOGGER = Logger.getLogger(PolicyLoader.class.getName());
-    private static final String SERVICE_OPERATION = "Service Operation";
+    static final String SERVICE_OPERATION = "Service Operation";
     private static final String INCLUDE = "Include";
     private static final List<String> SUPPORTED_POLICY_TYPES = Arrays.asList(SERVICE_OPERATION, INCLUDE);
 

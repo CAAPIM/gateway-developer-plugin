@@ -7,6 +7,10 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 public class Folder {
+
+    public static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
+    public static final String ROOT_FOLDER_NAME = "Root Node";
+
     private String id;
     private String path;
     private String name;
