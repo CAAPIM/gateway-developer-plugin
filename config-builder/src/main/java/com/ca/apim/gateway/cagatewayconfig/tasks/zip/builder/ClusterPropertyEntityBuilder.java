@@ -46,7 +46,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
             case DEPLOYMENT:
                 bundle.getStaticProperties().entrySet().stream().map(propertyEntry -> {
                     if (bundle.getEnvironmentProperties().containsKey(PREFIX_GATEWAY + propertyEntry.getKey())) {
-                        throw new EntityBuilderException("The Cluster property: " + propertyEntry.getKey() + " is defined in both static.properties and env.properties");
+                        throw new EntityBuilderException("The Cluster property: '" + propertyEntry.getKey() + "' is defined in both static.properties and env.properties");
                     }
                     return buildClusterPropertyEntity(propertyEntry.getKey(), propertyEntry.getValue(), document);
                 }).forEach(streamBuilder);
