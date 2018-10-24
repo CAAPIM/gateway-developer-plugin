@@ -133,10 +133,12 @@ class ExplodeBundleTaskTest {
     private void validateFilesOutputTypeFromDir(File exportDir, String fileExtension) {
         File configDir = new File(exportDir, "config");
         File[] files = configDir.listFiles();
-        Arrays.stream(files)
-                //Every config file except properties files should be the outputType specified
-                .filter(file -> !file.getName().endsWith(".properties") && !file.isDirectory())
-                .collect(Collectors.toList())
-                .forEach(file -> assertEquals(FilenameUtils.getExtension(file.getPath()), fileExtension));
+        if (files != null) {
+            Arrays.stream(files)
+                    //Every config file except properties files should be the outputType specified
+                    .filter(file -> !file.getName().endsWith(".properties") && !file.isDirectory())
+                    .collect(Collectors.toList())
+                    .forEach(file -> assertEquals(FilenameUtils.getExtension(file.getPath()), fileExtension));
+        }
     }
 }
