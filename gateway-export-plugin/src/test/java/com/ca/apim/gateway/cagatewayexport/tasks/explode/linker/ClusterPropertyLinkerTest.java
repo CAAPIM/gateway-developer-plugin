@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 import com.ca.apim.gateway.cagatewayexport.util.properties.OrderedProperties;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -35,7 +36,7 @@ class ClusterPropertyLinkerTest {
 
     @BeforeEach
     void setUp() {
-        clusterPropertyLinker = new ClusterPropertyLinker();
+        clusterPropertyLinker = new ClusterPropertyLinker(DocumentFileUtils.INSTANCE);
         bundle = new Bundle();
         bundle.addEntity(new ClusterProperty("my.name", "my-value", "1"));
         bundle.addEntity(new ClusterProperty("ENV.my.name", "my-value", "2"));

@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.util.properties.OrderedProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.MapType;
@@ -47,15 +46,8 @@ class WriterHelper {
         documentFileUtils.createFolder(configFolder.toPath());
 
         File propertiesFile = new File(configFolder, fileName + ".properties");
-        // check if the properties file exist and load current properties into the properties object
-        if (propertiesFile.exists()) {
-            Properties currentProperties = new OrderedProperties();
-            try (InputStream stream = Files.newInputStream(propertiesFile.toPath())){
-                currentProperties.load(stream);
-            } catch (IOException e) {
-                throw new WriteException("Exception reading existing contents from " + fileName + " properties file", e);
-            }
-
+        Properties currentProperties = documentFileUtils.loadExistingProperties(propertiesFile, fileName);
+        if (!currentProperties.isEmpty()) {
             // iterate the new properties and join them to the current properties contents
             // new property value is chosen except if its value is null
             properties
