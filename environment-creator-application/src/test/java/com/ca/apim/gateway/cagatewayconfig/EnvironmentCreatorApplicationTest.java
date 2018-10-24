@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.DependencyBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.google.common.collect.ImmutableMap;
@@ -23,8 +22,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Objects;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEntityBuilder.DEFAULT_HTTPS_8443;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.ListenPortEntityBuilder.DEFAULT_HTTP_8080;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.DEFAULT_HTTPS_8443;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.DEFAULT_HTTP_8080;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EnvironmentCreatorApplicationTest {
