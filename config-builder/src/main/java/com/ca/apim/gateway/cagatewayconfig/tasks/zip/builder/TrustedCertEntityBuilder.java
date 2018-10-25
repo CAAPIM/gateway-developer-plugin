@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.CertificateData;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -140,7 +141,8 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
     }
 
     @NotNull
-    private URL getUrl(String name) {
+    @VisibleForTesting
+    URL getUrl(String name) {
         final URL url;
         try {
             url = new URL(name);

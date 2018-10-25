@@ -105,4 +105,36 @@ public class TrustedCert {
     private boolean extractBoolean(Map<String, Object> properties, String keyName) {
         return properties.get(keyName) != null && parseBoolean(properties.get(keyName).toString());
     }
+
+    public boolean isVerifyHostname() {
+        return verifyHostname;
+    }
+
+    public boolean isTrustedForSsl() {
+        return trustedForSsl;
+    }
+
+    public boolean isTrustedAsSamlAttestingEntity() {
+        return trustedAsSamlAttestingEntity;
+    }
+
+    public boolean isTrustAnchor() {
+        return trustAnchor;
+    }
+
+    public boolean isRevocationCheckingEnabled() {
+        return revocationCheckingEnabled;
+    }
+
+    public boolean isTrustedForSigningClientCerts() {
+        return trustedForSigningClientCerts;
+    }
+
+    public boolean isTrustedForSigningServerCerts() {
+        return trustedForSigningServerCerts;
+    }
+
+    public boolean isTrustedAsSamlIssuer() {
+        return trustedAsSamlIssuer;
+    }
 }

@@ -23,7 +23,8 @@ public class DependencyLoaderRegistry {
     private final Map<String, BundleDependencyLoader> entityLoaders;
 
     @Inject
-    DependencyLoaderRegistry(final Set<BundleDependencyLoader> loaders) {
+    @VisibleForTesting
+    public DependencyLoaderRegistry(final Set<BundleDependencyLoader> loaders) {
         entityLoaders = unmodifiableMap(loaders.stream().collect(toMap(BundleDependencyLoader::getEntityType, identity())));
     }
 

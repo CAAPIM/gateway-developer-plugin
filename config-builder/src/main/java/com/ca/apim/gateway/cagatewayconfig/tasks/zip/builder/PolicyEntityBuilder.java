@@ -45,7 +45,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     private static final String SUBTAG = "subtag";
     private static final String TYPE = "type";
     private static final String POLICY = "policy";
-    private static final String POLICY_TYPE_INCLUDE = "Include";
+    static final String POLICY_TYPE_INCLUDE = "Include";
     private static final Integer ORDER = 200;
 
     private final DocumentTools documentTools;

@@ -103,4 +103,10 @@ class PolicyAndFolderLoaderTest {
 
         assertThrows(BundleLoadException.class, () -> policyAndFolderLoader.load(bundle, temporaryFolder.getRoot()));
     }
+
+    @Test
+    void loadFromEnvironment() {
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
+        assertThrows(BundleLoadException.class, () -> policyAndFolderLoader.load(new Bundle(), "policy", "policy"));
+    }
 }

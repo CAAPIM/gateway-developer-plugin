@@ -9,6 +9,8 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
@@ -18,19 +20,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.w3c.dom.Element;
 
+import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.*;
+import java.security.cert.*;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert.CertificateData;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.TRUSTED_CERT_TYPE;
@@ -41,8 +47,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TrustedCertEntityBuilderTest {
@@ -102,6 +107,88 @@ class TrustedCertEntityBuilderTest {
         final Element trustedCertEntityXml = verifyTrustedCertElement(trustedCerts, true);
         verifyProperties(trustedCertEntityXml);
         verifyCertDetails(trustedCertEntityXml);
+    }
+
+    @Test
+    void tryBuildTrustedCertFromUrlReturningEmpty() throws Exception {
+        //Set up mock socket factory
+        SSLSocketFactory sf = mock(SSLSocketFactory.class);
+        SSLSocket socket = mock(SSLSocket.class);
+        SSLSession sslSession = mock(SSLSession.class);
+        when(sf.createSocket(anyString(), anyInt())).thenReturn(socket);
+        when(socket.getSession()).thenReturn(sslSession);
+        when(sslSession.getPeerCertificates()).thenReturn(new X509Certificate[]{});
+
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), sf, certFact);
+
+        final Bundle bundle = new Bundle();
+        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
+        bundle.putAllTrustedCerts(ImmutableMap.of(URL_NAME, trustedCert));
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+    }
+
+    @Test
+    void tryBuildTrustedCertFromUrlInvalidCertType() throws Exception {
+        //Set up mock socket factory
+        SSLSocketFactory sf = mock(SSLSocketFactory.class);
+        SSLSocket socket = mock(SSLSocket.class);
+        SSLSession sslSession = mock(SSLSession.class);
+        when(sf.createSocket(anyString(), anyInt())).thenReturn(socket);
+        when(socket.getSession()).thenReturn(sslSession);
+        when(sslSession.getPeerCertificates()).thenReturn(new Certificate[]{ new Certificate("MockCertificate") {
+            @Override
+            public byte[] getEncoded() {
+                return new byte[0];
+            }
+
+            @Override
+            public void verify(PublicKey key) {
+
+            }
+
+            @Override
+            public void verify(PublicKey key, String sigProvider) {
+
+            }
+
+            @Override
+            public String toString() {
+                return null;
+            }
+
+            @Override
+            public PublicKey getPublicKey() {
+                return null;
+            }
+        }});
+
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), sf, certFact);
+
+        final Bundle bundle = new Bundle();
+        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
+        bundle.putAllTrustedCerts(ImmutableMap.of(URL_NAME, trustedCert));
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+    }
+
+    @Test
+    void tryBuildTrustedCertFromUrlThrowingException() throws Exception {
+        //Set up mock socket factory
+        SSLSocketFactory sf = mock(SSLSocketFactory.class);
+        SSLSocket socket = mock(SSLSocket.class);
+        SSLSession sslSession = mock(SSLSession.class);
+        when(sf.createSocket(anyString(), anyInt())).thenReturn(socket);
+        when(socket.getSession()).thenReturn(sslSession);
+        doThrow(IOException.class).when(socket).startHandshake();
+
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), sf, certFact);
+
+        final Bundle bundle = new Bundle();
+        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
+        bundle.putAllTrustedCerts(ImmutableMap.of(URL_NAME, trustedCert));
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
@@ -166,6 +253,33 @@ class TrustedCertEntityBuilderTest {
         assertEquals(EXPECT_BIG_INT, new BigInteger(getSingleChildElementTextContent(certDataXml, SERIAL_NUMBER)));
         assertEquals(EXPECT_SUB_NAME, getSingleChildElementTextContent(certDataXml, SUBJECT_NAME));
         assertEquals(EXPECT_DATA, getSingleChildElementTextContent(certDataXml, ENCODED));
+    }
+
+    @Test
+    void buildDeploymentBundle() {
+        final String EXPECT_ISSUER = "issuer";
+        final BigInteger EXPECT_BIG_INT = new BigInteger("1234");
+        final String EXPECT_SUB_NAME = "subName";
+        final String EXPECT_DATA = "data";
+
+        final Bundle bundle = new Bundle();
+        final CertificateData certData = new CertificateData(EXPECT_ISSUER, EXPECT_BIG_INT, EXPECT_SUB_NAME, EXPECT_DATA);
+        final TrustedCert trustedCert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), certData);
+        bundle.putAllTrustedCerts(ImmutableMap.of(CERT_NAME, trustedCert));
+
+        TestUtils.testDeploymentBundleWithOnlyMapping(
+                new TrustedCertEntityBuilder(new IdGenerator(), null, certFact),
+                bundle,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                EntityTypes.TRUSTED_CERT_TYPE,
+                Stream.of(CERT_NAME).collect(Collectors.toList())
+        );
+    }
+
+    @Test
+    void tryGetMalformedURL() {
+        final TrustedCertEntityBuilder builder = new TrustedCertEntityBuilder(new IdGenerator(), null, certFact);
+        assertThrows(EntityBuilderException.class, () -> builder.getUrl("ttps://malformed.url.com"));
     }
 
     private void verifyProperties(Element trustedCertEntityXml) throws DocumentParseException {

@@ -17,13 +17,13 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_ID;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
 public class FolderLoader implements BundleDependencyLoader {
-    private static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
 
     @Override
     public void load(Bundle bundle, Element element) {
@@ -55,8 +55,9 @@ public class FolderLoader implements BundleDependencyLoader {
     }
 
     private Path getPath(Folder folder) {
-        if (folder.getParentFolder() == null || ROOT_FOLDER_ID.equals(folder.getParentFolder().getId()))
+        if (folder.getParentFolder() == null || ROOT_FOLDER_ID.equals(folder.getParentFolder().getId())) {
             return Paths.get(folder.getName());
+        }
         return getPath(folder.getParentFolder()).resolve(folder.getName());
     }
 

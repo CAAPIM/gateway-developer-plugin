@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang.mutable.MutableBoolean;
 import org.junit.jupiter.api.Test;
@@ -89,7 +90,7 @@ class StoredPasswordEntityBuilderTest {
         assertEquals(STORED_PASSWD, xml.getNodeName());
         assertNotNull(getSingleChildElement(xml, NAME));
         assertEquals(pwdName, getSingleChildElementTextContent(xml, NAME));
-        assertNotNull(getSingleChildElement(xml, NAME));
+        assertNotNull(getSingleChildElement(xml, PASSWORD));
         assertEquals(reverse(pwdName), getSingleChildElementTextContent(xml, PASSWORD));
 
         Element properties = getSingleChildElement(xml, PROPERTIES);
