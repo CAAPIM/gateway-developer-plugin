@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.util.injection;
 
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
@@ -19,7 +20,6 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;

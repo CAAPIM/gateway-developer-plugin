@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 import javax.inject.Singleton;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
 public class FolderLoader implements EntityLoader<Folder> {

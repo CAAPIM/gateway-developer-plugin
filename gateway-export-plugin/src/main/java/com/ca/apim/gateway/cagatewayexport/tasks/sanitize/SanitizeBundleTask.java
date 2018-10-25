@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.sanitize;
 
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.InputFile;

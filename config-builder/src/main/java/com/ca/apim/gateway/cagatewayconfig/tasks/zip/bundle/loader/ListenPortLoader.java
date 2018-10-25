@@ -13,8 +13,8 @@ import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ClientAuthentication.fromType;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
@@ -32,7 +32,7 @@ public class ListenPortLoader implements BundleDependencyLoader {
         final String name = getSingleChildElementTextContent(listenPortElement, NAME);
         final String protocol = getSingleChildElementTextContent(listenPortElement, PROTOCOL);
         final Integer port = parseInt(getSingleChildElementTextContent(listenPortElement, PORT));
-        final List<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPortElement, ENABLED_FEATURES), STRING_VALUE);
+        final Set<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPortElement, ENABLED_FEATURES), STRING_VALUE);
         final String targetServiceReference = getSingleChildElementTextContent(listenPortElement, TARGET_SERVICE_REFERENCE);
         final ListenPortTlsSettings tlsSettings = getTlsSettings(listenPortElement);
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPortElement, PROPERTIES, true), PROPERTIES);
@@ -40,7 +40,7 @@ public class ListenPortLoader implements BundleDependencyLoader {
         ListenPort listenPort = new ListenPort();
         listenPort.setProtocol(protocol);
         listenPort.setPort(port);
-        listenPort.setEnabledFeatures(new HashSet<>(enabledFeatures));
+        listenPort.setEnabledFeatures(enabledFeatures);
         listenPort.setTargetServiceReference(targetServiceReference);
         listenPort.setTlsSettings(tlsSettings);
         listenPort.setProperties(properties);

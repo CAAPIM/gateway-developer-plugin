@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
 public class PolicyBackedServiceLoader implements EntityLoader<PolicyBackedServiceEntity> {

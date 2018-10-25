@@ -6,13 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;

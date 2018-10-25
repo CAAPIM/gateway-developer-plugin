@@ -19,8 +19,8 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_MAX_POOL_SIZE;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_MIN_POOL_SIZE;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper.mapPropertiesElements;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElementTextContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
 public class JdbcConnectionLoader implements EntityLoader<JdbcConnectionEntity> {
