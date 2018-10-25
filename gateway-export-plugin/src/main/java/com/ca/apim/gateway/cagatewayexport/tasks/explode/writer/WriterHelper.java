@@ -17,6 +17,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 
+import static com.ca.apim.gateway.cagatewayexport.util.properties.PropertyFileUtils.loadExistingProperties;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
@@ -46,7 +47,7 @@ class WriterHelper {
         documentFileUtils.createFolder(configFolder.toPath());
 
         File propertiesFile = new File(configFolder, fileName + ".properties");
-        Properties currentProperties = documentFileUtils.loadExistingProperties(propertiesFile, fileName);
+        Properties currentProperties = loadExistingProperties(propertiesFile);
         if (!currentProperties.isEmpty()) {
             // iterate the new properties and join them to the current properties contents
             // new property value is chosen except if its value is null

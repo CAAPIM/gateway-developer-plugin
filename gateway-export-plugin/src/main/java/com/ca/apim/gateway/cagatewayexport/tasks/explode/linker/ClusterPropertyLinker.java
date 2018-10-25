@@ -9,9 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
-import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.util.HashSet;
@@ -19,15 +17,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayexport.util.properties.PropertyFileUtils.loadExistingProperties;
+
 @Singleton
 public class ClusterPropertyLinker implements EntitiesLinker {
-    private DocumentFileUtils documentFileUtils;
-
-    @Inject
-    ClusterPropertyLinker(DocumentFileUtils documentFileUtils) {
-        this.documentFileUtils = documentFileUtils;
-    }
-
     @Override
     public void link(Bundle filteredBundle, Bundle bundle) {
         throw new UnsupportedOperationException();
@@ -38,7 +31,7 @@ public class ClusterPropertyLinker implements EntitiesLinker {
         Map<String, ClusterProperty> clusterPropertyMap = filteredBundle.getEntities(ClusterProperty.class);
         Set<String> idsToRemove = new HashSet<>();
         File propertiesFile = new File(new File(rootFolder, "config"), "static.properties");
-        Properties staticProperties = documentFileUtils.loadExistingProperties(propertiesFile, "static");
+        Properties staticProperties = loadExistingProperties(propertiesFile);
 
         for (ClusterProperty clusterProperty : clusterPropertyMap.values()) {
             if (!staticProperties.containsKey(clusterProperty.getName())) {

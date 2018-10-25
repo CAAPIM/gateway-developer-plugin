@@ -7,9 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.util.file;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
-import com.ca.apim.gateway.cagatewayexport.util.properties.OrderedProperties;
 import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
-import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 
 import javax.xml.transform.Transformer;
@@ -19,7 +17,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -93,21 +90,6 @@ public final class DocumentFileUtils {
             throw new DocumentFileUtilsException("Exception writing xml element to stream.", e);
         }
     }
-
-    @NotNull
-    public Properties loadExistingProperties(File propertiesFile, String fileName) {
-        Properties properties = new OrderedProperties();
-        // check if the properties file exist and load current properties into the properties object
-        if (propertiesFile.exists()) {
-            try (InputStream stream = Files.newInputStream(propertiesFile.toPath())) {
-                properties.load(stream);
-            } catch (IOException e) {
-                throw new DocumentFileUtilsException("Exception reading existing contents from " + fileName + ".properties file", e);
-            }
-        }
-        return properties;
-    }
-
 
     /**
      * Close a {@link java.io.Closeable} without throwing any exceptions.

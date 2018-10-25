@@ -36,7 +36,7 @@ class ClusterPropertyLinkerTest {
 
     @BeforeEach
     void setUp() {
-        clusterPropertyLinker = new ClusterPropertyLinker(DocumentFileUtils.INSTANCE);
+        clusterPropertyLinker = new ClusterPropertyLinker();
         bundle = new Bundle();
         bundle.addEntity(new ClusterProperty("my.name", "my-value", "1"));
         bundle.addEntity(new ClusterProperty("ENV.my.name", "my-value", "2"));
