@@ -23,20 +23,16 @@ public class BundleElementNames {
     public static final String ATTRIBUTE_KEYSTORE_ID = "keystoreId";
     public static final String ATTRIBUTE_KEY_ALGORITHM = "keyAlgorithm";
 
-    // Property names
-    public static final String PROPERTY_USER = "user";
-    public static final String PROPERTY_PASSWORD = "password";
-    public static final String PROPERTY_MIN_POOL_SIZE = "minimumPoolSize";
-    public static final String PROPERTY_MAX_POOL_SIZE = "maximumPoolSize";
-
     // Common Elements
     public static final String NAME = "l7:Name";
     public static final String PROPERTIES = "l7:Properties";
     public static final String PROPERTY = "l7:Property";
-    public static final String INT_VALUE = "l7:IntegerValue";
+    public static final String INT_VALUE = "l7:IntValue";
+    public static final String INTEGER_VALUE = "l7:IntegerValue";
     public static final String LONG_VALUE = "l7:LongValue";
     public static final String BOOLEAN_VALUE = "l7:BooleanValue";
     public static final String STRING_VALUE = "l7:StringValue";
+    public static final String DATE_VALUE = "l7:DateValue";
     public static final String RESOURCE = "l7:Resource";
     public static final String REFERENCE = "l7:Reference";
     public static final String RESOURCES = "l7:Resources";
@@ -46,6 +42,8 @@ public class BundleElementNames {
     public static final String MAPPINGS = "l7:Mappings";
     public static final String MAPPING = "l7:Mapping";
     public static final String ITEM = "l7:Item";
+    public static final String DEPENDENCIES = "l7:Dependencies";
+    public static final String DEPENDENCY_GRAPH = "l7:DependencyGraph";
     public static final String ID = "l7:Id";
     public static final String TYPE = "l7:Type";
     public static final String GUID = "l7:Guid";

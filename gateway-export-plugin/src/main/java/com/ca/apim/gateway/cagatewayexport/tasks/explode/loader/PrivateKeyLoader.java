@@ -14,7 +14,7 @@ import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.*;
 import static java.util.stream.Collectors.toList;

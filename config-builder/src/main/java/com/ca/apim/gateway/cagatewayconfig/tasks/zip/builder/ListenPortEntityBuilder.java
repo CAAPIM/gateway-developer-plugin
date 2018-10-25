@@ -16,9 +16,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ClientAuthentication.OPTIONAL;
@@ -142,14 +140,14 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         ListenPort defaultHttps = new ListenPort();
         defaultHttps.setPort(HTTPS_DEFAULT_PORT);
         defaultHttps.setProtocol(PROTOCOL_HTTPS);
-        defaultHttps.setEnabledFeatures(asList(MESSAGE_INPUT.getDescription(),
+        defaultHttps.setEnabledFeatures(new HashSet<>(asList(MESSAGE_INPUT.getDescription(),
                 ADMIN_REMOTE.getDescription(),
                 ADMIN_APPLET.getDescription(),
-                OTHER_SERVLETS.getDescription()));
+                OTHER_SERVLETS.getDescription())));
         defaultHttps.setTlsSettings(new ListenPortTlsSettings());
         defaultHttps.getTlsSettings().setClientAuthentication(OPTIONAL);
-        defaultHttps.getTlsSettings().setEnabledVersions(TLS_VERSIONS);
-        defaultHttps.getTlsSettings().setEnabledCipherSuites(DEFAULT_RECOMMENDED_CIPHERS);
+        defaultHttps.getTlsSettings().setEnabledVersions(new HashSet<>(TLS_VERSIONS));
+        defaultHttps.getTlsSettings().setEnabledCipherSuites(new HashSet<>(DEFAULT_RECOMMENDED_CIPHERS));
         defaultHttps.getTlsSettings().setProperties(new HashMap<>());
         defaultHttps.getTlsSettings().getProperties().put(USES_TLS, TRUE);
         return defaultHttps;
@@ -160,12 +158,12 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         ListenPort defaultHttp = new ListenPort();
         defaultHttp.setPort(HTTP_DEFAULT_PORT);
         defaultHttp.setProtocol(PROTOCOL_HTTP);
-        defaultHttp.setEnabledFeatures(asList(MESSAGE_INPUT.getDescription(),
+        defaultHttp.setEnabledFeatures(new HashSet<>(asList(MESSAGE_INPUT.getDescription(),
                 POLICYDISCO.getDescription(),
                 PING.getDescription(),
                 STS.getDescription(),
                 WSDLPROXY.getDescription(),
-                SNMPQUERY.getDescription()));
+                SNMPQUERY.getDescription())));
         return defaultHttp;
     }
 

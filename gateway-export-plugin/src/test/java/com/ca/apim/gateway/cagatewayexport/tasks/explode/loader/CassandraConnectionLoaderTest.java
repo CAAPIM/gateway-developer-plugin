@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.*;
 import static java.security.Security.getAlgorithms;
 import static org.junit.jupiter.api.Assertions.*;

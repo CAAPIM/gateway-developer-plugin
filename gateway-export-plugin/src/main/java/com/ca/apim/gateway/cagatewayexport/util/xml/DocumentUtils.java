@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -206,7 +206,7 @@ public class DocumentUtils {
         return createElementWithAttributes(document, elementName, ImmutableMap.of(attributeName, attributeValue));
     }
 
-    public static Element createElementWithAttributes(final Document document, final String elementName, final Map<String, String> attributes) {
+    private static Element createElementWithAttributes(final Document document, final String elementName, final Map<String, String> attributes) {
         Element element = document.createElement(elementName);
         attributes.forEach(element::setAttribute);
         return element;

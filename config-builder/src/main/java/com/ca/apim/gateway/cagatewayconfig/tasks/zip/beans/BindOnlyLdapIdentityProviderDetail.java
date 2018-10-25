@@ -4,10 +4,13 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+/**
+ * Created by chaoy01 on 2018-08-17.
+ */
 @JsonTypeName("BIND_ONLY_LDAP")
 public class BindOnlyLdapIdentityProviderDetail extends LdapIdentityProviderDetail {
 

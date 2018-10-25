@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.Service;
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 

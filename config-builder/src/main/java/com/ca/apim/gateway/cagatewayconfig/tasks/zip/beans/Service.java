@@ -6,9 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import java.util.Map;
 import java.util.Set;
 
+@JsonInclude(Include.NON_NULL)
 public class Service {
     private String id;
     private String url;

@@ -6,11 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.BindOnlyLdapIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.FederatedIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.IdentityProviderEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.BindOnlyLdapIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.FederatedIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
+
 import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import org.jetbrains.annotations.NotNull;
@@ -21,10 +22,10 @@ import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.*;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.IdentityProviderType.fromType;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.copyMap;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.*;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.IdentityProvider.Type.fromType;
 
 @Singleton
 public class IdentityProviderWriter implements EntityWriter {
@@ -51,7 +52,7 @@ public class IdentityProviderWriter implements EntityWriter {
 
     private IdentityProvider getIdentityProviderBean(final IdentityProviderEntity identityProviderEntity) {
         final IdentityProvider idProvider = new IdentityProvider();
-        final Type type = fromType(identityProviderEntity.getType().getValue());
+        final IdentityProviderType type = fromType(identityProviderEntity.getType().getValue());
         idProvider.setType(type);
         idProvider.setProperties(copyMap(identityProviderEntity.getProperties()));
 

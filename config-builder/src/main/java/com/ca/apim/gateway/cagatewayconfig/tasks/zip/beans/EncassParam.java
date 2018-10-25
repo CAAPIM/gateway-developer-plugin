@@ -10,6 +10,14 @@ public class EncassParam {
     private String name;
     private String type;
 
+    public EncassParam() {
+    }
+
+    public EncassParam(String name, String type) {
+        this.name = name;
+        this.type = type;
+    }
+
     public String getName() {
         return name;
     }

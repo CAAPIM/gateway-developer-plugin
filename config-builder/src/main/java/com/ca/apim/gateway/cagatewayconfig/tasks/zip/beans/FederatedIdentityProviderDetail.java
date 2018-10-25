@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -17,6 +17,10 @@ public class FederatedIdentityProviderDetail implements IdentityProviderDetail {
     private Set<String> certificateReferences;
 
     public FederatedIdentityProviderDetail(final Set<String> certificateReferences) {
+        this.certificateReferences = certificateReferences;
+    }
+
+    public void setCertificateReferences(Set<String> certificateReferences) {
         this.certificateReferences = certificateReferences;
     }
 

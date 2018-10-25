@@ -7,7 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 

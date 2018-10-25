@@ -30,6 +30,11 @@ public class TrustedCert {
     public TrustedCert() {}
 
     public TrustedCert(Map<String, Object> properties, CertificateData certificateData) {
+        this(properties);
+        this.certificateData = certificateData;
+    }
+
+    public TrustedCert(Map<String, Object> properties) {
         verifyHostname = extractBoolean(properties, VERIFY_HOSTNAME);
         trustedForSsl = extractBoolean(properties, TRUSTED_FOR_SSL);
         trustedAsSamlAttestingEntity = extractBoolean(properties, TRUSTED_AS_SAML_ATTESTING_ENTITY);
@@ -38,7 +43,6 @@ public class TrustedCert {
         trustedForSigningClientCerts = extractBoolean(properties, TRUSTING_SIGNING_CLIENT_CERTS);
         trustedForSigningServerCerts = extractBoolean(properties, TRUSTED_SIGNING_SERVER_CERTS);
         trustedAsSamlIssuer = extractBoolean(properties, TRUSTED_AS_SAML_ISSUER);
-        this.certificateData = certificateData;
     }
 
     public Map<String, Object> createProperties() {

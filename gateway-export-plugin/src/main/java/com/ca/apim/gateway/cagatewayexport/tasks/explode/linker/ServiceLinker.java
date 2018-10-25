@@ -23,7 +23,7 @@ import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty.Type.SERVICE;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 

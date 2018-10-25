@@ -6,9 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+@SuppressWarnings("unused")
 public class PolicyBackedServiceOperation {
     private String policy;
     private String operationName;
+
+    public PolicyBackedServiceOperation() {
+    }
+
+    public PolicyBackedServiceOperation(String operationName, String policy) {
+        this.operationName = operationName;
+        this.policy = policy;
+    }
 
     public String getPolicy() {
         return policy;

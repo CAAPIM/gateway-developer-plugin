@@ -5,14 +5,23 @@
  */
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
+
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ListenPortTlsSettings.*;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableList;
 
+/**
+ * Listen port representation for yaml/json files.
+ */
+@JsonInclude(NON_NULL)
 public class ListenPort {
 
     public static final String PROTOCOL_HTTP = "HTTP";
@@ -62,7 +71,7 @@ public class ListenPort {
 
     private String protocol;
     private int port;
-    private List<String> enabledFeatures;
+    private Set<String> enabledFeatures;
     private ListenPortTlsSettings tlsSettings;
     private Map<String, Object> properties;
     private String targetServiceReference;
@@ -83,11 +92,11 @@ public class ListenPort {
         this.port = port;
     }
 
-    public List<String> getEnabledFeatures() {
+    public Set<String> getEnabledFeatures() {
         return enabledFeatures;
     }
 
-    public void setEnabledFeatures(List<String> enabledFeatures) {
+    public void setEnabledFeatures(Set<String> enabledFeatures) {
         this.enabledFeatures = enabledFeatures;
     }
 
@@ -122,8 +131,8 @@ public class ListenPort {
         public static final String TLSV12 = "TLSv1.2";
 
         private ClientAuthentication clientAuthentication;
-        private List<String> enabledVersions;
-        private List<String> enabledCipherSuites;
+        private Set<String> enabledVersions;
+        private Set<String> enabledCipherSuites;
         private Map<String, Object> properties;
 
         public ClientAuthentication getClientAuthentication() {
@@ -134,19 +143,19 @@ public class ListenPort {
             this.clientAuthentication = clientAuthentication;
         }
 
-        public List<String> getEnabledVersions() {
+        public Set<String> getEnabledVersions() {
             return enabledVersions;
         }
 
-        public void setEnabledVersions(List<String> enabledVersions) {
+        public void setEnabledVersions(Set<String> enabledVersions) {
             this.enabledVersions = enabledVersions;
         }
 
-        public List<String> getEnabledCipherSuites() {
+        public Set<String> getEnabledCipherSuites() {
             return enabledCipherSuites;
         }
 
-        public void setEnabledCipherSuites(List<String> enabledCipherSuites) {
+        public void setEnabledCipherSuites(Set<String> enabledCipherSuites) {
             this.enabledCipherSuites = enabledCipherSuites;
         }
 

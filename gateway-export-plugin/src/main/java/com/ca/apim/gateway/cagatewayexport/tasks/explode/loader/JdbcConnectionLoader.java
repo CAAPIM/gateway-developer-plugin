@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.JdbcConnectionEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import org.apache.commons.lang3.StringUtils;
@@ -14,9 +15,10 @@ import org.w3c.dom.Element;
 import javax.inject.Singleton;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_MAX_POOL_SIZE;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_MIN_POOL_SIZE;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper.mapPropertiesElements;
-import static com.ca.apim.gateway.cagatewayexport.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
@@ -36,8 +38,8 @@ public class JdbcConnectionLoader implements EntityLoader<JdbcConnectionEntity> 
         final String driverClass = getSingleChildElementTextContent(extension, DRIVER_CLASS);
         final String jdbcUrl = getSingleChildElementTextContent(extension, JDBC_URL);
         final Map<String, Object> connectionProperties = mapPropertiesElements(getSingleChildElement(extension, CONNECTION_PROPERTIES, true), CONNECTION_PROPERTIES);
-        final String user = (String) connectionProperties.remove(PROPERTY_USER);
-        final String passwordRef = (String) connectionProperties.remove(PROPERTY_PASSWORD);
+        final String user = (String) connectionProperties.remove(PropertyConstants.PROPERTY_USER);
+        final String passwordRef = (String) connectionProperties.remove(PropertyConstants.PROPERTY_PASSWORD);
         if (StringUtils.isEmpty(passwordRef)) {
             throw new WriteException("JDBC Connection " + name + " is missing reference for a stored password.");
         }

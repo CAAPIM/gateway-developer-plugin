@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ public class ListenPortLoader implements BundleDependencyLoader {
         ListenPort listenPort = new ListenPort();
         listenPort.setProtocol(protocol);
         listenPort.setPort(port);
-        listenPort.setEnabledFeatures(enabledFeatures);
+        listenPort.setEnabledFeatures(new HashSet<>(enabledFeatures));
         listenPort.setTargetServiceReference(targetServiceReference);
         listenPort.setTlsSettings(tlsSettings);
         listenPort.setProperties(properties);
@@ -59,10 +60,10 @@ public class ListenPortLoader implements BundleDependencyLoader {
         tlsSettings.setClientAuthentication(fromType(clientAuthentication));
 
         Element enabledCipherSuites = getSingleChildElement(tlsSettingsElement, ENABLED_CIPHER_SUITES, true);
-        tlsSettings.setEnabledCipherSuites(getChildElementsTextContents(enabledCipherSuites, STRING_VALUE));
+        tlsSettings.setEnabledCipherSuites(new HashSet<>(getChildElementsTextContents(enabledCipherSuites, STRING_VALUE)));
 
         Element enabledVersions = getSingleChildElement(tlsSettingsElement, ENABLED_VERSIONS, true);
-        tlsSettings.setEnabledVersions(getChildElementsTextContents(enabledVersions, STRING_VALUE));
+        tlsSettings.setEnabledVersions(new HashSet<>(getChildElementsTextContents(enabledVersions, STRING_VALUE)));
 
         Element properties = getSingleChildElement(tlsSettingsElement, PROPERTIES, true);
         tlsSettings.setProperties(mapPropertiesElements(properties, PROPERTIES));
