@@ -26,6 +26,7 @@ public class JdbcConnection {
     private String passwordRef;
     private Integer minimumPoolSize;
     private Integer maximumPoolSize;
+    private String password;
 
     public String getDriverClass() {
         return driverClass;
@@ -57,6 +58,14 @@ public class JdbcConnection {
 
     public void setPasswordRef(String passwordRef) {
         this.passwordRef = passwordRef;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Integer getMinimumPoolSize() {

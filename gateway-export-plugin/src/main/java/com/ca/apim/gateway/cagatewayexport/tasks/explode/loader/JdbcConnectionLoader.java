@@ -7,8 +7,6 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.JdbcConnectionEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -37,10 +35,7 @@ public class JdbcConnectionLoader implements EntityLoader<JdbcConnectionEntity> 
         final String jdbcUrl = getSingleChildElementTextContent(extension, JDBC_URL);
         final Map<String, Object> connectionProperties = mapPropertiesElements(getSingleChildElement(extension, CONNECTION_PROPERTIES, true), CONNECTION_PROPERTIES);
         final String user = (String) connectionProperties.remove(PROPERTY_USER);
-        final String passwordRef = (String) connectionProperties.remove(PROPERTY_PASSWORD);
-        if (StringUtils.isEmpty(passwordRef)) {
-            throw new WriteException("JDBC Connection " + name + " is missing reference for a stored password.");
-        }
+        final String password = (String) connectionProperties.remove(PROPERTY_PASSWORD);
 
         return new JdbcConnectionEntity.Builder()
                 .id(jdbcConnection.getAttribute(ATTRIBUTE_ID))
@@ -48,7 +43,7 @@ public class JdbcConnectionLoader implements EntityLoader<JdbcConnectionEntity> 
                 .user(user)
                 .minimumPoolSize(minPoolSize)
                 .maximumPoolSize(maxPoolSize)
-                .passwordRef(passwordRef)
+                .password(password)
                 .properties(connectionProperties)
                 .driverClass(driverClass)
                 .jdbcUrl(jdbcUrl)

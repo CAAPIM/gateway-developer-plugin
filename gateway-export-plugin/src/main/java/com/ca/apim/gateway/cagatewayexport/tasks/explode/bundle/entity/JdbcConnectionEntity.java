@@ -26,6 +26,7 @@ public class JdbcConnectionEntity implements Entity {
     private final Integer minimumPoolSize;
     private final Integer maximumPoolSize;
     private String passwordRef;
+    private String password;
     private final Map<String, Object> properties;
 
     private JdbcConnectionEntity(Builder builder) {
@@ -38,6 +39,7 @@ public class JdbcConnectionEntity implements Entity {
         minimumPoolSize = builder.minimumPoolSize;
         maximumPoolSize = builder.maximumPoolSize;
         passwordRef = builder.passwordRef;
+        password = builder.password;
     }
 
     public String getId() {
@@ -64,8 +66,16 @@ public class JdbcConnectionEntity implements Entity {
         return passwordRef;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     public void setPasswordRef(String passwordRef) {
         this.passwordRef = passwordRef;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Integer getMinimumPoolSize() {
@@ -88,6 +98,7 @@ public class JdbcConnectionEntity implements Entity {
         private String jdbcUrl;
         private String user;
         private String passwordRef;
+        private String password;
         private Integer minimumPoolSize;
         private Integer maximumPoolSize;
         private Map<String, Object> properties;
@@ -124,6 +135,11 @@ public class JdbcConnectionEntity implements Entity {
 
         public Builder passwordRef(String passwordRef) {
             this.passwordRef = passwordRef;
+            return this;
+        }
+
+        public Builder password(String password) {
+            this.password = password;
             return this;
         }
 

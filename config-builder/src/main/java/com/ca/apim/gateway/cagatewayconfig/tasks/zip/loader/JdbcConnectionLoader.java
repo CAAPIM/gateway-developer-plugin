@@ -37,6 +37,11 @@ public class JdbcConnectionLoader extends EntityLoaderBase<JdbcConnection> {
 
     @Override
     protected void putToBundle(Bundle bundle, @NotNull Map<String, JdbcConnection> entitiesMap) {
+        entitiesMap.forEach((k, v) -> {
+            if (v.getPasswordRef() != null && v.getPassword() != null) {
+                throw new BundleLoadException("Cannot specify both a password reference and a password in for jdbc connection: " + k);
+            }
+        });
         bundle.putAllJdbcConnections(entitiesMap);
     }
 

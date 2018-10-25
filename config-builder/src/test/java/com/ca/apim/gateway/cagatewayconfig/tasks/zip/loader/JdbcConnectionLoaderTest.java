@@ -17,8 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
@@ -29,7 +29,7 @@ import java.io.IOException;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
 class JdbcConnectionLoaderTest {
@@ -58,7 +58,7 @@ class JdbcConnectionLoaderTest {
                 "  maximumPoolSize: 15\n" +
                 "  properties:\n" +
                 "    EnableCancelTimeout: \"true\"\n";
-        loadJdbcConnection(yaml, "yml", false);
+        loadJdbcConnection(yaml, "yml", null);
     }
 
     @Test
@@ -76,7 +76,7 @@ class JdbcConnectionLoaderTest {
                 "    }\n" +
                 "  }\n" +
                 "}";
-        loadJdbcConnection(json, "json", false);
+        loadJdbcConnection(json, "json", null);
     }
 
     @Test
@@ -90,7 +90,7 @@ class JdbcConnectionLoaderTest {
                 "  maximumPoolSize: 15\n" +
                 "  properties:\n" +
                 "    EnableCancelTimeout: \"true\"\n";
-        loadJdbcConnection(yaml, "yml", true);
+        loadJdbcConnection(yaml, "yml", JsonToolsException.class);
     }
 
     @Test
@@ -107,20 +107,35 @@ class JdbcConnectionLoaderTest {
                 "      \"EnableCancelTimeout\" : \"true\"\n" +
                 "    }\n" +
                 "  }\n";
-        loadJdbcConnection(json, "json", true);
+        loadJdbcConnection(json, "json", JsonToolsException.class);
     }
 
-    private void loadJdbcConnection(String content, String fileTyoe, boolean expectException) throws IOException {
+    @Test
+    void loadJdbcConnectionYamlPasswordAndPasswordRef() throws IOException {
+        String yaml = CONNECTION_NAME + ":\n" +
+                "  driverClass: \"com.mysql.jdbc.Driver\"\n" +
+                "  jdbcUrl: \"jdbc:mysql://localhost:3306/ssg\"\n" +
+                "  user: \"gateway\"\n" +
+                "  passwordRef: \"gateway\"\n" +
+                "  password: \"gateway\"\n" +
+                "  minimumPoolSize: 3\n" +
+                "  maximumPoolSize: 15\n" +
+                "  properties:\n" +
+                "    EnableCancelTimeout: \"true\"\n";
+        loadJdbcConnection(yaml, "yml", BundleLoadException.class);
+    }
+
+    private void loadJdbcConnection(String content, String fileType, Class<? extends Exception> expectException) throws IOException {
         JdbcConnectionLoader loader = new JdbcConnectionLoader(jsonTools);
         final File configFolder = rootProjectDir.createDirectory("config");
-        final File identityProvidersFile = new File(configFolder, "jdbc-connections." + fileTyoe);
+        final File identityProvidersFile = new File(configFolder, "jdbc-connections." + fileType);
         Files.touch(identityProvidersFile);
 
         when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(content.getBytes()));
 
         final Bundle bundle = new Bundle();
-        if (expectException) {
-            assertThrows(JsonToolsException.class, () -> loadJdbcConnections(loader, bundle, rootProjectDir));
+        if (expectException != null) {
+            assertThrows(expectException, () -> loadJdbcConnections(loader, bundle, rootProjectDir));
             return;
         } else {
             loadJdbcConnections(loader, bundle, rootProjectDir);
