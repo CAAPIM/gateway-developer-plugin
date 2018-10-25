@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
+package com.ca.apim.gateway.cagatewayexport.util.properties;
 
 public class PropertyFileException extends RuntimeException {
     public PropertyFileException(String message) {

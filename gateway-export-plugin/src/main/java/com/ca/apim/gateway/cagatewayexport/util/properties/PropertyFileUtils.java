@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayexport.util.properties;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PropertyFileException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
