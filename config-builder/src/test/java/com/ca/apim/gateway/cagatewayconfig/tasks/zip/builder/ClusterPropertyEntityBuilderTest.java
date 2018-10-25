@@ -61,7 +61,7 @@ class ClusterPropertyEntityBuilderTest {
                 builder,
                 bundle,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
-                CLUSTER_PROPERTY_TYPE, ENV_PROPS.keySet().stream().map(k -> k.replace(PREFIX_GATEWAY, PREFIX_ENV)).collect(toList())
+                CLUSTER_PROPERTY_TYPE, ENV_PROPS.keySet().stream().map(k -> k.replace(PREFIX_GATEWAY, "")).collect(toList())
         );
     }
 
@@ -97,8 +97,20 @@ class ClusterPropertyEntityBuilderTest {
         assertExpectedProperties(entities, ENV_PROPS);
     }
 
+    @Test
+    void buildDeploymentBundleWithDuplicateProps() {
+        ClusterPropertyEntityBuilder builder = new ClusterPropertyEntityBuilder(ID_GENERATOR);
+        Bundle bundle = new Bundle();
+        bundle.putAllStaticProperties(STATIC_PROPS);
+        //Duplicate prop envprop1 in both static and env props
+        bundle.getStaticProperties().put("envprop1", "some value");
+        bundle.putAllEnvironmentProperties(ENV_PROPS);
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+    }
+
     private static void assertExpectedProperties(List<Entity> entities, Map<String, String> readOnlyExpectedProps) {
-        Map<String, String> expectedProps = readOnlyExpectedProps.entrySet().stream().collect(toMap(o -> o.getKey().replace(PREFIX_GATEWAY, PREFIX_ENV), Entry::getValue));
+        Map<String, String> expectedProps = readOnlyExpectedProps.entrySet().stream().collect(toMap(o -> o.getKey().replace(PREFIX_GATEWAY, ""), Entry::getValue));
         assertFalse(entities.isEmpty());
         entities.forEach(e -> {
             assertNotNull(e.getId());
