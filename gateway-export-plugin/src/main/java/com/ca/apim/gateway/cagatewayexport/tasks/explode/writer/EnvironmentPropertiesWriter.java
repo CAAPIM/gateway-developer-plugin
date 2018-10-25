@@ -6,10 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
-import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
