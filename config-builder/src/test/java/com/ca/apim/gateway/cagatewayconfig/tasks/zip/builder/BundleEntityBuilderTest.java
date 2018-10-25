@@ -27,19 +27,21 @@ class BundleEntityBuilderTest {
     // This class is covered by testing others, so a simple testing is enough here.
     @Test
     void build() {
-        BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new EntityBuilder() {
-            @Override
-            public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-                return Collections.singletonList(getEntityWithOnlyMapping(LISTEN_PORT_TYPE, "Test", "Test"));
-            }
-
-            @Override
-            public @NotNull Integer getOrder() {
-                return 0;
-            }
-        }), new BundleDocumentBuilder());
+        BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()), new BundleDocumentBuilder());
 
         final Element element = builder.build(new Bundle(), BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertNotNull(element);
+    }
+
+    private static class TestEntityBuilder implements EntityBuilder {
+        @Override
+        public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+            return Collections.singletonList(getEntityWithOnlyMapping(LISTEN_PORT_TYPE, "Test", "Test"));
+        }
+
+        @Override
+        public @NotNull Integer getOrder() {
+            return 0;
+        }
     }
 }
