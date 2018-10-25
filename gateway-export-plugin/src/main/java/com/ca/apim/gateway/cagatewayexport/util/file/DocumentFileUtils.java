@@ -14,10 +14,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Level;
@@ -93,7 +90,6 @@ public final class DocumentFileUtils {
             throw new DocumentFileUtilsException("Exception writing xml element to stream.", e);
         }
     }
-
 
     /**
      * Close a {@link java.io.Closeable} without throwing any exceptions.

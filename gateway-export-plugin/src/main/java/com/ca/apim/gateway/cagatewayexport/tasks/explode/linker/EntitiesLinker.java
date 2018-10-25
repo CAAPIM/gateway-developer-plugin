@@ -8,7 +8,13 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 
+import java.io.File;
+
 public interface EntitiesLinker {
 
     void link(Bundle filteredBundle, Bundle bundle);
+
+    default void link(Bundle filteredBundle, Bundle bundle, File rootFolder) {
+        link(filteredBundle, bundle);
+    }
 }

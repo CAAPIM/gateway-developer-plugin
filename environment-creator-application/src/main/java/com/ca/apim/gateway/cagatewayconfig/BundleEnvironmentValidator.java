@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 public class BundleEnvironmentValidator {
@@ -66,7 +67,7 @@ public class BundleEnvironmentValidator {
     private void findInBundle(Bundle bundle, String type, String name) {
         switch (type) {
             case EntityTypes.CLUSTER_PROPERTY_TYPE:
-                if (bundle.getEnvironmentProperties().get(name) == null) {
+                if (bundle.getEnvironmentProperties().get(PREFIX_GATEWAY + name) == null) {
                     throw new MissingEnvironmentException("Missing environment value for property: " + name);
                 }
                 break;

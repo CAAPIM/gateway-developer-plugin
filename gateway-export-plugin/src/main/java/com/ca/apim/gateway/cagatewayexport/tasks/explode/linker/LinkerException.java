@@ -10,4 +10,9 @@ public class LinkerException extends RuntimeException {
     public LinkerException(String message) {
         super(message);
     }
+
+    public LinkerException(String message, Exception e) {
+        super(message, e);
+    }
+
 }
