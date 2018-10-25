@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.util;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.Entity;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType;
@@ -15,6 +16,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -22,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_ID;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -178,4 +182,16 @@ public class TestUtils {
         );
     }
 
+    public static Folder createRoot() {
+        return createFolder(ROOT_FOLDER_NAME, ROOT_FOLDER_ID, null);
+    }
+
+    @NotNull
+    public static Folder createFolder(String folderName, String folderId, Folder parent) {
+        Folder folder = new Folder();
+        folder.setName(folderName);
+        folder.setId(folderId);
+        folder.setParentFolder(parent);
+        return folder;
+    }
 }

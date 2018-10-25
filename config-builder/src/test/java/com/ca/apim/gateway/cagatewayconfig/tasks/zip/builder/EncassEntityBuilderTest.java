@@ -37,7 +37,7 @@ class EncassEntityBuilderTest {
     private static final String TEST_POLICY_ID = "PolicyID";
 
     @Test
-    void buildFromEmptyBundle_noPBS() {
+    void buildFromEmptyBundle_noEncass() {
         EncassEntityBuilder builder = new EncassEntityBuilder(ID_GENERATOR);
         final List<Entity> entities = builder.build(new Bundle(), DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 

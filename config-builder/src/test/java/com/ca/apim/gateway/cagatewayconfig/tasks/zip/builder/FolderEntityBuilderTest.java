@@ -24,6 +24,8 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FO
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.ENVIRONMENT;
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createRoot;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static java.util.Optional.ofNullable;
@@ -108,16 +110,4 @@ class FolderEntityBuilderTest {
         return ImmutableMap.of(FOLDER_1, folder1, FOLDER_2, folder2, FOLDER_3, folder3);
     }
 
-    private static Folder createRoot() {
-        return createFolder(ROOT_FOLDER_NAME, ROOT_FOLDER_ID, null);
-    }
-
-    @NotNull
-    private static Folder createFolder(String folderName, String folderId, Folder parent) {
-        Folder folder = new Folder();
-        folder.setName(folderName);
-        folder.setId(folderId);
-        folder.setParentFolder(parent);
-        return folder;
-    }
 }

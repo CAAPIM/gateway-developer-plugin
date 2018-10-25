@@ -21,6 +21,9 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 @Singleton
 public class BundleDocumentBuilder {
 
+    static final String L7 = "xmlns:l7";
+    static final String GATEWAY_MANAGEMENT = "http://ns.l7tech.com/2010/04/gateway-management";
+
     public Element build(Document document, List<Entity> entities) {
         final Element references = document.createElement(REFERENCES);
         final Element mappings = document.createElement(MAPPINGS);
@@ -28,7 +31,7 @@ public class BundleDocumentBuilder {
         final Element bundle = createElementWithChildren(document, BUNDLE, references, mappings);
 
         entities.forEach(e -> addEntity(references, mappings, e, document));
-        bundle.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
+        bundle.setAttribute(L7, GATEWAY_MANAGEMENT);
         return bundle;
     }
 
