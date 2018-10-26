@@ -92,8 +92,7 @@ public class PolicyXMLSimplifier {
     static void simplifySetVariable(Element element, Bundle resultantBundle) throws DocumentParseException {
         Element base64ExpressionElement = getSingleElement(element, BASE_64_EXPRESSION);
         String base64Expression = base64ExpressionElement.getAttribute(STRING_VALUE);
-        byte[] decodedValue;
-        decodedValue = base64Decode(base64Expression);
+        byte[] decodedValue = base64Decode(base64Expression);
 
         Element variableToSetElement = getSingleElement(element, VARIABLE_TO_SET);
         String variableName = variableToSetElement.getAttribute(STRING_VALUE);

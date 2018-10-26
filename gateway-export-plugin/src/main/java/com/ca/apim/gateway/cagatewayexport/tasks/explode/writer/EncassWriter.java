@@ -12,13 +12,14 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
-import org.jetbrains.annotations.NotNull;
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
@@ -45,11 +46,11 @@ public class EncassWriter implements EntityWriter {
         writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE, Encass.class);
     }
 
-    @NotNull
-    private Encass getEncassBean(EncassEntity encassEntity) {
+    @VisibleForTesting
+    Encass getEncassBean(EncassEntity encassEntity) {
         Encass encassBean = new Encass();
-        encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).sorted(Comparator.comparing(EncassParam::getName)).collect(Collectors.toList()));
-        encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).sorted(Comparator.comparing(EncassParam::getName)).collect(Collectors.toList()));
+        encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
+        encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
         return encassBean;
     }
 }

@@ -26,6 +26,7 @@ public class JdbcConnectionLinker implements EntityLinker<JdbcConnectionEntity> 
     public void link(JdbcConnectionEntity entity, Bundle bundle, Bundle targetBundle) {
         if (entity.getPassword() != null) {
             if (entity.getPassword().startsWith("$L7C2$")) {
+                // Ignore passwords that are L7C2 encoded. We can't decode them anyways.
                 entity.setPassword(null);
             } else {
                 String storedPasswordReference = extractVariableName(entity.getPassword());

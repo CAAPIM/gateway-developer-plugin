@@ -17,10 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashSet;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.PolicyEntityBuilder.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,6 +40,107 @@ class PolicyEntityBuilderTest {
         bundle = new Bundle();
         bundle.setDependencies(new HashSet<>());
         document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+    }
+
+    @Test
+    void testPrepareSetVariableAssertionNoENV() throws DocumentParseException {
+        Element setVariableAssertionElement = createSetVariableAssertion(document, "my-var", "base64Text");
+        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertionElement);
+
+        Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
+        assertEquals("my-var", nameElement.getAttribute(STRING_VALUE));
+
+        Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
+        String b64 = expressionElement.getAttribute(STRING_VALUE);
+        assertEquals(Base64.getEncoder().encodeToString("base64Text".getBytes(StandardCharsets.UTF_8)), b64);
+    }
+
+    @Test
+    void testPrepareSetVariableAssertionENV() throws DocumentParseException {
+        Element setVariableAssertionElement = createSetVariableAssertion(document, "ENV.my-var", "base64Text");
+        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertionElement);
+
+        Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
+        assertEquals("ENV.my-var", nameElement.getAttribute(STRING_VALUE));
+
+        Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
+        assertEquals("ENV.my-var", expressionElement.getAttribute(ENV_PARAM_NAME));
+        assertFalse(expressionElement.hasAttribute(STRING_VALUE));
+    }
+
+    @Test
+    void testPrepareSetVariableAssertionMissingVariableToSet() throws DocumentParseException {
+        Element setVariableAssertion = document.createElement(SET_VARIABLE);
+        document.appendChild(setVariableAssertion);
+        Element expression = document.createElement(EXPRESSION);
+        expression.appendChild(document.createCDATASection("ashdkjsah"));
+        setVariableAssertion.appendChild(expression);
+
+        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertion));
+    }
+
+    @Test
+    void testPrepareSetVariableAssertionMissingBase64Value() throws DocumentParseException {
+        Element setVariableAssertion = document.createElement(SET_VARIABLE);
+        document.appendChild(setVariableAssertion);
+        Element variableToSet = document.createElement(VARIABLE_TO_SET);
+        variableToSet.setAttribute(STRING_VALUE, "my.var");
+        setVariableAssertion.appendChild(variableToSet);
+        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertion);
+
+        Element nameElement = getSingleElement(setVariableAssertion, VARIABLE_TO_SET);
+        assertEquals("my.var", nameElement.getAttribute(STRING_VALUE));
+
+        Element expressionElement = getSingleChildElement(setVariableAssertion, BASE_64_EXPRESSION, true);
+        assertNull(expressionElement);
+    }
+
+    @Test
+    void testPrepareSetVariableAssertionNotENVEmptyValue() throws DocumentParseException {
+        Element setVariableAssertionElement = createSetVariableAssertion(document, "my-var", null);
+        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertionElement);
+
+        Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
+        assertEquals("my-var", nameElement.getAttribute(STRING_VALUE));
+
+        Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
+        String b64 = expressionElement.getAttribute(STRING_VALUE);
+        assertTrue(b64.isEmpty());
+    }
+
+    @Test
+    void testPrepareSetVariableAssertionNotENVTextNode() throws DocumentParseException {
+        Element setVariableAssertion = document.createElement(SET_VARIABLE);
+        document.appendChild(setVariableAssertion);
+        Element expression = document.createElement(EXPRESSION);
+        expression.setTextContent("my \n Text \r\n Content");
+        setVariableAssertion.appendChild(expression);
+        Element variableToSet = document.createElement(VARIABLE_TO_SET);
+        variableToSet.setAttribute(STRING_VALUE, "my-var");
+        setVariableAssertion.appendChild(variableToSet);
+
+        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertion);
+
+        Element nameElement = getSingleElement(setVariableAssertion, VARIABLE_TO_SET);
+        assertEquals("my-var", nameElement.getAttribute(STRING_VALUE));
+
+        Element expressionElement = getSingleElement(setVariableAssertion, BASE_64_EXPRESSION);
+        String b64 = expressionElement.getAttribute(STRING_VALUE);
+        assertEquals(Base64.getEncoder().encodeToString("my \n Text \r\n Content".getBytes(StandardCharsets.UTF_8)), b64);
+    }
+
+    @Test
+    void testPrepareSetVariableAssertionNotENVElementNode() throws DocumentParseException {
+        Element setVariableAssertion = document.createElement(SET_VARIABLE);
+        document.appendChild(setVariableAssertion);
+        Element expression = document.createElement(EXPRESSION);
+        expression.appendChild(document.createElement("ashdkjsah"));
+        setVariableAssertion.appendChild(expression);
+        Element variableToSet = document.createElement(VARIABLE_TO_SET);
+        variableToSet.setAttribute(STRING_VALUE, "my-var");
+        setVariableAssertion.appendChild(variableToSet);
+
+        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertion));
     }
 
     @Test
@@ -144,6 +248,21 @@ class PolicyEntityBuilderTest {
 
         Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         assertEquals("ad620794-a27f-4d94-85b7-669ba838367b", guidElement.getAttribute(STRING_VALUE));
+    }
+
+    @NotNull
+    private Element createSetVariableAssertion(Document document, String variableName, String variableValue) {
+        Element setVariableAssertion = document.createElement(SET_VARIABLE);
+        document.appendChild(setVariableAssertion);
+        Element expression = document.createElement(EXPRESSION);
+        if (variableValue != null) {
+            expression.appendChild(document.createCDATASection(variableValue));
+        }
+        setVariableAssertion.appendChild(expression);
+        Element variableToSet = document.createElement(VARIABLE_TO_SET);
+        variableToSet.setAttribute(STRING_VALUE, variableName);
+        setVariableAssertion.appendChild(variableToSet);
+        return setVariableAssertion;
     }
 
     @NotNull

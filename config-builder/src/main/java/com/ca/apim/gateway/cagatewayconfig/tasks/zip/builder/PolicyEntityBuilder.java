@@ -42,7 +42,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     static final String STRING_VALUE = "stringValue";
     static final String BOOLEAN_VALUE = "booleanValue";
     static final String POLICY_PATH = "policyPath";
-    private static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
+    static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
     private static final String TAG = "tag";
     private static final String SUBTAG = "subtag";
     private static final String TYPE = "type";
@@ -104,7 +104,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareBase64Element(policyDocument, assertionElement, RESPONSE_BODY, BASE_64_RESPONSE_BODY);
     }
 
-    private void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
+    @VisibleForTesting
+    static void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
         Element nameElement;
         try {
             nameElement = getSingleElement(assertionElement, VARIABLE_TO_SET);
@@ -123,7 +124,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-    private void prepareBase64Element(Document policyDocument, Element assertionElement, String elementName, String base64ElementName) {
+    private static void prepareBase64Element(Document policyDocument, Element assertionElement, String elementName, String base64ElementName) {
         Element element;
         try {
             element = getSingleElement(assertionElement, elementName);
@@ -138,7 +139,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         assertionElement.removeChild(element);
     }
 
-    private String getCDataOrText(Element element) {
+    private static String getCDataOrText(Element element) {
         StringBuilder content = new StringBuilder();
         NodeList children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
@@ -156,14 +157,14 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    static void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Node encapsulatedAssertionElement) {
-        if (((Element) encapsulatedAssertionElement).hasAttribute(POLICY_PATH)) {
-            final String policyPath = ((Element) encapsulatedAssertionElement).getAttribute(POLICY_PATH);
-            final String guid = findEncassReferencedGuid(policy, bundle, (Element) encapsulatedAssertionElement, policyPath);
+    static void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement) {
+        if (encapsulatedAssertionElement.hasAttribute(POLICY_PATH)) {
+            final String policyPath = encapsulatedAssertionElement.getAttribute(POLICY_PATH);
+            final String guid = findEncassReferencedGuid(policy, bundle, encapsulatedAssertionElement, policyPath);
             updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, policyPath, guid);
-        } else if (!isNoOpIfConfigMissing((Element) encapsulatedAssertionElement)) {
-            Element guidElement = getSingleChildElement((Element) encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
-            Element nameElement = getSingleChildElement((Element) encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
+        } else if (!isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
+            Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
+            Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
             throw new EntityBuilderException("No policyPath specified for encass in policy: '" + policy.getPath() + "' GUID: '" + (guidElement != null ? guidElement.getAttribute(STRING_VALUE) : null) + "' Name: '" + (nameElement != null ? nameElement.getAttribute(STRING_VALUE) : null) + "'");
         } else {
             LOGGER.log(Level.FINE, "No policyPath specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
