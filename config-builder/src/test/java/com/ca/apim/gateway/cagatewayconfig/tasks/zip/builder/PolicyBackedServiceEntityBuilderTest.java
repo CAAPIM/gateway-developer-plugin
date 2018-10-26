@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.DEPLOYMENT;
@@ -110,7 +110,7 @@ class PolicyBackedServiceEntityBuilderTest {
         PolicyBackedServiceOperation operation = new PolicyBackedServiceOperation();
         operation.setOperationName(TEST_OPERATION_NAME);
         operation.setPolicy(TEST_POLICY);
-        pbs.setOperations(new ArrayList<>());
+        pbs.setOperations(new HashSet<>());
         pbs.getOperations().add(operation);
         return pbs;
     }

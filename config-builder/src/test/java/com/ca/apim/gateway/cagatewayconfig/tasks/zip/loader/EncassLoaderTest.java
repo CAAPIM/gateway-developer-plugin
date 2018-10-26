@@ -165,21 +165,13 @@ class EncassLoaderTest {
         assertNotNull(encass.getArguments());
         assertFalse(encass.getArguments().isEmpty());
         assertEquals(2, encass.getArguments().size());
-        EncassParam hello = encass.getArguments().get(0);
-        assertEquals("hello", hello.getName());
-        assertEquals("string", hello.getType());
-        EncassParam helloAgain = encass.getArguments().get(1);
-        assertEquals("hello-again", helloAgain.getName());
-        assertEquals("message", helloAgain.getType());
+        encass.getArguments().forEach(e -> assertTrue((e.getName().equals("hello") && e.getType().equals("string")) ||
+                (e.getName().equals("hello-again") && e.getType().equals("message"))));
         assertNotNull(encass.getResults());
         assertFalse(encass.getResults().isEmpty());
         assertEquals(2, encass.getResults().size());
-        EncassParam goodbye = encass.getResults().get(0);
-        assertEquals("goodbye", goodbye.getName());
-        assertEquals("string", goodbye.getType());
-        EncassParam goodbyeAgain = encass.getResults().get(1);
-        assertEquals("goodbye-again", goodbyeAgain.getName());
-        assertEquals("message", goodbyeAgain.getType());
+        encass.getResults().forEach(e -> assertTrue((e.getName().equals("goodbye") && e.getType().equals("string")) ||
+                (e.getName().equals("goodbye-again") && e.getType().equals("message"))));
     }
 
 }

@@ -158,20 +158,6 @@ public class DocumentUtils {
         return elements;
     }
 
-    /**
-     * Generate dom Element from a XML String.
-     *
-     * @param documentTools DocumentTools instance used for parsing
-     * @param string xml String
-     * @return Xml Element
-     * @throws DocumentParseException if any errors
-     */
-    public static Element stringToXML(DocumentTools documentTools, String string) throws DocumentParseException {
-        Document document = documentTools.parse(string);
-        documentTools.cleanup(document);
-        return document.getDocumentElement();
-    }
-
     public static Element createElementWithTextContent(final Document document, final String elementName, final Object textContent) {
         Element element = document.createElement(elementName);
         element.setTextContent(textContent != null ? textContent.toString() : EMPTY);
