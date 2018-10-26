@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -47,8 +48,8 @@ public class EncassWriter implements EntityWriter {
     @NotNull
     private Encass getEncassBean(EncassEntity encassEntity) {
         Encass encassBean = new Encass();
-        encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toSet()));
-        encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toSet()));
+        encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).sorted(Comparator.comparing(EncassParam::getName)).collect(Collectors.toList()));
+        encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).sorted(Comparator.comparing(EncassParam::getName)).collect(Collectors.toList()));
         return encassBean;
     }
 }
