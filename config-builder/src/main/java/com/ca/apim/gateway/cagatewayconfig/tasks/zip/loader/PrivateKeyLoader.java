@@ -48,22 +48,24 @@ public class PrivateKeyLoader extends EntityLoaderBase<PrivateKey> {
     @Override
     public void load(final Bundle bundle, final File rootDir) {
         super.load(bundle, rootDir);
-        loadFromDirectory(bundle.getPrivateKeys().values(), new File(rootDir, "config/privateKeys"));
+        loadFromDirectory(bundle.getPrivateKeys().values(), new File(rootDir, "config/privateKeys"), false);
     }
 
-    public static void loadFromDirectory(Collection<PrivateKey> privateKeys, File privateKeysDirectory) {
+    public static void loadFromDirectory(Collection<PrivateKey> privateKeys, File privateKeysDirectory, boolean failOnMissingKeys) {
         if (!privateKeys.isEmpty()) {
             // load p12 file
-            if (!privateKeysDirectory.exists()) {
+            if (privateKeysDirectory.exists()) {
+                privateKeys.forEach(k -> {
+                    File pk = new File(privateKeysDirectory, k.getAlias() + ".p12");
+                    if (pk.exists()) {
+                        k.setPrivateKeyFile(() -> newInputStream(pk.toPath()));
+                    } else if (failOnMissingKeys) {
+                        throw new BundleLoadException("Private Key file for key '" + k.getAlias() + "' not found in the private keys directory specified: " + privateKeysDirectory.getPath());
+                    }
+                });
+            } else if (failOnMissingKeys) {
                 throw new BundleLoadException("Directory specified for private keys does not exist: " + privateKeysDirectory.getPath());
             }
-            privateKeys.forEach(k -> {
-                File pk = new File(privateKeysDirectory, k.getAlias() + ".p12");
-                if (!pk.exists()) {
-                    throw new BundleLoadException("Private Key file for key '" + k.getAlias() + "' not found in the private keys directory specified: " + privateKeysDirectory.getPath());
-                }
-                k.setPrivateKeyFile(() -> newInputStream(pk.toPath()));
-            });
         }
     }
 

@@ -188,9 +188,7 @@ class PrivateKeyLoaderTest {
                 "    \"keyPassword\": \"\"\n" +
                 "  }\n" +
                 "}";
-        when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes()));
-
-        assertThrows(BundleLoadException.class, () -> loader.load(new Bundle(), rootProjectDir.getRoot()));
+        loadPrivateKeys(json, "json", false);
     }
 
     @Test
@@ -219,7 +217,6 @@ class PrivateKeyLoaderTest {
                 "    \"keyPassword\": \"\"\n" +
                 "  }\n" +
                 "}";
-        when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes()));
-        assertThrows(BundleLoadException.class, () -> loader.load(new Bundle(), rootProjectDir.getRoot()));
+        loadPrivateKeys(json, "json", false);
     }
 }

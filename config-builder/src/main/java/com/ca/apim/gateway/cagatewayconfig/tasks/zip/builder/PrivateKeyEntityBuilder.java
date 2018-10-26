@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +17,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.math.BigInteger;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -69,12 +71,16 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
     }
 
     private void buildAndAppendCertificateChainElement(PrivateKey privateKey, Element privateKeyElem, Document document) {
-        final KeyStore keyStore = keystoreHelper.loadKeyStore(privateKey);
-        final Certificate[] certificates = keystoreHelper.loadCertificatesForPrivateKey(privateKey, keyStore);
-
-        final Element[] certificatesElements = Stream.of(certificates)
-                .map(c -> createCertDataElementFromCert((X509Certificate) c, document)).toArray(Element[]::new);
-        privateKeyElem.appendChild(createElementWithChildren(document, CERTIFICATE_CHAIN, certificatesElements));
+        if (privateKey.getPrivateKeyFile() != null) {
+            final KeyStore keyStore = keystoreHelper.loadKeyStore(privateKey);
+            final Certificate[] certificates = keystoreHelper.loadCertificatesForPrivateKey(privateKey, keyStore);
+            final Element[] certificatesElements = Stream.of(certificates)
+                    .map(c -> createCertDataElementFromCert((X509Certificate) c, document)).toArray(Element[]::new);
+            privateKeyElem.appendChild(createElementWithChildren(document, CERTIFICATE_CHAIN, certificatesElements));
+        } else {
+            //add a dummy certificate
+            privateKeyElem.appendChild(createElementWithChildren(document, CERTIFICATE_CHAIN, CertificateUtils.createCertDataElementFromCert("", BigInteger.valueOf(0), "", "MIIBfTCCASegAwIBAgIJAPH69zKKw4ixMA0GCSqGSIb3DQEBBQUAMA8xDTALBgNVBAMTBHRlc3QwHhcNMTgxMDEzMDMyODI1WhcNMzgxMDA4MDMyODI1WjAPMQ0wCwYDVQQDEwR0ZXN0MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAIS+Vr8zPOBmSclkUtW/z0UXaMjhg7dix6IUZs+UoSiw/2GXfU2vc3renVAbn3AZaJEqnxgrcX4nldqt0WBIP4sCAwEAAaNmMGQwDgYDVR0PAQH/BAQDAgXgMBIGA1UdJQEB/wQIMAYGBFUdJQAwHQYDVR0OBBYEFN/aeDDEAB6MTxZhMhf/eJKnmaE5MB8GA1UdIwQYMBaAFN/aeDDEAB6MTxZhMhf/eJKnmaE5MA0GCSqGSIb3DQEBBQUAA0EAdolvh7bMX5ZMkM/yntJlBdzS8ukM/ULh8I11wKd6dDltyMuk9rOP0iEk1nsSFuFL0uQ4kIe12KyDwr8ns7VKvQ==", document)));
+        }
     }
 
     @Override
