@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.cagatewayexport.util.injection;
 
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EntityTypeRegistry;
@@ -18,7 +20,6 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
-import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.AbstractModule;
@@ -52,6 +53,7 @@ public class ExportPluginModule extends AbstractModule {
 
         // bind default tools to default instances
         bind(DocumentTools.class).toInstance(DocumentTools.INSTANCE);
+        bind(FileUtils.class).toInstance(FileUtils.INSTANCE);
         bind(JsonTools.class).toInstance(JsonTools.INSTANCE);
         bind(DocumentFileUtils.class).toInstance(DocumentFileUtils.INSTANCE);
         bind(PolicyXMLSimplifier.class).toInstance(PolicyXMLSimplifier.INSTANCE);

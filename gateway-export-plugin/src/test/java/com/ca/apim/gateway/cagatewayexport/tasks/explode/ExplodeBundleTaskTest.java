@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayexport.util.json.JsonTools.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExplodeBundleTaskTest {
@@ -33,7 +34,7 @@ class ExplodeBundleTaskTest {
         File exportDir = setUpExportDir(temporaryFolder);
 
         explodeBundleTask.perform();
-        validateFilesOutputTypeFromDir(exportDir, YAML_FILE_EXTENSION);
+        validateFilesOutputTypeFromDir(exportDir, YML_EXTENSION);
     }
 
     @Test
@@ -44,7 +45,7 @@ class ExplodeBundleTaskTest {
         explodeBundleTask.setOutputType(JSON);
         explodeBundleTask.perform();
 
-        validateFilesOutputTypeFromDir(exportDir, JSON_FILE_EXTENSION);
+        validateFilesOutputTypeFromDir(exportDir, JSON_EXTENSION);
     }
 
     @Test
@@ -55,7 +56,7 @@ class ExplodeBundleTaskTest {
         explodeBundleTask.setOutputType("xml");
         explodeBundleTask.perform();
 
-        validateFilesOutputTypeFromDir(exportDir, YAML_FILE_EXTENSION);
+        validateFilesOutputTypeFromDir(exportDir, YML_EXTENSION);
     }
 
     @Test
@@ -63,10 +64,10 @@ class ExplodeBundleTaskTest {
     void performYamlExport(TemporaryFolder temporaryFolder) throws Exception {
         File exportDir = setUpExportDir(temporaryFolder);
 
-        explodeBundleTask.setOutputType(YAML_FILE_EXTENSION);
+        explodeBundleTask.setOutputType(YAML);
         explodeBundleTask.perform();
 
-        validateFilesOutputTypeFromDir(exportDir, YAML_FILE_EXTENSION);
+        validateFilesOutputTypeFromDir(exportDir, YML_EXTENSION);
     }
 
     @Test
@@ -136,6 +137,6 @@ class ExplodeBundleTaskTest {
                 //Every config file except properties files should be the outputType specified
                 .filter(file -> !file.getName().endsWith(".properties") && !file.isDirectory())
                 .collect(Collectors.toList())
-                .forEach(file -> assertEquals(file.getName().substring(file.getName().length() - fileExtension.length()), fileExtension));
+                .forEach(file -> assertEquals(FilenameUtils.getExtension(file.getPath()), fileExtension));
     }
 }

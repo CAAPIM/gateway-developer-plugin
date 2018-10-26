@@ -9,11 +9,11 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.BindOnlyLdapIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.FederatedIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.IdentityProviderEntity;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
 
-import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;

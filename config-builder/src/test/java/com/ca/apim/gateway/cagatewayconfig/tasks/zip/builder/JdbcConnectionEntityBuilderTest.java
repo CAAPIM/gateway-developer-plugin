@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -23,9 +22,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static java.util.Collections.emptyMap;
@@ -43,7 +44,7 @@ class JdbcConnectionEntityBuilderTest {
     @Test
     void buildFromEmptyBundle_noConnections() {
         JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
-        final List<Entity> entities = builder.build(new Bundle(), EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(new Bundle(), ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertTrue(entities.isEmpty());
     }
@@ -54,7 +55,7 @@ class JdbcConnectionEntityBuilderTest {
         final Bundle bundle = new Bundle();
         bundle.putAllJdbcConnections(ImmutableMap.of(TEST_JDBC_CONNECTION, buildJdbcConnection(emptyMap())));
 
-        final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(bundle, ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
         assertEquals(1, entities.size());
@@ -67,7 +68,7 @@ class JdbcConnectionEntityBuilderTest {
 
     @Test
     void buildJdbcConnectionEntityCustomProperties() {
-        buildAndCheckJdbcConnection(ImmutableMap.of(PropertyConstants.PROPERTY_MIN_POOL_SIZE, 10, PropertyConstants.PROPERTY_MAX_POOL_SIZE, 50));
+        buildAndCheckJdbcConnection(ImmutableMap.of(PROPERTY_MIN_POOL_SIZE, 10, PROPERTY_MAX_POOL_SIZE, 50));
     }
 
     private static void buildAndCheckJdbcConnection(Map<String, Object> properties) {
@@ -100,8 +101,8 @@ class JdbcConnectionEntityBuilderTest {
         assertNotNull(getSingleChildElement(extension, CONNECTION_PROPERTIES));
         assertPropertiesContent(
                 ImmutableMap.of(
-                        PropertyConstants.PROPERTY_USER, GATEWAY_USER,
-                        PropertyConstants.PROPERTY_PASSWORD, "${secpass." + PASSWORD_REF + ".plaintext}"
+                        PROPERTY_USER, GATEWAY_USER,
+                        PROPERTY_PASSWORD, "${secpass." + PASSWORD_REF + ".plaintext}"
                 ),
                 mapPropertiesElements(getSingleChildElement(extension, CONNECTION_PROPERTIES), CONNECTION_PROPERTIES)
         );
@@ -113,8 +114,8 @@ class JdbcConnectionEntityBuilderTest {
         jdbcConnection.setPasswordRef(PASSWORD_REF);
         jdbcConnection.setDriverClass(TEST_DRIVER_CLASS);
         jdbcConnection.setJdbcUrl(TEST_JDBC_URL);
-        jdbcConnection.setMinimumPoolSize((Integer) properties.get(PropertyConstants.PROPERTY_MIN_POOL_SIZE));
-        jdbcConnection.setMaximumPoolSize((Integer) properties.get(PropertyConstants.PROPERTY_MAX_POOL_SIZE));
+        jdbcConnection.setMinimumPoolSize((Integer) properties.get(PROPERTY_MIN_POOL_SIZE));
+        jdbcConnection.setMaximumPoolSize((Integer) properties.get(PROPERTY_MAX_POOL_SIZE));
 
         return jdbcConnection;
     }

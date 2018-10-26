@@ -8,9 +8,8 @@ package com.ca.apim.gateway.cagatewayconfig.util.json;
 
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY;
+import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_DOC_START_MARKER;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public class JsonTools {
@@ -32,16 +32,28 @@ public class JsonTools {
 
     public static final String JSON = "json";
     public static final String YAML = "yaml";
-    private static final String JSON_EXTENSION = "json";
-    private static final String YML_EXTENSION = "yml";
+    public static final String JSON_EXTENSION = "json";
+    public static final String YML_EXTENSION = "yml";
     private static final String YAML_EXTENSION = "yaml";
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
     private final FileUtils fileUtils;
+    private String outputType;
+    private String fileExtension;
 
     public JsonTools(FileUtils fileUtils) {
         this.fileUtils = fileUtils;
         objectMapperMap.put(JSON, buildObjectMapper(new JsonFactory()));
-        objectMapperMap.put(YAML, buildObjectMapper(new YAMLFactory()));
+        objectMapperMap.put(YAML, buildObjectMapper(new YAMLFactory().disable(WRITE_DOC_START_MARKER)));
+        outputType = YAML;
+        fileExtension = "." + YML_EXTENSION;
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return getObjectMapper(outputType);
+    }
+
+    public ObjectWriter getObjectWriter() {
+        return getObjectMapper(outputType).writer().withDefaultPrettyPrinter();
     }
 
     public ObjectMapper getObjectMapper(final String type) {
@@ -113,6 +125,24 @@ public class JsonTools {
         }
     }
 
+    public void setOutputType(String outputType) {
+        if (JSON.equalsIgnoreCase(outputType)) {
+            this.outputType = JSON;
+            fileExtension = "." + JSON_EXTENSION;
+        } else if (YAML.equalsIgnoreCase(outputType)) {
+            this.outputType = YAML;
+            fileExtension = "." + YML_EXTENSION;
+        } else {
+            LOGGER.log(Level.WARNING,
+                    "Output type specified is not YAML nor JSON. Using YAML as the default output type.");
+        }
+    }
+
+    public String getFileExtension() {
+        return fileExtension;
+    }
+
+
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {
         ObjectMapper objectMapper = new ObjectMapper(jf);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -121,6 +151,15 @@ public class JsonTools {
         // if it does not have any references to certs, an identityProviderDetail is not generated. Normally this would
         // throw JsonToolsException. See test case IdentityProviderLoaderTest#loadFedIdWithNoCertRefs()
         objectMapper.configure(FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false);
+        if (jf instanceof YAMLFactory) {
+            //make it so that null values get left as blanks rather then the string `null`
+            objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<Object>() {
+                @Override
+                public void serialize(Object value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                    gen.writeNumber("");
+                }
+            });
+        }
         return objectMapper;
     }
 }

@@ -10,7 +10,6 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +29,7 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilde
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
@@ -73,13 +73,13 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
         );
 
         Map<String, Object> properties = new HashMap<>();
-        properties.put(PropertyConstants.PROPERTY_MIN_POOL_SIZE, jdbc.getMinimumPoolSize());
-        properties.put(PropertyConstants.PROPERTY_MAX_POOL_SIZE, jdbc.getMaximumPoolSize());
+        properties.put(PROPERTY_MIN_POOL_SIZE, jdbc.getMinimumPoolSize());
+        properties.put(PROPERTY_MAX_POOL_SIZE, jdbc.getMaximumPoolSize());
         buildAndAppendPropertiesElement(properties, document, jdbcElement);
 
         Map<String, Object> connectionProperties = Optional.ofNullable(jdbc.getProperties()).orElseGet(HashMap::new);
-        connectionProperties.put(PropertyConstants.PROPERTY_USER, jdbc.getUser());
-        connectionProperties.put(PropertyConstants.PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jdbc.getPasswordRef()));
+        connectionProperties.put(PROPERTY_USER, jdbc.getUser());
+        connectionProperties.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jdbc.getPasswordRef()));
 
         jdbcElement.appendChild(createElementWithChildren(
                 document,
