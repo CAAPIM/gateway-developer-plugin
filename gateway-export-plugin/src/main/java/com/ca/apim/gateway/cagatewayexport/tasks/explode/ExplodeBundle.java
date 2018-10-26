@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.BundleFilter;
@@ -15,8 +17,6 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegi
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
 import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 import org.w3c.dom.Document;
 
 import javax.inject.Inject;

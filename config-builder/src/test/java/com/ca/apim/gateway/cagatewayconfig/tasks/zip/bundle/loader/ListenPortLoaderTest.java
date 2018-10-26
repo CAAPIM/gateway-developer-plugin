@@ -13,7 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.Feature;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ListenPortTlsSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
@@ -48,13 +48,13 @@ class ListenPortLoaderTest {
         assertNotNull(listenPort);
         assertEquals(1234, listenPort.getPort());
         assertEquals("http", listenPort.getProtocol());
-        assertTrue(ListUtils.isEqualList(listenPort.getEnabledFeatures(), Stream.of(Feature.values()).map(Feature::name).collect(Collectors.toList())));
+        assertTrue(SetUtils.isEqualSet(listenPort.getEnabledFeatures(), Stream.of(Feature.values()).map(Feature::name).collect(Collectors.toSet())));
         assertEquals("Service", listenPort.getTargetServiceReference());
         assertNotNull(listenPort.getTlsSettings());
         ListenPortTlsSettings tlsSettings = listenPort.getTlsSettings();
         assertEquals(ClientAuthentication.REQUIRED, tlsSettings.getClientAuthentication());
-        assertTrue(ListUtils.isEqualList(tlsSettings.getEnabledCipherSuites(), DEFAULT_RECOMMENDED_CIPHERS));
-        assertTrue(ListUtils.isEqualList(tlsSettings.getEnabledVersions(), TLS_VERSIONS));
+        assertTrue(SetUtils.isEqualSet(tlsSettings.getEnabledCipherSuites(), DEFAULT_RECOMMENDED_CIPHERS));
+        assertTrue(SetUtils.isEqualSet(tlsSettings.getEnabledVersions(), TLS_VERSIONS));
         assertPropertiesContent(Collections.emptyMap(), tlsSettings.getProperties());
         assertPropertiesContent(ImmutableMap.of("prop", "value"), listenPort.getProperties());
     }
@@ -72,7 +72,7 @@ class ListenPortLoaderTest {
         assertNotNull(listenPort);
         assertEquals(1234, listenPort.getPort());
         assertEquals("http", listenPort.getProtocol());
-        assertTrue(ListUtils.isEqualList(listenPort.getEnabledFeatures(), Stream.of(Feature.values()).map(Feature::name).collect(Collectors.toList())));
+        assertTrue(SetUtils.isEqualSet(listenPort.getEnabledFeatures(), Stream.of(Feature.values()).map(Feature::name).collect(Collectors.toSet())));
         assertEquals("Service", listenPort.getTargetServiceReference());
         assertNull(listenPort.getTlsSettings());
         assertPropertiesContent(ImmutableMap.of("prop", "value"), listenPort.getProperties());

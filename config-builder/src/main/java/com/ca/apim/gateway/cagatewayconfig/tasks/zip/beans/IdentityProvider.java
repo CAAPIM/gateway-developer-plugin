@@ -4,12 +4,14 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import java.util.Map;
+
+import static java.util.Arrays.stream;
 
 public class IdentityProvider {
     public enum IdentityProviderType {
@@ -26,6 +28,10 @@ public class IdentityProvider {
         public String getValue() {
             return this.value;
         }
+
+        public static IdentityProviderType fromType(String type) {
+            return stream(values()).filter(c -> c.value.equals(type)).findFirst().orElse(null);
+        }
     }
 
     private IdentityProviderType type;
@@ -33,9 +39,9 @@ public class IdentityProvider {
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes( {
-            @JsonSubTypes.Type(value=BindOnlyLdapIdentityProviderDetail.class, name="BIND_ONLY_LDAP"),
-            @JsonSubTypes.Type(value=FullLdapIdentityProviderDetail.class, name="LDAP"),
-            @JsonSubTypes.Type(value=FederatedIdentityProviderDetail.class, name="FEDERATED")
+            @JsonSubTypes.Type(value= BindOnlyLdapIdentityProviderDetail.class, name="BIND_ONLY_LDAP"),
+            @JsonSubTypes.Type(value= FullLdapIdentityProviderDetail.class, name="LDAP"),
+            @JsonSubTypes.Type(value= FederatedIdentityProviderDetail.class, name="FEDERATED")
     })
     private IdentityProviderDetail identityProviderDetail;
 

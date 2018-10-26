@@ -30,10 +30,14 @@ public class DocumentFileUtils {
     }
 
     public void createFile(Element element, Path path) {
+        createFile(element, path, false);
+    }
+
+    public void createFile(Element element, Path path, boolean addNamespace) {
         OutputStream fos = null;
         try {
             fos = Files.newOutputStream(path);
-            printXML(element, fos);
+            printXML(element, fos, addNamespace);
         } catch (IOException e) {
             throw new DocumentFileUtilsException("Error writing to file '" + path + "': " + e.getMessage(), e);
         } finally {
@@ -41,9 +45,38 @@ public class DocumentFileUtils {
         }
     }
 
+    public synchronized void createFolder(Path folderPath) {
+        if (!folderPath.toFile().exists()) {
+            try {
+                Files.createDirectory(folderPath);
+            } catch (IOException e) {
+                throw new DocumentFileUtilsException("Exception creating folder: " + folderPath, e);
+            }
+        } else if (!folderPath.toFile().isDirectory()) {
+            throw new DocumentFileUtilsException("Wanted to create folder but found a file: " + folderPath);
+        }
+    }
+
+    /**
+     * Create all folder in this path. Does not fail if any of them already exist.
+     *
+     * @param folderPath Path representing all folders that should be created.
+     */
+    public synchronized void createFolders(Path folderPath) {
+        if (!folderPath.toFile().exists()) {
+            try {
+                Files.createDirectories(folderPath);
+            } catch (IOException e) {
+                throw new DocumentFileUtilsException("Exception creating folder(s): " + folderPath, e);
+            }
+        } else if (!folderPath.toFile().isDirectory()) {
+            throw new DocumentFileUtilsException("Wanted to create folder but found a file: " + folderPath);
+        }
+    }
+
     public String elementToString(Element element) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        printXML(element, byteArrayOutputStream);
+        printXML(element, byteArrayOutputStream, false);
         try {
             return byteArrayOutputStream.toString(UTF_8.name());
         } catch (UnsupportedEncodingException e) {
@@ -53,7 +86,11 @@ public class DocumentFileUtils {
         }
     }
 
-    private void printXML(final Element node, final OutputStream outStream) {
+    private void printXML(final Element node, final OutputStream outStream, boolean addNamespace) {
+        if (addNamespace) {
+            node.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
+        }
+
         final Transformer transformer = documentTools.getTransformer();
         final OutputStreamWriter writer = new OutputStreamWriter(outStream, UTF_8);
         try {

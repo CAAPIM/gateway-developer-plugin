@@ -6,16 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.CassandraConnectionEntity;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.security.Security.getAlgorithms;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,7 +89,7 @@ class CassandraConnectionLoaderTest {
             cassandraElement.appendChild(createElementWithTextContent(document, TLS_CIPHERS, Joiner.on(",").join(getAlgorithms("Cipher"))));
         }
         if (properties) {
-            cassandraElement.appendChild(buildPropertiesElement(ImmutableMap.of("testProp", "testValue"), document, PROPERTIES));
+            buildAndAppendPropertiesElement(ImmutableMap.of("testProp", "testValue"), document, cassandraElement);
         }
 
         return createElementWithChildren(

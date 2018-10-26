@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
-import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.MapType;

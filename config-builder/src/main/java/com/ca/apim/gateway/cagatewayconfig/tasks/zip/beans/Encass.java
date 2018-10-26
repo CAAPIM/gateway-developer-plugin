@@ -6,26 +6,26 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-import java.util.List;
+import java.util.Set;
 
 public class Encass {
-    private List<EncassParam> arguments;
-    private List<EncassParam> results;
+    private Set<EncassParam> arguments;
+    private Set<EncassParam> results;
     private String guid;
 
-    public List<EncassParam> getArguments() {
+    public Set<EncassParam> getArguments() {
         return arguments;
     }
 
-    public void setArguments(List<EncassParam> arguments) {
+    public void setArguments(Set<EncassParam> arguments) {
         this.arguments = arguments;
     }
 
-    public List<EncassParam> getResults() {
+    public Set<EncassParam> getResults() {
         return results;
     }
 
-    public void setResults(List<EncassParam> results) {
+    public void setResults(Set<EncassParam> results) {
         this.results = results;
     }
 

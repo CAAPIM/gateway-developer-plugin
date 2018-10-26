@@ -15,8 +15,8 @@ import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
 public class EncassLoader implements EntityLoader<EncassEntity> {

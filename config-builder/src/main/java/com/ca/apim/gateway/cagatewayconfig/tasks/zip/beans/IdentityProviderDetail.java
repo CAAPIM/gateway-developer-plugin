@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 /**
  * Marker Class for IdentityProviderDetail objects

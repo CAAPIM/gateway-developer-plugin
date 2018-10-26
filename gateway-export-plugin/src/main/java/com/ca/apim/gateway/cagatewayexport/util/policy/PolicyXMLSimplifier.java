@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilderException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
@@ -28,7 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLElements.*;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 
 public class PolicyXMLSimplifier {
     public static final PolicyXMLSimplifier INSTANCE = new PolicyXMLSimplifier();
@@ -36,9 +37,27 @@ public class PolicyXMLSimplifier {
     private static final Logger LOGGER = Logger.getLogger(PolicyWriter.class.getName());
 
     public void simplifyPolicyXML(Element policyElement, Bundle bundle, Bundle resultantBundle) {
-        findAndSimplifyAssertion(policyElement, INCLUDE, element -> simplifyIncludeAssertion(bundle, element));
-        findAndSimplifyAssertion(policyElement, ENCAPSULATED, element -> simplifyEncapsulatedAssertion(bundle, element));
-        findAndSimplifyAssertion(policyElement, SET_VARIABLE, element -> simplifySetVariable(element, resultantBundle));
+        findAndSimplifyAssertion(policyElement, INCLUDE, element -> {
+            try {
+                simplifyIncludeAssertion(bundle, element);
+            } catch (DocumentParseException e) {
+                throw new BundleBuilderException(e.getMessage());
+            }
+        });
+        findAndSimplifyAssertion(policyElement, ENCAPSULATED, element -> {
+            try {
+                simplifyEncapsulatedAssertion(bundle, element);
+            } catch (DocumentParseException e) {
+                throw new BundleBuilderException(e.getMessage());
+            }
+        });
+        findAndSimplifyAssertion(policyElement, SET_VARIABLE, element -> {
+            try {
+                simplifySetVariable(element, resultantBundle);
+            } catch (DocumentParseException e) {
+                throw new BundleBuilderException(e.getMessage());
+            }
+        });
         findAndSimplifyAssertion(policyElement, HARDCODED_RESPONSE, this::simplifyHardcodedResponse);
     }
 
@@ -46,7 +65,7 @@ public class PolicyXMLSimplifier {
         Element base64ResponseBodyElement;
         try {
             base64ResponseBodyElement = getSingleElement(element, BASE_64_RESPONSE_BODY);
-        } catch (BundleBuilderException e) {
+        } catch (DocumentParseException e) {
             LOGGER.log(Level.FINE, "Base64ResponseBody missing from hardcoded assertion.");
             return;
         }
@@ -59,7 +78,7 @@ public class PolicyXMLSimplifier {
         element.removeChild(base64ResponseBodyElement);
     }
 
-    private void simplifySetVariable(Element element, Bundle resultantBundle) {
+    private void simplifySetVariable(Element element, Bundle resultantBundle) throws DocumentParseException {
         Element base64ExpressionElement = getSingleElement(element, BASE_64_EXPRESSION);
         String base64Expression = base64ExpressionElement.getAttribute(STRING_VALUE);
         byte[] decodedValue = Base64.getDecoder().decode(base64Expression);
@@ -84,7 +103,7 @@ public class PolicyXMLSimplifier {
         element.removeChild(base64ExpressionElement);
     }
 
-    private void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) {
+    private void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) throws DocumentParseException{
         Element encassGuidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         String encassGuid = encassGuidElement.getAttribute(STRING_VALUE);
         Optional<EncassEntity> encassEntity = bundle.getEntities(EncassEntity.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
@@ -103,7 +122,7 @@ public class PolicyXMLSimplifier {
         }
     }
 
-    private void simplifyIncludeAssertion(Bundle bundle, Element assertionElement) {
+    private void simplifyIncludeAssertion(Bundle bundle, Element assertionElement) throws DocumentParseException {
         Element policyGuidElement = getSingleElement(assertionElement, POLICY_GUID);
         String includedPolicyGuid = policyGuidElement.getAttribute(STRING_VALUE);
         Optional<PolicyEntity> policyEntity = bundle.getEntities(PolicyEntity.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();

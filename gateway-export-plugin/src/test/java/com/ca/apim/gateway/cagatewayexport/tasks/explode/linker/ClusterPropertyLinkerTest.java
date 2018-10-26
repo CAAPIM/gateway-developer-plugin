@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
-import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 import com.ca.apim.gateway.cagatewayexport.util.properties.OrderedProperties;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;

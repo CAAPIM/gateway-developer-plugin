@@ -7,9 +7,13 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.io.InputStream;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.*;
+
+@JsonInclude(Include.NON_NULL)
 @SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
 public class PrivateKey {
 

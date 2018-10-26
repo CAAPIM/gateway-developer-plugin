@@ -31,6 +31,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buil
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.security.Security.getAlgorithms;
 import static org.junit.Assert.*;

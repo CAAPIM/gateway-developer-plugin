@@ -6,15 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentParseException;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentTools;
-import com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -23,9 +23,9 @@ import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty.Type.SERVICE;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
 public class ServiceLinker implements EntityLinker<ServiceEntity> {

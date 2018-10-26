@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import org.jetbrains.annotations.NotNull;
 

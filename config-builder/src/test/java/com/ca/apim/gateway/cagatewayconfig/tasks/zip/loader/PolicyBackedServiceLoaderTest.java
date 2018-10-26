@@ -130,7 +130,7 @@ class PolicyBackedServiceLoaderTest {
         assertNotNull(pbs.getOperations());
         assertFalse(pbs.getOperations().isEmpty());
         assertEquals(1, pbs.getOperations().size());
-        PolicyBackedServiceOperation operation = pbs.getOperations().get(0);
+        PolicyBackedServiceOperation operation = pbs.getOperations().iterator().next();
         assertEquals("run", operation.getOperationName());
         assertEquals("gateway-solution/policy-backed-service/a-policy-backed-service.xml", operation.getPolicy());
     }

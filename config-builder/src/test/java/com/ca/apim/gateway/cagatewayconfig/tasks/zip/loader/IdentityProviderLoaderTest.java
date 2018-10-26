@@ -7,9 +7,9 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.BindOnlyLdapIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.FederatedIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.BindOnlyLdapIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.FederatedIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;

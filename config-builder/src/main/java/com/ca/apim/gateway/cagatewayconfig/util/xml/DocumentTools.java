@@ -20,6 +20,7 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -54,6 +55,14 @@ public class DocumentTools {
     public Transformer getTransformer() {
         try {
             return configureTransformer(transformerFactory.newTransformer());
+        } catch (TransformerConfigurationException e) {
+            throw new DocumentToolsException("Exception loading stylesheet.", e);
+        }
+    }
+
+    public Transformer getTransformer(final StreamSource stylesheet) {
+        try {
+            return configureTransformer(transformerFactory.newTransformer(stylesheet));
         } catch (TransformerConfigurationException e) {
             throw new DocumentToolsException("Exception loading stylesheet.", e);
         }

@@ -8,11 +8,12 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.BindOnlyLdapIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.FederatedIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.BindOnlyLdapIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.FederatedIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.apache.commons.collections4.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -20,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderHelper.getEntityWithNameMapping;
@@ -102,7 +104,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
                 ATTRIBUTE_RESOURCE_URI,
                 TRUSTED_CERT_URI);
         federatedIdProviderDetailElem.appendChild(certReferencesElem);
-        final List<String> certReferences = identityProviderDetail.getCertificateReferences();
+        final Set<String> certReferences = identityProviderDetail.getCertificateReferences();
         if (CollectionUtils.isEmpty(certReferences)) {
             throw new EntityBuilderException("Certificate References must not be empty.");
         }
@@ -129,7 +131,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
         extensionElement.appendChild(bindOnlyLdapIdentityProviderDetailElement);
         final Element serverUrlsElement = document.createElement(SERVER_URLS);
         bindOnlyLdapIdentityProviderDetailElement.appendChild(serverUrlsElement);
-        final List<String> serverUrls = identityProviderDetail.getServerUrls();
+        final Set<String> serverUrls = identityProviderDetail.getServerUrls();
         if (CollectionUtils.isEmpty(serverUrls)) {
             throw new EntityBuilderException("Server Urls must not be empty.");
         }
@@ -162,6 +164,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
     }
 
     @Override
+    @NotNull
     public Integer getOrder() {
         return ORDER;
     }

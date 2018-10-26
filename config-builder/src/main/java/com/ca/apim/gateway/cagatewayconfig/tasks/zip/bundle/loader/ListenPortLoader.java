@@ -12,8 +12,9 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ClientAuthentication.fromType;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
@@ -31,7 +32,7 @@ public class ListenPortLoader implements BundleDependencyLoader {
         final String name = getSingleChildElementTextContent(listenPortElement, NAME);
         final String protocol = getSingleChildElementTextContent(listenPortElement, PROTOCOL);
         final Integer port = parseInt(getSingleChildElementTextContent(listenPortElement, PORT));
-        final List<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPortElement, ENABLED_FEATURES), STRING_VALUE);
+        final Set<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPortElement, ENABLED_FEATURES), STRING_VALUE);
         final String targetServiceReference = getSingleChildElementTextContent(listenPortElement, TARGET_SERVICE_REFERENCE);
         final ListenPortTlsSettings tlsSettings = getTlsSettings(listenPortElement);
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPortElement, PROPERTIES, true), PROPERTIES);
@@ -59,10 +60,10 @@ public class ListenPortLoader implements BundleDependencyLoader {
         tlsSettings.setClientAuthentication(fromType(clientAuthentication));
 
         Element enabledCipherSuites = getSingleChildElement(tlsSettingsElement, ENABLED_CIPHER_SUITES, true);
-        tlsSettings.setEnabledCipherSuites(getChildElementsTextContents(enabledCipherSuites, STRING_VALUE));
+        tlsSettings.setEnabledCipherSuites(new HashSet<>(getChildElementsTextContents(enabledCipherSuites, STRING_VALUE)));
 
         Element enabledVersions = getSingleChildElement(tlsSettingsElement, ENABLED_VERSIONS, true);
-        tlsSettings.setEnabledVersions(getChildElementsTextContents(enabledVersions, STRING_VALUE));
+        tlsSettings.setEnabledVersions(new HashSet<>(getChildElementsTextContents(enabledVersions, STRING_VALUE)));
 
         Element properties = getSingleChildElement(tlsSettingsElement, PROPERTIES, true);
         tlsSettings.setProperties(mapPropertiesElements(properties, PROPERTIES));

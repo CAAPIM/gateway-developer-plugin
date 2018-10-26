@@ -15,10 +15,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderHelper.mapPropertiesElements;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElement;
-import static com.ca.apim.gateway.cagatewayexport.util.xml.DocumentUtils.getSingleChildElementTextContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Singleton

@@ -8,10 +8,9 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.BindOnlyLdapIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.FederatedIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.identityprovider.IdentityProvider.IdentityProviderType;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.BindOnlyLdapIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.FederatedIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
@@ -24,18 +23,18 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.*;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.IdentityProviderType.*;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElementAttributeValues;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
+import static java.util.Arrays.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -70,7 +69,7 @@ class IdentityProviderEntityBuilderTest {
         final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final Bundle bundle = new Bundle();
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
+        identityProvider.setType(BIND_ONLY_LDAP);
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("simple ldap config", identityProvider);
         }});
@@ -82,7 +81,7 @@ class IdentityProviderEntityBuilderTest {
         final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final Bundle bundle = new Bundle();
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
+        identityProvider.setType(BIND_ONLY_LDAP);
 
         //omit the serverUrls
         final BindOnlyLdapIdentityProviderDetail identityProviderDetail = new BindOnlyLdapIdentityProviderDetail();
@@ -109,7 +108,7 @@ class IdentityProviderEntityBuilderTest {
         final List<Entity> identityProviders = builder.build(bundle, ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertEquals(1, identityProviders.size());
-        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, "simple ldap config", IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
+        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, "simple ldap config", BIND_ONLY_LDAP);
         final Element idProviderProperties = getSingleElement(identityProviderEntityXml, PROPERTIES);
         final NodeList propertyList = idProviderProperties.getElementsByTagName(PROPERTY);
         assertEquals(2, propertyList.getLength());
@@ -151,7 +150,7 @@ class IdentityProviderEntityBuilderTest {
         identityProviderDetail.setUseSslClientAuthentication(false);
         identityProviderDetail.setBindPatternPrefix("testpre");
         identityProviderDetail.setBindPatternSuffix("testsuf");
-        identityProviderDetail.setServerUrls(Arrays.asList("http://ldap:port", "http://ldap:port2"));
+        identityProviderDetail.setServerUrls(new LinkedHashSet<>(Arrays.asList("http://ldap:port", "http://ldap:port2")));
         identityProvider.setIdentityProviderDetail(identityProviderDetail);
         return identityProvider;
     }
@@ -160,8 +159,8 @@ class IdentityProviderEntityBuilderTest {
     void buildFedIPCertReferenceNotFound() {
         final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProvider.IdentityProviderType.FEDERATED);
-        final List<String> certReferences = Arrays.asList("cert1","cert2");
+        identityProvider.setType(FEDERATED);
+        final Set<String> certReferences = new HashSet<>(asList("cert1","cert2"));
         final FederatedIdentityProviderDetail identityProviderDetail = new FederatedIdentityProviderDetail();
         identityProviderDetail.setCertificateReferences(certReferences);
         identityProvider.setIdentityProviderDetail(identityProviderDetail);
@@ -192,7 +191,7 @@ class IdentityProviderEntityBuilderTest {
     void buildFedIPNoDetails() throws DocumentParseException {
         final IdentityProviderEntityBuilder builder = new IdentityProviderEntityBuilder(new IdGenerator());
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProvider.IdentityProviderType.FEDERATED);
+        identityProvider.setType(FEDERATED);
         final Bundle bundle = new Bundle();
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("fed IP no details", identityProvider);
@@ -200,7 +199,7 @@ class IdentityProviderEntityBuilderTest {
 
         final List<Entity> identityProviders = builder.build(bundle, ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
-        Element identityProviderEntityXml = verifyIdProvider(identityProviders, "fed IP no details", IdentityProvider.IdentityProviderType.FEDERATED);
+        Element identityProviderEntityXml = verifyIdProvider(identityProviders, "fed IP no details", FEDERATED);
         //No identityProviderDetail element
         assertThrows(DocumentParseException.class, () -> getSingleElement(identityProviderEntityXml, FEDERATED_ID_PROV_DETAIL));
     }
@@ -219,8 +218,8 @@ class IdentityProviderEntityBuilderTest {
             put("cert2", cert2);
         }});
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProvider.IdentityProviderType.FEDERATED);
-        final List<String> certReferences = Arrays.asList("cert1","cert2");
+        identityProvider.setType(FEDERATED);
+        final Set<String> certReferences = new LinkedHashSet<>(asList("cert1","cert2"));
         final FederatedIdentityProviderDetail identityProviderDetail = new FederatedIdentityProviderDetail();
         identityProviderDetail.setCertificateReferences(certReferences);
         identityProvider.setIdentityProviderDetail(identityProviderDetail);
@@ -231,7 +230,7 @@ class IdentityProviderEntityBuilderTest {
         final List<Entity> identityProviders = builder.build(bundle, ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertEquals(1, identityProviders.size());
-        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, FED_ID_NAME, IdentityProvider.IdentityProviderType.FEDERATED);
+        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, FED_ID_NAME, FEDERATED);
         final Element fedIdentityProviderDetailXml = getSingleElement(identityProviderEntityXml, FEDERATED_ID_PROV_DETAIL);
         final Element certRefs = getSingleElement(fedIdentityProviderDetailXml, CERTIFICATE_REFERENCES);
         final List<String> certList = getChildElementAttributeValues(certRefs, REFERENCE, ATTRIBUTE_ID);
@@ -241,7 +240,7 @@ class IdentityProviderEntityBuilderTest {
     }
 
     @NotNull
-    private Element verifyIdProvider(List<Entity> identityProviders, String idProvName, IdentityProvider.IdentityProviderType bindOnlyLdap) throws DocumentParseException {
+    private Element verifyIdProvider(List<Entity> identityProviders, String idProvName, IdentityProviderType bindOnlyLdap) throws DocumentParseException {
         final Entity identityProviderEntity = identityProviders.get(0);
         assertEquals("ID_PROVIDER_CONFIG", identityProviderEntity.getType());
         assertNotNull(identityProviderEntity.getId());

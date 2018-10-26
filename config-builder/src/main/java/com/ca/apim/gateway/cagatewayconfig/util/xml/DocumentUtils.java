@@ -16,10 +16,12 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
@@ -46,6 +48,14 @@ public class DocumentUtils {
         }
     }
 
+    /**
+     * Search in the children of the element specified a single element with the name specified.
+     *
+     * @param entityItemElement element to search into
+     * @param elementName element name to search
+     * @return a single element found
+     * @throws DependencyBundleLoadException if not found, multiple found or invalid node type found (not element)
+     */
     public static Element getSingleChildElement(final Element entityItemElement, final String elementName) {
         return getSingleChildElement(entityItemElement, elementName, false);
     }
@@ -107,8 +117,8 @@ public class DocumentUtils {
      * @param elementName       element name to search
      * @return list of contents from elements found, empty if not found any
      */
-    public static List<String> getChildElementsTextContents(final Element entityItemElement, final String elementName) {
-        return getChildElements(entityItemElement, elementName).stream().map(Element::getTextContent).collect(toList());
+    public static Set<String> getChildElementsTextContents(final Element entityItemElement, final String elementName) {
+        return getChildElements(entityItemElement, elementName).stream().map(Element::getTextContent).collect(toSet());
     }
 
     /**
@@ -148,20 +158,6 @@ public class DocumentUtils {
         return elements;
     }
 
-    /**
-     * Generate dom Element from a XML String.
-     *
-     * @param documentTools DocumentTools instance used for parsing
-     * @param string xml String
-     * @return Xml Element
-     * @throws DocumentParseException if any errors
-     */
-    public static Element stringToXML(DocumentTools documentTools, String string) throws DocumentParseException {
-        Document document = documentTools.parse(string);
-        documentTools.cleanup(document);
-        return document.getDocumentElement();
-    }
-
     public static Element createElementWithTextContent(final Document document, final String elementName, final Object textContent) {
         Element element = document.createElement(elementName);
         element.setTextContent(textContent != null ? textContent.toString() : EMPTY);
@@ -189,5 +185,50 @@ public class DocumentUtils {
         attributes.forEach(element::setAttribute);
         Stream.of(children).forEach(element::appendChild);
         return element;
+    }
+
+    /**
+     * Search in the children of the element specified a single element with the name specified and returns the value from the attribute specified.
+     *
+     * @param entityItemElement element to search into
+     * @param elementName element name to search
+     * @param attributeName attribute name to get value
+     * @return value from the attribute found in a single element, null if element is not present or attribute is not present or its value is empty
+     */
+    public static String getSingleChildElementAttribute(final Element entityItemElement, final String elementName, final String attributeName) {
+        Element element = getSingleChildElement(entityItemElement, elementName, true);
+        if (element == null) {
+            return null;
+        }
+
+        String attribute = element.getAttribute(attributeName);
+        return attribute == null || attribute.isEmpty() ? null : attribute;
+    }
+
+    /**
+     * Generate dom Element from a XML String.
+     *
+     * @param documentTools DocumentTools instance used for parsing
+     * @param string xml String
+     * @return Xml Element
+     * @throws DocumentParseException if any errors
+     */
+    public static Element stringToXML(DocumentTools documentTools, String string) throws DocumentParseException {
+        Document document = documentTools.parse(string);
+        documentTools.cleanup(document);
+        return document.getDocumentElement();
+    }
+
+    /**
+     * Search in the children of the element specified all elements with the name specified
+     * and returns the specified attribute from all of them.
+     *
+     * @param entityItemElement element to search into
+     * @param elementName element name to search
+     * @param attribute attribute to search
+     * @return list of attribute value from elements found, empty if not found any
+     */
+    public static List<String> getChildElementsAttributeValues(final Element entityItemElement, final String elementName, final String attribute) {
+        return getChildElements(entityItemElement, elementName).stream().map(e -> e.getAttribute(attribute)).collect(toList());
     }
 }

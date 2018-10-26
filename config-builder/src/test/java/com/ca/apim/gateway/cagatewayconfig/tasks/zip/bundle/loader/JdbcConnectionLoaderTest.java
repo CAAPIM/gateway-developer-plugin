@@ -16,8 +16,8 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createJdbcXml;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.PROPERTY_MAX_POOL_SIZE;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.PROPERTY_MIN_POOL_SIZE;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_MAX_POOL_SIZE;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_MIN_POOL_SIZE;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JdbcConnectionLoaderTest {

@@ -6,12 +6,17 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
  * Define stored passwords.
  */
+@JsonInclude(NON_NULL)
 public class StoredPassword {
 
     private static final String PROPERTY_DESCRIPTION = "description";

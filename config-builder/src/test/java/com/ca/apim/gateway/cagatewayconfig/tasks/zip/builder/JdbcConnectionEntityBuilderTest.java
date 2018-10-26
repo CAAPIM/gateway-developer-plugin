@@ -22,9 +22,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static java.util.Collections.emptyMap;
@@ -42,7 +44,7 @@ class JdbcConnectionEntityBuilderTest {
     @Test
     void buildFromEmptyBundle_noConnections() {
         JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
-        final List<Entity> entities = builder.build(new Bundle(), EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(new Bundle(), ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertTrue(entities.isEmpty());
     }
@@ -53,7 +55,7 @@ class JdbcConnectionEntityBuilderTest {
         final Bundle bundle = new Bundle();
         bundle.putAllJdbcConnections(ImmutableMap.of(TEST_JDBC_CONNECTION, buildJdbcConnection(emptyMap())));
 
-        final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(bundle, ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
         assertEquals(1, entities.size());
@@ -66,7 +68,7 @@ class JdbcConnectionEntityBuilderTest {
 
     @Test
     void buildJdbcConnectionEntityCustomProperties() {
-        buildAndCheckJdbcConnection(ImmutableMap.of(PROPERTY_MIN_POOL_SIZE, 10,PROPERTY_MAX_POOL_SIZE, 50));
+        buildAndCheckJdbcConnection(ImmutableMap.of(PROPERTY_MIN_POOL_SIZE, 10, PROPERTY_MAX_POOL_SIZE, 50));
     }
 
     private static void buildAndCheckJdbcConnection(Map<String, Object> properties) {

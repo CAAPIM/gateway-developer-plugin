@@ -6,14 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.ListenPortEntityTlsSettings;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.ListenPort;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.ListenPort.ClientAuthentication;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.ListenPort.ListenPortTlsSettings;
-import com.ca.apim.gateway.cagatewayexport.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayexport.util.json.JsonTools;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,6 +19,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.*;
 import static java.util.stream.Collectors.toMap;
 

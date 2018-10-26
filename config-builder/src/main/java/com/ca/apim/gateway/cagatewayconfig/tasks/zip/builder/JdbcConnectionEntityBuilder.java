@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -28,6 +29,7 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilde
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
@@ -91,6 +93,7 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
     }
 
     @Override
+    @NotNull
     public Integer getOrder() {
         return ORDER;
     }

@@ -19,6 +19,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -128,7 +129,7 @@ class EncassEntityBuilderTest {
     private static Encass buildTestEncass() {
         Encass encass = new Encass();
         encass.setGuid(TEST_GUID);
-        encass.setArguments(new ArrayList<>());
+        encass.setArguments(new HashSet<>());
         EncassParam param1 = new EncassParam();
         param1.setName("Param1");
         param1.setType("string");
@@ -137,7 +138,7 @@ class EncassEntityBuilderTest {
         param2.setType("message");
         encass.getArguments().add(param1);
         encass.getArguments().add(param2);
-        encass.setResults(new ArrayList<>());
+        encass.setResults(new HashSet<>());
         EncassParam result1 = new EncassParam();
         result1.setName("Result1");
         result1.setType("string");

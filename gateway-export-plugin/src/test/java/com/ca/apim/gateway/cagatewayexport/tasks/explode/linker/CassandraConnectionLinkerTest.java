@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.CassandraConnectionEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.beans.CassandraConnection;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -29,7 +29,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.lang.Boolean.TRUE;
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -214,12 +214,12 @@ class ListenPortEntityBuilderTest {
         final ListenPort testPort = new ListenPort();
         testPort.setPort(TEST_HTTP_PORT);
         testPort.setProtocol("HTTP");
-        testPort.setEnabledFeatures(asList(MESSAGE_INPUT.getDescription(),
+        testPort.setEnabledFeatures(new HashSet<>(asList(MESSAGE_INPUT.getDescription(),
                 POLICYDISCO.getDescription(),
                 PING.getDescription(),
                 STS.getDescription(),
                 WSDLPROXY.getDescription(),
-                SNMPQUERY.getDescription()));
+                SNMPQUERY.getDescription())));
         return testPort;
     }
 
@@ -234,11 +234,11 @@ class ListenPortEntityBuilderTest {
     private static ListenPort buildPortWithAllOptions() {
         final ListenPort testPort = buildPort();
         testPort.setTargetServiceReference(SERVICE_REFERENCE);
-        testPort.setEnabledFeatures(Stream.of(Feature.values()).map(Feature::getDescription).collect(toList()));
+        testPort.setEnabledFeatures(Stream.of(Feature.values()).map(Feature::getDescription).collect(toSet()));
         testPort.setTlsSettings(new ListenPortTlsSettings());
         testPort.getTlsSettings().setClientAuthentication(OPTIONAL);
-        testPort.getTlsSettings().setEnabledVersions(TLS_VERSIONS);
-        testPort.getTlsSettings().setEnabledCipherSuites(DEFAULT_RECOMMENDED_CIPHERS);
+        testPort.getTlsSettings().setEnabledVersions(new HashSet<>(TLS_VERSIONS));
+        testPort.getTlsSettings().setEnabledCipherSuites(new HashSet<>(DEFAULT_RECOMMENDED_CIPHERS));
         testPort.getTlsSettings().setProperties(new HashMap<>());
         testPort.getTlsSettings().getProperties().put("usesTLS", TRUE);
         testPort.setProperties(new HashMap<>());
