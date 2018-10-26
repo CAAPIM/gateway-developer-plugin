@@ -64,7 +64,7 @@ public class BuilderUtils {
         if (String.class.isAssignableFrom(value.getClass())) {
             elementType = STRING_VALUE;
         } else if (Integer.class.isAssignableFrom(value.getClass())) {
-            elementType = INT_VALUE;
+            elementType = INTEGER_VALUE;
         } else if (Long.class.isAssignableFrom(value.getClass())) {
             elementType = LONG_VALUE;
         } else if (Boolean.class.isAssignableFrom(value.getClass())) {
@@ -117,6 +117,7 @@ public class BuilderUtils {
             case STRING_VALUE: return valueElement.getTextContent();
             case BOOLEAN_VALUE: return toBoolean(valueElement.getTextContent());
             case LONG_VALUE: return parseLong(valueElement.getTextContent());
+            case INTEGER_VALUE:
             case INT_VALUE: return parseInt(valueElement.getTextContent());
             default:
                 throw new DependencyBundleLoadException("Type of property " + key + " is " + valueElement.getNodeName() + " which is not yet supported");
