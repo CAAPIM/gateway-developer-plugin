@@ -12,6 +12,8 @@ import javax.inject.Named;
 
 @Named("CLUSTER_PROPERTY")
 public class ClusterProperty implements Entity {
+    public static final String CLUSTER_HOSTNAME_PROPERTY_NAME = "cluster.hostname";
+
     private final String name;
     private final String id;
     private final String value;
