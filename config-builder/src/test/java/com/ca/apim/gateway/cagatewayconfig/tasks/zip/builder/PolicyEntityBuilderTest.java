@@ -250,6 +250,51 @@ class PolicyEntityBuilderTest {
         assertEquals("ad620794-a27f-4d94-85b7-669ba838367b", guidElement.getAttribute(STRING_VALUE));
     }
 
+    @Test
+    void testPrepareHardcodedResponseAssertion() throws DocumentParseException {
+        Element hardcodedAssertionElement = createHardcodedAssertionElement(document, "assertion body");
+        PolicyEntityBuilder.prepareHardcodedResponseAssertion(document, hardcodedAssertionElement);
+
+        Element b64BodyElement = getSingleElement(hardcodedAssertionElement, BASE_64_RESPONSE_BODY);
+        String b64 = b64BodyElement.getAttribute(STRING_VALUE);
+        assertEquals(Base64.getEncoder().encodeToString("assertion body".getBytes(StandardCharsets.UTF_8)), b64);
+
+    }
+
+    @Test
+    void testPrepareIncludeAssertion() throws DocumentParseException {
+        String policyPath = "my/policy/path.xml";
+        Policy policy = new Policy();
+        policy.setGuid("123-abc-567");
+        bundle.getPolicies().put(policyPath, policy);
+
+        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
+
+        PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement);
+
+        Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
+        assertEquals(policy.getGuid(), policyGuidElement.getAttribute(STRING_VALUE));
+        assertFalse(policyGuidElement.hasAttribute(POLICY_PATH));
+    }
+
+    private Element createIncludeAssertionElement(Document document, String policyPath) {
+        Element includeAssertion = document.createElement(INCLUDE);
+        document.appendChild(includeAssertion);
+        Element guidElement = document.createElement(POLICY_GUID);
+        guidElement.setAttribute(POLICY_PATH, policyPath);
+        includeAssertion.appendChild(guidElement);
+        return includeAssertion;
+    }
+
+    private Element createHardcodedAssertionElement(Document document, String body) {
+        Element hardcodedAssertion = document.createElement(HARDCODED_RESPONSE);
+        document.appendChild(hardcodedAssertion);
+        Element bodyElement = document.createElement(RESPONSE_BODY);
+        bodyElement.appendChild(document.createCDATASection(body));
+        hardcodedAssertion.appendChild(bodyElement);
+        return hardcodedAssertion;
+    }
+
     @NotNull
     private Element createSetVariableAssertion(Document document, String variableName, String variableValue) {
         Element setVariableAssertion = document.createElement(SET_VARIABLE);

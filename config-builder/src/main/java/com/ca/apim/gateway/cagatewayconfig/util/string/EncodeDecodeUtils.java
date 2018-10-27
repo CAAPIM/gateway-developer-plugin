@@ -25,4 +25,8 @@ public class EncodeDecodeUtils {
         pathToDecode = pathToDecode.replaceAll("¯_", "\\");
         return pathToDecode;
     }
+
+    public static boolean containsInvalidCharacter(String name) {
+        return name.contains("_¯") || name.contains("¯_") || name.contains("\\") || name.contains("/");
+    }
 }

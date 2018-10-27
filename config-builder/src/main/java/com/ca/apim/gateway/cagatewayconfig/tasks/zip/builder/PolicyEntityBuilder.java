@@ -100,7 +100,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policy.setPolicyDocument(policyElement);
     }
 
-    private void prepareHardcodedResponseAssertion(Document policyDocument, Element assertionElement) {
+    @VisibleForTesting
+    static void prepareHardcodedResponseAssertion(Document policyDocument, Element assertionElement) {
         prepareBase64Element(policyDocument, assertionElement, RESPONSE_BODY, BASE_64_RESPONSE_BODY);
     }
 
@@ -230,7 +231,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return Boolean.valueOf(isNoOp);
     }
 
-    private void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
+    @VisibleForTesting
+    static void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
         Element policyGuidElement;
         try {
             policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
