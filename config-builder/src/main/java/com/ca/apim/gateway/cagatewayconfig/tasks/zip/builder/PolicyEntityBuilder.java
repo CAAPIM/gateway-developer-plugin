@@ -74,7 +74,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
+    @VisibleForTesting
+    static void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
         if (orderedPolicies.contains(policy) || bundle.getServices().get(FilenameUtils.removeExtension(policy.getPath())) != null) {
             //This is a service policy it should have already be handled by the service entity builder OR This policy has already been added to the policy list
             return;
@@ -271,7 +272,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Entity buildPolicyEntity(Policy policy, Bundle bundle, Document document) {
+    @VisibleForTesting
+    Entity buildPolicyEntity(Policy policy, Bundle bundle, Document document) {
         String id = policy.getId();
         PolicyTags policyTags = getPolicyTags(policy, bundle);
 

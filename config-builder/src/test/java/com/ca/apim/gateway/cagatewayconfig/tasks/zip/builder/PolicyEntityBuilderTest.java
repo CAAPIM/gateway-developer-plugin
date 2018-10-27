@@ -6,11 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.google.common.collect.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +18,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
 
@@ -69,7 +70,7 @@ class PolicyEntityBuilderTest {
     }
 
     @Test
-    void testPrepareSetVariableAssertionMissingVariableToSet() throws DocumentParseException {
+    void testPrepareSetVariableAssertionMissingVariableToSet() {
         Element setVariableAssertion = document.createElement(SET_VARIABLE);
         document.appendChild(setVariableAssertion);
         Element expression = document.createElement(EXPRESSION);
@@ -130,7 +131,7 @@ class PolicyEntityBuilderTest {
     }
 
     @Test
-    void testPrepareSetVariableAssertionNotENVElementNode() throws DocumentParseException {
+    void testPrepareSetVariableAssertionNotENVElementNode() {
         Element setVariableAssertion = document.createElement(SET_VARIABLE);
         document.appendChild(setVariableAssertion);
         Element expression = document.createElement(EXPRESSION);
@@ -275,6 +276,129 @@ class PolicyEntityBuilderTest {
         Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
         assertEquals(policy.getGuid(), policyGuidElement.getAttribute(STRING_VALUE));
         assertFalse(policyGuidElement.hasAttribute(POLICY_PATH));
+    }
+
+    @Test
+    void testPrepareIncludeAssertionNoPolicyGuid() {
+        String policyPath = "my/policy/path.xml";
+        Policy policy = new Policy();
+        policy.setGuid("123-abc-567");
+        bundle.getPolicies().put(policyPath, policy);
+
+        Element includeAssertion = document.createElement(INCLUDE);
+        document.appendChild(includeAssertion);
+
+        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertion));
+    }
+
+    @Test
+    void testPrepareIncludeAssertionNoPolicyFound() {
+        String policyPath = "my/policy/path.xml";
+        Policy policy = new Policy();
+        policy.setGuid("123-abc-567");
+        bundle.getPolicies().put(policyPath, policy);
+
+        Element includeAssertionElement = createIncludeAssertionElement(document, "some/other/path.xml");
+
+        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement));
+    }
+
+    @Test
+    void testPrepareIncludeAssertionPolicyInDependentBundle() throws DocumentParseException {
+        String policyPath = "my/policy/path.xml";
+        Policy policy = new Policy();
+        policy.setGuid("123-abc-567");
+        Bundle dependentBundle = new Bundle();
+        dependentBundle.getPolicies().put(policyPath, policy);
+        bundle.getDependencies().add(dependentBundle);
+        bundle.getDependencies().add(new Bundle());
+
+        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
+
+        PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement);
+
+        Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
+        assertEquals(policy.getGuid(), policyGuidElement.getAttribute(STRING_VALUE));
+        assertFalse(policyGuidElement.hasAttribute(POLICY_PATH));
+    }
+
+    @Test
+    void testPrepareIncludeAssertionPolicyInMultipleDependentBundle() {
+        String policyPath = "my/policy/path.xml";
+        Policy policy = new Policy();
+        policy.setGuid("123-abc-567");
+        Bundle dependentBundle = new Bundle();
+        dependentBundle.getPolicies().put(policyPath, policy);
+        bundle.getDependencies().add(dependentBundle);
+        Bundle dependentBundle2 = new Bundle();
+        dependentBundle2.getPolicies().put(policyPath, policy);
+        bundle.getDependencies().add(dependentBundle2);
+
+        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
+
+        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement));
+    }
+
+    @Test
+    void maybeAddPolicy() {
+        Policy policy1 = new Policy();
+        Policy policy2 = new Policy();
+        policy1.getDependencies().add(policy2);
+
+        ArrayList<Policy> orderedPolicies = new ArrayList<>();
+        HashSet<Policy> seenPolicies = new HashSet<>();
+        PolicyEntityBuilder.maybeAddPolicy(bundle, policy1, orderedPolicies, seenPolicies);
+
+        assertEquals(2, orderedPolicies.size());
+        assertEquals(policy1, orderedPolicies.get(1));
+        assertEquals(policy2, orderedPolicies.get(0));
+
+        PolicyEntityBuilder.maybeAddPolicy(bundle, policy2, orderedPolicies, seenPolicies);
+
+        assertEquals(2, orderedPolicies.size());
+        assertEquals(policy1, orderedPolicies.get(1));
+        assertEquals(policy2, orderedPolicies.get(0));
+
+        // test dependency loop
+        policy2.getDependencies().add(policy1);
+        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.maybeAddPolicy(bundle, policy2, new ArrayList<>(), new HashSet<>()));
+    }
+
+    @Test
+    void buildPolicyEntityTest() {
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+
+        Policy policyToBuild = new Policy();
+        policyToBuild.setId("policy-id");
+        policyToBuild.setGuid("policy-guid-123");
+        Folder parentFolder = new Folder();
+        parentFolder.setId("folder-id");
+        policyToBuild.setParentFolder(parentFolder);
+
+        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
+
+        assertEquals(policyToBuild.getId(), policyEntity.getId());
+    }
+
+    @Test
+    void buildPolicyEntityTestPBS() {
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+
+        Policy policyToBuild = new Policy();
+        policyToBuild.setPath("my/policy/path.xml");
+        policyToBuild.setId("policy-id");
+        policyToBuild.setGuid("policy-guid-123");
+        Folder parentFolder = new Folder();
+        parentFolder.setId("folder-id");
+        policyToBuild.setParentFolder(parentFolder);
+
+        PolicyBackedService policyBackedService = new PolicyBackedService();
+        policyBackedService.setInterfaceName("pbs-interface");
+        policyBackedService.setOperations(Sets.newHashSet(new PolicyBackedServiceOperation("my-op", policyToBuild.getPath())));
+        bundle.getPolicyBackedServices().put("pbs", policyBackedService);
+        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
+
+        assertEquals(policyToBuild.getId(), policyEntity.getId());
     }
 
     private Element createIncludeAssertionElement(Document document, String policyPath) {
