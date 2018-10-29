@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.jetbrains.annotations.NotNull;
@@ -28,9 +29,7 @@ import java.util.stream.Stream;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SERVICE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceEntityBuilderTest {
 
@@ -71,7 +70,7 @@ class ServiceEntityBuilderTest {
 
         Bundle bundle = new Bundle();
 
-        Folder serviceParentFolder = setUpFolderAndPolicy(bundle);
+        Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
 
         Service service = new Service();
         service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
@@ -93,7 +92,38 @@ class ServiceEntityBuilderTest {
 
         Entity serviceEntity = services.get(0);
 
-        verifyService(service, serviceEntity, 1);
+        verifyService(service, serviceEntity, 1, "service" + 1);
+    }
+
+    @Test
+    void buildOneServicesEncodedPath() throws DocumentParseException {
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+
+        Bundle bundle = new Bundle();
+
+        Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "my/policy-_¯-¯_/_¯-¯_-path.xml", "_¯-¯_-path");
+
+        Service service = new Service();
+        service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
+        service.setUrl("/my/service/url");
+        service.setPolicy("my/policy-_¯-¯_/_¯-¯_-path.xml");
+        service.setParentFolder(serviceParentFolder);
+        service.setProperties(new HashMap<String, String>() {{
+            put("key1", "value1");
+            put("ENV.key.environment", "something");
+        }});
+
+        bundle.putAllServices(new HashMap<String, Service>() {{
+            put("my/service-_¯-¯_/_¯-¯_-path", service);
+        }});
+
+        List<Entity> services = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        assertEquals(1, services.size());
+
+        Entity serviceEntity = services.get(0);
+
+        verifyService(service, serviceEntity, 1, EncodeDecodeUtils.decodePath("_¯-¯_-path"));
     }
 
     @Test
@@ -101,7 +131,7 @@ class ServiceEntityBuilderTest {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
-        Folder serviceParentFolder = setUpFolderAndPolicy(bundle);
+        Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
 
         Service service1 = new Service();
         service1.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
@@ -132,16 +162,16 @@ class ServiceEntityBuilderTest {
 
         assertEquals(2, services.size());
         if (services.get(0).getName().equals("service1")) {
-            verifyService(service1, services.get(0), 1);
-            verifyService(service2, services.get(1), 2);
+            verifyService(service1, services.get(0), 1, "service" + 1);
+            verifyService(service2, services.get(1), 2, "service" + 2);
         } else {
-            verifyService(service2, services.get(0), 2);
-            verifyService(service1, services.get(1), 1);
+            verifyService(service2, services.get(0), 2, "service" + 2);
+            verifyService(service1, services.get(1), 1, "service" + 1);
         }
     }
 
     @NotNull
-    private Folder setUpFolderAndPolicy(Bundle bundle) throws DocumentParseException {
+    private Folder setUpFolderAndPolicy(Bundle bundle, String policyPath, String policyName) throws DocumentParseException {
         Folder parentFolder = new Folder();
         parentFolder.setId("asd");
         parentFolder.setName("my");
@@ -158,8 +188,8 @@ class ServiceEntityBuilderTest {
         }});
 
         Policy policy = new Policy();
-        policy.setName("policy");
-        policy.setPath("/my/policy.xml");
+        policy.setName(policyName);
+        policy.setPath(policyPath);
         policy.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?> <wsp:Policy xmlns:L7p=\"http://www.layer7tech.com/ws/policy\" xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\"> <wsp:All wsp:Usage=\"Required\"/> </wsp:Policy>\n");
         policy.setPolicyDocument(DocumentTools.INSTANCE.parse(policy.getPolicyXML()).getDocumentElement());
         policy.setParentFolder(parentFolder);
@@ -169,14 +199,14 @@ class ServiceEntityBuilderTest {
         return serviceParentFolder;
     }
 
-    private void verifyService(Service service, Entity serviceEntity, int serviceNumber) throws DocumentParseException {
+    private void verifyService(Service service, Entity serviceEntity, int serviceNumber, String expectedServiceName) throws DocumentParseException {
         assertEquals(SERVICE_TYPE, serviceEntity.getType());
         assertNotNull(serviceEntity.getId());
         Element serviceEntityXml = serviceEntity.getXml();
         assertEquals(SERVICE, serviceEntityXml.getTagName());
         Element serviceDetails = getSingleElement(serviceEntityXml, SERVICE_DETAIL);
         Element serviceName = getSingleElement(serviceDetails, NAME);
-        assertEquals("service" + serviceNumber, serviceName.getTextContent());
+        assertEquals(expectedServiceName, serviceName.getTextContent());
 
         Element serviceMappings = getSingleElement(serviceDetails, SERVICE_MAPPINGS);
         Element serviceHttpMappings = getSingleElement(serviceMappings, HTTP_MAPPING);

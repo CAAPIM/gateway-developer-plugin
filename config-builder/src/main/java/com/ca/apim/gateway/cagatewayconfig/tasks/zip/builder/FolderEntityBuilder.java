@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -43,8 +44,9 @@ public class FolderEntityBuilder implements EntityBuilder {
         if (parentFolderId != null) {
             folder.setAttribute(ATTRIBUTE_FOLDER_ID, parentFolderId);
         }
-        folder.appendChild(createElementWithTextContent(document, NAME, name));
-        Entity entity = new Entity(FOLDER_TYPE, name, id, folder);
+        String decodedName = EncodeDecodeUtils.decodePath(name);
+        folder.appendChild(createElementWithTextContent(document, NAME, decodedName));
+        Entity entity = new Entity(FOLDER_TYPE, decodedName, id, folder);
 
         //Set the root folder mapping to new or existing
         if (parentFolderId == null) {

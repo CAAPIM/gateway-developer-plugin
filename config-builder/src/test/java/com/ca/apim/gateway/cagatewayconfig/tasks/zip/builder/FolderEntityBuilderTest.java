@@ -11,16 +11,15 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_ID;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType.ENVIRONMENT;
@@ -40,7 +39,7 @@ class FolderEntityBuilderTest {
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
     private static final String FOLDER_1 = "Folder1";
     private static final String FOLDER_2 = "Folder2";
-    private static final String FOLDER_3 = "Folder3";
+    private static final String FOLDER_3 = "Fo-_¯-¯_-lder3";
 
     @Test
     void buildFromEmptyBundle_noFolders() {
@@ -86,9 +85,9 @@ class FolderEntityBuilderTest {
         entitiesMap.forEach((k, entity) -> {
             k = ROOT_FOLDER_NAME.equals(k) ? EMPTY : k;
 
-            Folder folder = bundle.getFolders().get(k);
+            Folder folder = bundle.getFolders().get(EncodeDecodeUtils.encodePath(k));
             assertNotNull(folder);
-            assertEquals(folder.getName(), entity.getName());
+            assertEquals(EncodeDecodeUtils.decodePath(folder.getName()), entity.getName());
             assertNotNull(entity.getId());
             assertNotNull(entity.getXml());
             assertEquals(EntityTypes.FOLDER_TYPE, entity.getType());

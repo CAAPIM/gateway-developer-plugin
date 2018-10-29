@@ -3,3 +3,5 @@ my-pbs:
   operations:
   - policy: "example project/example-pbs.xml"
     operationName: "run"
+  - policy: "example project/folder-_¯-¯_-slashed/example-_¯-¯_-slashed.xml"
+    operationName: "another"

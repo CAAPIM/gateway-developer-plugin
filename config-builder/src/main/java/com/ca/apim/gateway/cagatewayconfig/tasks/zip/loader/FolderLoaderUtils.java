@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -66,7 +65,7 @@ class FolderLoaderUtils {
     }
 
     static String getPath(final File policy, final File policyRootDir) {
-        return EncodeDecodeUtils.decodePath(policyRootDir.toURI().relativize(policy.toURI()).getPath());
+        return policyRootDir.toURI().relativize(policy.toURI()).getPath();
     }
 
     private FolderLoaderUtils(){}

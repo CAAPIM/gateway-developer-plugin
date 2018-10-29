@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -55,7 +56,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + policyPath);
         }
-        final String name = policy.getName();
+        final String name = EncodeDecodeUtils.decodePath(policy.getName());
         final String id = idGenerator.generate();
 
         Element encassAssertionElement = createElementWithAttributesAndChildren(

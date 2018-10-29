@@ -9,3 +9,14 @@ example project/encass-policy.xml:
     type: "string"
   - name: "goodbye-again"
     type: "message"
+example project/folder-_¯-¯_-slashed/example-_¯-¯_-slashed.xml:
+  arguments:
+  - name: "hello"
+    type: "string"
+  - name: "hello-again"
+    type: "message"
+  results:
+  - name: "goodbye"
+    type: "string"
+  - name: "goodbye-again"
+    type: "message"

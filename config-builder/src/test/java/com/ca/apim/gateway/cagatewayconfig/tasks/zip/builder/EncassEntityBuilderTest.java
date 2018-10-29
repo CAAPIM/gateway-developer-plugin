@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -48,34 +49,41 @@ class EncassEntityBuilderTest {
     @Test
     void buildWithNoPolicy() {
         final Bundle bundle = new Bundle();
-        assertThrows(EntityBuilderException.class, () -> buildBundleWithEncass(bundle, DEPLOYMENT));
+        assertThrows(EntityBuilderException.class, () -> buildBundleWithEncass(bundle, DEPLOYMENT, TEST_ENCASS, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS));
     }
 
     @Test
     void buildDeploymentWithEncass() {
         final Bundle bundle = new Bundle();
-        putPolicy(bundle);
-        buildBundleWithEncass(bundle, DEPLOYMENT);
+        putPolicy(bundle, TEST_ENCASS, TEST_POLICY_ID, TEST_ENCASS);
+        buildBundleWithEncass(bundle, DEPLOYMENT, TEST_ENCASS, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS);
+    }
+
+    @Test
+    void buildDeploymentWithEncassEncodedPolicyName() {
+        final Bundle bundle = new Bundle();
+        putPolicy(bundle, "example-_¯-¯_-slashed", TEST_POLICY_ID, "example/folder-_¯-¯_-slashed/example-_¯-¯_-slashed.xml");
+        buildBundleWithEncass(bundle, DEPLOYMENT, "example/folder-_¯-¯_-slashed/example-_¯-¯_-slashed.xml", TEST_GUID, TEST_POLICY_ID, "example-_¯-¯_-slashed");
     }
 
     @Test
     void buildEnvironmentWithPBS() {
         final Bundle bundle = new Bundle();
-        putPolicy(bundle);
-        buildBundleWithEncass(bundle, ENVIRONMENT);
+        putPolicy(bundle, TEST_ENCASS, TEST_POLICY_ID, TEST_ENCASS);
+        buildBundleWithEncass(bundle, ENVIRONMENT, TEST_ENCASS, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS);
     }
 
-    private static void putPolicy(Bundle bundle) {
+    private static void putPolicy(Bundle bundle, String name, String id, String path) {
         Policy policy = new Policy();
-        policy.setName(TEST_ENCASS);
-        policy.setId(TEST_POLICY_ID);
-        bundle.getPolicies().put(TEST_ENCASS, policy);
+        policy.setName(name);
+        policy.setId(id);
+        bundle.getPolicies().put(path, policy);
     }
 
-    private static void buildBundleWithEncass(Bundle bundle, BundleType deployment) {
+    private static void buildBundleWithEncass(Bundle bundle, BundleType deployment, String policyPath, String encassGuid, String policyId, String policyName) {
         EncassEntityBuilder builder = new EncassEntityBuilder(ID_GENERATOR);
-        Encass encass = buildTestEncass();
-        bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+        Encass encass = buildTestEncass(encassGuid);
+        bundle.putAllEncasses(ImmutableMap.of(policyPath, encass));
 
         final List<Entity> entities = builder.build(bundle, deployment, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
@@ -83,7 +91,7 @@ class EncassEntityBuilderTest {
         assertEquals(1, entities.size());
 
         Entity entity = entities.get(0);
-        assertEquals(TEST_ENCASS, entity.getName());
+        assertEquals(EncodeDecodeUtils.decodePath(policyName), entity.getName());
         assertNotNull(entity.getId());
         assertNotNull(entity.getXml());
         assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, entity.getType());
@@ -91,11 +99,11 @@ class EncassEntityBuilderTest {
         Element xml = entity.getXml();
         assertEquals(ENCAPSULATED_ASSERTION, xml.getTagName());
         assertNotNull(getSingleChildElement(xml, NAME));
-        assertEquals(TEST_ENCASS, getSingleChildElementTextContent(xml, NAME));
+        assertEquals(EncodeDecodeUtils.decodePath(policyName), getSingleChildElementTextContent(xml, NAME));
         assertNotNull(getSingleChildElement(xml, GUID));
-        assertEquals(TEST_GUID, getSingleChildElementTextContent(xml, GUID));
+        assertEquals(encassGuid, getSingleChildElementTextContent(xml, GUID));
         assertNotNull(getSingleChildElement(xml, POLICY_REFERENCE));
-        assertEquals(TEST_POLICY_ID, getSingleChildElement(xml, POLICY_REFERENCE).getAttribute(ATTRIBUTE_ID));
+        assertEquals(policyId, getSingleChildElement(xml, POLICY_REFERENCE).getAttribute(ATTRIBUTE_ID));
         Element arguments = getSingleChildElement(xml, ENCAPSULATED_ARGUMENTS);
         assertNotNull(arguments);
         List<Element> argumentElements = getChildElements(arguments, ENCAPSULATED_ASSERTION_ARGUMENT);
@@ -126,9 +134,9 @@ class EncassEntityBuilderTest {
         assertTrue(argumentElements.isEmpty());
     }
 
-    private static Encass buildTestEncass() {
+    private static Encass buildTestEncass(String encassGuid) {
         Encass encass = new Encass();
-        encass.setGuid(TEST_GUID);
+        encass.setGuid(encassGuid);
         encass.setArguments(new HashSet<>());
         EncassParam param1 = new EncassParam();
         param1.setName("Param1");

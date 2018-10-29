@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.Sets;
@@ -162,6 +163,23 @@ class PolicyEntityBuilderTest {
     }
 
     @Test
+    void testPrepareEncapsulatedAssertionEncoded() throws DocumentParseException {
+        String policyPath = "my/policy-_¯-¯_/_¯-¯_-path.xml";
+        Encass encass = new Encass();
+        encass.setGuid("123");
+        bundle.getEncasses().put(policyPath, encass);
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, policyPath);
+
+        PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
+
+        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
+        assertEquals(policyPath, nameElement.getAttribute(STRING_VALUE));
+
+        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
+        assertEquals(encass.getGuid(), guidElement.getAttribute(STRING_VALUE));
+    }
+
+    @Test
     void testPrepareEncapsulatedAssertionEncassInDependencyBundle() throws DocumentParseException {
         String policyPath = "my/policy/path.xml";
         Encass encass = new Encass();
@@ -279,6 +297,22 @@ class PolicyEntityBuilderTest {
     }
 
     @Test
+    void testPrepareIncludeAssertionEncodedPath() throws DocumentParseException {
+        String policyPath = "my/policy-_¯-¯_/_¯-¯_-path.xml";
+        Policy policy = new Policy();
+        policy.setGuid("123-abc-567");
+        bundle.getPolicies().put(policyPath, policy);
+
+        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
+
+        PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement);
+
+        Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
+        assertEquals(policy.getGuid(), policyGuidElement.getAttribute(STRING_VALUE));
+        assertFalse(policyGuidElement.hasAttribute(POLICY_PATH));
+    }
+
+    @Test
     void testPrepareIncludeAssertionNoPolicyGuid() {
         String policyPath = "my/policy/path.xml";
         Policy policy = new Policy();
@@ -369,6 +403,7 @@ class PolicyEntityBuilderTest {
         PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
 
         Policy policyToBuild = new Policy();
+        policyToBuild.setName("path");
         policyToBuild.setId("policy-id");
         policyToBuild.setGuid("policy-guid-123");
         Folder parentFolder = new Folder();
@@ -381,11 +416,30 @@ class PolicyEntityBuilderTest {
     }
 
     @Test
+    void buildPolicyEntityTestEncodedPath() {
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+
+        Policy policyToBuild = new Policy();
+        policyToBuild.setName("policy-_¯-¯_");
+        policyToBuild.setId("policy-id");
+        policyToBuild.setGuid("policy-guid-123");
+        Folder parentFolder = new Folder();
+        parentFolder.setId("folder-id");
+        policyToBuild.setParentFolder(parentFolder);
+
+        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
+
+        assertEquals(policyToBuild.getId(), policyEntity.getId());
+        assertEquals(EncodeDecodeUtils.decodePath(policyToBuild.getName()), policyEntity.getName());
+    }
+
+    @Test
     void buildPolicyEntityTestPBS() {
         PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/path.xml");
+        policyToBuild.setName("path");
         policyToBuild.setId("policy-id");
         policyToBuild.setGuid("policy-guid-123");
         Folder parentFolder = new Folder();

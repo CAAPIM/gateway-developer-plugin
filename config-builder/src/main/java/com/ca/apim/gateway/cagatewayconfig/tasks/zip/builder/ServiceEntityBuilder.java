@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
@@ -52,7 +53,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
-        String processedName = FilenameUtils.getBaseName(servicePath);
+        String processedName = EncodeDecodeUtils.decodePath(FilenameUtils.getBaseName(servicePath));
         Policy policy = bundle.getPolicies().get(service.getPolicy());
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());

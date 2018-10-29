@@ -10,12 +10,10 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
@@ -42,10 +40,8 @@ public class EncassLoader extends EntityLoaderBase<Encass> {
 
     @Override
     protected void putToBundle(final Bundle bundle, @NotNull final Map<String, Encass> entitiesMap) {
-        Map<String, Encass> parsedEncasses = new HashMap<>(entitiesMap.size());
-        entitiesMap.forEach((k, e) -> parsedEncasses.put(EncodeDecodeUtils.decodePath(k), e));
-        parsedEncasses.values().forEach(encass -> encass.setGuid(idGenerator.generateGuid()));
-        bundle.putAllEncasses(parsedEncasses);
+        entitiesMap.values().forEach(encass -> encass.setGuid(idGenerator.generateGuid()));
+        bundle.putAllEncasses(entitiesMap);
     }
 
     @Override

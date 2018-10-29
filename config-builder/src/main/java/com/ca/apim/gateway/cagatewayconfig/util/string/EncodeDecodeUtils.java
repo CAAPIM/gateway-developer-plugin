@@ -22,7 +22,7 @@ public class EncodeDecodeUtils {
 
     public static String decodePath(String pathToDecode) {
         pathToDecode = pathToDecode.replaceAll("_¯", "/");
-        pathToDecode = pathToDecode.replaceAll("¯_", "\\");
+        pathToDecode = pathToDecode.replaceAll("¯_", "\\\\");
         return pathToDecode;
     }
 

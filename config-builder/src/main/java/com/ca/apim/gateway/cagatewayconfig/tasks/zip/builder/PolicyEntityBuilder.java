@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
@@ -281,7 +282,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 document,
                 POLICY_DETAIL,
                 ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_GUID, policy.getGuid(), ATTRIBUTE_FOLDER_ID, policy.getParentFolder().getId()),
-                createElementWithTextContent(document, NAME, policy.getName()),
+                createElementWithTextContent(document, NAME, EncodeDecodeUtils.decodePath(policy.getName())),
                 createElementWithTextContent(document, POLICY_TYPE, policyTags == null ? POLICY_TYPE_INCLUDE : policyTags.type)
         );
 
@@ -308,7 +309,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
-        return new Entity(EntityTypes.POLICY_TYPE, policy.getName(), id, policyElement);
+        return new Entity(EntityTypes.POLICY_TYPE, EncodeDecodeUtils.decodePath(policy.getName()), id, policyElement);
     }
 
     private PolicyTags getPolicyTags(Policy policy, Bundle bundle) {

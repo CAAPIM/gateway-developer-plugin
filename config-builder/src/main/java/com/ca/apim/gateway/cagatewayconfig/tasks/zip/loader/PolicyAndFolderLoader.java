@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
@@ -20,9 +19,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.createFolder;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.getPath;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.getPolicyRootDir;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.*;
 
 @Singleton
 public class PolicyAndFolderLoader implements EntityLoader {
@@ -82,9 +79,9 @@ public class PolicyAndFolderLoader implements EntityLoader {
         String fileName = policyFile.getName();
         int indexOfPeriod = fileName.lastIndexOf('.');
         if (indexOfPeriod > 0) {
-            return EncodeDecodeUtils.decodePath(fileName.substring(0, indexOfPeriod));
+            return fileName.substring(0, indexOfPeriod);
         } else {
-            return EncodeDecodeUtils.decodePath(fileName);
+            return fileName;
         }
     }
 
