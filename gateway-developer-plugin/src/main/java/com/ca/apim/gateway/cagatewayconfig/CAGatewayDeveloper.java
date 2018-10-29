@@ -23,7 +23,6 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 
     private static final String BUNDLE_CONFIGURATION = "bundle";
     private static final String BUNDLE_FILE_EXTENSION = "bundle";
-    private static final String BUNDLE_REQUIRED_FILE_EXTENSION = "req." + BUNDLE_FILE_EXTENSION;
     private static final String BUILT_BUNDLE_DIRECTORY = "bundle";
     private static final String GATEWAY_BUILD_DIRECTORY = "gateway";
     private static final String ENV_APPLICATION_CONFIGURATION = "environment-creator-application";
@@ -65,7 +64,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         final PackageTask packageGW7Task = project.getTasks().create("package-gw7", PackageTask.class, t -> {
             t.dependsOn(buildBundleTask);
             t.getInto().set(new DefaultProvider<RegularFile>(() -> () -> new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), getBuiltArtifactName(project, "gw7"))));
-            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, BUNDLE_REQUIRED_FILE_EXTENSION))));
+            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, BUNDLE_FILE_EXTENSION))));
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getContainerApplicationDependencies().setFrom(project.getConfigurations().getByName(ENV_APPLICATION_CONFIGURATION));
         });
@@ -84,7 +83,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                         },
                         configurablePublishArtifact -> {
                             configurablePublishArtifact.builtBy(buildBundleTask);
-                            configurablePublishArtifact.setExtension(BUNDLE_REQUIRED_FILE_EXTENSION);
+                            configurablePublishArtifact.setExtension(BUNDLE_FILE_EXTENSION);
                             configurablePublishArtifact.setName(project.getName() + '-' + project.getVersion());
                             configurablePublishArtifact.setType(BUNDLE_FILE_EXTENSION);
                         }));

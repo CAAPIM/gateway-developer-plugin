@@ -30,6 +30,9 @@ import java.util.stream.StreamSupport;
  */
 class Packager {
     private static final String DIRECTORY_OPT_DOCKER_RC_D = "/opt/docker/rc.d/";
+    private static final String BUNDLE_FILE_EXTENSION = "bundle";
+    private static final String REQ_BUNDLE_FILE_EXTENSION = "req." + BUNDLE_FILE_EXTENSION;
+
 
     private final GW7Builder gw7Builder;
     private final FileUtils fileUtils;
@@ -54,9 +57,9 @@ class Packager {
         Set<GW7Builder.PackageFile> packageFiles = Stream.of(
                 // adds dependency bundles
                 StreamSupport.stream(Spliterators.spliteratorUnknownSize(dependencyBundles.descendingIterator(), Spliterator.ORDERED), false) // reverses the order of the dependencyBundles
-                        .map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundleCounter.getAndIncrement()) + "_" + f.getName(), f.length(), () -> fileUtils.getInputStream(f))),
+                        .map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundleCounter.getAndIncrement()) + "_" + convertToReqBundle(f.getName()), f.length(), () -> fileUtils.getInputStream(f))),
                 //adds the deployment bundle
-                Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundles.size() + 1) + "_" + bundle.getName(), bundle.length(), () -> fileUtils.getInputStream(bundle))),
+                Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundles.size() + 1) + "_" + convertToReqBundle(bundle.getName()), bundle.length(), () -> fileUtils.getInputStream(bundle))),
                 //apply-environment.sh script
                 Stream.<GW7Builder.PackageFile>builder()
                         .add(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh", applyEnvBytes.length, () -> new ByteArrayInputStream(applyEnvBytes), true))
@@ -69,6 +72,10 @@ class Packager {
 
         gw7Builder.buildPackage(fileUtils.getOutputStream(gw7File),
                 packageFiles);
+    }
+
+    private String convertToReqBundle(String bundleFile) {
+        return bundleFile.substring(0, bundleFile.length()-BUNDLE_FILE_EXTENSION.length()).concat(REQ_BUNDLE_FILE_EXTENSION);
     }
 
     private String getFileCounter(int numBundles, int currentBundleNumber) {

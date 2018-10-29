@@ -75,7 +75,7 @@ class CAGatewayDeveloperTest {
 
         File buildGatewayDir = new File(testProjectDir, "dist");
         Assert.assertTrue(buildGatewayDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayDir, projectFolder + projectVersion + ".req.bundle");
+        File builtBundleFile = new File(buildGatewayDir, projectFolder + projectVersion + ".bundle");
         Assert.assertTrue(builtBundleFile.isFile());
     }
 
@@ -122,7 +122,7 @@ class CAGatewayDeveloperTest {
         Assert.assertTrue(buildGatewayDir.isDirectory());
         File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
         Assert.assertTrue(buildGatewayBundlesDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayBundlesDir, projectName + projectVersion + ".req.bundle");
+        File builtBundleFile = new File(buildGatewayBundlesDir, projectName + projectVersion + ".bundle");
         Assert.assertTrue(builtBundleFile.isFile());
         File gw7PackageFile = new File(buildGatewayDir, projectName + projectVersion + ".gw7");
         Assert.assertTrue(gw7PackageFile.isFile());
