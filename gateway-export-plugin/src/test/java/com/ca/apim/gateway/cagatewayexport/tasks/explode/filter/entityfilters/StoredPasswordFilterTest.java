@@ -6,6 +6,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEnt
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
+import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
@@ -35,7 +36,7 @@ class StoredPasswordFilterTest {
         StoredPasswordFilter filter = new StoredPasswordFilter();
 
         Bundle filteredBundle = new Bundle();
-        filteredBundle.addEntity(new PolicyEntity("my-policy", "1", "", "", null, ""));
+        filteredBundle.addEntity(TestUtils.createPolicy("my-policy", "1", "", "", null, ""));
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(
                 ImmutableMap.of(

@@ -29,7 +29,7 @@ class EncassLinkerTest {
 
         Bundle fullBundle = new Bundle();
         fullBundle.addEntity(myEncass);
-        fullBundle.addEntity(new PolicyEntity("myEncassPolicy", "1", "1", "1", null, ""));
+        fullBundle.addEntity(new PolicyEntity.Builder().setName("myEncassPolicy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
         fullBundle.addEntity(new Folder("myFolder", "1", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
@@ -70,7 +70,7 @@ class EncassLinkerTest {
 
         Bundle fullBundle = new Bundle();
         fullBundle.addEntity(myEncass);
-        fullBundle.addEntity(new PolicyEntity("myEncassPolicy", "1", "1", "1", null, ""));
+        fullBundle.addEntity(new PolicyEntity.Builder().setName("myEncassPolicy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
         fullBundle.addEntity(new Folder("myFolder", "2", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());

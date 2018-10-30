@@ -6,11 +6,16 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.w3c.dom.Element;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@JsonInclude(NON_EMPTY)
 public class Policy extends Folderable {
     private String path;
     private String policyXML;
@@ -19,6 +24,7 @@ public class Policy extends Folderable {
     private Element policyDocument;
     private final Set<Policy> dependencies = new HashSet<>();
     private String id;
+    private String tag;
 
     public String getPath() {
         return path;
@@ -70,5 +76,13 @@ public class Policy extends Folderable {
 
     public String getId() {
         return id;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }

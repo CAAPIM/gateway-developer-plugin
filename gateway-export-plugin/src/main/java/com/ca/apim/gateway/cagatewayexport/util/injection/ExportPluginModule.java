@@ -29,6 +29,7 @@ import org.reflections.Reflections;
 
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
+import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isInterface;
 import static java.util.Optional.ofNullable;
 
@@ -80,7 +81,11 @@ public class ExportPluginModule extends AbstractModule {
 
         // bind the entity writers
         Multibinder<EntityWriter> writersBinder = newSetBinder(binder(), EntityWriter.class);
-        reflections.getSubTypesOf(EntityWriter.class).forEach(l -> writersBinder.addBinding().to(l));
+        reflections.getSubTypesOf(EntityWriter.class).forEach(l -> {
+            if (!isAbstract(l.getModifiers())) {
+                writersBinder.addBinding().to(l);
+            }
+        });
         bind(EntityWriterRegistry.class);
 
         // bind the entity type registry

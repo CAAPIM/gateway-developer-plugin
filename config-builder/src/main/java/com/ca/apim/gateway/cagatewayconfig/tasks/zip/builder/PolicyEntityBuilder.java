@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
@@ -35,6 +36,8 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buil
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_SUBTAG;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_TAG;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @Singleton
@@ -46,8 +49,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
     static final String POLICY_PATH = "policyPath";
     static final String ENCASS_NAME = "encassName";
     static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
-    private static final String TAG = "tag";
-    private static final String SUBTAG = "subtag";
     private static final String TYPE = "type";
     private static final String POLICY = "policy";
     private static final String POLICY_TYPE_INCLUDE = "Include";
@@ -291,7 +292,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
         if (policyTags != null) {
             buildAndAppendPropertiesElement(
-                    ImmutableMap.of(TAG, policyTags.tag, SUBTAG, policyTags.subtag),
+                    ImmutableMap.of(PROPERTY_TAG, policyTags.tag, PROPERTY_SUBTAG, policyTags.subtag),
                     document,
                     policyDetailElement
             );
@@ -305,7 +306,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyElement.appendChild(policyDetailElement);
 
         Element resourcesElement = document.createElement(RESOURCES);
-        Element resourceSetElement = createElementWithAttribute(document, RESOURCE_SET, TAG, POLICY);
+        Element resourceSetElement = createElementWithAttribute(document, RESOURCE_SET, PROPERTY_TAG, POLICY);
         Element resourceElement = createElementWithAttribute(document, RESOURCE, TYPE, POLICY);
         resourceElement.setTextContent(documentFileUtils.elementToString(policy.getPolicyDocument()));
 

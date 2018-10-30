@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createPolicy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PrivateKeyFilterTest {
@@ -35,7 +36,7 @@ class PrivateKeyFilterTest {
         PrivateKeyFilter filter = new PrivateKeyFilter();
 
         Bundle filteredBundle = new Bundle();
-        filteredBundle.addEntity(new PolicyEntity("my-policy", "1", "", "", null, ""));
+        filteredBundle.addEntity(createPolicy("my-policy", "1", "", "", null, ""));
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(
                 ImmutableMap.of(

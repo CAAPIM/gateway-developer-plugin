@@ -6,16 +6,22 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType.isValidType;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_TAG;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
 public class PolicyLoader implements EntityLoader<PolicyEntity> {
@@ -27,22 +33,37 @@ public class PolicyLoader implements EntityLoader<PolicyEntity> {
         final String guid = policy.getAttribute(ATTRIBUTE_GUID);
 
         final Element policyDetails = getSingleChildElement(policy, POLICY_DETAIL);
-        Element policyTypeElement = getSingleChildElement(policyDetails, POLICY_TYPE);
-        if (!("Include".equals(policyTypeElement.getTextContent()) || "Service Operation".equals(policyTypeElement.getTextContent()))) {
-            LOGGER.log(Level.WARNING, "Skipping unsupported PolicyType: {0}", policyTypeElement.getTextContent());
+        final String policyType = getSingleChildElementTextContent(policyDetails, POLICY_TYPE);
+        final Map<String, Object> policyDetailProperties = mapPropertiesElements(getSingleChildElement(policyDetails, PROPERTIES), PROPERTIES);
+        final String policyTag = (String) policyDetailProperties.get(PROPERTY_TAG);
+        if (!isValidType(policyType, policyTag)) {
+            LOGGER.log(Level.WARNING, () -> {
+                if (policyTag != null) {
+                    return String.format("Skipping unsupported PolicyType: %s, with tag %s", policyType, policyTag);
+                }
+                return String.format("Skipping unsupported PolicyType: %s", policyType);
+            });
             return null;
         }
 
         final String id = policyDetails.getAttribute(ATTRIBUTE_ID);
         final String folderId = policyDetails.getAttribute(ATTRIBUTE_FOLDER_ID);
-        Element nameElement = getSingleChildElement(policyDetails, NAME);
-        final String name = EncodeDecodeUtils.encodePath(nameElement.getTextContent());
+        final String name = EncodeDecodeUtils.encodePath(getSingleChildElementTextContent(policyDetails, NAME));
 
         final Element resources = getSingleChildElement(policy, RESOURCES);
         final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
         final Element resource = getSingleChildElement(resourceSet, RESOURCE);
         final String policyString = resource.getTextContent();
-        return new PolicyEntity(name, id, guid, folderId, policy, policyString);
+        return new PolicyEntity.Builder()
+                .setName(name)
+                .setId(id)
+                .setGuid(guid)
+                .setParentFolderId(folderId)
+                .setPolicyXML(policy)
+                .setPolicy(policyString)
+                .setTag(policyTag)
+                .setPolicyType(PolicyType.fromType(policyType))
+                .build();
     }
 
     @Override
