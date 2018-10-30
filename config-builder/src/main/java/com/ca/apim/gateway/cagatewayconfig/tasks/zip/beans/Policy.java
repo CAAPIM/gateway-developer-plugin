@@ -11,11 +11,10 @@ import org.w3c.dom.Element;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Policy {
+public class Policy extends Folderable {
     private String path;
     private String policyXML;
     private String name;
-    private Folder parentFolder;
     private String guid;
     private Element policyDocument;
     private final Set<Policy> dependencies = new HashSet<>();
@@ -43,14 +42,6 @@ public class Policy {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Folder getParentFolder() {
-        return parentFolder;
-    }
-
-    public void setParentFolder(Folder parentFolder) {
-        this.parentFolder = parentFolder;
     }
 
     public void setGuid(String guid) {

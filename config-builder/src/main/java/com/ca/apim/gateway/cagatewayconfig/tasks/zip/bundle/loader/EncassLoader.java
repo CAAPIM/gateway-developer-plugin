@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -35,7 +36,8 @@ public class EncassLoader implements BundleDependencyLoader {
         encass.setGuid(guid);
 
         String policyPath = getPath(bundle, policyId);
-        bundle.getEncasses().put(policyPath, encass);
+        encass.setPolicy(policyPath);
+        bundle.getEncasses().put(FilenameUtils.removeExtension(policyPath), encass);
     }
 
     private String getPath(Bundle bundle, String policyId) {

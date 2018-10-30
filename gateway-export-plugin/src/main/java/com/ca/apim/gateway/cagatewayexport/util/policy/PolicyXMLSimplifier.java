@@ -18,6 +18,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -121,7 +122,7 @@ public class PolicyXMLSimplifier {
         if (encassEntity.isPresent()) {
             PolicyEntity policyEntity = bundle.getEntities(PolicyEntity.class).get(encassEntity.get().getPolicyId());
             if (policyEntity != null) {
-                encapsulatedAssertionElement.setAttribute("policyPath", getPolicyPath(bundle, policyEntity));
+                encapsulatedAssertionElement.setAttribute("encassPath", FilenameUtils.removeExtension(getPolicyPath(bundle, policyEntity)));
                 Element encapsulatedAssertionConfigNameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
                 encapsulatedAssertionElement.removeChild(encapsulatedAssertionConfigNameElement);
                 encapsulatedAssertionElement.removeChild(encassGuidElement);

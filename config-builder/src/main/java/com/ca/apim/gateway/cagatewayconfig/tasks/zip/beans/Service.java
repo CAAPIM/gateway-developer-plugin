@@ -13,11 +13,10 @@ import java.util.Map;
 import java.util.Set;
 
 @JsonInclude(Include.NON_NULL)
-public class Service {
+public class Service extends Folderable{
     private String id;
     private String url;
     private String policy;
-    private Folder parentFolder;
     private Set<String> httpMethods;
     private Map<String,String> properties;
 
@@ -43,14 +42,6 @@ public class Service {
 
     public void setPolicy(String policy) {
         this.policy = policy;
-    }
-
-    public Folder getParentFolder() {
-        return parentFolder;
-    }
-
-    public void setParentFolder(Folder parentFolder) {
-        this.parentFolder = parentFolder;
     }
 
     public Set<String> getHttpMethods() {

@@ -15,6 +15,6 @@
             <L7p:DataType variableDataType="message"/>
             <L7p:VariableToSet stringValue="encass-messsage-input"/>
         </L7p:SetVariable>
-        <L7p:Encapsulated policyPath="another/some other.xml" />
+        <L7p:Encapsulated encassPath="another/some other" />
     </wsp:All>
 </wsp:Policy>

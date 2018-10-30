@@ -6,7 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folderable;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -17,6 +21,36 @@ import java.util.List;
 import java.util.Map;
 
 class FolderLoaderUtils {
+
+    /**
+     * Creates all the folders along the path for each folderable bean
+     * @param bundle The bundle
+     * @param rootDir The project rootDir
+     * @param folderableMap The map of folderable entities in which the key is the path relative to the `policy` folder
+     * @param <E> The folderable bean
+     */
+    static <E extends Folderable> void createFolders(Bundle bundle, File rootDir, Map<String, E> folderableMap) {
+        final File policyRootDir = getPolicyRootDir(rootDir);
+        if (policyRootDir == null) return;
+
+        final Map<String, Folder> folderMap = bundle.getFolders();
+        final Folder rootFolder = folderMap.computeIfAbsent(
+                getPath(policyRootDir, policyRootDir),
+                key -> createFolder(policyRootDir.getName(), key, null)
+        );
+
+        folderableMap.forEach((folderablePath, folderable) -> {
+            final String pathExcludingService = FilenameUtils.getFullPath(folderablePath);
+            if (StringUtils.isEmpty(pathExcludingService)) {
+                //service is directly under the root dir
+                folderable.setParentFolder(rootFolder);
+            } else {
+                //service is in a folder, create folders if they don't already exist
+                createFoldersAlongPath(pathExcludingService, folderMap, rootFolder);
+                folderable.setParentFolder(folderMap.get(pathExcludingService));
+            }
+        });
+    }
 
     @Nullable
     static File getPolicyRootDir(File rootDir) {
@@ -38,7 +72,7 @@ class FolderLoaderUtils {
      * @param folderMap The existing map of folders
      * @param rootFolder The root folder
      */
-    static void createFolders(final String stringPath, Map<String, Folder> folderMap, Folder rootFolder) {
+    static void createFoldersAlongPath(final String stringPath, Map<String, Folder> folderMap, Folder rootFolder) {
         final Path path = Paths.get(stringPath);
         List<Path> paths = new ArrayList<>();
         int i = 0;

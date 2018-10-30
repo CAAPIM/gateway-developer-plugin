@@ -15,6 +15,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
@@ -82,8 +83,8 @@ class EncassEntityBuilderTest {
 
     private static void buildBundleWithEncass(Bundle bundle, BundleType deployment, String policyPath, String encassGuid, String policyId, String policyName) {
         EncassEntityBuilder builder = new EncassEntityBuilder(ID_GENERATOR);
-        Encass encass = buildTestEncass(encassGuid);
-        bundle.putAllEncasses(ImmutableMap.of(policyPath, encass));
+        Encass encass = buildTestEncass(encassGuid, policyPath);
+        bundle.putAllEncasses(ImmutableMap.of(FilenameUtils.removeExtension(policyPath), encass));
 
         final List<Entity> entities = builder.build(bundle, deployment, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
@@ -134,8 +135,9 @@ class EncassEntityBuilderTest {
         assertTrue(argumentElements.isEmpty());
     }
 
-    private static Encass buildTestEncass(String encassGuid) {
+    private static Encass buildTestEncass(String encassGuid, String policyPath) {
         Encass encass = new Encass();
+        encass.setPolicy(policyPath);
         encass.setGuid(encassGuid);
         encass.setArguments(new HashSet<>());
         EncassParam param1 = new EncassParam();

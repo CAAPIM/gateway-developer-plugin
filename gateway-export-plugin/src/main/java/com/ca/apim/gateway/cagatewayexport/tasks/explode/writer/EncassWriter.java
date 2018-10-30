@@ -23,6 +23,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
+import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 @Singleton
 public class EncassWriter implements EntityWriter {
@@ -41,7 +42,7 @@ public class EncassWriter implements EntityWriter {
         Map<String, Encass> encassBeans = bundle.getEntities(EncassEntity.class)
                 .values()
                 .stream()
-                .collect(Collectors.toMap(EncassEntity::getPath, this::getEncassBean));
+                .collect(Collectors.toMap(e -> removeExtension(e.getPath()), this::getEncassBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE, Encass.class);
     }
@@ -49,6 +50,7 @@ public class EncassWriter implements EntityWriter {
     @VisibleForTesting
     Encass getEncassBean(EncassEntity encassEntity) {
         Encass encassBean = new Encass();
+        encassBean.setPolicy(encassEntity.getPath());
         encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
         encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
         return encassBean;

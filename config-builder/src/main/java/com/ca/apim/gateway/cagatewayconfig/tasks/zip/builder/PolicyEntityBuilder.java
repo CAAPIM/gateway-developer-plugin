@@ -19,6 +19,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.*;
 
 import javax.inject.Inject;
@@ -43,12 +44,13 @@ public class PolicyEntityBuilder implements EntityBuilder {
     static final String STRING_VALUE = "stringValue";
     static final String BOOLEAN_VALUE = "booleanValue";
     static final String POLICY_PATH = "policyPath";
+    static final String ENCASS_PATH = "encassPath";
     static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
     private static final String TAG = "tag";
     private static final String SUBTAG = "subtag";
     private static final String TYPE = "type";
     private static final String POLICY = "policy";
-    static final String POLICY_TYPE_INCLUDE = "Include";
+    private static final String POLICY_TYPE_INCLUDE = "Include";
     private static final Integer ORDER = 200;
     static final String ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 
@@ -70,6 +72,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle, document)).collect(Collectors.toList());
     }
 
+    @NotNull
     @Override
     public Integer getOrder() {
         return ORDER;
@@ -161,16 +164,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
     @VisibleForTesting
     static void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement) {
-        if (encapsulatedAssertionElement.hasAttribute(POLICY_PATH)) {
-            final String policyPath = encapsulatedAssertionElement.getAttribute(POLICY_PATH);
-            final String guid = findEncassReferencedGuid(policy, bundle, encapsulatedAssertionElement, policyPath);
-            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, policyPath, guid);
+        if (encapsulatedAssertionElement.hasAttribute(ENCASS_PATH)) {
+            final String encassPath = encapsulatedAssertionElement.getAttribute(ENCASS_PATH);
+            final String guid = findEncassReferencedGuid(policy, bundle, encapsulatedAssertionElement, encassPath);
+            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encassPath, guid);
         } else if (!isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
             Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
             Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
-            throw new EntityBuilderException("No policyPath specified for encass in policy: '" + policy.getPath() + "' GUID: '" + (guidElement != null ? guidElement.getAttribute(STRING_VALUE) : null) + "' Name: '" + (nameElement != null ? nameElement.getAttribute(STRING_VALUE) : null) + "'");
+            throw new EntityBuilderException("No encassPath specified for encass in policy: '" + policy.getPath() + "' GUID: '" + (guidElement != null ? guidElement.getAttribute(STRING_VALUE) : null) + "' Name: '" + (nameElement != null ? nameElement.getAttribute(STRING_VALUE) : null) + "'");
         } else {
-            LOGGER.log(Level.FINE, "No policyPath specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
+            LOGGER.log(Level.FINE, "No encassPath specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
         }
     }
 
@@ -221,7 +224,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         );
         encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
 
-        ((Element) encapsulatedAssertionElement).removeAttribute(POLICY_PATH);
+        ((Element) encapsulatedAssertionElement).removeAttribute(ENCASS_PATH);
     }
 
     private static boolean isNoOpIfConfigMissing(Element encapsulatedAssertionElement) {
