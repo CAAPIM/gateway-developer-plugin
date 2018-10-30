@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.File;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.createFolders;
@@ -45,12 +44,6 @@ public class EncassLoader extends EntityLoaderBase<Encass> {
     protected void putToBundle(final Bundle bundle, @NotNull final Map<String, Encass> entitiesMap) {
         entitiesMap.values().forEach(encass -> encass.setGuid(idGenerator.generateGuid()));
         bundle.putAllEncasses(entitiesMap);
-    }
-
-    @Override
-    public void load(final Bundle bundle, final File rootDir) {
-        super.load(bundle, rootDir);
-        createFolders(bundle, rootDir, bundle.getEncasses());
     }
 
     @Override

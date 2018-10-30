@@ -13,7 +13,7 @@ import java.util.Set;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @JsonInclude(NON_NULL)
-public class Encass extends Folderable {
+public class Encass {
     private String policy;
     private Set<EncassParam> arguments;
     private Set<EncassParam> results;

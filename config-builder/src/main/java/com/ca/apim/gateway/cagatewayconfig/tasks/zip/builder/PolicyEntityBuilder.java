@@ -44,7 +44,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     static final String STRING_VALUE = "stringValue";
     static final String BOOLEAN_VALUE = "booleanValue";
     static final String POLICY_PATH = "policyPath";
-    static final String ENCASS_PATH = "encassPath";
+    static final String ENCASS_NAME = "encassName";
     static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
     private static final String TAG = "tag";
     private static final String SUBTAG = "subtag";
@@ -164,37 +164,37 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
     @VisibleForTesting
     static void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement) {
-        if (encapsulatedAssertionElement.hasAttribute(ENCASS_PATH)) {
-            final String encassPath = encapsulatedAssertionElement.getAttribute(ENCASS_PATH);
-            final String guid = findEncassReferencedGuid(policy, bundle, encapsulatedAssertionElement, encassPath);
-            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encassPath, guid);
+        if (encapsulatedAssertionElement.hasAttribute(ENCASS_NAME)) {
+            final String encassName = encapsulatedAssertionElement.getAttribute(ENCASS_NAME);
+            final String guid = findEncassReferencedGuid(policy, bundle, encapsulatedAssertionElement, encassName);
+            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encassName, guid);
         } else if (!isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
             Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
             Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
-            throw new EntityBuilderException("No encassPath specified for encass in policy: '" + policy.getPath() + "' GUID: '" + (guidElement != null ? guidElement.getAttribute(STRING_VALUE) : null) + "' Name: '" + (nameElement != null ? nameElement.getAttribute(STRING_VALUE) : null) + "'");
+            throw new EntityBuilderException("No encassName specified for encass in policy: '" + policy.getPath() + "' GUID: '" + (guidElement != null ? guidElement.getAttribute(STRING_VALUE) : null) + "' Name: '" + (nameElement != null ? nameElement.getAttribute(STRING_VALUE) : null) + "'");
         } else {
-            LOGGER.log(Level.FINE, "No encassPath specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
+            LOGGER.log(Level.FINE, "No encassName specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
         }
     }
 
-    private static String findEncassReferencedGuid(Policy policy, Bundle bundle, Element encapsulatedAssertionElement, String policyPath) {
-        LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", policyPath);
-        final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(policyPath));
+    private static String findEncassReferencedGuid(Policy policy, Bundle bundle, Element encapsulatedAssertionElement, String name) {
+        LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", name);
+        final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(name));
         if (referenceEncass.get() == null) {
             bundle.getDependencies().forEach(b -> {
-                Encass encass = b.getEncasses().get(policyPath);
+                Encass encass = b.getEncasses().get(name);
                 if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
-                    throw new EntityBuilderException("Found multiple encasses in dependency bundles with policy path: " + policyPath);
+                    throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
                 }
             });
         }
         final String guid;
         if (referenceEncass.get() == null) {
             if (isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
-                LOGGER.log(Level.FINE, "Could not find referenced encass with path: \"{0}\". In policy: \"{1}\". Since NoOp is true, this will be treated as a No Op.", new String[]{policyPath, policy.getPath()});
+                LOGGER.log(Level.FINE, "Could not find referenced encass with name: \"{0}\". In policy: \"{1}\". Since NoOp is true, this will be treated as a No Op.", new String[]{name, policy.getPath()});
                 guid = ZERO_GUID;
             } else {
-                throw new EntityBuilderException("Could not find referenced encass with path: '" + policyPath + "'. In policy: " + policy.getPath());
+                throw new EntityBuilderException("Could not find referenced encass with name: '" + name + "'. In policy: " + policy.getPath());
             }
         } else {
             guid = referenceEncass.get().getGuid();
@@ -224,7 +224,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         );
         encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
 
-        ((Element) encapsulatedAssertionElement).removeAttribute(ENCASS_PATH);
+        ((Element) encapsulatedAssertionElement).removeAttribute(ENCASS_NAME);
     }
 
     private static boolean isNoOpIfConfigMissing(Element encapsulatedAssertionElement) {

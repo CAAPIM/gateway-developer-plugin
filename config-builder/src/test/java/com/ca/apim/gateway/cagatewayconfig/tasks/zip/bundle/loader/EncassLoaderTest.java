@@ -27,6 +27,7 @@ class EncassLoaderTest {
     private static final String TEST_GUID = UUID.randomUUID().toString();
     private static final String POLICY_ID = "PolicyID";
     private static final String TEST_POLICY_PATH = "PolicyPath";
+    private static final String TEST_NAME = "EncassName";
     private EncassLoader loader = new EncassLoader();
 
     @Test
@@ -67,9 +68,9 @@ class EncassLoaderTest {
 
         assertFalse(bundle.getEncasses().isEmpty());
         assertEquals(1, bundle.getEncasses().size());
-        assertNotNull(bundle.getEncasses().get(TEST_POLICY_PATH));
+        assertNotNull(bundle.getEncasses().get(TEST_NAME));
 
-        Encass entity = bundle.getEncasses().get(TEST_POLICY_PATH);
+        Encass entity = bundle.getEncasses().get(TEST_NAME);
         assertNotNull(entity);
         assertEquals(TEST_GUID, entity.getGuid());
     }
@@ -80,7 +81,8 @@ class EncassLoaderTest {
                 ENCAPSULATED_ASSERTION,
                 ImmutableMap.of(ATTRIBUTE_ID, "id"),
                 createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, POLICY_ID),
-                createElementWithTextContent(document, GUID, TEST_GUID)
+                createElementWithTextContent(document, GUID, TEST_GUID),
+                createElementWithTextContent(document, NAME, TEST_NAME)
         );
 
         return createElementWithChildren(

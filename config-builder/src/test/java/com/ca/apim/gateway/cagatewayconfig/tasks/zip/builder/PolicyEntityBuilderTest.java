@@ -27,7 +27,6 @@ import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.PolicyEntity
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
-import static org.apache.commons.io.FilenameUtils.removeExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PolicyEntityBuilderTest {
@@ -35,6 +34,7 @@ class PolicyEntityBuilderTest {
     private Policy policy;
     private Bundle bundle;
     private Document document;
+    private final String TEST_ENCASS = "EncassName";
 
     @BeforeEach
     void beforeEach() {
@@ -152,13 +152,13 @@ class PolicyEntityBuilderTest {
         Encass encass = new Encass();
         encass.setGuid("123");
         encass.setPolicy(policyPath);
-        bundle.getEncasses().put(removeExtension(policyPath), encass);
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, policyPath);
+        bundle.getEncasses().put(TEST_ENCASS, encass);
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
 
         PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(removeExtension(policyPath), nameElement.getAttribute(STRING_VALUE));
+        assertEquals(TEST_ENCASS, nameElement.getAttribute(STRING_VALUE));
 
         Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         assertEquals(encass.getGuid(), guidElement.getAttribute(STRING_VALUE));
@@ -170,13 +170,13 @@ class PolicyEntityBuilderTest {
         Encass encass = new Encass();
         encass.setGuid("123");
         encass.setPolicy(policyPath);
-        bundle.getEncasses().put(removeExtension(policyPath), encass);
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, policyPath);
+        bundle.getEncasses().put(TEST_ENCASS, encass);
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
 
         PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(removeExtension(policyPath), nameElement.getAttribute(STRING_VALUE));
+        assertEquals(TEST_ENCASS, nameElement.getAttribute(STRING_VALUE));
 
         Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         assertEquals(encass.getGuid(), guidElement.getAttribute(STRING_VALUE));
@@ -189,14 +189,14 @@ class PolicyEntityBuilderTest {
         encass.setGuid("123");
         encass.setPolicy(policyPath);
         Bundle dependencyBundle = new Bundle();
-        dependencyBundle.getEncasses().put(removeExtension(policyPath), encass);
+        dependencyBundle.getEncasses().put(TEST_ENCASS, encass);
         bundle.getDependencies().add(dependencyBundle);
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, policyPath);
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
 
         PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(removeExtension(policyPath), nameElement.getAttribute(STRING_VALUE));
+        assertEquals(TEST_ENCASS, nameElement.getAttribute(STRING_VALUE));
 
         Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         assertEquals(encass.getGuid(), guidElement.getAttribute(STRING_VALUE));
@@ -209,32 +209,30 @@ class PolicyEntityBuilderTest {
         encass.setGuid("123");
         encass.setPolicy(policyPath);
         Bundle dependencyBundle = new Bundle();
-        dependencyBundle.getEncasses().put(removeExtension(policyPath), encass);
+        dependencyBundle.getEncasses().put(TEST_ENCASS, encass);
         bundle.getDependencies().add(dependencyBundle);
 
         Bundle dependencyBundle2 = new Bundle();
-        dependencyBundle2.getEncasses().put(removeExtension(policyPath), encass);
+        dependencyBundle2.getEncasses().put(TEST_ENCASS, encass);
         bundle.getDependencies().add(dependencyBundle2);
 
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, policyPath);
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
 
         EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement));
-        assertTrue(exception.getMessage().contains(removeExtension(policyPath)));
+        assertTrue(exception.getMessage().contains(TEST_ENCASS));
     }
 
     @Test
     void testPrepareEncapsulatedAssertionMissingEncass() {
-        String policyPath = "my/policy/path.xml";
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, policyPath);
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
 
         EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement));
-        assertTrue(exception.getMessage().contains(removeExtension(policyPath)));
+        assertTrue(exception.getMessage().contains(TEST_ENCASS));
     }
 
     @Test
     void testPrepareEncapsulatedAssertionMissingEncassWithNoOp() throws DocumentParseException {
-        String policyPath = "my/policy/path.xml";
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, policyPath);
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
 
         Element noOpElement = document.createElement(NO_OP_IF_CONFIG_MISSING);
         encapsulatedAssertionElement.appendChild(noOpElement);
@@ -243,7 +241,7 @@ class PolicyEntityBuilderTest {
         PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(removeExtension(policyPath), nameElement.getAttribute(STRING_VALUE));
+        assertEquals(TEST_ENCASS, nameElement.getAttribute(STRING_VALUE));
 
         Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         assertEquals(ZERO_GUID, guidElement.getAttribute(STRING_VALUE));
@@ -493,11 +491,10 @@ class PolicyEntityBuilderTest {
         return setVariableAssertion;
     }
 
-    @NotNull
-    private Element createEncapsulatedAssertionElement(Document document, String policyPath) {
+    private Element createEncapsulatedAssertionElement(Document document) {
         Element setEncapsulatedAssertion = document.createElement(ENCAPSULATED);
         document.appendChild(setEncapsulatedAssertion);
-        setEncapsulatedAssertion.setAttribute(ENCASS_PATH, removeExtension(policyPath));
+        setEncapsulatedAssertion.setAttribute(ENCASS_NAME, TEST_ENCASS);
         return setEncapsulatedAssertion;
     }
 

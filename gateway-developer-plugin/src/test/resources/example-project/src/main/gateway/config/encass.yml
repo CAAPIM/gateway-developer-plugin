@@ -1,4 +1,4 @@
-example project/encass-policy:
+encass-policy:
   policy: example project/encass-policy.xml
   arguments:
   - name: "hello"
@@ -10,7 +10,19 @@ example project/encass-policy:
     type: "string"
   - name: "goodbye-again"
     type: "message"
-example project/folder-_¯-¯_-slashed/example-_¯-¯_-slashed:
+encass-policy-same-policy:
+  policy: example project/encass-policy.xml
+  arguments:
+  - name: "hello"
+    type: "string"
+  - name: "hello-again"
+    type: "message"
+  results:
+  - name: "goodbye"
+    type: "string"
+  - name: "goodbye-again"
+    type: "message"
+example-_¯-¯_-slashed:
   policy: example project/folder-_¯-¯_-slashed/example-_¯-¯_-slashed.xml
   arguments:
   - name: "hello"

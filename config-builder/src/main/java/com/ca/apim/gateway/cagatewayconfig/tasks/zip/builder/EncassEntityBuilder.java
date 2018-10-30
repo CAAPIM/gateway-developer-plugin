@@ -10,9 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,12 +52,11 @@ public class EncassEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildEncassEntity(Bundle bundle, String policyPath, Encass encass, Document document) {
+    private Entity buildEncassEntity(Bundle bundle, String name, Encass encass, Document document) {
         Policy policy = bundle.getPolicies().get(encass.getPolicy());
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + encass.getPolicy());
         }
-        final String name = EncodeDecodeUtils.decodePath(FilenameUtils.getBaseName(policyPath));
         final String id = idGenerator.generate();
 
         Element encassAssertionElement = createElementWithAttributesAndChildren(

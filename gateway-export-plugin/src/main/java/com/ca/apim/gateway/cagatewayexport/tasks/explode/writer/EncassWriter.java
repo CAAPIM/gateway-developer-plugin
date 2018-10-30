@@ -42,7 +42,7 @@ public class EncassWriter implements EntityWriter {
         Map<String, Encass> encassBeans = bundle.getEntities(EncassEntity.class)
                 .values()
                 .stream()
-                .collect(Collectors.toMap(e -> removeExtension(e.getPath()), this::getEncassBean));
+                .collect(Collectors.toMap(EncassEntity::getName, this::getEncassBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE, Encass.class);
     }

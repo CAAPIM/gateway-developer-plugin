@@ -10,7 +10,6 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -19,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
 public class EncassLoader implements BundleDependencyLoader {
@@ -26,7 +26,7 @@ public class EncassLoader implements BundleDependencyLoader {
     @Override
     public void load(Bundle bundle, Element element) {
         final Element encassElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), ENCAPSULATED_ASSERTION);
-
+        final String encassName = getSingleChildElementTextContent(encassElement, NAME);
         final Element policyReference = getSingleChildElement(encassElement, POLICY_REFERENCE);
         final String policyId = policyReference.getAttribute(ATTRIBUTE_ID);
         Element guidElement = getSingleChildElement(encassElement, GUID);
@@ -37,7 +37,7 @@ public class EncassLoader implements BundleDependencyLoader {
 
         String policyPath = getPath(bundle, policyId);
         encass.setPolicy(policyPath);
-        bundle.getEncasses().put(FilenameUtils.removeExtension(policyPath), encass);
+        bundle.getEncasses().put(encassName, encass);
     }
 
     private String getPath(Bundle bundle, String policyId) {
