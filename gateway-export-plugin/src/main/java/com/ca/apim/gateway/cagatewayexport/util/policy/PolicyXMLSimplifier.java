@@ -18,7 +18,6 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -115,14 +114,14 @@ public class PolicyXMLSimplifier {
         element.removeChild(base64ExpressionElement);
     }
 
-    private void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) throws DocumentParseException{
+    private void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) throws DocumentParseException {
         Element encassGuidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         String encassGuid = encassGuidElement.getAttribute(STRING_VALUE);
         Optional<EncassEntity> encassEntity = bundle.getEntities(EncassEntity.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
         if (encassEntity.isPresent()) {
             PolicyEntity policyEntity = bundle.getEntities(PolicyEntity.class).get(encassEntity.get().getPolicyId());
             if (policyEntity != null) {
-                encapsulatedAssertionElement.setAttribute("encassPath", FilenameUtils.removeExtension(getPolicyPath(bundle, policyEntity)));
+                encapsulatedAssertionElement.setAttribute("encassName", encassEntity.get().getName());
                 Element encapsulatedAssertionConfigNameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
                 encapsulatedAssertionElement.removeChild(encapsulatedAssertionConfigNameElement);
                 encapsulatedAssertionElement.removeChild(encassGuidElement);

@@ -32,7 +32,8 @@ import static org.mockito.Mockito.when;
 @Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
 class EncassLoaderTest {
 
-    private static final String NAME = "gateway-solution/encass-policy.xml";
+    private static final String NAME = "encass policy";
+    private static final String POLICY_PATH = "gateway-solution/encass-policy.xml";
 
     private TemporaryFolder rootProjectDir;
     private JsonTools jsonTools;
@@ -48,6 +49,7 @@ class EncassLoaderTest {
     @Test
     void loadYaml() throws IOException {
         String yaml = NAME + ":\n" +
+                "  policy: " + POLICY_PATH + "\n" +
                 "  arguments:\n" +
                 "  - name: \"hello\"\n" +
                 "    type: \"string\"\n" +
@@ -65,6 +67,7 @@ class EncassLoaderTest {
     void loadJson() throws IOException {
         String json = "{\n" +
                 "  \"" + NAME + "\" : {\n" +
+                "      \"policy\": \"" + POLICY_PATH + "\",\n" +
                 "      \"arguments\": [\n" +
                 "         {\n" +
                 "            \"name\": \"hello\",\n" +
@@ -163,6 +166,7 @@ class EncassLoaderTest {
         Encass encass = bundle.getEncasses().get(NAME);
         assertNotNull(encass.getGuid());
         assertNotNull(encass.getArguments());
+        assertEquals(encass.getPolicy(), POLICY_PATH);
         assertFalse(encass.getArguments().isEmpty());
         assertEquals(2, encass.getArguments().size());
         encass.getArguments().forEach(e -> assertTrue((e.getName().equals("hello") && e.getType().equals("string")) ||
