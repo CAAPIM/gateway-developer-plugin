@@ -9,27 +9,29 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType.isValidType;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_TAG;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
 public class PolicyLoader implements BundleDependencyLoader {
 
     private static final Logger LOGGER = Logger.getLogger(PolicyLoader.class.getName());
-    static final String SERVICE_OPERATION = "Service Operation";
-    private static final String INCLUDE = "Include";
-    private static final List<String> SUPPORTED_POLICY_TYPES = Arrays.asList(SERVICE_OPERATION, INCLUDE);
 
     @Override
     public void load(Bundle bundle, Element element) {
@@ -37,9 +39,16 @@ public class PolicyLoader implements BundleDependencyLoader {
         final String guid = policyElement.getAttribute(ATTRIBUTE_GUID);
 
         final Element policyDetails = getSingleChildElement(policyElement, POLICY_DETAIL);
-        Element policyTypeElement = getSingleChildElement(policyDetails, POLICY_TYPE);
-        if (!SUPPORTED_POLICY_TYPES.contains(policyTypeElement.getTextContent())) {
-            LOGGER.log(Level.WARNING, "Skipping unsupported PolicyType: {0}", policyTypeElement.getTextContent());
+        final String policyType = getSingleChildElementTextContent(policyDetails, POLICY_TYPE);
+        final Map<String, Object> policyDetailProperties = mapPropertiesElements(getSingleChildElement(policyDetails, PROPERTIES, true), PROPERTIES);
+        final String policyTag = (String) policyDetailProperties.get(PROPERTY_TAG);
+        if (!isValidType(policyType, policyTag)) {
+            LOGGER.log(Level.WARNING, () -> {
+                if (policyTag != null) {
+                    return String.format("Skipping unsupported PolicyType: %s, with tag %s", policyType, policyTag);
+                }
+                return String.format("Skipping unsupported PolicyType: %s", policyType);
+            });
             return;
         }
 
@@ -56,6 +65,8 @@ public class PolicyLoader implements BundleDependencyLoader {
         policy.setParentFolder(parentFolder);
         policy.setGuid(guid);
         policy.setId(id);
+        policy.setTag(policyTag);
+        policy.setPolicyType(PolicyType.fromType(policyType));
 
         bundle.getPolicies().put(policy.getPath(), policy);
     }

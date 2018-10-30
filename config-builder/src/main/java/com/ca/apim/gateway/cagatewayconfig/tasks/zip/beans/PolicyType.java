@@ -12,7 +12,7 @@ import java.util.List;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public enum PolicyType {
     INCLUDE("Include"),

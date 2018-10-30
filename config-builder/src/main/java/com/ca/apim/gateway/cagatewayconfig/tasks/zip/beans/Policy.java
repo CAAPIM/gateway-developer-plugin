@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @JsonInclude(NON_EMPTY)
 public class Policy extends Folderable {
@@ -25,6 +25,7 @@ public class Policy extends Folderable {
     private final Set<Policy> dependencies = new HashSet<>();
     private String id;
     private String tag;
+    private PolicyType policyType;
 
     public String getPath() {
         return path;
@@ -84,5 +85,25 @@ public class Policy extends Folderable {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public PolicyType getPolicyType() {
+        return policyType;
+    }
+
+    public void setPolicyType(PolicyType policyType) {
+        this.policyType = policyType;
+    }
+
+    public void merge(Policy otherPolicy) {
+        this.policyXML = firstNonNull(otherPolicy.policyXML, this.policyXML);
+        this.name = firstNonNull(otherPolicy.name, this.name);
+        this.parentFolder = firstNonNull(otherPolicy.parentFolder, this.parentFolder);
+        this.guid = firstNonNull(otherPolicy.guid, this.guid);
+        this.policyDocument = firstNonNull(otherPolicy.policyDocument, this.policyDocument);
+        this.dependencies.addAll(otherPolicy.dependencies);
+        this.id = firstNonNull(otherPolicy.id, this.id);
+        this.tag = firstNonNull(otherPolicy.tag, this.tag);
+        this.policyType = firstNonNull(otherPolicy.policyType, this.policyType);
     }
 }

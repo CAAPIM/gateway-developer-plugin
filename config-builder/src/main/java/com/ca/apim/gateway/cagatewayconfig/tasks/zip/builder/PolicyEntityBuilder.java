@@ -6,19 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
+import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.*;
@@ -31,14 +30,17 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType.*;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType.INCLUDE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_SUBTAG;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_TAG;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Singleton
 public class PolicyEntityBuilder implements EntityBuilder {
@@ -51,7 +53,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
     static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
     private static final String TYPE = "type";
     private static final String POLICY = "policy";
-    private static final String POLICY_TYPE_INCLUDE = "Include";
     private static final Integer ORDER = 200;
     static final String ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 
@@ -70,7 +71,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         List<Policy> orderedPolicies = new LinkedList<>();
         bundle.getPolicies().forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
 
-        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle, document)).collect(Collectors.toList());
+        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle, document)).collect(toList());
     }
 
     @NotNull
@@ -98,7 +99,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Document policyDocument = stringToXML(policy.getPolicyXML());
         Element policyElement = policyDocument.getDocumentElement();
 
-        prepareAssertion(policyElement, INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
+        prepareAssertion(policyElement, PolicyXMLElements.INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
         prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement));
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
@@ -287,12 +288,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 POLICY_DETAIL,
                 ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_GUID, policy.getGuid(), ATTRIBUTE_FOLDER_ID, policy.getParentFolder().getId()),
                 createElementWithTextContent(document, NAME, EncodeDecodeUtils.decodePath(policy.getName())),
-                createElementWithTextContent(document, POLICY_TYPE, policyTags == null ? POLICY_TYPE_INCLUDE : policyTags.type)
+                createElementWithTextContent(document, POLICY_TYPE, policyTags == null ? INCLUDE.getType() : policyTags.type.getType())
         );
 
         if (policyTags != null) {
+            Builder<String, Object> builder = ImmutableMap.<String, Object>builder().put(PROPERTY_TAG, policyTags.tag);
+            if (policyTags.subtag != null) {
+                builder.put(PROPERTY_SUBTAG, policyTags.subtag);
+            }
             buildAndAppendPropertiesElement(
-                    ImmutableMap.of(PROPERTY_TAG, policyTags.tag, PROPERTY_SUBTAG, policyTags.subtag),
+                    builder.build(),
                     document,
                     policyDetailElement
             );
@@ -317,10 +322,15 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private PolicyTags getPolicyTags(Policy policy, Bundle bundle) {
+        // Global and Internal policies have only the tag and can be treated as is
+        if (Stream.of(GLOBAL, INTERNAL).collect(toList()).contains(policy.getPolicyType()) && isNotEmpty(policy.getTag())) {
+            return new PolicyTags(policy.getPolicyType(), policy.getTag(), null);
+        }
+
         final AtomicReference<PolicyTags> policyTags = new AtomicReference<>();
         for (PolicyBackedService pbs : bundle.getPolicyBackedServices().values()) {
             pbs.getOperations().stream().filter(o -> o.getPolicy().equals(policy.getPath())).forEach(o -> {
-                if (!policyTags.compareAndSet(null, new PolicyTags("Service Operation", pbs.getInterfaceName(), o.getOperationName()))) {
+                if (!policyTags.compareAndSet(null, new PolicyTags(SERVICE_OPERATION, pbs.getInterfaceName(), o.getOperationName()))) {
                     throw new EntityBuilderException("Found multiple policy backed service operations for policy: " + policy.getPath());
                 }
             });
@@ -340,11 +350,11 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private class PolicyTags {
-        private final String type;
+        private final PolicyType type;
         private final String tag;
         private final String subtag;
 
-        private PolicyTags(String type, String tag, String subtag) {
+        private PolicyTags(PolicyType type, String tag, String subtag) {
             this.type = type;
             this.tag = tag;
             this.subtag = subtag;

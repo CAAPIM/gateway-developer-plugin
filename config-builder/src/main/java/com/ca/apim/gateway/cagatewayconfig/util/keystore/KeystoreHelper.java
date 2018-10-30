@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.keystore;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jetbrains.annotations.NotNull;
 
