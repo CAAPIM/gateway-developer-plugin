@@ -24,30 +24,38 @@ public class JdbcConnectionLinker implements EntityLinker<JdbcConnectionEntity> 
 
     @Override
     public void link(JdbcConnectionEntity entity, Bundle bundle, Bundle targetBundle) {
-        String storedPasswordReference = extractVariableName(entity.getPasswordRef());
-        if (isEmpty(storedPasswordReference)) {
-            throw new LinkerException("Password variable specified " + entity.getPasswordRef() + " for JDBC Connection " + entity.getName() + " does not match the expected format (${secpass.<stored_password_name>.plaintext})");
-        }
-
-        Matcher matcher = secpassPattern.matcher(storedPasswordReference);
-        if (matcher.matches()) {
-            // the middle string between secpass and plaintext will be the stored password name
-            String storedPasswordName = matcher.group(1);
-            final StoredPasswordEntity storedPassword =
-                    bundle.getEntities(StoredPasswordEntity.class).values()
-                    .stream()
-                    .filter(e -> e.getName().equals(storedPasswordName))
-                    .findFirst()
-                    .orElse(null);
-            if (storedPassword == null) {
-                throw new LinkerException("Could not find Stored Password for JDBC Connection: " + entity.getName() + ". Password Name: " + storedPasswordName);
+        if (entity.getPassword() != null) {
+            if (entity.getPassword().startsWith("$L7C2$")) {
+                // Ignore passwords that are L7C2 encoded. We can't decode them anyways.
+                entity.setPassword(null);
+            } else {
+                String storedPasswordReference = extractVariableName(entity.getPassword());
+                if (!isEmpty(storedPasswordReference)) {
+                    Matcher matcher = secpassPattern.matcher(storedPasswordReference);
+                    if (matcher.matches()) {
+                        // the middle string between secpass and plaintext will be the stored password name
+                        String storedPasswordName = matcher.group(1);
+                        setPasswordRef(entity, bundle, storedPasswordName);
+                    }
+                }
             }
-
-            // replace the expression with the password reference by name
-            entity.setPasswordRef(storedPassword.getName());
-        } else {
-            throw new LinkerException("Password variable specified ${" + storedPasswordReference + "} for JDBC Connection " + entity.getName() + " does not match the expected format (${secpass.<stored_password_name>.plaintext})");
         }
+    }
+
+    private void setPasswordRef(JdbcConnectionEntity entity, Bundle bundle, String storedPasswordName) {
+        final StoredPasswordEntity storedPassword =
+                bundle.getEntities(StoredPasswordEntity.class).values()
+                        .stream()
+                        .filter(e -> e.getName().equals(storedPasswordName))
+                        .findFirst()
+                        .orElse(null);
+        if (storedPassword == null) {
+            throw new LinkerException("Could not find Stored Password for JDBC Connection: " + entity.getName() + ". Password Name: " + storedPasswordName);
+        }
+
+        // replace the expression with the password reference by name
+        entity.setPasswordRef(storedPassword.getName());
+        entity.setPassword(null);
     }
 
     @Override

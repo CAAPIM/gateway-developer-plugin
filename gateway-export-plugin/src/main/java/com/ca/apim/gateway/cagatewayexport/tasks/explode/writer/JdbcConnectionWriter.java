@@ -51,6 +51,7 @@ public class JdbcConnectionWriter implements EntityWriter {
         jdbcConnection.setMaximumPoolSize(entity.getMaximumPoolSize());
         jdbcConnection.setMinimumPoolSize(entity.getMinimumPoolSize());
         jdbcConnection.setPasswordRef(entity.getPasswordRef());
+        jdbcConnection.setPassword(entity.getPassword());
         jdbcConnection.setUser(entity.getUser());
         jdbcConnection.setProperties(entity.getProperties());
         return jdbcConnection;

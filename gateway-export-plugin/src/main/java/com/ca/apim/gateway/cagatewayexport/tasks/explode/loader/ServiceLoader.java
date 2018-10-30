@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import org.w3c.dom.Element;
 
@@ -25,7 +26,7 @@ public class ServiceLoader implements EntityLoader<ServiceEntity> {
         final String id = serviceDetails.getAttribute(ATTRIBUTE_ID);
         final String folderId = serviceDetails.getAttribute(ATTRIBUTE_FOLDER_ID);
         Element nameElement = getSingleChildElement(serviceDetails, NAME);
-        final String name = nameElement.getTextContent();
+        final String name = EncodeDecodeUtils.encodePath(nameElement.getTextContent());
 
         final Element resources = getSingleChildElement(service, RESOURCES);
         final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);

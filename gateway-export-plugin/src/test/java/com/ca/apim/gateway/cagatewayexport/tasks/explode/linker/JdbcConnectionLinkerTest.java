@@ -40,12 +40,21 @@ class JdbcConnectionLinkerTest {
 
         assertNotNull(jdbcConnection.getPasswordRef());
         assertEquals(passwordVar, jdbcConnection.getPasswordRef());
+        assertNull(jdbcConnection.getPassword());
     }
 
     @Test
     void linkMissingPassword() {
         final JdbcConnectionEntity jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, GATEWAY));
         assertThrows(LinkerException.class, () -> linker.link(jdbcConnection, new Bundle(), new Bundle()));
+    }
+
+    @Test
+    void linkNullPassword() {
+        final JdbcConnectionEntity jdbcConnection = createJdbcConnection(null);
+        linker.link(jdbcConnection, new Bundle(), new Bundle());
+        assertNull(jdbcConnection.getPasswordRef());
+        assertNull(jdbcConnection.getPassword());
     }
 
     @Test
@@ -58,22 +67,36 @@ class JdbcConnectionLinkerTest {
     }
 
     @Test
-    void linkInvalidVariable() {
+    void linkNotPasswordVariable() {
         final JdbcConnectionEntity jdbcConnection = createJdbcConnection("${" + GATEWAY + "}");
-        assertThrows(LinkerException.class, () -> linker.link(jdbcConnection, new Bundle(), new Bundle()));
+        linker.link(jdbcConnection, new Bundle(), new Bundle());
+        assertNull(jdbcConnection.getPasswordRef());
+        assertEquals("${" + GATEWAY + "}", jdbcConnection.getPassword());
+        assertNotNull(jdbcConnection.getPassword());
     }
 
     @Test
-    void linkInvalidVariableFormat() {
+    void linkNotVariableFormat() {
         final JdbcConnectionEntity jdbcConnection = createJdbcConnection(GATEWAY);
-        assertThrows(LinkerException.class, () -> linker.link(jdbcConnection, new Bundle(), new Bundle()));
+        linker.link(jdbcConnection, new Bundle(), new Bundle());
+        assertNull(jdbcConnection.getPasswordRef());
+        assertEquals(GATEWAY, jdbcConnection.getPassword());
+        assertNotNull(jdbcConnection.getPassword());
     }
 
-    private static JdbcConnectionEntity createJdbcConnection(String passwordRef) {
+    @Test
+    void linkL7C2VariableFormat() {
+        final JdbcConnectionEntity jdbcConnection = createJdbcConnection("$L7C2$1,3ok3RLhLqpD3Z3QdyTpoa2iHU2dRYdAF3TgSchF2ttI=$2EqC+niJG4yw7LOJ52Rur0VcGccT/r1WpHE+4Aiqj5GcNNYXub9h7pO5CrGT7eFGhyub2ilKx5M+ULQtbU5ZTcGxgj4K+H0+y9Yq5LNbKggoHYa+3T8r9pIcUamcCx7q");
+        linker.link(jdbcConnection, new Bundle(), new Bundle());
+        assertNull(jdbcConnection.getPasswordRef());
+        assertNull(jdbcConnection.getPassword());
+    }
+
+    private static JdbcConnectionEntity createJdbcConnection(String password) {
         return new JdbcConnectionEntity.Builder()
                 .name("Test")
                 .user("gateway")
-                .passwordRef(passwordRef)
+                .password(password)
                 .build();
     }
 

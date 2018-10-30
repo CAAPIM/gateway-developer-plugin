@@ -19,9 +19,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.createFolder;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.getPath;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.getPolicyRootDir;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.*;
 
 @Singleton
 public class PolicyAndFolderLoader implements EntityLoader {

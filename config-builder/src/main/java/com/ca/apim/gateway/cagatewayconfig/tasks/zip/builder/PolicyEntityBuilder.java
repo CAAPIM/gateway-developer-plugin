@@ -13,8 +13,10 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.*;
@@ -38,15 +40,17 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
 
-    private static final String STRING_VALUE = "stringValue";
-    private static final String POLICY_PATH = "policyPath";
-    private static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
+    static final String STRING_VALUE = "stringValue";
+    static final String BOOLEAN_VALUE = "booleanValue";
+    static final String POLICY_PATH = "policyPath";
+    static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
     private static final String TAG = "tag";
     private static final String SUBTAG = "subtag";
     private static final String TYPE = "type";
     private static final String POLICY = "policy";
     static final String POLICY_TYPE_INCLUDE = "Include";
     private static final Integer ORDER = 200;
+    static final String ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
@@ -71,7 +75,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
+    @VisibleForTesting
+    static void maybeAddPolicy(Bundle bundle, Policy policy, List<Policy> orderedPolicies, Set<Policy> seenPolicies) {
         if (orderedPolicies.contains(policy) || bundle.getServices().get(FilenameUtils.removeExtension(policy.getPath())) != null) {
             //This is a service policy it should have already be handled by the service entity builder OR This policy has already been added to the policy list
             return;
@@ -90,18 +95,20 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Element policyElement = policyDocument.getDocumentElement();
 
         prepareAssertion(policyElement, INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
-        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(bundle, policyDocument, assertionElement));
+        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement));
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
         policy.setPolicyDocument(policyElement);
     }
 
-    private void prepareHardcodedResponseAssertion(Document policyDocument, Element assertionElement) {
+    @VisibleForTesting
+    static void prepareHardcodedResponseAssertion(Document policyDocument, Element assertionElement) {
         prepareBase64Element(policyDocument, assertionElement, RESPONSE_BODY, BASE_64_RESPONSE_BODY);
     }
 
-    private void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
+    @VisibleForTesting
+    static void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
         Element nameElement;
         try {
             nameElement = getSingleElement(assertionElement, VARIABLE_TO_SET);
@@ -110,7 +117,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
 
         String variableName = nameElement.getAttribute(STRING_VALUE);
-        if(variableName.startsWith(PREFIX_ENV)){
+        if (variableName.startsWith(PREFIX_ENV)) {
             assertionElement.insertBefore(
                     createElementWithAttribute(policyDocument, BASE_64_EXPRESSION, ENV_PARAM_NAME, variableName),
                     assertionElement.getFirstChild()
@@ -120,7 +127,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-    private void prepareBase64Element(Document policyDocument, Element assertionElement, String elementName, String base64ElementName) {
+    private static void prepareBase64Element(Document policyDocument, Element assertionElement, String elementName, String base64ElementName) {
         Element element;
         try {
             element = getSingleElement(assertionElement, elementName);
@@ -135,7 +142,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         assertionElement.removeChild(element);
     }
 
-    private String getCDataOrText(Element element) {
+    private static String getCDataOrText(Element element) {
         StringBuilder content = new StringBuilder();
         NodeList children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
@@ -152,27 +159,52 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return content.toString();
     }
 
-    private void prepareEncapsulatedAssertion(Bundle bundle, Document policyDocument, Node encapsulatedAssertionElement) {
-        final String policyPath = ((Element) encapsulatedAssertionElement).getAttribute(POLICY_PATH);
+    @VisibleForTesting
+    static void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement) {
+        if (encapsulatedAssertionElement.hasAttribute(POLICY_PATH)) {
+            final String policyPath = encapsulatedAssertionElement.getAttribute(POLICY_PATH);
+            final String guid = findEncassReferencedGuid(policy, bundle, encapsulatedAssertionElement, policyPath);
+            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, policyPath, guid);
+        } else if (!isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
+            Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
+            Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
+            throw new EntityBuilderException("No policyPath specified for encass in policy: '" + policy.getPath() + "' GUID: '" + (guidElement != null ? guidElement.getAttribute(STRING_VALUE) : null) + "' Name: '" + (nameElement != null ? nameElement.getAttribute(STRING_VALUE) : null) + "'");
+        } else {
+            LOGGER.log(Level.FINE, "No policyPath specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
+        }
+    }
+
+    private static String findEncassReferencedGuid(Policy policy, Bundle bundle, Element encapsulatedAssertionElement, String policyPath) {
         LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", policyPath);
         final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(policyPath));
         if (referenceEncass.get() == null) {
             bundle.getDependencies().forEach(b -> {
-                if (!referenceEncass.compareAndSet(null, b.getEncasses().get(policyPath))) {
+                Encass encass = b.getEncasses().get(policyPath);
+                if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
                     throw new EntityBuilderException("Found multiple encasses in dependency bundles with policy path: " + policyPath);
                 }
             });
         }
+        final String guid;
         if (referenceEncass.get() == null) {
-            throw new EntityBuilderException("Could not find referenced encass with path: " + policyPath);
+            if (isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
+                LOGGER.log(Level.FINE, "Could not find referenced encass with path: \"{0}\". In policy: \"{1}\". Since NoOp is true, this will be treated as a No Op.", new String[]{policyPath, policy.getPath()});
+                guid = ZERO_GUID;
+            } else {
+                throw new EntityBuilderException("Could not find referenced encass with path: '" + policyPath + "'. In policy: " + policy.getPath());
+            }
+        } else {
+            guid = referenceEncass.get().getGuid();
         }
-        final String guid = referenceEncass.get().getGuid();
+        return guid;
+    }
 
+    private static void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, String encassName, String encassGuid) {
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
                 policyDocument,
                 ENCAPSULATED_ASSERTION_CONFIG_NAME,
                 STRING_VALUE,
-                policyPath
+                encassName
         );
         Node firstChild = encapsulatedAssertionElement.getFirstChild();
         if (firstChild != null) {
@@ -185,14 +217,24 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 policyDocument,
                 ENCAPSULATED_ASSERTION_CONFIG_GUID,
                 STRING_VALUE,
-                guid
+                encassGuid
         );
         encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
 
         ((Element) encapsulatedAssertionElement).removeAttribute(POLICY_PATH);
     }
 
-    private void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
+    private static boolean isNoOpIfConfigMissing(Element encapsulatedAssertionElement) {
+        Element noOpElement = getSingleChildElement(encapsulatedAssertionElement, NO_OP_IF_CONFIG_MISSING, true);
+        if (noOpElement == null) {
+            return false;
+        }
+        final String isNoOp = noOpElement.getAttribute(BOOLEAN_VALUE);
+        return Boolean.valueOf(isNoOp);
+    }
+
+    @VisibleForTesting
+    static void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
         Element policyGuidElement;
         try {
             policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
@@ -207,7 +249,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
             policy.getDependencies().add(includedPolicy.get());
         } else {
             bundle.getDependencies().forEach(b -> {
-                if (!includedPolicy.compareAndSet(null, b.getPolicies().get(policyPath))) {
+                Policy policyForPath = b.getPolicies().get(policyPath);
+                if (policyForPath != null && !includedPolicy.compareAndSet(null, policyForPath)) {
                     throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
                 }
             });
@@ -230,7 +273,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-    private Entity buildPolicyEntity(Policy policy, Bundle bundle, Document document) {
+    @VisibleForTesting
+    Entity buildPolicyEntity(Policy policy, Bundle bundle, Document document) {
         String id = policy.getId();
         PolicyTags policyTags = getPolicyTags(policy, bundle);
 
@@ -238,7 +282,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 document,
                 POLICY_DETAIL,
                 ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_GUID, policy.getGuid(), ATTRIBUTE_FOLDER_ID, policy.getParentFolder().getId()),
-                createElementWithTextContent(document, NAME, policy.getName()),
+                createElementWithTextContent(document, NAME, EncodeDecodeUtils.decodePath(policy.getName())),
                 createElementWithTextContent(document, POLICY_TYPE, policyTags == null ? POLICY_TYPE_INCLUDE : policyTags.type)
         );
 
@@ -265,7 +309,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
-        return new Entity(EntityTypes.POLICY_TYPE, policy.getName(), id, policyElement);
+        return new Entity(EntityTypes.POLICY_TYPE, EncodeDecodeUtils.decodePath(policy.getName()), id, policyElement);
     }
 
     private PolicyTags getPolicyTags(Policy policy, Bundle bundle) {

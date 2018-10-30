@@ -27,7 +27,7 @@ class KeystoreCreator {
     }
 
     static void createKeyStoreIfNecessary(String keyStoreDirPath, String privateKeyFolderPath, Collection<PrivateKey> privateKeys, FileUtils fileUtils, String systemPropertiesPath) {
-        PrivateKeyLoader.loadFromDirectory(privateKeys, new File(privateKeyFolderPath));
+        PrivateKeyLoader.loadFromDirectory(privateKeys, new File(privateKeyFolderPath), true);
 
         KeystoreHelper keystoreHelper = ConfigBuilderModule.getInjector().getInstance(KeystoreHelper.class);
         final byte[] keyStore = keystoreHelper.createKeyStore(privateKeys);

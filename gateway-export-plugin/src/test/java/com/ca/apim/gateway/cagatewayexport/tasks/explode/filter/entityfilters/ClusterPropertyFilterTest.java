@@ -40,12 +40,13 @@ class ClusterPropertyFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(
                 ImmutableMap.of(
-                        new Dependency("1", PolicyEntity.class), Arrays.asList(new Dependency("2", ClusterProperty.class), new Dependency("3", ClusterProperty.class)),
+                        new Dependency("1", PolicyEntity.class), Arrays.asList(new Dependency("2", ClusterProperty.class), new Dependency("3", ClusterProperty.class), new Dependency("6", ClusterProperty.class)),
                         new Dependency("2", PolicyEntity.class), Collections.singletonList(new Dependency("4", ClusterProperty.class))));
         bundle.addEntity(new ClusterProperty("prop1", "1", "1"));
         bundle.addEntity(new ClusterProperty("prop2", "2", "2"));
         bundle.addEntity(new ClusterProperty("prop3", "3", "3"));
         bundle.addEntity(new ClusterProperty("prop4", "4", "4"));
+        bundle.addEntity(new ClusterProperty("cluster.hostname", "6", "6"));
 
         FilterConfiguration filterConfiguration = new FilterConfiguration();
         List<ClusterProperty> clusterProperties = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);

@@ -25,6 +25,8 @@ import org.testcontainers.shaded.com.google.common.io.Files;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -91,7 +93,7 @@ class PrivateKeyLoaderTest {
 
     private void createPrivateKeys(String... keys) throws IOException {
         File keysDir = new File(config, "privateKeys");
-        keysDir.mkdir();
+        assertTrue(keysDir.mkdir());
         for (String k : keys) {
             Files.touch(new File(keysDir, k + ".p12"));
         }
@@ -167,7 +169,6 @@ class PrivateKeyLoaderTest {
 
     @Test
     void loadNonexistingDirectory() throws IOException {
-        PrivateKeyLoader loader = new PrivateKeyLoader(jsonTools);
         final File identityProvidersFile = new File(config, "private-keys.json");
         Files.touch(identityProvidersFile);
 
@@ -188,19 +189,16 @@ class PrivateKeyLoaderTest {
                 "    \"keyPassword\": \"\"\n" +
                 "  }\n" +
                 "}";
-        when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes()));
-
-        assertThrows(BundleLoadException.class, () -> loader.load(new Bundle(), rootProjectDir.getRoot()));
+        loadPrivateKeys(json, "json", false);
     }
 
     @Test
     void loadMissingKeyFiles() throws IOException {
-        PrivateKeyLoader loader = new PrivateKeyLoader(jsonTools);
         final File identityProvidersFile = new File(config, "private-keys.json");
         Files.touch(identityProvidersFile);
 
         File keysDir = new File(config, "privateKeys");
-        keysDir.mkdir();
+        assertTrue(keysDir.mkdir());
 
         String json = "{\n" +
                 "  \"key1\": {\n" +
@@ -219,7 +217,31 @@ class PrivateKeyLoaderTest {
                 "    \"keyPassword\": \"\"\n" +
                 "  }\n" +
                 "}";
-        when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(json.getBytes()));
-        assertThrows(BundleLoadException.class, () -> loader.load(new Bundle(), rootProjectDir.getRoot()));
+        loadPrivateKeys(json, "json", false);
+    }
+
+    @Test
+    void loadMissingKeyFilesFailIfMissing() {
+        File keysDir = new File(config, "privateKeys");
+        assertTrue(keysDir.mkdir());
+
+        Collection<PrivateKey> privateKeys = new HashSet<>();
+        PrivateKey privateKey = new PrivateKey();
+        privateKey.setAlias("my-key");
+        privateKeys.add(privateKey);
+
+        assertThrows(BundleLoadException.class, () -> PrivateKeyLoader.loadFromDirectory(privateKeys, keysDir, true));
+    }
+
+    @Test
+    void loadNonexistingDirectoryFailIfMissing() {
+        File keysDir = new File(config, "someNonExistingDirectory");
+
+        Collection<PrivateKey> privateKeys = new HashSet<>();
+        PrivateKey privateKey = new PrivateKey();
+        privateKey.setAlias("my-key");
+        privateKeys.add(privateKey);
+
+        assertThrows(BundleLoadException.class, () -> PrivateKeyLoader.loadFromDirectory(privateKeys, keysDir, true));
     }
 }
