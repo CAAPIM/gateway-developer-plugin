@@ -6,20 +6,16 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType.GLOBAL;
 
 @Singleton
-public class GlobalPolicyLoader extends EntityLoaderBase<Policy> {
+public class GlobalPolicyLoader extends PolicyLoaderBase {
 
     private static final String FILE_NAME = "global-policies";
 
@@ -29,22 +25,13 @@ public class GlobalPolicyLoader extends EntityLoaderBase<Policy> {
     }
 
     @Override
-    protected void putToBundle(Bundle bundle, @NotNull Map<String, Policy> entitiesMap) {
-        final Map<String, Policy> policiesByPath = entitiesMap.values().stream().collect(Collectors.toMap(Policy::getPath, policy -> {
-            policy.setPolicyType(GLOBAL);
-            return policy;
-        }));
-        bundle.putAllPolicies(policiesByPath);
+    PolicyType getPolicyType() {
+        return GLOBAL;
     }
 
     @Override
     public String getEntityType() {
         return "GLOBAL_POLICY";
-    }
-
-    @Override
-    protected Class<Policy> getBeanClass() {
-        return Policy.class;
     }
 
     @Override

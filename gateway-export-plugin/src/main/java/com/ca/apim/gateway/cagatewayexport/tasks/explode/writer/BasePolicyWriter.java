@@ -14,12 +14,9 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEnt
 import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType.GLOBAL;
 
 public abstract class BasePolicyWriter implements EntityWriter {
 

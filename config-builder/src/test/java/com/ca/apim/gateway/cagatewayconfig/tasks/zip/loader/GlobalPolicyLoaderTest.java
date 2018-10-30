@@ -51,7 +51,7 @@ class GlobalPolicyLoaderTest {
         String yaml = "'" + NAME + "':\n" +
                 "  path: \"gateway-solution/global-policies/" + NAME + ".xml\"\n" +
                 "  tag: \"message-completed\"";
-        load(yaml, "yml", false);
+        load(yaml, "yml", null);
     }
 
     @Test
@@ -62,7 +62,7 @@ class GlobalPolicyLoaderTest {
                 "    \"tag\": \"message-completed\"\n" +
                 "  }\n" +
                 "}";
-        load(json, "json", false);
+        load(json, "json", null);
     }
 
     @Test
@@ -70,7 +70,7 @@ class GlobalPolicyLoaderTest {
         String yaml = "'" + NAME + "':\n" +
                 "  path \"gateway-solution/global-policies/" + NAME + ".xml\"\n" +
                 "  tag \"message-completed\"";
-        load(yaml, "yml", true);
+        load(yaml, "yml", JsonToolsException.class);
     }
 
     @Test
@@ -81,10 +81,22 @@ class GlobalPolicyLoaderTest {
                 "    \"tag\": \"message-completed\"\n" +
                 "  \n" +
                 "";
-        load(json, "json", true);
+        load(json, "json", JsonToolsException.class);
     }
 
-    private void load(String content, String fileTyoe, boolean expectException) throws IOException {
+    @Test
+    void loadRepeatedTag() throws IOException {
+        String yaml = "global-completed-policy:\n" +
+                "  path: \"gateway-solution/global-policies/global-completed-policy.xml\"\n" +
+                "  tag: \"message-completed\"\n" +
+                "global-completed-policy-2:\n" +
+                "  path: \"gateway-solution/global-policies/global-completed-policy-2.xml\"\n" +
+                "  tag: \"message-completed\"";
+        load(yaml, "yml", BundleLoadException.class);
+    }
+
+
+    private void load(String content, String fileTyoe, Class<? extends Exception> expectException) throws IOException {
         GlobalPolicyLoader loader = new GlobalPolicyLoader(jsonTools);
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "global-policies." + fileTyoe);
@@ -93,8 +105,8 @@ class GlobalPolicyLoaderTest {
         when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(content.getBytes()));
 
         final Bundle bundle = new Bundle();
-        if (expectException) {
-            assertThrows(JsonToolsException.class, () -> load(loader, bundle, rootProjectDir));
+        if (expectException != null) {
+            assertThrows(expectException, () -> load(loader, bundle, rootProjectDir));
             return;
         } else {
             load(loader, bundle, rootProjectDir);
