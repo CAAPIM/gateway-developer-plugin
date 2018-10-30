@@ -34,7 +34,7 @@ public class PolicyLoader implements EntityLoader<PolicyEntity> {
 
         final Element policyDetails = getSingleChildElement(policy, POLICY_DETAIL);
         final String policyType = getSingleChildElementTextContent(policyDetails, POLICY_TYPE);
-        final Map<String, Object> policyDetailProperties = mapPropertiesElements(getSingleChildElement(policyDetails, PROPERTIES), PROPERTIES);
+        final Map<String, Object> policyDetailProperties = mapPropertiesElements(getSingleChildElement(policyDetails, PROPERTIES, true), PROPERTIES);
         final String policyTag = (String) policyDetailProperties.get(PROPERTY_TAG);
         if (!isValidType(policyType, policyTag)) {
             LOGGER.log(Level.WARNING, () -> {

@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -22,11 +23,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.PolicyEntityBuilder.BOOLEAN_VALUE;
 import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.PolicyEntityBuilder.*;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.PolicyEntityBuilder.STRING_VALUE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PolicyEntityBuilderTest {
@@ -456,6 +461,68 @@ class PolicyEntityBuilderTest {
         Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
 
         assertEquals(policyToBuild.getId(), policyEntity.getId());
+    }
+
+    @Test
+    void buildPolicyEntityTestGlobal() {
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+
+        Policy policyToBuild = new Policy();
+        policyToBuild.setPath("my/policy/global.xml");
+        policyToBuild.setName("global");
+        policyToBuild.setId("global-policy-id");
+        policyToBuild.setGuid("global-policy-guid-123");
+        policyToBuild.setTag("global-policy");
+        policyToBuild.setPolicyType(PolicyType.GLOBAL);
+        Folder parentFolder = new Folder();
+        parentFolder.setId("folder-id");
+        policyToBuild.setParentFolder(parentFolder);
+
+        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
+
+        assertEquals(policyToBuild.getId(), policyEntity.getId());
+        assertEquals(policyToBuild.getName(), policyEntity.getName());
+        assertNotNull(policyEntity.getXml());
+        Element policyDetail = getSingleChildElement(policyEntity.getXml(), POLICY_DETAIL);
+        assertNotNull(policyDetail);
+        String type = getSingleChildElementTextContent(policyDetail, POLICY_TYPE);
+        assertNotNull(type);
+        assertEquals(PolicyType.GLOBAL.getType(), type);
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(policyDetail, PROPERTIES), PROPERTIES);
+        assertFalse(properties.isEmpty());
+        assertEquals("global-policy", properties.get(PropertyConstants.PROPERTY_TAG));
+        assertNull(properties.get(PropertyConstants.PROPERTY_SUBTAG));
+    }
+
+    @Test
+    void buildPolicyEntityTestInternal() {
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+
+        Policy policyToBuild = new Policy();
+        policyToBuild.setPath("my/policy/internal.xml");
+        policyToBuild.setName("internal");
+        policyToBuild.setId("internal-policy-id");
+        policyToBuild.setGuid("internal-policy-guid-123");
+        policyToBuild.setTag("internal-policy");
+        policyToBuild.setPolicyType(PolicyType.INTERNAL);
+        Folder parentFolder = new Folder();
+        parentFolder.setId("folder-id");
+        policyToBuild.setParentFolder(parentFolder);
+
+        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
+
+        assertEquals(policyToBuild.getId(), policyEntity.getId());
+        assertEquals(policyToBuild.getName(), policyEntity.getName());
+        assertNotNull(policyEntity.getXml());
+        Element policyDetail = getSingleChildElement(policyEntity.getXml(), POLICY_DETAIL);
+        assertNotNull(policyDetail);
+        String type = getSingleChildElementTextContent(policyDetail, POLICY_TYPE);
+        assertNotNull(type);
+        assertEquals(PolicyType.INTERNAL.getType(), type);
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(policyDetail, PROPERTIES), PROPERTIES);
+        assertFalse(properties.isEmpty());
+        assertEquals("internal-policy", properties.get(PropertyConstants.PROPERTY_TAG));
+        assertNull(properties.get(PropertyConstants.PROPERTY_SUBTAG));
     }
 
     private Element createIncludeAssertionElement(Document document, String policyPath) {

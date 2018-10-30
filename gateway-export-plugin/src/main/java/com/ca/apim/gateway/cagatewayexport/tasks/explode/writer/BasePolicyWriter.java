@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -39,7 +40,8 @@ public abstract class BasePolicyWriter implements EntityWriter {
         WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, globalPolicies, getFileName(), Policy.class);
     }
 
-    private Policy getPolicyBean(PolicyEntity policyEntity) {
+    @VisibleForTesting
+    Policy getPolicyBean(PolicyEntity policyEntity) {
         Policy policy = new Policy();
         policy.setTag(policyEntity.getTag());
         policy.setPath(policyEntity.getPolicyPath());
