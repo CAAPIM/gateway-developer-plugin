@@ -35,8 +35,8 @@ class PolicyBackedServiceLinkerTest {
 
         Bundle fullBundle = new Bundle();
         fullBundle.addEntity(myPolicyBackedServiceEntity);
-        fullBundle.addEntity(new PolicyEntity("operation1Policy", "1", "1", "1", null, ""));
-        fullBundle.addEntity(new PolicyEntity("operation2Policy", "2", "2", "1", null, ""));
+        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation1Policy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
+        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation2Policy").setId("2").setGuid("2").setParentFolderId("1").setPolicy("").build());
         fullBundle.addEntity(new Folder("myFolder", "1", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
@@ -62,8 +62,8 @@ class PolicyBackedServiceLinkerTest {
 
         Bundle fullBundle = new Bundle();
         fullBundle.addEntity(myPolicyBackedServiceEntity);
-        fullBundle.addEntity(new PolicyEntity("operation1Policy", "1", "1", "1", null, ""));
-        fullBundle.addEntity(new PolicyEntity("operation3Policy", "3", "3", "1", null, ""));
+        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation1Policy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
+        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation3Policy").setId("3").setGuid("3").setParentFolderId("1").setPolicy("").build());
         fullBundle.addEntity(new Folder("myFolder", "1", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
@@ -86,8 +86,8 @@ class PolicyBackedServiceLinkerTest {
 
         Bundle fullBundle = new Bundle();
         fullBundle.addEntity(myPolicyBackedServiceEntity);
-        fullBundle.addEntity(new PolicyEntity("operation1Policy", "1", "1", "1", null, ""));
-        fullBundle.addEntity(new PolicyEntity("operation2Policy", "2", "2", "1", null, ""));
+        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation1Policy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
+        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation2Policy").setId("2").setGuid("2").setParentFolderId("1").setPolicy("").build());
         fullBundle.addEntity(new Folder("myFolder", "2", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());

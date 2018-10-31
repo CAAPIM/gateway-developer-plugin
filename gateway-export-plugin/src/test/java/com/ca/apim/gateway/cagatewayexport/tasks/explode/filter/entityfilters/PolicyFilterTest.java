@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createPolicy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,11 +44,11 @@ class PolicyFilterTest {
                 ImmutableMap.of(
                         new Dependency("1", PolicyEntity.class), Arrays.asList(new Dependency("2", PolicyEntity.class), new Dependency("3", PolicyEntity.class)),
                         new Dependency("2", PolicyEntity.class), Collections.singletonList(new Dependency("4", PolicyEntity.class))));
-        bundle.addEntity(new PolicyEntity("policy1", "1", "", "2", null, ""));
-        bundle.addEntity(new PolicyEntity("policy2", "2", "", "5", null, ""));
-        bundle.addEntity(new PolicyEntity("policy3", "3", "", null, null, ""));
-        bundle.addEntity(new PolicyEntity("policy4", "4", "", "1", null, ""));
-        bundle.addEntity(new PolicyEntity("policy5", "5", "", "4", null, ""));
+        bundle.addEntity(createPolicy("policy1", "1", "", "2", null, ""));
+        bundle.addEntity(createPolicy("policy2", "2", "", "5", null, ""));
+        bundle.addEntity(createPolicy("policy3", "3", "", null, null, ""));
+        bundle.addEntity(createPolicy("policy4", "4", "", "1", null, ""));
+        bundle.addEntity(createPolicy("policy5", "5", "", "4", null, ""));
 
         List<PolicyEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 

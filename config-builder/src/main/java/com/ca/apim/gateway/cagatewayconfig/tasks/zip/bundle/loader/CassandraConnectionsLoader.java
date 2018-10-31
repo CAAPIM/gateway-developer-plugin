@@ -20,7 +20,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapP
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Singleton
 public class CassandraConnectionsLoader implements BundleDependencyLoader {

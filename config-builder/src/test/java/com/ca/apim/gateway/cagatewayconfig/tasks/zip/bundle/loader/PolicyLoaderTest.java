@@ -19,16 +19,10 @@ import org.w3c.dom.Element;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_ID;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder.ROOT_FOLDER_NAME;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.PolicyLoader.SERVICE_OPERATION;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType.SERVICE_OPERATION;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.RESOURCE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithChildren;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PolicyLoaderTest {
 
@@ -48,7 +42,7 @@ class PolicyLoaderTest {
         f1.setPath(TEST_FOLDER_1);
         bundle.getFolders().put(TEST_FOLDER_1, f1);
 
-        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, SERVICE_OPERATION, TEST_FOLDER_1));
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, SERVICE_OPERATION.getType(), TEST_FOLDER_1));
 
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
@@ -78,7 +72,7 @@ class PolicyLoaderTest {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();
 
-        assertThrows(DependencyBundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, SERVICE_OPERATION, TEST_FOLDER_1)));
+        assertThrows(DependencyBundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, SERVICE_OPERATION.getType(), TEST_FOLDER_1)));
     }
 
     @Test
@@ -92,7 +86,7 @@ class PolicyLoaderTest {
         bundle.getFolders().put(TEST_FOLDER_1, f1);
         bundle.getFolders().put(TEST_FOLDER_1 + "_1", f1);
 
-        assertThrows(DependencyBundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, SERVICE_OPERATION, TEST_FOLDER_1)));
+        assertThrows(DependencyBundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, SERVICE_OPERATION.getType(), TEST_FOLDER_1)));
     }
 
     private static Element createPolicyBundleXml(Document document, String policyID, String policyName, String policyType, String folderID) {

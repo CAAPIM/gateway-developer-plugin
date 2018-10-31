@@ -45,8 +45,11 @@ public class Bundle {
         return policies;
     }
 
-    public void putAllPolicies(@NotNull Map<String, Policy> policies) {
-        this.policies.putAll(policies);
+    public synchronized void putAllPolicies(@NotNull Map<String, Policy> policies) {
+        // Some loaders will partially load a policy entity
+        // and the main loader will fully load,
+        // so we merge the information in order to get the complete policy entity
+        policies.forEach((path, p) -> this.policies.merge(path, p, Policy::merge));
     }
 
     public void putAllFolders(@NotNull Map<String, Folder> folders) {

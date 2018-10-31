@@ -10,7 +10,7 @@ dependencies {
     // due to maven central publication the deps here need to have the version specified
     compile 'org.bouncycastle:bcprov-jdk15on:1.60'
     compile 'commons-io:commons-io:2.6'
-    compile 'commons-lang:commons-lang:2.6'
+    compile 'org.apache.commons:commons-lang3:3.8.1'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.6'
     compile 'com.google.guava:guava:26.0-jre'

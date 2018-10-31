@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createPolicy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,9 +35,9 @@ class PolicyBackedServiceFilterTest {
         PolicyBackedServiceFilter filter = new PolicyBackedServiceFilter();
 
         Bundle filteredBundle = new Bundle();
-        filteredBundle.addEntity(new PolicyEntity("policy1", "1", "", null, null, ""));
-        filteredBundle.addEntity(new PolicyEntity("policy2", "2", "", null, null, ""));
-        filteredBundle.addEntity(new PolicyEntity("policy3", "3", "", null, null, ""));
+        filteredBundle.addEntity(createPolicy("policy1", "1", "", null, null, ""));
+        filteredBundle.addEntity(createPolicy("policy2", "2", "", null, null, ""));
+        filteredBundle.addEntity(createPolicy("policy3", "3", "", null, null, ""));
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(
                 ImmutableMap.of(

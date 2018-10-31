@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createPolicy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,7 +35,7 @@ class EncassFilterTest {
         EncassFilter filter = new EncassFilter();
 
         Bundle filteredBundle = new Bundle();
-        filteredBundle.addEntity(new PolicyEntity("my-policy", "1", "", "", null, ""));
+        filteredBundle.addEntity(createPolicy("my-policy", "1", "", "", null, ""));
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencies(
                 ImmutableMap.of(

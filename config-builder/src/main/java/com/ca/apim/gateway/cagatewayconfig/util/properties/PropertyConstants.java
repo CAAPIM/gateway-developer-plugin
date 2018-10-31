@@ -31,6 +31,8 @@ public class PropertyConstants {
     public static final String PROPERTY_PASSWORD = "password";
     public static final String PROPERTY_MIN_POOL_SIZE = "minimumPoolSize";
     public static final String PROPERTY_MAX_POOL_SIZE = "maximumPoolSize";
+    public static final String PROPERTY_TAG = "tag";
+    public static final String PROPERTY_SUBTAG = "subtag";
 
     private PropertyConstants() { }
 }
