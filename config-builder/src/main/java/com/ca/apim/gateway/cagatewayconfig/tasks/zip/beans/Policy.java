@@ -95,7 +95,7 @@ public class Policy extends Folderable {
         this.policyType = policyType;
     }
 
-    public void merge(Policy otherPolicy) {
+    public Policy merge(Policy otherPolicy) {
         this.policyXML = firstNonNull(otherPolicy.policyXML, this.policyXML);
         this.name = firstNonNull(otherPolicy.name, this.name);
         this.parentFolder = firstNonNull(otherPolicy.parentFolder, this.parentFolder);
@@ -105,5 +105,7 @@ public class Policy extends Folderable {
         this.id = firstNonNull(otherPolicy.id, this.id);
         this.tag = firstNonNull(otherPolicy.tag, this.tag);
         this.policyType = firstNonNull(otherPolicy.policyType, this.policyType);
+
+        return this;
     }
 }
