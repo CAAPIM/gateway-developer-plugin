@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
 public class EncassLoader implements BundleDependencyLoader {
@@ -25,7 +26,7 @@ public class EncassLoader implements BundleDependencyLoader {
     @Override
     public void load(Bundle bundle, Element element) {
         final Element encassElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), ENCAPSULATED_ASSERTION);
-
+        final String encassName = getSingleChildElementTextContent(encassElement, NAME);
         final Element policyReference = getSingleChildElement(encassElement, POLICY_REFERENCE);
         final String policyId = policyReference.getAttribute(ATTRIBUTE_ID);
         Element guidElement = getSingleChildElement(encassElement, GUID);
@@ -35,7 +36,8 @@ public class EncassLoader implements BundleDependencyLoader {
         encass.setGuid(guid);
 
         String policyPath = getPath(bundle, policyId);
-        bundle.getEncasses().put(policyPath, encass);
+        encass.setPolicy(policyPath);
+        bundle.getEncasses().put(encassName, encass);
     }
 
     private String getPath(Bundle bundle, String policyId) {

@@ -73,7 +73,7 @@ class FolderLoaderUtilsTest {
         Folder root = createFolder("root", "", null);
         Map<String, Folder> folderMap = new HashedMap<>();
         //Test
-        createFolders(path, folderMap, root);
+        createFoldersAlongPath(path, folderMap, root);
 
         assertEquals(3, folderMap.size());
         verifyFolder("a/", root, folderMap);

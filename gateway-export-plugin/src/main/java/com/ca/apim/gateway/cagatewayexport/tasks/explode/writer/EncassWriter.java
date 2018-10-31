@@ -41,7 +41,7 @@ public class EncassWriter implements EntityWriter {
         Map<String, Encass> encassBeans = bundle.getEntities(EncassEntity.class)
                 .values()
                 .stream()
-                .collect(Collectors.toMap(EncassEntity::getPath, this::getEncassBean));
+                .collect(Collectors.toMap(EncassEntity::getName, this::getEncassBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE, Encass.class);
     }
@@ -49,6 +49,7 @@ public class EncassWriter implements EntityWriter {
     @VisibleForTesting
     Encass getEncassBean(EncassEntity encassEntity) {
         Encass encassBean = new Encass();
+        encassBean.setPolicy(encassEntity.getPath());
         encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
         encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
         return encassBean;

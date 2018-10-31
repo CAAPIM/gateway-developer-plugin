@@ -14,7 +14,7 @@
             <L7p:DataType variableDataType="message"/>
             <L7p:VariableToSet stringValue="encass-messsage-input"/>
         </L7p:SetVariable>
-        <L7p:Encapsulated policyPath="example project/encass-policy.xml">
+        <L7p:Encapsulated encassName="encass-policy">
             <L7p:Parameters mapValue="included">
                 <L7p:entry>
                     <L7p:key stringValue="hello"/>

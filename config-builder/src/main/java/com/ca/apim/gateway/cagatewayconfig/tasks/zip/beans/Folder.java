@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-public class Folder {
+public class Folder extends Folderable {
 
     public static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
     public static final String ROOT_FOLDER_NAME = "Root Node";
@@ -14,7 +14,6 @@ public class Folder {
     private String id;
     private String path;
     private String name;
-    private Folder parentFolder;
 
     public String getId() {
         return id;
@@ -38,13 +37,5 @@ public class Folder {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Folder getParentFolder() {
-        return parentFolder;
-    }
-
-    public void setParentFolder(Folder parentFolder) {
-        this.parentFolder = parentFolder;
     }
 }

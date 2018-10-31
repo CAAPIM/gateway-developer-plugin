@@ -6,9 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Set;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+@JsonInclude(NON_NULL)
 public class Encass {
+    private String policy;
     private Set<EncassParam> arguments;
     private Set<EncassParam> results;
     private String guid;
@@ -35,5 +41,13 @@ public class Encass {
 
     public void setGuid(String guid) {
         this.guid = guid;
+    }
+
+    public String getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(String policy) {
+        this.policy = policy;
     }
 }
