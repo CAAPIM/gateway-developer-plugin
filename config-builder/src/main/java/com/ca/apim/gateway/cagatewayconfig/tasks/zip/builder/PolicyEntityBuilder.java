@@ -12,7 +12,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;

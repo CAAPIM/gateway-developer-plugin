@@ -95,10 +95,10 @@ public class Policy extends Folderable {
         this.policyType = policyType;
     }
 
-    public Policy merge(Policy otherPolicy) {
+    Policy merge(Policy otherPolicy) {
         this.policyXML = firstNonNull(otherPolicy.policyXML, this.policyXML);
         this.name = firstNonNull(otherPolicy.name, this.name);
-        this.parentFolder = firstNonNull(otherPolicy.parentFolder, this.parentFolder);
+        this.setParentFolder(firstNonNull(otherPolicy.getParentFolder(), this.getParentFolder()));
         this.guid = firstNonNull(otherPolicy.guid, this.guid);
         this.policyDocument = firstNonNull(otherPolicy.policyDocument, this.policyDocument);
         this.dependencies.addAll(otherPolicy.dependencies);
