@@ -16,8 +16,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.FolderLoaderUtils.createFolders;
-
 @Singleton
 public class EncassLoader extends EntityLoaderBase<Encass> {
 

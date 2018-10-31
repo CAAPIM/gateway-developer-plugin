@@ -23,7 +23,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
-import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 @Singleton
 public class EncassWriter implements EntityWriter {
