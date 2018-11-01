@@ -84,7 +84,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                         configurablePublishArtifact -> {
                             configurablePublishArtifact.builtBy(buildBundleTask);
                             configurablePublishArtifact.setExtension(BUNDLE_FILE_EXTENSION);
-                            configurablePublishArtifact.setName(project.getName() + '-' + project.getVersion());
+                            configurablePublishArtifact.setName(project.getName());
                             configurablePublishArtifact.setType(BUNDLE_FILE_EXTENSION);
                         }));
     }
