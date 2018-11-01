@@ -47,12 +47,12 @@ public class ScheduledTaskWriter implements EntityWriter {
     ScheduledTask getScheduledTaskBean(ScheduledTaskEntity scheduledTaskEntity) {
         ScheduledTask scheduledTask = new ScheduledTask();
         scheduledTask.setPolicy(scheduledTaskEntity.getPolicyPath());
-        scheduledTask.setOneNode(scheduledTaskEntity.isOneNode());
+        scheduledTask.setOneNode(scheduledTaskEntity.getIsOneNode());
         scheduledTask.setJobType(scheduledTaskEntity.getJobType());
         scheduledTask.setJobStatus(scheduledTaskEntity.getJobStatus());
         scheduledTask.setExecutionDate(scheduledTaskEntity.getExecutionDate());
         scheduledTask.setCronExpression(scheduledTaskEntity.getCronExpression());
-        scheduledTask.setShouldExecuteOnCreate(scheduledTaskEntity.isShouldExecuteOnCreate());
+        scheduledTask.setShouldExecuteOnCreate(scheduledTaskEntity.getShouldExecuteOnCreate());
         scheduledTask.setProperties(scheduledTaskEntity.getProperties());
         return scheduledTask;
     }

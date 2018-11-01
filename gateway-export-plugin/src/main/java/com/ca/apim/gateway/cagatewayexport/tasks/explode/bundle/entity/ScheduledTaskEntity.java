@@ -52,7 +52,7 @@ public class ScheduledTaskEntity implements Entity {
         return policyId;
     }
 
-    public boolean isOneNode() {
+    public boolean getIsOneNode() {
         return isOneNode;
     }
 
@@ -72,7 +72,7 @@ public class ScheduledTaskEntity implements Entity {
         return cronExpression;
     }
 
-    public boolean isShouldExecuteOnCreate() {
+    public boolean getShouldExecuteOnCreate() {
         return shouldExecuteOnCreate;
     }
 
