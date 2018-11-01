@@ -34,6 +34,7 @@ class EncassEntityBuilderTest {
 
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
     private static final String TEST_ENCASS = "TestEncass";
+    private static final String TEST_POLICY_PATH= "test/policy.xml";
     private static final String TEST_GUID = UUID.randomUUID().toString();
     private static final String TEST_POLICY_ID = "PolicyID";
 
@@ -48,14 +49,14 @@ class EncassEntityBuilderTest {
     @Test
     void buildWithNoPolicy() {
         final Bundle bundle = new Bundle();
-        assertThrows(EntityBuilderException.class, () -> buildBundleWithEncass(bundle, DEPLOYMENT, TEST_ENCASS, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS));
+        assertThrows(EntityBuilderException.class, () -> buildBundleWithEncass(bundle, DEPLOYMENT, TEST_POLICY_PATH, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS));
     }
 
     @Test
     void buildDeploymentWithEncass() {
         final Bundle bundle = new Bundle();
-        putPolicy(bundle, TEST_ENCASS, TEST_POLICY_ID, TEST_ENCASS);
-        buildBundleWithEncass(bundle, DEPLOYMENT, TEST_ENCASS, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS);
+        putPolicy(bundle, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_POLICY_PATH);
+        buildBundleWithEncass(bundle, DEPLOYMENT, TEST_POLICY_PATH, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS);
     }
 
     @Test
@@ -66,10 +67,10 @@ class EncassEntityBuilderTest {
     }
 
     @Test
-    void buildEnvironmentWithPBS() {
+    void buildEnvironmentWithEncass() {
         final Bundle bundle = new Bundle();
-        putPolicy(bundle, TEST_ENCASS, TEST_POLICY_ID, TEST_ENCASS);
-        buildBundleWithEncass(bundle, ENVIRONMENT, TEST_ENCASS, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS);
+        putPolicy(bundle, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_ENCASS);
+        buildBundleWithEncass(bundle, ENVIRONMENT, TEST_POLICY_PATH, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS);
     }
 
     private static void putPolicy(Bundle bundle, String name, String id, String path) {

@@ -21,7 +21,6 @@ public class ClusterPropertyFilter implements EntityFilter<ClusterProperty> {
 
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             EncassFilter.class,
-            ScheduledTaskFilter.class,
             IdentityProviderFilter.class,
             PolicyBackedServiceFilter.class,
             PolicyFilter.class,
