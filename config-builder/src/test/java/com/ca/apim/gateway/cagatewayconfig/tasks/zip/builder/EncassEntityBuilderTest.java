@@ -69,7 +69,7 @@ class EncassEntityBuilderTest {
     @Test
     void buildEnvironmentWithEncass() {
         final Bundle bundle = new Bundle();
-        putPolicy(bundle, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_ENCASS);
+        putPolicy(bundle, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_POLICY_PATH);
         buildBundleWithEncass(bundle, ENVIRONMENT, TEST_POLICY_PATH, TEST_GUID, TEST_POLICY_ID, TEST_ENCASS);
     }
 
