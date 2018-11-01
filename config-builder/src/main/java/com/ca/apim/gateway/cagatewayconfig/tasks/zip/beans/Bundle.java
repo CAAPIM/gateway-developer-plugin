@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Bundle {
     private final Map<String, Service> services = new HashMap<>();
     private final Map<String, Encass> encasses = new HashMap<>();
+    private final Map<String, ScheduledTask> scheduledTasks = new HashMap<>();
     private final Map<String, Policy> policies = new HashMap<>();
     private final Map<String, Folder> folders = new ConcurrentHashMap<>();
     private final Map<String, String> staticProperties = new HashMap<>();
@@ -162,5 +163,13 @@ public class Bundle {
 
     public void putAllCertificateFiles(@NotNull Map<String, SupplierWithIO<InputStream>> certificateFiles) {
         this.certificateFiles.putAll(certificateFiles);
+    }
+
+    public Map<String, ScheduledTask> getScheduledTasks() {
+        return scheduledTasks;
+    }
+
+    public void putAllScheduledTasks(@NotNull Map<String, ScheduledTask> scheduledTasks) {
+        this.scheduledTasks.putAll(scheduledTasks);
     }
 }
