@@ -57,6 +57,13 @@ public class PolicyXMLSimplifier {
             }
         });
         findAndSimplifyAssertion(policyElement, HARDCODED_RESPONSE, this::simplifyHardcodedResponse);
+        findAndSimplifyAssertion(policyElement, AUTHENTICATION, element -> {
+            try {
+                simplifyAuthenticationAssertion(bundle, element);
+            } catch (DocumentParseException e) {
+                throw new BundleBuilderException(e.getMessage());
+            }
+        });
     }
 
     private void simplifyHardcodedResponse(Element element) {
@@ -85,7 +92,7 @@ public class PolicyXMLSimplifier {
     }
 
     @VisibleForTesting
-    static void simplifySetVariable(Element element, Bundle resultantBundle) throws DocumentParseException {
+    void simplifySetVariable(Element element, Bundle resultantBundle) throws DocumentParseException {
         Element base64ExpressionElement = getSingleElement(element, BASE_64_EXPRESSION);
         String base64Expression = base64ExpressionElement.getAttribute(STRING_VALUE);
         byte[] decodedValue = base64Decode(base64Expression);
@@ -127,6 +134,31 @@ public class PolicyXMLSimplifier {
         } else {
             LOGGER.log(Level.WARNING, "Could not find referenced encass with guid: {0}", encassGuid);
         }
+    }
+
+    @VisibleForTesting
+    void simplifyAuthenticationAssertion(Bundle bundle, Element authenticationAssertionElement) throws DocumentParseException {
+        final Element idProviderGoidElement = getSingleElement(authenticationAssertionElement, ID_PROV_OID);
+        final String idProviderGoid = idProviderGoidElement.getAttribute(GOID_VALUE);
+        final Optional<IdentityProviderEntity> idProvEntity = bundle.getEntities(IdentityProviderEntity.class).values().stream().filter(e -> e.getId().equals(idProviderGoid)).findAny();
+        if (idProvEntity.isPresent()) {
+            updateAuthenticationAssertionElement(authenticationAssertionElement, idProviderGoidElement, idProvEntity.get().getName());
+        } else if (INTERNAL_IDP_ID.equals(idProviderGoid)) {
+            updateAuthenticationAssertionElement(authenticationAssertionElement, idProviderGoidElement, INTERNAL_IDP_NAME);
+        } else {
+            LOGGER.log(Level.WARNING, "Could not find referenced identity provider with id: {0}", idProviderGoid);
+        }
+    }
+
+    private void updateAuthenticationAssertionElement(Element authenticationAssertionElement, Element goidElementToRemove, String internalIdpName) {
+        final Node firstChild = authenticationAssertionElement.getFirstChild();
+        final Element idProviderNameElement = createElementWithAttributes(authenticationAssertionElement.getOwnerDocument(), ID_PROV_NAME, ImmutableMap.of(STRING_VALUE, internalIdpName));
+        if (firstChild != null) {
+            authenticationAssertionElement.insertBefore(idProviderNameElement, firstChild);
+        } else {
+            authenticationAssertionElement.appendChild(idProviderNameElement);
+        }
+        authenticationAssertionElement.removeChild(goidElementToRemove);
     }
 
     private void simplifyIncludeAssertion(Bundle bundle, Element assertionElement) throws DocumentParseException {

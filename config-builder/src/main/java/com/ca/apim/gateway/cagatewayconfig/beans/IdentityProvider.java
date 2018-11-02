@@ -6,14 +6,17 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import javax.inject.Named;
 import java.util.Map;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.util.Arrays.stream;
 
+@JsonInclude(NON_EMPTY)
 @Named("ID_PROVIDER_CONFIG")
 public class IdentityProvider extends GatewayEntity {
 
@@ -40,6 +43,7 @@ public class IdentityProvider extends GatewayEntity {
         }
     }
 
+    private String id;
     private IdentityProviderType type;
     private Map<String,Object> properties;
 
@@ -61,6 +65,14 @@ public class IdentityProvider extends GatewayEntity {
             @JsonSubTypes.Type(value= FederatedIdentityProviderDetail.class, name="FEDERATED")
     })
     private IdentityProviderDetail identityProviderDetail;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public IdentityProviderType getType() {
         return type;
