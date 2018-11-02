@@ -8,12 +8,14 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.inject.Named;
 import java.util.Map;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @JsonInclude(NON_NULL)
-public class ScheduledTask {
+@Named("SCHEDULED_TASK")
+public class ScheduledTask extends GatewayEntity {
     private String policy;
     private boolean isOneNode;
     private String jobType;

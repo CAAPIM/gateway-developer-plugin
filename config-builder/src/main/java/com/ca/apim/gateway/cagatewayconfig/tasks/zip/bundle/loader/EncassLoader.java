@@ -15,16 +15,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import javax.inject.Singleton;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementAttribute;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @Singleton
 public class EncassLoader implements BundleDependencyLoader {
@@ -32,11 +29,11 @@ public class EncassLoader implements BundleDependencyLoader {
     @Override
     public void load(Bundle bundle, Element element) {
         final Element encassElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), ENCAPSULATED_ASSERTION);
-        final String encassName = getSingleChildElementTextContent(encassElement, NAME);
-        final Element policyReference = getSingleChildElement(encassElement, POLICY_REFERENCE);
-        final String policyId = policyReference.getAttribute(ATTRIBUTE_ID);
-        Element guidElement = getSingleChildElement(encassElement, GUID);
-        final String guid = guidElement.getTextContent();
+
+        final String policyId = getSingleChildElementAttribute(encassElement, POLICY_REFERENCE, ATTRIBUTE_ID);
+        final String name = getSingleChildElementTextContent(encassElement, NAME);
+        final String guid = getSingleChildElementTextContent(encassElement, GUID);
+
 
         Encass encass = new Encass();
         encass.setGuid(guid);
@@ -46,7 +43,7 @@ public class EncassLoader implements BundleDependencyLoader {
         encass.setArguments(getArguments(encassElement));
         encass.setResults(getResults(encassElement));
         encass.setPolicyId(policyId);
-        bundle.getEncasses().put(encassName, encass);
+        bundle.getEncasses().put(name, encass);
     }
 
     private String getPath(Bundle bundle, String policyId) {
@@ -67,9 +64,9 @@ public class EncassLoader implements BundleDependencyLoader {
             if (!(encapsulatedAssertionResultElement.item(i) instanceof Element)) {
                 throw new DependencyBundleLoadException("Unexpected encass results node: " + encapsulatedResultsElement.getClass());
             }
-            Element resultNameElement = getSingleChildElement((Element) encapsulatedAssertionResultElement.item(i), RESULT_NAME);
-            Element resultTypeElement = getSingleChildElement((Element) encapsulatedAssertionResultElement.item(i), RESULT_TYPE);
-            encassResults.add(new EncassParam(resultNameElement.getTextContent(), resultTypeElement.getTextContent()));
+            String resultName = getSingleChildElementTextContent((Element) encapsulatedAssertionResultElement.item(i), RESULT_NAME);
+            String resultType = getSingleChildElementTextContent((Element) encapsulatedAssertionResultElement.item(i), RESULT_TYPE);
+            encassResults.add(new EncassParam(resultName, resultType));
         }
         return encassResults;
     }
@@ -82,9 +79,9 @@ public class EncassLoader implements BundleDependencyLoader {
             if (!(encapsulatedAssertionArgumentElement.item(i) instanceof Element)) {
                 throw new DependencyBundleLoadException("Unexpected encass argument node: " + encapsulatedArgumentsElement.getClass());
             }
-            Element argumentNameElement = getSingleChildElement((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_NAME);
-            Element argumentTypeElement = getSingleChildElement((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_TYPE);
-            encassArguments.add(new EncassParam(argumentNameElement.getTextContent(), argumentTypeElement.getTextContent()));
+            String argumentName = getSingleChildElementTextContent((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_NAME);
+            String argumentType = getSingleChildElementTextContent((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_TYPE);
+            encassArguments.add(new EncassParam(argumentName, argumentType));
         }
         return encassArguments;
     }

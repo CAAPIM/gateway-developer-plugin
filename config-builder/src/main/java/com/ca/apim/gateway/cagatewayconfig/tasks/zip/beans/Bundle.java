@@ -177,11 +177,11 @@ public class Bundle {
     }
 
     public Map<String, ScheduledTask> getScheduledTasks() {
-        return scheduledTasks;
+        return getEntities(ScheduledTask.class);
     }
 
     public void putAllScheduledTasks(@NotNull Map<String, ScheduledTask> scheduledTasks) {
-        this.scheduledTasks.putAll(scheduledTasks);
+        this.getScheduledTasks().putAll(scheduledTasks);
     }
 
     public FolderTree getFolderTree() {
