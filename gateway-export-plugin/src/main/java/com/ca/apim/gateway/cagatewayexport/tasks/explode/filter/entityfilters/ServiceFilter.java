@@ -1,8 +1,8 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
-public class ServiceFilter implements EntityFilter<ServiceEntity> {
+public class ServiceFilter implements EntityFilter<Service> {
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {
@@ -23,9 +23,9 @@ public class ServiceFilter implements EntityFilter<ServiceEntity> {
     }
 
     @Override
-    public List<ServiceEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+    public List<Service> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
         Map<String, Folder> folders = filteredBundle.getEntities(Folder.class);
-        return bundle.getEntities(ServiceEntity.class).values().stream()
-                .filter(s -> folders.containsKey(s.getFolderId())).collect(Collectors.toList());
+        return bundle.getEntities(Service.class).values().stream()
+                .filter(s -> folders.containsKey(s.getParentFolder().getId())).collect(Collectors.toList());
     }
 }

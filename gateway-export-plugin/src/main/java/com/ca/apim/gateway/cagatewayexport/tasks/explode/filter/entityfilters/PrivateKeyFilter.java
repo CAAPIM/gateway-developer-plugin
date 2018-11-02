@@ -1,7 +1,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PrivateKeyEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
@@ -14,10 +14,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PrivateKeyEntity.SSL_DEFAULT_PRIVATE_KEY;
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey.SSL_DEFAULT_PRIVATE_KEY;
 
 @Singleton
-public class PrivateKeyFilter implements EntityFilter<PrivateKeyEntity> {
+public class PrivateKeyFilter implements EntityFilter<PrivateKey> {
 
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
@@ -31,8 +31,8 @@ public class PrivateKeyFilter implements EntityFilter<PrivateKeyEntity> {
 
     @Override
     @SuppressWarnings("squid:S1157")
-    public List<PrivateKeyEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
-        Stream<PrivateKeyEntity> stream = DependencyUtils.filterDependencies(PrivateKeyEntity.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName())).stream();
+    public List<PrivateKey> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        Stream<PrivateKey> stream = DependencyUtils.filterDependencies(PrivateKey.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName())).stream();
         if (!filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(SSL_DEFAULT_PRIVATE_KEY.toUpperCase())) {
             stream = stream
                     // filter out the default ssl key
@@ -43,7 +43,7 @@ public class PrivateKeyFilter implements EntityFilter<PrivateKeyEntity> {
                     // filter out the default ssl key
                     .filter(p -> !p.getName().equals(SSL_DEFAULT_PRIVATE_KEY.toLowerCase()));
         }
-        List<PrivateKeyEntity> privateKeys = stream.collect(Collectors.toList());
+        List<PrivateKey> privateKeys = stream.collect(Collectors.toList());
         DependencyUtils.validateEntitiesInList(privateKeys, filterConfiguration.getRequiredEntityNames(ENTITY_NAME), "Private Key(s)");
         return privateKeys;
     }

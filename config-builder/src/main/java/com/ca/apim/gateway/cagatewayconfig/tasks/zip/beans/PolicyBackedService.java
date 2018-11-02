@@ -6,9 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+import javax.inject.Named;
 import java.util.Set;
 
-public class PolicyBackedService {
+@Named("POLICY_BACKED_SERVICE")
+public class PolicyBackedService extends GatewayEntity {
     private String interfaceName;
     private Set<PolicyBackedServiceOperation> operations;
 

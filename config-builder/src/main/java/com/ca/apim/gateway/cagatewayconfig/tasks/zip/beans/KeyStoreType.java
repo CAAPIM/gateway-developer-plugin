@@ -42,4 +42,8 @@ public enum KeyStoreType {
     public static KeyStoreType fromName(String name) {
         return Stream.of(values()).filter(k -> k.name.equals(name)).findFirst().orElse(GENERIC);
     }
+
+    public static KeyStoreType fromId(String id) {
+        return Stream.of(values()).filter(k -> id.equals(k.id)).findFirst().orElse(GENERIC);
+    }
 }

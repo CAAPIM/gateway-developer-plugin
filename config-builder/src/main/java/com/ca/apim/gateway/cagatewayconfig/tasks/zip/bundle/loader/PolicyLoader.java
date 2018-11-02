@@ -57,6 +57,11 @@ public class PolicyLoader implements BundleDependencyLoader {
         Element nameElement = getSingleChildElement(policyDetails, NAME);
         final String name = nameElement.getTextContent();
 
+        final Element resources = getSingleChildElement(policyElement, RESOURCES);
+        final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
+        final Element resource = getSingleChildElement(resourceSet, RESOURCE);
+        final String policyString = resource.getTextContent();
+
         Folder parentFolder = getFolder(bundle, folderId);
 
         Policy policy = new Policy();
@@ -67,6 +72,8 @@ public class PolicyLoader implements BundleDependencyLoader {
         policy.setId(id);
         policy.setTag(policyTag);
         policy.setPolicyType(PolicyType.fromType(policyType));
+        policy.setPolicyDocument(policyElement);
+        policy.setPolicyXML(policyString);
 
         bundle.getPolicies().put(policy.getPath(), policy);
     }

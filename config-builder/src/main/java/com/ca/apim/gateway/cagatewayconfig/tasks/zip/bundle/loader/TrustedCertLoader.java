@@ -30,7 +30,10 @@ public class TrustedCertLoader implements BundleDependencyLoader {
         final String name = getSingleChildElementTextContent(trustedCertElem, NAME);
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(trustedCertElem, PROPERTIES, true), PROPERTIES);
 
-        bundle.getTrustedCerts().put(name, new TrustedCert(properties, getCertData(trustedCertElem)));
+        TrustedCert cert = new TrustedCert(properties, getCertData(trustedCertElem));
+        cert.setId(trustedCertElem.getAttribute(ATTRIBUTE_ID));
+        cert.setName(getSingleChildElementTextContent(trustedCertElem, NAME));
+        bundle.getTrustedCerts().put(name, cert);
     }
 
     private CertificateData getCertData(final Element trustedCertElem) {

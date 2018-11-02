@@ -4,9 +4,8 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.google.common.annotations.VisibleForTesting;
 import org.reflections.Reflections;
 
@@ -14,7 +13,6 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EntityUtils.getEntityType;
 import static java.util.Collections.unmodifiableMap;
 
 /**
@@ -22,13 +20,13 @@ import static java.util.Collections.unmodifiableMap;
  */
 public class EntityTypeRegistry {
 
-    private final Map<String, Class<? extends Entity>> entityTypeMap;
+    private final Map<String, Class<? extends GatewayEntity>> entityTypeMap;
 
     @Inject
     public EntityTypeRegistry(final Reflections reflections) {
-        Map<String, Class<? extends Entity>> entityTypes = new HashMap<>();
-        reflections.getSubTypesOf(Entity.class).forEach(e -> {
-            String type = getEntityType(e);
+        Map<String, Class<? extends GatewayEntity>> entityTypes = new HashMap<>();
+        reflections.getSubTypesOf(GatewayEntity.class).forEach(e -> {
+            String type = EntityUtils.getEntityType(e);
             if (type != null) {
                 entityTypes.put(type, e);
             }
@@ -37,12 +35,12 @@ public class EntityTypeRegistry {
         this.entityTypeMap = unmodifiableMap(entityTypes);
     }
 
-    public Class<? extends Entity> getEntityClass(String entityType) {
+    public Class<? extends GatewayEntity> getEntityClass(String entityType) {
         return entityTypeMap.get(entityType);
     }
 
     @VisibleForTesting
-    public Map<String, Class<? extends Entity>> getEntityTypeMap() {
+    public Map<String, Class<? extends GatewayEntity>> getEntityTypeMap() {
         return entityTypeMap;
     }
 }

@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,8 +33,8 @@ public class FolderTree {
     private synchronized void addFolder(final Folder folder) {
         idFolderMap.put(folder.getId(), folder);
 
-        if (folder.getParentFolderId() != null && !folder.getParentFolderId().isEmpty()) {
-            folderChildrenMap.compute(folder.getParentFolderId(), (k, v) -> {
+        if (folder.getParentFolder() != null && !folder.getParentFolder().getId().isEmpty()) {
+            folderChildrenMap.compute(folder.getParentFolder().getId(), (k, v) -> {
                 if (v == null) {
                     return new HashSet<>(Collections.singleton(folder));
                 } else {
@@ -63,10 +63,10 @@ public class FolderTree {
 
     public Path getPath(final Folder folder) {
         Folder currentFolder = folder;
-        Path path = currentFolder.getParentFolderId() == null ? Paths.get("") : Paths.get(currentFolder.getName());
-        while (currentFolder.getParentFolderId() != null) {
-            currentFolder = idFolderMap.get(currentFolder.getParentFolderId());
-            path = Paths.get(currentFolder.getParentFolderId() == null ? "" : currentFolder.getName()).resolve(path);
+        Path path = currentFolder.getParentFolder() == null ? Paths.get("") : Paths.get(currentFolder.getName());
+        while (currentFolder.getParentFolder() != null) {
+            currentFolder = idFolderMap.get(currentFolder.getParentFolder().getId());
+            path = Paths.get(currentFolder.getParentFolder() == null ? "" : currentFolder.getName()).resolve(path);
         }
         return path;
     }

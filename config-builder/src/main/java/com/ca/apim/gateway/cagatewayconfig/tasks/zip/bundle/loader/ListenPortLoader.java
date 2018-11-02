@@ -38,6 +38,8 @@ public class ListenPortLoader implements BundleDependencyLoader {
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPortElement, PROPERTIES, true), PROPERTIES);
 
         ListenPort listenPort = new ListenPort();
+        listenPort.setId(listenPortElement.getAttribute(ATTRIBUTE_ID));
+        listenPort.setName(name);
         listenPort.setProtocol(protocol);
         listenPort.setPort(port);
         listenPort.setEnabledFeatures(enabledFeatures);

@@ -4,9 +4,11 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ClusterProperty;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -15,19 +17,25 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
-public class ClusterPropertyLoader implements EntityLoader<ClusterProperty> {
+public class ClusterPropertyLoader implements BundleDependencyLoader {
 
     @Override
-    public ClusterProperty load(Element element) {
+    public void load(Bundle bundle, Element element) {
         final Element xml = getSingleChildElement(getSingleChildElement(element, RESOURCE), CLUSTER_PROPERTY);
         final String name = getSingleChildElement(xml, NAME).getTextContent();
         final String value = getSingleChildElement(xml, VALUE).getTextContent();
         final String id = xml.getAttribute(ATTRIBUTE_ID);
-        return new ClusterProperty(name, value, id);
+
+        ClusterProperty clusterProperty = new ClusterProperty();
+        clusterProperty.setName(name);
+        clusterProperty.setId(id);
+        clusterProperty.setValue(value);
+
+        bundle.getClusterProperties().put(name, clusterProperty);
     }
 
     @Override
-    public Class<ClusterProperty> entityClass() {
-        return ClusterProperty.class;
+    public String getEntityType() {
+        return EntityTypes.CLUSTER_PROPERTY_TYPE;
     }
 }

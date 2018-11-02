@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 class FolderTreeException extends RuntimeException {
     FolderTreeException(String message) {

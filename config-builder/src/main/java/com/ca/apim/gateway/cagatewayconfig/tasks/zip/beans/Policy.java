@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.w3c.dom.Element;
 
+import javax.inject.Named;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,14 +17,14 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @JsonInclude(NON_EMPTY)
+@Named("POLICY")
 public class Policy extends Folderable {
+
     private String path;
     private String policyXML;
-    private String name;
     private String guid;
     private Element policyDocument;
     private final Set<Policy> dependencies = new HashSet<>();
-    private String id;
     private String tag;
     private PolicyType policyType;
 
@@ -41,14 +42,6 @@ public class Policy extends Folderable {
 
     public void setPolicyXML(String policyXML) {
         this.policyXML = policyXML;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void setGuid(String guid) {
@@ -71,14 +64,6 @@ public class Policy extends Folderable {
         return dependencies;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
     public String getTag() {
         return tag;
     }
@@ -97,12 +82,12 @@ public class Policy extends Folderable {
 
     Policy merge(Policy otherPolicy) {
         this.policyXML = firstNonNull(otherPolicy.policyXML, this.policyXML);
-        this.name = firstNonNull(otherPolicy.name, this.name);
+        this.setName(firstNonNull(otherPolicy.getName(), this.getName()));
         this.setParentFolder(firstNonNull(otherPolicy.getParentFolder(), this.getParentFolder()));
         this.guid = firstNonNull(otherPolicy.guid, this.guid);
         this.policyDocument = firstNonNull(otherPolicy.policyDocument, this.policyDocument);
         this.dependencies.addAll(otherPolicy.dependencies);
-        this.id = firstNonNull(otherPolicy.id, this.id);
+        this.setId(firstNonNull(otherPolicy.getId(), this.getId()));
         this.tag = firstNonNull(otherPolicy.tag, this.tag);
         this.policyType = firstNonNull(otherPolicy.policyType, this.policyType);
 

@@ -1,6 +1,6 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
 import com.google.common.collect.Sets;
 import org.jetbrains.annotations.NotNull;

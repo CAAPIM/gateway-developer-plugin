@@ -7,6 +7,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.inject.Named;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
@@ -22,7 +23,8 @@ import static java.util.Collections.unmodifiableList;
  * Listen port representation for yaml/json files.
  */
 @JsonInclude(NON_NULL)
-public class ListenPort {
+@Named("SSG_CONNECTOR")
+public class ListenPort extends GatewayEntity {
 
     public static final String PROTOCOL_HTTP = "HTTP";
     public static final String PROTOCOL_HTTPS = "HTTPS";

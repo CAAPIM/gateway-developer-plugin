@@ -6,11 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
@@ -32,16 +31,16 @@ public abstract class BasePolicyWriter implements EntityWriter {
     @Override
     public void write(Bundle bundle, File rootFolder) {
         final Map<String, Policy> globalPolicies = filterPolicies(bundle).values().stream()
-                .collect(Collectors.toMap(PolicyEntity::getName, this::getPolicyBean));
+                .collect(Collectors.toMap(Policy::getName, this::getPolicyBean));
 
         WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, globalPolicies, getFileName(), Policy.class);
     }
 
     @VisibleForTesting
-    Policy getPolicyBean(PolicyEntity policyEntity) {
+    Policy getPolicyBean(Policy policyEntity) {
         Policy policy = new Policy();
         policy.setTag(policyEntity.getTag());
-        policy.setPath(policyEntity.getPolicyPath());
+        policy.setPath(policyEntity.getPath());
         return policy;
     }
 
@@ -54,6 +53,6 @@ public abstract class BasePolicyWriter implements EntityWriter {
      * @param bundle bundle object containing policies
      * @return the policy entities filtered by this writer
      */
-    abstract Map<String, PolicyEntity> filterPolicies(Bundle bundle);
+    abstract Map<String, Policy> filterPolicies(Bundle bundle);
 
 }

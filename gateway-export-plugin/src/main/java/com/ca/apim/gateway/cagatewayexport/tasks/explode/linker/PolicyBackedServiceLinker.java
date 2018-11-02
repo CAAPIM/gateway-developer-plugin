@@ -6,31 +6,29 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
 
 import javax.inject.Singleton;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.PolicyLinker.getPolicyPath;
 
 @Singleton
-public class PolicyBackedServiceLinker implements EntityLinker<PolicyBackedServiceEntity> {
+public class PolicyBackedServiceLinker implements EntityLinker<PolicyBackedService> {
 
     @Override
-    public Class<PolicyBackedServiceEntity> getEntityClass() {
-        return PolicyBackedServiceEntity.class;
+    public Class<PolicyBackedService> getEntityClass() {
+        return PolicyBackedService.class;
     }
 
     @Override
-    public void link(PolicyBackedServiceEntity pbs, Bundle bundle, Bundle targetBundle) {
-        for (String operation : pbs.getOperations().keySet()) {
-            String policyId = pbs.getOperations().get(operation);
-            PolicyEntity policy = bundle.getEntities(PolicyEntity.class).get(policyId);
+    public void link(PolicyBackedService pbs, Bundle bundle, Bundle targetBundle) {
+        for (PolicyBackedServiceOperation operation : pbs.getOperations()) {
+            String policyId = operation.getPolicy();
+            Policy policy = bundle.getPolicies().get(policyId);
             if (policy == null) {
                 throw new LinkerException("Could not find policy for Policy Backed Service. Policy ID: " + policyId);
             }
-            pbs.getOperations().put(operation, getPolicyPath(policy, bundle, pbs));
+            operation.setPolicy(getPolicyPath(policy, bundle, pbs));
         }
     }
 }

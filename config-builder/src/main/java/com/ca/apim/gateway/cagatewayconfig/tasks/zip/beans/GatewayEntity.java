@@ -6,16 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-import javax.inject.Named;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@Named("FOLDER")
-public class Folder extends Folderable {
+public class GatewayEntity {
 
-    public static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
-    public static final String ROOT_FOLDER_NAME = "Root Node";
-
+    @JsonIgnore
     private String id;
-    private String path;
+    @JsonIgnore
     private String name;
 
     public String getId() {
@@ -24,14 +21,6 @@ public class Folder extends Folderable {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public String getName() {

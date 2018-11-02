@@ -4,17 +4,15 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
-
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import java.util.Objects;
 
 public class Dependency {
     private final String id;
-    private final Class<? extends Entity> type;
+    private final Class<? extends GatewayEntity> type;
 
-    public Dependency(String id, Class<? extends Entity> type) {
+    public Dependency(String id, Class<? extends GatewayEntity> type) {
         this.id = id;
         this.type = type;
     }
@@ -23,7 +21,7 @@ public class Dependency {
         return id;
     }
 
-    public Class<? extends Entity> getType() {
+    public Class<? extends GatewayEntity> getType() {
         return type;
     }
 

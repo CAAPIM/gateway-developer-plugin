@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.CassandraConnectionEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.CassandraConnection;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Singleton
-public class CassandraConnectionFilter implements EntityFilter<CassandraConnectionEntity> {
+public class CassandraConnectionFilter implements EntityFilter<CassandraConnection> {
 
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
@@ -39,8 +39,8 @@ public class CassandraConnectionFilter implements EntityFilter<CassandraConnecti
     }
 
     @Override
-    public List<CassandraConnectionEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
-        List<CassandraConnectionEntity> cassandraConnections = DependencyUtils.filterDependencies(CassandraConnectionEntity.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()));
+    public List<CassandraConnection> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        List<CassandraConnection> cassandraConnections = DependencyUtils.filterDependencies(CassandraConnection.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()));
         DependencyUtils.validateEntitiesInList(cassandraConnections, filterConfiguration.getRequiredEntityNames(ENTITY_NAME), "Cassandra Connection(s)");
         return cassandraConnections;
     }

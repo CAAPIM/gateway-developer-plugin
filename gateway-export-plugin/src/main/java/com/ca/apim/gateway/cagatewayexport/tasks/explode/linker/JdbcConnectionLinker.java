@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.JdbcConnectionEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword;
 
 import javax.inject.Singleton;
 import java.util.regex.Matcher;
@@ -18,12 +18,12 @@ import static com.ca.apim.gateway.cagatewayexport.util.gateway.VariableUtils.ext
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Singleton
-public class JdbcConnectionLinker implements EntityLinker<JdbcConnectionEntity> {
+public class JdbcConnectionLinker implements EntityLinker<JdbcConnection> {
 
     private Pattern secpassPattern = Pattern.compile("secpass.(.+?).plaintext");
 
     @Override
-    public void link(JdbcConnectionEntity entity, Bundle bundle, Bundle targetBundle) {
+    public void link(JdbcConnection entity, Bundle bundle, Bundle targetBundle) {
         if (entity.getPassword() != null) {
             if (entity.getPassword().startsWith("$L7C2$")) {
                 // Ignore passwords that are L7C2 encoded. We can't decode them anyways.
@@ -42,9 +42,9 @@ public class JdbcConnectionLinker implements EntityLinker<JdbcConnectionEntity> 
         }
     }
 
-    private void setPasswordRef(JdbcConnectionEntity entity, Bundle bundle, String storedPasswordName) {
-        final StoredPasswordEntity storedPassword =
-                bundle.getEntities(StoredPasswordEntity.class).values()
+    private void setPasswordRef(JdbcConnection entity, Bundle bundle, String storedPasswordName) {
+        final StoredPassword storedPassword =
+                bundle.getEntities(StoredPassword.class).values()
                         .stream()
                         .filter(e -> e.getName().equals(storedPasswordName))
                         .findFirst()
@@ -59,7 +59,7 @@ public class JdbcConnectionLinker implements EntityLinker<JdbcConnectionEntity> 
     }
 
     @Override
-    public Class<JdbcConnectionEntity> getEntityClass() {
-        return JdbcConnectionEntity.class;
+    public Class<JdbcConnection> getEntityClass() {
+        return JdbcConnection.class;
     }
 }

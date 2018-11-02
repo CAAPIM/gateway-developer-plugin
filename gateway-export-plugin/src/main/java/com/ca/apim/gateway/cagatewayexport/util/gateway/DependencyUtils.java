@@ -1,8 +1,8 @@
 package com.ca.apim.gateway.cagatewayexport.util.gateway;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Dependency;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,9 +26,9 @@ public class DependencyUtils {
      * @return The list of filtered entities
      */
     @NotNull
-    public static <E extends Entity> List<E> filterDependencies(Class<E> dependentEntityType, Bundle bundle, Bundle filteredBundle, Predicate<E> includeEntity) {
+    public static <E extends GatewayEntity> List<E> filterDependencies(Class<E> dependentEntityType, Bundle bundle, Bundle filteredBundle, Predicate<E> includeEntity) {
         // Gets entities of the given type that are dependencies of entities in the filteredBundle
-        Set<Dependency> dependentEntities = DependencyUtils.filterDependencies(dependentEntityType, bundle.getDependencies(), filteredBundle);
+        Set<Dependency> dependentEntities = DependencyUtils.filterDependencies(dependentEntityType, bundle.getDependencyMap(), filteredBundle);
 
         return bundle.getEntities(dependentEntityType).values().stream()
                 //keep only entities the are dependencies of entities in the filtered bundle
@@ -45,7 +45,7 @@ public class DependencyUtils {
      * @param <E>                 The entity type
      * @return A set of dependencies of type `dependentEntityType` that are dependencies of entities in the bundle.
      */
-    private static <E extends Entity> Set<Dependency> filterDependencies(Class<E> dependentEntityType, Map<Dependency, List<Dependency>> dependencies, Bundle bundle) {
+    private static <E extends GatewayEntity> Set<Dependency> filterDependencies(Class<E> dependentEntityType, Map<Dependency, List<Dependency>> dependencies, Bundle bundle) {
         return dependencies.entrySet().stream()
                 // filter out dependencies that are not in the bundle
                 .filter(e -> bundle.getEntities(e.getKey().getType()).get(e.getKey().getId()) != null)
@@ -64,7 +64,7 @@ public class DependencyUtils {
      * @param entityName  The name of the entity. Used in an exception message
      * @param <E>         The entity Type
      */
-    public static <E extends Entity> void validateEntitiesInList(List<E> entities, Collection<String> entityNames, final String entityName) {
+    public static <E extends GatewayEntity> void validateEntitiesInList(List<E> entities, Collection<String> entityNames, final String entityName) {
         Set<String> missingEntities = new HashSet<>();
         entityNames.forEach(name -> {
             if (entities.stream().noneMatch(c -> name.equals(c.getName()))) {

@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -43,6 +44,10 @@ public class FolderLoader implements BundleDependencyLoader {
                 throw new DependencyBundleLoadException("Invalid dependency bundle. Found multiple folders with id: " + parentFolderID);
             }
             parentFolder = parentFolderList.get(0);
+        }
+
+        if (EncodeDecodeUtils.containsInvalidCharacter(name)) {
+            throw new DependencyBundleLoadException("Folder name contains invalid characters: " + name);
         }
 
         Folder folder = new Folder();

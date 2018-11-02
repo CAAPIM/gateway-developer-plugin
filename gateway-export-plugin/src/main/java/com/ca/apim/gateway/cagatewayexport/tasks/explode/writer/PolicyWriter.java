@@ -6,11 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;
@@ -35,18 +35,18 @@ public class PolicyWriter implements EntityWriter {
 
         //create folders
         bundle.getFolderTree().stream().forEach(folder -> {
-            if (folder.getParentFolderId() != null) {
+            if (folder.getParentFolder() != null) {
                 Path folderFile = policyFolder.toPath().resolve(bundle.getFolderTree().getPath(folder));
                 documentFileUtils.createFolder(folderFile);
             }
         });
 
         //create policies
-        Map<String, ServiceEntity> services = bundle.getEntities(ServiceEntity.class);
-        services.values().parallelStream().forEach(serviceEntity -> writePolicy(bundle, policyFolder, serviceEntity.getFolderId(), serviceEntity.getName(), serviceEntity.getPolicyXml()));
+        Map<String, Service> services = bundle.getEntities(Service.class);
+        services.values().parallelStream().forEach(serviceEntity -> writePolicy(bundle, policyFolder, serviceEntity.getParentFolder().getId(), serviceEntity.getName(), serviceEntity.getPolicyXML()));
 
-        Map<String, PolicyEntity> policies = bundle.getEntities(PolicyEntity.class);
-        policies.values().parallelStream().forEach(policyEntity -> writePolicy(bundle, policyFolder, policyEntity.getFolderId(), policyEntity.getName(), policyEntity.getPolicyXML()));
+        Map<String, Policy> policies = bundle.getEntities(Policy.class);
+        policies.values().parallelStream().forEach(policyEntity -> writePolicy(bundle, policyFolder, policyEntity.getParentFolder().getId(), policyEntity.getName(), policyEntity.getPolicyDocument()));
 
     }
 

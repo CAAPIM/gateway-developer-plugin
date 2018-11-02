@@ -4,10 +4,13 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -16,10 +19,10 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
-public class ServiceLoader implements EntityLoader<ServiceEntity> {
+public class ServiceLoader implements BundleDependencyLoader {
 
     @Override
-    public ServiceEntity load(Element element) {
+    public void load(Bundle bundle, Element element) {
         final Element service = getSingleChildElement(getSingleChildElement(element, RESOURCE), SERVICE);
 
         final Element serviceDetails = getSingleChildElement(service, SERVICE_DETAIL);
@@ -32,11 +35,21 @@ public class ServiceLoader implements EntityLoader<ServiceEntity> {
         final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
         final Element resource = getSingleChildElement(resourceSet, RESOURCE);
         final String servicePolicyString = resource.getTextContent();
-        return new ServiceEntity(name, id, folderId, serviceDetails, servicePolicyString);
+
+        Service serviceEntity = new Service();
+        serviceEntity.setName(name);
+        serviceEntity.setId(id);
+        Folder folder = new Folder();
+        folder.setId(folderId);
+        serviceEntity.setParentFolder(folder);
+        serviceEntity.setServiceDetailsElement(serviceDetails);
+        serviceEntity.setPolicy(servicePolicyString);
+
+        bundle.getServices().put(name, serviceEntity);
     }
 
     @Override
-    public Class<ServiceEntity> entityClass() {
-        return ServiceEntity.class;
+    public String getEntityType() {
+        return EntityTypes.SERVICE_TYPE;
     }
 }

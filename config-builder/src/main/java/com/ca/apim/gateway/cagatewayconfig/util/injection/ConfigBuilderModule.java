@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.injection;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.BundleDependencyLoader;
@@ -85,6 +86,8 @@ public class ConfigBuilderModule extends AbstractModule {
             }
         });
         bind(EntityLoaderRegistry.class);
+
+        bind(EntityTypeRegistry.class);
     }
 
     public static Injector getInjector() {

@@ -29,7 +29,9 @@ public class CassandraConnectionsLoader implements BundleDependencyLoader {
     public void load(Bundle bundle, Element element) {
         final Element cassandraConnectionElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), CASSANDRA_CONNECTION);
 
+        final String name = getSingleChildElementTextContent(cassandraConnectionElement, NAME);
         CassandraConnection cassandraConnection = new CassandraConnection();
+        cassandraConnection.setName(name);
         cassandraConnection.setKeyspace(getSingleChildElementTextContent(cassandraConnectionElement, KEYSPACE));
         cassandraConnection.setCompression(getSingleChildElementTextContent(cassandraConnectionElement, COMPRESSION));
         cassandraConnection.setContactPoint(getSingleChildElementTextContent(cassandraConnectionElement, CONTACT_POINT));
@@ -50,7 +52,6 @@ public class CassandraConnectionsLoader implements BundleDependencyLoader {
         cassandraConnection.setTlsCiphers(ciphers);
         cassandraConnection.setProperties(mapPropertiesElements(getSingleChildElement(cassandraConnectionElement, PROPERTIES, true), PROPERTIES));
 
-        final String name = getSingleChildElementTextContent(cassandraConnectionElement, NAME);
         bundle.getCassandraConnections().put(name, cassandraConnection);
     }
 

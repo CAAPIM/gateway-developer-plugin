@@ -8,8 +8,10 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
@@ -17,32 +19,15 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
  * Define stored passwords.
  */
 @JsonInclude(NON_NULL)
-public class StoredPassword {
+@Named("SECURE_PASSWORD")
+public class StoredPassword extends GatewayEntity {
 
     private static final String PROPERTY_DESCRIPTION = "description";
     private static final String PROPERTY_TYPE = "type";
     private static final String PROPERTY_USAGE_FROM_VARIABLE = "usageFromVariable";
 
-    private String id;
-    private String name;
     private String password;
     private Map<String, Object> properties;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getPassword() {
         return password;
@@ -61,7 +46,7 @@ public class StoredPassword {
     }
 
     public void addDefaultProperties() {
-        this.properties = fillDefaultProperties(this.name, this.properties);
+        this.properties = fillDefaultProperties(this.getName(), this.properties);
     }
 
     public static Map<String, Object> fillDefaultProperties(String name, Map<String, Object> properties) {
@@ -90,5 +75,9 @@ public class StoredPassword {
         public String getName() {
             return name;
         }
+    }
+
+    public boolean isType(Type type) {
+        return properties != null && Objects.equals(properties.get(PROPERTY_TYPE), type.getName());
     }
 }

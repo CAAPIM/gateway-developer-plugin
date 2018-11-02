@@ -1,7 +1,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Singleton
-public class ListenPortFilter implements EntityFilter<ListenPortEntity> {
+public class ListenPortFilter implements EntityFilter<ListenPort> {
 
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             ServiceFilter.class).collect(Collectors.toSet());
@@ -28,8 +28,8 @@ public class ListenPortFilter implements EntityFilter<ListenPortEntity> {
     }
 
     @Override
-    public List<ListenPortEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
-        List<ListenPortEntity> listenPorts = DependencyUtils.filterDependencies(ListenPortEntity.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()));
+    public List<ListenPort> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        List<ListenPort> listenPorts = DependencyUtils.filterDependencies(ListenPort.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()));
         DependencyUtils.validateEntitiesInList(listenPorts, filterConfiguration.getRequiredEntityNames(ENTITY_NAME), "Listen Port(s)");
         return listenPorts;
     }

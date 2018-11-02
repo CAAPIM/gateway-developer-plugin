@@ -4,31 +4,18 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity;
+package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
+public class EnvironmentProperty extends GatewayEntity {
 
-public class EnvironmentProperty implements Entity {
-    private final String name;
-    private final String id;
     private final String value;
     private final Type type;
 
     public EnvironmentProperty(final String name, final String value, final Type type) {
-        this.name = name;
+        this.setName(name);
         this.value = value;
         this.type = type;
-        this.id = type + ":" + name;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getName() {
-        return name;
+        this.setId(type + ":" + name);
     }
 
     public String getValue() {
@@ -41,7 +28,7 @@ public class EnvironmentProperty implements Entity {
 
     @Override
     public String toString() {
-        return id;
+        return getId();
     }
 
     public enum Type {

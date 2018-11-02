@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-public abstract class Folderable {
+public abstract class Folderable extends GatewayEntity {
     private Folder parentFolder;
 
     public Folder getParentFolder() {

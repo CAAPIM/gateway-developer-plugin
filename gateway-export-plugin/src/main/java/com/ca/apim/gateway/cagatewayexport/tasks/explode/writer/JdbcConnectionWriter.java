@@ -6,11 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.JdbcConnectionEntity;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,15 +35,15 @@ public class JdbcConnectionWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, JdbcConnection> jdbcConnections = bundle.getEntities(JdbcConnectionEntity.class)
+        Map<String, JdbcConnection> jdbcConnections = bundle.getEntities(JdbcConnection.class)
                 .values()
                 .stream()
-                .collect(toMap(JdbcConnectionEntity::getName, this::getJdbcConnectionBean));
+                .collect(toMap(JdbcConnection::getName, this::getJdbcConnectionBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, jdbcConnections, JDBC_CONNECTIONS_FILE, JdbcConnection.class);
     }
 
-    private JdbcConnection getJdbcConnectionBean(JdbcConnectionEntity entity) {
+    private JdbcConnection getJdbcConnectionBean(JdbcConnection entity) {
         JdbcConnection jdbcConnection = new JdbcConnection();
         jdbcConnection.setDriverClass(entity.getDriverClass());
         jdbcConnection.setJdbcUrl(entity.getJdbcUrl());

@@ -6,10 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.GatewayEntity;
 
-public interface EntityLinker<E extends Entity> extends EntitiesLinker {
+public interface EntityLinker<E extends GatewayEntity> extends EntitiesLinker {
 
     default void link(Bundle filteredBundle, Bundle bundle) {
         filteredBundle.getEntities(getEntityClass()).values().forEach(e -> link(e, bundle, filteredBundle));

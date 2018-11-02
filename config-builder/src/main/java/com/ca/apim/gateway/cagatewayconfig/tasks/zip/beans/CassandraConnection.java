@@ -6,8 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.inject.Named;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,7 +17,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @JsonInclude(NON_NULL)
 @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
-public class CassandraConnection {
+@Named("CASSANDRA_CONFIGURATION")
+public class CassandraConnection extends GatewayEntity {
 
     private String keyspace;
     private String contactPoint;

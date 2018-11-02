@@ -6,13 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.EnvironmentProperty.Type;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import org.w3c.dom.Element;
@@ -24,11 +25,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty.Type.SERVICE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
-public class ServiceLinker implements EntityLinker<ServiceEntity> {
+public class ServiceLinker implements EntityLinker<Service> {
     private final DocumentTools documentTools;
     private final PolicyXMLSimplifier policyXMLSimplifier;
 
@@ -39,12 +39,12 @@ public class ServiceLinker implements EntityLinker<ServiceEntity> {
     }
 
     @Override
-    public Class<ServiceEntity> getEntityClass() {
-        return ServiceEntity.class;
+    public Class<Service> getEntityClass() {
+        return Service.class;
     }
 
     @Override
-    public void link(ServiceEntity service, Bundle bundle, Bundle targetBundle) {
+    public void link(Service service, Bundle bundle, Bundle targetBundle) {
         try {
             Element policyElement = DocumentUtils.stringToXML(documentTools, service.getPolicy());
             policyXMLSimplifier.simplifyPolicyXML(policyElement, bundle, targetBundle);
@@ -58,9 +58,10 @@ public class ServiceLinker implements EntityLinker<ServiceEntity> {
         NodeList propertyNodes = servicePropertiesElement.getElementsByTagName(PROPERTY);
         for (int i = 0; i < propertyNodes.getLength(); i++) {
             if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.ENV.")) {
-                targetBundle.addEntity(new EnvironmentProperty(
+                EnvironmentProperty environmentProperty = new EnvironmentProperty(
                         propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(13),
-                        getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent(), SERVICE));
+                        getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent(), Type.SERVICE);
+                targetBundle.getEntities(EnvironmentProperty.class).put(environmentProperty.getId(), environmentProperty);
             }
         }
     }
@@ -72,8 +73,8 @@ public class ServiceLinker implements EntityLinker<ServiceEntity> {
      * @param serviceEntity the service entity
      * @return the full path for the specified service
      */
-    static String getServicePath(Bundle bundle, ServiceEntity serviceEntity) {
-        Folder folder = bundle.getFolderTree().getFolderById(serviceEntity.getFolderId());
+    static String getServicePath(Bundle bundle, Service serviceEntity) {
+        Folder folder = bundle.getFolderTree().getFolderById(serviceEntity.getParentFolder().getId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
         return Paths.get(folderPath.toString(), serviceEntity.getName()).toString();
     }

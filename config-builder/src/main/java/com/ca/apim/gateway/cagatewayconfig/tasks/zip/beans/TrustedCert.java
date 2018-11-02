@@ -8,15 +8,16 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
 import com.google.common.collect.ImmutableMap;
 
+import javax.inject.Named;
 import java.math.BigInteger;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static java.lang.Boolean.parseBoolean;
 
-public class TrustedCert {
+@Named("TRUSTED_CERT")
+public class TrustedCert extends GatewayEntity {
 
-    private String id;
     private boolean verifyHostname;
     private boolean trustedForSsl;
     private boolean trustedAsSamlAttestingEntity;
@@ -64,14 +65,6 @@ public class TrustedCert {
 
     public CertificateData getCertificateData() {
         return certificateData;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public static class CertificateData {

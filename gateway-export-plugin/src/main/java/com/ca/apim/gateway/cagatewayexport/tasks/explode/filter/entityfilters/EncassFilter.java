@@ -1,8 +1,8 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
-public class EncassFilter implements EntityFilter<EncassEntity> {
+public class EncassFilter implements EntityFilter<Encass> {
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {
@@ -23,10 +23,10 @@ public class EncassFilter implements EntityFilter<EncassEntity> {
     }
 
     @Override
-    public List<EncassEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+    public List<Encass> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
         // get all policies from the filtered bundle
-        Map<String, PolicyEntity> policies = filteredBundle.getEntities(PolicyEntity.class);
-        return bundle.getEntities(EncassEntity.class).values().stream()
+        Map<String, Policy> policies = filteredBundle.getPolicies();
+        return bundle.getEntities(Encass.class).values().stream()
                 // keep only encapsulated assertions with backing policies that are in the filtered bundle
                 .filter(e -> policies.containsKey(e.getPolicyId())).collect(Collectors.toList());
     }

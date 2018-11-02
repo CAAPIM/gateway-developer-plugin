@@ -6,14 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.FolderTree;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters.FolderFilter;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Map;
 
 public class BundleFilter {
     private final EntityFilterRegistry filterRegistry;
@@ -34,13 +34,21 @@ public class BundleFilter {
 
         Bundle filteredBundle = new Bundle();
         //for each entity filter, filter and then add the results to the filtered bundle
-        filterRegistry.getEntityFilters().forEach(ef -> ((List<? extends Entity>) ef.filter(folderPath, filterConfiguration, bundle, filteredBundle)).forEach(filteredBundle::addEntity));
+        filterRegistry.getEntityFilters()
+                .forEach(ef ->
+                        ((List<? extends GatewayEntity>) ef.filter(folderPath, filterConfiguration, bundle, filteredBundle))
+                                .forEach(e -> {
+                                            final Map<String, GatewayEntity> entities = filteredBundle.getEntities((Class<GatewayEntity>) e.getClass());
+                                            entities.put(e.getId(), e);
+                                        }
+                                )
+                );
 
         // Add parent folders to the filtered Bundle
-        FolderFilter.parentFolders(folderPath, bundle).forEach(filteredBundle::addEntity);
+        FolderFilter.parentFolders(folderPath, bundle).forEach(f -> filteredBundle.getFolders().put(f.getId(), f));
 
         // build the folder tree
-        FolderTree folderTree = new FolderTree(filteredBundle.getEntities(Folder.class).values());
+        FolderTree folderTree = new FolderTree(filteredBundle.getFolders().values());
         filteredBundle.setFolderTree(folderTree);
         return filteredBundle;
     }

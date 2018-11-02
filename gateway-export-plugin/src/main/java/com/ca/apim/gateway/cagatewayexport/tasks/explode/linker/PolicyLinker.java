@@ -6,13 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import org.w3c.dom.Element;
@@ -24,7 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Singleton
-public class PolicyLinker implements EntityLinker<PolicyEntity> {
+public class PolicyLinker implements EntityLinker<Policy> {
     private final DocumentTools documentTools;
     private final PolicyXMLSimplifier policyXMLSimplifier;
 
@@ -35,23 +34,24 @@ public class PolicyLinker implements EntityLinker<PolicyEntity> {
     }
 
     @Override
-    public Class<PolicyEntity> getEntityClass() {
-        return PolicyEntity.class;
+    public Class<Policy> getEntityClass() {
+        return Policy.class;
     }
 
     @Override
-    public void link(PolicyEntity policy, Bundle bundle, Bundle targetBundle) {
+    public void link(Policy policy, Bundle bundle, Bundle targetBundle) {
         try {
-            Element policyElement = DocumentUtils.stringToXML(documentTools, policy.getPolicy());
+            Element policyElement = DocumentUtils.stringToXML(documentTools, policy.getPolicyXML());
             policyXMLSimplifier.simplifyPolicyXML(policyElement, bundle, targetBundle);
-            policy.setPolicyXML(policyElement);
+            policy.setPolicyDocument(policyElement);
         } catch (DocumentParseException e) {
             throw new WriteException("Exception linking and simplifying policy: " + policy.getName() + " Message: " + e.getMessage(), e);
         }
+
         policy.setPolicyPath(getPolicyPath(policy, bundle, policy));
     }
 
-    static <E extends Entity> String getPolicyPath(PolicyEntity policy, Bundle bundle, E entity) {
+    static <E extends GatewayEntity> String getPolicyPath(Policy policy, Bundle bundle, E entity) {
         Folder folder = bundle.getFolderTree().getFolderById(policy.getFolderId());
         if (folder == null) {
             throw new LinkerException(String.format("Could not find folder for %s: %s. Policy Name:ID: %s:%s. Folder ID: %s",

@@ -9,11 +9,17 @@ package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import javax.inject.Named;
 import java.util.Map;
 
 import static java.util.Arrays.stream;
 
-public class IdentityProvider {
+@Named("ID_PROVIDER_CONFIG")
+public class IdentityProvider extends GatewayEntity {
+
+    public static final String INTERNAL_IDP_ID = "0000000000000000fffffffffffffffe";
+    public static final String INTERNAL_IDP_NAME = "Internal Identity Provider";
+
     public enum IdentityProviderType {
         INTERNAL("Internal"),
         LDAP("LDAP"),

@@ -11,62 +11,73 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class Bundle {
-    private final Map<String, Service> services = new HashMap<>();
-    private final Map<String, Encass> encasses = new HashMap<>();
-    private final Map<String, ScheduledTask> scheduledTasks = new HashMap<>();
-    private final Map<String, Policy> policies = new HashMap<>();
-    private final Map<String, Folder> folders = new ConcurrentHashMap<>();
+
+    // simple map of entities to avoid having to add here a new map for each entity
+    private final Map<Class, Map<String, ?>> entities = new HashMap<>();
+
+    // some special things need their own maps
     private final Map<String, String> staticProperties = new HashMap<>();
     private final Map<String, String> environmentProperties = new HashMap<>();
-    private final Map<String, PolicyBackedService> policyBackedServices = new HashMap<>();
-    private final Map<String, IdentityProvider> identityProviders = new HashMap<>();
-    private final Map<String, ListenPort> listenPorts = new HashMap<>();
-    private final Map<String, StoredPassword> storedPasswords = new HashMap<>();
-    private final Map<String, JdbcConnection> jdbcConnections = new HashMap<>();
-    private final Map<String, TrustedCert> trustedCerts = new HashMap<>();
-    private final Map<String, PrivateKey> privateKeys = new HashMap<>();
-    private final Map<String, CassandraConnection> cassandraConnections = new HashMap<>();
     private final Map<String, SupplierWithIO<InputStream>> certificateFiles = new HashMap<>();
     private Set<Bundle> dependencies;
+    private FolderTree folderTree;
+    private Map<Dependency, List<Dependency>> dependencyMap;
+
+    @SuppressWarnings("unchecked")
+    public <E extends GatewayEntity> Map<String, E> getEntities(Class<E> entityType) {
+        return (Map<String, E>) entities.computeIfAbsent(entityType, (Function<Class, Map<String, E>>) aClass -> new HashMap<>());
+    }
+
+    public Map<String, ClusterProperty> getClusterProperties() {
+        return getEntities(ClusterProperty.class);
+    }
+
+    public void putAllClusterProperties(@NotNull Map<String, ClusterProperty> clusterProperties) {
+        this.getClusterProperties().putAll(clusterProperties);
+    }
 
     public Map<String, Service> getServices() {
-        return services;
+        return getEntities(Service.class);
     }
 
     public void putAllServices(@NotNull Map<String, Service> services) {
-        this.services.putAll(services);
+        this.getServices().putAll(services);
     }
 
     public Map<String, Policy> getPolicies() {
-        return policies;
+        return getEntities(Policy.class);
     }
 
     public synchronized void putAllPolicies(@NotNull Map<String, Policy> policies) {
         // Some loaders will partially load a policy entity
         // and the main loader will fully load,
         // so we merge the information in order to get the complete policy entity
-        policies.forEach((path, p) -> this.policies.merge(path, p, Policy::merge));
+        final Map<String, Policy> policyMap = this.getPolicies();
+        policies.forEach((path, p) -> policyMap.merge(path, p, Policy::merge));
     }
 
     public void putAllFolders(@NotNull Map<String, Folder> folders) {
-        this.folders.putAll(folders);
+        this.getFolders().putAll(folders);
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, Folder> getFolders() {
-        return folders;
+        return (Map<String, Folder>) entities.computeIfAbsent(Folder.class, (Function<Class, Map<String, Folder>>) aClass -> new ConcurrentHashMap<>());
     }
 
     public void putAllEncasses(@NotNull Map<String, Encass> encasses) {
-        this.encasses.putAll(encasses);
+        this.getEncasses().putAll(encasses);
     }
 
     public Map<String, Encass> getEncasses() {
-        return encasses;
+        return getEntities(Encass.class);
     }
 
     public void putAllStaticProperties(@NotNull Map<String, String> properties) {
@@ -86,43 +97,43 @@ public class Bundle {
     }
 
     public void putAllPolicyBackedServices(@NotNull Map<String, PolicyBackedService> policyBackedServices) {
-        this.policyBackedServices.putAll(policyBackedServices);
+        this.getPolicyBackedServices().putAll(policyBackedServices);
     }
 
     public Map<String, PolicyBackedService> getPolicyBackedServices() {
-        return policyBackedServices;
+        return getEntities(PolicyBackedService.class);
     }
 
     public Map<String, IdentityProvider> getIdentityProviders() {
-        return identityProviders;
+        return getEntities(IdentityProvider.class);
     }
 
     public void putAllIdentityProviders(@NotNull Map<String, IdentityProvider> identityProviders) {
-        this.identityProviders.putAll(identityProviders);
+        this.getIdentityProviders().putAll(identityProviders);
     }
 
     public Map<String, ListenPort> getListenPorts() {
-        return listenPorts;
+        return getEntities(ListenPort.class);
     }
 
     public void putAllListenPorts(@NotNull Map<String, ListenPort> listenPorts) {
-        this.listenPorts.putAll(listenPorts);
+        this.getEntities(ListenPort.class).putAll(listenPorts);
     }
 
     public Map<String, StoredPassword> getStoredPasswords() {
-        return storedPasswords;
+        return getEntities(StoredPassword.class);
     }
 
     public void putAllStoredPasswords(@NotNull Map<String, StoredPassword> storedPasswords) {
-        this.storedPasswords.putAll(storedPasswords);
+        this.getStoredPasswords().putAll(storedPasswords);
     }
 
     public Map<String, JdbcConnection> getJdbcConnections() {
-        return jdbcConnections;
+        return getEntities(JdbcConnection.class);
     }
 
     public void putAllJdbcConnections(@NotNull Map<String, JdbcConnection> jdbcConnections) {
-        this.jdbcConnections.putAll(jdbcConnections);
+        this.getJdbcConnections().putAll(jdbcConnections);
     }
 
     public Set<Bundle> getDependencies() {
@@ -134,27 +145,27 @@ public class Bundle {
     }
 
     public Map<String, TrustedCert> getTrustedCerts() {
-        return trustedCerts;
+        return getEntities(TrustedCert.class);
     }
 
     public void putAllTrustedCerts(@NotNull Map<String, TrustedCert> trustedCerts) {
-        this.trustedCerts.putAll(trustedCerts);
+        this.getTrustedCerts().putAll(trustedCerts);
     }
 
     public Map<String, PrivateKey> getPrivateKeys() {
-        return privateKeys;
+        return getEntities(PrivateKey.class);
     }
 
     public void putAllPrivateKeys(@NotNull Map<String, PrivateKey> privateKeys) {
-        this.privateKeys.putAll(privateKeys);
+        this.getPrivateKeys().putAll(privateKeys);
     }
 
     public Map<String, CassandraConnection> getCassandraConnections() {
-        return cassandraConnections;
+        return getEntities(CassandraConnection.class);
     }
 
     public void putAllCassandraConnections(@NotNull Map<String, CassandraConnection> cassandraConnections) {
-        this.cassandraConnections.putAll(cassandraConnections);
+        this.getCassandraConnections().putAll(cassandraConnections);
     }
 
     public Map<String, SupplierWithIO<InputStream>> getCertificateFiles() {
@@ -171,5 +182,21 @@ public class Bundle {
 
     public void putAllScheduledTasks(@NotNull Map<String, ScheduledTask> scheduledTasks) {
         this.scheduledTasks.putAll(scheduledTasks);
+    }
+
+    public FolderTree getFolderTree() {
+        return folderTree;
+    }
+
+    public void setFolderTree(FolderTree folderTree) {
+        this.folderTree = folderTree;
+    }
+
+    public Map<Dependency, List<Dependency>> getDependencyMap() {
+        return dependencyMap;
+    }
+
+    public void setDependencyMap(Map<Dependency, List<Dependency>> dependencyMap) {
+        this.dependencyMap = dependencyMap;
     }
 }

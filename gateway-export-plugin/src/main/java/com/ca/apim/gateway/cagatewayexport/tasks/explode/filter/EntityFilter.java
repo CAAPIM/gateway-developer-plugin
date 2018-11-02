@@ -1,14 +1,14 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
 
-public interface EntityFilter<E extends Entity> extends Comparable<EntityFilter> {
+public interface EntityFilter<E extends GatewayEntity> extends Comparable<EntityFilter> {
 
     /**
      * @return the position of the entity filter, has to be non null and not conflicting

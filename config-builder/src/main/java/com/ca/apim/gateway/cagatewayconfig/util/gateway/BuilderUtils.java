@@ -15,6 +15,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,9 +28,12 @@ import static java.lang.Long.parseLong;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
+import static org.apache.commons.lang3.time.DateUtils.parseDateStrictly;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class BuilderUtils {
+
+    private static final String DATE_VALUE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     public static void buildAndAppendPropertiesElement(final Map<String, Object> properties, final Document document, final Element elementToAppendInto) {
         if (MapUtils.isEmpty(properties)) {
@@ -119,8 +124,18 @@ public class BuilderUtils {
             case LONG_VALUE: return parseLong(valueElement.getTextContent());
             case INTEGER_VALUE:
             case INT_VALUE: return parseInt(valueElement.getTextContent());
+            case DATE_VALUE: return parseDateFromString(key, valueElement.getTextContent());
             default:
                 throw new DependencyBundleLoadException("Type of property " + key + " is " + valueElement.getNodeName() + " which is not yet supported");
+        }
+    }
+
+    @NotNull
+    private static Date parseDateFromString(final String key, final String dateAsString) {
+        try {
+            return parseDateStrictly(dateAsString, DATE_VALUE_PATTERN);
+        } catch (ParseException e) {
+            throw new EntityBuilderException("Unable to parse date property (" + key + ") value: " + dateAsString);
         }
     }
 

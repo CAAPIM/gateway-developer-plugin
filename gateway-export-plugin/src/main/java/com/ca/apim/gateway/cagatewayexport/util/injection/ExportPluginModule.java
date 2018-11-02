@@ -11,13 +11,10 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
@@ -74,11 +71,6 @@ public class ExportPluginModule extends AbstractModule {
         reflections.getSubTypesOf(EntityFilter.class).forEach(l -> filtersBinder.addBinding().to(l));
         bind(EntityFilterRegistry.class);
 
-        // bind the entity loaders
-        Multibinder<EntityLoader> loadersBinder = newSetBinder(binder(), EntityLoader.class);
-        reflections.getSubTypesOf(EntityLoader.class).forEach(l -> loadersBinder.addBinding().to(l));
-        bind(EntityLoaderRegistry.class);
-
         // bind the entity writers
         Multibinder<EntityWriter> writersBinder = newSetBinder(binder(), EntityWriter.class);
         reflections.getSubTypesOf(EntityWriter.class).forEach(l -> {
@@ -87,9 +79,6 @@ public class ExportPluginModule extends AbstractModule {
             }
         });
         bind(EntityWriterRegistry.class);
-
-        // bind the entity type registry
-        bind(EntityTypeRegistry.class);
 
         // bind the explode task implementation
         bind(ExplodeBundle.class);
