@@ -26,6 +26,6 @@ public class PolicyFilter implements EntityFilter<Policy> {
     public List<Policy> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
         Map<String, Folder> folders = filteredBundle.getEntities(Folder.class);
         return bundle.getEntities(Policy.class).values().stream()
-                .filter(p -> folders.containsKey(p.getParentFolder().getId())).collect(Collectors.toList());
+                .filter(p -> folders.containsKey(p.getParentFolderId())).collect(Collectors.toList());
     }
 }

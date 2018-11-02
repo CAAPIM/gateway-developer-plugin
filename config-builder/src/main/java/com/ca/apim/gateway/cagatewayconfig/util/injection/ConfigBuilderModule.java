@@ -86,12 +86,15 @@ public class ConfigBuilderModule extends AbstractModule {
             }
         });
         bind(EntityLoaderRegistry.class);
-
         bind(EntityTypeRegistry.class);
     }
 
     public static Injector getInjector() {
         return ofNullable(injector).orElseGet(ConfigBuilderModule::create);
+    }
+
+    public static <T> T getInstance(Class<T> serviceClass) {
+        return getInjector().getInstance(serviceClass);
     }
 
     @VisibleForTesting

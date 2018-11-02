@@ -10,11 +10,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
@@ -74,24 +71,6 @@ class ExportPluginModuleTest {
     }
 
     @Test
-    void checkLoadersAndRegistry() {
-        final List<Binding<EntityLoader>> loadersBindings = injector.findBindingsByType(TypeLiteral.get(EntityLoader.class));
-        assertNotNull(loadersBindings);
-        assertFalse(loadersBindings.isEmpty());
-
-        final List<EntityLoader> loaders = loadersBindings.stream().map(b -> injector.getInstance(b.getKey())).collect(toList());
-        assertFalse(loaders.isEmpty());
-        assertEquals(loadersBindings.size(), loaders.size());
-
-        final EntityLoaderRegistry registry = injector.getInstance(EntityLoaderRegistry.class);
-        assertNotNull(registry);
-        assertNotNull(registry.getEntityLoaders());
-        assertFalse(registry.getEntityLoaders().isEmpty());
-        assertEquals(registry.getEntityLoaders().size(), loaders.size());
-        assertTrue(registry.getEntityLoaders().values().containsAll(loaders));
-    }
-
-    @Test
     void checkWritersAndRegistry() {
         final List<Binding<EntityWriter>> writersBindings = injector.findBindingsByType(TypeLiteral.get(EntityWriter.class));
         assertNotNull(writersBindings);
@@ -107,14 +86,6 @@ class ExportPluginModuleTest {
         assertFalse(registry.getEntityWriters().isEmpty());
         assertEquals(registry.getEntityWriters().size(), writers.size());
         assertTrue(registry.getEntityWriters().containsAll(writers));
-    }
-
-    @Test
-    void checkEntityRegistry() {
-        final EntityTypeRegistry registry = injector.getInstance(EntityTypeRegistry.class);
-        assertNotNull(registry);
-        assertNotNull(registry.getEntityTypeMap());
-        assertFalse(registry.getEntityTypeMap().isEmpty());
     }
 
     @Test

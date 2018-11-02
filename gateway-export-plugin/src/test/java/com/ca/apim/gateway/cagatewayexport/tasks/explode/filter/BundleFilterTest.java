@@ -1,7 +1,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters.FilterTestUtils;
 import org.junit.jupiter.api.Test;
 

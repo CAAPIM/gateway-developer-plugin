@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.inject.Named;
@@ -30,6 +29,22 @@ public class CassandraConnection extends GatewayEntity {
     private Boolean ssl;
     private Set<String> tlsCiphers;
     private Map<String, Object> properties;
+
+    public CassandraConnection() {}
+
+    private CassandraConnection(Builder builder) {
+        setName(builder.name);
+        setId(builder.id);
+        contactPoint = builder.contactPoint;
+        port = builder.port;
+        username = builder.username;
+        passwordId = builder.passwordId;
+        compression = builder.compression;
+        ssl = builder.ssl;
+        tlsCiphers = builder.tlsCiphers;
+        properties = builder.properties;
+        keyspace = builder.keyspace;
+    }
 
     public String getKeyspace() {
         return keyspace;
@@ -109,5 +124,79 @@ public class CassandraConnection extends GatewayEntity {
 
     public void setPasswordId(String passwordId) {
         this.passwordId = passwordId;
+    }
+
+    public static class Builder {
+
+        private String name;
+        private String id;
+        private String keyspace;
+        private String contactPoint;
+        private Integer port;
+        private String username;
+        private String passwordId;
+        private String compression;
+        private Boolean ssl;
+        private Set<String> tlsCiphers;
+        private Map<String, Object> properties;
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder contactPoint(String contactPoint) {
+            this.contactPoint = contactPoint;
+            return this;
+        }
+
+        public Builder port(Integer port) {
+            this.port = port;
+            return this;
+        }
+
+        public Builder username(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public Builder passwordId(String passwordId) {
+            this.passwordId = passwordId;
+            return this;
+        }
+
+        public Builder compression(String compression) {
+            this.compression = compression;
+            return this;
+        }
+
+        public Builder ssl(Boolean ssl) {
+            this.ssl = ssl;
+            return this;
+        }
+
+        public Builder tlsCiphers(Set<String> tlsCiphers) {
+            this.tlsCiphers = tlsCiphers;
+            return this;
+        }
+
+        public Builder properties(Map<String, Object> properties) {
+            this.properties = properties;
+            return this;
+        }
+
+        public Builder keyspace(String keyspace) {
+            this.keyspace = keyspace;
+            return this;
+        }
+
+        public CassandraConnection build() {
+            return new CassandraConnection(this);
+        }
     }
 }

@@ -10,12 +10,13 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.EncassParam;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Iterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createEncass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -24,9 +25,9 @@ class EncassWriterTest {
 
     @Test
     void testGetBeanArgsAndResultsAreOrdered() {
-        EncassEntity entity = new EncassEntity("my-encass", "123", "abc", "policy-123",
-                Arrays.asList(new EncassEntity.EncassParam("a", "t"), new EncassEntity.EncassParam("x", "t"), new EncassEntity.EncassParam("1", "t"), new EncassEntity.EncassParam("B", "t")),
-                Arrays.asList(new EncassEntity.EncassParam("B", "t"), new EncassEntity.EncassParam("1", "t"), new EncassEntity.EncassParam("x", "t"), new EncassEntity.EncassParam("a", "t")));
+        Encass entity = createEncass("my-encass", "123", "abc", "policy-123",
+                Stream.of(new EncassParam("a", "t"), new EncassParam("x", "t"), new EncassParam("1", "t"), new EncassParam("B", "t")).collect(Collectors.toSet()),
+                Stream.of(new EncassParam("B", "t"), new EncassParam("1", "t"), new EncassParam("x", "t"), new EncassParam("a", "t")).collect(Collectors.toSet()));
 
         final Encass bean = writer.getEncassBean(entity);
         assertNotNull(bean);

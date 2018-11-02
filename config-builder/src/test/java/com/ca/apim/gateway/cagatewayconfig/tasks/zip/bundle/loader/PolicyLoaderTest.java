@@ -31,6 +31,13 @@ class PolicyLoaderTest {
     private static final String TEST_POLICY_NAME = "Policy";
     private static final String TEST_FOLDER_1 = "Folder1";
     private PolicyLoader loader = new PolicyLoader();
+    private static final String TEST_POLICY_XML = "&lt;wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\" xmlns:L7p=\"http://www.layer7tech.com/ws/policy\"&gt;\n" +
+            "    &lt;wsp:All wsp:Usage=\"Required\"&gt;\n" +
+            "        &lt;L7p:CommentAssertion&gt;\n" +
+            "            &lt;L7p:Comment stringValue=\"comment\"/&gt;\n" +
+            "        &lt;/L7p:CommentAssertion&gt;\n" +
+            "    &lt;/wsp:All&gt;\n" +
+            "&lt;/wsp:Policy&gt;";
 
     @Test
     void test() {
@@ -100,6 +107,22 @@ class PolicyLoaderTest {
                         ImmutableMap.of(ATTRIBUTE_FOLDER_ID, folderID, ATTRIBUTE_GUID, TEST_GUID, ATTRIBUTE_ID, policyID),
                         createElementWithTextContent(document, NAME, policyName),
                         createElementWithTextContent(document, POLICY_TYPE, policyType)
+                )
+        );
+
+        element.appendChild(
+                createElementWithChildren(
+                        document,
+                        RESOURCES,
+                        createElementWithChildren(
+                                document,
+                                RESOURCE_SET,
+                                createElementWithTextContent(
+                                        document,
+                                        RESOURCE,
+                                        TEST_POLICY_XML
+                                )
+                        )
                 )
         );
 

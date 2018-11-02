@@ -78,6 +78,20 @@ public class ListenPort extends GatewayEntity {
     private Map<String, Object> properties;
     private String targetServiceReference;
 
+    public ListenPort() {
+    }
+
+    private ListenPort(final Builder builder) {
+        setId(builder.id);
+        setName(builder.name);
+        protocol = builder.protocol;
+        port = builder.port;
+        enabledFeatures = builder.enabledFeatures;
+        tlsSettings = builder.tlsSettings;
+        properties = builder.properties;
+        targetServiceReference = builder.targetServiceReference;
+    }
+
     public String getProtocol() {
         return protocol;
     }
@@ -220,5 +234,61 @@ public class ListenPort extends GatewayEntity {
             return description;
         }
 
+    }
+
+    public static class Builder {
+
+        private String id;
+        private String name;
+        private String protocol;
+        private int port;
+        private Set<String> enabledFeatures;
+        private ListenPortTlsSettings tlsSettings;
+        private Map<String, Object> properties;
+        private String targetServiceReference;
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder protocol(String protocol) {
+            this.protocol = protocol;
+            return this;
+        }
+
+        public Builder port(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public Builder enabledFeatures(Set<String> enabledFeatures) {
+            this.enabledFeatures = enabledFeatures;
+            return this;
+        }
+
+        public Builder tlsSettings(ListenPortTlsSettings tlsSettings) {
+            this.tlsSettings = tlsSettings;
+            return this;
+        }
+
+        public Builder properties(Map<String, Object> properties) {
+            this.properties = properties;
+            return this;
+        }
+
+        public Builder targetServiceReference(String targetServiceReference) {
+            this.targetServiceReference = targetServiceReference;
+            return this;
+        }
+
+        public ListenPort build () {
+            return new ListenPort(this);
+        }
     }
 }

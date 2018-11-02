@@ -25,6 +25,21 @@ public class ScheduledTask extends GatewayEntity {
     private boolean shouldExecuteOnCreate;
     private Map<String, Object> properties;
 
+    public ScheduledTask() {}
+
+    private ScheduledTask(Builder builder) {
+        setName(builder.name);
+        setId(builder.id);
+        setPolicy(builder.policyId);
+        this.isOneNode = builder.isOneNode;
+        this.jobType = builder.jobType;
+        this.jobStatus = builder.jobStatus;
+        this.executionDate = builder.executionDate;
+        this.cronExpression = builder.cronExpression;
+        this.shouldExecuteOnCreate = builder.shouldExecuteOnCreate;
+        this.properties = builder.properties;
+    }
+
     public String getPolicy() {
         return policy;
     }
@@ -87,5 +102,72 @@ public class ScheduledTask extends GatewayEntity {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    public static class Builder {
+        private String name;
+        private String id;
+        private String policyId;
+        private boolean isOneNode;
+        private String jobType;
+        private String jobStatus;
+        private String executionDate;
+        private String cronExpression;
+        private boolean shouldExecuteOnCreate;
+        Map<String, Object> properties;
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder policyId(String policyId) {
+            this.policyId = policyId;
+            return this;
+        }
+
+        public Builder oneNode(boolean oneNode) {
+            isOneNode = oneNode;
+            return this;
+        }
+
+        public Builder jobType(String jobType) {
+            this.jobType = jobType;
+            return this;
+        }
+
+        public Builder jobStatus(String jobStatus) {
+            this.jobStatus = jobStatus;
+            return this;
+        }
+
+        public Builder executionDate(String executionDate) {
+            this.executionDate = executionDate;
+            return this;
+        }
+
+        public Builder cronExpression(String cronExpression) {
+            this.cronExpression = cronExpression;
+            return this;
+        }
+
+        public Builder shouldExecuteOnCreate(boolean shouldExecuteOnCreate) {
+            this.shouldExecuteOnCreate = shouldExecuteOnCreate;
+            return this;
+        }
+
+        public Builder properties(Map<String, Object> properties) {
+            this.properties = properties;
+            return this;
+        }
+
+        public ScheduledTask build() {
+            return new ScheduledTask(this);
+        }
     }
 }

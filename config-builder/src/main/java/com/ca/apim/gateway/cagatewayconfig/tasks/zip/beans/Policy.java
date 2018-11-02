@@ -28,6 +28,19 @@ public class Policy extends Folderable {
     private String tag;
     private PolicyType policyType;
 
+    public Policy() {}
+
+    public Policy(final Builder builder) {
+        setName(builder.name);
+        setId(builder.id);
+        this.guid = builder.guid;
+        this.policyDocument = builder.policyXML;
+        this.policyXML = builder.policy;
+        this.tag = builder.tag;
+        this.policyType = builder.policyType;
+        setParentFolder(builder.parentFolderId != null ? new Folder(builder.parentFolderId, null) : null);
+    }
+
     public String getPath() {
         return path;
     }
@@ -92,5 +105,61 @@ public class Policy extends Folderable {
         this.policyType = firstNonNull(otherPolicy.policyType, this.policyType);
 
         return this;
+    }
+
+    public static class Builder {
+
+        private String name;
+        private String id;
+        private String guid;
+        private String policy;
+        private String tag;
+        private String parentFolderId;
+        private PolicyType policyType;
+        private Element policyXML;
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setGuid(String guid) {
+            this.guid = guid;
+            return this;
+        }
+
+        public Builder setPolicy(String policy) {
+            this.policy = policy;
+            return this;
+        }
+
+        public Builder setTag(String tag) {
+            this.tag = tag;
+            return this;
+        }
+
+        public Builder setPolicyXML(Element policyXML) {
+            this.policyXML = policyXML;
+            return this;
+        }
+
+        public Builder setPolicyType(PolicyType policyType) {
+            this.policyType = policyType;
+            return this;
+        }
+
+        public Builder setParentFolderId(String parentFolderId) {
+            this.parentFolderId = parentFolderId;
+            return this;
+        }
+
+        public Policy build() {
+            return new Policy(this);
+        }
     }
 }

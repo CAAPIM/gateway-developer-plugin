@@ -35,10 +35,8 @@ class JdbcConnectionLoaderTest {
 
         JdbcConnection entity = bundle.getJdbcConnections().get("Test");
         assertNotNull(entity);
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(PROPERTY_MIN_POOL_SIZE, 1);
-        properties.put(PROPERTY_MAX_POOL_SIZE, 2);
-        assertPropertiesContent(properties, entity.getProperties());
+        assertEquals(1, entity.getMinimumPoolSize().intValue());
+        assertEquals(2, entity.getMaximumPoolSize().intValue());
     }
 
 }

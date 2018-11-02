@@ -35,6 +35,11 @@ public class Bundle {
         return (Map<String, E>) entities.computeIfAbsent(entityType, (Function<Class, Map<String, E>>) aClass -> new HashMap<>());
     }
 
+    @SuppressWarnings("unchecked")
+    public <E extends GatewayEntity> void addEntity(E entity) {
+        getEntities((Class<GatewayEntity>) entity.getClass()).put(entity.getId(), entity);
+    }
+
     public Map<String, ClusterProperty> getClusterProperties() {
         return getEntities(ClusterProperty.class);
     }

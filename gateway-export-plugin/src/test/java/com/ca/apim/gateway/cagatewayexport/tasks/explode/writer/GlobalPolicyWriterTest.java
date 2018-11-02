@@ -6,12 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
@@ -29,7 +28,7 @@ class GlobalPolicyWriterTest {
     @Test
     void testWithGlobalPolicies() {
         Bundle bundle = new Bundle();
-        PolicyEntity globalPolicy = new PolicyEntity.Builder()
+        Policy globalPolicy = new Policy.Builder()
                 .setName(TEST_POLICY_NAME)
                 .setId(TEST_POLICY_ID)
                 .setParentFolderId(TEST_FOLDER_1)
@@ -37,14 +36,14 @@ class GlobalPolicyWriterTest {
                 .setPolicyType(PolicyType.GLOBAL)
                 .build();
         bundle.addEntity(globalPolicy);
-        bundle.addEntity(new PolicyEntity.Builder()
+        bundle.addEntity(new Policy.Builder()
                 .setName(TEST_POLICY_NAME + "_1")
                 .setId(TEST_POLICY_ID + "_1")
                 .setParentFolderId(TEST_FOLDER_1 + "_1")
                 .setPolicyType(PolicyType.INTERNAL)
                 .build());
 
-        final Map<String, PolicyEntity> globalPolicies = writer.filterPolicies(bundle);
+        final Map<String, Policy> globalPolicies = writer.filterPolicies(bundle);
 
         assertNotNull(globalPolicies);
         assertFalse(globalPolicies.isEmpty());
@@ -55,14 +54,14 @@ class GlobalPolicyWriterTest {
     @Test
     void testNoGlobalPolicies() {
         Bundle bundle = new Bundle();
-        bundle.addEntity(new PolicyEntity.Builder()
+        bundle.addEntity(new Policy.Builder()
                 .setName(TEST_POLICY_NAME + "_1")
                 .setId(TEST_POLICY_ID + "_1")
                 .setParentFolderId(TEST_FOLDER_1 + "_1")
                 .setPolicyType(PolicyType.SERVICE_OPERATION)
                 .build());
 
-        final Map<String, PolicyEntity> globalPolicies = writer.filterPolicies(bundle);
+        final Map<String, Policy> globalPolicies = writer.filterPolicies(bundle);
 
         assertNotNull(globalPolicies);
         assertTrue(globalPolicies.isEmpty());
@@ -71,14 +70,14 @@ class GlobalPolicyWriterTest {
     @Test
     void testGetGlobalPolicyBean() {
         String path = Paths.get(TEST_FOLDER_1, TEST_POLICY_NAME + ".xml").toString();
-        PolicyEntity globalPolicy = new PolicyEntity.Builder()
+        Policy globalPolicy = new Policy.Builder()
                 .setName(TEST_POLICY_NAME)
                 .setId(TEST_POLICY_ID)
                 .setParentFolderId(TEST_FOLDER_1)
                 .setTag("global-policy")
                 .setPolicyType(PolicyType.INTERNAL)
                 .build();
-        globalPolicy.setPolicyPath(path);
+        globalPolicy.setPath(path);
         final Policy policyBean = writer.getPolicyBean(globalPolicy);
 
         assertNotNull(policyBean);

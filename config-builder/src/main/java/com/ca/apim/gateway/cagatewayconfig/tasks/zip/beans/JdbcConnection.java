@@ -30,6 +30,22 @@ public class JdbcConnection extends GatewayEntity {
     private Integer maximumPoolSize;
     private String password;
 
+    public JdbcConnection() {
+    }
+
+    private JdbcConnection(Builder builder) {
+        setId(builder.id);
+        setName(builder.name);
+        driverClass = builder.driverClass;
+        jdbcUrl = builder.jdbcUrl;
+        properties = builder.properties;
+        user = builder.user;
+        minimumPoolSize = builder.minimumPoolSize;
+        maximumPoolSize = builder.maximumPoolSize;
+        passwordRef = builder.passwordRef;
+        password = builder.password;
+    }
+
     public String getDriverClass() {
         return driverClass;
     }
@@ -94,4 +110,71 @@ public class JdbcConnection extends GatewayEntity {
         this.properties = properties;
     }
 
+    public static class Builder {
+
+        private String id;
+        private String name;
+        private String driverClass;
+        private String jdbcUrl;
+        private String user;
+        private String passwordRef;
+        private String password;
+        private Integer minimumPoolSize;
+        private Integer maximumPoolSize;
+        private Map<String, Object> properties;
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder driverClass(String driverClass) {
+            this.driverClass = driverClass;
+            return this;
+        }
+
+        public Builder jdbcUrl(String jdbcUrl) {
+            this.jdbcUrl = jdbcUrl;
+            return this;
+        }
+
+        public Builder properties(Map<String, Object> properties) {
+            this.properties = properties;
+            return this;
+        }
+
+        public Builder user(String user) {
+            this.user = user;
+            return this;
+        }
+
+        public Builder passwordRef(String passwordRef) {
+            this.passwordRef = passwordRef;
+            return this;
+        }
+
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder minimumPoolSize(Integer minimumPoolSize) {
+            this.minimumPoolSize = minimumPoolSize;
+            return this;
+        }
+
+        public Builder maximumPoolSize(Integer maximumPoolSize) {
+            this.maximumPoolSize = maximumPoolSize;
+            return this;
+        }
+
+        public JdbcConnection build() {
+            return new JdbcConnection(this);
+        }
+    }
 }

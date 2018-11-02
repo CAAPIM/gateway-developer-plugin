@@ -6,12 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
@@ -29,7 +28,7 @@ class AuditPolicyWriterTest {
     @Test
     void testWithAuditPolicies() {
         Bundle bundle = new Bundle();
-        PolicyEntity auditPolicy = new PolicyEntity.Builder()
+        Policy auditPolicy = new Policy.Builder()
                 .setName(TEST_POLICY_NAME)
                 .setId(TEST_POLICY_ID)
                 .setParentFolderId(TEST_FOLDER_1)
@@ -37,14 +36,14 @@ class AuditPolicyWriterTest {
                 .setPolicyType(PolicyType.INTERNAL)
                 .build();
         bundle.addEntity(auditPolicy);
-        bundle.addEntity(new PolicyEntity.Builder()
+        bundle.addEntity(new Policy.Builder()
                 .setName(TEST_POLICY_NAME + "_1")
                 .setId(TEST_POLICY_ID + "_1")
                 .setParentFolderId(TEST_FOLDER_1 + "_1")
                 .setPolicyType(PolicyType.INTERNAL)
                 .build());
 
-        final Map<String, PolicyEntity> auditPolicies = writer.filterPolicies(bundle);
+        final Map<String, Policy> auditPolicies = writer.filterPolicies(bundle);
 
         assertNotNull(auditPolicies);
         assertFalse(auditPolicies.isEmpty());
@@ -55,14 +54,14 @@ class AuditPolicyWriterTest {
     @Test
     void testNoAuditPolicies() {
         Bundle bundle = new Bundle();
-        bundle.addEntity(new PolicyEntity.Builder()
+        bundle.addEntity(new Policy.Builder()
                 .setName(TEST_POLICY_NAME + "_1")
                 .setId(TEST_POLICY_ID + "_1")
                 .setParentFolderId(TEST_FOLDER_1 + "_1")
                 .setPolicyType(PolicyType.INTERNAL)
                 .build());
 
-        final Map<String, PolicyEntity> auditPolicies = writer.filterPolicies(bundle);
+        final Map<String, Policy> auditPolicies = writer.filterPolicies(bundle);
 
         assertNotNull(auditPolicies);
         assertTrue(auditPolicies.isEmpty());
@@ -71,14 +70,14 @@ class AuditPolicyWriterTest {
     @Test
     void testGetAuditPolicyBean() {
         String path = Paths.get(TEST_FOLDER_1, TEST_POLICY_NAME + ".xml").toString();
-        PolicyEntity auditPolicy = new PolicyEntity.Builder()
+        Policy auditPolicy = new Policy.Builder()
                 .setName(TEST_POLICY_NAME)
                 .setId(TEST_POLICY_ID)
                 .setParentFolderId(TEST_FOLDER_1)
                 .setTag("audit-sink")
                 .setPolicyType(PolicyType.INTERNAL)
                 .build();
-        auditPolicy.setPolicyPath(path);
+        auditPolicy.setPath(path);
         final Policy policyBean = writer.getPolicyBean(auditPolicy);
 
         assertNotNull(policyBean);

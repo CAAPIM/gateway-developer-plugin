@@ -14,6 +14,8 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static java.lang.Boolean.parseBoolean;
+import static java.util.Collections.emptyMap;
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @Named("TRUSTED_CERT")
 public class TrustedCert extends GatewayEntity {
@@ -31,8 +33,14 @@ public class TrustedCert extends GatewayEntity {
     public TrustedCert() {}
 
     public TrustedCert(Map<String, Object> properties, CertificateData certificateData) {
-        this(properties);
+        this(firstNonNull(properties, emptyMap()));
         this.certificateData = certificateData;
+    }
+
+    private TrustedCert(final Builder builder) {
+        this(builder.properties, new CertificateData(builder.encodedData));
+        setId(builder.id);
+        setName(builder.name);
     }
 
     public TrustedCert(Map<String, Object> properties) {
@@ -79,6 +87,10 @@ public class TrustedCert extends GatewayEntity {
             this.issuerName = issuerName;
             this.serialNumber = serialNumber;
             this.subjectName = subjectName;
+            this.encodedData = encodedData;
+        }
+
+        public CertificateData(String encodedData) {
             this.encodedData = encodedData;
         }
 
@@ -133,5 +145,36 @@ public class TrustedCert extends GatewayEntity {
 
     public boolean isTrustedAsSamlIssuer() {
         return trustedAsSamlIssuer;
+    }
+
+    public static class Builder {
+        private String id;
+        private String name;
+        private Map<String, Object> properties;
+        private String encodedData;
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder properties(Map<String, Object> properties) {
+            this.properties = properties;
+            return this;
+        }
+
+        public Builder encodedData(String encodedData) {
+            this.encodedData = encodedData;
+            return this;
+        }
+
+        public TrustedCert build() {
+            return new TrustedCert(this);
+        }
     }
 }

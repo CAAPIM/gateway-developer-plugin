@@ -21,6 +21,7 @@ public class Encass extends GatewayEntity {
     private Set<EncassParam> results;
     private String guid;
     private String policyId;
+    private String path;
 
     public Set<EncassParam> getArguments() {
         return arguments;
@@ -60,5 +61,13 @@ public class Encass extends GatewayEntity {
 
     public void setPolicyId(String policyId) {
         this.policyId = policyId;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

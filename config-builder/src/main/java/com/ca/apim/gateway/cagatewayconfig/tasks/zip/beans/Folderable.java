@@ -16,4 +16,8 @@ public abstract class Folderable extends GatewayEntity {
     public void setParentFolder(Folder parentFolder) {
         this.parentFolder = parentFolder;
     }
+
+    public String getParentFolderId() {
+        return this.parentFolder != null ? this.parentFolder.getId() : null;
+    }
 }

@@ -76,13 +76,40 @@ class EncassLoaderTest {
     }
 
     private static Element createEncassXml(Document document) {
-        Element cassandraElement = createElementWithAttributesAndChildren(
+        Element encassElement = createElementWithAttributesAndChildren(
                 document,
                 ENCAPSULATED_ASSERTION,
                 ImmutableMap.of(ATTRIBUTE_ID, "id"),
                 createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, POLICY_ID),
                 createElementWithTextContent(document, GUID, TEST_GUID),
                 createElementWithTextContent(document, NAME, TEST_NAME)
+        );
+
+        encassElement.appendChild(
+                createElementWithChildren(
+                        document,
+                        ENCAPSULATED_ARGUMENTS,
+                        createElementWithChildren(
+                            document,
+                            ENCAPSULATED_ASSERTION_ARGUMENT,
+                            createElementWithTextContent(document, ORDINAL, String.valueOf(1)),
+                            createElementWithTextContent(document, ARGUMENT_NAME, "param"),
+                            createElementWithTextContent(document, ARGUMENT_TYPE, "string"),
+                            createElementWithTextContent(document, GUI_PROMPT, Boolean.TRUE.toString())
+                    )
+                )
+        );
+        encassElement.appendChild(
+                createElementWithChildren(
+                        document,
+                        ENCAPSULATED_RESULTS,
+                        createElementWithChildren(
+                                document,
+                                ENCAPSULATED_ASSERTION_RESULT,
+                                createElementWithTextContent(document, RESULT_NAME, "result"),
+                                createElementWithTextContent(document, RESULT_TYPE, "string")
+                        )
+                )
         );
 
         return createElementWithChildren(
@@ -93,7 +120,7 @@ class EncassLoaderTest {
                 createElementWithChildren(
                         document,
                         RESOURCE,
-                        cassandraElement
+                        encassElement
                 )
         );
     }

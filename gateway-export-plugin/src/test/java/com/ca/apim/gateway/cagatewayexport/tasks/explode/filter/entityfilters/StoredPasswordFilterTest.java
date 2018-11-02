@@ -2,8 +2,8 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Dependency;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
@@ -24,9 +24,9 @@ class StoredPasswordFilterTest {
 
         Bundle filteredBundle = new Bundle();
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(Collections.emptyMap());
+        bundle.setDependencyMap(Collections.emptyMap());
 
-        List<StoredPasswordEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
+        List<StoredPassword> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, filteredEntities.size());
     }
@@ -38,18 +38,18 @@ class StoredPasswordFilterTest {
         Bundle filteredBundle = new Bundle();
         filteredBundle.addEntity(TestUtils.createPolicy("my-policy", "1", "", "", null, ""));
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(
+        bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", PolicyEntity.class), Arrays.asList(new Dependency("2", StoredPasswordEntity.class), new Dependency("3", StoredPasswordEntity.class)),
-                        new Dependency("2", PolicyEntity.class), Collections.singletonList(new Dependency("4", StoredPasswordEntity.class))));
-        bundle.addEntity(new StoredPasswordEntity.Builder().name("password1").id("1").properties(ImmutableMap.of("type", StoredPasswordEntity.Type.PASSWORD.getName())).build());
-        bundle.addEntity(new StoredPasswordEntity.Builder().name("password2").id("2").properties(ImmutableMap.of("type", StoredPasswordEntity.Type.PASSWORD.getName())).build());
-        bundle.addEntity(new StoredPasswordEntity.Builder().name("password3").id("3").properties(ImmutableMap.of("type", StoredPasswordEntity.Type.PEM_PRIVATE_KEY.getName())).build());
-        bundle.addEntity(new StoredPasswordEntity.Builder().name("password4").id("4").properties(ImmutableMap.of("type", StoredPasswordEntity.Type.PASSWORD.getName())).build());
+                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", StoredPassword.class), new Dependency("3", StoredPassword.class)),
+                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", StoredPassword.class))));
+        bundle.addEntity(new StoredPassword.Builder().name("password1").id("1").properties(ImmutableMap.of("type", StoredPassword.Type.PASSWORD.getName())).build());
+        bundle.addEntity(new StoredPassword.Builder().name("password2").id("2").properties(ImmutableMap.of("type", StoredPassword.Type.PASSWORD.getName())).build());
+        bundle.addEntity(new StoredPassword.Builder().name("password3").id("3").properties(ImmutableMap.of("type", StoredPassword.Type.PEM_PRIVATE_KEY.getName())).build());
+        bundle.addEntity(new StoredPassword.Builder().name("password4").id("4").properties(ImmutableMap.of("type", StoredPassword.Type.PASSWORD.getName())).build());
 
 
         FilterConfiguration filterConfiguration = new FilterConfiguration();
-        List<StoredPasswordEntity> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
+        List<StoredPassword> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(1, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "password2".equals(c.getName())));

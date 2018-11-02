@@ -45,7 +45,7 @@ class IdentityProviderLoaderTest {
     }
 
     private static Element createIDPXml(Document document) {
-        Element cassandraElement = createElementWithAttributesAndChildren(
+        Element element = createElementWithAttributesAndChildren(
                 document,
                 ID_PROV,
                 ImmutableMap.of(ATTRIBUTE_ID, "id"),
@@ -60,6 +60,35 @@ class IdentityProviderLoaderTest {
                 )
         );
 
+        final Element extensionElement = document.createElement(EXTENSION);
+        final Element bindOnlyLdapIdentityProviderDetailElement = document.createElement(BIND_ONLY_ID_PROV_DETAIL);
+        extensionElement.appendChild(bindOnlyLdapIdentityProviderDetailElement);
+        final Element serverUrlsElement = document.createElement(SERVER_URLS);
+        bindOnlyLdapIdentityProviderDetailElement.appendChild(serverUrlsElement);
+        serverUrlsElement.appendChild(createElementWithTextContent(document, STRING_VALUE, "ldap://localhost"));
+        bindOnlyLdapIdentityProviderDetailElement.appendChild(
+                createElementWithTextContent(
+                        document,
+                        USE_SSL_CLIENT_AUTH,
+                        Boolean.FALSE.toString()
+                )
+        );
+        bindOnlyLdapIdentityProviderDetailElement.appendChild(
+                createElementWithTextContent(
+                        document,
+                        BIND_PATTERN_PREFIX,
+                        "prefix"
+                )
+        );
+        bindOnlyLdapIdentityProviderDetailElement.appendChild(
+                createElementWithTextContent(
+                        document,
+                        BIND_PATTERN_SUFFIX,
+                        "suffix"
+                )
+        );
+        element.appendChild(extensionElement);
+
         return createElementWithChildren(
                 document,
                 ITEM,
@@ -68,7 +97,7 @@ class IdentityProviderLoaderTest {
                 createElementWithChildren(
                         document,
                         RESOURCE,
-                        cassandraElement
+                        element
                 )
         );
     }

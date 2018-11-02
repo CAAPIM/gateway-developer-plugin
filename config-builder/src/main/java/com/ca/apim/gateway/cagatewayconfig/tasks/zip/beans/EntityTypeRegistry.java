@@ -10,6 +10,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.reflections.Reflections;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import static java.util.Collections.unmodifiableMap;
 /**
  *
  */
+@Singleton
 public class EntityTypeRegistry {
 
     private final Map<String, Class<? extends GatewayEntity>> entityTypeMap;

@@ -14,7 +14,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +30,9 @@ public class BundleBuilder {
     private final DependencyLoaderRegistry entityLoaderRegistry;
     private final EntityTypeRegistry entityTypeRegistry;
 
-    @Inject
-    public BundleBuilder(final EntityTypeRegistry entityTypeRegistry) {
-        this.entityLoaderRegistry = ConfigBuilderModule.getInjector().getInstance(DependencyLoaderRegistry.class);
-        this.entityTypeRegistry = entityTypeRegistry;
+    public BundleBuilder() {
+        this.entityLoaderRegistry = ConfigBuilderModule.getInstance(DependencyLoaderRegistry.class);
+        this.entityTypeRegistry = ConfigBuilderModule.getInstance(EntityTypeRegistry.class);
     }
 
     public Bundle buildBundle(final Element bundleElement) {

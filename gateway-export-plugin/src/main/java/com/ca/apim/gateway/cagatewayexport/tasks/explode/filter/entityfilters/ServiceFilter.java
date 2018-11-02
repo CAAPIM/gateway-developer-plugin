@@ -26,6 +26,6 @@ public class ServiceFilter implements EntityFilter<Service> {
     public List<Service> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
         Map<String, Folder> folders = filteredBundle.getEntities(Folder.class);
         return bundle.getEntities(Service.class).values().stream()
-                .filter(s -> folders.containsKey(s.getParentFolder().getId())).collect(Collectors.toList());
+                .filter(s -> folders.containsKey(s.getParentFolderId())).collect(Collectors.toList());
     }
 }

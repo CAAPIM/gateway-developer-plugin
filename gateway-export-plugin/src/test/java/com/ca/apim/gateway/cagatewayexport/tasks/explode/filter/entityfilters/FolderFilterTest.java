@@ -1,13 +1,14 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.FolderTree;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createFolder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,12 +26,15 @@ class FolderFilterTest {
     @Test
     void filterBundle() {
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.addEntity(new Folder("my", "1", FilterTestUtils.ROOT_FOLDER_ID));
-        bundle.addEntity(new Folder("folder", "2", "1"));
-        bundle.addEntity(new Folder("fold", "5", "1"));
-        bundle.addEntity(new Folder("path", "3", "2"));
-        bundle.addEntity(new Folder("sub-folder", "4", "3"));
-        bundle.addEntity(new Folder("another-path", "6", "2"));
+        Folder folder1 = createFolder("my", "1", Folder.ROOT_FOLDER);
+        Folder folder2 = createFolder("folder", "2", folder1);
+        Folder folder3 = createFolder("path", "3", createFolder("folder", "2", folder1));
+        bundle.addEntity(folder1);
+        bundle.addEntity(folder2);
+        bundle.addEntity(createFolder("fold", "5", folder1));
+        bundle.addEntity(folder3);
+        bundle.addEntity(createFolder("sub-folder", "4", folder3));
+        bundle.addEntity(createFolder("another-path", "6", folder2));
         bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
 
         FolderFilter folderFilter = new FolderFilter();
@@ -55,10 +59,13 @@ class FolderFilterTest {
     @Test
     void filterParentFolder() {
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.addEntity(new Folder("my", "1", FilterTestUtils.ROOT_FOLDER_ID));
-        bundle.addEntity(new Folder("folder", "2", "1"));
-        bundle.addEntity(new Folder("path", "3", "2"));
-        bundle.addEntity(new Folder("sub-folder", "4", "3"));
+        Folder folder1 = createFolder("my", "1", Folder.ROOT_FOLDER);
+        Folder folder2 = createFolder("folder", "2", folder1);
+        Folder folder3 = createFolder("path", "3", folder2);
+        bundle.addEntity(folder1);
+        bundle.addEntity(folder2);
+        bundle.addEntity(folder3);
+        bundle.addEntity(createFolder("sub-folder", "4", folder3));
         bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
 
         List<Folder> parentFolders = FolderFilter.parentFolders("/my/folder/path", bundle);
@@ -72,12 +79,15 @@ class FolderFilterTest {
     @Test
     void filterParentFolderFoldersWithPartialNames() {
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.addEntity(new Folder("my", "1", FilterTestUtils.ROOT_FOLDER_ID));
-        bundle.addEntity(new Folder("folder", "2", "1"));
-        bundle.addEntity(new Folder("fold", "5", "1"));
-        bundle.addEntity(new Folder("path", "3", "2"));
-        bundle.addEntity(new Folder("pa", "6", "2"));
-        bundle.addEntity(new Folder("sub-folder", "4", "3"));
+        Folder folder1 = createFolder("my", "1", Folder.ROOT_FOLDER);
+        Folder folder2 = createFolder("folder", "2", folder1);
+        Folder folder3 = createFolder("path", "3", folder2);
+        bundle.addEntity(folder1);
+        bundle.addEntity(folder2);
+        bundle.addEntity(createFolder("fold", "5", folder1));
+        bundle.addEntity(folder3);
+        bundle.addEntity(createFolder("pa", "6", folder2));
+        bundle.addEntity(createFolder("sub-folder", "4", folder3));
         bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
 
         List<Folder> parentFolders = FolderFilter.parentFolders("/my/folder/path", bundle);

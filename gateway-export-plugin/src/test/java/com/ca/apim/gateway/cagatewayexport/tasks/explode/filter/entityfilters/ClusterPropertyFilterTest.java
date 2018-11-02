@@ -1,9 +1,9 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ClusterProperty;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Dependency;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createClusterProperty;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClusterPropertyFilterTest {
@@ -25,7 +26,7 @@ class ClusterPropertyFilterTest {
 
         Bundle filteredBundle = new Bundle();
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(Collections.emptyMap());
+        bundle.setDependencyMap(Collections.emptyMap());
 
         List<ClusterProperty> clusterProperties = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
@@ -39,15 +40,15 @@ class ClusterPropertyFilterTest {
         Bundle filteredBundle = new Bundle();
         filteredBundle.addEntity(TestUtils.createPolicy("my-policy", "1", "", "", null, ""));
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(
+        bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", PolicyEntity.class), Arrays.asList(new Dependency("2", ClusterProperty.class), new Dependency("3", ClusterProperty.class), new Dependency("6", ClusterProperty.class)),
-                        new Dependency("2", PolicyEntity.class), Collections.singletonList(new Dependency("4", ClusterProperty.class))));
-        bundle.addEntity(new ClusterProperty("prop1", "1", "1"));
-        bundle.addEntity(new ClusterProperty("prop2", "2", "2"));
-        bundle.addEntity(new ClusterProperty("prop3", "3", "3"));
-        bundle.addEntity(new ClusterProperty("prop4", "4", "4"));
-        bundle.addEntity(new ClusterProperty("cluster.hostname", "6", "6"));
+                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", ClusterProperty.class), new Dependency("3", ClusterProperty.class), new Dependency("6", ClusterProperty.class)),
+                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", ClusterProperty.class))));
+        bundle.addEntity(createClusterProperty("prop1", "1", "1"));
+        bundle.addEntity(createClusterProperty("prop2", "2", "2"));
+        bundle.addEntity(createClusterProperty("prop3", "3", "3"));
+        bundle.addEntity(createClusterProperty("prop4", "4", "4"));
+        bundle.addEntity(createClusterProperty("cluster.hostname", "6", "6"));
 
         FilterConfiguration filterConfiguration = new FilterConfiguration();
         List<ClusterProperty> clusterProperties = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);

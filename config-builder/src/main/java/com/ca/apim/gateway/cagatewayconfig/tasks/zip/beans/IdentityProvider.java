@@ -43,6 +43,17 @@ public class IdentityProvider extends GatewayEntity {
     private IdentityProviderType type;
     private Map<String,Object> properties;
 
+    public IdentityProvider() {}
+
+    private IdentityProvider(Builder builder) {
+        this.setId(builder.id);
+        this.setName(builder.name);
+        this.type = builder.type;
+        this.properties = builder.properties;
+        this.identityProviderDetail = builder.identityProviderDetail;
+    }
+
+
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "type")
     @JsonSubTypes( {
             @JsonSubTypes.Type(value= BindOnlyLdapIdentityProviderDetail.class, name="BIND_ONLY_LDAP"),
@@ -73,5 +84,42 @@ public class IdentityProvider extends GatewayEntity {
 
     public void setIdentityProviderDetail(IdentityProviderDetail identityProviderDetail) {
         this.identityProviderDetail = identityProviderDetail;
+    }
+
+    public static class Builder {
+        private String name;
+        private String id;
+        private IdentityProviderType type;
+        private Map<String, Object> properties;
+        private IdentityProviderDetail identityProviderDetail;
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder type(IdentityProviderType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder identityProviderDetail(IdentityProviderDetail identityProviderDetail) {
+            this.identityProviderDetail = identityProviderDetail;
+            return this;
+        }
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder properties(Map<String, Object> properties) {
+            this.properties = properties;
+            return this;
+        }
+
+        public IdentityProvider build() {
+            return new IdentityProvider(this);
+        }
     }
 }

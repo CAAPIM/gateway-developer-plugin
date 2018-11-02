@@ -13,10 +13,18 @@ public class Folder extends Folderable {
 
     public static final String ROOT_FOLDER_ID = "0000000000000000ffffffffffffec76";
     public static final String ROOT_FOLDER_NAME = "Root Node";
+    public static final Folder ROOT_FOLDER = new Folder(ROOT_FOLDER_ID, ROOT_FOLDER_NAME);
 
     private String id;
     private String path;
     private String name;
+
+    public Folder() {}
+
+    public Folder(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     public String getId() {
         return id;

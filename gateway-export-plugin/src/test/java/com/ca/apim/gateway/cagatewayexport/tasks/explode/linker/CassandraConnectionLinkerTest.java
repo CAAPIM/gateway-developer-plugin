@@ -7,8 +7,8 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.CassandraConnectionEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.CassandraConnection;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,32 +19,32 @@ class CassandraConnectionLinkerTest {
 
     @Test
     void testLinkNoPasswordId() {
-        CassandraConnectionEntity cassandraConnection = new CassandraConnectionEntity.Builder().build();
+        CassandraConnection cassandraConnection = new CassandraConnection();
         linker.link(cassandraConnection, null, null);
 
-        assertNull(cassandraConnection.getPasswordName());
+        assertNull(cassandraConnection.getStoredPasswordName());
     }
 
     @Test
     void testLinkPasswordNotFound() {
-        CassandraConnectionEntity cassandraConnection = new CassandraConnectionEntity.Builder().passwordId("123").build();
+        CassandraConnection cassandraConnection = new CassandraConnection.Builder().passwordId("123").build();
         assertThrows(LinkerException.class, () -> linker.link(cassandraConnection, new Bundle(), null));
     }
 
     @Test
     void testLinkWithPassword() {
-        CassandraConnectionEntity cassandraConnection = new CassandraConnectionEntity.Builder().passwordId("123").build();
+        CassandraConnection cassandraConnection = new CassandraConnection.Builder().passwordId("123").build();
         Bundle bundle = new Bundle();
-        bundle.addEntity(new StoredPasswordEntity.Builder().name("name").id("123").build());
+        bundle.addEntity(new StoredPassword.Builder().name("name").id("123").build());
 
         linker.link(cassandraConnection, bundle, null);
 
-        assertNotNull(cassandraConnection.getPasswordName());
-        assertEquals("name", cassandraConnection.getPasswordName());
+        assertNotNull(cassandraConnection.getStoredPasswordName());
+        assertEquals("name", cassandraConnection.getStoredPasswordName());
     }
 
     @Test
     void testGetEntityClass() {
-        assertEquals(CassandraConnectionEntity.class, linker.getEntityClass());
+        assertEquals(CassandraConnection.class, linker.getEntityClass());
     }
 }

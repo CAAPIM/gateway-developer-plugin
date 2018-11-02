@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -48,18 +49,18 @@ public class PolicyLinker implements EntityLinker<Policy> {
             throw new WriteException("Exception linking and simplifying policy: " + policy.getName() + " Message: " + e.getMessage(), e);
         }
 
-        policy.setPolicyPath(getPolicyPath(policy, bundle, policy));
+        policy.setPath(getPolicyPath(policy, bundle, policy));
     }
 
     static <E extends GatewayEntity> String getPolicyPath(Policy policy, Bundle bundle, E entity) {
-        Folder folder = bundle.getFolderTree().getFolderById(policy.getFolderId());
+        Folder folder = bundle.getFolderTree().getFolderById(policy.getParentFolder().getId());
         if (folder == null) {
             throw new LinkerException(String.format("Could not find folder for %s: %s. Policy Name:ID: %s:%s. Folder ID: %s",
                     entity.getClass().getAnnotation(Named.class).value(),
                     entity.getName(),
                     policy.getName(),
                     policy.getId(),
-                    policy.getFolderId()));
+                    policy.getParentFolder().getId()));
         }
         Path folderPath = bundle.getFolderTree().getPath(folder);
         return Paths.get(folderPath.toString(), policy.getName() + ".xml").toString();

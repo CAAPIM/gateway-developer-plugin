@@ -29,6 +29,15 @@ public class StoredPassword extends GatewayEntity {
     private String password;
     private Map<String, Object> properties;
 
+    public StoredPassword() {
+    }
+
+    private StoredPassword(Builder builder) {
+        setId(builder.id);
+        setName(builder.name);
+        properties = builder.properties;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -79,5 +88,31 @@ public class StoredPassword extends GatewayEntity {
 
     public boolean isType(Type type) {
         return properties != null && Objects.equals(properties.get(PROPERTY_TYPE), type.getName());
+    }
+
+    public static class Builder {
+
+        private String id;
+        private String name;
+        private Map<String, Object> properties;
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder properties(Map<String, Object> properties) {
+            this.properties = properties;
+            return this;
+        }
+
+        public StoredPassword build() {
+            return new StoredPassword(this);
+        }
     }
 }

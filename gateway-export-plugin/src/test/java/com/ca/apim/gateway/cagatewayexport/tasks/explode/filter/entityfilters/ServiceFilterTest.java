@@ -1,10 +1,6 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Dependency;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -13,6 +9,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createFolder;
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -23,9 +21,9 @@ class ServiceFilterTest {
 
         Bundle filteredBundle = new Bundle();
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(Collections.emptyMap());
+        bundle.setDependencyMap(Collections.emptyMap());
 
-        List<ServiceEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
+        List<Service> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, filteredEntities.size());
     }
@@ -35,22 +33,26 @@ class ServiceFilterTest {
         ServiceFilter filter = new ServiceFilter();
 
         Bundle filteredBundle = new Bundle();
-        filteredBundle.addEntity(new Folder("folder1", "1", null));
-        filteredBundle.addEntity(new Folder("folder2", "2", "3"));
-        filteredBundle.addEntity(new Folder("folder3", "3", "1"));
-        filteredBundle.addEntity(new Folder("folder4", "4", "1"));
+        Folder folder1 = createFolder("folder1", "1", null);
+        Folder folder3 = createFolder("folder3", "3", folder1);
+        Folder folder2 = createFolder("folder2", "2", folder3);
+        Folder folder4 = createFolder("folder4", "4", folder1);
+        filteredBundle.addEntity(folder1);
+        filteredBundle.addEntity(folder2);
+        filteredBundle.addEntity(folder3);
+        filteredBundle.addEntity(folder4);
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(
+        bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", PolicyEntity.class), Arrays.asList(new Dependency("2", ServiceEntity.class), new Dependency("3", ServiceEntity.class)),
-                        new Dependency("2", PolicyEntity.class), Collections.singletonList(new Dependency("4", ServiceEntity.class))));
-        bundle.addEntity(new ServiceEntity("service1", "1", "2", null, ""));
-        bundle.addEntity(new ServiceEntity("service2", "2", "5", null, ""));
-        bundle.addEntity(new ServiceEntity("service3", "3", null, null, ""));
-        bundle.addEntity(new ServiceEntity("service4", "4", "1", null, ""));
-        bundle.addEntity(new ServiceEntity("service5", "5", "4", null, ""));
+                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", Service.class), new Dependency("3", Service.class)),
+                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", Service.class))));
+        bundle.addEntity(createService("service1", "1", folder2, null, ""));
+        bundle.addEntity(createService("service2", "2", createFolder("folder5", "5", null), null, ""));
+        bundle.addEntity(createService("service3", "3", null, null, ""));
+        bundle.addEntity(createService("service4", "4", folder1, null, ""));
+        bundle.addEntity(createService("service5", "5", folder4, null, ""));
 
-        List<ServiceEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
+        List<Service> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(3, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "service1".equals(c.getName())));

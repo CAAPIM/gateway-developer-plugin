@@ -7,8 +7,10 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.IdentityProviderEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.TrustedCertEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.FederatedIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.IdentityProviderType;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -16,7 +18,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.IdentityProviderEntity.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class IdentityProviderLinkerTest {
@@ -43,7 +44,7 @@ class IdentityProviderLinkerTest {
             bundle.addEntity(createTrustedCert(cert));
         }
 
-        final IdentityProviderEntity identityProvider = createIdentityProvider(certId);
+        final IdentityProvider identityProvider = createIdentityProvider(certId);
         linker.link(identityProvider, bundle, bundle);
 
 
@@ -54,16 +55,16 @@ class IdentityProviderLinkerTest {
         assertEquals(nameList, idProvDetail.getCertificateReferences());
     }
 
-    private static IdentityProviderEntity createIdentityProvider(String... certNames) {
-        return new Builder()
+    private static IdentityProvider createIdentityProvider(String... certNames) {
+        return new IdentityProvider.Builder()
                 .name("Test")
-                .type(Type.FEDERATED)
+                .type(IdentityProviderType.FEDERATED)
                 .identityProviderDetail(new FederatedIdentityProviderDetail(new HashSet<>(Arrays.asList(certNames))))
                 .build();
     }
 
-    private static TrustedCertEntity createTrustedCert(String id) {
-        return new TrustedCertEntity.Builder()
+    private static TrustedCert createTrustedCert(String id) {
+        return new TrustedCert.Builder()
                 .name(id + "name")
                 .id(id)
                 .encodedData("someData")

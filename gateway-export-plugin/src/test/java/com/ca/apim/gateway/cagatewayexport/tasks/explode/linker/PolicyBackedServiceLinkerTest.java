@@ -6,18 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PolicyBackedServiceLinkerTest {
 
@@ -28,24 +25,24 @@ class PolicyBackedServiceLinkerTest {
         Map<String, String> operations = new HashMap<>();
         operations.put("operation1", "1");
         operations.put("operation2", "2");
-        PolicyBackedServiceEntity myPolicyBackedServiceEntity = new PolicyBackedServiceEntity("myEncass", "1", "PolicyBackedServiceEntity", operations);
+        PolicyBackedService myPolicyBackedService = createPolicyBackedService("myEncass", "1", "PolicyBackedService", operations);
 
         Bundle bundle = new Bundle();
-        bundle.addEntity(myPolicyBackedServiceEntity);
+        bundle.addEntity(myPolicyBackedService);
 
         Bundle fullBundle = new Bundle();
-        fullBundle.addEntity(myPolicyBackedServiceEntity);
-        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation1Policy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
-        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation2Policy").setId("2").setGuid("2").setParentFolderId("1").setPolicy("").build());
-        fullBundle.addEntity(new Folder("myFolder", "1", null));
+        fullBundle.addEntity(myPolicyBackedService);
+        fullBundle.addEntity(createPolicy("operation1Policy", "1", "1", "1", null, ""));
+        fullBundle.addEntity(createPolicy("operation2Policy", "2", "2", "1", null, ""));
+        fullBundle.addEntity(createFolder("myFolder", "1", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
         fullBundle.setFolderTree(folderTree);
 
         policyBackedServiceLinker.link(bundle, fullBundle);
 
-        assertEquals("operation1Policy.xml", bundle.getEntities(PolicyBackedServiceEntity.class).get("1").getOperations().get("operation1"));
-        assertEquals("operation2Policy.xml", bundle.getEntities(PolicyBackedServiceEntity.class).get("1").getOperations().get("operation2"));
+        assertEquals("operation1Policy.xml", bundle.getEntities(PolicyBackedService.class).get("1").getOperations().stream().collect(Collectors.toMap(PolicyBackedServiceOperation::getOperationName, PolicyBackedServiceOperation::getPolicy)).get("operation1"));
+        assertEquals("operation2Policy.xml", bundle.getEntities(PolicyBackedService.class).get("1").getOperations().stream().collect(Collectors.toMap(PolicyBackedServiceOperation::getOperationName, PolicyBackedServiceOperation::getPolicy)).get("operation2"));
     }
 
     @Test
@@ -55,16 +52,16 @@ class PolicyBackedServiceLinkerTest {
         Map<String, String> operations = new HashMap<>();
         operations.put("operation1", "1");
         operations.put("operation2", "2");
-        PolicyBackedServiceEntity myPolicyBackedServiceEntity = new PolicyBackedServiceEntity("myEncass", "1", "PolicyBackedServiceEntity", operations);
+        PolicyBackedService myPolicyBackedService = createPolicyBackedService("myEncass", "1", "PolicyBackedService", operations);
 
         Bundle bundle = new Bundle();
-        bundle.addEntity(myPolicyBackedServiceEntity);
+        bundle.addEntity(myPolicyBackedService);
 
         Bundle fullBundle = new Bundle();
-        fullBundle.addEntity(myPolicyBackedServiceEntity);
-        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation1Policy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
-        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation3Policy").setId("3").setGuid("3").setParentFolderId("1").setPolicy("").build());
-        fullBundle.addEntity(new Folder("myFolder", "1", null));
+        fullBundle.addEntity(myPolicyBackedService);
+        fullBundle.addEntity(createPolicy("operation1Policy", "1", "1", "1", null, ""));
+        fullBundle.addEntity(createPolicy("operation3Policy", "3", "3", "1", null, ""));
+        fullBundle.addEntity(createFolder("myFolder", "1", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
         fullBundle.setFolderTree(folderTree);
@@ -79,16 +76,16 @@ class PolicyBackedServiceLinkerTest {
         Map<String, String> operations = new HashMap<>();
         operations.put("operation1", "1");
         operations.put("operation2", "2");
-        PolicyBackedServiceEntity myPolicyBackedServiceEntity = new PolicyBackedServiceEntity("myEncass", "1", "PolicyBackedServiceEntity", operations);
+        PolicyBackedService myPolicyBackedService = createPolicyBackedService("myEncass", "1", "PolicyBackedService", operations);
 
         Bundle bundle = new Bundle();
-        bundle.addEntity(myPolicyBackedServiceEntity);
+        bundle.addEntity(myPolicyBackedService);
 
         Bundle fullBundle = new Bundle();
-        fullBundle.addEntity(myPolicyBackedServiceEntity);
-        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation1Policy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
-        fullBundle.addEntity(new PolicyEntity.Builder().setName("operation2Policy").setId("2").setGuid("2").setParentFolderId("1").setPolicy("").build());
-        fullBundle.addEntity(new Folder("myFolder", "2", null));
+        fullBundle.addEntity(myPolicyBackedService);
+        fullBundle.addEntity(createPolicy("operation1Policy", "1", "1", "1", null, ""));
+        fullBundle.addEntity(createPolicy("operation2Policy", "2", "2", "1", null, ""));
+        fullBundle.addEntity(createFolder("myFolder", "2", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
         fullBundle.setFolderTree(folderTree);
