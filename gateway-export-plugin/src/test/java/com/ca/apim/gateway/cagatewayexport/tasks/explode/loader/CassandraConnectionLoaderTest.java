@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.CassandraConnectionEntity;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;

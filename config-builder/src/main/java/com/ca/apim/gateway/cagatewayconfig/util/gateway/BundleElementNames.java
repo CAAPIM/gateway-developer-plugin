@@ -148,6 +148,15 @@ public class BundleElementNames {
     public static final String SSL = "l7:Ssl";
     public static final String TLS_CIPHERS = "l7:TlsCiphers";
 
+    // Scheduled Tasks
+    public static final String SCHEDULED_TASK = "l7:ScheduledTask";
+    public static final String ONE_NODE = "l7:OneNode";
+    public static final String JOB_TYPE = "l7:JobType";
+    public static final String JOB_STATUS = "l7:JobStatus";
+    public static final String EXECUTION_DATE = "l7:ExecutionDate";
+    public static final String CRON_EXPRESSION = "l7:CronExpression";
+    public static final String EXECUTE_ON_CREATE = "l7:ExecuteOnCreate";
+
     private BundleElementNames() {
         //
     }

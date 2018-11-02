@@ -17,6 +17,8 @@ import java.util.List;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementAttribute;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
 public class EncassLoader implements EntityLoader<EncassEntity> {
@@ -25,12 +27,9 @@ public class EncassLoader implements EntityLoader<EncassEntity> {
     public EncassEntity load(Element element) {
         final Element encass = getSingleChildElement(getSingleChildElement(element, RESOURCE), ENCAPSULATED_ASSERTION);
 
-        final Element policyReference = getSingleChildElement(encass, POLICY_REFERENCE);
-        final String policyId = policyReference.getAttribute(ATTRIBUTE_ID);
-        Element nameElement = getSingleChildElement(encass, NAME);
-        final String name = nameElement.getTextContent();
-        Element guidElement = getSingleChildElement(encass, GUID);
-        final String guid = guidElement.getTextContent();
+        final String policyId = getSingleChildElementAttribute(encass, POLICY_REFERENCE, ATTRIBUTE_ID);
+        final String name = getSingleChildElementTextContent(encass, NAME);
+        final String guid = getSingleChildElementTextContent(encass, GUID);
 
         return new EncassEntity(name, encass.getAttribute(ATTRIBUTE_ID), guid, policyId, getArguments(encass), getResults(encass));
     }
@@ -43,9 +42,9 @@ public class EncassLoader implements EntityLoader<EncassEntity> {
             if (!(encapsulatedAssertionResultElement.item(i) instanceof Element)) {
                 throw new WriteException("Unexpected encass results node: " + encapsulatedResultsElement.getClass());
             }
-            Element resultNameElement = getSingleChildElement((Element) encapsulatedAssertionResultElement.item(i), RESULT_NAME);
-            Element resultTypeElement = getSingleChildElement((Element) encapsulatedAssertionResultElement.item(i), RESULT_TYPE);
-            encassResults.add(new EncassEntity.EncassParam(resultNameElement.getTextContent(), resultTypeElement.getTextContent()));
+            String resultName = getSingleChildElementTextContent((Element) encapsulatedAssertionResultElement.item(i), RESULT_NAME);
+            String resultType = getSingleChildElementTextContent((Element) encapsulatedAssertionResultElement.item(i), RESULT_TYPE);
+            encassResults.add(new EncassEntity.EncassParam(resultName, resultType));
         }
         return encassResults;
     }
@@ -58,9 +57,9 @@ public class EncassLoader implements EntityLoader<EncassEntity> {
             if (!(encapsulatedAssertionArgumentElement.item(i) instanceof Element)) {
                 throw new WriteException("Unexpected encass argument node: " + encapsulatedArgumentsElement.getClass());
             }
-            Element argumentNameElement = getSingleChildElement((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_NAME);
-            Element argumentTypeElement = getSingleChildElement((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_TYPE);
-            encassArguments.add(new EncassEntity.EncassParam(argumentNameElement.getTextContent(), argumentTypeElement.getTextContent()));
+            String argumentName = getSingleChildElementTextContent((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_NAME);
+            String argumentType = getSingleChildElementTextContent((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_TYPE);
+            encassArguments.add(new EncassEntity.EncassParam(argumentName, argumentType));
         }
         return encassArguments;
     }

@@ -17,6 +17,7 @@ import java.util.TreeMap;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
 public class PolicyBackedServiceLoader implements EntityLoader<PolicyBackedServiceEntity> {
@@ -25,10 +26,8 @@ public class PolicyBackedServiceLoader implements EntityLoader<PolicyBackedServi
     public PolicyBackedServiceEntity load(Element element) {
         final Element policyBackedService = getSingleChildElement(getSingleChildElement(element, RESOURCE), POLICY_BACKED_SERVICE);
 
-        Element nameElement = getSingleChildElement(policyBackedService, NAME);
-        final String name = nameElement.getTextContent();
-        Element interfaceNameElement = getSingleChildElement(policyBackedService, INTERFACE_NAME);
-        final String interfaceName = interfaceNameElement.getTextContent();
+        final String name = getSingleChildElementTextContent(policyBackedService, NAME);
+        final String interfaceName = getSingleChildElementTextContent(policyBackedService, INTERFACE_NAME);
 
         return new PolicyBackedServiceEntity(name, policyBackedService.getAttribute(ATTRIBUTE_ID), interfaceName, buildOperationsMap(policyBackedService));
     }
@@ -42,9 +41,9 @@ public class PolicyBackedServiceLoader implements EntityLoader<PolicyBackedServi
             if (!(policyBackedServiceOperationNodeList.item(i) instanceof Element)) {
                 throw new WriteException("Unexpected Policy Backed Service Operation node: " + policyBackedServiceOperationsElement.getClass());
             }
-            Element policyIdElement = getSingleChildElement((Element) policyBackedServiceOperationNodeList.item(i), POLICY_ID);
-            Element operationNameElement = getSingleChildElement((Element) policyBackedServiceOperationNodeList.item(i), OPERATION_NAME);
-            operations.put(operationNameElement.getTextContent(), policyIdElement.getTextContent());
+            String policyId = getSingleChildElementTextContent((Element) policyBackedServiceOperationNodeList.item(i), POLICY_ID);
+            String operationName = getSingleChildElementTextContent((Element) policyBackedServiceOperationNodeList.item(i), OPERATION_NAME);
+            operations.put(operationName, policyId);
         }
 
         return operations;
