@@ -27,7 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
-import static com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 
 public class PolicyXMLSimplifier {
     public static final PolicyXMLSimplifier INSTANCE = new PolicyXMLSimplifier();

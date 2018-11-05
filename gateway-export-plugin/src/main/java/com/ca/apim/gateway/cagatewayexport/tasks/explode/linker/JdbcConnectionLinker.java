@@ -14,7 +14,7 @@ import javax.inject.Singleton;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.ca.apim.gateway.cagatewayexport.util.gateway.VariableUtils.extractVariableName;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.VariableUtils.extractVariableName;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Singleton

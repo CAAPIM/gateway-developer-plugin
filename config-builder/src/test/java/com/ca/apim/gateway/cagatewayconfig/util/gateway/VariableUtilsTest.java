@@ -4,13 +4,12 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.util.gateway;
+package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
 import org.junit.jupiter.api.Test;
 
-import static com.ca.apim.gateway.cagatewayexport.util.gateway.VariableUtils.extractVariableName;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.VariableUtils.extractVariableName;
+import static org.junit.jupiter.api.Assertions.*;
 
 class VariableUtilsTest {
 

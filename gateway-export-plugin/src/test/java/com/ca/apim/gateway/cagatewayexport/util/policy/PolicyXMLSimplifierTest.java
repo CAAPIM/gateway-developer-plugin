@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
-import static com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PolicyXMLSimplifierTest {
