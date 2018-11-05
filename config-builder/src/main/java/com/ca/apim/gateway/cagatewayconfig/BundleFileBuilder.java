@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Singleton
-class BundleBuilder {
+class BundleFileBuilder {
 
     private final DocumentFileUtils documentFileUtils;
     private final EntityLoaderRegistry entityLoaderRegistry;
@@ -35,11 +35,11 @@ class BundleBuilder {
     private final DocumentTools documentTools;
 
     @Inject
-    BundleBuilder(final DocumentTools documentTools,
-                  final DocumentFileUtils documentFileUtils,
-                  final EntityLoaderRegistry entityLoaderRegistry,
-                  final BundleEntityBuilder bundleEntityBuilder,
-                  final EntityBundleLoader entityBundleLoader) {
+    BundleFileBuilder(final DocumentTools documentTools,
+                      final DocumentFileUtils documentFileUtils,
+                      final EntityLoaderRegistry entityLoaderRegistry,
+                      final BundleEntityBuilder bundleEntityBuilder,
+                      final EntityBundleLoader entityBundleLoader) {
         this.documentFileUtils = documentFileUtils;
         this.documentTools = documentTools;
         this.entityLoaderRegistry = entityLoaderRegistry;

@@ -51,7 +51,7 @@ public class BuildBundleTask extends DefaultTask {
 
     @TaskAction
     public void perform() {
-        BundleBuilder bundleBuilder = ConfigBuilderModule.getInjector().getInstance(BundleBuilder.class);
-        bundleBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(), dependencies.getFiles(), getProject().getName() + '-' + getProject().getVersion());
+        BundleFileBuilder bundleFileBuilder = ConfigBuilderModule.getInjector().getInstance(BundleFileBuilder.class);
+        bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(), dependencies.getFiles(), getProject().getName() + '-' + getProject().getVersion());
     }
 }

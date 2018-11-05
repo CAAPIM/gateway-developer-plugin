@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BundleBuilderTest {
+class BundleFileBuilderTest {
 
     @Mock
     DocumentFileUtils documentFileUtils;
@@ -52,8 +52,8 @@ class BundleBuilderTest {
 
     @Test
     void buildBundleNoSource() {
-        BundleBuilder bundleBuilder = new BundleBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
-        bundleBuilder.buildBundle(null, new File("output"), Collections.emptySet(), "my-bundle");
+        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
+        bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptySet(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
     }
@@ -64,8 +64,8 @@ class BundleBuilderTest {
         policy.setName("from-file");
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
-        BundleBuilder bundleBuilder = new BundleBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
-        bundleBuilder.buildBundle(new File("input"), new File("output"), Collections.emptySet(), "my-bundle");
+        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
+        bundleFileBuilder.buildBundle(new File("input"), new File("output"), Collections.emptySet(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
     }
