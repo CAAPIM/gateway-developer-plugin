@@ -34,9 +34,9 @@ public class EncassLoader implements BundleDependencyLoader {
         final String name = getSingleChildElementTextContent(encassElement, NAME);
         final String guid = getSingleChildElementTextContent(encassElement, GUID);
 
-
         Encass encass = new Encass();
         encass.setGuid(guid);
+        encass.setName(name);
 
         String policyPath = getPath(bundle, policyId);
         encass.setPolicy(policyPath);

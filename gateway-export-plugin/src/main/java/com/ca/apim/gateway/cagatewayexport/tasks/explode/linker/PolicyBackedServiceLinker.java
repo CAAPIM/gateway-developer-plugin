@@ -24,7 +24,7 @@ public class PolicyBackedServiceLinker implements EntityLinker<PolicyBackedServi
     public void link(PolicyBackedService pbs, Bundle bundle, Bundle targetBundle) {
         for (PolicyBackedServiceOperation operation : pbs.getOperations()) {
             String policyId = operation.getPolicy();
-            Policy policy = bundle.getPolicies().get(policyId);
+            Policy policy = bundle.getPolicies().values().stream().filter(p -> policyId.equals(p.getId())).findFirst().orElse(null);
             if (policy == null) {
                 throw new LinkerException("Could not find policy for Policy Backed Service. Policy ID: " + policyId);
             }

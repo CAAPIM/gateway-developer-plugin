@@ -52,10 +52,10 @@ public class JdbcConnectionLoader implements BundleDependencyLoader {
         jdbcConnection.setJdbcUrl(jdbcUrl);
         jdbcConnection.setDriverClass(driverClass);
         jdbcConnection.setUser(user);
-        jdbcConnection.setPasswordRef(VariableUtils.extractVariableName(password));
+        jdbcConnection.setPassword(password);
         jdbcConnection.setMinimumPoolSize(minPoolSize);
         jdbcConnection.setMaximumPoolSize(maxPoolSize);
-        jdbcConnection.setProperties(properties);
+        jdbcConnection.setProperties(connectionProperties);
 
         bundle.getJdbcConnections().put(name, jdbcConnection);
     }

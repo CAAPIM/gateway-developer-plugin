@@ -115,7 +115,7 @@ public class PolicyXMLSimplifier {
         String encassGuid = encassGuidElement.getAttribute(STRING_VALUE);
         Optional<Encass> encassEntity = bundle.getEntities(Encass.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
         if (encassEntity.isPresent()) {
-            Policy policyEntity = bundle.getEntities(Policy.class).get(encassEntity.get().getPolicyId());
+            Policy policyEntity = bundle.getPolicies().values().stream().filter(p -> encassEntity.get().getPolicyId().equals(p.getId())).findFirst().orElse(null);
             if (policyEntity != null) {
                 encapsulatedAssertionElement.setAttribute("encassName", encassEntity.get().getName());
                 Element encapsulatedAssertionConfigNameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);

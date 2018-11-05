@@ -23,7 +23,7 @@ public class ScheduledTaskLinker implements EntityLinker<ScheduledTask> {
 
     @Override
     public void link(ScheduledTask scheduledTaskEntity, Bundle bundle, Bundle targetBundle) {
-        Policy policy = bundle.getEntities(Policy.class).get(scheduledTaskEntity.getPolicy());
+        Policy policy = bundle.getPolicies().values().stream().filter(p -> scheduledTaskEntity.getPolicy().equals(p.getId())).findFirst().orElse(null);
         if (policy == null) {
             throw new LinkerException("Could not find policy for Scheduled Task: " + scheduledTaskEntity.getName() + ". Policy ID: " + scheduledTaskEntity.getPolicy());
         }
