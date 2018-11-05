@@ -21,7 +21,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
-public class PolicyBackedServiceLoader implements BundleDependencyLoader {
+public class PolicyBackedServiceLoader implements BundleEntityLoader {
 
     @Override
     public void load(final Bundle bundle, Element element) {
@@ -48,7 +48,7 @@ public class PolicyBackedServiceLoader implements BundleDependencyLoader {
         NodeList policyBackedServiceOperationNodeList = policyBackedServiceOperationsElement.getElementsByTagName(POLICY_BACKED_SERVICE_OPERATION);
         for (int i = 0; i < policyBackedServiceOperationNodeList.getLength(); i++) {
             if (!(policyBackedServiceOperationNodeList.item(i) instanceof Element)) {
-                throw new DependencyBundleLoadException("Unexpected Policy Backed Service Operation node: " + policyBackedServiceOperationsElement.getClass());
+                throw new BundleLoadException("Unexpected Policy Backed Service Operation node: " + policyBackedServiceOperationsElement.getClass());
             }
             Element policyIdElement = getSingleChildElement((Element) policyBackedServiceOperationNodeList.item(i), POLICY_ID);
             Element operationNameElement = getSingleChildElement((Element) policyBackedServiceOperationNodeList.item(i), OPERATION_NAME);

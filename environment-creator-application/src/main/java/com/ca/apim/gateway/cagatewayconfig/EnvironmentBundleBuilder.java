@@ -7,8 +7,8 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 
 import java.util.Map;
 

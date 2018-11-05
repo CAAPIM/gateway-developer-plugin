@@ -26,7 +26,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.Arrays.stream;
 
 @Singleton
-public class IdentityProviderLoader implements BundleDependencyLoader {
+public class IdentityProviderLoader implements BundleEntityLoader {
 
     IdentityProviderLoader() {
     }
@@ -38,7 +38,7 @@ public class IdentityProviderLoader implements BundleDependencyLoader {
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(identityProviderElement, PROPERTIES, true), PROPERTIES);
 
         final String typeString = getSingleChildElementTextContent(identityProviderElement, ID_PROV_TYPE);
-        IdentityProviderType type = stream(IdentityProviderType.values()).filter(c -> c.getValue().equals(typeString)).findFirst().orElseThrow(() -> new DependencyBundleLoadException("Invalid Identity Provider Type: " + typeString));
+        IdentityProviderType type = stream(IdentityProviderType.values()).filter(c -> c.getValue().equals(typeString)).findFirst().orElseThrow(() -> new BundleLoadException("Invalid Identity Provider Type: " + typeString));
 
         IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setId(identityProviderElement.getAttribute(ATTRIBUTE_ID));

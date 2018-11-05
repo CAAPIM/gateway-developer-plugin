@@ -23,7 +23,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Singleton
-public class CassandraConnectionsLoader implements BundleDependencyLoader {
+public class CassandraConnectionsLoader implements BundleEntityLoader {
 
     @Override
     public void load(Bundle bundle, Element element) {

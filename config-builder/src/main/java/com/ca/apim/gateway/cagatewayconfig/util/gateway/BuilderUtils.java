@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
-import com.ca.apim.gateway.cagatewayconfig.builder.EntityBuilderException;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyBundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import org.apache.commons.collections4.MapUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -90,7 +90,7 @@ public class BuilderUtils {
      * @param propertiesElement properties element of bundle (l7:Properties)
      * @param propertiesElementName name of the node expected
      * @return map of properties found into element, empty if null or no properties
-     * @throws DependencyBundleLoadException if node is not 'propertiesElementName', if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
+     * @throws BundleLoadException if node is not 'propertiesElementName', if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
      */
     public static Map<String, Object> mapPropertiesElements(final Element propertiesElement, final String propertiesElementName) {
         if (propertiesElement == null) {
@@ -98,7 +98,7 @@ public class BuilderUtils {
         }
 
         if (!Objects.equals(propertiesElement.getNodeName(), propertiesElementName)) {
-            throw new DependencyBundleLoadException("Current node is not " + propertiesElementName + " node, it is " + propertiesElement.getNodeName());
+            throw new BundleLoadException("Current node is not " + propertiesElementName + " node, it is " + propertiesElement.getNodeName());
         }
 
         final List<Element> properties = getChildElements(propertiesElement, PROPERTY);
@@ -113,7 +113,7 @@ public class BuilderUtils {
                 }
             }
 
-            throw new DependencyBundleLoadException("Property " + propKey + " does not have a value");
+            throw new BundleLoadException("Property " + propKey + " does not have a value");
         }));
     }
 
@@ -126,7 +126,7 @@ public class BuilderUtils {
             case INT_VALUE: return parseInt(valueElement.getTextContent());
             case DATE_VALUE: return parseDateFromString(key, valueElement.getTextContent());
             default:
-                throw new DependencyBundleLoadException("Type of property " + key + " is " + valueElement.getNodeName() + " which is not yet supported");
+                throw new BundleLoadException("Type of property " + key + " is " + valueElement.getNodeName() + " which is not yet supported");
         }
     }
 

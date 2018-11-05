@@ -32,7 +32,7 @@ class FolderLoaderTest {
     void loadWithoutParent() {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();
-        assertThrows(DependencyBundleLoadException.class, () -> loader.load(bundle, createFolderXml(doc, TEST_FOLDER_1, TEST_FOLDER_1, Folder.ROOT_FOLDER_ID)));
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createFolderXml(doc, TEST_FOLDER_1, TEST_FOLDER_1, Folder.ROOT_FOLDER_ID)));
     }
 
     @Test
@@ -44,7 +44,7 @@ class FolderLoaderTest {
         bundle.getFolders().put(TEST_FOLDER_1, f1);
         bundle.getFolders().put(TEST_FOLDER_1 + "_1", f1);
 
-        assertThrows(DependencyBundleLoadException.class, () -> loader.load(bundle, createFolderXml(doc, TEST_FOLDER_2, TEST_FOLDER_2, TEST_FOLDER_1)));
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createFolderXml(doc, TEST_FOLDER_2, TEST_FOLDER_2, TEST_FOLDER_1)));
     }
 
     @Test

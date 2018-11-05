@@ -24,7 +24,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
-public class FolderLoader implements BundleDependencyLoader {
+public class FolderLoader implements BundleEntityLoader {
 
     @Override
     public void load(Bundle bundle, Element element) {
@@ -39,15 +39,15 @@ public class FolderLoader implements BundleDependencyLoader {
         } else {
             List<Folder> parentFolderList = bundle.getFolders().values().stream().filter(f -> parentFolderID.equals(f.getId())).collect(Collectors.toList());
             if (parentFolderList.isEmpty()) {
-                throw new DependencyBundleLoadException("Invalid dependency bundle. Could not find folder with id: " + parentFolderID);
+                throw new BundleLoadException("Invalid dependency bundle. Could not find folder with id: " + parentFolderID);
             } else if (parentFolderList.size() > 1) {
-                throw new DependencyBundleLoadException("Invalid dependency bundle. Found multiple folders with id: " + parentFolderID);
+                throw new BundleLoadException("Invalid dependency bundle. Found multiple folders with id: " + parentFolderID);
             }
             parentFolder = parentFolderList.get(0);
         }
 
         if (EncodeDecodeUtils.containsInvalidCharacter(name)) {
-            throw new DependencyBundleLoadException("Folder name contains invalid characters: " + name);
+            throw new BundleLoadException("Folder name contains invalid characters: " + name);
         }
 
         Folder folder = new Folder();

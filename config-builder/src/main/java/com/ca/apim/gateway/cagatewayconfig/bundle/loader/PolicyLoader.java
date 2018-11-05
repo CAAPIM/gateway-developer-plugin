@@ -28,7 +28,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
-public class PolicyLoader implements BundleDependencyLoader {
+public class PolicyLoader implements BundleEntityLoader {
 
     private static final Logger LOGGER = Logger.getLogger(PolicyLoader.class.getName());
 
@@ -84,9 +84,9 @@ public class PolicyLoader implements BundleDependencyLoader {
     private Folder getFolder(Bundle bundle, String folderId) {
         List<Folder> folderList = bundle.getFolders().values().stream().filter(f -> folderId.equals(f.getId())).collect(Collectors.toList());
         if (folderList.isEmpty()) {
-            throw new DependencyBundleLoadException("Invalid dependency bundle. Could not find folder with id: " + folderId);
+            throw new BundleLoadException("Invalid dependency bundle. Could not find folder with id: " + folderId);
         } else if (folderList.size() > 1) {
-            throw new DependencyBundleLoadException("Invalid dependency bundle. Found multiple folders with id: " + folderId);
+            throw new BundleLoadException("Invalid dependency bundle. Found multiple folders with id: " + folderId);
         }
         return folderList.get(0);
     }

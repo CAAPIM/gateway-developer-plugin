@@ -22,7 +22,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
-public class JdbcConnectionLoader implements BundleDependencyLoader {
+public class JdbcConnectionLoader implements BundleEntityLoader {
 
     @VisibleForTesting
     public JdbcConnectionLoader() {

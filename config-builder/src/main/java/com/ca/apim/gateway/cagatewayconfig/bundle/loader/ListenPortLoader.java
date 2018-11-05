@@ -23,7 +23,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.lang.Integer.parseInt;
 
 @Singleton
-public class ListenPortLoader implements BundleDependencyLoader {
+public class ListenPortLoader implements BundleEntityLoader {
 
     @Override
     public void load(final Bundle bundle, final Element element) {

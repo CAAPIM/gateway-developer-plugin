@@ -7,8 +7,8 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleDependencyLoader;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -27,11 +27,11 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class BundleBuilder {
     private static final Logger LOGGER = Logger.getLogger(BundleBuilder.class.getName());
-    private final DependencyLoaderRegistry entityLoaderRegistry;
+    private final BundleEntityLoaderRegistry entityLoaderRegistry;
     private final EntityTypeRegistry entityTypeRegistry;
 
     public BundleBuilder() {
-        this.entityLoaderRegistry = ConfigBuilderModule.getInstance(DependencyLoaderRegistry.class);
+        this.entityLoaderRegistry = ConfigBuilderModule.getInstance(BundleEntityLoaderRegistry.class);
         this.entityTypeRegistry = ConfigBuilderModule.getInstance(EntityTypeRegistry.class);
     }
 
@@ -104,7 +104,7 @@ public class BundleBuilder {
 
     private void handleItem(final Element element, final Bundle bundle) {
         final String type = getSingleChildElement(element, TYPE).getTextContent();
-        final BundleDependencyLoader entityLoader = entityLoaderRegistry.getLoader(type);
+        final BundleEntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
         if (entityLoader != null) {
             entityLoader.load(bundle, element);
         } else {

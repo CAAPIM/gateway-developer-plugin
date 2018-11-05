@@ -81,7 +81,7 @@ class TrustedCertLoaderTest {
     void loadNoSerialNumber() throws Exception {
         TrustedCertLoader loader = new TrustedCertLoader();
         Bundle bundle = new Bundle();
-        assertThrows(DependencyBundleLoadException.class, () -> loader.load(bundle, buildTrustedCertElement(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), null)));
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, buildTrustedCertElement(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), null)));
     }
 
     private static Element buildTrustedCertElement(Document document, BigInteger serial) {

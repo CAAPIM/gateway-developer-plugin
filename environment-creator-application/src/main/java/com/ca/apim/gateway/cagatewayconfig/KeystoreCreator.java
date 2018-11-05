@@ -7,7 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
-import com.ca.apim.gateway.cagatewayconfig.loader.PrivateKeyLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.PrivateKeyLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeyStoreCreationException;

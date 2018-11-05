@@ -8,9 +8,9 @@ package com.ca.apim.gateway.cagatewayconfig.util;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.builder.Entity;
-import com.ca.apim.gateway.cagatewayconfig.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.builder.EntityBuilder.BundleType;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;

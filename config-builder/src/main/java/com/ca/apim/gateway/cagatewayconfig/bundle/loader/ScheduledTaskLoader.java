@@ -20,7 +20,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 
 @Singleton
-public class ScheduledTaskLoader implements BundleDependencyLoader {
+public class ScheduledTaskLoader implements BundleEntityLoader {
     @Override
     public void load(Bundle bundle, Element element) {
         final Element scheduledTask = getSingleChildElement(getSingleChildElement(element, RESOURCE), SCHEDULED_TASK);

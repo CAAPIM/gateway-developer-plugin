@@ -20,7 +20,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
-public class StoredPasswordLoader implements BundleDependencyLoader {
+public class StoredPasswordLoader implements BundleEntityLoader {
 
     @Override
     public void load(final Bundle bundle, final Element element) {

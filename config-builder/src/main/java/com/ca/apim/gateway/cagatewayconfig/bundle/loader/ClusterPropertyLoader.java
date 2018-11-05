@@ -17,7 +17,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
-public class ClusterPropertyLoader implements BundleDependencyLoader {
+public class ClusterPropertyLoader implements BundleEntityLoader {
 
     @Override
     public void load(Bundle bundle, Element element) {

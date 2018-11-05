@@ -43,7 +43,7 @@ class EncassLoaderTest {
 
     @Test
     void loadNoPolicy() {
-        assertThrows(DependencyBundleLoadException.class, () -> load(new Bundle()));
+        assertThrows(BundleLoadException.class, () -> load(new Bundle()));
     }
 
     @Test
@@ -60,7 +60,7 @@ class EncassLoaderTest {
         Bundle bundle = new Bundle();
         bundle.getPolicies().put(policy.getPath(), policy);
         bundle.getPolicies().put(secondPolicy.getPath(), secondPolicy);
-        assertThrows(DependencyBundleLoadException.class, () -> load(bundle));
+        assertThrows(BundleLoadException.class, () -> load(bundle));
     }
 
     private void load(Bundle bundle) {

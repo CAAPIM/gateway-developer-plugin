@@ -8,11 +8,11 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.builder.BundleEntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.DependencyBundleLoader;
-import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ class BundleBuilderTest {
     @Mock
     BundleEntityBuilder bundleEntityBuilder;
     @Mock
-    DependencyBundleLoader dependencyBundleLoader;
+    EntityBundleLoader entityBundleLoader;
     @Mock
     DocumentTools documentTools;
     @Mock
@@ -52,7 +52,7 @@ class BundleBuilderTest {
 
     @Test
     void buildBundleNoSource() {
-        BundleBuilder bundleBuilder = new BundleBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, dependencyBundleLoader);
+        BundleBuilder bundleBuilder = new BundleBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
         bundleBuilder.buildBundle(null, new File("output"), Collections.emptySet(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
@@ -64,7 +64,7 @@ class BundleBuilderTest {
         policy.setName("from-file");
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
-        BundleBuilder bundleBuilder = new BundleBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, dependencyBundleLoader);
+        BundleBuilder bundleBuilder = new BundleBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
         bundleBuilder.buildBundle(new File("input"), new File("output"), Collections.emptySet(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any());

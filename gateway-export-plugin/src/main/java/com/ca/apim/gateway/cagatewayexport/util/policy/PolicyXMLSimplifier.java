@@ -7,7 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyBundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
@@ -39,21 +39,21 @@ public class PolicyXMLSimplifier {
             try {
                 simplifyIncludeAssertion(bundle, element);
             } catch (DocumentParseException e) {
-                throw new DependencyBundleLoadException(e.getMessage());
+                throw new BundleLoadException(e.getMessage());
             }
         });
         findAndSimplifyAssertion(policyElement, ENCAPSULATED, element -> {
             try {
                 simplifyEncapsulatedAssertion(bundle, element);
             } catch (DocumentParseException e) {
-                throw new DependencyBundleLoadException(e.getMessage());
+                throw new BundleLoadException(e.getMessage());
             }
         });
         findAndSimplifyAssertion(policyElement, SET_VARIABLE, element -> {
             try {
                 simplifySetVariable(element, resultantBundle);
             } catch (DocumentParseException e) {
-                throw new DependencyBundleLoadException(e.getMessage());
+                throw new BundleLoadException(e.getMessage());
             }
         });
         findAndSimplifyAssertion(policyElement, HARDCODED_RESPONSE, this::simplifyHardcodedResponse);

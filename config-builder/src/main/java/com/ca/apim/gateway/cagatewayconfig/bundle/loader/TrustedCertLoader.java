@@ -22,7 +22,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
 @Singleton
-public class TrustedCertLoader implements BundleDependencyLoader {
+public class TrustedCertLoader implements BundleEntityLoader {
 
     @Override
     public void load(Bundle bundle, Element element) {
@@ -49,7 +49,7 @@ public class TrustedCertLoader implements BundleDependencyLoader {
                     getSingleChildElementTextContent(certDataElem, ENCODED)
             );
         }
-        throw new DependencyBundleLoadException("Serial number of Trusted Cert must not be empty.");
+        throw new BundleLoadException("Serial number of Trusted Cert must not be empty.");
     }
 
     @Override

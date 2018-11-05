@@ -24,7 +24,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @Singleton
-public class EncassLoader implements BundleDependencyLoader {
+public class EncassLoader implements BundleEntityLoader {
 
     @Override
     public void load(Bundle bundle, Element element) {
@@ -49,9 +49,9 @@ public class EncassLoader implements BundleDependencyLoader {
     private String getPath(Bundle bundle, String policyId) {
         List<Policy> policyList = bundle.getPolicies().values().stream().filter(p -> policyId.equals(p.getId())).collect(Collectors.toList());
         if (policyList.isEmpty()) {
-            throw new DependencyBundleLoadException("Invalid dependency bundle. Could not find policy with id: " + policyId);
+            throw new BundleLoadException("Invalid dependency bundle. Could not find policy with id: " + policyId);
         } else if (policyList.size() > 1) {
-            throw new DependencyBundleLoadException("Invalid dependency bundle. Found multiple policies with id: " + policyId);
+            throw new BundleLoadException("Invalid dependency bundle. Found multiple policies with id: " + policyId);
         }
         return policyList.get(0).getPath();
     }
@@ -62,7 +62,7 @@ public class EncassLoader implements BundleDependencyLoader {
         Set<EncassParam> encassResults = new LinkedHashSet<>(encapsulatedAssertionResultElement.getLength());
         for (int i = 0; i < encapsulatedAssertionResultElement.getLength(); i++) {
             if (!(encapsulatedAssertionResultElement.item(i) instanceof Element)) {
-                throw new DependencyBundleLoadException("Unexpected encass results node: " + encapsulatedResultsElement.getClass());
+                throw new BundleLoadException("Unexpected encass results node: " + encapsulatedResultsElement.getClass());
             }
             String resultName = getSingleChildElementTextContent((Element) encapsulatedAssertionResultElement.item(i), RESULT_NAME);
             String resultType = getSingleChildElementTextContent((Element) encapsulatedAssertionResultElement.item(i), RESULT_TYPE);
@@ -77,7 +77,7 @@ public class EncassLoader implements BundleDependencyLoader {
         Set<EncassParam> encassArguments = new LinkedHashSet<>(encapsulatedAssertionArgumentElement.getLength());
         for (int i = 0; i < encapsulatedAssertionArgumentElement.getLength(); i++) {
             if (!(encapsulatedAssertionArgumentElement.item(i) instanceof Element)) {
-                throw new DependencyBundleLoadException("Unexpected encass argument node: " + encapsulatedArgumentsElement.getClass());
+                throw new BundleLoadException("Unexpected encass argument node: " + encapsulatedArgumentsElement.getClass());
             }
             String argumentName = getSingleChildElementTextContent((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_NAME);
             String argumentType = getSingleChildElementTextContent((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_TYPE);

@@ -6,13 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.injection;
 
-import com.ca.apim.gateway.cagatewayconfig.builder.BundleDocumentBuilder;
-import com.ca.apim.gateway.cagatewayconfig.builder.BundleEntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleDependencyLoader;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyLoaderRegistry;
-import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDocumentBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
@@ -97,15 +97,15 @@ class ConfigBuilderModuleTest {
 
     @Test
     void checkDependencyLoaders() {
-        final List<Binding<BundleDependencyLoader>> loadersBindings = injector.findBindingsByType(TypeLiteral.get(BundleDependencyLoader.class));
+        final List<Binding<BundleEntityLoader>> loadersBindings = injector.findBindingsByType(TypeLiteral.get(BundleEntityLoader.class));
         assertNotNull(loadersBindings);
         assertFalse(loadersBindings.isEmpty());
 
-        final List<BundleDependencyLoader> loaders = loadersBindings.stream().map(b -> injector.getInstance(b.getKey())).collect(toList());
+        final List<BundleEntityLoader> loaders = loadersBindings.stream().map(b -> injector.getInstance(b.getKey())).collect(toList());
         assertFalse(loaders.isEmpty());
         assertEquals(loadersBindings.size(), loaders.size());
 
-        final DependencyLoaderRegistry registry = injector.getInstance(DependencyLoaderRegistry.class);
+        final BundleEntityLoaderRegistry registry = injector.getInstance(BundleEntityLoaderRegistry.class);
         assertNotNull(registry);
         assertNotNull(registry.getEntityLoaders());
         assertFalse(registry.getEntityLoaders().isEmpty());

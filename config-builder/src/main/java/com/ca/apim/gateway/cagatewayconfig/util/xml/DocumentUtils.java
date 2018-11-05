@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.xml;
 
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyBundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,7 +54,7 @@ public class DocumentUtils {
      * @param entityItemElement element to search into
      * @param elementName element name to search
      * @return a single element found
-     * @throws DependencyBundleLoadException if not found, multiple found or invalid node type found (not element)
+     * @throws BundleLoadException if not found, multiple found or invalid node type found (not element)
      */
     public static Element getSingleChildElement(final Element entityItemElement, final String elementName) {
         return getSingleChildElement(entityItemElement, elementName, false);
@@ -67,7 +67,7 @@ public class DocumentUtils {
      * @param elementName       element name to search
      * @param optional          if not found returns null instead of throwing exception
      * @return a single element found
-     * @throws DependencyBundleLoadException if multiple found or invalid node type found (not element)
+     * @throws BundleLoadException if multiple found or invalid node type found (not element)
      */
     public static Element getSingleChildElement(final Element entityItemElement, final String elementName, boolean optional) {
         final NodeList childNodes = entityItemElement.getChildNodes();
@@ -77,7 +77,7 @@ public class DocumentUtils {
                 if (foundNode == null) {
                     foundNode = childNodes.item(i);
                 } else {
-                    throw new DependencyBundleLoadException("Multiple " + elementName + " elements found");
+                    throw new BundleLoadException("Multiple " + elementName + " elements found");
                 }
             }
         }
@@ -86,12 +86,12 @@ public class DocumentUtils {
                 return null;
             }
 
-            throw new DependencyBundleLoadException(elementName + " element not found");
+            throw new BundleLoadException(elementName + " element not found");
         }
         if (foundNode.getNodeType() == ELEMENT_NODE) {
             return (Element) foundNode;
         } else {
-            throw new DependencyBundleLoadException("Unexpected " + elementName + " node discovered: " + foundNode.toString());
+            throw new BundleLoadException("Unexpected " + elementName + " node discovered: " + foundNode.toString());
         }
     }
 

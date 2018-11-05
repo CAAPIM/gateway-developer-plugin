@@ -79,7 +79,7 @@ class PolicyLoaderTest {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();
 
-        assertThrows(DependencyBundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1)));
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1)));
     }
 
     @Test
@@ -93,7 +93,7 @@ class PolicyLoaderTest {
         bundle.getFolders().put(TEST_FOLDER_1, f1);
         bundle.getFolders().put(TEST_FOLDER_1 + "_1", f1);
 
-        assertThrows(DependencyBundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1)));
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1)));
     }
 
     private static Element createPolicyBundleXml(Document document, String policyID, String policyName, String policyType, String folderID) {

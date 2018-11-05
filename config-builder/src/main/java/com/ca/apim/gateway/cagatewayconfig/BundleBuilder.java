@@ -7,11 +7,11 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.builder.BundleEntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.DependencyBundleLoader;
-import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
@@ -31,7 +31,7 @@ class BundleBuilder {
     private final DocumentFileUtils documentFileUtils;
     private final EntityLoaderRegistry entityLoaderRegistry;
     private final BundleEntityBuilder bundleEntityBuilder;
-    private final DependencyBundleLoader dependencyBundleLoader;
+    private final EntityBundleLoader entityBundleLoader;
     private final DocumentTools documentTools;
 
     @Inject
@@ -39,12 +39,12 @@ class BundleBuilder {
                   final DocumentFileUtils documentFileUtils,
                   final EntityLoaderRegistry entityLoaderRegistry,
                   final BundleEntityBuilder bundleEntityBuilder,
-                  final DependencyBundleLoader dependencyBundleLoader) {
+                  final EntityBundleLoader entityBundleLoader) {
         this.documentFileUtils = documentFileUtils;
         this.documentTools = documentTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
         this.bundleEntityBuilder = bundleEntityBuilder;
-        this.dependencyBundleLoader = dependencyBundleLoader;
+        this.entityBundleLoader = entityBundleLoader;
     }
 
     void buildBundle(File rootDir, File outputDir, Set<File> dependencies, String name) {
@@ -61,7 +61,7 @@ class BundleBuilder {
             //Load Dependencies
             // Improvements can be made here by doing this loading in a separate task and caching the intermediate results.
             // That way the dependent bundles are not re-processed on every new build
-            final Set<Bundle> dependencyBundles = dependencies.stream().map(dependencyBundleLoader::load).collect(Collectors.toSet());
+            final Set<Bundle> dependencyBundles = dependencies.stream().map(entityBundleLoader::load).collect(Collectors.toSet());
             bundle.setDependencies(dependencyBundles);
         }
 
