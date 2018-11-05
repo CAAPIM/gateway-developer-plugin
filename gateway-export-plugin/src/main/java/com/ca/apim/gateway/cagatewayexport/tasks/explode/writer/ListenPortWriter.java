@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
@@ -17,8 +17,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ClientAuthentication;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.ListenPortTlsSettings;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ClientAuthentication;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSettings;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.*;
 import static java.util.stream.Collectors.toMap;
 

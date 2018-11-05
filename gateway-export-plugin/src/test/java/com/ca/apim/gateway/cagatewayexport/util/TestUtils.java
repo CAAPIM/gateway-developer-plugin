@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.util;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import org.w3c.dom.Element;
 
 import java.util.LinkedHashSet;

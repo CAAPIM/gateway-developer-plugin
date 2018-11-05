@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ import javax.inject.Singleton;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType.INTERNAL;
+import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.INTERNAL;
 import static java.util.function.Function.identity;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;

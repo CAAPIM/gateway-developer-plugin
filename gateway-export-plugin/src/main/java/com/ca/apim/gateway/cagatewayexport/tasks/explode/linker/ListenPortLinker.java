@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 
 import javax.inject.Singleton;
 

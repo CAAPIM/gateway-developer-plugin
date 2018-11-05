@@ -1,8 +1,8 @@
 package com.ca.apim.gateway.cagatewayexport.util.gateway;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Dependency;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import org.jetbrains.annotations.NotNull;
 

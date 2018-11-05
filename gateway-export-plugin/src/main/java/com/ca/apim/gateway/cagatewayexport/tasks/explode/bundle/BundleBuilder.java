@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.BundleDependencyLoader;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleDependencyLoader;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

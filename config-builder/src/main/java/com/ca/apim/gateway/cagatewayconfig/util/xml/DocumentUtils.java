@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.xml;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyBundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyBundleLoadException;
 import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

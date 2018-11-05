@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.gw7;
 
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.GW7Builder;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;

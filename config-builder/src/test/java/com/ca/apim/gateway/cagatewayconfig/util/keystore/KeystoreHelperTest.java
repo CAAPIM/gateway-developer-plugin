@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.keystore;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
+import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.jetbrains.annotations.NotNull;

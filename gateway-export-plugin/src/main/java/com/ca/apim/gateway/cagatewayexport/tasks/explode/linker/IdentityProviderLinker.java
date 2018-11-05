@@ -7,11 +7,11 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.FederatedIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.IdentityProviderType;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.FederatedIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType;
+import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 
 import javax.inject.Singleton;
 import java.util.Set;

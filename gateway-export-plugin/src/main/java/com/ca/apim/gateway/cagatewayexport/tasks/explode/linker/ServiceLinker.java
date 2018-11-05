@@ -6,11 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.EnvironmentProperty;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.EnvironmentProperty.Type;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
+import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;

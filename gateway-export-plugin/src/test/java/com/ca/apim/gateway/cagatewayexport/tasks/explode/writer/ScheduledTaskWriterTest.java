@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ScheduledTask;
+import com.ca.apim.gateway.cagatewayconfig.beans.ScheduledTask;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import org.junit.jupiter.api.Test;

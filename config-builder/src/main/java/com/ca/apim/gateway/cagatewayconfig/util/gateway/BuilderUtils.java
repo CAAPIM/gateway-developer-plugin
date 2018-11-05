@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderException;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyBundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyBundleLoadException;
 import org.apache.commons.collections4.MapUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;

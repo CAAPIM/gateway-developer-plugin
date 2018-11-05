@@ -6,11 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.injection;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.*;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.BundleDependencyLoader;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyLoaderRegistry;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.builder.BundleDocumentBuilder;
+import com.ca.apim.gateway.cagatewayconfig.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.builder.EntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleDependencyLoader;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;

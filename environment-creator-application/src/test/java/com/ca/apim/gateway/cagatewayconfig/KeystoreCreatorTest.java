@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.KeyStoreType;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
+import com.ca.apim.gateway.cagatewayconfig.beans.KeyStoreType;
+import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeyStoreCreationException;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;

@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

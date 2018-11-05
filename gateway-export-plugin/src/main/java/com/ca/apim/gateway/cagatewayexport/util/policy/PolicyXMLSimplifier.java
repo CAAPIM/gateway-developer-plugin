@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyBundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.DependencyBundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;

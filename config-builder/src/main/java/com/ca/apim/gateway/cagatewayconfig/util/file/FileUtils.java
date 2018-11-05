@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.file;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.builder.EntityBuilderException;
 
 import java.io.File;
 import java.io.IOException;

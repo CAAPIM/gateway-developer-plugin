@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ClusterProperty;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.ClusterProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 import com.ca.apim.gateway.cagatewayexport.util.properties.OrderedProperties;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
