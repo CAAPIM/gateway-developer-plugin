@@ -101,7 +101,7 @@ public class EnvironmentCreatorApplication {
         File[] templatizedBundles = templatizedFolder.listFiles((dir, name) -> name.endsWith(".bundle"));
         if (templatizedBundles != null) {
             BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
-            BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(environmentBundle.getEnvironmentProperties());
+            BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(environmentBundle);
             Arrays.asList(templatizedBundles)
                     .forEach(templatizedBundle -> {
                         logger.log(Level.FINE, () -> "Processing deployment bundle: " + templatizedBundle);

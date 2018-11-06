@@ -6,17 +6,21 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.INTERNAL_IDP_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BundleDetemplatizerTest {
 
-    private String bundle = "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+    private String bundleXml = "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
             "    <l7:References>\n" +
             "        <l7:Item>\n" +
             "            <l7:Name>my-gateway-api</l7:Name>\n" +
@@ -52,6 +56,14 @@ class BundleDetemplatizerTest {
             "            &lt;L7p:Base64Expression ENV_PARAM_NAME=\"ENV.anotherEnvVar\"/&gt;\n" +
             "            &lt;L7p:VariableToSet stringValue=\"ENV.anotherEnvVar\"/&gt;\n" +
             "        &lt;/L7p:SetVariable&gt;\n" +
+            "        &lt;L7p:Authentication&gt;\n" +
+            "            &lt;L7p:IdentityProviderName stringValue=\"Internal Identity Provider\"/&gt;\n" +
+            "            &lt;L7p:Target target=\"RESPONSE\"/&gt;\n" +
+            "        &lt;/L7p:Authentication&gt;\n" +
+            "        &lt;L7p:Authentication&gt;\n" +
+            "            &lt;L7p:IdentityProviderName stringValue=\"test-IDP\"/&gt;\n" +
+            "            &lt;L7p:Target target=\"RESPONSE\"/&gt;\n" +
+            "        &lt;/L7p:Authentication&gt;\n" +
             "    &lt;/wsp:All&gt;\n" +
             "&lt;/wsp:Policy&gt;\n" +
             "</l7:Resource>\n" +
@@ -71,10 +83,17 @@ class BundleDetemplatizerTest {
         Map<String,String> env = new HashMap<>();
         env.put("myEnvironmentVariable", "abc");
         env.put("anotherEnvVar", "qwe");
+        IdentityProvider idpTest = new IdentityProvider();
+        String testGoid = "8263a394a3782fa4984bcffc2363b8cc";
+        idpTest.setId(testGoid);
 
-        BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(env);
+        Bundle bundle = new Bundle();
+        bundle.putAllEnvironmentProperties(env);
+        bundle.putAllIdentityProviders(ImmutableMap.of("test-IDP", idpTest));
 
-        String detemplatizedBundle = bundleDetemplatizer.detemplatizeBundleString(bundle).toString();
+        BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(bundle);
+
+        String detemplatizedBundle = bundleDetemplatizer.detemplatizeBundleString(bundleXml).toString();
 
         assertEquals("<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
                 "    <l7:References>\n" +
@@ -112,6 +131,14 @@ class BundleDetemplatizerTest {
                 "            &lt;L7p:Base64Expression stringValue=\"cXdl\"/&gt;\n" +
                 "            &lt;L7p:VariableToSet stringValue=\"ENV.anotherEnvVar\"/&gt;\n" +
                 "        &lt;/L7p:SetVariable&gt;\n" +
+                "        &lt;L7p:Authentication&gt;\n" +
+                "            &lt;L7p:IdentityProviderOid goidValue=\"" + INTERNAL_IDP_ID +"\"/&gt;\n" +
+                "            &lt;L7p:Target target=\"RESPONSE\"/&gt;\n" +
+                "        &lt;/L7p:Authentication&gt;\n" +
+                "        &lt;L7p:Authentication&gt;\n" +
+                "            &lt;L7p:IdentityProviderOid goidValue=\"" + testGoid + "\"/&gt;\n" +
+                "            &lt;L7p:Target target=\"RESPONSE\"/&gt;\n" +
+                "        &lt;/L7p:Authentication&gt;\n" +
                 "    &lt;/wsp:All&gt;\n" +
                 "&lt;/wsp:Policy&gt;\n" +
                 "</l7:Resource>\n" +
@@ -131,8 +158,10 @@ class BundleDetemplatizerTest {
     void detemplatizeBundleStringMissingEnv() {
         Map<String,String> env = new HashMap<>();
         env.put("myEnvironmentVariable", "abc");
+        Bundle bundle = new Bundle();
+        bundle.putAllEnvironmentProperties(env);
 
-        BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(env);
-        assertThrows(BundleDetemplatizeException.class, () -> bundleDetemplatizer.detemplatizeBundleString(bundle));
+        BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(bundle);
+        assertThrows(BundleDetemplatizeException.class, () -> bundleDetemplatizer.detemplatizeBundleString(bundleXml));
     }
 }
