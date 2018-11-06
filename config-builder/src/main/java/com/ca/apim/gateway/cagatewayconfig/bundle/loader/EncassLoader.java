@@ -6,12 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.EncassParam;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.inject.Singleton;
@@ -57,32 +55,35 @@ public class EncassLoader implements BundleEntityLoader {
         return policyList.get(0).getPath();
     }
 
-    private Set<EncassParam> getResults(Element encass) {
+    private Set<EncassResult> getResults(Element encass) {
         Element encapsulatedResultsElement = getSingleChildElement(encass, ENCAPSULATED_RESULTS);
         NodeList encapsulatedAssertionResultElement = encapsulatedResultsElement.getElementsByTagName(ENCAPSULATED_ASSERTION_RESULT);
-        Set<EncassParam> encassResults = new LinkedHashSet<>(encapsulatedAssertionResultElement.getLength());
-        for (int i = 0; i < encapsulatedAssertionResultElement.getLength(); i++) {
-            if (!(encapsulatedAssertionResultElement.item(i) instanceof Element)) {
+        Set<EncassResult> encassResults = new LinkedHashSet<>(encapsulatedAssertionResultElement.getLength());
+        for (Node node : nodeList(encapsulatedAssertionResultElement)) {
+            if (!(node instanceof Element)) {
                 throw new BundleLoadException("Unexpected encass results node: " + encapsulatedResultsElement.getClass());
             }
-            String resultName = getSingleChildElementTextContent((Element) encapsulatedAssertionResultElement.item(i), RESULT_NAME);
-            String resultType = getSingleChildElementTextContent((Element) encapsulatedAssertionResultElement.item(i), RESULT_TYPE);
-            encassResults.add(new EncassParam(resultName, resultType));
+            final Element encassResultElement = (Element) node;
+            String resultName = getSingleChildElementTextContent(encassResultElement, RESULT_NAME);
+            String resultType = getSingleChildElementTextContent(encassResultElement, RESULT_TYPE);
+            encassResults.add(new EncassResult(resultName, resultType));
         }
         return encassResults;
     }
 
-    private Set<EncassParam> getArguments(Element encass) {
+    private Set<EncassArgument> getArguments(Element encass) {
         Element encapsulatedArgumentsElement = getSingleChildElement(encass, ENCAPSULATED_ARGUMENTS);
         NodeList encapsulatedAssertionArgumentElement = encapsulatedArgumentsElement.getElementsByTagName(ENCAPSULATED_ASSERTION_ARGUMENT);
-        Set<EncassParam> encassArguments = new LinkedHashSet<>(encapsulatedAssertionArgumentElement.getLength());
-        for (int i = 0; i < encapsulatedAssertionArgumentElement.getLength(); i++) {
-            if (!(encapsulatedAssertionArgumentElement.item(i) instanceof Element)) {
+        Set<EncassArgument> encassArguments = new LinkedHashSet<>(encapsulatedAssertionArgumentElement.getLength());
+        for (Node node : nodeList(encapsulatedAssertionArgumentElement)) {
+            if (!(node instanceof Element)) {
                 throw new BundleLoadException("Unexpected encass argument node: " + encapsulatedArgumentsElement.getClass());
             }
-            String argumentName = getSingleChildElementTextContent((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_NAME);
-            String argumentType = getSingleChildElementTextContent((Element) encapsulatedAssertionArgumentElement.item(i), ARGUMENT_TYPE);
-            encassArguments.add(new EncassParam(argumentName, argumentType));
+            final Element encassArgElement = (Element) node;
+            String argumentName = getSingleChildElementTextContent(encassArgElement, ARGUMENT_NAME);
+            String argumentType = getSingleChildElementTextContent(encassArgElement, ARGUMENT_TYPE);
+            Boolean guiPrompt = Boolean.parseBoolean(getSingleChildElementTextContent(encassArgElement, GUI_PROMPT));
+            encassArguments.add(new EncassArgument(argumentName, argumentType, guiPrompt));
         }
         return encassArguments;
     }

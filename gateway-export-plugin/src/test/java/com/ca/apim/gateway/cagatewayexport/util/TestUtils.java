@@ -50,7 +50,7 @@ public class TestUtils {
         return createEncass(name, id, guid, policyId, null, null);
     }
 
-    public static Encass createEncass(final String name, final String id, final String guid, String policyId, Set<EncassParam> arguments, Set<EncassParam> results) {
+    public static Encass createEncass(final String name, final String id, final String guid, String policyId, Set<EncassArgument> arguments, Set<EncassResult> results) {
         Encass encass = new Encass();
         encass.setName(name);
         encass.setId(id);

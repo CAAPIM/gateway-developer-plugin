@@ -6,10 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.EncassParam;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
@@ -110,9 +107,9 @@ class EncassEntityBuilderTest {
         new ArrayList<>(argumentElements).forEach(e -> {
             assertNotNull(getSingleChildElement(e, ARGUMENT_NAME));
             String argumentName = getSingleChildElementTextContent(e, ARGUMENT_NAME);
-            assertTrue(encass.getArguments().stream().map(EncassParam::getName).collect(toList()).contains(argumentName));
+            assertTrue(encass.getArguments().stream().map(EncassArgument::getName).collect(toList()).contains(argumentName));
             assertNotNull(getSingleChildElement(e, ARGUMENT_TYPE));
-            assertEquals(encass.getArguments().stream().filter(p -> p.getName().equals(argumentName)).findFirst().map(EncassParam::getType).orElse(null), getSingleChildElementTextContent(e, ARGUMENT_TYPE));
+            assertEquals(encass.getArguments().stream().filter(p -> p.getName().equals(argumentName)).findFirst().map(EncassArgument::getType).orElse(null), getSingleChildElementTextContent(e, ARGUMENT_TYPE));
             argumentElements.remove(e);
         });
 
@@ -124,9 +121,9 @@ class EncassEntityBuilderTest {
         new ArrayList<>(resultElements).forEach(e -> {
             assertNotNull(getSingleChildElement(e, RESULT_NAME));
             String resultName = getSingleChildElementTextContent(e, RESULT_NAME);
-            assertTrue(encass.getResults().stream().map(EncassParam::getName).collect(toList()).contains(resultName));
+            assertTrue(encass.getResults().stream().map(EncassResult::getName).collect(toList()).contains(resultName));
             assertNotNull(getSingleChildElement(e, RESULT_TYPE));
-            assertEquals(encass.getResults().stream().filter(p -> p.getName().equals(resultName)).findFirst().map(EncassParam::getType).orElse(null), getSingleChildElementTextContent(e, RESULT_TYPE));
+            assertEquals(encass.getResults().stream().filter(p -> p.getName().equals(resultName)).findFirst().map(EncassResult::getType).orElse(null), getSingleChildElementTextContent(e, RESULT_TYPE));
             resultElements.remove(e);
         });
         assertTrue(argumentElements.isEmpty());
@@ -137,19 +134,19 @@ class EncassEntityBuilderTest {
         encass.setPolicy(policyPath);
         encass.setGuid(encassGuid);
         encass.setArguments(new HashSet<>());
-        EncassParam param1 = new EncassParam();
+        EncassArgument param1 = new EncassArgument();
         param1.setName("Param1");
         param1.setType("string");
-        EncassParam param2 = new EncassParam();
+        EncassArgument param2 = new EncassArgument();
         param2.setName("Param2");
         param2.setType("message");
         encass.getArguments().add(param1);
         encass.getArguments().add(param2);
         encass.setResults(new HashSet<>());
-        EncassParam result1 = new EncassParam();
+        EncassResult result1 = new EncassResult();
         result1.setName("Result1");
         result1.setType("string");
-        EncassParam result2 = new EncassParam();
+        EncassResult result2 = new EncassResult();
         result2.setName("Result2");
         result2.setType("message");
         encass.getResults().add(result1);
