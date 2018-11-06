@@ -7,9 +7,9 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.EncassParam;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -39,6 +39,7 @@ public class EncassLoader implements BundleEntityLoader {
         encass.setName(name);
 
         String policyPath = getPath(bundle, policyId);
+        encass.setId(encassElement.getAttribute(ATTRIBUTE_ID));
         encass.setPolicy(policyPath);
         encass.setArguments(getArguments(encassElement));
         encass.setResults(getResults(encassElement));

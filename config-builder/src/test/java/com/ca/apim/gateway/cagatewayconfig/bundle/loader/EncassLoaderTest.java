@@ -73,6 +73,7 @@ class EncassLoaderTest {
         Encass entity = bundle.getEncasses().get(TEST_NAME);
         assertNotNull(entity);
         assertEquals(TEST_GUID, entity.getGuid());
+        assertEquals("id", entity.getId());
     }
 
     private static Element createEncassXml(Document document) {

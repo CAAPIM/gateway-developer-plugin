@@ -37,6 +37,7 @@ class StoredPasswordLoaderTest {
         StoredPassword entity = bundle.getStoredPasswords().get("Test");
         assertNotNull(entity);
         assertEquals("Test", entity.getName());
+        assertEquals("123qwe", entity.getId());
         assertNull(entity.getPassword());
         assertPropertiesContent(ImmutableMap.of(
                 "description", "gateway",
@@ -48,7 +49,7 @@ class StoredPasswordLoaderTest {
         Element cassandraElement = createElementWithAttributesAndChildren(
                 document,
                 STORED_PASSWD,
-                ImmutableMap.of(ATTRIBUTE_ID, "id"),
+                ImmutableMap.of(ATTRIBUTE_ID, "123qwe"),
                 createElementWithTextContent(document, NAME, "Test"),
                 createElementWithTextContent(document, PASSWORD, "Test"),
                 buildPropertiesElement(

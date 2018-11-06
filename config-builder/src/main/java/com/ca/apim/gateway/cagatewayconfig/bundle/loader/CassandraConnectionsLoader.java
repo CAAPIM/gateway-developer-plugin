@@ -32,6 +32,7 @@ public class CassandraConnectionsLoader implements BundleEntityLoader {
         final String name = getSingleChildElementTextContent(cassandraConnectionElement, NAME);
         CassandraConnection cassandraConnection = new CassandraConnection();
         cassandraConnection.setName(name);
+        cassandraConnection.setId(cassandraConnectionElement.getAttribute(ATTRIBUTE_ID));
         cassandraConnection.setKeyspace(getSingleChildElementTextContent(cassandraConnectionElement, KEYSPACE));
         cassandraConnection.setCompression(getSingleChildElementTextContent(cassandraConnectionElement, COMPRESSION));
         cassandraConnection.setContactPoint(getSingleChildElementTextContent(cassandraConnectionElement, CONTACT_POINT));

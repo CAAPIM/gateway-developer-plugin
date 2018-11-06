@@ -30,6 +30,7 @@ public class StoredPasswordLoader implements BundleEntityLoader {
         final Map<String, Object> properties = BuilderUtils.mapPropertiesElements(getSingleChildElement(storedPass, PROPERTIES, true), PROPERTIES);
 
         StoredPassword password = new StoredPassword();
+        password.setId(storedPass.getAttribute(ATTRIBUTE_ID));
         password.setName(name);
         password.setProperties(properties);
 

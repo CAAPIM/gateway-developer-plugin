@@ -12,7 +12,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createCassandraXml;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static java.security.Security.getAlgorithms;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,6 +30,7 @@ class CassandraConnectionsLoaderTest {
 
         CassandraConnection entity = bundle.getCassandraConnections().get("Test");
         assertNotNull(entity);
+        assertEquals("id", entity.getId());
         assertEquals("Test", entity.getKeyspace());
         assertEquals("Test", entity.getContactPoint());
         assertEquals(new Integer(1234), entity.getPort());
