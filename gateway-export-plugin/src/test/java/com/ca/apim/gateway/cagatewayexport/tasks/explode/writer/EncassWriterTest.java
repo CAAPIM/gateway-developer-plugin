@@ -14,7 +14,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createEncass;
