@@ -8,15 +8,13 @@ package com.ca.apim.gateway.cagatewayconfig.util.xml;
 
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
@@ -230,5 +228,30 @@ public class DocumentUtils {
      */
     public static List<String> getChildElementsAttributeValues(final Element entityItemElement, final String elementName, final String attribute) {
         return getChildElements(entityItemElement, elementName).stream().map(e -> e.getAttribute(attribute)).collect(toList());
+    }
+
+    /**
+     * Returns a Iterable wrapper for {@link NodeList} to be used in foreach loops.
+     *
+     * @param nodeList node list
+     * @return iterable wrapper
+     */
+    public static Iterable<Node> nodeList(@NotNull final NodeList nodeList) {
+        return () -> new Iterator<Node>() {
+
+            private int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return index < nodeList.getLength();
+            }
+
+            @Override
+            public Node next() {
+                if (!hasNext())
+                    throw new NoSuchElementException();
+                return nodeList.item(index++);
+            }
+        };
     }
 }

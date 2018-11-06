@@ -6,9 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
@@ -16,10 +14,13 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EncassLoaderTest {
@@ -74,6 +75,20 @@ class EncassLoaderTest {
         assertNotNull(entity);
         assertEquals(TEST_GUID, entity.getGuid());
         assertEquals("id", entity.getId());
+        assertNotNull(entity.getArguments());
+        assertEquals(2, entity.getArguments().size());
+        final Map<String, EncassArgument> args = entity.getArguments().stream().collect(toMap(EncassArgument::getName, identity()));
+        assertNotNull(args.get("param"));
+        assertEquals("string", args.get("param").getType());
+        assertEquals(true, args.get("param").getRequireExplicit());
+        assertNotNull(args.get("param2"));
+        assertEquals("string", args.get("param2").getType());
+        assertEquals(false, args.get("param2").getRequireExplicit());
+        assertNotNull(entity.getResults());
+        assertEquals(1, entity.getResults().size());
+        EncassResult result = entity.getResults().iterator().next();
+        assertEquals("result", result.getName());
+        assertEquals("string", result.getType());
     }
 
     private static Element createEncassXml(Document document) {
@@ -97,7 +112,15 @@ class EncassLoaderTest {
                             createElementWithTextContent(document, ARGUMENT_NAME, "param"),
                             createElementWithTextContent(document, ARGUMENT_TYPE, "string"),
                             createElementWithTextContent(document, GUI_PROMPT, Boolean.TRUE.toString())
-                    )
+                        ),
+                        createElementWithChildren(
+                                document,
+                                ENCAPSULATED_ASSERTION_ARGUMENT,
+                                createElementWithTextContent(document, ORDINAL, String.valueOf(2)),
+                                createElementWithTextContent(document, ARGUMENT_NAME, "param2"),
+                                createElementWithTextContent(document, ARGUMENT_TYPE, "string"),
+                                createElementWithTextContent(document, GUI_PROMPT, Boolean.FALSE.toString())
+                        )
                 )
         );
         encassElement.appendChild(

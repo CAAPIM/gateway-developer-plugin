@@ -25,6 +25,8 @@ import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ENCAPS
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static java.lang.Boolean.FALSE;
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @Singleton
 public class EncassEntityBuilder implements EntityBuilder {
@@ -100,7 +102,7 @@ public class EncassEntityBuilder implements EntityBuilder {
                             createElementWithTextContent(document, ORDINAL, String.valueOf(ordinal.getAndIncrement())),
                             createElementWithTextContent(document, ARGUMENT_NAME, param.getName()),
                             createElementWithTextContent(document, ARGUMENT_TYPE, param.getType()),
-                            createElementWithTextContent(document, GUI_PROMPT, Boolean.TRUE.toString())
+                            createElementWithTextContent(document, GUI_PROMPT, firstNonNull(param.getRequireExplicit(), FALSE).toString())
                     )
             ));
         }

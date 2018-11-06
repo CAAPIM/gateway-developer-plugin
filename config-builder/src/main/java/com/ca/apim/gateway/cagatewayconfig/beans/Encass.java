@@ -17,25 +17,25 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Named("ENCAPSULATED_ASSERTION")
 public class Encass extends GatewayEntity {
     private String policy;
-    private Set<EncassParam> arguments;
-    private Set<EncassParam> results;
+    private Set<EncassArgument> arguments;
+    private Set<EncassResult> results;
     private String guid;
     private String policyId;
     private String path;
 
-    public Set<EncassParam> getArguments() {
+    public Set<EncassArgument> getArguments() {
         return arguments;
     }
 
-    public void setArguments(Set<EncassParam> arguments) {
+    public void setArguments(Set<EncassArgument> arguments) {
         this.arguments = arguments;
     }
 
-    public Set<EncassParam> getResults() {
+    public Set<EncassResult> getResults() {
         return results;
     }
 
-    public void setResults(Set<EncassParam> results) {
+    public void setResults(Set<EncassResult> results) {
         this.results = results;
     }
 

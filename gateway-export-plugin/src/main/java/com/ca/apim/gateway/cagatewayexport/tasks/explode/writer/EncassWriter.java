@@ -8,7 +8,8 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.EncassParam;
+import com.ca.apim.gateway.cagatewayconfig.beans.EncassArgument;
+import com.ca.apim.gateway.cagatewayconfig.beans.EncassResult;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.google.common.annotations.VisibleForTesting;
@@ -22,6 +23,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
+import static java.util.stream.Collectors.toCollection;
 
 @Singleton
 public class EncassWriter implements EntityWriter {
@@ -49,8 +51,30 @@ public class EncassWriter implements EntityWriter {
     Encass getEncassBean(Encass encassEntity) {
         Encass encassBean = new Encass();
         encassBean.setPolicy(encassEntity.getPolicy());
-        encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
-        encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
+        encassBean.setArguments(
+                encassEntity.getArguments()
+                        .stream()
+                        .map(
+                                encassParam -> new EncassArgument(
+                                        encassParam.getName(),
+                                        encassParam.getType(),
+                                        encassParam.getRequireExplicit()
+                                )
+                        ).collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassArgument::getName)))
+                )
+        );
+
+        encassBean.setResults(
+                encassEntity.getResults()
+                        .stream()
+                        .map(
+                                encassParam -> new EncassResult(
+                                        encassParam.getName(),
+                                        encassParam.getType()
+                                )
+                        ).collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassResult::getName)))
+                )
+        );
         return encassBean;
     }
 }

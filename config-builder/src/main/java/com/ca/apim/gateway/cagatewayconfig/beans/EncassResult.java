@@ -6,14 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-public class EncassParam {
+public class EncassResult {
     private String name;
     private String type;
 
-    public EncassParam() {
+    public EncassResult() {
     }
 
-    public EncassParam(String name, String type) {
+    public EncassResult(String name, String type) {
         this.name = name;
         this.type = type;
     }
