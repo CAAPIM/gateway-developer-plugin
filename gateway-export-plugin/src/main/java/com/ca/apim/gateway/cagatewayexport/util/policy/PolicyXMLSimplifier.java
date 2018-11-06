@@ -26,6 +26,9 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 
@@ -61,7 +64,7 @@ public class PolicyXMLSimplifier {
             try {
                 simplifyAuthenticationAssertion(bundle, element);
             } catch (DocumentParseException e) {
-                throw new BundleBuilderException(e.getMessage());
+                throw new BundleLoadException(e.getMessage());
             }
         });
     }
@@ -140,9 +143,9 @@ public class PolicyXMLSimplifier {
     void simplifyAuthenticationAssertion(Bundle bundle, Element authenticationAssertionElement) throws DocumentParseException {
         final Element idProviderGoidElement = getSingleElement(authenticationAssertionElement, ID_PROV_OID);
         final String idProviderGoid = idProviderGoidElement.getAttribute(GOID_VALUE);
-        final Optional<IdentityProviderEntity> idProvEntity = bundle.getEntities(IdentityProviderEntity.class).values().stream().filter(e -> e.getId().equals(idProviderGoid)).findAny();
-        if (idProvEntity.isPresent()) {
-            updateAuthenticationAssertionElement(authenticationAssertionElement, idProviderGoidElement, idProvEntity.get().getName());
+        final Optional<IdentityProvider> idProv = bundle.getEntities(IdentityProvider.class).values().stream().filter(e -> e.getId().equals(idProviderGoid)).findAny();
+        if (idProv.isPresent()) {
+            updateAuthenticationAssertionElement(authenticationAssertionElement, idProviderGoidElement, idProv.get().getName());
         } else if (INTERNAL_IDP_ID.equals(idProviderGoid)) {
             updateAuthenticationAssertionElement(authenticationAssertionElement, idProviderGoidElement, INTERNAL_IDP_NAME);
         } else {
@@ -152,7 +155,7 @@ public class PolicyXMLSimplifier {
 
     private void updateAuthenticationAssertionElement(Element authenticationAssertionElement, Element goidElementToRemove, String internalIdpName) {
         final Node firstChild = authenticationAssertionElement.getFirstChild();
-        final Element idProviderNameElement = createElementWithAttributes(authenticationAssertionElement.getOwnerDocument(), ID_PROV_NAME, ImmutableMap.of(STRING_VALUE, internalIdpName));
+        final Element idProviderNameElement = createElementWithAttribute(authenticationAssertionElement.getOwnerDocument(), ID_PROV_NAME, STRING_VALUE, internalIdpName);
         if (firstChild != null) {
             authenticationAssertionElement.insertBefore(idProviderNameElement, firstChild);
         } else {

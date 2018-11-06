@@ -1,5 +1,7 @@
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
@@ -9,8 +11,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -53,12 +57,12 @@ class PolicyXMLSimplifierTest {
     void simplifyAuthenticationAssertion() throws DocumentParseException {
         String id = new IdGenerator().generate();
         String testName = "test";
-        IdentityProviderEntity identityProviderEntity = new IdentityProviderEntity.Builder()
+        IdentityProvider identityProvider = new IdentityProvider.Builder()
                 .id(id)
                 .name(testName)
                 .build();
         Bundle bundle = new Bundle();
-        bundle.addEntity(identityProviderEntity);
+        bundle.addEntity(identityProvider);
         Element authenticationAssertion = createAuthenticationAssertionElement(id);
         policyXMLSimplifier.simplifyAuthenticationAssertion(bundle, authenticationAssertion);
 

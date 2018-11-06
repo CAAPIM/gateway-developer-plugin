@@ -6,15 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.INTERNAL_IDP_ID;
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -83,13 +83,10 @@ class BundleDetemplatizerTest {
         Map<String,String> env = new HashMap<>();
         env.put("myEnvironmentVariable", "abc");
         env.put("anotherEnvVar", "qwe");
-        IdentityProvider idpTest = new IdentityProvider();
-        String testGoid = "8263a394a3782fa4984bcffc2363b8cc";
-        idpTest.setId(testGoid);
-
+        String testIdpGoid = "8263a394a3782fa4984bcffc2363b8cc";
         Bundle bundle = new Bundle();
         bundle.putAllEnvironmentProperties(env);
-        bundle.putAllIdentityProviders(ImmutableMap.of("test-IDP", idpTest));
+        bundle.putAllIdentityProviders(ImmutableMap.of("test-IDP", new IdentityProvider.Builder().id(testIdpGoid).build()));
 
         BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(bundle);
 
@@ -136,7 +133,7 @@ class BundleDetemplatizerTest {
                 "            &lt;L7p:Target target=\"RESPONSE\"/&gt;\n" +
                 "        &lt;/L7p:Authentication&gt;\n" +
                 "        &lt;L7p:Authentication&gt;\n" +
-                "            &lt;L7p:IdentityProviderOid goidValue=\"" + testGoid + "\"/&gt;\n" +
+                "            &lt;L7p:IdentityProviderOid goidValue=\"" + testIdpGoid + "\"/&gt;\n" +
                 "            &lt;L7p:Target target=\"RESPONSE\"/&gt;\n" +
                 "        &lt;/L7p:Authentication&gt;\n" +
                 "    &lt;/wsp:All&gt;\n" +

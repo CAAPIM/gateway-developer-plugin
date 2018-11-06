@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 
 import java.util.Base64;
 import java.util.Map;
@@ -15,8 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.INTERNAL_IDP_ID;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider.INTERNAL_IDP_NAME;
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 
 public class BundleDetemplatizer {

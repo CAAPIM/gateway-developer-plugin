@@ -29,6 +29,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP;
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType.FEDERATED;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElementAttributeValues;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
@@ -112,7 +114,7 @@ class IdentityProviderEntityBuilderTest {
         final List<Entity> identityProviders = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertEquals(1, identityProviders.size());
-        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, "simple ldap config", IdentityProviderType.BIND_ONLY_LDAP);
+        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, "simple ldap config", BIND_ONLY_LDAP);
         final Element idProviderProperties = getSingleElement(identityProviderEntityXml, PROPERTIES);
         final NodeList propertyList = idProviderProperties.getElementsByTagName(PROPERTY);
         assertEquals(2, propertyList.getLength());
@@ -145,7 +147,7 @@ class IdentityProviderEntityBuilderTest {
     private static IdentityProvider createBindOnlyLdap() {
         final IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setId(TEST_ID);
-        identityProvider.setType(IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP);
+        identityProvider.setType(BIND_ONLY_LDAP);
         identityProvider.setProperties(new HashMap<String, Object>() {{
             put("key1", "value1");
             put("key2", "value2");
@@ -163,7 +165,7 @@ class IdentityProviderEntityBuilderTest {
     @Test
     void buildFedIPCertReferenceNotFound() {
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProviderType.FEDERATED);
+        identityProvider.setType(FEDERATED);
         final Set<String> certReferences = new HashSet<>(asList("cert1","cert2"));
         final FederatedIdentityProviderDetail identityProviderDetail = new FederatedIdentityProviderDetail();
         identityProviderDetail.setCertificateReferences(certReferences);
@@ -180,7 +182,7 @@ class IdentityProviderEntityBuilderTest {
     @Test
     void buildFedIPMissingCertReferences() {
         final IdentityProvider identityProvider = new IdentityProvider();
-        identityProvider.setType(IdentityProvider.IdentityProviderType.FEDERATED);
+        identityProvider.setType(FEDERATED);
         final FederatedIdentityProviderDetail identityProviderDetail = new FederatedIdentityProviderDetail();
         identityProvider.setIdentityProviderDetail(identityProviderDetail);
         identityProvider.setId(TEST_ID);
@@ -204,7 +206,7 @@ class IdentityProviderEntityBuilderTest {
 
         final List<Entity> identityProviders = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
-        Element identityProviderEntityXml = verifyIdProvider(identityProviders, "fed IP no details", IdentityProviderType.FEDERATED);
+        Element identityProviderEntityXml = verifyIdProvider(identityProviders, "fed IP no details", FEDERATED);
         //No identityProviderDetail element
         assertThrows(DocumentParseException.class, () -> getSingleElement(identityProviderEntityXml, FEDERATED_ID_PROV_DETAIL));
     }
@@ -235,7 +237,7 @@ class IdentityProviderEntityBuilderTest {
         final List<Entity> identityProviders = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertEquals(1, identityProviders.size());
-        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, FED_ID_NAME, IdentityProviderType.FEDERATED);
+        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, FED_ID_NAME, FEDERATED);
         final Element fedIdentityProviderDetailXml = getSingleElement(identityProviderEntityXml, FEDERATED_ID_PROV_DETAIL);
         final Element certRefs = getSingleElement(fedIdentityProviderDetailXml, CERTIFICATE_REFERENCES);
         final List<String> certList = getChildElementAttributeValues(certRefs, REFERENCE, ATTRIBUTE_ID);
