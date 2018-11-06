@@ -36,26 +36,6 @@ public class CassandraConnectionWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, CassandraConnection> jdbcConnections = bundle.getCassandraConnections()
-                .values()
-                .stream()
-                .collect(toMap(CassandraConnection::getName, this::getBean));
-
-        writeFile(rootFolder, documentFileUtils, jsonTools, jdbcConnections, CASSANDRA_CONNECTIONS_FILE, CassandraConnection.class);
-    }
-
-    @VisibleForTesting
-    CassandraConnection getBean(CassandraConnection entity) {
-        CassandraConnection cassandraConnection = new CassandraConnection();
-        cassandraConnection.setCompression(entity.getCompression());
-        cassandraConnection.setContactPoint(entity.getContactPoint());
-        cassandraConnection.setPort(entity.getPort());
-        cassandraConnection.setSsl(entity.getSsl());
-        cassandraConnection.setUsername(entity.getUsername());
-        cassandraConnection.setKeyspace(entity.getKeyspace());
-        cassandraConnection.setStoredPasswordName(entity.getStoredPasswordName());
-        cassandraConnection.setProperties(entity.getProperties());
-        cassandraConnection.setTlsCiphers(entity.getTlsCiphers());
-        return cassandraConnection;
+        writeFile(rootFolder, documentFileUtils, jsonTools, bundle.getCassandraConnections(), CASSANDRA_CONNECTIONS_FILE, CassandraConnection.class);
     }
 }

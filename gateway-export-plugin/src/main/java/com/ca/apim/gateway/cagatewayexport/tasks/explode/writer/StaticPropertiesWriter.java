@@ -15,7 +15,8 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 @Singleton
 public class StaticPropertiesWriter implements EntityWriter {
@@ -34,7 +35,7 @@ public class StaticPropertiesWriter implements EntityWriter {
         Map<String, ClusterProperty> clusterProperties = bundle.getEntities(ClusterProperty.class);
 
         Properties properties = new Properties();
-        properties.putAll(clusterProperties.values().stream().collect(Collectors.toMap(ClusterProperty::getName, ClusterProperty::getValue)));
+        properties.putAll(clusterProperties.values().stream().collect(toMap(ClusterProperty::getName, ClusterProperty::getValue)));
 
         WriterHelper.writePropertiesFile(rootFolder, documentFileUtils, properties, STATIC_PROPERTIES_FILE);
     }

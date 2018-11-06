@@ -10,12 +10,13 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.function.Function.identity;
 
 public abstract class BasePolicyWriter implements EntityWriter {
 
@@ -31,17 +32,9 @@ public abstract class BasePolicyWriter implements EntityWriter {
     @Override
     public void write(Bundle bundle, File rootFolder) {
         final Map<String, Policy> globalPolicies = filterPolicies(bundle).values().stream()
-                .collect(Collectors.toMap(Policy::getName, this::getPolicyBean));
+                .collect(Collectors.toMap(Policy::getName, identity()));
 
         WriterHelper.writeFile(rootFolder, documentFileUtils, jsonTools, globalPolicies, getFileName(), Policy.class);
-    }
-
-    @VisibleForTesting
-    Policy getPolicyBean(Policy policyEntity) {
-        Policy policy = new Policy();
-        policy.setTag(policyEntity.getTag());
-        policy.setPath(policyEntity.getPath());
-        return policy;
     }
 
     /**

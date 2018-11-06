@@ -35,18 +35,7 @@ public class PolicyBackedServiceWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, PolicyBackedService> policyBackedServiceBeans = bundle.getEntities(PolicyBackedService.class)
-                .values()
-                .stream()
-                .collect(Collectors.toMap(PolicyBackedService::getName, this::getPolicyBackedServiceBean));
-
-        writeFile(rootFolder, documentFileUtils, jsonTools, policyBackedServiceBeans, POLICY_BACKED_SERVICES_FILE, PolicyBackedService.class);
+        writeFile(rootFolder, documentFileUtils, jsonTools, bundle.getEntities(PolicyBackedService.class), POLICY_BACKED_SERVICES_FILE, PolicyBackedService.class);
     }
 
-    private PolicyBackedService getPolicyBackedServiceBean(PolicyBackedService policyBackedServiceEntity) {
-        PolicyBackedService policyBackedServiceBean = new PolicyBackedService();
-        policyBackedServiceBean.setInterfaceName(policyBackedServiceEntity.getInterfaceName());
-        policyBackedServiceBean.setOperations(policyBackedServiceEntity.getOperations().stream().map(e -> new PolicyBackedServiceOperation(e.getOperationName(), e.getPolicy())).collect(toSet()));
-        return policyBackedServiceBean;
-    }
 }

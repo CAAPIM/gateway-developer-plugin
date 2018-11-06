@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
@@ -42,12 +41,7 @@ public class ServiceWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, Service> serviceBeans = bundle.getEntities(Service.class)
-                .values()
-                .stream()
-                .collect(Collectors.toMap(Service::getPath, this::getServiceBean));
-
-        writeFile(rootFolder, documentFileUtils, jsonTools, serviceBeans, SERVICES_FILE, Service.class);
+        writeFile(rootFolder, documentFileUtils, jsonTools, bundle.getEntities(Service.class), SERVICES_FILE, Service.class);
     }
 
     @NotNull

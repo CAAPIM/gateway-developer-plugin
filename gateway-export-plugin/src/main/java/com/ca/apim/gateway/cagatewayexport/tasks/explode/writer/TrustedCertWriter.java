@@ -9,15 +9,14 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Collection;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.writeCertificateData;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
 
 @Singleton
@@ -36,25 +35,17 @@ public class TrustedCertWriter implements EntityWriter {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, TrustedCert> trustedCertBeans = bundle.getEntities(TrustedCert.class)
-                .values()
-                .stream()
-                .collect(Collectors.toMap(TrustedCert::getName, (v -> getTrustedCertBean(v, rootFolder))));
+        writeCertFiles(bundle.getTrustedCerts().values(), rootFolder);
 
-        writeFile(rootFolder, documentFileUtils, jsonTools, trustedCertBeans, TRUSTED_CERTS_FILE, TrustedCert.class);
+        writeFile(rootFolder, documentFileUtils, jsonTools, bundle.getEntities(TrustedCert.class), TRUSTED_CERTS_FILE, TrustedCert.class);
     }
 
-    private TrustedCert getTrustedCertBean(final TrustedCert trustedCertEntity, File rootFolder) {
-        writeCertFile(trustedCertEntity, rootFolder);
-        return trustedCertEntity;
-    }
-
-    private void writeCertFile(TrustedCert trustedCertEntity, File rootFolder) {
+    private void writeCertFiles(Collection<TrustedCert> trustedCerts, File rootFolder) {
         final File configFolder = new File(rootFolder, "config");
         documentFileUtils.createFolder(configFolder.toPath());
         final File certFolder = new File(configFolder, "certificates");
         documentFileUtils.createFolder(certFolder.toPath());
 
-        CertificateUtils.writeCertificateData(certFolder, trustedCertEntity.getName(), trustedCertEntity.getCertificateData().getEncodedData());
+        trustedCerts.forEach(trustedCertEntity -> writeCertificateData(certFolder, trustedCertEntity.getName(), trustedCertEntity.getCertificateData().getEncodedData()));
     }
 }

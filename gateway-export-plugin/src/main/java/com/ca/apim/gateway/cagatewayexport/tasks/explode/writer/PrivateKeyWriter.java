@@ -35,18 +35,7 @@ public class PrivateKeyWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, PrivateKey> privateKeys = bundle.getEntities(PrivateKey.class)
-                .values()
-                .stream()
-                .collect(toMap(PrivateKey::getName, this::getPrivateKeyBean));
-
-        writeFile(rootFolder, documentFileUtils, jsonTools, privateKeys, FILE_NAME, PrivateKey.class);
+        writeFile(rootFolder, documentFileUtils, jsonTools, bundle.getEntities(PrivateKey.class), FILE_NAME, PrivateKey.class);
     }
 
-    private PrivateKey getPrivateKeyBean(PrivateKey entity) {
-        PrivateKey privateKey = new PrivateKey();
-        privateKey.setAlgorithm(entity.getAlgorithm());
-        privateKey.setKeystore(entity.getKeyStoreType().getName());
-        return privateKey;
-    }
 }

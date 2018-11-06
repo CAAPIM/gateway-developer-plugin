@@ -10,13 +10,10 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.ScheduledTask;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
 
@@ -34,25 +31,7 @@ public class ScheduledTaskWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, ScheduledTask> scheduledTaskBeans = bundle.getScheduledTasks()
-                .values()
-                .stream()
-                .collect(Collectors.toMap(ScheduledTask::getName, this::getScheduledTaskBean));
-
-        writeFile(rootFolder, documentFileUtils, jsonTools, scheduledTaskBeans, SCHEDULED_TASKS_FILE, ScheduledTask.class);
+        writeFile(rootFolder, documentFileUtils, jsonTools, bundle.getScheduledTasks(), SCHEDULED_TASKS_FILE, ScheduledTask.class);
     }
 
-    @VisibleForTesting
-    ScheduledTask getScheduledTaskBean(ScheduledTask scheduledTaskEntity) {
-        ScheduledTask scheduledTask = new ScheduledTask();
-        scheduledTask.setPolicy(scheduledTaskEntity.getPolicy());
-        scheduledTask.setOneNode(scheduledTaskEntity.getIsOneNode());
-        scheduledTask.setJobType(scheduledTaskEntity.getJobType());
-        scheduledTask.setJobStatus(scheduledTaskEntity.getJobStatus());
-        scheduledTask.setExecutionDate(scheduledTaskEntity.getExecutionDate());
-        scheduledTask.setCronExpression(scheduledTaskEntity.getCronExpression());
-        scheduledTask.setShouldExecuteOnCreate(scheduledTaskEntity.getShouldExecuteOnCreate());
-        scheduledTask.setProperties(scheduledTaskEntity.getProperties());
-        return scheduledTask;
-    }
 }

@@ -37,19 +37,21 @@ public class EnvironmentPropertiesWriter implements EntityWriter {
 
         Properties properties = new Properties();
         properties.putAll(environmentProperty.values().stream()
-                .collect(Collectors.toMap(property -> {
-                    switch (property.getType()) {
-                        case LOCAL:
-                            return property.getName();
-                        case GLOBAL:
-                            return "gateway." + property.getName();
-                        case SERVICE:
-                            return "service.property." + property.getName();
-                        default:
-                            throw new LinkerException("Unknown Environment Property Type: " + property.getType());
-                    }
-                }, EnvironmentProperty::getValue)));
+                .collect(Collectors.toMap(this::getPropertyName, EnvironmentProperty::getValue)));
 
         writePropertiesFile(rootFolder, documentFileUtils, properties, FILE_NAME);
+    }
+
+    private String getPropertyName(EnvironmentProperty property) {
+        switch (property.getType()) {
+            case LOCAL:
+                return property.getName();
+            case GLOBAL:
+                return "gateway." + property.getName();
+            case SERVICE:
+                return "service.property." + property.getName();
+            default:
+                throw new LinkerException("Unknown Environment Property Type: " + property.getType());
+        }
     }
 }
