@@ -43,7 +43,6 @@ public class IdentityProvider extends GatewayEntity {
         }
     }
 
-    private String id;
     private IdentityProviderType type;
     private Map<String,Object> properties;
 
@@ -65,14 +64,6 @@ public class IdentityProvider extends GatewayEntity {
             @JsonSubTypes.Type(value= FederatedIdentityProviderDetail.class, name="FEDERATED")
     })
     private IdentityProviderDetail identityProviderDetail;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public IdentityProviderType getType() {
         return type;
