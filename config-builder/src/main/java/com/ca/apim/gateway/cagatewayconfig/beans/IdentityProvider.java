@@ -6,14 +6,17 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import javax.inject.Named;
 import java.util.Map;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.util.Arrays.stream;
 
+@JsonInclude(NON_EMPTY)
 @Named("ID_PROVIDER_CONFIG")
 public class IdentityProvider extends GatewayEntity {
 

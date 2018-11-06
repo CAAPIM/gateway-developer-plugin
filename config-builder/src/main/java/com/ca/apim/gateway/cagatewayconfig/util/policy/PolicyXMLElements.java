@@ -11,6 +11,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.policy;
  */
 public class PolicyXMLElements {
 
+    public static final String GOID_VALUE = "goidValue";
     public static final String STRING_VALUE = "stringValue";
     public static final String INCLUDE = "L7p:Include";
     public static final String ENCAPSULATED = "L7p:Encapsulated";
@@ -25,6 +26,10 @@ public class PolicyXMLElements {
     public static final String ENCAPSULATED_ASSERTION_CONFIG_NAME = "L7p:EncapsulatedAssertionConfigName";
     public static final String POLICY_GUID = "L7p:PolicyGuid";
     public static final String NO_OP_IF_CONFIG_MISSING = "L7p:NoOpIfConfigMissing";
+    public static final String AUTHENTICATION = "L7p:Authentication";
+    public static final String ID_PROV_OID = "L7p:IdentityProviderOid";
+    public static final String ID_PROV_NAME = "L7p:IdentityProviderName";
+    public static final String TARGET = "L7p:Target";
 
     private PolicyXMLElements() {
 

@@ -11,13 +11,11 @@ import com.ca.apim.gateway.cagatewayconfig.beans.FederatedIdentityProviderDetail
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.beans.BindOnlyLdapIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
@@ -35,11 +33,8 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
 
     private static final Integer ORDER = 1100;
     private static final String TRUSTED_CERT_URI = "http://ns.l7tech.com/2010/04/gateway-management/trustedCertificates";
-    private final IdGenerator idGenerator;
 
-    @Inject
-    IdentityProviderEntityBuilder(IdGenerator idGenerator) {
-        this.idGenerator = idGenerator;
+    IdentityProviderEntityBuilder() {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
@@ -47,7 +42,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             case DEPLOYMENT:
                 return bundle.getIdentityProviders().entrySet().stream()
                         .map(
-                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, identityProviderEntry.getKey(), idGenerator.generate())
+                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, identityProviderEntry.getKey(), identityProviderEntry.getValue().getId())
                         ).collect(Collectors.toList());
             case ENVIRONMENT:
                 return bundle.getIdentityProviders().entrySet().stream().map(identityProviderEntry ->
@@ -59,7 +54,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildIdentityProviderEntity(Bundle bundle, String name, IdentityProvider identityProvider, Document document) {
-        final String id = idGenerator.generate();
+        final String id = identityProvider.getId();
         final Element identityProviderElement = createElementWithAttribute(document, ID_PROV, ATTRIBUTE_ID, id);
         identityProviderElement.appendChild(createElementWithTextContent(document, NAME, name));
         identityProviderElement.appendChild(createElementWithTextContent(document, ID_PROV_TYPE, identityProvider.getType().getValue()));

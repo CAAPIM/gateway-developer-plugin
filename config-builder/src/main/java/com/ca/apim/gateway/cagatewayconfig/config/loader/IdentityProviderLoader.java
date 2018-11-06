@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,10 +23,12 @@ import java.util.Map;
 public class IdentityProviderLoader extends EntityLoaderBase<IdentityProvider> {
 
     private static final String FILE_NAME = "identity-providers";
+    private IdGenerator idGenerator;
 
     @Inject
-    IdentityProviderLoader(JsonTools jsonTools) {
+    IdentityProviderLoader(final JsonTools jsonTools, final IdGenerator idGenerator) {
         super(jsonTools);
+        this.idGenerator = idGenerator;
     }
 
     @Override
@@ -40,6 +43,7 @@ public class IdentityProviderLoader extends EntityLoaderBase<IdentityProvider> {
 
     @Override
     protected void putToBundle(Bundle bundle, @NotNull Map<String, IdentityProvider> entitiesMap) {
+        entitiesMap.values().forEach(idProv -> idProv.setId(idGenerator.generate()));
         bundle.putAllIdentityProviders(entitiesMap);
     }
 

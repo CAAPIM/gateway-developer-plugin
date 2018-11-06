@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.FederatedIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.beans.BindOnlyLdapIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
@@ -39,6 +40,8 @@ class IdentityProviderLoaderTest {
 
     private TemporaryFolder rootProjectDir;
     private JsonTools jsonTools;
+    private IdGenerator idGenerator;
+    private IdentityProviderLoader identityProviderLoader;
     @Mock
     private FileUtils fileUtils;
 
@@ -46,11 +49,12 @@ class IdentityProviderLoaderTest {
     void setUp(TemporaryFolder rootProjectDir) {
         jsonTools = new JsonTools(fileUtils);
         this.rootProjectDir = rootProjectDir;
+        idGenerator = new IdGenerator();
+        identityProviderLoader = new IdentityProviderLoader(jsonTools, idGenerator);
     }
 
     @Test
     void loadBindOnlyLdapJSON() throws IOException {
-        final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
         final String json = "{\n" +
                 "  \"simple ldap\": {\n" +
                 "    \"type\" : \"BIND_ONLY_LDAP\",\n" +
@@ -82,7 +86,6 @@ class IdentityProviderLoaderTest {
 
     @Test
     void loadBindOnlyLdapYml() throws IOException {
-        final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
         final String yml = "  simple ldap:\n" +
                 "    type: BIND_ONLY_LDAP\n" +
                 "    properties:\n" +
@@ -108,7 +111,6 @@ class IdentityProviderLoaderTest {
 
     @Test
     void loadIncorrectTypeForBoolean() throws IOException {
-        final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
         final String json = "{\n" +
                 "  \"simple ldap\": {\n" +
                 "    \"type\" : \"BIND_ONLY_LDAP\",\n" +
@@ -139,7 +141,6 @@ class IdentityProviderLoaderTest {
 
     @Test
     void loadFedIdWithMultipleCertRefs() throws IOException {
-        final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
         final String yml = "fed ID:\n" +
                 "  type: FEDERATED\n" +
                 "  properties:\n" +
@@ -171,7 +172,6 @@ class IdentityProviderLoaderTest {
 
     @Test
     void loadFedIdWithNoCertRefs() throws IOException {
-        final IdentityProviderLoader identityProviderLoader = new IdentityProviderLoader(jsonTools);
         final String yml = "fed_no_cert:\n" +
                 "  type: \"FEDERATED\"\n" +
                 "  properties:\n" +
