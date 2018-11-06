@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;

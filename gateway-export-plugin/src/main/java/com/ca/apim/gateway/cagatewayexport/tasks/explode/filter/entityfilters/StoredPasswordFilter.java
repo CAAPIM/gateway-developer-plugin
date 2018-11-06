@@ -1,7 +1,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Singleton
-public class StoredPasswordFilter implements EntityFilter<StoredPasswordEntity> {
+public class StoredPasswordFilter implements EntityFilter<StoredPassword> {
 
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
@@ -30,10 +30,10 @@ public class StoredPasswordFilter implements EntityFilter<StoredPasswordEntity> 
     }
 
     @Override
-    public List<StoredPasswordEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
-        List<StoredPasswordEntity> passwords = DependencyUtils.filterDependencies(StoredPasswordEntity.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()))
+    public List<StoredPassword> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        List<StoredPassword> passwords = DependencyUtils.filterDependencies(StoredPassword.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()))
                 // currently only string password types are supported. PEM password support still needs to be added
-                .stream().filter(e -> e.isType(StoredPasswordEntity.Type.PASSWORD)).collect(Collectors.toList());
+                .stream().filter(e -> e.isType(StoredPassword.Type.PASSWORD)).collect(Collectors.toList());
         DependencyUtils.validateEntitiesInList(passwords, filterConfiguration.getRequiredEntityNames(ENTITY_NAME), "Password(s)");
         return passwords;
     }

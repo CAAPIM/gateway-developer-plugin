@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.gw7.PackageTask;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.BuildBundleTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;

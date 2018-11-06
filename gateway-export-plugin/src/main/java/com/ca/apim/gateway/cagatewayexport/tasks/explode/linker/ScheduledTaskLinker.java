@@ -6,27 +6,27 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ScheduledTaskEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.ScheduledTask;
 
 import javax.inject.Singleton;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.PolicyLinker.getPolicyPath;
 
 @Singleton
-public class ScheduledTaskLinker implements EntityLinker<ScheduledTaskEntity> {
+public class ScheduledTaskLinker implements EntityLinker<ScheduledTask> {
     @Override
-    public Class<ScheduledTaskEntity> getEntityClass() {
-        return ScheduledTaskEntity.class;
+    public Class<ScheduledTask> getEntityClass() {
+        return ScheduledTask.class;
     }
 
     @Override
-    public void link(ScheduledTaskEntity scheduledTaskEntity, Bundle bundle, Bundle targetBundle) {
-        PolicyEntity policy = bundle.getEntities(PolicyEntity.class).get(scheduledTaskEntity.getPolicyId());
+    public void link(ScheduledTask scheduledTaskEntity, Bundle bundle, Bundle targetBundle) {
+        Policy policy = bundle.getPolicies().values().stream().filter(p -> scheduledTaskEntity.getPolicy().equals(p.getId())).findFirst().orElse(null);
         if (policy == null) {
-            throw new LinkerException("Could not find policy for Scheduled Task: " + scheduledTaskEntity.getName() + ". Policy ID: " + scheduledTaskEntity.getPolicyId());
+            throw new LinkerException("Could not find policy for Scheduled Task: " + scheduledTaskEntity.getName() + ". Policy ID: " + scheduledTaskEntity.getPolicy());
         }
-        scheduledTaskEntity.setPolicyPath(getPolicyPath(policy, bundle, scheduledTaskEntity));
+        scheduledTaskEntity.setPolicy(getPolicyPath(policy, bundle, scheduledTaskEntity));
     }
 }

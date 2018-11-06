@@ -2,7 +2,7 @@ package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
-import static com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PolicyXMLSimplifierTest {

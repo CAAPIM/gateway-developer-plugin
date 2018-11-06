@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ClusterProperty;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.ClusterProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 import com.ca.apim.gateway.cagatewayexport.util.properties.OrderedProperties;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -23,9 +23,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createClusterProperty;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(TemporaryFolderExtension.class)
 class ClusterPropertyLinkerTest {
@@ -37,10 +36,10 @@ class ClusterPropertyLinkerTest {
     void setUp() {
         clusterPropertyLinker = new ClusterPropertyLinker();
         bundle = new Bundle();
-        bundle.addEntity(new ClusterProperty("my.name", "my-value", "1"));
-        bundle.addEntity(new ClusterProperty("ENV.my.name", "my-value", "2"));
-        bundle.addEntity(new ClusterProperty("another", "my-value", "3"));
-        bundle.addEntity(new ClusterProperty("ENV.hello", "my-value", "4"));
+        bundle.addEntity(createClusterProperty("my.name", "my-value", "1"));
+        bundle.addEntity(createClusterProperty("ENV.my.name", "my-value", "2"));
+        bundle.addEntity(createClusterProperty("another", "my-value", "3"));
+        bundle.addEntity(createClusterProperty("ENV.hello", "my-value", "4"));
     }
 
     @Test

@@ -6,12 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.injection;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.BundleEntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.BundleDependencyLoader;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyLoaderRegistry;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
@@ -72,9 +73,9 @@ public class ConfigBuilderModule extends AbstractModule {
         bind(BundleEntityBuilder.class);
 
         // bind all bundle dependency loaders to the module
-        Multibinder<BundleDependencyLoader> depLoadersBinder = newSetBinder(binder(), BundleDependencyLoader.class);
-        reflections.getSubTypesOf(BundleDependencyLoader.class).forEach(l -> depLoadersBinder.addBinding().to(l));
-        bind(DependencyLoaderRegistry.class);
+        Multibinder<BundleEntityLoader> depLoadersBinder = newSetBinder(binder(), BundleEntityLoader.class);
+        reflections.getSubTypesOf(BundleEntityLoader.class).forEach(l -> depLoadersBinder.addBinding().to(l));
+        bind(BundleEntityLoaderRegistry.class);
 
         // bind all entity loaders to the module
         Multibinder<EntityLoader> entityLoadersBinder = newSetBinder(binder(), EntityLoader.class);
@@ -85,10 +86,15 @@ public class ConfigBuilderModule extends AbstractModule {
             }
         });
         bind(EntityLoaderRegistry.class);
+        bind(EntityTypeRegistry.class);
     }
 
     public static Injector getInjector() {
         return ofNullable(injector).orElseGet(ConfigBuilderModule::create);
+    }
+
+    public static <T> T getInstance(Class<T> serviceClass) {
+        return getInjector().getInstance(serviceClass);
     }
 
     @VisibleForTesting

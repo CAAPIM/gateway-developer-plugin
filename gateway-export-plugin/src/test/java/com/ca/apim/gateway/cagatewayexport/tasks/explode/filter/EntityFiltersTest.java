@@ -1,7 +1,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Entity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.google.common.collect.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class EntityFiltersTest {
         assertEquals(TestEntityFilter2.class, filters.next().getClass());
     }
 
-    static abstract class TestEntityFilterBase<E extends Entity> {
+    static abstract class TestEntityFilterBase<E extends GatewayEntity> {
 
         private final Collection<Class<? extends EntityFilter>> dependencies;
 
@@ -73,17 +73,17 @@ class EntityFiltersTest {
     }
 
 
-    static class TestEntityFilter1 extends TestEntityFilterBase<Entity> implements EntityFilter<Entity> {
+    static class TestEntityFilter1 extends TestEntityFilterBase<GatewayEntity> implements EntityFilter<GatewayEntity> {
     }
 
-    static class TestEntityFilter2 extends TestEntityFilterBase<Entity> implements EntityFilter<Entity> {
+    static class TestEntityFilter2 extends TestEntityFilterBase<GatewayEntity> implements EntityFilter<GatewayEntity> {
         public TestEntityFilter2() {
             super(Stream.of(
                     TestEntityFilter3.class).collect(Collectors.toSet()));
         }
     }
 
-    static class TestEntityFilter3 extends TestEntityFilterBase<Entity> implements EntityFilter<Entity> {
+    static class TestEntityFilter3 extends TestEntityFilterBase<GatewayEntity> implements EntityFilter<GatewayEntity> {
         public TestEntityFilter3() {
             super(Stream.of(
                     TestEntityFilter1.class).collect(Collectors.toSet()));

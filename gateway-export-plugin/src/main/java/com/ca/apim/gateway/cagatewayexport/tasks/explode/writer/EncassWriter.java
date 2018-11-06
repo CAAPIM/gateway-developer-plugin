@@ -6,12 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.EncassParam;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.beans.EncassParam;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
 import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
@@ -38,18 +37,18 @@ public class EncassWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, Encass> encassBeans = bundle.getEntities(EncassEntity.class)
+        Map<String, Encass> encassBeans = bundle.getEntities(Encass.class)
                 .values()
                 .stream()
-                .collect(Collectors.toMap(EncassEntity::getName, this::getEncassBean));
+                .collect(Collectors.toMap(Encass::getName, this::getEncassBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, encassBeans, ENCASS_FILE, Encass.class);
     }
 
     @VisibleForTesting
-    Encass getEncassBean(EncassEntity encassEntity) {
+    Encass getEncassBean(Encass encassEntity) {
         Encass encassBean = new Encass();
-        encassBean.setPolicy(encassEntity.getPath());
+        encassBean.setPolicy(encassEntity.getPolicy());
         encassBean.setArguments(encassEntity.getArguments().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
         encassBean.setResults(encassEntity.getResults().stream().map(encassParam -> new EncassParam(encassParam.getName(), encassParam.getType())).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(EncassParam::getName)))));
         return encassBean;

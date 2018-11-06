@@ -6,11 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -18,12 +17,15 @@ import org.w3c.dom.NodeList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
 
 @Singleton
 public class ServiceWriter implements EntityWriter {
@@ -40,16 +42,16 @@ public class ServiceWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, Service> serviceBeans = bundle.getEntities(ServiceEntity.class)
+        Map<String, Service> serviceBeans = bundle.getEntities(Service.class)
                 .values()
                 .stream()
-                .collect(Collectors.toMap(ServiceEntity::getPath, this::getServiceBean));
+                .collect(Collectors.toMap(Service::getPath, this::getServiceBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, serviceBeans, SERVICES_FILE, Service.class);
     }
 
     @NotNull
-    private Service getServiceBean(ServiceEntity serviceEntity) {
+    private Service getServiceBean(Service serviceEntity) {
         Service serviceBean = new Service();
         serviceBean.setPolicy(serviceEntity.getPath() + ".xml");
         Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);

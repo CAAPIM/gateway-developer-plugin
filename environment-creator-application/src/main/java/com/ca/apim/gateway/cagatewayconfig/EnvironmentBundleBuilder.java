@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 
 import java.util.Map;
 

@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;

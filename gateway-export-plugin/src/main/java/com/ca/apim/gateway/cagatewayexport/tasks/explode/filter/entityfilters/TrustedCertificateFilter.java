@@ -1,7 +1,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.TrustedCertEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Singleton
-public class TrustedCertificateFilter implements EntityFilter<TrustedCertEntity> {
+public class TrustedCertificateFilter implements EntityFilter<TrustedCert> {
 
     private static final Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
             PolicyFilter.class,
@@ -29,8 +29,8 @@ public class TrustedCertificateFilter implements EntityFilter<TrustedCertEntity>
     }
 
     @Override
-    public List<TrustedCertEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
-        List<TrustedCertEntity> certificates = DependencyUtils.filterDependencies(TrustedCertEntity.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()));
+    public List<TrustedCert> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+        List<TrustedCert> certificates = DependencyUtils.filterDependencies(TrustedCert.class, bundle, filteredBundle, e -> filterConfiguration.getRequiredEntityNames(ENTITY_NAME).contains(e.getName()));
         DependencyUtils.validateEntitiesInList(certificates, filterConfiguration.getRequiredEntityNames(ENTITY_NAME), "Certificate(s)");
         return certificates;
     }

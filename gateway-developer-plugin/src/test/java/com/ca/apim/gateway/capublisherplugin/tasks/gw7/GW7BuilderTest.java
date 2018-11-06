@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.capublisherplugin.tasks.gw7;
 
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.GW7Builder;
+import com.ca.apim.gateway.cagatewayconfig.tasks.gw7.GW7Builder;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;

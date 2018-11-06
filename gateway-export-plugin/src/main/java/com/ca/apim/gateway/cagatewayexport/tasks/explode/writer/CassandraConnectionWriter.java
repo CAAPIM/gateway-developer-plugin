@@ -6,11 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.CassandraConnection;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.CassandraConnectionEntity;
 import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
@@ -37,16 +36,16 @@ public class CassandraConnectionWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, CassandraConnection> jdbcConnections = bundle.getEntities(CassandraConnectionEntity.class)
+        Map<String, CassandraConnection> jdbcConnections = bundle.getCassandraConnections()
                 .values()
                 .stream()
-                .collect(toMap(CassandraConnectionEntity::getName, this::getBean));
+                .collect(toMap(CassandraConnection::getName, this::getBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, jdbcConnections, CASSANDRA_CONNECTIONS_FILE, CassandraConnection.class);
     }
 
     @VisibleForTesting
-    CassandraConnection getBean(CassandraConnectionEntity entity) {
+    CassandraConnection getBean(CassandraConnection entity) {
         CassandraConnection cassandraConnection = new CassandraConnection();
         cassandraConnection.setCompression(entity.getCompression());
         cassandraConnection.setContactPoint(entity.getContactPoint());
@@ -54,7 +53,7 @@ public class CassandraConnectionWriter implements EntityWriter {
         cassandraConnection.setSsl(entity.getSsl());
         cassandraConnection.setUsername(entity.getUsername());
         cassandraConnection.setKeyspace(entity.getKeyspace());
-        cassandraConnection.setStoredPasswordName(entity.getPasswordName());
+        cassandraConnection.setStoredPasswordName(entity.getStoredPasswordName());
         cassandraConnection.setProperties(entity.getProperties());
         cassandraConnection.setTlsCiphers(entity.getTlsCiphers());
         return cassandraConnection;

@@ -6,10 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.CassandraConnection;
+import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.CassandraConnectionEntity;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +26,7 @@ class CassandraConnectionWriterTest {
 
     @Test
     void testGetBean() {
-        CassandraConnectionEntity entity = new CassandraConnectionEntity.Builder()
+        CassandraConnection entity = new CassandraConnection.Builder()
                 .username("username")
                 .keyspace("keyspace")
                 .contactPoint("contactPoint")
@@ -37,7 +36,7 @@ class CassandraConnectionWriterTest {
                 .tlsCiphers(Stream.of("Cipher").collect(Collectors.toSet()))
                 .properties(ImmutableMap.of("prop1", "value1"))
                 .build();
-        entity.setPasswordName("passwordName");
+        entity.setStoredPasswordName("passwordName");
 
         final CassandraConnection bean = writer.getBean(entity);
         assertNotNull(bean);

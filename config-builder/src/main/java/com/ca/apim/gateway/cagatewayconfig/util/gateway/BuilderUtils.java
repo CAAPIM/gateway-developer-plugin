@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.builder.EntityBuilderException;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.loader.DependencyBundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import org.apache.commons.collections4.MapUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -15,6 +15,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,9 +28,12 @@ import static java.lang.Long.parseLong;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
+import static org.apache.commons.lang3.time.DateUtils.parseDateStrictly;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class BuilderUtils {
+
+    private static final String DATE_VALUE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
     public static void buildAndAppendPropertiesElement(final Map<String, Object> properties, final Document document, final Element elementToAppendInto) {
         if (MapUtils.isEmpty(properties)) {
@@ -85,7 +90,7 @@ public class BuilderUtils {
      * @param propertiesElement properties element of bundle (l7:Properties)
      * @param propertiesElementName name of the node expected
      * @return map of properties found into element, empty if null or no properties
-     * @throws DependencyBundleLoadException if node is not 'propertiesElementName', if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
+     * @throws BundleLoadException if node is not 'propertiesElementName', if there is any l7:Property without any l7:xxxValue and if the l7:xxxValue is not yet supported.
      */
     public static Map<String, Object> mapPropertiesElements(final Element propertiesElement, final String propertiesElementName) {
         if (propertiesElement == null) {
@@ -93,7 +98,7 @@ public class BuilderUtils {
         }
 
         if (!Objects.equals(propertiesElement.getNodeName(), propertiesElementName)) {
-            throw new DependencyBundleLoadException("Current node is not " + propertiesElementName + " node, it is " + propertiesElement.getNodeName());
+            throw new BundleLoadException("Current node is not " + propertiesElementName + " node, it is " + propertiesElement.getNodeName());
         }
 
         final List<Element> properties = getChildElements(propertiesElement, PROPERTY);
@@ -108,7 +113,7 @@ public class BuilderUtils {
                 }
             }
 
-            throw new DependencyBundleLoadException("Property " + propKey + " does not have a value");
+            throw new BundleLoadException("Property " + propKey + " does not have a value");
         }));
     }
 
@@ -119,8 +124,18 @@ public class BuilderUtils {
             case LONG_VALUE: return parseLong(valueElement.getTextContent());
             case INTEGER_VALUE:
             case INT_VALUE: return parseInt(valueElement.getTextContent());
+            case DATE_VALUE: return parseDateFromString(key, valueElement.getTextContent());
             default:
-                throw new DependencyBundleLoadException("Type of property " + key + " is " + valueElement.getNodeName() + " which is not yet supported");
+                throw new BundleLoadException("Type of property " + key + " is " + valueElement.getNodeName() + " which is not yet supported");
+        }
+    }
+
+    @NotNull
+    private static Date parseDateFromString(final String key, final String dateAsString) {
+        try {
+            return parseDateStrictly(dateAsString, DATE_VALUE_PATTERN);
+        } catch (ParseException e) {
+            throw new EntityBuilderException("Unable to parse date property (" + key + ") value: " + dateAsString);
         }
     }
 

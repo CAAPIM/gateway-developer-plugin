@@ -6,27 +6,28 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 
 import javax.inject.Singleton;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.PolicyLinker.getPolicyPath;
 
 @Singleton
-public class EncassLinker implements EntityLinker<EncassEntity> {
+public class EncassLinker implements EntityLinker<Encass> {
     @Override
-    public Class<EncassEntity> getEntityClass() {
-        return EncassEntity.class;
+    public Class<Encass> getEntityClass() {
+        return Encass.class;
     }
 
     @Override
-    public void link(EncassEntity encass, Bundle bundle, Bundle targetBundle) {
-        PolicyEntity policy = bundle.getEntities(PolicyEntity.class).get(encass.getPolicyId());
+    public void link(Encass encass, Bundle bundle, Bundle targetBundle) {
+        Policy policy = bundle.getPolicies().values().stream().filter(p -> encass.getPolicyId().equals(p.getId())).findFirst().orElse(null);
         if (policy == null) {
             throw new LinkerException("Could not find policy for Encapsulated Assertion: " + encass.getName() + ". Policy ID: " + encass.getPolicyId());
         }
         encass.setPath(getPolicyPath(policy, bundle, encass));
     }
+
 }

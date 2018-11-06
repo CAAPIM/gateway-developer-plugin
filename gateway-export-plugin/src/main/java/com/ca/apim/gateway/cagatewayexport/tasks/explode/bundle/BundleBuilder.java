@@ -6,17 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EntityTypeRegistry;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoader;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,13 +27,12 @@ import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class BundleBuilder {
     private static final Logger LOGGER = Logger.getLogger(BundleBuilder.class.getName());
-    private final EntityLoaderRegistry entityLoaderRegistry;
+    private final BundleEntityLoaderRegistry entityLoaderRegistry;
     private final EntityTypeRegistry entityTypeRegistry;
 
-    @Inject
-    public BundleBuilder(final EntityLoaderRegistry entityLoaderRegistry, final EntityTypeRegistry entityTypeRegistry) {
-        this.entityLoaderRegistry = entityLoaderRegistry;
-        this.entityTypeRegistry = entityTypeRegistry;
+    public BundleBuilder() {
+        this.entityLoaderRegistry = ConfigBuilderModule.getInstance(BundleEntityLoaderRegistry.class);
+        this.entityTypeRegistry = ConfigBuilderModule.getInstance(EntityTypeRegistry.class);
     }
 
     public Bundle buildBundle(final Element bundleElement) {
@@ -50,9 +46,9 @@ public class BundleBuilder {
                 handleItem((Element) node, bundle);
             }
         }
-        FolderTree folderTree = new FolderTree(bundle.getEntities(Folder.class).values());
+        FolderTree folderTree = new FolderTree(bundle.getFolders().values());
         bundle.setFolderTree(folderTree);
-        bundle.setDependencies(buildDependencies(getSingleChildElement(getSingleChildElement(bundleElement, DEPENDENCY_GRAPH), DEPENDENCIES)));
+        bundle.setDependencyMap(buildDependencies(getSingleChildElement(getSingleChildElement(bundleElement, DEPENDENCY_GRAPH), DEPENDENCIES)));
 
         return bundle;
     }
@@ -98,7 +94,7 @@ public class BundleBuilder {
         final String id = getSingleChildElement(dependencyElement, ID).getTextContent();
         final String type = getSingleChildElement(dependencyElement, TYPE).getTextContent();
 
-        Class<? extends Entity> typeClass = entityTypeRegistry.getEntityClass(type);
+        Class<? extends GatewayEntity> typeClass = entityTypeRegistry.getEntityClass(type);
         if (typeClass != null) {
             return new Dependency(id, typeClass);
         }
@@ -108,12 +104,9 @@ public class BundleBuilder {
 
     private void handleItem(final Element element, final Bundle bundle) {
         final String type = getSingleChildElement(element, TYPE).getTextContent();
-        final EntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
+        final BundleEntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
         if (entityLoader != null) {
-            final Entity entity = entityLoader.load(element);
-            if (entity != null) {
-                bundle.addEntity(entity);
-            }
+            entityLoader.load(bundle, element);
         } else {
             LOGGER.log(Level.INFO, "No entity loader found for entity type: {0}", type);
         }

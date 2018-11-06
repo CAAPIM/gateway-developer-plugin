@@ -1,9 +1,9 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.TrustedCertEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
@@ -24,9 +24,9 @@ class TrustedCertificateFilterTest {
 
         Bundle filteredBundle = new Bundle();
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(Collections.emptyMap());
+        bundle.setDependencyMap(Collections.emptyMap());
 
-        List<TrustedCertEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
+        List<TrustedCert> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, filteredEntities.size());
     }
@@ -38,17 +38,17 @@ class TrustedCertificateFilterTest {
         Bundle filteredBundle = new Bundle();
         filteredBundle.addEntity(TestUtils.createPolicy("my-policy", "1", "", "", null, ""));
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(
+        bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", PolicyEntity.class), Arrays.asList(new Dependency("2", TrustedCertEntity.class), new Dependency("3", TrustedCertEntity.class)),
-                        new Dependency("2", PolicyEntity.class), Collections.singletonList(new Dependency("4", TrustedCertEntity.class))));
-        bundle.addEntity(new TrustedCertEntity.Builder().name("cert1").id("1").build());
-        bundle.addEntity(new TrustedCertEntity.Builder().name("cert2").id("2").build());
-        bundle.addEntity(new TrustedCertEntity.Builder().name("cert3").id("3").build());
-        bundle.addEntity(new TrustedCertEntity.Builder().name("cert4").id("4").build());
+                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", TrustedCert.class), new Dependency("3", TrustedCert.class)),
+                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", TrustedCert.class))));
+        bundle.addEntity(new TrustedCert.Builder().name("cert1").id("1").build());
+        bundle.addEntity(new TrustedCert.Builder().name("cert2").id("2").build());
+        bundle.addEntity(new TrustedCert.Builder().name("cert3").id("3").build());
+        bundle.addEntity(new TrustedCert.Builder().name("cert4").id("4").build());
 
         FilterConfiguration filterConfiguration = new FilterConfiguration();
-        List<TrustedCertEntity> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
+        List<TrustedCert> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(2, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "cert2".equals(c.getName())));

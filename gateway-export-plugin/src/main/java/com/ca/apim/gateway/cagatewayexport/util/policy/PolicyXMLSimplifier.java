@@ -6,13 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilderException;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EnvironmentProperty;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
@@ -30,8 +26,8 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 
 public class PolicyXMLSimplifier {
     public static final PolicyXMLSimplifier INSTANCE = new PolicyXMLSimplifier();
@@ -43,21 +39,21 @@ public class PolicyXMLSimplifier {
             try {
                 simplifyIncludeAssertion(bundle, element);
             } catch (DocumentParseException e) {
-                throw new BundleBuilderException(e.getMessage());
+                throw new BundleLoadException(e.getMessage());
             }
         });
         findAndSimplifyAssertion(policyElement, ENCAPSULATED, element -> {
             try {
                 simplifyEncapsulatedAssertion(bundle, element);
             } catch (DocumentParseException e) {
-                throw new BundleBuilderException(e.getMessage());
+                throw new BundleLoadException(e.getMessage());
             }
         });
         findAndSimplifyAssertion(policyElement, SET_VARIABLE, element -> {
             try {
                 simplifySetVariable(element, resultantBundle);
             } catch (DocumentParseException e) {
-                throw new BundleBuilderException(e.getMessage());
+                throw new BundleLoadException(e.getMessage());
             }
         });
         findAndSimplifyAssertion(policyElement, HARDCODED_RESPONSE, this::simplifyHardcodedResponse);
@@ -105,7 +101,7 @@ public class PolicyXMLSimplifier {
             if (existingEnvironmentProperty != null) {
                 throw new LinkerException("Found duplicate environment property: `" + variableName.substring(4) + "`. Cannot have multiple environment properties with the same name.");
             }
-            resultantBundle.addEntity(environmentProperty);
+            resultantBundle.getEntities(EnvironmentProperty.class).put(environmentProperty.getId(), environmentProperty);
         } else {
             Element expressionElement = element.getOwnerDocument().createElement(EXPRESSION);
             expressionElement.appendChild(element.getOwnerDocument().createCDATASection(new String(decodedValue)));
@@ -117,9 +113,9 @@ public class PolicyXMLSimplifier {
     private void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) throws DocumentParseException {
         Element encassGuidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         String encassGuid = encassGuidElement.getAttribute(STRING_VALUE);
-        Optional<EncassEntity> encassEntity = bundle.getEntities(EncassEntity.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
+        Optional<Encass> encassEntity = bundle.getEntities(Encass.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();
         if (encassEntity.isPresent()) {
-            PolicyEntity policyEntity = bundle.getEntities(PolicyEntity.class).get(encassEntity.get().getPolicyId());
+            Policy policyEntity = bundle.getPolicies().values().stream().filter(p -> encassEntity.get().getPolicyId().equals(p.getId())).findFirst().orElse(null);
             if (policyEntity != null) {
                 encapsulatedAssertionElement.setAttribute("encassName", encassEntity.get().getName());
                 Element encapsulatedAssertionConfigNameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
@@ -136,7 +132,7 @@ public class PolicyXMLSimplifier {
     private void simplifyIncludeAssertion(Bundle bundle, Element assertionElement) throws DocumentParseException {
         Element policyGuidElement = getSingleElement(assertionElement, POLICY_GUID);
         String includedPolicyGuid = policyGuidElement.getAttribute(STRING_VALUE);
-        Optional<PolicyEntity> policyEntity = bundle.getEntities(PolicyEntity.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
+        Optional<Policy> policyEntity = bundle.getEntities(Policy.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
         if (policyEntity.isPresent()) {
             policyGuidElement.setAttribute("policyPath", getPolicyPath(bundle, policyEntity.get()));
             policyGuidElement.removeAttribute(STRING_VALUE);
@@ -156,8 +152,8 @@ public class PolicyXMLSimplifier {
         }
     }
 
-    private String getPolicyPath(Bundle bundle, PolicyEntity policyEntity) {
-        Folder folder = bundle.getFolderTree().getFolderById(policyEntity.getFolderId());
+    private String getPolicyPath(Bundle bundle, Policy policyEntity) {
+        Folder folder = bundle.getFolderTree().getFolderById(policyEntity.getParentFolder().getId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
         return Paths.get(folderPath.toString(), policyEntity.getName() + ".xml").toString();
     }

@@ -7,13 +7,13 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.IdentityProviderEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.IdentityProviderEntity.FederatedIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.TrustedCertEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.FederatedIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType;
+import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 
 import javax.inject.Singleton;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,16 +21,16 @@ import java.util.stream.Collectors;
  * Linker for IdentityProvider and TrustedCertificate.
  */
 @Singleton
-public class IdentityProviderLinker implements EntityLinker<IdentityProviderEntity> {
+public class IdentityProviderLinker implements EntityLinker<IdentityProvider> {
 
     @Override
-    public Class<IdentityProviderEntity> getEntityClass() {
-        return IdentityProviderEntity.class;
+    public Class<IdentityProvider> getEntityClass() {
+        return IdentityProvider.class;
     }
 
     @Override
-    public void link(IdentityProviderEntity entity, Bundle bundle, Bundle targetBundle) {
-        if (entity.getType() != IdentityProviderEntity.Type.FEDERATED) {
+    public void link(IdentityProvider entity, Bundle bundle, Bundle targetBundle) {
+        if (entity.getType() != IdentityProviderType.FEDERATED) {
             return;
         }
 
@@ -38,12 +38,12 @@ public class IdentityProviderLinker implements EntityLinker<IdentityProviderEnti
         if (identityProviderDetail != null) {
             Set<String> certIds = identityProviderDetail.getCertificateReferences();
 
-            Set<TrustedCertEntity> trustedCerts = bundle.getEntities(TrustedCertEntity.class).values()
+            Set<TrustedCert> trustedCerts = bundle.getEntities(TrustedCert.class).values()
                     .stream()
                     .filter(e -> certIds.contains(e.getId()))
                     .collect(Collectors.toSet());
             if (!trustedCerts.isEmpty()) {
-                entity.setIdentityProviderDetail(new FederatedIdentityProviderDetail(trustedCerts.stream().map(TrustedCertEntity::getName).collect(Collectors.toSet())));
+                entity.setIdentityProviderDetail(new FederatedIdentityProviderDetail(trustedCerts.stream().map(TrustedCert::getName).collect(Collectors.toSet())));
             }
         }
     }

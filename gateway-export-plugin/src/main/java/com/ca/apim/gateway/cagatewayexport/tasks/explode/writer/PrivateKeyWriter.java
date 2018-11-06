@@ -6,11 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PrivateKey;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PrivateKeyEntity;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,18 +35,18 @@ public class PrivateKeyWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, PrivateKey> privateKeys = bundle.getEntities(PrivateKeyEntity.class)
+        Map<String, PrivateKey> privateKeys = bundle.getEntities(PrivateKey.class)
                 .values()
                 .stream()
-                .collect(toMap(PrivateKeyEntity::getName, this::getPrivateKeyBean));
+                .collect(toMap(PrivateKey::getName, this::getPrivateKeyBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, privateKeys, FILE_NAME, PrivateKey.class);
     }
 
-    private PrivateKey getPrivateKeyBean(PrivateKeyEntity entity) {
+    private PrivateKey getPrivateKeyBean(PrivateKey entity) {
         PrivateKey privateKey = new PrivateKey();
         privateKey.setAlgorithm(entity.getAlgorithm());
-        privateKey.setKeystore(entity.getKeystore().getName());
+        privateKey.setKeystore(entity.getKeyStoreType().getName());
         return privateKey;
     }
 }

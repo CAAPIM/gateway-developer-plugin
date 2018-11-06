@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ServiceEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 
 import javax.inject.Singleton;
 
@@ -18,20 +18,20 @@ import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.ServiceLi
  * Linker for ListenPort and TargetService.
  */
 @Singleton
-public class ListenPortLinker implements EntityLinker<ListenPortEntity> {
+public class ListenPortLinker implements EntityLinker<ListenPort> {
 
     @Override
-    public Class<ListenPortEntity> getEntityClass() {
-        return ListenPortEntity.class;
+    public Class<ListenPort> getEntityClass() {
+        return ListenPort.class;
     }
 
     @Override
-    public void link(ListenPortEntity entity, Bundle bundle, Bundle targetBundle) {
+    public void link(ListenPort entity, Bundle bundle, Bundle targetBundle) {
         if (entity.getTargetServiceReference() == null || entity.getTargetServiceReference().isEmpty()) {
             return;
         }
 
-        ServiceEntity service = bundle.getEntities(ServiceEntity.class).get(entity.getTargetServiceReference());
+        Service service = bundle.getEntities(Service.class).values().stream().filter(s -> s.getId().equals(entity.getTargetServiceReference())).findFirst().orElse(null);
         if (service == null) {
             throw new LinkerException("Could not find Service for Listen Port: " + entity.getName() + ". Service Reference: " + entity.getTargetServiceReference());
         }

@@ -6,26 +6,27 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.EncassEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Folder;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.FolderTree;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.beans.FolderTree;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.*;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class EncassLinkerTest {
     private EncassLinker encassLinker;
-    private EncassEntity myEncass;
+    private Encass myEncass;
     private Bundle bundle;
 
     @BeforeEach
     void setUp() {
         encassLinker = new EncassLinker();
-        myEncass = new EncassEntity("myEncass", "1", "1", "1", null, null);
+        myEncass = createEncass("myEncass", "1", "1", "1");
         bundle = new Bundle();
         bundle.addEntity(myEncass);
     }
@@ -34,22 +35,22 @@ class EncassLinkerTest {
     void link() {
         Bundle fullBundle = new Bundle();
         fullBundle.addEntity(myEncass);
-        fullBundle.addEntity(new PolicyEntity.Builder().setName("myEncassPolicy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
-        fullBundle.addEntity(new Folder("myFolder", "1", null));
+        fullBundle.addEntity(createPolicy("myEncassPolicy", "1", "1", "1", null, EMPTY));
+        fullBundle.addEntity(createFolder("myFolder", "1", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
         fullBundle.setFolderTree(folderTree);
 
         encassLinker.link(bundle, fullBundle);
 
-        assertEquals("myEncassPolicy.xml", bundle.getEntities(EncassEntity.class).get("1").getPath());
+        assertEquals("myEncassPolicy.xml", bundle.getEntities(Encass.class).get("1").getPath());
     }
 
     @Test
     void linkMissingPolicy() {
         Bundle fullBundle = new Bundle();
         fullBundle.addEntity(myEncass);
-        fullBundle.addEntity(new Folder("myFolder", "1", null));
+        fullBundle.addEntity(createFolder("myFolder", "1", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
         fullBundle.setFolderTree(folderTree);
@@ -61,8 +62,8 @@ class EncassLinkerTest {
     void linkFolderIsMissing() {
         Bundle fullBundle = new Bundle();
         fullBundle.addEntity(myEncass);
-        fullBundle.addEntity(new PolicyEntity.Builder().setName("myEncassPolicy").setId("1").setGuid("1").setParentFolderId("1").setPolicy("").build());
-        fullBundle.addEntity(new Folder("myFolder", "2", null));
+        fullBundle.addEntity(createPolicy("myEncassPolicy", "1","1", "1", null, ""));
+        fullBundle.addEntity(createFolder("myFolder", "2", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
         fullBundle.setFolderTree(folderTree);

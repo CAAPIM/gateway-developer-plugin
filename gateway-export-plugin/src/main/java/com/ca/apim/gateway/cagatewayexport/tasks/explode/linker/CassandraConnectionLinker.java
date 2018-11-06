@@ -6,32 +6,32 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.CassandraConnectionEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
+import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 
 import javax.inject.Singleton;
 
 @Singleton
-public class CassandraConnectionLinker implements EntityLinker<CassandraConnectionEntity> {
+public class CassandraConnectionLinker implements EntityLinker<CassandraConnection> {
 
     @Override
-    public void link(CassandraConnectionEntity entity, Bundle bundle, Bundle targetBundle) {
+    public void link(CassandraConnection entity, Bundle bundle, Bundle targetBundle) {
         if (entity.getPasswordId() == null) {
             return;
         }
 
-        StoredPasswordEntity storedPassword = bundle.getEntities(StoredPasswordEntity.class).get(entity.getPasswordId());
+        StoredPassword storedPassword = bundle.getEntities(StoredPassword.class).get(entity.getPasswordId());
         if (storedPassword == null) {
             throw new LinkerException("Could not find Stored Password for Cassandra Connection: " + entity.getName() + ". Password ID: " + entity.getPasswordId());
         }
 
-        entity.setPasswordName(storedPassword.getName());
+        entity.setStoredPasswordName(storedPassword.getName());
     }
 
     @Override
-    public Class<CassandraConnectionEntity> getEntityClass() {
-        return CassandraConnectionEntity.class;
+    public Class<CassandraConnection> getEntityClass() {
+        return CassandraConnection.class;
     }
 
 }

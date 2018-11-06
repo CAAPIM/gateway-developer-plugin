@@ -6,11 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ScheduledTask;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.ScheduledTask;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ScheduledTaskEntity;
 import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Inject;
@@ -35,18 +34,18 @@ public class ScheduledTaskWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, ScheduledTask> scheduledTaskBeans = bundle.getEntities(ScheduledTaskEntity.class)
+        Map<String, ScheduledTask> scheduledTaskBeans = bundle.getScheduledTasks()
                 .values()
                 .stream()
-                .collect(Collectors.toMap(ScheduledTaskEntity::getName, this::getScheduledTaskBean));
+                .collect(Collectors.toMap(ScheduledTask::getName, this::getScheduledTaskBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, scheduledTaskBeans, SCHEDULED_TASKS_FILE, ScheduledTask.class);
     }
 
     @VisibleForTesting
-    ScheduledTask getScheduledTaskBean(ScheduledTaskEntity scheduledTaskEntity) {
+    ScheduledTask getScheduledTaskBean(ScheduledTask scheduledTaskEntity) {
         ScheduledTask scheduledTask = new ScheduledTask();
-        scheduledTask.setPolicy(scheduledTaskEntity.getPolicyPath());
+        scheduledTask.setPolicy(scheduledTaskEntity.getPolicy());
         scheduledTask.setOneNode(scheduledTaskEntity.getIsOneNode());
         scheduledTask.setJobType(scheduledTaskEntity.getJobType());
         scheduledTask.setJobStatus(scheduledTaskEntity.getJobStatus());

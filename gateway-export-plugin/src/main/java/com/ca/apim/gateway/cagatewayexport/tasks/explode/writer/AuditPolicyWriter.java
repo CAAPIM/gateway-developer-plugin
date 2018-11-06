@@ -6,10 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
@@ -17,7 +17,7 @@ import javax.inject.Singleton;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyType.INTERNAL;
+import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.INTERNAL;
 import static java.util.function.Function.identity;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -33,12 +33,12 @@ public class AuditPolicyWriter extends BasePolicyWriter {
     }
 
     @Override
-    Map<String, PolicyEntity> filterPolicies(Bundle bundle) {
-        return bundle.getEntities(PolicyEntity.class)
+    Map<String, Policy> filterPolicies(Bundle bundle) {
+        return bundle.getPolicies()
                 .values()
                 .stream()
                 .filter(e -> e.getPolicyType() == INTERNAL && firstNonNull(e.getTag(), EMPTY).startsWith("audit"))
-                .collect(Collectors.toMap(PolicyEntity::getName, identity()));
+                .collect(Collectors.toMap(Policy::getName, identity()));
     }
 
     @NotNull

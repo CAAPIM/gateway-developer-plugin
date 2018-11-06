@@ -1,8 +1,8 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
-public class PolicyBackedServiceFilter implements EntityFilter<PolicyBackedServiceEntity> {
+public class PolicyBackedServiceFilter implements EntityFilter<PolicyBackedService> {
 
     @Override
     public @NotNull Collection<Class<? extends EntityFilter>> getDependencyEntityFilters() {
@@ -23,10 +23,10 @@ public class PolicyBackedServiceFilter implements EntityFilter<PolicyBackedServi
     }
 
     @Override
-    public List<PolicyBackedServiceEntity> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
+    public List<PolicyBackedService> filter(String folderPath, FilterConfiguration filterConfiguration, Bundle bundle, Bundle filteredBundle) {
         // get all policies from the filtered bundle
-        Map<String, PolicyEntity> policies = filteredBundle.getEntities(PolicyEntity.class);
-        return bundle.getEntities(PolicyBackedServiceEntity.class).values().stream()
-                .filter(pbs -> pbs.getOperations().values().stream().anyMatch(policies::containsKey)).collect(Collectors.toList());
+        Map<String, Policy> policies = filteredBundle.getPolicies();
+        return bundle.getEntities(PolicyBackedService.class).values().stream()
+                .filter(pbs -> pbs.getOperations().stream().anyMatch(o -> policies.containsKey(o.getPolicy()))).collect(Collectors.toList());
     }
 }

@@ -11,6 +11,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.policy;
  */
 public class PolicyXMLElements {
 
+    public static final String STRING_VALUE = "stringValue";
     public static final String INCLUDE = "L7p:Include";
     public static final String ENCAPSULATED = "L7p:Encapsulated";
     public static final String SET_VARIABLE = "L7p:SetVariable";

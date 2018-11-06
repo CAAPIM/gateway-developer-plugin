@@ -6,12 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.ListenPortEntity.ListenPortEntityTlsSettings;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,7 +17,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.*;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ClientAuthentication;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSettings;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.*;
 import static java.util.stream.Collectors.toMap;
 
@@ -39,15 +38,15 @@ public class ListenPortWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, ListenPort> listenPortBeans = bundle.getEntities(ListenPortEntity.class)
+        Map<String, ListenPort> listenPortBeans = bundle.getEntities(ListenPort.class)
                 .values()
                 .stream()
-                .collect(toMap(ListenPortEntity::getName, this::getListenPortBean));
+                .collect(toMap(ListenPort::getName, this::getListenPortBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, listenPortBeans, LISTEN_PORTS_FILE, ListenPort.class);
     }
 
-    private ListenPort getListenPortBean(ListenPortEntity listenPortEntity) {
+    private ListenPort getListenPortBean(ListenPort listenPortEntity) {
         ListenPort listenPort = new ListenPort();
         listenPort.setPort(listenPortEntity.getPort());
         listenPort.setEnabledFeatures(listenPortEntity.getEnabledFeatures());
@@ -59,7 +58,7 @@ public class ListenPortWriter implements EntityWriter {
         return listenPort;
     }
 
-    private ListenPortTlsSettings getTlsSettingsBean(ListenPortEntityTlsSettings tlsSettingsEntity) {
+    private ListenPortTlsSettings getTlsSettingsBean(ListenPortTlsSettings tlsSettingsEntity) {
         if (tlsSettingsEntity == null) {
             return null;
         }

@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,10 +34,10 @@ public class StoredPasswordWriter implements EntityWriter {
     @Override
     public void write(Bundle bundle, File rootFolder) {
         Properties properties = new Properties();
-        properties.putAll(bundle.getEntities(StoredPasswordEntity.class)
+        properties.putAll(bundle.getEntities(StoredPassword.class)
                 .values()
                 .stream()
-                .collect(toMap(StoredPasswordEntity::getName, e -> EMPTY)));
+                .collect(toMap(StoredPassword::getName, e -> EMPTY)));
 
         WriterHelper.writePropertiesFile(rootFolder, documentFileUtils, properties, STORED_PASSWORDS_FILE);
     }

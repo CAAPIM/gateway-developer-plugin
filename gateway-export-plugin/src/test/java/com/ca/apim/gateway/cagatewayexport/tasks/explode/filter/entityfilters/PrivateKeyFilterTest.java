@@ -1,9 +1,9 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.Dependency;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PrivateKeyEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
@@ -24,9 +24,9 @@ class PrivateKeyFilterTest {
 
         Bundle filteredBundle = new Bundle();
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(Collections.emptyMap());
+        bundle.setDependencyMap(Collections.emptyMap());
 
-        List<PrivateKeyEntity> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
+        List<PrivateKey> filteredEntities = filter.filter("/my/folder/path", new FilterConfiguration(), bundle, filteredBundle);
 
         assertEquals(0, filteredEntities.size());
     }
@@ -38,18 +38,18 @@ class PrivateKeyFilterTest {
         Bundle filteredBundle = new Bundle();
         filteredBundle.addEntity(createPolicy("my-policy", "1", "", "", null, ""));
         Bundle bundle = FilterTestUtils.getBundle();
-        bundle.setDependencies(
+        bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", PolicyEntity.class), Arrays.asList(new Dependency("2", PrivateKeyEntity.class), new Dependency("3", PrivateKeyEntity.class)),
-                        new Dependency("2", PolicyEntity.class), Collections.singletonList(new Dependency("4", PrivateKeyEntity.class))));
-        bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("pk1").setId("1").build());
-        bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("SSL").setId("2").build());
-        bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("pk3").setId("3").build());
-        bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("pk4").setId("4").build());
-        bundle.addEntity(new PrivateKeyEntity.Builder().setAlias("ssl").setId("5").build());
+                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", PrivateKey.class), new Dependency("3", PrivateKey.class)),
+                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", PrivateKey.class))));
+        bundle.addEntity(new PrivateKey.Builder().setAlias("pk1").setId("1").build());
+        bundle.addEntity(new PrivateKey.Builder().setAlias("SSL").setId("2").build());
+        bundle.addEntity(new PrivateKey.Builder().setAlias("pk3").setId("3").build());
+        bundle.addEntity(new PrivateKey.Builder().setAlias("pk4").setId("4").build());
+        bundle.addEntity(new PrivateKey.Builder().setAlias("ssl").setId("5").build());
 
         FilterConfiguration filterConfiguration = new FilterConfiguration();
-        List<PrivateKeyEntity> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
+        List<PrivateKey> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);
 
         assertEquals(1, filteredEntities.size());
         assertTrue(filteredEntities.stream().anyMatch(c -> "pk3".equals(c.getName())));

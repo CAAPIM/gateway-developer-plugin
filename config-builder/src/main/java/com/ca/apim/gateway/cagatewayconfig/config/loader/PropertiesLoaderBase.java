@@ -1,0 +1,61 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+package com.ca.apim.gateway.cagatewayconfig.config.loader;
+
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.google.common.collect.ImmutableMap;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+public abstract class PropertiesLoaderBase implements EntityLoader {
+
+    private FileUtils fileUtils;
+
+    PropertiesLoaderBase(final FileUtils fileUtils) {
+        this.fileUtils = fileUtils;
+    }
+
+    @Override
+    public void load(Bundle bundle, File rootDir) {
+        File propertiesFile = new File(rootDir, this.getFilePath());
+        if (propertiesFile.exists()) {
+            Properties properties = new Properties();
+            try (InputStream inStream = fileUtils.getInputStream(propertiesFile)) {
+                properties.load(inStream);
+            } catch (IOException e) {
+                throw new ConfigLoadException("Could not load properties file (" + propertiesFile + "): " + e.getMessage(), e);
+            }
+            Map<String, String> map = new HashMap<>();
+            properties.forEach((k, v) -> map.put(k.toString(), v.toString()));
+            this.putToBundle(bundle, map);
+        }
+    }
+
+    @Override
+    public void load(Bundle bundle, String name, String value) {
+        putToBundle(bundle, ImmutableMap.<String, String>builder().put(name, value).build());
+    }
+
+    /**
+     * @return the file path for this loader
+     */
+    protected abstract String getFilePath();
+
+    /**
+     * Put the loaded properties into the bundle.
+     *
+     * @param bundle The bundle to load properties into
+     * @param properties map of properties
+     */
+    protected abstract void putToBundle(Bundle bundle, Map<String, String> properties);
+}

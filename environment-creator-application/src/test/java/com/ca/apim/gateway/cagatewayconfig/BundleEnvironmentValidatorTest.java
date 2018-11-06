@@ -6,11 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.JdbcConnection;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.StoredPassword;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.TrustedCert;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.JdbcConnection;
+import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
+import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
+import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 

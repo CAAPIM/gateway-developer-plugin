@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.JdbcConnectionEntity;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.StoredPasswordEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.JdbcConnection;
+import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,7 +35,7 @@ class JdbcConnectionLinkerTest {
         Bundle bundle = new Bundle();
         bundle.addEntity(createStoredPassword(passwordVar));
 
-        final JdbcConnectionEntity jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, passwordVar));
+        final JdbcConnection jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, passwordVar));
         linker.link(jdbcConnection, bundle, bundle);
 
         assertNotNull(jdbcConnection.getPasswordRef());
@@ -45,13 +45,13 @@ class JdbcConnectionLinkerTest {
 
     @Test
     void linkMissingPassword() {
-        final JdbcConnectionEntity jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, GATEWAY));
+        final JdbcConnection jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, GATEWAY));
         assertThrows(LinkerException.class, () -> linker.link(jdbcConnection, new Bundle(), new Bundle()));
     }
 
     @Test
     void linkNullPassword() {
-        final JdbcConnectionEntity jdbcConnection = createJdbcConnection(null);
+        final JdbcConnection jdbcConnection = createJdbcConnection(null);
         linker.link(jdbcConnection, new Bundle(), new Bundle());
         assertNull(jdbcConnection.getPasswordRef());
         assertNull(jdbcConnection.getPassword());
@@ -62,13 +62,13 @@ class JdbcConnectionLinkerTest {
         Bundle bundle = new Bundle();
         bundle.addEntity(createStoredPassword(GATEWAY + GATEWAY));
 
-        final JdbcConnectionEntity jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, GATEWAY));
+        final JdbcConnection jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, GATEWAY));
         assertThrows(LinkerException.class, () -> linker.link(jdbcConnection, bundle, bundle));
     }
 
     @Test
     void linkNotPasswordVariable() {
-        final JdbcConnectionEntity jdbcConnection = createJdbcConnection("${" + GATEWAY + "}");
+        final JdbcConnection jdbcConnection = createJdbcConnection("${" + GATEWAY + "}");
         linker.link(jdbcConnection, new Bundle(), new Bundle());
         assertNull(jdbcConnection.getPasswordRef());
         assertEquals("${" + GATEWAY + "}", jdbcConnection.getPassword());
@@ -77,7 +77,7 @@ class JdbcConnectionLinkerTest {
 
     @Test
     void linkNotVariableFormat() {
-        final JdbcConnectionEntity jdbcConnection = createJdbcConnection(GATEWAY);
+        final JdbcConnection jdbcConnection = createJdbcConnection(GATEWAY);
         linker.link(jdbcConnection, new Bundle(), new Bundle());
         assertNull(jdbcConnection.getPasswordRef());
         assertEquals(GATEWAY, jdbcConnection.getPassword());
@@ -86,22 +86,22 @@ class JdbcConnectionLinkerTest {
 
     @Test
     void linkL7C2VariableFormat() {
-        final JdbcConnectionEntity jdbcConnection = createJdbcConnection("$L7C2$1,3ok3RLhLqpD3Z3QdyTpoa2iHU2dRYdAF3TgSchF2ttI=$2EqC+niJG4yw7LOJ52Rur0VcGccT/r1WpHE+4Aiqj5GcNNYXub9h7pO5CrGT7eFGhyub2ilKx5M+ULQtbU5ZTcGxgj4K+H0+y9Yq5LNbKggoHYa+3T8r9pIcUamcCx7q");
+        final JdbcConnection jdbcConnection = createJdbcConnection("$L7C2$1,3ok3RLhLqpD3Z3QdyTpoa2iHU2dRYdAF3TgSchF2ttI=$2EqC+niJG4yw7LOJ52Rur0VcGccT/r1WpHE+4Aiqj5GcNNYXub9h7pO5CrGT7eFGhyub2ilKx5M+ULQtbU5ZTcGxgj4K+H0+y9Yq5LNbKggoHYa+3T8r9pIcUamcCx7q");
         linker.link(jdbcConnection, new Bundle(), new Bundle());
         assertNull(jdbcConnection.getPasswordRef());
         assertNull(jdbcConnection.getPassword());
     }
 
-    private static JdbcConnectionEntity createJdbcConnection(String password) {
-        return new JdbcConnectionEntity.Builder()
+    private static JdbcConnection createJdbcConnection(String password) {
+        return new JdbcConnection.Builder()
                 .name("Test")
                 .user("gateway")
                 .password(password)
                 .build();
     }
 
-    private static StoredPasswordEntity createStoredPassword(String name) {
-        return new StoredPasswordEntity
+    private static StoredPassword createStoredPassword(String name) {
+        return new StoredPassword
                 .Builder()
                 .name(name)
                 .build();

@@ -6,12 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedService;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.PolicyBackedServiceOperation;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.PolicyBackedService;
+import com.ca.apim.gateway.cagatewayconfig.beans.PolicyBackedServiceOperation;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.Bundle;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.entity.PolicyBackedServiceEntity;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,18 +35,18 @@ public class PolicyBackedServiceWriter implements EntityWriter {
 
     @Override
     public void write(Bundle bundle, File rootFolder) {
-        Map<String, PolicyBackedService> policyBackedServiceBeans = bundle.getEntities(PolicyBackedServiceEntity.class)
+        Map<String, PolicyBackedService> policyBackedServiceBeans = bundle.getEntities(PolicyBackedService.class)
                 .values()
                 .stream()
-                .collect(Collectors.toMap(PolicyBackedServiceEntity::getName, this::getPolicyBackedServiceBean));
+                .collect(Collectors.toMap(PolicyBackedService::getName, this::getPolicyBackedServiceBean));
 
         writeFile(rootFolder, documentFileUtils, jsonTools, policyBackedServiceBeans, POLICY_BACKED_SERVICES_FILE, PolicyBackedService.class);
     }
 
-    private PolicyBackedService getPolicyBackedServiceBean(PolicyBackedServiceEntity policyBackedServiceEntity) {
+    private PolicyBackedService getPolicyBackedServiceBean(PolicyBackedService policyBackedServiceEntity) {
         PolicyBackedService policyBackedServiceBean = new PolicyBackedService();
         policyBackedServiceBean.setInterfaceName(policyBackedServiceEntity.getInterfaceName());
-        policyBackedServiceBean.setOperations(policyBackedServiceEntity.getOperations().entrySet().stream().map(e -> new PolicyBackedServiceOperation(e.getKey(), e.getValue())).collect(toSet()));
+        policyBackedServiceBean.setOperations(policyBackedServiceEntity.getOperations().stream().map(e -> new PolicyBackedServiceOperation(e.getOperationName(), e.getPolicy())).collect(toSet()));
         return policyBackedServiceBean;
     }
 }

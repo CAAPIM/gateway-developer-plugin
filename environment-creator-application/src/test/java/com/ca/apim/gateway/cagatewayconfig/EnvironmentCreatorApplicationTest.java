@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.tasks.zip.bundle.DependencyBundleLoader;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.google.common.collect.ImmutableMap;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -22,8 +22,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Objects;
 
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.DEFAULT_HTTPS_8443;
-import static com.ca.apim.gateway.cagatewayconfig.tasks.zip.beans.ListenPort.DEFAULT_HTTP_8080;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.DEFAULT_HTTPS_8443;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.DEFAULT_HTTP_8080;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EnvironmentCreatorApplicationTest {
@@ -133,7 +133,7 @@ class EnvironmentCreatorApplicationTest {
         assertTrue(environmentBundleFile.exists());
         System.out.println(new String(Files.readAllBytes(environmentBundleFile.toPath())));
 
-        DependencyBundleLoader bundleLoader = ConfigBuilderModule.getInjector().getInstance(DependencyBundleLoader.class);
+        EntityBundleLoader bundleLoader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
         Bundle environmentBundle = bundleLoader.load(environmentBundleFile);
 
         assertEquals(1, environmentBundle.getIdentityProviders().size());
