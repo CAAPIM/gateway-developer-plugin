@@ -13,7 +13,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -65,23 +64,5 @@ class GlobalPolicyWriterTest {
 
         assertNotNull(globalPolicies);
         assertTrue(globalPolicies.isEmpty());
-    }
-
-    @Test
-    void testGetGlobalPolicyBean() {
-        String path = Paths.get(TEST_FOLDER_1, TEST_POLICY_NAME).toString();
-        Policy globalPolicy = new Policy.Builder()
-                .setName(TEST_POLICY_NAME)
-                .setId(TEST_POLICY_ID)
-                .setParentFolderId(TEST_FOLDER_1)
-                .setTag("global-policy")
-                .setPolicyType(PolicyType.INTERNAL)
-                .build();
-        globalPolicy.setPath(path);
-        final Policy policyBean = writer.getPolicyBean(globalPolicy);
-
-        assertNotNull(policyBean);
-        assertEquals("global-policy", policyBean.getTag());
-        assertEquals(path, policyBean.getPath());
     }
 }

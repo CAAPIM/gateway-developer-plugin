@@ -18,19 +18,19 @@ import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createEncass;
 import static java.util.stream.Collectors.toSet;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class EncassWriterTest {
     private EncassWriter writer = new EncassWriter(DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
 
     @Test
     void testGetBeanArgsAndResultsAreOrdered() {
-        Encass entity = createEncass("my-encass", "123", "abc", "policy-123",
+        Encass bean = createEncass("my-encass", "123", "abc", "policy-123",
                 Stream.of(new EncassArgument("a", "t"), new EncassArgument("x", "t"), new EncassArgument("1", "t"), new EncassArgument("B", "t")).collect(toSet()),
                 Stream.of(new EncassResult("B", "t"), new EncassResult("1", "t"), new EncassResult("x", "t"), new EncassResult("a", "t")).collect(toSet()));
 
-        final Encass bean = writer.getEncassBean(entity);
-        assertNotNull(bean);
+        bean.sortArgumentsAndResults();
         assertNotNull(bean.getArguments());
         assertEquals(4, bean.getArguments().size());
         Iterator<EncassArgument> argIter = bean.getArguments().iterator();
@@ -48,38 +48,4 @@ class EncassWriterTest {
         assertEquals("x", resIter.next().getName());
     }
 
-    @Test
-    void testGetBean() {
-        Encass entity = createEncass("my-encass", "123", "abc", "policy-123",
-                Stream.of(new EncassArgument("a", "t", true), new EncassArgument("x", "t", false), new EncassArgument("1", "t")).collect(toSet()),
-                Stream.of(new EncassResult("B", "t"), new EncassResult("1", "t")).collect(toSet()));
-
-        final Encass bean = writer.getEncassBean(entity);
-        assertNotNull(bean);
-        assertNotNull(bean.getArguments());
-        assertEquals(3, bean.getArguments().size());
-        Iterator<EncassArgument> argIter = bean.getArguments().iterator();
-        EncassArgument arg = argIter.next();
-        assertEquals("1", arg.getName());
-        assertEquals("t", arg.getType());
-        assertNull(arg.getRequireExplicit());
-        arg = argIter.next();
-        assertEquals("a", arg.getName());
-        assertEquals("t", arg.getType());
-        assertTrue(arg.getRequireExplicit());
-        arg = argIter.next();
-        assertEquals("x", arg.getName());
-        assertEquals("t", arg.getType());
-        assertFalse(arg.getRequireExplicit());
-
-        assertNotNull(bean.getResults());
-        assertEquals(2, bean.getResults().size());
-        Iterator<EncassResult> resIter = bean.getResults().iterator();
-        EncassResult result = resIter.next();
-        assertEquals("1", result.getName());
-        assertEquals("t", result.getType());
-        result = resIter.next();
-        assertEquals("B", result.getName());
-        assertEquals("t", result.getType());
-    }
 }

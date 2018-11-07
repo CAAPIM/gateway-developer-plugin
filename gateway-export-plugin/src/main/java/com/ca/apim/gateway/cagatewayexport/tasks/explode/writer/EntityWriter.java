@@ -10,6 +10,9 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 
 import java.io.File;
 
+@FunctionalInterface
 public interface EntityWriter {
+
     void write(Bundle bundle, File rootFolder);
+
 }

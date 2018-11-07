@@ -6,11 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.inject.Named;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 /**
@@ -19,6 +21,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @JsonInclude(NON_NULL)
 @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 @Named("JDBC_CONNECTION")
+@ConfigurationFile(name = "jdbc-connections", type = JSON_YAML)
 public class JdbcConnection extends GatewayEntity {
 
     private String driverClass;

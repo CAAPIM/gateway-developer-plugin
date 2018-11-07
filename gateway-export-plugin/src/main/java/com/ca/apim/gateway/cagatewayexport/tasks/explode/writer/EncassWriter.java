@@ -18,9 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.writeFile;
 import static java.util.stream.Collectors.toCollection;

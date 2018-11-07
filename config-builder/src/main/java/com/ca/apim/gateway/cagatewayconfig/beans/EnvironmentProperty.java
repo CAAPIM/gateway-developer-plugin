@@ -6,7 +6,16 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-public class EnvironmentProperty extends GatewayEntity {
+import com.ca.apim.gateway.cagatewayconfig.config.EntityConfigException;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+
+import javax.inject.Named;
+
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
+
+@Named("ENVIRONMENT_PROPERTY")
+@ConfigurationFile(name = "env", type = PROPERTIES)
+public class EnvironmentProperty extends GatewayEntity implements PropertiesEntity {
 
     private final String value;
     private final Type type;
@@ -16,6 +25,20 @@ public class EnvironmentProperty extends GatewayEntity {
         this.value = value;
         this.type = type;
         this.setId(type + ":" + name);
+    }
+
+    @Override
+    public String getKey() {
+        switch (type) {
+            case LOCAL:
+                return getName();
+            case GLOBAL:
+                return "gateway." + getName();
+            case SERVICE:
+                return "service.property." + getName();
+            default:
+                throw new EntityConfigException("Unknown Environment Property Type: " + getType());
+        }
     }
 
     public String getValue() {

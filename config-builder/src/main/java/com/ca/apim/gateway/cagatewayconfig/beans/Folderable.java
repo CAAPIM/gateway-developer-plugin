@@ -6,7 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public abstract class Folderable extends GatewayEntity {
+
+    @JsonIgnore
     private Folder parentFolder;
 
     public Folder getParentFolder() {
@@ -17,6 +21,7 @@ public abstract class Folderable extends GatewayEntity {
         this.parentFolder = parentFolder;
     }
 
+    @JsonIgnore
     public String getParentFolderId() {
         return this.parentFolder != null ? this.parentFolder.getId() : null;
     }
