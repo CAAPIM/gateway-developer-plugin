@@ -54,7 +54,7 @@ class PolicyLoaderTest {
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
 
-        String path = Paths.get(TEST_FOLDER_1, TEST_POLICY_NAME + ".xml").toString();
+        String path = Paths.get(TEST_FOLDER_1, TEST_POLICY_NAME).toString();
         Policy policy = bundle.getPolicies().get(path);
         assertNotNull(policy);
         assertEquals(TEST_POLICY_ID, policy.getId());

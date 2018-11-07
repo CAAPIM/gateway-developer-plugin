@@ -1,16 +1,17 @@
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
+import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
@@ -87,6 +88,68 @@ class PolicyXMLSimplifierTest {
         assertNull(getSingleChildElement(authenticationAssertion, ID_PROV_NAME, true));
     }
 
+    @Test
+    void simplifyIncludeAssertion() throws DocumentParseException {
+        String id = new IdGenerator().generate();
+        String testName = "test";
+        Policy policy = new Policy.Builder()
+                .setGuid(id)
+                .setName(testName)
+                .setParentFolderId(ROOT_FOLDER_ID)
+                .build();
+        Bundle bundle = new Bundle();
+        bundle.addEntity(policy);
+        bundle.addEntity(ROOT_FOLDER);
+        FolderTree folderTree = new FolderTree(bundle.getEntities(Folder.class).values());
+        bundle.setFolderTree(folderTree);
+
+        Element includeAssertion = createIncludeAssertionElement(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), id);
+        policyXMLSimplifier.simplifyIncludeAssertion(bundle, includeAssertion);
+
+        assertEquals(testName, getSingleChildElementAttribute(includeAssertion, POLICY_GUID, "policyPath"));
+        assertNull(getSingleChildElementAttribute(includeAssertion, POLICY_GUID, STRING_VALUE));
+    }
+
+    @Test
+    void simplifyIncludeAssertionMissingPolicy() throws DocumentParseException {
+        String id = new IdGenerator().generate();
+        Bundle bundle = new Bundle();
+        bundle.addEntity(ROOT_FOLDER);
+        FolderTree folderTree = new FolderTree(bundle.getEntities(Folder.class).values());
+        bundle.setFolderTree(folderTree);
+
+        Element includeAssertion = createIncludeAssertionElement(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), id);
+        policyXMLSimplifier.simplifyIncludeAssertion(bundle, includeAssertion);
+
+        assertNull(getSingleChildElementAttribute(includeAssertion, POLICY_GUID, "policyPath"));
+        assertEquals(id, getSingleChildElementAttribute(includeAssertion, POLICY_GUID, STRING_VALUE));
+    }
+
+    @Test
+    void simplifyPolicy() {
+        String policyID = new IdGenerator().generate();
+        String testName = "test";
+        Policy policy = new Policy.Builder()
+                .setGuid(policyID)
+                .setName(testName)
+                .setParentFolderId(ROOT_FOLDER_ID)
+                .build();
+        Bundle bundle = new Bundle();
+        bundle.addEntity(policy);
+        bundle.addEntity(ROOT_FOLDER);
+        FolderTree folderTree = new FolderTree(bundle.getEntities(Folder.class).values());
+        bundle.setFolderTree(folderTree);
+
+        Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Element policyXML = createElementWithChildren(
+                document,
+                "wsp:Policy",
+                createIncludeAssertionElement(document, policyID)
+        );
+
+        policyXMLSimplifier.simplifyPolicyXML(policyXML, bundle, bundle);
+    }
+
     @NotNull
     private Element createSetVariableAssertionElement(String variableName, String base64Data) {
         Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
@@ -112,6 +175,14 @@ class PolicyXMLSimplifierTest {
                 AUTHENTICATION,
                 createElementWithAttribute(document, ID_PROV_OID, GOID_VALUE, id),
                 createElementWithAttribute(document, TARGET, "target", "RESPONSE")
+        );
+    }
+
+    private Element createIncludeAssertionElement(Document document, String id) {
+        return createElementWithChildren(
+                document,
+                INCLUDE,
+                createElementWithAttribute(document, POLICY_GUID, STRING_VALUE, id)
         );
     }
 }

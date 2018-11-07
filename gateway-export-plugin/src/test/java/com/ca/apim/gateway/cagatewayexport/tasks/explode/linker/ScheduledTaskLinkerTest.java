@@ -51,7 +51,7 @@ class ScheduledTaskLinkerTest {
         fullBundle.setFolderTree(folderTree);
 
         scheduledTaskLinker.link(bundle, fullBundle);
-        assertEquals("myScheduledPolicy.xml", bundle.getEntities(ScheduledTask.class).get("1").getPolicy());
+        assertEquals("myScheduledPolicy", bundle.getEntities(ScheduledTask.class).get("1").getPolicy());
     }
 
     @Test

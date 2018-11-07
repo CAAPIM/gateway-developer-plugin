@@ -14,7 +14,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PolicyBackedServiceLinkerTest {
 
@@ -41,8 +42,8 @@ class PolicyBackedServiceLinkerTest {
 
         policyBackedServiceLinker.link(bundle, fullBundle);
 
-        assertEquals("operation1Policy.xml", bundle.getEntities(PolicyBackedService.class).get("1").getOperations().stream().collect(Collectors.toMap(PolicyBackedServiceOperation::getOperationName, PolicyBackedServiceOperation::getPolicy)).get("operation1"));
-        assertEquals("operation2Policy.xml", bundle.getEntities(PolicyBackedService.class).get("1").getOperations().stream().collect(Collectors.toMap(PolicyBackedServiceOperation::getOperationName, PolicyBackedServiceOperation::getPolicy)).get("operation2"));
+        assertEquals("operation1Policy", bundle.getEntities(PolicyBackedService.class).get("1").getOperations().stream().collect(Collectors.toMap(PolicyBackedServiceOperation::getOperationName, PolicyBackedServiceOperation::getPolicy)).get("operation1"));
+        assertEquals("operation2Policy", bundle.getEntities(PolicyBackedService.class).get("1").getOperations().stream().collect(Collectors.toMap(PolicyBackedServiceOperation::getOperationName, PolicyBackedServiceOperation::getPolicy)).get("operation2"));
     }
 
     @Test

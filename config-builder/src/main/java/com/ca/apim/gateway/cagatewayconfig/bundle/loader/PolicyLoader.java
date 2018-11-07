@@ -78,7 +78,7 @@ public class PolicyLoader implements BundleEntityLoader {
     }
 
     private String getPath(Folder parentFolder, String name) {
-        return Paths.get(parentFolder.getPath()).resolve(name + ".xml").toString();
+        return Paths.get(parentFolder.getPath()).resolve(name).toString();
     }
 
     private Folder getFolder(Bundle bundle, String folderId) {

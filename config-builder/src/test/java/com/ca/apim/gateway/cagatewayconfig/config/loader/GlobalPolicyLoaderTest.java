@@ -17,8 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
@@ -49,7 +49,7 @@ class GlobalPolicyLoaderTest {
     @Test
     void loadYaml() throws IOException {
         String yaml = "'" + NAME + "':\n" +
-                "  path: \"gateway-solution/global-policies/" + NAME + ".xml\"\n" +
+                "  path: \"gateway-solution/global-policies/" + NAME + "\"\n" +
                 "  tag: \"message-completed\"";
         load(yaml, "yml", null);
     }
@@ -58,7 +58,7 @@ class GlobalPolicyLoaderTest {
     void loadJson() throws IOException {
         String json = "{\n" +
                 "  \"" + NAME + "\": {\n" +
-                "    \"path\": \"gateway-solution/global-policies/" + NAME + ".xml\",\n" +
+                "    \"path\": \"gateway-solution/global-policies/" + NAME + "\",\n" +
                 "    \"tag\": \"message-completed\"\n" +
                 "  }\n" +
                 "}";
@@ -68,7 +68,7 @@ class GlobalPolicyLoaderTest {
     @Test
     void loadMalformedYaml() throws IOException {
         String yaml = "'" + NAME + "':\n" +
-                "  path \"gateway-solution/global-policies/" + NAME + ".xml\"\n" +
+                "  path \"gateway-solution/global-policies/" + NAME + "\"\n" +
                 "  tag \"message-completed\"";
         load(yaml, "yml", JsonToolsException.class);
     }
@@ -77,7 +77,7 @@ class GlobalPolicyLoaderTest {
     void loadMalformedJson() throws IOException {
         String json = "{\n" +
                 "  \"" + NAME + "\": {\n" +
-                "    \"path\": \"gateway-solution/global-policies/" + NAME + ".xml\",\n" +
+                "    \"path\": \"gateway-solution/global-policies/" + NAME + "\",\n" +
                 "    \"tag\": \"message-completed\"\n" +
                 "  \n" +
                 "";
@@ -87,10 +87,10 @@ class GlobalPolicyLoaderTest {
     @Test
     void loadRepeatedTag() throws IOException {
         String yaml = "global-completed-policy:\n" +
-                "  path: \"gateway-solution/global-policies/global-completed-policy.xml\"\n" +
+                "  path: \"gateway-solution/global-policies/global-completed-policy\"\n" +
                 "  tag: \"message-completed\"\n" +
                 "global-completed-policy-2:\n" +
-                "  path: \"gateway-solution/global-policies/global-completed-policy-2.xml\"\n" +
+                "  path: \"gateway-solution/global-policies/global-completed-policy-2\"\n" +
                 "  tag: \"message-completed\"";
         load(yaml, "yml", ConfigLoadException.class);
     }
@@ -121,8 +121,8 @@ class GlobalPolicyLoaderTest {
     private static void check(Bundle bundle) {
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
-        
-        String policyPath = Paths.get("gateway-solution", "global-policies", NAME + ".xml").toString();
+
+        String policyPath = Paths.get("gateway-solution", "global-policies", NAME).toString();
         assertNotNull(bundle.getPolicies().get(policyPath));
 
         Policy policy = bundle.getPolicies().get(policyPath);

@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
@@ -22,15 +21,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
-import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 
 public class PolicyXMLSimplifier {
     public static final PolicyXMLSimplifier INSTANCE = new PolicyXMLSimplifier();
@@ -38,35 +36,11 @@ public class PolicyXMLSimplifier {
     private static final Logger LOGGER = Logger.getLogger(PolicyWriter.class.getName());
 
     public void simplifyPolicyXML(Element policyElement, Bundle bundle, Bundle resultantBundle) {
-        findAndSimplifyAssertion(policyElement, INCLUDE, element -> {
-            try {
-                simplifyIncludeAssertion(bundle, element);
-            } catch (DocumentParseException e) {
-                throw new BundleLoadException(e.getMessage());
-            }
-        });
-        findAndSimplifyAssertion(policyElement, ENCAPSULATED, element -> {
-            try {
-                simplifyEncapsulatedAssertion(bundle, element);
-            } catch (DocumentParseException e) {
-                throw new BundleLoadException(e.getMessage());
-            }
-        });
-        findAndSimplifyAssertion(policyElement, SET_VARIABLE, element -> {
-            try {
-                simplifySetVariable(element, resultantBundle);
-            } catch (DocumentParseException e) {
-                throw new BundleLoadException(e.getMessage());
-            }
-        });
+        findAndSimplifyAssertion(policyElement, INCLUDE, element -> simplifyIncludeAssertion(bundle, element));
+        findAndSimplifyAssertion(policyElement, ENCAPSULATED, element -> simplifyEncapsulatedAssertion(bundle, element));
+        findAndSimplifyAssertion(policyElement, SET_VARIABLE, element -> simplifySetVariable(element, resultantBundle));
         findAndSimplifyAssertion(policyElement, HARDCODED_RESPONSE, this::simplifyHardcodedResponse);
-        findAndSimplifyAssertion(policyElement, AUTHENTICATION, element -> {
-            try {
-                simplifyAuthenticationAssertion(bundle, element);
-            } catch (DocumentParseException e) {
-                throw new BundleLoadException(e.getMessage());
-            }
-        });
+        findAndSimplifyAssertion(policyElement, AUTHENTICATION, element -> simplifyAuthenticationAssertion(bundle, element));
     }
 
     private void simplifyHardcodedResponse(Element element) {
@@ -164,7 +138,8 @@ public class PolicyXMLSimplifier {
         authenticationAssertionElement.removeChild(goidElementToRemove);
     }
 
-    private void simplifyIncludeAssertion(Bundle bundle, Element assertionElement) throws DocumentParseException {
+    @VisibleForTesting
+    void simplifyIncludeAssertion(Bundle bundle, Element assertionElement) throws DocumentParseException {
         Element policyGuidElement = getSingleElement(assertionElement, POLICY_GUID);
         String includedPolicyGuid = policyGuidElement.getAttribute(STRING_VALUE);
         Optional<Policy> policyEntity = bundle.getEntities(Policy.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
@@ -176,20 +151,28 @@ public class PolicyXMLSimplifier {
         }
     }
 
-    private void findAndSimplifyAssertion(Element policyElement, String assertionTagName, Consumer<Element> simplifier) {
+    private void findAndSimplifyAssertion(Element policyElement, String assertionTagName, AssertionProcessor simplifier) {
         NodeList includeReferences = policyElement.getElementsByTagName(assertionTagName);
         for (int i = 0; i < includeReferences.getLength(); i++) {
             Node includeElement = includeReferences.item(i);
             if (!(includeElement instanceof Element)) {
-                throw new WriteException("Unexpected Assertion node type: " + includeElement.getNodeType());
+                throw new BundleLoadException("Unexpected Assertion node type: " + includeElement.getNodeType());
             }
-            simplifier.accept((Element) includeElement);
+            try {
+                simplifier.process((Element) includeElement);
+            } catch (DocumentParseException e) {
+                throw new BundleLoadException(e.getMessage());
+            }
         }
     }
 
     private String getPolicyPath(Bundle bundle, Policy policyEntity) {
         Folder folder = bundle.getFolderTree().getFolderById(policyEntity.getParentFolder().getId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return Paths.get(folderPath.toString(), policyEntity.getName() + ".xml").toString();
+        return Paths.get(folderPath.toString(), policyEntity.getName()).toString();
+    }
+
+    interface AssertionProcessor {
+        void process(Element t) throws DocumentParseException;
     }
 }
