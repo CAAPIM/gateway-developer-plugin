@@ -27,7 +27,7 @@
             </L7p:Parameters>
         </L7p:Encapsulated>
         <L7p:Include>
-            <L7p:PolicyGuid policyPath="example project/encass-policy.xml"/>
+            <L7p:PolicyGuid policyPath="example project/encass-policy"/>
         </L7p:Include>
     </wsp:All>
 </wsp:Policy>

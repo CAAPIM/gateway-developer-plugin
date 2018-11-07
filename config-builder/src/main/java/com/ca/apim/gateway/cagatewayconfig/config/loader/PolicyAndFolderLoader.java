@@ -62,8 +62,10 @@ public class PolicyAndFolderLoader implements EntityLoader {
     }
 
     private Policy loadPolicy(final File policyFile, final File rootDir, Folder parentFolder) {
+        String policyPath = FolderLoaderUtils.getPath(policyFile, rootDir);
+
         Policy policy = new Policy();
-        policy.setPath(FolderLoaderUtils.getPath(policyFile, rootDir));
+        policy.setPath(policyPath.substring(0, policyPath.length() - ".xml".length()));
         policy.setPolicyXML(fileUtils.getFileAsString(policyFile));
         policy.setName(getPolicyName(policyFile));
         policy.setParentFolder(parentFolder);

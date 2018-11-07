@@ -69,7 +69,7 @@ class AuditPolicyWriterTest {
 
     @Test
     void testGetAuditPolicyBean() {
-        String path = Paths.get(TEST_FOLDER_1, TEST_POLICY_NAME + ".xml").toString();
+        String path = Paths.get(TEST_FOLDER_1, TEST_POLICY_NAME).toString();
         Policy auditPolicy = new Policy.Builder()
                 .setName(TEST_POLICY_NAME)
                 .setId(TEST_POLICY_ID)

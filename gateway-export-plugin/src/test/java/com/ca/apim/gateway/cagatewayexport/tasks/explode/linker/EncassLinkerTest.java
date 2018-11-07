@@ -43,7 +43,7 @@ class EncassLinkerTest {
 
         encassLinker.link(bundle, fullBundle);
 
-        assertEquals("myEncassPolicy.xml", bundle.getEntities(Encass.class).get("1").getPath());
+        assertEquals("myEncassPolicy", bundle.getEntities(Encass.class).get("1").getPath());
     }
 
     @Test

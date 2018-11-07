@@ -75,7 +75,7 @@ class PolicyAndFolderLoaderTest {
         Folder parentFolder = bundle.getFolders().get("a/b/c/");
         Assert.assertNotNull(parentFolder);
 
-        Policy loadedPolicy = bundle.getPolicies().get("a/b/c/policy.xml");
+        Policy loadedPolicy = bundle.getPolicies().get("a/b/c/policy");
         Assert.assertNotNull(loadedPolicy);
         Assert.assertEquals(parentFolder, loadedPolicy.getParentFolder());
     }

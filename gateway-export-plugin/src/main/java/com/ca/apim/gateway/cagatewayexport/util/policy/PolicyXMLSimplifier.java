@@ -28,9 +28,9 @@ import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
-import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 
 public class PolicyXMLSimplifier {
     public static final PolicyXMLSimplifier INSTANCE = new PolicyXMLSimplifier();
@@ -190,6 +190,6 @@ public class PolicyXMLSimplifier {
     private String getPolicyPath(Bundle bundle, Policy policyEntity) {
         Folder folder = bundle.getFolderTree().getFolderById(policyEntity.getParentFolder().getId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return Paths.get(folderPath.toString(), policyEntity.getName() + ".xml").toString();
+        return Paths.get(folderPath.toString(), policyEntity.getName()).toString();
     }
 }

@@ -17,8 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
@@ -28,7 +28,7 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
 class AuditPolicyLoaderTest {
@@ -49,7 +49,7 @@ class AuditPolicyLoaderTest {
     @Test
     void loadYaml() throws IOException {
         String yaml = "'" + NAME + "':\n" +
-                "  path: \"gateway-solution/audit-policies/" + NAME + ".xml\"\n" +
+                "  path: \"gateway-solution/audit-policies/" + NAME + "\"\n" +
                 "  tag: \"audit-sink\"";
         load(yaml, "yml", null);
     }
@@ -58,7 +58,7 @@ class AuditPolicyLoaderTest {
     void loadJson() throws IOException {
         String json = "{\n" +
                 "  \"" + NAME + "\": {\n" +
-                "    \"path\": \"gateway-solution/audit-policies/" + NAME + ".xml\",\n" +
+                "    \"path\": \"gateway-solution/audit-policies/" + NAME + "\",\n" +
                 "    \"tag\": \"audit-sink\"\n" +
                 "  }\n" +
                 "}";
@@ -68,7 +68,7 @@ class AuditPolicyLoaderTest {
     @Test
     void loadMalformedYaml() throws IOException {
         String yaml = "'" + NAME + "':\n" +
-                "  path \"gateway-solution/audit-policies/" + NAME + ".xml\"\n" +
+                "  path \"gateway-solution/audit-policies/" + NAME + "\"\n" +
                 "  tag \"audit-sink\"";
         load(yaml, "yml", JsonToolsException.class);
     }
@@ -77,7 +77,7 @@ class AuditPolicyLoaderTest {
     void loadMalformedJson() throws IOException {
         String json = "{\n" +
                 "  \"" + NAME + "\": {\n" +
-                "    \"path\": \"gateway-solution/audit-policies/" + NAME + ".xml\",\n" +
+                "    \"path\": \"gateway-solution/audit-policies/" + NAME + "\",\n" +
                 "    \"tag\": \"audit-sink\"\n" +
                 "  \n" +
                 "";
@@ -87,10 +87,10 @@ class AuditPolicyLoaderTest {
     @Test
     void loadRepeatedTag() throws IOException {
         String yaml = "'[Internal Audit Sink Policy]':\n" +
-                "  path: \"gateway-solution/audit-policies/[Internal Audit Sink Policy].xml\"\n" +
+                "  path: \"gateway-solution/audit-policies/[Internal Audit Sink Policy]\"\n" +
                 "  tag: \"audit-sink\"\n" +
                 "'[Internal Audit Sink Policy 1]':\n" +
-                "  path: \"gateway-solution/audit-policies/[Internal Audit Sink Policy 1].xml\"\n" +
+                "  path: \"gateway-solution/audit-policies/[Internal Audit Sink Policy 1]\"\n" +
                 "  tag: \"audit-sink\"";
         load(yaml, "yml", ConfigLoadException.class);
     }
@@ -121,7 +121,7 @@ class AuditPolicyLoaderTest {
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
 
-        String policyPath = Paths.get("gateway-solution", "audit-policies", NAME + ".xml").toString();
+        String policyPath = Paths.get("gateway-solution", "audit-policies", NAME).toString();
         assertNotNull(bundle.getPolicies().get(policyPath));
 
         Policy policy = bundle.getPolicies().get(policyPath);
