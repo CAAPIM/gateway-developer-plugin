@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.EntityConfigException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +17,10 @@ import static java.util.Arrays.stream;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public enum PolicyType {
-    INCLUDE("Include"),
-    SERVICE_OPERATION("Service Operation"),
-    GLOBAL("Global"),
-    INTERNAL("Internal",
+    INCLUDE("Include", Policy.class),
+    SERVICE_OPERATION("Service Operation", Policy.class),
+    GLOBAL("Global", GlobalPolicy.class),
+    INTERNAL("Internal", AuditPolicy.class,
             "audit-lookup",
             "audit-sink",
             "audit-message-filter",
@@ -26,14 +28,24 @@ public enum PolicyType {
 
     private String type;
     private List<String> tags;
+    private Class<? extends Policy> policyClass;
 
-    PolicyType(String type, String... tags) {
+    PolicyType(String type, Class<? extends Policy> policyClass, String... tags) {
         this.type = type;
+        this.policyClass = policyClass;
         this.tags = new ArrayList<>(asList(firstNonNull(tags, new String[0])));
     }
 
     public String getType() {
         return type;
+    }
+
+    public Policy createPolicyObject() {
+        try {
+            return policyClass.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new EntityConfigException("Could not create policy object for " + policyClass.getSimpleName(), e);
+        }
     }
 
     public static boolean isValidType(String type, String tag) {

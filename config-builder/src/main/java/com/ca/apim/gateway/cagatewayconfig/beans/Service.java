@@ -90,7 +90,7 @@ public class Service extends Folderable {
 
     @Override
     public String getMappingValue() {
-        return path;
+        return getPath();
     }
 
     @Override

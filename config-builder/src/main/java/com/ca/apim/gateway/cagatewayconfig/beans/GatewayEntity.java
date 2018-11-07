@@ -39,7 +39,7 @@ public class GatewayEntity {
      */
     @JsonIgnore
     public String getMappingValue() {
-        return name;
+        return getName();
     }
 
     /**

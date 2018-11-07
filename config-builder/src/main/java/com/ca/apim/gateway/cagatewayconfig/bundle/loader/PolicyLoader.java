@@ -6,10 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.beans.PolicyType;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
@@ -21,11 +18,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.GLOBAL;
+import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.INTERNAL;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_TAG;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Singleton
 public class PolicyLoader implements BundleEntityLoader {
@@ -60,21 +61,27 @@ public class PolicyLoader implements BundleEntityLoader {
         final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
         final Element resource = getSingleChildElement(resourceSet, RESOURCE);
         final String policyString = resource.getTextContent();
+        final PolicyType type = PolicyType.fromType(policyType);
 
         Folder parentFolder = getFolder(bundle, folderId);
 
-        Policy policy = new Policy();
+        Policy policy = type.createPolicyObject();
         policy.setPath(getPath(parentFolder, name));
         policy.setName(name);
         policy.setParentFolder(parentFolder);
         policy.setGuid(guid);
         policy.setId(id);
         policy.setTag(policyTag);
-        policy.setPolicyType(PolicyType.fromType(policyType));
+        policy.setPolicyType(type);
         policy.setPolicyDocument(policyElement);
         policy.setPolicyXML(policyString);
 
         bundle.getPolicies().put(policy.getPath(), policy);
+        if (type == GLOBAL) {
+            bundle.getEntities(GlobalPolicy.class).put(policy.getPath(), (GlobalPolicy) policy);
+        } else if (type == INTERNAL && firstNonNull(policyTag, EMPTY).startsWith("audit")) {
+            bundle.getEntities(AuditPolicy.class).put(policy.getPath(), (AuditPolicy) policy);
+        }
     }
 
     private String getPath(Folder parentFolder, String name) {

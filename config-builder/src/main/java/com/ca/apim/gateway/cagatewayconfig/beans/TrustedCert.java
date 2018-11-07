@@ -8,6 +8,8 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.ImmutableMap;
 
 import javax.inject.Named;
@@ -22,6 +24,7 @@ import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.emptyMap;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
+@JsonInclude(Include.NON_NULL)
 @Named("TRUSTED_CERT")
 @ConfigurationFile(name = "trusted-certs", type = JSON_YAML)
 public class TrustedCert extends GatewayEntity {
@@ -190,5 +193,8 @@ public class TrustedCert extends GatewayEntity {
         documentFileUtils.createFolder(certFolder.toPath());
 
         writeCertificateData(certFolder, getName(), getCertificateData().getEncodedData());
+
+        // remove the certificate data so it dont get written to the file
+        this.certificateData = null;
     }
 }

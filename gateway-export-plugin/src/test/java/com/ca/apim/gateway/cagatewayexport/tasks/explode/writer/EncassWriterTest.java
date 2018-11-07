@@ -9,8 +9,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.EncassArgument;
 import com.ca.apim.gateway.cagatewayconfig.beans.EncassResult;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
@@ -22,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class EncassWriterTest {
-    private EncassWriter writer = new EncassWriter(DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
 
     @Test
     void testGetBeanArgsAndResultsAreOrdered() {

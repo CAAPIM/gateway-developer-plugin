@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.inject.Named;
@@ -27,6 +28,7 @@ public class PrivateKey extends GatewayEntity {
     private String keystore;
     private String algorithm;
     private String keyPassword;
+    @JsonIgnore
     private KeyStoreType keyStoreType;
     private SupplierWithIO<InputStream> privateKeyFile;
 
@@ -40,6 +42,7 @@ public class PrivateKey extends GatewayEntity {
         setAlgorithm(builder.algorithm);
     }
 
+    @JsonIgnore
     public String getAlias() {
         return this.getName();
     }

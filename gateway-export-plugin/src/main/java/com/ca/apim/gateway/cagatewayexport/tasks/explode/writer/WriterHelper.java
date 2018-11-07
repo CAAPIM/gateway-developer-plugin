@@ -32,12 +32,13 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 class WriterHelper {
 
+    private static final String CONFIG_DIRECTORY = "config";
     private static final String ERROR_WRITE = "Exception writing %s config file";
 
     private WriterHelper() {
     }
 
-    public static void write(Bundle bundle, File rootFolder, GatewayEntityInfo info, DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    static void write(Bundle bundle, File rootFolder, GatewayEntityInfo info, DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
         if (info.getFileType() == JSON_YAML) {
             writeFile(rootFolder, documentFileUtils, jsonTools, bundle.getEntities(info.getEntityClass()), info.getFileName(), info.getEntityClass());
         } else if (info.getFileType() == PROPERTIES) {
@@ -56,8 +57,8 @@ class WriterHelper {
      * @param beans beans to be written as properties files
      * @param fileName name of the file
      */
-    static <B extends GatewayEntity> void writePropertiesFile(File rootFolder, DocumentFileUtils documentFileUtils, Map<String, B> beans, String fileName) {
-        File configFolder = new File(rootFolder, "config");
+    private static <B extends GatewayEntity> void writePropertiesFile(File rootFolder, DocumentFileUtils documentFileUtils, Map<String, B> beans, String fileName) {
+        File configFolder = new File(rootFolder, CONFIG_DIRECTORY);
         documentFileUtils.createFolder(configFolder.toPath());
 
         Properties properties = new Properties();
@@ -84,7 +85,7 @@ class WriterHelper {
             return;
         }
 
-        File configFolder = new File(rootFolder, "config");
+        File configFolder = new File(rootFolder, CONFIG_DIRECTORY);
         documentFileUtils.createFolder(configFolder.toPath());
 
         File propertiesFile = new File(configFolder, fileName + ".properties");
@@ -123,7 +124,7 @@ class WriterHelper {
             return;
         }
 
-        File configFolder = new File(rootFolder, "config");
+        File configFolder = new File(rootFolder, CONFIG_DIRECTORY);
         documentFileUtils.createFolder(configFolder.toPath());
 
         // remap the beans by name and run pre-write methods
