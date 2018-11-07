@@ -8,6 +8,8 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.EntityConfigException;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,8 +44,9 @@ public enum PolicyType {
 
     public Policy createPolicyObject() {
         try {
-            return policyClass.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            Constructor constructor = policyClass.getConstructor();
+            return (Policy) constructor.newInstance();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new EntityConfigException("Could not create policy object for " + policyClass.getSimpleName(), e);
         }
     }

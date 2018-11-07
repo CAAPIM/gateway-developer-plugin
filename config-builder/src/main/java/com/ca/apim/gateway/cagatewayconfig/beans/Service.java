@@ -95,6 +95,6 @@ public class Service extends Folderable {
 
     @Override
     public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
-        setPolicy(getPath() + ".xml");
+        setPolicy(getPath());
     }
 }
