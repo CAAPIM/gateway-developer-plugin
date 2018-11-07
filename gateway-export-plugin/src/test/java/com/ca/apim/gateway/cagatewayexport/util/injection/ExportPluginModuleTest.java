@@ -80,12 +80,11 @@ class ExportPluginModuleTest {
         assertFalse(writers.isEmpty());
         assertEquals(writersBindings.size(), writers.size());
 
-//        final EntityWriterRegistry registry = injector.getInstance(EntityWriterRegistry.class);
-//        assertNotNull(registry);
-//        assertNotNull(registry.getEntityWriters());
-//        assertFalse(registry.getEntityWriters().isEmpty());
-//        assertEquals(registry.getEntityWriters().size(), writers.size());
-//        assertTrue(registry.getEntityWriters().containsAll(writers));
+        final EntityWriterRegistry registry = injector.getInstance(EntityWriterRegistry.class);
+        assertNotNull(registry);
+        assertNotNull(registry.getEntityWriters());
+        assertFalse(registry.getEntityWriters().isEmpty());
+        assertTrue(registry.getEntityWriters().containsAll(writers));
     }
 
     @Test
