@@ -7,12 +7,17 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -22,9 +27,11 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class PolicyWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
+    private PolicyConverterRegistry policyConverterRegistry;
 
     @Inject
-    PolicyWriter(DocumentFileUtils documentFileUtils) {
+    PolicyWriter(PolicyConverterRegistry policyConverterRegistry, DocumentFileUtils documentFileUtils) {
+        this.policyConverterRegistry = policyConverterRegistry;
         this.documentFileUtils = documentFileUtils;
     }
 
@@ -58,7 +65,12 @@ public class PolicyWriter implements EntityWriter {
         Path folderPath = policyFolder.toPath().resolve(bundle.getFolderTree().getPath(folder));
         documentFileUtils.createFolders(folderPath);
 
-        Path policyPath = folderPath.resolve(name + ".xml");
-        documentFileUtils.createFile(policy, policyPath, false);
+        PolicyConverter policyConverter = policyConverterRegistry.getFromPolicyElement(name, policy);
+        Path policyPath = folderPath.resolve(name + policyConverter.getPolicyTypeExtension());
+        try (InputStream policyStream = policyConverter.convertFromPolicy(policy)) {
+            FileUtils.copyInputStreamToFile(policyStream, policyPath.toFile());
+        } catch (IOException e) {
+            throw new WriteException("Unable to write assertion js policy", e);
+        }
     }
 }

@@ -86,7 +86,7 @@ public class DocumentFileUtils {
         }
     }
 
-    private void printXML(final Element node, final OutputStream outStream, boolean addNamespace) {
+    public void printXML(final Element node, final OutputStream outStream, boolean addNamespace) {
         if (addNamespace) {
             node.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
         }

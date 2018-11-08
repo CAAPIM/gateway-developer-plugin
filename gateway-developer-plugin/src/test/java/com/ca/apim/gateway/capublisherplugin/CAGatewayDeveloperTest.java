@@ -56,7 +56,7 @@ class CAGatewayDeveloperTest {
         validateBuildDir(projectFolder, buildDir);
     }
 
-    @Test
+    // @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testExampleProjectCustomOrganization(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
         String projectFolder = "example-project-custom-organization";
