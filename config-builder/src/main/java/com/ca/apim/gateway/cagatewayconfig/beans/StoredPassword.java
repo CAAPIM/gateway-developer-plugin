@@ -7,9 +7,13 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Named;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +28,8 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 @JsonInclude(NON_NULL)
 @Named("SECURE_PASSWORD")
 @ConfigurationFile(name = "stored-passwords", type = PROPERTIES)
-public class StoredPassword extends GatewayEntity implements PropertiesEntity {
+@EnvironmentType("PASSWORD")
+public class StoredPassword extends PropertiesEntity {
 
     private static final String PROPERTY_DESCRIPTION = "description";
     private static final String PROPERTY_TYPE = "type";
@@ -58,6 +63,11 @@ public class StoredPassword extends GatewayEntity implements PropertiesEntity {
         this.properties = properties;
     }
 
+    @Override
+    public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
+        addDefaultProperties();
+    }
+
     public void addDefaultProperties() {
         this.properties = fillDefaultProperties(this.getName(), this.properties);
     }
@@ -80,8 +90,18 @@ public class StoredPassword extends GatewayEntity implements PropertiesEntity {
     }
 
     @Override
+    public void setKey(String key) {
+        setName(key);
+    }
+
+    @Override
     public String getValue() {
         return EMPTY;
+    }
+
+    @Override
+    public void setValue(String value) {
+        setPassword(value);
     }
 
     public enum Type {

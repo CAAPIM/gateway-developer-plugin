@@ -7,14 +7,15 @@
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 
 import java.io.File;
 import java.util.Map;
@@ -22,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EntityLoaderBaseTest {
@@ -111,7 +112,7 @@ class EntityLoaderBaseTest {
         }
     }
 
-    static class TestEntity {
+    static class TestEntity extends GatewayEntity {
         String name;
 
         public TestEntity() {

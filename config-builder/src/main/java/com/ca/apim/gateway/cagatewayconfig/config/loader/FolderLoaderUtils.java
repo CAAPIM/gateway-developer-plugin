@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-class FolderLoaderUtils {
+public class FolderLoaderUtils {
 
     /**
      * Creates all the folders along the path for each folderable bean
@@ -29,7 +29,7 @@ class FolderLoaderUtils {
      * @param folderableMap The map of folderable entities in which the key is the path relative to the `policy` folder
      * @param <E> The folderable bean
      */
-    static <E extends Folderable> void createFolders(Bundle bundle, File rootDir, Map<String, E> folderableMap) {
+    public static <E extends Folderable> void createFolders(Bundle bundle, File rootDir, Map<String, E> folderableMap) {
         final File policyRootDir = getPolicyRootDir(rootDir);
         if (policyRootDir == null) return;
 

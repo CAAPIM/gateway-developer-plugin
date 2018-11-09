@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.ScheduledTask;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
@@ -17,17 +18,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
 class ScheduledTaskLoaderTest {
@@ -149,7 +152,7 @@ class ScheduledTaskLoaderTest {
     }
 
     private void load(String content, String fileTyoe, boolean expectException, boolean isOneTime) throws IOException {
-        ScheduledTaskLoader loader = new ScheduledTaskLoader(jsonTools);
+        EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(ScheduledTask.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File scheduledTaskFile = new File(configFolder, "scheduled-tasks." + fileTyoe);
         Files.touch(scheduledTaskFile);
@@ -166,7 +169,7 @@ class ScheduledTaskLoaderTest {
         check(bundle, isOneTime);
     }
 
-    private static void load(ScheduledTaskLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
+    private static void load(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
         loader.load(bundle, rootProjectDir.getRoot());
     }
 

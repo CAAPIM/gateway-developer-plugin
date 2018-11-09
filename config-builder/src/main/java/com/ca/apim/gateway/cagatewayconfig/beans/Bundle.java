@@ -23,8 +23,6 @@ public class Bundle {
     private final Map<Class, Map<String, ?>> entities = new HashMap<>();
 
     // some special things need their own maps
-    private final Map<String, String> staticProperties = new HashMap<>();
-    private final Map<String, String> environmentProperties = new HashMap<>();
     private final Map<String, SupplierWithIO<InputStream>> certificateFiles = new HashMap<>();
     private Set<Bundle> dependencies;
     private FolderTree folderTree;
@@ -85,20 +83,20 @@ public class Bundle {
         return getEntities(Encass.class);
     }
 
-    public void putAllStaticProperties(@NotNull Map<String, String> properties) {
-        this.staticProperties.putAll(properties);
+    public void putAllStaticProperties(@NotNull Map<String, ClusterProperty> properties) {
+        this.getEntities(ClusterProperty.class).putAll(properties);
     }
 
-    public Map<String, String> getStaticProperties() {
-        return staticProperties;
+    public Map<String, ClusterProperty> getStaticProperties() {
+        return getEntities(ClusterProperty.class);
     }
 
-    public void putAllEnvironmentProperties(@NotNull Map<String, String> properties) {
-        this.environmentProperties.putAll(properties);
+    public void putAllEnvironmentProperties(@NotNull Map<String, EnvironmentProperty> properties) {
+        this.getEntities(EnvironmentProperty.class).putAll(properties);
     }
 
-    public Map<String, String> getEnvironmentProperties() {
-        return environmentProperties;
+    public Map<String, EnvironmentProperty> getEnvironmentProperties() {
+        return getEntities(EnvironmentProperty.class);
     }
 
     public void putAllPolicyBackedServices(@NotNull Map<String, PolicyBackedService> policyBackedServices) {

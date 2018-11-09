@@ -9,9 +9,13 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 /**
  * An entity that can be represented by a key-value pair in a properties file
  */
-public interface PropertiesEntity {
+public abstract class PropertiesEntity extends GatewayEntity {
 
-    String getKey();
+    public abstract String getKey();
 
-    String getValue();
+    public abstract void setKey(String key);
+
+    public abstract String getValue();
+
+    public abstract void setValue(String value);
 }

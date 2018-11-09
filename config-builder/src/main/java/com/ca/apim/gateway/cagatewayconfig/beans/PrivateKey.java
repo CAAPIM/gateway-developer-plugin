@@ -6,21 +6,28 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.inject.Named;
+import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
+import static java.nio.file.Files.newInputStream;
 
 @JsonInclude(Include.NON_NULL)
 @SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
 @Named("SSG_KEY_ENTRY")
 @ConfigurationFile(name = "private-keys", type = JSON_YAML)
+@EnvironmentType("PRIVATE_KEY")
 public class PrivateKey extends GatewayEntity {
 
     public static final String SSL_DEFAULT_PRIVATE_KEY = "SSL";
@@ -120,6 +127,40 @@ public class PrivateKey extends GatewayEntity {
 
         public PrivateKey build() {
             return new PrivateKey(this);
+        }
+    }
+
+    @Override
+    public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
+        if (rootFolder != null) {
+            loadPrivateKey(this, new File(rootFolder, "config/privateKeys"), false);
+        }
+
+        setAlias(entityKey);
+        setKeyStoreType(KeyStoreType.fromName(getKeystore()));
+    }
+
+    public static void loadFromDirectory(Collection<PrivateKey> privateKeys, File privateKeysDirectory, boolean failOnMissingKeys) {
+        if (!privateKeys.isEmpty()) {
+            if (!privateKeysDirectory.exists() && failOnMissingKeys) {
+                throw new ConfigLoadException("Directory specified for private keys does not exist: " + privateKeysDirectory.getPath());
+            }
+
+            // load p12 file
+            if (privateKeysDirectory.exists()) {
+                privateKeys.forEach(k -> {
+                    loadPrivateKey(k, privateKeysDirectory, failOnMissingKeys);
+                });
+            }
+        }
+    }
+
+    private static void loadPrivateKey(PrivateKey k, File privateKeysDirectory, boolean failOnMissingKeys) {
+        File pk = new File(privateKeysDirectory, k.getAlias() + ".p12");
+        if (pk.exists()) {
+            k.setPrivateKeyFile(() -> newInputStream(pk.toPath()));
+        } else if (failOnMissingKeys) {
+            throw new ConfigLoadException("Private Key file for key '" + k.getAlias() + "' not found in the private keys directory specified: " + privateKeysDirectory.getPath());
         }
     }
 }

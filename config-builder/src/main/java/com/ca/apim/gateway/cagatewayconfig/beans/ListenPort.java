@@ -6,6 +6,7 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.inject.Named;
@@ -27,6 +28,7 @@ import static java.util.Collections.unmodifiableList;
 @JsonInclude(NON_NULL)
 @Named("SSG_CONNECTOR")
 @ConfigurationFile(name = "listen-ports", type = JSON_YAML)
+@EnvironmentType("LISTEN_PORT")
 public class ListenPort extends GatewayEntity {
 
     public static final String PROTOCOL_HTTP = "HTTP";

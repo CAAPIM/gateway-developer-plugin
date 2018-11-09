@@ -26,9 +26,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
 class EncassLoaderTest {
@@ -138,7 +140,7 @@ class EncassLoaderTest {
     }
 
     private void load(String content, String fileTyoe, boolean expectException) throws IOException {
-        EncassLoader loader = new EncassLoader(jsonTools, new IdGenerator());
+        EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(Encass.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "encass." + fileTyoe);
         Files.touch(identityProvidersFile);
@@ -155,7 +157,7 @@ class EncassLoaderTest {
         check(bundle);
     }
 
-    private static void load(EncassLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
+    private static void load(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
         loader.load(bundle, rootProjectDir.getRoot());
     }
 

@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class EncassWriterTest {
+class EncassArgsResultsOrderingTest {
 
     @Test
     void testGetBeanArgsAndResultsAreOrdered() {

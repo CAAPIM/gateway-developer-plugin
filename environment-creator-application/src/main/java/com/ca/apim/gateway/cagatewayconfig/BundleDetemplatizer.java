@@ -10,14 +10,15 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 
 import java.util.Base64;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static java.util.stream.Collectors.toMap;
 
 public class BundleDetemplatizer {
 
@@ -29,7 +30,7 @@ public class BundleDetemplatizer {
 
     public CharSequence detemplatizeBundleString(CharSequence bundleString) {
         //prefer to use string replacement instead of loading and parsing the bundle. This should perform faster and we are only replacing a limited amount of the bundle so it should be OK to do so.
-        Map<String, String> environmentVariables = bundle.getEnvironmentProperties();
+        Map<String, String> environmentVariables = bundle.getEnvironmentProperties().entrySet().stream().collect(toMap(Entry::getKey, e -> e.getValue().getValue()));
 
         //Replaces variables in set context variable assertions
         bundleString = replaceVariableInBundle(bundleString, environmentVariables,
@@ -68,7 +69,7 @@ public class BundleDetemplatizer {
     }
 
     private Map<String, String> createIdProviderNameGoid(Bundle bundle) {
-        Map<String, String> idProviders = bundle.getIdentityProviders().entrySet().stream().collect(Collectors.toMap(
+        Map<String, String> idProviders = bundle.getIdentityProviders().entrySet().stream().collect(toMap(
                 Map.Entry::getKey,
                 e -> e.getValue().getId()));
         idProviders.put(INTERNAL_IDP_NAME, INTERNAL_IDP_ID);

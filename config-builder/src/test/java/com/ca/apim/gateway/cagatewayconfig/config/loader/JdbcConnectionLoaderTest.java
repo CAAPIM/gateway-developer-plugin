@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.JdbcConnection;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
@@ -17,8 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
@@ -26,10 +27,12 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
 class JdbcConnectionLoaderTest {
@@ -126,7 +129,7 @@ class JdbcConnectionLoaderTest {
     }
 
     private void loadJdbcConnection(String content, String fileType, Class<? extends Exception> expectException) throws IOException {
-        JdbcConnectionLoader loader = new JdbcConnectionLoader(jsonTools);
+        EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(JdbcConnection.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "jdbc-connections." + fileType);
         Files.touch(identityProvidersFile);
@@ -143,7 +146,7 @@ class JdbcConnectionLoaderTest {
         checkJdbcConnection(bundle);
     }
 
-    private static void loadJdbcConnections(JdbcConnectionLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
+    private static void loadJdbcConnections(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
         loader.load(bundle, rootProjectDir.getRoot());
     }
 

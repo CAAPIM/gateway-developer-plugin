@@ -6,8 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 
@@ -40,6 +42,18 @@ public class GatewayEntity {
     @JsonIgnore
     public String getMappingValue() {
         return getName();
+    }
+
+    /**
+     * Override this method to run anything after each entity is loaded from config files.
+     *
+     * @param entityKey the key for the entity
+     * @param bundle the bundle object
+     * @param rootFolder the root folder location, null if loading from environment
+     * @param idGenerator the id generator instance
+     */
+    public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
+        //
     }
 
     /**

@@ -6,7 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -23,6 +25,7 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @JsonInclude(Include.NON_NULL)
 @Named("SERVICE")
 @ConfigurationFile(name = "services", type = JSON_YAML)
+@EnvironmentType("SERVICE")
 public class Service extends Folderable {
 
     private String url;

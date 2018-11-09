@@ -7,22 +7,24 @@
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.PropertiesEntity;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.google.common.collect.ImmutableMap;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
-public abstract class PropertiesLoaderBase implements EntityLoader {
+public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implements EntityLoader {
 
     private FileUtils fileUtils;
+    private final IdGenerator idGenerator;
 
-    PropertiesLoaderBase(final FileUtils fileUtils) {
+    PropertiesLoaderBase(final FileUtils fileUtils, final IdGenerator idGenerator) {
         this.fileUtils = fileUtils;
+        this.idGenerator = idGenerator;
     }
 
     @Override
@@ -35,15 +37,28 @@ public abstract class PropertiesLoaderBase implements EntityLoader {
             } catch (IOException e) {
                 throw new ConfigLoadException("Could not load properties file (" + propertiesFile + "): " + e.getMessage(), e);
             }
-            Map<String, String> map = new HashMap<>();
-            properties.forEach((k, v) -> map.put(k.toString(), v.toString()));
-            this.putToBundle(bundle, map);
+            properties.forEach((k, v) -> putToBundle(bundle, rootDir, k.toString(), v.toString()));
         }
     }
 
     @Override
     public void load(Bundle bundle, String name, String value) {
-        putToBundle(bundle, ImmutableMap.<String, String>builder().put(name, value).build());
+        putToBundle(bundle, null, name, value);
+    }
+
+    private void putToBundle(Bundle bundle, File rootDir, String key, String value) {
+        P entity;
+        try {
+            entity = this.getEntityClass().getConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new ConfigLoadException("Could not create entity instance for " + this.getEntityClass().getSimpleName(), e);
+        }
+
+        entity.setKey(key);
+        entity.setValue(value);
+        entity.postLoad(key, bundle, rootDir, idGenerator);
+
+        bundle.getEntities(this.getEntityClass()).put(key, entity);
     }
 
     /**
@@ -52,10 +67,8 @@ public abstract class PropertiesLoaderBase implements EntityLoader {
     protected abstract String getFilePath();
 
     /**
-     * Put the loaded properties into the bundle.
-     *
-     * @param bundle The bundle to load properties into
-     * @param properties map of properties
+     * @return the entity class of this loader
      */
-    protected abstract void putToBundle(Bundle bundle, Map<String, String> properties);
+    protected abstract Class<P> getEntityClass();
+
 }

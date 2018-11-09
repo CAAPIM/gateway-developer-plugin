@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -80,9 +82,9 @@ class BundleDetemplatizerTest {
 
     @Test
     void detemplatizeBundleString() {
-        Map<String,String> env = new HashMap<>();
-        env.put("myEnvironmentVariable", "abc");
-        env.put("anotherEnvVar", "qwe");
+        Map<String,EnvironmentProperty> env = new HashMap<>();
+        env.put("myEnvironmentVariable", new EnvironmentProperty("myEnvironmentVariable","abc", Type.LOCAL));
+        env.put("anotherEnvVar", new EnvironmentProperty("anotherEnvVar", "qwe", Type.LOCAL));
         String testIdpGoid = "8263a394a3782fa4984bcffc2363b8cc";
         Bundle bundle = new Bundle();
         bundle.putAllEnvironmentProperties(env);
@@ -153,8 +155,8 @@ class BundleDetemplatizerTest {
 
     @Test
     void detemplatizeBundleStringMissingEnv() {
-        Map<String,String> env = new HashMap<>();
-        env.put("myEnvironmentVariable", "abc");
+        Map<String,EnvironmentProperty> env = new HashMap<>();
+        env.put("myEnvironmentVariable", new EnvironmentProperty("myEnvironmentVariable","abc", Type.LOCAL));
         Bundle bundle = new Bundle();
         bundle.putAllEnvironmentProperties(env);
 
