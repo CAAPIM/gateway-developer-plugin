@@ -6,21 +6,35 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Named;
+import java.io.File;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.TreeSet;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static java.util.stream.Collectors.toCollection;
 
 @JsonInclude(NON_NULL)
 @Named("ENCAPSULATED_ASSERTION")
+@ConfigurationFile(name = "encass", type = JSON_YAML)
 public class Encass extends GatewayEntity {
+
     private String policy;
     private Set<EncassArgument> arguments;
     private Set<EncassResult> results;
+    @JsonIgnore
     private String guid;
+    @JsonIgnore
     private String policyId;
+    @JsonIgnore
     private String path;
 
     public Set<EncassArgument> getArguments() {
@@ -69,5 +83,16 @@ public class Encass extends GatewayEntity {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    @Override
+    public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
+        sortArgumentsAndResults();
+    }
+
+    @VisibleForTesting
+    public void sortArgumentsAndResults() {
+        setArguments(getArguments().stream().collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassArgument::getName)))));
+        setResults(getResults().stream().collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassResult::getName)))));
     }
 }

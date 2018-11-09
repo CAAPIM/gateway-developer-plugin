@@ -6,11 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriterHelper.write;
 import static java.util.Collections.unmodifiableCollection;
 
 @Singleton
@@ -19,8 +26,19 @@ public class EntityWriterRegistry {
     private final Collection<EntityWriter> entityWriters;
 
     @Inject
-    public EntityWriterRegistry(final Set<EntityWriter> writers) {
-        this.entityWriters = unmodifiableCollection(writers);
+    public EntityWriterRegistry(final Set<EntityWriter> writers, final DocumentFileUtils documentFileUtils, final JsonTools jsonTools) {
+        // add the implemented writers
+        Set<EntityWriter> allWriters = new HashSet<>(writers);
+
+        // create generic writers for the entities configured to not have a specific implementation
+        EntityTypeRegistry entityTypeRegistry = ConfigBuilderModule.getInstance(EntityTypeRegistry.class);
+        entityTypeRegistry.getEntityTypeMap().values().forEach(info -> {
+            if (info.getFileName() != null && info.getFileType() != null) {
+                allWriters.add((bundle, rootFolder) -> write(bundle, rootFolder, info, documentFileUtils, jsonTools));
+            }
+        });
+
+        this.entityWriters = unmodifiableCollection(allWriters);
     }
 
     public Collection<EntityWriter> getEntityWriters() {

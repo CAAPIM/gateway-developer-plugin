@@ -6,7 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType;
+import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.unmodifiableMap;
+import static java.util.Optional.ofNullable;
 
 /**
  *
@@ -22,15 +24,17 @@ import static java.util.Collections.unmodifiableMap;
 @Singleton
 public class EntityTypeRegistry {
 
-    private final Map<String, Class<? extends GatewayEntity>> entityTypeMap;
+    private static final GatewayEntityInfo NO_INFO = new GatewayEntityInfo();
+    private final Map<String, GatewayEntityInfo> entityTypeMap;
 
     @Inject
     public EntityTypeRegistry(final Reflections reflections) {
-        Map<String, Class<? extends GatewayEntity>> entityTypes = new HashMap<>();
+        Map<String, GatewayEntityInfo> entityTypes = new HashMap<>();
         reflections.getSubTypesOf(GatewayEntity.class).forEach(e -> {
             String type = EntityUtils.getEntityType(e);
             if (type != null) {
-                entityTypes.put(type, e);
+                final Pair<String, FileType> configFileInfo = EntityUtils.getEntityConfigFileInfo(e);
+                entityTypes.put(type, new GatewayEntityInfo(e, configFileInfo.getLeft(), configFileInfo.getRight()));
             }
         });
 
@@ -38,11 +42,39 @@ public class EntityTypeRegistry {
     }
 
     public Class<? extends GatewayEntity> getEntityClass(String entityType) {
-        return entityTypeMap.get(entityType);
+        return ofNullable(entityTypeMap.get(entityType)).orElse(NO_INFO).entityClass;
     }
 
-    @VisibleForTesting
-    public Map<String, Class<? extends GatewayEntity>> getEntityTypeMap() {
+    public Map<String, GatewayEntityInfo> getEntityTypeMap() {
         return entityTypeMap;
+    }
+
+    public static class GatewayEntityInfo {
+
+        private Class<? extends GatewayEntity> entityClass;
+        private String fileName;
+        private FileType fileType;
+
+        private GatewayEntityInfo() {
+        }
+
+        private GatewayEntityInfo(Class<? extends GatewayEntity> entityClass, String fileName, FileType fileType) {
+            this.entityClass = entityClass;
+            this.fileName = fileName;
+            this.fileType = fileType;
+        }
+
+        @SuppressWarnings("unchecked")
+        public Class<GatewayEntity> getEntityClass() {
+            return (Class<GatewayEntity>) entityClass;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+
+        public FileType getFileType() {
+            return fileType;
+        }
     }
 }

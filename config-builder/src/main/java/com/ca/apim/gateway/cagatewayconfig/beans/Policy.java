@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.w3c.dom.Element;
 
@@ -21,11 +22,16 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 public class Policy extends Folderable {
 
     private String path;
+    @JsonIgnore
     private String policyXML;
+    @JsonIgnore
     private String guid;
+    @JsonIgnore
     private Element policyDocument;
+    @JsonIgnore
     private final Set<Policy> dependencies = new HashSet<>();
     private String tag;
+    @JsonIgnore
     private PolicyType policyType;
 
     public Policy() {}

@@ -6,24 +6,34 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.w3c.dom.Element;
 
 import javax.inject.Named;
+import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
+
 @JsonInclude(Include.NON_NULL)
 @Named("SERVICE")
+@ConfigurationFile(name = "services", type = JSON_YAML)
 public class Service extends Folderable {
 
     private String url;
     private String policy;
     private Set<String> httpMethods;
     private Map<String,String> properties;
+    @JsonIgnore
     private Element serviceDetailsElement;
+    @JsonIgnore
     private Element policyXML;
+    @JsonIgnore
     private String path;
 
     public String getUrl() {
@@ -76,5 +86,15 @@ public class Service extends Folderable {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    @Override
+    public String getMappingValue() {
+        return getPath();
+    }
+
+    @Override
+    public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
+        setPolicy(getPath());
     }
 }

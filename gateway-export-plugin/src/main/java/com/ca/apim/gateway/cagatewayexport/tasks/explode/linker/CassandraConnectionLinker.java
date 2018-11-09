@@ -21,7 +21,7 @@ public class CassandraConnectionLinker implements EntityLinker<CassandraConnecti
             return;
         }
 
-        StoredPassword storedPassword = bundle.getEntities(StoredPassword.class).get(entity.getPasswordId());
+        StoredPassword storedPassword = bundle.getEntities(StoredPassword.class).values().stream().filter(s -> entity.getPasswordId().equals(s.getId())).findFirst().orElse(null);
         if (storedPassword == null) {
             throw new LinkerException("Could not find Stored Password for Cassandra Connection: " + entity.getName() + ". Password ID: " + entity.getPasswordId());
         }

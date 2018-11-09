@@ -84,7 +84,6 @@ class ExportPluginModuleTest {
         assertNotNull(registry);
         assertNotNull(registry.getEntityWriters());
         assertFalse(registry.getEntityWriters().isEmpty());
-        assertEquals(registry.getEntityWriters().size(), writers.size());
         assertTrue(registry.getEntityWriters().containsAll(writers));
     }
 

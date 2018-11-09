@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.inject.Named;
@@ -13,14 +14,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * Define stored passwords.
  */
 @JsonInclude(NON_NULL)
 @Named("SECURE_PASSWORD")
-public class StoredPassword extends GatewayEntity {
+@ConfigurationFile(name = "stored-passwords", type = PROPERTIES)
+public class StoredPassword extends GatewayEntity implements PropertiesEntity {
 
     private static final String PROPERTY_DESCRIPTION = "description";
     private static final String PROPERTY_TYPE = "type";
@@ -68,6 +72,16 @@ public class StoredPassword extends GatewayEntity {
         properties.putIfAbsent(PROPERTY_USAGE_FROM_VARIABLE, true);
 
         return properties;
+    }
+
+    @Override
+    public String getKey() {
+        return getName();
+    }
+
+    @Override
+    public String getValue() {
+        return EMPTY;
     }
 
     public enum Type {

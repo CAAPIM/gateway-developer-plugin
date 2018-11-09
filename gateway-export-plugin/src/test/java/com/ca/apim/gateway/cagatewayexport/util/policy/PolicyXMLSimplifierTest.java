@@ -168,7 +168,8 @@ class PolicyXMLSimplifierTest {
         return setVariableAssertion;
     }
 
-    @NotNull private Element createAuthenticationAssertionElement(String id) {
+    @NotNull
+    private Element createAuthenticationAssertionElement(String id) {
         Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         return createElementWithChildren(
                 document,

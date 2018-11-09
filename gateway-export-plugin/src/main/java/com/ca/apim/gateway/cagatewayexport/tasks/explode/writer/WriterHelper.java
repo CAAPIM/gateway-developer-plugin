@@ -6,6 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry.GatewayEntityInfo;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.PropertiesEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
@@ -15,19 +19,57 @@ import com.fasterxml.jackson.databind.type.MapType;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
 import static com.ca.apim.gateway.cagatewayexport.util.properties.PropertyFileUtils.loadExistingProperties;
 import static java.lang.String.format;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 class WriterHelper {
 
+    private static final String CONFIG_DIRECTORY = "config";
     private static final String ERROR_WRITE = "Exception writing %s config file";
 
     private WriterHelper() {
+    }
+
+    static void write(Bundle bundle, File rootFolder, GatewayEntityInfo info, DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+        if (info.getFileType() == JSON_YAML) {
+            writeFile(rootFolder, documentFileUtils, jsonTools, bundle.getEntities(info.getEntityClass()), info.getFileName(), info.getEntityClass());
+        } else if (info.getFileType() == PROPERTIES) {
+            writePropertiesFile(rootFolder, documentFileUtils, bundle.getEntities(info.getEntityClass()), info.getFileName());
+        } else {
+            throw new WriteException("Unsupported file type: " + info.getFileType());
+        }
+    }
+
+
+    /**
+     * Write beans map to config folder into rootFolder specified, using specified filename.
+     *
+     * @param rootFolder root folder
+     * @param documentFileUtils file utility
+     * @param beans beans to be written as properties files
+     * @param fileName name of the file
+     */
+    private static <B extends GatewayEntity> void writePropertiesFile(File rootFolder, DocumentFileUtils documentFileUtils, Map<String, B> beans, String fileName) {
+        File configFolder = new File(rootFolder, CONFIG_DIRECTORY);
+        documentFileUtils.createFolder(configFolder.toPath());
+
+        Properties properties = new Properties();
+        properties.putAll(beans
+                .values()
+                .stream()
+                .peek(b -> b.preWrite(configFolder, documentFileUtils))
+                .map(PropertiesEntity.class::cast)
+                .collect(toMap(PropertiesEntity::getKey, PropertiesEntity::getValue)));
+
+        writePropertiesFile(rootFolder, documentFileUtils, properties, fileName);
     }
 
     /**
@@ -43,7 +85,7 @@ class WriterHelper {
             return;
         }
 
-        File configFolder = new File(rootFolder, "config");
+        File configFolder = new File(rootFolder, CONFIG_DIRECTORY);
         documentFileUtils.createFolder(configFolder.toPath());
 
         File propertiesFile = new File(configFolder, fileName + ".properties");
@@ -77,13 +119,22 @@ class WriterHelper {
      * @param beanClass The class type of the bean
      * @param <B> type of bean
      */
-    static <B> void writeFile(File rootFolder, DocumentFileUtils documentFileUtils, JsonTools jsonTools, Map<String, B> beans, String fileName, Class<B> beanClass) {
+    static <B extends GatewayEntity> void writeFile(File rootFolder, DocumentFileUtils documentFileUtils, JsonTools jsonTools, Map<String, B> beans, String fileName, Class<B> beanClass) {
         if (beans.isEmpty()) {
             return;
         }
 
-        File configFolder = new File(rootFolder, "config");
+        File configFolder = new File(rootFolder, CONFIG_DIRECTORY);
         documentFileUtils.createFolder(configFolder.toPath());
+
+        // remap the beans by name and run pre-write methods
+        LinkedHashMap<String, B> beansByName = new LinkedHashMap<>();
+        beans.forEach((k, v) -> {
+            v.preWrite(configFolder, documentFileUtils);
+            beansByName.put(v.getMappingValue(), v);
+        });
+        beans = beansByName;
+
         ObjectWriter objectWriter = jsonTools.getObjectWriter();
 
         // check if a current file exists and merge contents
@@ -116,38 +167,6 @@ class WriterHelper {
         } catch (IOException e) {
             throw new WriteException(format(ERROR_WRITE, fileName), e);
         }
-    }
-
-    /**
-     * Copy one set to new one, returning null if the original is empty or null.
-     *
-     * @param originalSet original set of beans
-     * @return empty list if originalSet is null, otherwise new linkedhashset with the contents.
-     * @param <B> type of bean
-     */
-    static <B> Set<B> copySet(Set<B> originalSet) {
-        if (originalSet == null) {
-            return emptySet();
-        }
-
-        return new LinkedHashSet<>(originalSet);
-    }
-
-    /**
-     * Copy one map to new one, returning null if the original is empty or null.
-     *
-     * @param originalMap original map of beans
-     * @return empty map if originalMap is null, otherwise new linked hash map with the contents.
-     * @param <K> type of key
-     * @param <V> type of value
-     */
-    static <K, V> Map<K, V> copyMap(Map<K, V> originalMap) {
-        if (originalMap == null) {
-            return emptyMap();
-        }
-
-        // keeping original order if any
-        return new LinkedHashMap<>(originalMap);
     }
 
 }

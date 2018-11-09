@@ -12,11 +12,19 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.inject.Singleton;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.nodeList;
 
 @Singleton
 public class ServiceLoader implements BundleEntityLoader {
@@ -44,6 +52,32 @@ public class ServiceLoader implements BundleEntityLoader {
         serviceEntity.setParentFolder(folder);
         serviceEntity.setServiceDetailsElement(serviceDetails);
         serviceEntity.setPolicy(servicePolicyString);
+
+        Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);
+        Element httpMappingElement = getSingleChildElement(serviceMappingsElement, HTTP_MAPPING);
+        Element urlPatternElement = getSingleChildElement(httpMappingElement, URL_PATTERN);
+        serviceEntity.setUrl(urlPatternElement.getTextContent());
+        Element verbsElement = getSingleChildElement(httpMappingElement, VERBS);
+        NodeList verbs = verbsElement.getElementsByTagName(VERB);
+        Set<String> httpMethods = new HashSet<>();
+        for (Node verb : nodeList(verbs)) {
+            httpMethods.add(verb.getTextContent());
+        }
+        serviceEntity.setHttpMethods(httpMethods);
+
+        Element servicePropertiesElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), PROPERTIES);
+        NodeList propertyNodes = servicePropertiesElement.getElementsByTagName(PROPERTY);
+        Map<String, String> properties = new HashMap<>();
+        for (int i = 0; i < propertyNodes.getLength(); i++) {
+            if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.")) {
+                String propertyValue = null;
+                if (!propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.ENV.")) {
+                    propertyValue = getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent();
+                }
+                properties.put(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(9), propertyValue);
+            }
+        }
+        serviceEntity.setProperties(properties);
 
         bundle.getServices().put(name, serviceEntity);
     }

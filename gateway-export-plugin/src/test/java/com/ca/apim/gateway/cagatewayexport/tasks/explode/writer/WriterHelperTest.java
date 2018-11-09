@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -170,6 +171,7 @@ class WriterHelperTest {
                 .setAttributeNumber(1)
                 .setAttributeList(asList("GG", "WW", "77"))
                 .setAttributeMap(ImmutableMap.of("PP", "QQ", "RR", "SS", "TT", "UU"));
+        bean.setName("Test1");
         final Map<String, TestBean> beans = ImmutableMap.of("Test1", bean);
 
         this.jsonTools.setOutputType(type);
@@ -219,12 +221,14 @@ class WriterHelperTest {
                 .setAttributeList(asList("GG", "WW", "77"))
                 .setAttributeSet(toSet("GG", "WW", "77"))
                 .setAttributeMap(ImmutableMap.of("PP", "QQ", "RR", "SS", "TT", "UU"));
+        bean.setName("Test1");
         final TestBean beanToMerge = new TestBean()
                 .setAttributeString("ValueMerged")
                 .setAttributeNumber(654321)
                 .setAttributeList(asList("GG", "WW", "77"))
                 .setAttributeSet(toSet("GG", "WW", "77"))
                 .setAttributeMap(ImmutableMap.of("XX", "QQ", "RR", "SS", "ZZ", "UU"));
+        beanToMerge.setName("Test");
         final Map<String, TestBean> beans = new HashMap<>(ImmutableMap.of("Test1", bean, "Test", beanToMerge));
 
         this.jsonTools.setOutputType(type);
@@ -357,7 +361,7 @@ class WriterHelperTest {
     }
 
     @JsonInclude(NON_NULL)
-    public static class TestBean {
+    public static class TestBean extends GatewayEntity {
 
         private static final TypeReference<LinkedHashMap<String, TestBean>> MAPPING = new TypeReference<LinkedHashMap<String, TestBean>>() {
         };
@@ -373,6 +377,7 @@ class WriterHelperTest {
         }
 
         TestBean(String attributeString) {
+            setName(attributeString);
             this.attributeString = attributeString;
         }
 

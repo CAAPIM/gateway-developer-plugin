@@ -6,18 +6,27 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.ImmutableMap;
 
 import javax.inject.Named;
+import java.io.File;
 import java.math.BigInteger;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.writeCertificateData;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.emptyMap;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
+@JsonInclude(Include.NON_NULL)
 @Named("TRUSTED_CERT")
+@ConfigurationFile(name = "trusted-certs", type = JSON_YAML)
 public class TrustedCert extends GatewayEntity {
 
     private boolean verifyHostname;
@@ -176,5 +185,16 @@ public class TrustedCert extends GatewayEntity {
         public TrustedCert build() {
             return new TrustedCert(this);
         }
+    }
+
+    @Override
+    public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
+        final File certFolder = new File(configFolder, "certificates");
+        documentFileUtils.createFolder(certFolder.toPath());
+
+        writeCertificateData(certFolder, getName(), getCertificateData().getEncodedData());
+
+        // remove the certificate data so it dont get written to the file
+        this.certificateData = null;
     }
 }

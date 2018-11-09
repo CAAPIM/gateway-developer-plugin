@@ -5,6 +5,7 @@
  */
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.inject.Named;
@@ -13,6 +14,7 @@ import java.util.Set;
 import java.util.List;
 
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSettings.*;
 import static java.util.Arrays.asList;
@@ -24,6 +26,7 @@ import static java.util.Collections.unmodifiableList;
  */
 @JsonInclude(NON_NULL)
 @Named("SSG_CONNECTOR")
+@ConfigurationFile(name = "listen-ports", type = JSON_YAML)
 public class ListenPort extends GatewayEntity {
 
     public static final String PROTOCOL_HTTP = "HTTP";

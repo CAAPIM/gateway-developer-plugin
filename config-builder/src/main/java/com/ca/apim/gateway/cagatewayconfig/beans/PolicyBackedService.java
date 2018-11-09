@@ -6,10 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+
 import javax.inject.Named;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
+
 @Named("POLICY_BACKED_SERVICE")
+@ConfigurationFile(name = "policy-backed-services", type = JSON_YAML)
 public class PolicyBackedService extends GatewayEntity {
     private String interfaceName;
     private Set<PolicyBackedServiceOperation> operations;

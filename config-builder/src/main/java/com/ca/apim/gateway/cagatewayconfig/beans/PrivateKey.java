@@ -6,17 +6,21 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.inject.Named;
 import java.io.InputStream;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 @SuppressWarnings("squid:S2068") // sonarcloud believes 'password' field names may have hardcoded passwords
 @Named("SSG_KEY_ENTRY")
+@ConfigurationFile(name = "private-keys", type = JSON_YAML)
 public class PrivateKey extends GatewayEntity {
 
     public static final String SSL_DEFAULT_PRIVATE_KEY = "SSL";
@@ -24,6 +28,7 @@ public class PrivateKey extends GatewayEntity {
     private String keystore;
     private String algorithm;
     private String keyPassword;
+    @JsonIgnore
     private KeyStoreType keyStoreType;
     private SupplierWithIO<InputStream> privateKeyFile;
 
@@ -37,6 +42,7 @@ public class PrivateKey extends GatewayEntity {
         setAlgorithm(builder.algorithm);
     }
 
+    @JsonIgnore
     public String getAlias() {
         return this.getName();
     }

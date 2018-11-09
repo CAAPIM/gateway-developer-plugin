@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -13,11 +14,13 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import javax.inject.Named;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.util.Arrays.stream;
 
 @JsonInclude(NON_EMPTY)
 @Named("ID_PROVIDER_CONFIG")
+@ConfigurationFile(name = "identity-providers", type = JSON_YAML)
 public class IdentityProvider extends GatewayEntity {
 
     public static final String INTERNAL_IDP_ID = "0000000000000000fffffffffffffffe";
