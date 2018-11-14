@@ -6,11 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.JdbcConnection;
-import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
-import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
-import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -211,7 +208,7 @@ class BundleEnvironmentValidatorTest {
     @Test
     void validateEnvironmentProvidedClusterProperty() {
         Bundle environmentBundle = new Bundle();
-        environmentBundle.getEnvironmentProperties().put(PREFIX_GATEWAY + "myProperty", "value");
+        environmentBundle.getEnvironmentProperties().put(PREFIX_GATEWAY + "myProperty", new EnvironmentProperty("myOtherProperty", "value", Type.GLOBAL));
         BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
 
         bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
@@ -239,7 +236,7 @@ class BundleEnvironmentValidatorTest {
     @Test
     void validateEnvironmentProvidedMissingClusterProperty() {
         Bundle environmentBundle = new Bundle();
-        environmentBundle.getEnvironmentProperties().put("myOtherProperty", "value");
+        environmentBundle.getEnvironmentProperties().put("myOtherProperty", new EnvironmentProperty("myOtherProperty", "value", Type.LOCAL));
         BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
         Executable validateBundle = () -> bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
                 "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +

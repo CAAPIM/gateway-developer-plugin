@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -27,6 +28,7 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 @JsonInclude(Include.NON_NULL)
 @Named("TRUSTED_CERT")
 @ConfigurationFile(name = "trusted-certs", type = JSON_YAML)
+@EnvironmentType("CERTIFICATE")
 public class TrustedCert extends GatewayEntity {
 
     private boolean verifyHostname;

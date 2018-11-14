@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.PropertiesEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -71,9 +72,9 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildClusterPropertyEntity(String name, String value, Document document) {
+    private Entity buildClusterPropertyEntity(String name, PropertiesEntity value, Document document) {
         String id = idGenerator.generate();
-        Entity entity = EntityBuilderHelper.getEntityWithNameMapping(CLUSTER_PROPERTY_TYPE, name, id, buildClusterPropertyElement(name, id, value, document));
+        Entity entity = EntityBuilderHelper.getEntityWithNameMapping(CLUSTER_PROPERTY_TYPE, name, id, buildClusterPropertyElement(name, id, value.getValue(), document));
         entity.setMappingProperty(FAIL_ON_EXISTING, true);
         return entity;
     }

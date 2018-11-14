@@ -7,21 +7,41 @@
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.Extensions;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.*;
 
+@Extensions({ @ExtendWith(MockitoExtension.class) })
 class EntityLoaderRegistryTest {
+
+    @Mock
+    private EntityTypeRegistry entityTypeRegistry;
 
     @Test
     void getLoader() {
+        when(entityTypeRegistry.getEntityTypeMap()).thenReturn(Collections.emptyMap());
+
         EntityLoaderRegistry registry = new EntityLoaderRegistry(
-                Stream.of(new TestEntityLoader()).collect(Collectors.toSet())
+                Stream.of(new TestEntityLoader()).collect(Collectors.toSet()),
+                entityTypeRegistry,
+                JsonTools.INSTANCE,
+                new IdGenerator(),
+                FileUtils.INSTANCE
         );
 
         assertNotNull(registry.getEntityLoaders());

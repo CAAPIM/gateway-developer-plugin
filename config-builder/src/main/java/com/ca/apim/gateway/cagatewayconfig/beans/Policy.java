@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.w3c.dom.Element;
@@ -13,8 +14,12 @@ import org.w3c.dom.Element;
 import javax.inject.Named;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @JsonInclude(NON_EMPTY)
@@ -166,6 +171,29 @@ public class Policy extends Folderable {
 
         public Policy build() {
             return new Policy(this);
+        }
+    }
+
+    static void checkRepeatedTags(Bundle bundle, PolicyType policyType) {
+        Set<String> errors = new HashSet<>();
+        bundle.getPolicies().values()
+                .stream()
+                .filter(p -> p.getTag() != null)
+                .collect(groupingBy(Policy::getTag, Collectors.mapping(identity(), toList())))
+                .forEach((key, value) -> {
+                    if (value.size() > 1) {
+                        errors.add(
+                                String.format(
+                                        "Found more then one %s policy with tag '%s': [%s]",
+                                        policyType.getType(),
+                                        key,
+                                        String.join(", ", value.stream().map(Policy::getPath).collect(toList())
+                                )
+                        ));
+                    }
+                });
+        if (!errors.isEmpty()) {
+            throw new ConfigLoadException(String.join("\n", errors));
         }
     }
 }

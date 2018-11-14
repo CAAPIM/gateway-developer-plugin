@@ -28,6 +28,7 @@ import static java.lang.Long.parseLong;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
+import static org.apache.commons.lang3.time.DateFormatUtils.format;
 import static org.apache.commons.lang3.time.DateUtils.parseDateStrictly;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
@@ -65,6 +66,7 @@ public class BuilderUtils {
         Element propertyElement = document.createElement(PROPERTY);
         propertyElement.setAttribute(ATTRIBUTE_KEY, key);
         String elementType;
+        String elementValue = value.toString();
 
         if (String.class.isAssignableFrom(value.getClass())) {
             elementType = STRING_VALUE;
@@ -74,12 +76,15 @@ public class BuilderUtils {
             elementType = LONG_VALUE;
         } else if (Boolean.class.isAssignableFrom(value.getClass())) {
             elementType = BOOLEAN_VALUE;
+        } else if (Date.class.isAssignableFrom(value.getClass())) {
+            elementType = DATE_VALUE;
+            elementValue = format((Date) value, DATE_VALUE_PATTERN);
         } else {
             throw new EntityBuilderException("Could not create property (" + key + ") for value type: " + value.getClass().getTypeName());
         }
 
         Element valueElement = document.createElement(elementType);
-        valueElement.setTextContent(value.toString());
+        valueElement.setTextContent(elementValue);
         propertyElement.appendChild(valueElement);
         return propertyElement;
     }

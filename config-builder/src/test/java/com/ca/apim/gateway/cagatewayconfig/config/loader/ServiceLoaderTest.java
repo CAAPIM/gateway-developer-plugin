@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
@@ -16,9 +17,8 @@ import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
@@ -26,7 +26,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import static org.junit.Assert.*;
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,7 +50,7 @@ class ServiceLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void loadJSON(TemporaryFolder temporaryFolder) throws IOException {
-        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
+        EntityLoader serviceLoader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(Service.class));
         String json = "{\n" +
                 "    \"" + SERVICE_NAME_1 + "\": {\n" +
                 "        \"policy\": \"projectName/test\", \n" +
@@ -92,7 +95,7 @@ class ServiceLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void loadYAML(TemporaryFolder temporaryFolder) throws IOException {
-        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
+        EntityLoader serviceLoader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(Service.class));
         String json = SERVICE_NAME_1 + ":\n" +
                 "  policy: \"projectName/test\"\n" +
                 "  httpMethods:\n" +
@@ -127,7 +130,7 @@ class ServiceLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testBothJsonAndYaml(TemporaryFolder temporaryFolder) throws IOException {
-        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
+        EntityLoader serviceLoader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(Service.class));
         File configFolder = temporaryFolder.createDirectory("config");
         File servicesJsonFile = new File(configFolder, "services.json");
         Files.touch(servicesJsonFile);
@@ -141,7 +144,7 @@ class ServiceLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testNoServices(TemporaryFolder temporaryFolder) {
-        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
+        EntityLoader serviceLoader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(Service.class));
 
         Bundle bundle = new Bundle();
         serviceLoader.load(bundle, temporaryFolder.getRoot());
@@ -151,7 +154,7 @@ class ServiceLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void badJson(TemporaryFolder temporaryFolder) throws IOException {
-        ServiceLoader serviceLoader = new ServiceLoader(jsonTools);
+        EntityLoader serviceLoader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(Service.class));
         String json = "{\n" +
                 "    \"example project/example.xml\": {\n" +
                 "        \"httpMethods\": [\n" +
@@ -181,13 +184,6 @@ class ServiceLoaderTest {
     }
 
     private void verifyConfig(Bundle bundle) {
-        assertEquals(4, bundle.getFolders().size());
-        //Created four new folders
-        assertTrue(bundle.getFolders().containsKey(""));
-        assertTrue(bundle.getFolders().containsKey("projectName/"));
-        assertTrue(bundle.getFolders().containsKey("projectName/v1/"));
-        assertTrue(bundle.getFolders().containsKey("projectName/v1/subfolder/"));
-
         Service service1 = bundle.getServices().get(SERVICE_NAME_1);
         Service service2 = bundle.getServices().get(SERVICE_NAME_2);
 

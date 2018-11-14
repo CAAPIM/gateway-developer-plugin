@@ -6,10 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.inject.Named;
+import java.io.File;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
@@ -22,6 +26,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 @Named("JDBC_CONNECTION")
 @ConfigurationFile(name = "jdbc-connections", type = JSON_YAML)
+@EnvironmentType("JDBC_CONNECTION")
 public class JdbcConnection extends GatewayEntity {
 
     private String driverClass;
@@ -178,6 +183,13 @@ public class JdbcConnection extends GatewayEntity {
 
         public JdbcConnection build() {
             return new JdbcConnection(this);
+        }
+    }
+
+    @Override
+    public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
+        if (getPasswordRef() != null && getPassword() != null) {
+            throw new ConfigLoadException("Cannot specify both a password reference and a password for jdbc connection: " + entityKey);
         }
     }
 }

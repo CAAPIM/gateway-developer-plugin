@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
@@ -57,6 +58,9 @@ class BundleFileBuilder {
             // Load the entities to build a deployment bundle
             final Collection<EntityLoader> entityLoaders = entityLoaderRegistry.getEntityLoaders();
             entityLoaders.parallelStream().forEach(e -> e.load(bundle, rootDir));
+
+            // create the folder tree
+            FolderLoaderUtils.createFolders(bundle, rootDir, bundle.getServices());
 
             //Load Dependencies
             // Improvements can be made here by doing this loading in a separate task and caching the intermediate results.

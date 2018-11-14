@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.MapType;
@@ -24,12 +26,14 @@ import java.util.Map;
  *
  * @param <B> type of entity
  */
-public abstract class EntityLoaderBase<B> implements EntityLoader {
+public abstract class EntityLoaderBase<B extends GatewayEntity> implements EntityLoader {
 
     private final JsonTools jsonTools;
+    private IdGenerator idGenerator;
 
-    EntityLoaderBase(final JsonTools jsonTools) {
+    EntityLoaderBase(final JsonTools jsonTools, final IdGenerator idGenerator) {
         this.jsonTools = jsonTools;
+        this.idGenerator = idGenerator;
     }
 
     @Override
@@ -44,6 +48,7 @@ public abstract class EntityLoaderBase<B> implements EntityLoader {
 
         final Map<String, B> entities = jsonTools.readDocumentFile(entitiesFile, type);
         if (entities != null) {
+            entities.forEach((k,e) -> e.postLoad(k, bundle, rootDir, idGenerator));
             putToBundle(bundle, entities);
         }
     }
@@ -66,6 +71,7 @@ public abstract class EntityLoaderBase<B> implements EntityLoader {
         final JavaType type = jsonTools.getObjectMapper(valueType).getTypeFactory().constructType(this.getBeanClass());
 
         B entity = jsonTools.readStream(IOUtils.toInputStream(value, Charset.defaultCharset()), valueType, type);
+        entity.postLoad(name, bundle, null, idGenerator);
         putToBundle(bundle, ImmutableMap.<String, B>builder().put(name, entity).build());
     }
 

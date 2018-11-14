@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
@@ -28,6 +29,8 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -260,7 +263,7 @@ class CassandraConnectionsLoaderTest {
     }
 
     private void loadCassandraConnection(String content, String fileTyoe, boolean expectException) throws IOException {
-        CassandraConnectionsLoader loader = new CassandraConnectionsLoader(jsonTools);
+        EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(CassandraConnection.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File cassandraConnectionsFile = new File(configFolder, "cassandra-connections." + fileTyoe);
         Files.touch(cassandraConnectionsFile);
@@ -277,7 +280,7 @@ class CassandraConnectionsLoaderTest {
         checkCassandraConnection(bundle);
     }
 
-    private static void loadCassandraConnections(CassandraConnectionsLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
+    private static void loadCassandraConnections(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
         loader.load(bundle, rootProjectDir.getRoot());
     }
 

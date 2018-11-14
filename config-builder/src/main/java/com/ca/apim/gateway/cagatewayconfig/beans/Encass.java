@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,6 +27,7 @@ import static java.util.stream.Collectors.toCollection;
 @JsonInclude(NON_NULL)
 @Named("ENCAPSULATED_ASSERTION")
 @ConfigurationFile(name = "encass", type = JSON_YAML)
+@EnvironmentType("ENCAPSULATED_ASSERTION")
 public class Encass extends GatewayEntity {
 
     private String policy;
@@ -83,6 +86,11 @@ public class Encass extends GatewayEntity {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    @Override
+    public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
+        setGuid(idGenerator.generateGuid());
     }
 
     @Override

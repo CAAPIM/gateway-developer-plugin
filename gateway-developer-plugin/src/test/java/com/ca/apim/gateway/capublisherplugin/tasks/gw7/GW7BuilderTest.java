@@ -10,8 +10,8 @@ import com.ca.apim.gateway.cagatewayconfig.tasks.gw7.GW7Builder;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,9 +32,9 @@ public class GW7BuilderTest {
 
         TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new GZIPInputStream(in));
         TarArchiveEntry entry = tarArchiveInputStream.getNextTarEntry();
-        Assert.assertEquals("my/file/path", entry.getName());
-        Assert.assertEquals(3L, entry.getSize());
-        Assert.assertArrayEquals(new byte[]{1, 2, 3}, IOUtils.toByteArray(tarArchiveInputStream));
-        Assert.assertNull(tarArchiveInputStream.getNextTarEntry());
+        Assertions.assertEquals("my/file/path", entry.getName());
+        Assertions.assertEquals(3L, entry.getSize());
+        Assertions.assertArrayEquals(new byte[]{1, 2, 3}, IOUtils.toByteArray(tarArchiveInputStream));
+        Assertions.assertNull(tarArchiveInputStream.getNextTarEntry());
     }
 }

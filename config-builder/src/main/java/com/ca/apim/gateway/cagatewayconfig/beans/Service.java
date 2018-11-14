@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -23,12 +24,13 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @JsonInclude(Include.NON_NULL)
 @Named("SERVICE")
 @ConfigurationFile(name = "services", type = JSON_YAML)
+@EnvironmentType("SERVICE")
 public class Service extends Folderable {
 
     private String url;
     private String policy;
     private Set<String> httpMethods;
-    private Map<String,String> properties;
+    private Map<String,Object> properties;
     @JsonIgnore
     private Element serviceDetailsElement;
     @JsonIgnore
@@ -60,9 +62,9 @@ public class Service extends Folderable {
         this.httpMethods = httpMethods;
     }
 
-    public Map<String,String> getProperties(){ return properties;}
+    public Map<String,Object> getProperties(){ return properties;}
 
-    public void setProperties(Map<String,String> properties){ this.properties = properties;}
+    public void setProperties(Map<String,Object> properties){ this.properties = properties;}
 
     public Element getServiceDetailsElement() {
         return serviceDetailsElement;

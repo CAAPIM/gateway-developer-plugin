@@ -48,6 +48,19 @@ class FolderLoaderTest {
     }
 
     @Test
+    void loadWithInvalidCharName() {
+        Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Bundle bundle = new Bundle();
+        bundle.getFolders().put(Folder.ROOT_FOLDER_NAME, Folder.ROOT_FOLDER);
+        Folder f1 = new Folder();
+        f1.setName(TEST_FOLDER_1 + "/1");
+        f1.setId(TEST_FOLDER_1);
+        bundle.getFolders().put(f1.getName(), f1);
+
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createFolderXml(doc, f1.getName(), TEST_FOLDER_1, Folder.ROOT_FOLDER_ID)));
+    }
+
+    @Test
     void load() {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();

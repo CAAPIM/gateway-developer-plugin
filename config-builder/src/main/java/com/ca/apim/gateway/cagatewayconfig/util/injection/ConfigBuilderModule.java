@@ -81,7 +81,7 @@ public class ConfigBuilderModule extends AbstractModule {
         Multibinder<EntityLoader> entityLoadersBinder = newSetBinder(binder(), EntityLoader.class);
         reflections.getSubTypesOf(EntityLoader.class).forEach(l -> {
             // avoid trying to bind abstract classes
-            if (!Modifier.isAbstract(l.getModifiers())) {
+            if (!Modifier.isAbstract(l.getModifiers()) && l.getEnclosingClass() == null) {
                 entityLoadersBinder.addBinding().to(l);
             }
         });

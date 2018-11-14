@@ -22,12 +22,12 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
-public class BundleEnvironmentValidator {
+class BundleEnvironmentValidator {
 
     private final Bundle environmentBundle;
     private DocumentTools documentTools = DocumentTools.INSTANCE;
 
-    public BundleEnvironmentValidator(Bundle environmentBundle) {
+    BundleEnvironmentValidator(Bundle environmentBundle) {
         this.environmentBundle = environmentBundle;
     }
 
@@ -37,7 +37,7 @@ public class BundleEnvironmentValidator {
      * @param bundleName       The name of the bundle to look for environment requirements in
      * @param deploymentBundle The deployment bundle to look for enviornment requirements in
      */
-    public void validateEnvironmentProvided(String bundleName, String deploymentBundle) {
+    void validateEnvironmentProvided(String bundleName, String deploymentBundle) {
         Document deploymentBundleDocument;
         try {
             deploymentBundleDocument = documentTools.parse(deploymentBundle);

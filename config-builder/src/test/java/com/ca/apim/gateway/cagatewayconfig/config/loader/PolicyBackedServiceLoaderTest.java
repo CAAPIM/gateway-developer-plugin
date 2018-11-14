@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.beans.PolicyBackedServiceOperation;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
@@ -26,6 +27,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -99,7 +102,7 @@ class PolicyBackedServiceLoaderTest {
     }
 
     private void load(String content, String fileTyoe, boolean expectException) throws IOException {
-        PolicyBackedServiceLoader loader = new PolicyBackedServiceLoader(jsonTools);
+        EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(PolicyBackedService.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "policy-backed-services." + fileTyoe);
         Files.touch(identityProvidersFile);
@@ -116,7 +119,7 @@ class PolicyBackedServiceLoaderTest {
         check(bundle);
     }
 
-    private static void load(PolicyBackedServiceLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
+    private static void load(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
         loader.load(bundle, rootProjectDir.getRoot());
     }
 

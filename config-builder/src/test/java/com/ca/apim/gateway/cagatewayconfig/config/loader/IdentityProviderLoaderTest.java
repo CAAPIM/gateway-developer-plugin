@@ -6,10 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.BindOnlyLdapIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.FederatedIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
-import com.ca.apim.gateway.cagatewayconfig.beans.BindOnlyLdapIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
@@ -30,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
 import static org.junit.Assert.*;
 
 /**
@@ -41,7 +43,7 @@ class IdentityProviderLoaderTest {
     private TemporaryFolder rootProjectDir;
     private JsonTools jsonTools;
     private IdGenerator idGenerator;
-    private IdentityProviderLoader identityProviderLoader;
+    private EntityLoader identityProviderLoader;
     @Mock
     private FileUtils fileUtils;
 
@@ -50,7 +52,7 @@ class IdentityProviderLoaderTest {
         jsonTools = new JsonTools(fileUtils);
         this.rootProjectDir = rootProjectDir;
         idGenerator = new IdGenerator();
-        identityProviderLoader = new IdentityProviderLoader(jsonTools, idGenerator);
+        identityProviderLoader = createEntityLoader(jsonTools, idGenerator, createEntityInfo(IdentityProvider.class));
     }
 
     @Test

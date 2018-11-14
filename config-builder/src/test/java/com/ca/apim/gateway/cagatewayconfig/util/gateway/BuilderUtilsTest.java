@@ -6,47 +6,98 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
-import org.junit.Assert;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import org.junit.jupiter.api.Test;
+import org.mockito.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static java.util.Collections.emptyMap;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class BuilderUtilsTest {
+class BuilderUtilsTest {
 
     @Test
-    public void buildPropertiesElement() throws ParserConfigurationException {
+    void buildPropertiesElement() throws ParserConfigurationException {
         Element properties = BuilderUtils.buildPropertiesElement(new HashMap<String, Object>() {{
-            put("key1", "value1");
+            put("keyString", "value1");
+            put("keyInteger", 1);
+            put("keyLong", 1L);
+            put("keyBoolean", true);
         }}, DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
 
         NodeList propertyNodes = properties.getElementsByTagName("l7:Property");
-        assertEquals(1, propertyNodes.getLength());
-        for (int i = 0; i < propertyNodes.getLength(); i++) {
-            Node property = propertyNodes.item(i);
+        for (Node property : DocumentUtils.nodeList(propertyNodes)) {
             Node key = property.getAttributes().getNamedItem("key");
-            if ("key1".equals(key.getTextContent())) {
-                if (property instanceof Element) {
-                    NodeList value = ((Element) property).getElementsByTagName("l7:StringValue");
-                    Assert.assertEquals("value1", value.item(0).getTextContent());
-                    return;
-                }
+            switch (key.getTextContent()) {
+                case "keyString":
+                    NodeList valueString = ((Element) property).getElementsByTagName(STRING_VALUE);
+                    assertEquals("value1", valueString.item(0).getTextContent());
+                    break;
+                case "keyInteger":
+                    NodeList valueInt = ((Element) property).getElementsByTagName(INTEGER_VALUE);
+                    assertEquals(1, Integer.valueOf(valueInt.item(0).getTextContent()).intValue());
+                    break;
+                case "keyLong":
+                    NodeList valueLong = ((Element) property).getElementsByTagName(LONG_VALUE);
+                    assertEquals(1L, Long.valueOf(valueLong.item(0).getTextContent()).longValue());
+                    break;
+                case "keyBoolean":
+                    NodeList valueBoolean = ((Element) property).getElementsByTagName(BOOLEAN_VALUE);
+                    assertEquals(true, Boolean.valueOf(valueBoolean.item(0).getTextContent()));
+                    break;
+                default:
+                    fail("Unexpected key " + key.getTextContent());
             }
         }
-        Assert.fail("Did not find property for service property key1");
     }
 
     @Test
-    public void buildPropertiesElementEmptyProperties() throws ParserConfigurationException {
+    void buildPropertiesElementEmptyProperties() throws ParserConfigurationException {
         Element properties = BuilderUtils.buildPropertiesElement(new HashMap<>(), DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
 
         NodeList propertyNodes = properties.getElementsByTagName("l7:Property");
         assertEquals(0, propertyNodes.getLength());
+    }
+
+    @Test
+    void mapInvalidPropertiesNode() {
+        assertThrows(BundleLoadException.class, () -> BuilderUtils.mapPropertiesElements(Mockito.mock(Element.class), PROPERTIES));
+    }
+
+
+    @Test
+    void mapProperties() throws ParserConfigurationException {
+        Map<String, Object> map = new HashMap<String, Object>() {{
+            put("keyString", "value1");
+            put("keyInteger", 1);
+            put("keyLong", 1L);
+            put("keyBoolean", true);
+            put("keyDate", new Date());
+            put("keyNull", null);
+        }};
+
+        Element properties = BuilderUtils.buildPropertiesElement(map, DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        map.remove("keyNull");
+
+        final Map<String, Object> props = BuilderUtils.mapPropertiesElements(properties, PROPERTIES);
+        TestUtils.assertPropertiesContent(map, props);
+    }
+
+
+    @Test
+    void mapNoProperties() {
+        final Map<String, Object> props = BuilderUtils.mapPropertiesElements(null, PROPERTIES);
+        assertEquals(props, emptyMap());
     }
 }

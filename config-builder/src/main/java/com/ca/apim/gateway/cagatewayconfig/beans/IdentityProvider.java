@@ -7,11 +7,14 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import javax.inject.Named;
+import java.io.File;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
@@ -21,6 +24,7 @@ import static java.util.Arrays.stream;
 @JsonInclude(NON_EMPTY)
 @Named("ID_PROVIDER_CONFIG")
 @ConfigurationFile(name = "identity-providers", type = JSON_YAML)
+@EnvironmentType("IDENTITY_PROVIDER")
 public class IdentityProvider extends GatewayEntity {
 
     public static final String INTERNAL_IDP_ID = "0000000000000000fffffffffffffffe";
@@ -127,5 +131,10 @@ public class IdentityProvider extends GatewayEntity {
         public IdentityProvider build() {
             return new IdentityProvider(this);
         }
+    }
+
+    @Override
+    public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
+        setId(idGenerator.generate());
     }
 }

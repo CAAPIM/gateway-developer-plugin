@@ -127,7 +127,6 @@ class ConfigBuilderModuleTest {
         assertNotNull(registry);
         assertNotNull(registry.getEntityLoaders());
         assertFalse(registry.getEntityLoaders().isEmpty());
-        assertEquals(registry.getEntityLoaders().size(), loaders.size());
         assertTrue(registry.getEntityLoaders().containsAll(loaders.stream().filter(l -> !l.getClass().getSimpleName().contains("Test")).collect(Collectors.toList())));
         registry.getEntityLoaders().forEach(l -> assertFalse(Modifier.isAbstract(l.getClass().getModifiers())));
     }

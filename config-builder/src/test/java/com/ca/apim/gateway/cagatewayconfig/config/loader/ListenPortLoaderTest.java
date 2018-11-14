@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ClientAuthentication;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.Feature;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSettings;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
@@ -21,8 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
@@ -30,11 +31,13 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
 class ListenPortLoaderTest {
@@ -188,7 +191,7 @@ class ListenPortLoaderTest {
     }
 
     private void loadListenPort(String content, String fileTyoe, boolean expectException) throws IOException {
-        ListenPortLoader loader = new ListenPortLoader(jsonTools);
+        EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(ListenPort.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "listen-ports." + fileTyoe);
         Files.touch(identityProvidersFile);
@@ -205,7 +208,7 @@ class ListenPortLoaderTest {
         checkListenPort(bundle);
     }
 
-    private static void loadListenPorts(ListenPortLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
+    private static void loadListenPorts(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
         loader.load(bundle, rootProjectDir.getRoot());
     }
 

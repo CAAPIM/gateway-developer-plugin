@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.ClusterProperty;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
@@ -23,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -57,7 +60,7 @@ class StaticPropertiesLoaderTest {
 
     @Test
     void loadFromEnvironment() {
-        StaticPropertiesLoader loader = new StaticPropertiesLoader(fileUtils);
+        PropertiesLoaderBase loader = EntityLoaderUtils.createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(ClusterProperty.class));
 
         final Bundle bundle = new Bundle();
         loader.load(bundle, PROP_1, "value1");
@@ -66,14 +69,14 @@ class StaticPropertiesLoaderTest {
         assertEquals(1, bundle.getStaticProperties().size());
 
         // Prop1
-        final String prop1 = bundle.getStaticProperties().get(PROP_1);
+        final ClusterProperty prop1 = bundle.getStaticProperties().get(PROP_1);
         assertNotNull(prop1);
-        assertEquals("value1", prop1);
+        assertEquals("value1", prop1.getValue());
     }
 
     @Test
     void tryLoadNonexistentFile() {
-        StaticPropertiesLoader loader = new StaticPropertiesLoader(fileUtils);
+        PropertiesLoaderBase loader = EntityLoaderUtils.createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(ClusterProperty.class));
 
         final Bundle bundle = new Bundle();
         loader.load(bundle, rootProjectDir.getRoot());
@@ -88,24 +91,24 @@ class StaticPropertiesLoaderTest {
         assertEquals(3, bundle.getStaticProperties().size());
 
         // Prop1
-        final String prop1 = bundle.getStaticProperties().get(PROP_1);
+        final ClusterProperty prop1 = bundle.getStaticProperties().get(PROP_1);
         assertNotNull(prop1);
-        assertEquals("value1", prop1);
+        assertEquals("value1", prop1.getValue());
 
         // Prop2
-        final String prop2 = bundle.getStaticProperties().get(PROP_2);
+        final ClusterProperty prop2 = bundle.getStaticProperties().get(PROP_2);
         assertNotNull(prop2);
-        assertEquals("value2", prop2);
+        assertEquals("value2", prop2.getValue());
 
         // Prop3
-        final String prop3 = bundle.getStaticProperties().get(PROP_3);
+        final ClusterProperty prop3 = bundle.getStaticProperties().get(PROP_3);
         assertNotNull(prop3);
-        assertEquals("Gateway", prop3);
+        assertEquals("Gateway", prop3.getValue());
     }
 
     @Test
     void tryLoadPropertiesFromNonexistentFile() throws IOException {
-        StaticPropertiesLoader loader = new StaticPropertiesLoader(fileUtils);
+        PropertiesLoaderBase loader = EntityLoaderUtils.createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(ClusterProperty.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "static.properties");
         Files.touch(identityProvidersFile);
@@ -119,7 +122,7 @@ class StaticPropertiesLoaderTest {
     }
 
     private Bundle loadProperties(String content) throws IOException {
-        StaticPropertiesLoader loader = new StaticPropertiesLoader(fileUtils);
+        PropertiesLoaderBase loader = EntityLoaderUtils.createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(ClusterProperty.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "static.properties");
         Files.touch(identityProvidersFile);

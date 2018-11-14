@@ -6,10 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import org.w3c.dom.Element;
 
@@ -18,6 +15,9 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class PolicyWriter implements EntityWriter {
@@ -45,9 +45,12 @@ public class PolicyWriter implements EntityWriter {
         Map<String, Service> services = bundle.getEntities(Service.class);
         services.values().parallelStream().forEach(serviceEntity -> writePolicy(bundle, policyFolder, serviceEntity.getParentFolder().getId(), serviceEntity.getName(), serviceEntity.getPolicyXML()));
 
-        Map<String, Policy> policies = bundle.getEntities(Policy.class);
-        policies.values().parallelStream().forEach(policyEntity -> writePolicy(bundle, policyFolder, policyEntity.getParentFolder().getId(), policyEntity.getName(), policyEntity.getPolicyDocument()));
-
+        Stream.of(
+                bundle.getEntities(Policy.class).values().stream(),
+                bundle.getEntities(GlobalPolicy.class).values().stream().map(Policy.class::cast).collect(toList()).stream(),
+                bundle.getEntities(AuditPolicy.class).values().stream().map(Policy.class::cast).collect(toList()).stream()
+        ).flatMap(s -> s)
+                .forEach(policyEntity -> writePolicy(bundle, policyFolder, policyEntity.getParentFolder().getId(), policyEntity.getName(), policyEntity.getPolicyDocument()));
     }
 
     private void writePolicy(Bundle bundle, File policyFolder, String folderId, String name, Element policy) {

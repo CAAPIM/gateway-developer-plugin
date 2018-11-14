@@ -7,8 +7,10 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.FederatedIdentityProviderDetail;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
@@ -24,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class IdentityProviderLoaderTest {
 
+    private static final String CERT_REF = new IdGenerator().generate();
     private IdentityProviderLoader loader = new IdentityProviderLoader();
 
     @Test
@@ -42,6 +45,70 @@ class IdentityProviderLoaderTest {
                 "Prop", "Value",
                 "Gateway", "7layer"
         ), entity.getProperties());
+    }
+
+    @Test
+    void loadFederated() {
+        Bundle bundle = new Bundle();
+        loader.load(bundle, createFederatedIDPXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+
+        assertFalse(bundle.getIdentityProviders().isEmpty());
+        assertEquals(1, bundle.getIdentityProviders().size());
+        assertNotNull(bundle.getIdentityProviders().get("Test"));
+
+        IdentityProvider entity = bundle.getIdentityProviders().get("Test");
+        assertNotNull(entity);
+        assertEquals(IdentityProviderType.FEDERATED, entity.getType());
+        assertPropertiesContent(ImmutableMap.of(
+                "Prop", "Value",
+                "Gateway", "7layer"
+        ), entity.getProperties());
+        assertNotNull(entity.getIdentityProviderDetail());
+        assertTrue(entity.getIdentityProviderDetail() instanceof FederatedIdentityProviderDetail);
+
+        FederatedIdentityProviderDetail federatedIdentityProviderDetail = (FederatedIdentityProviderDetail) entity.getIdentityProviderDetail();
+        assertFalse(federatedIdentityProviderDetail.getCertificateReferences().isEmpty());
+        assertTrue(federatedIdentityProviderDetail.getCertificateReferences().contains(CERT_REF));
+        assertEquals(1, federatedIdentityProviderDetail.getCertificateReferences().size());
+    }
+
+    private static Element createFederatedIDPXml(Document document) {
+        Element element = createElementWithAttributesAndChildren(
+                document,
+                ID_PROV,
+                ImmutableMap.of(ATTRIBUTE_ID, "id"),
+                createElementWithTextContent(document, NAME, "Test"),
+                createElementWithTextContent(document, ID_PROV_TYPE, IdentityProviderType.FEDERATED.getValue()),
+                buildPropertiesElement(
+                        ImmutableMap.of(
+                                "Prop", "Value",
+                                "Gateway", "7layer"
+                        ),
+                        document
+                )
+        );
+
+        final Element extensionElement = document.createElement(EXTENSION);
+        final Element federatedIdentityProviderDetailElement = document.createElement(FEDERATED_ID_PROV_DETAIL);
+        extensionElement.appendChild(federatedIdentityProviderDetailElement);
+        final Element certificateReferences = document.createElement(CERTIFICATE_REFERENCES);
+        federatedIdentityProviderDetailElement.appendChild(certificateReferences);
+        final Element references = document.createElement(REFERENCE);
+        references.setAttribute(ATTRIBUTE_ID, CERT_REF);
+        certificateReferences.appendChild(references);
+        element.appendChild(extensionElement);
+
+        return createElementWithChildren(
+                document,
+                ITEM,
+                createElementWithTextContent(document, ID, "id"),
+                createElementWithTextContent(document, TYPE, EntityTypes.ID_PROVIDER_CONFIG_TYPE),
+                createElementWithChildren(
+                        document,
+                        RESOURCE,
+                        element
+                )
+        );
     }
 
     private static Element createIDPXml(Document document) {

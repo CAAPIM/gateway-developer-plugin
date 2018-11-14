@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
@@ -25,7 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
 import static com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword.fillDefaultProperties;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createPropertiesLoader;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,7 +64,7 @@ class StoredPasswordLoaderTest {
 
     @Test
     void loadFromEnvironment() {
-        StoredPasswordsLoader loader = new StoredPasswordsLoader(fileUtils);
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(StoredPassword.class));
 
         final Bundle bundle = new Bundle();
         loader.load(bundle, PASSWORD_1, "pwd1");
@@ -80,7 +83,7 @@ class StoredPasswordLoaderTest {
 
     @Test
     void tryLoadNonexistentFile() {
-        StoredPasswordsLoader loader = new StoredPasswordsLoader(fileUtils);
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(StoredPassword.class));
 
         final Bundle bundle = new Bundle();
         loader.load(bundle, rootProjectDir.getRoot());
@@ -121,7 +124,7 @@ class StoredPasswordLoaderTest {
 
     @Test
     void tryLoadPasswordsFromNonexistentFile() throws IOException {
-        StoredPasswordsLoader loader = new StoredPasswordsLoader(fileUtils);
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(StoredPassword.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "stored-passwords.properties");
         Files.touch(identityProvidersFile);
@@ -135,7 +138,7 @@ class StoredPasswordLoaderTest {
     }
 
     private Bundle loadPasswords(String content) throws IOException {
-        StoredPasswordsLoader loader = new StoredPasswordsLoader(fileUtils);
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(StoredPassword.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "stored-passwords.properties");
         Files.touch(identityProvidersFile);

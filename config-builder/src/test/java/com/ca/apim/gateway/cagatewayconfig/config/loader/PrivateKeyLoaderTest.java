@@ -6,9 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.KeyStoreType;
+import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
@@ -18,8 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extensions;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
@@ -28,9 +29,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Extensions({@ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class)})
 class PrivateKeyLoaderTest {
@@ -140,7 +143,7 @@ class PrivateKeyLoaderTest {
     }
 
     private void loadPrivateKeys(String content, String fileTyoe, boolean expectException) throws IOException {
-        PrivateKeyLoader loader = new PrivateKeyLoader(jsonTools);
+        EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(PrivateKey.class));
         final File privateKeys = new File(config, "private-keys." + fileTyoe);
         Files.touch(privateKeys);
 
@@ -230,7 +233,7 @@ class PrivateKeyLoaderTest {
         privateKey.setAlias("my-key");
         privateKeys.add(privateKey);
 
-        assertThrows(ConfigLoadException.class, () -> PrivateKeyLoader.loadFromDirectory(privateKeys, keysDir, true));
+        assertThrows(ConfigLoadException.class, () -> PrivateKey.loadFromDirectory(privateKeys, keysDir, true));
     }
 
     @Test
@@ -242,6 +245,6 @@ class PrivateKeyLoaderTest {
         privateKey.setAlias("my-key");
         privateKeys.add(privateKey);
 
-        assertThrows(ConfigLoadException.class, () -> PrivateKeyLoader.loadFromDirectory(privateKeys, keysDir, true));
+        assertThrows(ConfigLoadException.class, () -> PrivateKey.loadFromDirectory(privateKeys, keysDir, true));
     }
 }
