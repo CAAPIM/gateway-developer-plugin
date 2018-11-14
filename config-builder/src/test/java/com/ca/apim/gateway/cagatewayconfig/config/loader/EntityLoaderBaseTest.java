@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.collect.ImmutableMap;
@@ -83,7 +84,7 @@ class EntityLoaderBaseTest {
         }
 
         TestEntityLoader(JsonTools jsonTools, AtomicBoolean putToBundle) {
-            super(jsonTools);
+            super(jsonTools, new IdGenerator());
             this.putToBundle = putToBundle;
         }
 

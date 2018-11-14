@@ -31,10 +31,6 @@ public abstract class EntityLoaderBase<B extends GatewayEntity> implements Entit
     private final JsonTools jsonTools;
     private IdGenerator idGenerator;
 
-    EntityLoaderBase(final JsonTools jsonTools) {
-        this.jsonTools = jsonTools;
-    }
-
     EntityLoaderBase(final JsonTools jsonTools, final IdGenerator idGenerator) {
         this.jsonTools = jsonTools;
         this.idGenerator = idGenerator;
