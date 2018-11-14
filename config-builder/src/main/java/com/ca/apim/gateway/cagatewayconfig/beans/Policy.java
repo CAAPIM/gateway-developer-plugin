@@ -189,7 +189,7 @@ public class Policy extends Folderable {
                                         key,
                                         String.join(", ", value.stream().map(Policy::getPath).collect(toList())
                                 )
-                        );
+                        ));
                     }
                 });
         if (!errors.isEmpty()) {
