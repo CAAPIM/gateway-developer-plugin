@@ -6,14 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayconfig.config.loader.policy;
 
-import java.io.IOException;
-
 public class PolicyConverterException extends RuntimeException {
     public PolicyConverterException(String message) {
         super(message);
     }
 
-    public PolicyConverterException(IOException e) {
-        super(e);
+    public PolicyConverterException(String message, Throwable throwable) {
+        super(message, throwable);
     }
 }

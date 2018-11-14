@@ -20,8 +20,8 @@ public class PolicyConverterRegistry {
     private final Set<PolicyConverter> policyConverters;
 
     @Inject
-    public PolicyConverterRegistry(final Set<PolicyConverter> loaders) {
-        this.policyConverters = unmodifiableSet(loaders);
+    public PolicyConverterRegistry(final Set<PolicyConverter> converters) {
+        this.policyConverters = unmodifiableSet(converters);
     }
 
     @NotNull
@@ -34,7 +34,7 @@ public class PolicyConverterRegistry {
     @NotNull
     public PolicyConverter getFromPolicyElement(String name, Element policy) {
         return policyConverters.stream()
-                .filter(converter -> converter.canConvertible(name, policy))
+                .filter(converter -> converter.canConvert(name, policy))
                 .findFirst().orElse(getConverterFromFileName(XMLPolicyConverter.EXTENSION));
     }
 }

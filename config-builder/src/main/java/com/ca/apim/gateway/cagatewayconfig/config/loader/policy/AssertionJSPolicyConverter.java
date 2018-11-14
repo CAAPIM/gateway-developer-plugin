@@ -40,16 +40,23 @@ public class AssertionJSPolicyConverter implements PolicyConverter {
     }
 
     @Override
-    public boolean canConvertible(String policyName, Element policy) {
+    public boolean canConvert(String policyName, Element policy) {
         return getScriptString(policyName, policy).isPresent();
     }
 
     @Override
-    public InputStream convertFromPolicy(Element policy) {
+    public InputStream convertFromPolicyElement(Element policy) {
         Optional<String> jsPolicy = getScriptString(null, policy);
         return IOUtils.toInputStream(jsPolicy.orElseThrow(() -> new PolicyConverterException("Cannot Convert JS Policy")), StandardCharsets.UTF_8);
     }
 
+    /**
+     * Returns javascript from a policy that has a single javascript assertion.
+     *
+     * @param policyName The policy name, if not null it must match the name in the javascript assertion.
+     * @param policy     The policy element
+     * @return The Script as a String in an optional. The optional is empty if the policy does not contain a single javascript assertion.
+     */
     private Optional<String> getScriptString(@Nullable String policyName, Element policy) {
         Element rootAllAssertion = DocumentUtils.getSingleChildElement(policy, "wsp:All");
         if (rootAllAssertion.getChildNodes().getLength() == 1) {

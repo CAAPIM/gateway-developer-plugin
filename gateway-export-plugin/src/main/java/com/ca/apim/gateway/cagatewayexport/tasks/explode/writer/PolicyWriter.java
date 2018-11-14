@@ -67,7 +67,7 @@ public class PolicyWriter implements EntityWriter {
 
         PolicyConverter policyConverter = policyConverterRegistry.getFromPolicyElement(name, policy);
         Path policyPath = folderPath.resolve(name + policyConverter.getPolicyTypeExtension());
-        try (InputStream policyStream = policyConverter.convertFromPolicy(policy)) {
+        try (InputStream policyStream = policyConverter.convertFromPolicyElement(policy)) {
             FileUtils.copyInputStreamToFile(policyStream, policyPath.toFile());
         } catch (IOException e) {
             throw new WriteException("Unable to write assertion js policy", e);

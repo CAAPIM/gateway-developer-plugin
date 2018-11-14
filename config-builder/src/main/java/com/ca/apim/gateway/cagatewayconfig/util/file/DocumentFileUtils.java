@@ -92,10 +92,9 @@ public class DocumentFileUtils {
         }
 
         final Transformer transformer = documentTools.getTransformer();
-        final OutputStreamWriter writer = new OutputStreamWriter(outStream, UTF_8);
-        try {
+        try (OutputStreamWriter writer = new OutputStreamWriter(outStream, UTF_8)) {
             transformer.transform(new DOMSource(node), new StreamResult(writer));
-        } catch (TransformerException e) {
+        } catch (TransformerException | IOException e) {
             throw new DocumentFileUtilsException("Exception writing xml element to stream.", e);
         }
     }

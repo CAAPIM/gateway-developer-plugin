@@ -26,6 +26,15 @@ class PolicyConverterTest {
 
         policy = new File("/some/path/my.policy.ex.ten.sion");
         Assert.assertEquals("/some/path/my.policy", policyConverter.removeExtension(policy.getPath()));
+
+        policy = new File("/some/path/my.policy.ex.other.sion");
+        Assert.assertEquals("/some/path/my.policy.ex.other.sion", policyConverter.removeExtension(policy.getPath()));
+
+        policy = new File(".ex.ten.sion");
+        Assert.assertEquals("", policyConverter.removeExtension(policy.getName()));
+
+        policy = new File(".sion");
+        Assert.assertEquals(".sion", policyConverter.removeExtension(policy.getName()));
     }
 
     private static class TestPolicyConverter implements PolicyConverter {
@@ -50,12 +59,12 @@ class PolicyConverterTest {
         }
 
         @Override
-        public boolean canConvertible(String name, Element policy) {
+        public boolean canConvert(String name, Element policy) {
             return false;
         }
 
         @Override
-        public InputStream convertFromPolicy(Element policy) {
+        public InputStream convertFromPolicyElement(Element policy) {
             return null;
         }
     }

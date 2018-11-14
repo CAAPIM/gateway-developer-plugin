@@ -39,7 +39,7 @@ public class XMLPolicyConverter implements PolicyConverter {
     }
 
     @Override
-    public boolean canConvertible(String name, Element policy) {
+    public boolean canConvert(String name, Element policy) {
         // always return false. We don't want to automatically pick this converter
         return false;
     }
@@ -47,20 +47,13 @@ public class XMLPolicyConverter implements PolicyConverter {
     @Override
     @SuppressWarnings("squid:S2095")
     // Should not close the input stream since we are returning it. It should be auto closed by the caller
-    public InputStream convertFromPolicy(Element policy) {
+    public InputStream convertFromPolicyElement(Element policy) {
         final PipedOutputStream out = new PipedOutputStream();
-        new Thread(() -> {
-            documentFileUtils.printXML(policy, out, false);
-            try {
-                out.close();
-            } catch (IOException e) {
-                throw new PolicyConverterException(e);
-            }
-        }).start();
+        new Thread(() -> documentFileUtils.printXML(policy, out, false)).start();
         try {
             return new PipedInputStream(out);
         } catch (IOException e) {
-            throw new PolicyConverterException(e);
+            throw new PolicyConverterException("Unable to create stream for converting policy xml.", e);
         }
     }
 }
