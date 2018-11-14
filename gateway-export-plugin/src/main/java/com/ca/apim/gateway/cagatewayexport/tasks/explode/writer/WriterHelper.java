@@ -65,8 +65,10 @@ class WriterHelper {
         properties.putAll(beans
                 .values()
                 .stream()
-                .peek(b -> b.preWrite(configFolder, documentFileUtils))
-                .map(PropertiesEntity.class::cast)
+                .map(b -> {
+                    b.preWrite(configFolder, documentFileUtils);
+                    return (PropertiesEntity) b;
+                })
                 .collect(toMap(PropertiesEntity::getKey, PropertiesEntity::getValue)));
 
         writePropertiesFile(rootFolder, documentFileUtils, properties, fileName);

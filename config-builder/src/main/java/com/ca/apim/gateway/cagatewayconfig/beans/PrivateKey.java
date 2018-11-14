@@ -148,9 +148,7 @@ public class PrivateKey extends GatewayEntity {
 
             // load p12 file
             if (privateKeysDirectory.exists()) {
-                privateKeys.forEach(k -> {
-                    loadPrivateKey(k, privateKeysDirectory, failOnMissingKeys);
-                });
+                privateKeys.forEach(k -> loadPrivateKey(k, privateKeysDirectory, failOnMissingKeys));
             }
         }
     }

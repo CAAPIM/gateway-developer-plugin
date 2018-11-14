@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.base.Joiner;
 import org.w3c.dom.Element;
 
 import javax.inject.Named;
@@ -188,13 +187,13 @@ public class Policy extends Folderable {
                                         "Found more then one %s policy with tag '%s': [%s]",
                                         policyType.getType(),
                                         key,
-                                        Joiner.on(", ").join(value.stream().map(Policy::getPath).collect(toList()))
+                                        String.join(", ", value.stream().map(Policy::getPath).collect(toList())
                                 )
                         );
                     }
                 });
         if (!errors.isEmpty()) {
-            throw new ConfigLoadException(Joiner.on("\n").join(errors));
+            throw new ConfigLoadException(String.join("\n", errors));
         }
     }
 }

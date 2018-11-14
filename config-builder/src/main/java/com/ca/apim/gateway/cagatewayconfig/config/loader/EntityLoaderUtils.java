@@ -19,6 +19,8 @@ import java.util.Map;
 
 public class EntityLoaderUtils {
 
+    private EntityLoaderUtils() {}
+
     @NotNull
     public static EntityLoader createEntityLoader(JsonTools jsonTools, IdGenerator idGenerator, GatewayEntityInfo entityInfo) {
         return new EntityLoaderBase<GatewayEntity>(jsonTools, idGenerator) {
@@ -45,7 +47,7 @@ public class EntityLoaderUtils {
     }
 
     @NotNull
-    public static PropertiesLoaderBase createPropertiesLoader(FileUtils fileUtils, IdGenerator idGenerator, GatewayEntityInfo entityInfo) {
+    static PropertiesLoaderBase createPropertiesLoader(FileUtils fileUtils, IdGenerator idGenerator, GatewayEntityInfo entityInfo) {
         return new PropertiesLoaderBase(fileUtils, idGenerator) {
 
             @Override

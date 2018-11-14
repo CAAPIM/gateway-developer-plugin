@@ -47,8 +47,8 @@ public class PolicyWriter implements EntityWriter {
 
         Stream.of(
                 bundle.getEntities(Policy.class).values().stream(),
-                bundle.getEntities(GlobalPolicy.class).values().stream().peek(Policy.class::cast).collect(toList()).stream(),
-                bundle.getEntities(AuditPolicy.class).values().stream().peek(Policy.class::cast).collect(toList()).stream()
+                bundle.getEntities(GlobalPolicy.class).values().stream().map(Policy.class::cast).collect(toList()).stream(),
+                bundle.getEntities(AuditPolicy.class).values().stream().map(Policy.class::cast).collect(toList()).stream()
         ).flatMap(s -> s)
                 .forEach(policyEntity -> writePolicy(bundle, policyFolder, policyEntity.getParentFolder().getId(), policyEntity.getName(), policyEntity.getPolicyDocument()));
     }
