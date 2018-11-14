@@ -31,7 +31,7 @@ public class Service extends Folderable {
     private String url;
     private String policy;
     private Set<String> httpMethods;
-    private Map<String,String> properties;
+    private Map<String,Object> properties;
     @JsonIgnore
     private Element serviceDetailsElement;
     @JsonIgnore
@@ -63,9 +63,9 @@ public class Service extends Folderable {
         this.httpMethods = httpMethods;
     }
 
-    public Map<String,String> getProperties(){ return properties;}
+    public Map<String,Object> getProperties(){ return properties;}
 
-    public void setProperties(Map<String,String> properties){ this.properties = properties;}
+    public void setProperties(Map<String,Object> properties){ this.properties = properties;}
 
     public Element getServiceDetailsElement() {
         return serviceDetailsElement;

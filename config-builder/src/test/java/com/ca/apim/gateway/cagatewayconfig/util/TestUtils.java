@@ -53,7 +53,7 @@ public class TestUtils {
         assertEquals(expected.size(), actual.size());
 
         expected.forEach((key, value) -> {
-            assertNotNull(actual.get(key));
+            assertTrue(actual.containsKey(key));
             assertEquals(value, actual.get(key));
             actual.remove(key);
         });

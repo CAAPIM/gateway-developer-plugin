@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
+import com.google.common.annotations.VisibleForTesting;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -30,10 +31,10 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 
 public class CertificateUtils {
 
-    private static final String PEM_CERT_FILE_EXTENSION = ".pem";
-    private static final String PEM_CERT_BEGIN_MARKER = "-----BEGIN CERTIFICATE-----";
-    private static final String PEM_CERT_END_MARKER = "-----END CERTIFICATE-----";
-    private static final String LINE_SEPARATOR = System.lineSeparator();
+    static final String PEM_CERT_FILE_EXTENSION = ".pem";
+    static final String PEM_CERT_BEGIN_MARKER = "-----BEGIN CERTIFICATE-----";
+    static final String PEM_CERT_END_MARKER = "-----END CERTIFICATE-----";
+    static final String LINE_SEPARATOR = System.lineSeparator();
 
     private CertificateUtils() {}
 
@@ -86,7 +87,8 @@ public class CertificateUtils {
      * @param encodedData the raw encoded data of the certificate
      * @return byte[] containing the formatted data
      */
-    private static byte[] prepareCertificateData(@NotNull String encodedData) {
+    @VisibleForTesting
+    static byte[] prepareCertificateData(@NotNull String encodedData) {
         final String formattedData = encodedData.replaceAll("(.{64})", "$1" + LINE_SEPARATOR);
 
         return (PEM_CERT_BEGIN_MARKER +
@@ -103,7 +105,8 @@ public class CertificateUtils {
      * @param certName name of the certificate
      * @return formatted name with the 'pem' extension
      */
-    private static String buildCertificateFileName(@NotNull String certName) {
+    @VisibleForTesting
+    static String buildCertificateFileName(@NotNull String certName) {
         return certName + PEM_CERT_FILE_EXTENSION;
     }
 

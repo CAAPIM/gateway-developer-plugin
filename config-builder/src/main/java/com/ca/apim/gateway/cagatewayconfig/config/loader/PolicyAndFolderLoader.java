@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
@@ -19,8 +18,6 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Singleton
 public class PolicyAndFolderLoader implements EntityLoader {
@@ -68,7 +65,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
         String policyPath = FolderLoaderUtils.getPath(policyFile, rootDir);
 
         Policy policy = new Policy();
-        policy.setPath(policyPath.endsWith(".xml") ? policyPath.replaceAll(".xml", EMPTY) : policyPath);
+        policy.setPath(policyPath.substring(0, policyPath.length() - ".xml".length()));
         policy.setPolicyXML(fileUtils.getFileAsString(policyFile));
         policy.setName(getPolicyName(policyFile));
         policy.setParentFolder(parentFolder);

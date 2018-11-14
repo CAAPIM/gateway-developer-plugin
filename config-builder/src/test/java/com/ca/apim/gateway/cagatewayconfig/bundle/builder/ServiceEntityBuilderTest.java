@@ -53,7 +53,7 @@ class ServiceEntityBuilderTest {
         Service service = new Service();
         service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
         service.setUrl("/my/service/url");
-        service.setProperties(new HashMap<String, String>() {{
+        service.setProperties(new HashMap<String, Object>() {{
             put("key1", "value1");
             put("key2", "value2");
         }});
@@ -77,7 +77,7 @@ class ServiceEntityBuilderTest {
         service.setUrl("/my/service/url");
         service.setPolicy("/my/policy.xml");
         service.setParentFolder(serviceParentFolder);
-        service.setProperties(new HashMap<String, String>() {{
+        service.setProperties(new HashMap<String, Object>() {{
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
@@ -108,7 +108,7 @@ class ServiceEntityBuilderTest {
         service.setUrl("/my/service/url");
         service.setPolicy("my/policy-_¯-¯_/_¯-¯_-path.xml");
         service.setParentFolder(serviceParentFolder);
-        service.setProperties(new HashMap<String, String>() {{
+        service.setProperties(new HashMap<String, Object>() {{
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
@@ -138,7 +138,7 @@ class ServiceEntityBuilderTest {
         service1.setUrl("/my/service/url");
         service1.setPolicy("/my/policy.xml");
         service1.setParentFolder(serviceParentFolder);
-        service1.setProperties(new HashMap<String, String>() {{
+        service1.setProperties(new HashMap<String, Object>() {{
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
@@ -148,7 +148,7 @@ class ServiceEntityBuilderTest {
         service2.setUrl("/my/url");
         service2.setPolicy("/my/policy.xml");
         service2.setParentFolder(bundle.getFolders().get("my"));
-        service2.setProperties(new HashMap<String, String>() {{
+        service2.setProperties(new HashMap<String, Object>() {{
             put("key2", "value2");
             put("ENV.key.environment", "something");
         }});

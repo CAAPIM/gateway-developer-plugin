@@ -185,6 +185,13 @@ public class DocumentUtils {
         return element;
     }
 
+    public static Element createElementWithAttributesAndTextContent(final Document document, final String elementName, final Map<String, String> attributes, final Object textContent) {
+        Element element = document.createElement(elementName);
+        attributes.forEach(element::setAttribute);
+        element.setTextContent(textContent != null ? textContent.toString() : EMPTY);
+        return element;
+    }
+
     /**
      * Search in the children of the element specified a single element with the name specified and returns the value from the attribute specified.
      *

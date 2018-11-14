@@ -67,7 +67,7 @@ public class ServiceLoader implements BundleEntityLoader {
 
         Element servicePropertiesElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), PROPERTIES);
         NodeList propertyNodes = servicePropertiesElement.getElementsByTagName(PROPERTY);
-        Map<String, String> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
         for (int i = 0; i < propertyNodes.getLength(); i++) {
             if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.")) {
                 String propertyValue = null;

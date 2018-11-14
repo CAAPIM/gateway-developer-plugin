@@ -6,10 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
@@ -22,6 +19,9 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class PolicyLinker implements EntityLinker<Policy> {
@@ -37,6 +37,16 @@ public class PolicyLinker implements EntityLinker<Policy> {
     @Override
     public Class<Policy> getEntityClass() {
         return Policy.class;
+    }
+
+    @Override
+    public void link(Bundle filteredBundle, Bundle bundle) {
+        Stream.of(
+                bundle.getEntities(Policy.class).values().stream(),
+                bundle.getEntities(GlobalPolicy.class).values().stream().peek(Policy.class::cast).collect(toList()).stream(),
+                bundle.getEntities(AuditPolicy.class).values().stream().peek(Policy.class::cast).collect(toList()).stream()
+        ).flatMap(s -> s)
+                .forEach(p -> link(p, bundle, filteredBundle));
     }
 
     @Override
