@@ -55,13 +55,13 @@ public class BundleFilter {
     }
 
     public void validateImportedFolder(String folderPath, Bundle bundle) {
-        Boolean isValidImport = true;
+        Boolean isValidImport = false;
 
         // Verifies if node folder is found or if Root Node is found only if the base directory is specified
         for (Folder folder : bundle.getFolders().values()) {
             if (folderPath.endsWith(folder.getName()) || 
                 (folderPath.equals("/") && folder.getName().equals("Root Node"))) {
-                isValidImport = false;
+                isValidImport = true;
             }
         }
 
