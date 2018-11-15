@@ -49,8 +49,8 @@ public class ExplodeBundle {
         //filter out unwanted entities
         BundleFilter bundleFilter = ExportPluginModule.getInjector().getInstance(BundleFilter.class);
         Bundle filteredBundle = bundleFilter.filter(folderPath, filterConfiguration, bundle);
-        
-        bundleFilter.verifyImportedFolder(folderPath, filteredBundle);
+
+        bundleFilter.validateImportedFolder(folderPath, filteredBundle);
 
         //Link, simplify and process entities
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
