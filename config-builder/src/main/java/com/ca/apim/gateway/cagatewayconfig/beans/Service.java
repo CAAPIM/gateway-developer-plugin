@@ -37,6 +37,7 @@ public class Service extends Folderable {
     private Element policyXML;
     @JsonIgnore
     private String path;
+    private WSDL wsdl;
 
     public String getUrl() {
         return url;
@@ -98,5 +99,13 @@ public class Service extends Folderable {
     @Override
     public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
         setPolicy(getPath());
+    }
+
+    public WSDL getWsdl() {
+        return wsdl;
+    }
+
+    public void setWsdl(WSDL wsdl) {
+        this.wsdl = wsdl;
     }
 }
