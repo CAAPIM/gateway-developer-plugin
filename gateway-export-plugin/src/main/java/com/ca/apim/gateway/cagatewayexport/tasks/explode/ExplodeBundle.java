@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilder;
@@ -48,6 +49,8 @@ public class ExplodeBundle {
         //filter out unwanted entities
         BundleFilter bundleFilter = ExportPluginModule.getInjector().getInstance(BundleFilter.class);
         Bundle filteredBundle = bundleFilter.filter(folderPath, filterConfiguration, bundle);
+        
+        bundleFilter.verifyImportedFolder(folderPath, filteredBundle);
 
         //Link, simplify and process entities
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
