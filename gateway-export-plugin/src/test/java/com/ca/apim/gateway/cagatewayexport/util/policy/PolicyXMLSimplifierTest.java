@@ -1,9 +1,13 @@
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -16,8 +20,8 @@ import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNA
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PolicyXMLSimplifierTest {
     private PolicyXMLSimplifier policyXMLSimplifier = PolicyXMLSimplifier.INSTANCE;
@@ -34,6 +38,24 @@ class PolicyXMLSimplifierTest {
 
         NodeList base64ElementNodes = setVariableAssertion.getElementsByTagName(BASE_64_EXPRESSION);
         assertEquals(0, base64ElementNodes.getLength());
+    }
+
+    @Test
+    void simplifySetVariableInvalid() {
+        Element setVariableAssertion = createSetVariableAssertionElement("ENV.gateway.test", Base64.encodeBase64String("test".getBytes()));
+
+        Bundle resultantBundle = new Bundle();
+        assertThrows(LinkerException.class, () -> policyXMLSimplifier.simplifySetVariable(setVariableAssertion, resultantBundle));
+    }
+
+    @Test
+    void simplifySetVariableExisting() {
+        Element setVariableAssertion = createSetVariableAssertionElement("ENV.test", Base64.encodeBase64String("test".getBytes()));
+
+        Bundle resultantBundle = new Bundle();
+        EnvironmentProperty property = new EnvironmentProperty("test", "test", Type.LOCAL);
+        resultantBundle.getEnvironmentProperties().put(property.getId(), property);
+        assertThrows(LinkerException.class, () -> policyXMLSimplifier.simplifySetVariable(setVariableAssertion, resultantBundle));
     }
 
     @Test
@@ -150,6 +172,68 @@ class PolicyXMLSimplifierTest {
         policyXMLSimplifier.simplifyPolicyXML(policyXML, bundle, bundle);
     }
 
+    @Test
+    void simplifyHardcodedResponse() {
+        Element hardcodedResponse = createHardcodedResponse(true);
+        policyXMLSimplifier.simplifyHardcodedResponse(hardcodedResponse);
+        assertEquals("Test", getSingleChildElementTextContent(hardcodedResponse, RESPONSE_BODY));
+    }
+
+    @Test
+    void simplifyHardcodedResponseNoBody() {
+        Element hardcodedResponse = createHardcodedResponse(false);
+        policyXMLSimplifier.simplifyHardcodedResponse(hardcodedResponse);
+        assertNull(getSingleChildElementTextContent(hardcodedResponse, RESPONSE_BODY));
+    }
+
+    @Test
+    void simplifyEncapsulatedAssertion() throws DocumentParseException {
+        Element encapsulatedAssertion = createEncapsulatedAssertion();
+        Bundle bundle = new Bundle();
+        Encass encass = new Encass();
+        encass.setGuid("Test Guid");
+        encass.setName("Test Name");
+        encass.setPolicyId("Policy");
+        Policy policy = new Policy();
+        policy.setId("Policy");
+        bundle.getEncasses().put(encass.getGuid(), encass);
+        bundle.getPolicies().put(policy.getId(), policy);
+
+        policyXMLSimplifier.simplifyEncapsulatedAssertion(bundle, encapsulatedAssertion);
+
+        assertEquals("Test Name", encapsulatedAssertion.getAttribute("encassName"));
+        assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME, true));
+        assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_GUID, true));
+    }
+
+    @Test
+    void simplifyEncapsulatedAssertionMissingPolicy() throws DocumentParseException {
+        Element encapsulatedAssertion = createEncapsulatedAssertion();
+        Bundle bundle = new Bundle();
+        Encass encass = new Encass();
+        encass.setGuid("Test Guid");
+        encass.setName("Test Name");
+        encass.setPolicyId("Policy");
+        bundle.getEncasses().put(encass.getGuid(), encass);
+
+        policyXMLSimplifier.simplifyEncapsulatedAssertion(bundle, encapsulatedAssertion);
+
+        assertNull(StringUtils.trimToNull(encapsulatedAssertion.getAttribute("encassName")));
+        assertNotNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME));
+        assertNotNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_GUID));
+    }
+
+    @Test
+    void simplifyEncapsulatedAssertionMissingEncass() throws DocumentParseException {
+        Element encapsulatedAssertion = createEncapsulatedAssertion();
+        Bundle bundle = new Bundle();
+        policyXMLSimplifier.simplifyEncapsulatedAssertion(bundle, encapsulatedAssertion);
+
+        assertNull(StringUtils.trimToNull(encapsulatedAssertion.getAttribute("encassName")));
+        assertNotNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME));
+        assertNotNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_GUID));
+    }
+
     @NotNull
     private Element createSetVariableAssertionElement(String variableName, String base64Data) {
         Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
@@ -184,6 +268,29 @@ class PolicyXMLSimplifierTest {
                 document,
                 INCLUDE,
                 createElementWithAttribute(document, POLICY_GUID, STRING_VALUE, id)
+        );
+    }
+
+    private Element createHardcodedResponse(boolean body) {
+        Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        String base64 = encodeBase64String("Test".getBytes());
+        Element element = createElementWithChildren(
+                document,
+                HARDCODED_RESPONSE
+        );
+        if (body) {
+            element.appendChild(createElementWithAttribute(document, BASE_64_RESPONSE_BODY, STRING_VALUE, base64));
+        }
+        return element;
+    }
+
+    private Element createEncapsulatedAssertion() {
+        Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        return createElementWithChildren(
+                document,
+                ENCAPSULATED,
+                createElementWithAttribute(document, ENCAPSULATED_ASSERTION_CONFIG_GUID, STRING_VALUE, "Test Guid"),
+                createElementWithAttribute(document, ENCAPSULATED_ASSERTION_CONFIG_NAME, STRING_VALUE, "Test Name")
         );
     }
 }

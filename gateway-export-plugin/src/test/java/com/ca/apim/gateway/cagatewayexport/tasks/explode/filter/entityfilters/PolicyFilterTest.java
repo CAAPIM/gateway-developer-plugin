@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createFolder;
-import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createPolicy;
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createPolicy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

@@ -13,8 +13,8 @@ import com.ca.apim.gateway.cagatewayconfig.beans.ScheduledTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createFolder;
-import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createPolicy;
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createPolicy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

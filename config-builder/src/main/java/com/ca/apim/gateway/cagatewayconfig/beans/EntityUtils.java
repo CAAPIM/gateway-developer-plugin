@@ -28,6 +28,7 @@ public class EntityUtils {
      * Create EntityInfo object for the specified entity.
      *
      * @param entityClass entity class
+     * @param <E> entity type
      * @return info object
      */
     public static <E extends GatewayEntity> GatewayEntityInfo createEntityInfo(Class<E> entityClass) {

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createEncass;
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createEncass;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

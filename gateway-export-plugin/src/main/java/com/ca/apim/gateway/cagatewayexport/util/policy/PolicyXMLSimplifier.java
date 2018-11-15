@@ -43,7 +43,8 @@ public class PolicyXMLSimplifier {
         findAndSimplifyAssertion(policyElement, AUTHENTICATION, element -> simplifyAuthenticationAssertion(bundle, element));
     }
 
-    private void simplifyHardcodedResponse(Element element) {
+    @VisibleForTesting
+    void simplifyHardcodedResponse(Element element) {
         Element base64ResponseBodyElement;
         try {
             base64ResponseBodyElement = getSingleElement(element, BASE_64_RESPONSE_BODY);
@@ -94,7 +95,8 @@ public class PolicyXMLSimplifier {
         element.removeChild(base64ExpressionElement);
     }
 
-    private void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) throws DocumentParseException {
+    @VisibleForTesting
+    void simplifyEncapsulatedAssertion(Bundle bundle, Element encapsulatedAssertionElement) throws DocumentParseException {
         Element encassGuidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         String encassGuid = encassGuidElement.getAttribute(STRING_VALUE);
         Optional<Encass> encassEntity = bundle.getEntities(Encass.class).values().stream().filter(e -> encassGuid.equals(e.getGuid())).findAny();

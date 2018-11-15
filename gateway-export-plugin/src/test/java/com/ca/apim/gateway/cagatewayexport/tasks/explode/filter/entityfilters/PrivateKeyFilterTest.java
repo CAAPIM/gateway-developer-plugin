@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createPolicy;
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createPolicy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PrivateKeyFilterTest {
