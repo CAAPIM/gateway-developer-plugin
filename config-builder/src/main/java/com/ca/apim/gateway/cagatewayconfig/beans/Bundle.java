@@ -202,4 +202,34 @@ public class Bundle {
     public void setDependencyMap(Map<Dependency, List<Dependency>> dependencyMap) {
         this.dependencyMap = dependencyMap;
     }
+
+    public void verifyExistingFolderPath(String folderPath, Bundle bundle) {
+        Boolean isValidImport = false;
+
+        // True because there isn't a specific directory. Only requires Root Node to exist.
+        if (folderPath.equals("/")) {
+            isValidImport = true;
+        }
+        
+        // Compares the folder tree path structure with specified Gateway connection folder path
+        String[] folderList = folderPath.split("/");
+        if (folderList.length > 0) {
+            String leafFolderName = folderList[folderList.length - 1];
+            Folder leafFolder = new Folder();
+            for (Folder folder : bundle.getFolders().values()) {
+                if (folder.getName().equals(leafFolderName)) {
+                    leafFolder = folder;
+                }
+            }
+
+            String leafFolderPath = "/" + leafFolder.getPath();
+            if (folderPath.equals(leafFolderPath)) {
+                isValidImport = true;
+            }
+        }
+
+        if (!isValidImport) {
+            throw new RuntimeException("Unable to find specified folder \"" + folderPath + "\" in the Gateway connection folder path");
+        }
+    }
 }
