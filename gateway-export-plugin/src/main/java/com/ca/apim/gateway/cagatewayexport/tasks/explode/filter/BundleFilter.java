@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.FolderTree;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters.FolderFilter;
 
@@ -52,22 +51,6 @@ public class BundleFilter {
         FolderTree folderTree = new FolderTree(filteredBundle.getFolders().values());
         filteredBundle.setFolderTree(folderTree);
         return filteredBundle;
-    }
-
-    public void validateImportedFolder(String folderPath, Bundle bundle) {
-        Boolean isValidImport = false;
-
-        // Verifies if node folder is found or if Root Node is found only if the base directory is specified
-        for (Folder folder : bundle.getFolders().values()) {
-            if (folderPath.endsWith(folder.getName()) || 
-                (folderPath.equals("/") && folder.getName().equals("Root Node"))) {
-                isValidImport = true;
-            }
-        }
-
-        if (!isValidImport) {
-            throw new RuntimeException("Unable to find specified folder \"" + folderPath + "\" in the Gateway connection folder path");
-        }
     }
 
 }
