@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
-import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
+import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import org.junit.jupiter.api.Test;

@@ -13,7 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.FolderTree;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.*;
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.*;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

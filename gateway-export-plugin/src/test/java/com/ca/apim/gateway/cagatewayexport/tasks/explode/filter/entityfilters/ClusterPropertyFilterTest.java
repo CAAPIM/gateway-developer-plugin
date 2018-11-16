@@ -6,7 +6,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
-import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
+import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createClusterProperty;
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createClusterProperty;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClusterPropertyFilterTest {

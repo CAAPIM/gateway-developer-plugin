@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createClusterProperty;
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createClusterProperty;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(TemporaryFolderExtension.class)

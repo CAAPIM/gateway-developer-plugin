@@ -6,7 +6,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
-import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
+import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 

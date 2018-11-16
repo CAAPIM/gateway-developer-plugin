@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.*;
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
