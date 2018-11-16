@@ -20,7 +20,7 @@ import java.util.function.Function;
 public class Bundle {
 
     // simple map of entities to avoid having to add here a new map for each entity
-    private final Map<Class, Map<String, ?>> entities = new HashMap<>();
+    private final Map<Class, Map<String, ?>> entities = new ConcurrentHashMap<>();
 
     // some special things need their own maps
     private final Map<String, SupplierWithIO<InputStream>> certificateFiles = new HashMap<>();
@@ -40,10 +40,6 @@ public class Bundle {
 
     public Map<String, ClusterProperty> getClusterProperties() {
         return getEntities(ClusterProperty.class);
-    }
-
-    public void putAllClusterProperties(@NotNull Map<String, ClusterProperty> clusterProperties) {
-        this.getClusterProperties().putAll(clusterProperties);
     }
 
     public Map<String, Service> getServices() {
