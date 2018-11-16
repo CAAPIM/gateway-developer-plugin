@@ -9,9 +9,10 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,11 +23,13 @@ import java.util.Map;
 @Singleton
 public class PolicyAndFolderLoader implements EntityLoader {
 
+    private final PolicyConverterRegistry policyConverterRegistry;
     private final FileUtils fileUtils;
     private final IdGenerator idGenerator;
 
     @Inject
-    PolicyAndFolderLoader(FileUtils fileUtils, IdGenerator idGenerator) {
+    PolicyAndFolderLoader(PolicyConverterRegistry policyConverterRegistry, FileUtils fileUtils, IdGenerator idGenerator) {
+        this.policyConverterRegistry = policyConverterRegistry;
         this.fileUtils = fileUtils;
         this.idGenerator = idGenerator;
     }
@@ -55,34 +58,27 @@ public class PolicyAndFolderLoader implements EntityLoader {
                     loadPolicies(child, rootDir, folder, policies, folders);
                 } else {
                     Policy policy = loadPolicy(child, rootDir, folder);
-                    policies.put(policy.getPath(), policy);
+                    Policy existingPolicy = policies.put(policy.getPath(), policy);
+                    if (existingPolicy != null) {
+                        throw new ConfigLoadException("Found multiple policies with same path but different types. Policy Path: " + policy.getPath());
+                    }
                 }
             }
         }
     }
 
     private Policy loadPolicy(final File policyFile, final File rootDir, Folder parentFolder) {
-        String policyPath = FolderLoaderUtils.getPath(policyFile, rootDir);
+        PolicyConverter policyConverter = policyConverterRegistry.getConverterFromFileName(policyFile.getName());
 
         Policy policy = new Policy();
-        policy.setPath(policyPath.substring(0, policyPath.length() - ".xml".length()));
-        policy.setPolicyXML(fileUtils.getFileAsString(policyFile));
-        policy.setName(getPolicyName(policyFile));
+        policy.setPath(policyConverter.removeExtension(FolderLoaderUtils.getPath(policyFile, rootDir)));
+        policy.setName(policyConverter.removeExtension(policyFile.getName()));
         policy.setParentFolder(parentFolder);
         policy.setGuid(idGenerator.generateGuid());
         policy.setId(idGenerator.generate());
-        return policy;
-    }
 
-    @NotNull
-    String getPolicyName(File policyFile) {
-        String fileName = policyFile.getName();
-        int indexOfPeriod = fileName.lastIndexOf('.');
-        if (indexOfPeriod > 0) {
-            return fileName.substring(0, indexOfPeriod);
-        } else {
-            return fileName;
-        }
+        policy.setPolicyXML(policyConverter.getPolicyXML(policy, fileUtils.getFileAsString(policyFile)));
+        return policy;
     }
 
     @Override

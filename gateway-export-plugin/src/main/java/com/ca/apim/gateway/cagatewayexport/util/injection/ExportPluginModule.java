@@ -6,8 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayexport.util.injection;
 
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundle;
@@ -45,7 +48,7 @@ public class ExportPluginModule extends AbstractModule {
     @Override
     protected void configure() {
         // scan everything under the plugin package
-        Reflections reflections = new Reflections(BASE_PACKAGE);
+        Reflections reflections = new Reflections(ConfigBuilderModule.BASE_PACKAGE).merge(new Reflections(BASE_PACKAGE));
         // bind the reflections instance so it can be reused anywhere
         bind(Reflections.class).toInstance(reflections);
 
@@ -79,6 +82,11 @@ public class ExportPluginModule extends AbstractModule {
             }
         });
         bind(EntityWriterRegistry.class);
+
+        // bind all policy converters to the module
+        Multibinder<PolicyConverter> policyConverterBinder = newSetBinder(binder(), PolicyConverter.class);
+        reflections.getSubTypesOf(PolicyConverter.class).forEach(l -> policyConverterBinder.addBinding().to(l));
+        bind(PolicyConverterRegistry.class);
 
         // bind the explode task implementation
         bind(ExplodeBundle.class);

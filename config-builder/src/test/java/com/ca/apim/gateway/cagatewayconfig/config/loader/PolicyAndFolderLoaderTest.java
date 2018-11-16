@@ -9,8 +9,14 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.AssertionJSPolicyConverter;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterException;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.XMLPolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.google.common.collect.ImmutableSet;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.Assert;
@@ -32,28 +38,12 @@ class PolicyAndFolderLoaderTest {
     @Mock
     private FileUtils fileUtils;
 
-    @Test
-    void getPolicyNameTest() {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
-
-        File policy = new File("policy.xml");
-        Assert.assertEquals("policy", policyAndFolderLoader.getPolicyName(policy));
-
-        policy = new File("policy.xml");
-        Assert.assertEquals("policy", policyAndFolderLoader.getPolicyName(policy));
-
-        policy = new File("my.policy.xml");
-        Assert.assertEquals("my.policy", policyAndFolderLoader.getPolicyName(policy));
-
-        policy = new File("something");
-        Assert.assertEquals("something", policyAndFolderLoader.getPolicyName(policy));
-
-    }
+    private PolicyConverterRegistry policyConverterRegistry = new PolicyConverterRegistry(ImmutableSet.of(new AssertionJSPolicyConverter(), new XMLPolicyConverter(DocumentFileUtils.INSTANCE)));
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoad(TemporaryFolder temporaryFolder) throws IOException {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(fileUtils, new IdGenerator());
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, fileUtils, new IdGenerator());
         Mockito.when(fileUtils.getFileAsString(Mockito.any(File.class))).thenReturn("policy-content");
 
         File policyFolder = temporaryFolder.createDirectory("policy");
@@ -84,7 +74,7 @@ class PolicyAndFolderLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoadNoPolicyFolder(TemporaryFolder temporaryFolder) {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
         policyAndFolderLoader.load(bundle, temporaryFolder.getRoot());
@@ -95,7 +85,7 @@ class PolicyAndFolderLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoadPolicyFolderIsFile(TemporaryFolder temporaryFolder) throws IOException {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator());
 
         temporaryFolder.createFile("policy");
 
@@ -105,8 +95,37 @@ class PolicyAndFolderLoaderTest {
     }
 
     @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testLoadPolicyUnknownType(TemporaryFolder temporaryFolder) throws IOException {
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator());
+
+        File policyFolder = temporaryFolder.createDirectory("policy");
+        File policy = new File(policyFolder, "policy.blah");
+        Files.touch(policy);
+
+        Bundle bundle = new Bundle();
+
+        assertThrows(PolicyConverterException.class, () -> policyAndFolderLoader.load(bundle, temporaryFolder.getRoot()));
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testLoadPolicySameNameDifferentType(TemporaryFolder temporaryFolder) throws IOException {
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator());
+
+        File policyFolder = temporaryFolder.createDirectory("policy");
+        File policy = new File(policyFolder, "policy.xml");
+        Files.touch(policy);
+        policy = new File(policyFolder, "policy.assertion.js");
+        Files.touch(policy);
+
+        Bundle bundle = new Bundle();
+        assertThrows(ConfigLoadException.class, () -> policyAndFolderLoader.load(bundle, temporaryFolder.getRoot()));
+    }
+
+    @Test
     void loadFromEnvironment() {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(FileUtils.INSTANCE, new IdGenerator());
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator());
         assertThrows(ConfigLoadException.class, () -> policyAndFolderLoader.load(new Bundle(), "policy", "policy"));
     }
 }

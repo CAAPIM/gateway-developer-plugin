@@ -86,16 +86,15 @@ public class DocumentFileUtils {
         }
     }
 
-    private void printXML(final Element node, final OutputStream outStream, boolean addNamespace) {
+    public void printXML(final Element node, final OutputStream outStream, boolean addNamespace) {
         if (addNamespace) {
             node.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
         }
 
         final Transformer transformer = documentTools.getTransformer();
-        final OutputStreamWriter writer = new OutputStreamWriter(outStream, UTF_8);
-        try {
+        try (OutputStreamWriter writer = new OutputStreamWriter(outStream, UTF_8)) {
             transformer.transform(new DOMSource(node), new StreamResult(writer));
-        } catch (TransformerException e) {
+        } catch (TransformerException | IOException e) {
             throw new DocumentFileUtilsException("Exception writing xml element to stream.", e);
         }
     }
