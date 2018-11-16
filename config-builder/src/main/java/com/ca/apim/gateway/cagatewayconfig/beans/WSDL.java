@@ -1,7 +1,10 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class WSDL {
 
+    @JsonIgnore
     private String url;
     private String soapVersion;
     private String wsdlXml;

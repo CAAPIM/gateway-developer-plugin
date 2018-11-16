@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.WSDL;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
@@ -21,15 +22,11 @@ import javax.inject.Singleton;
 import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @Singleton
 public class ServiceLoader implements BundleEntityLoader {
-
-    static final String KEY_VALUE_SOAP = "soap";
-    static final String KEY_VALUE_SOAP_VERSION = "soapVersion";
-    static final String TAG_VALUE_POLICY = "policy";
-    static final String TAG_VALUE_WSDL = "wsdl";
 
     @Override
     public void load(Bundle bundle, Element element) {
@@ -44,20 +41,19 @@ public class ServiceLoader implements BundleEntityLoader {
         String soapVersion = null;
 
         Element servicePropertiesElement = getSingleChildElement(serviceDetails, PROPERTIES);
-        NodeList propertyNodes = servicePropertiesElement.getElementsByTagName(PROPERTY);
+        Map<String, Object> allProperties = BuilderUtils.mapPropertiesElements(servicePropertiesElement, PROPERTIES);
         Map<String, Object> properties = new HashMap<>();
-        for (int i = 0; i < propertyNodes.getLength(); i++) {
-            if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.")) {
-                String propertyValue = null;
-                if (!propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.ENV.")) {
-                    propertyValue = getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent();
+        for (Map.Entry<String, Object> entry : allProperties.entrySet()) {
+            if (entry.getKey().startsWith("property.")) {
+                Object propertyValue = null;
+                if (!entry.getKey().startsWith("property.ENV.")) {
+                    propertyValue = entry.getValue();
                 }
-                properties.put(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(9), propertyValue);
-            } else if (KEY_VALUE_SOAP.equals(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent())) {
-                String value = getSingleChildElement((Element) propertyNodes.item(i), BOOLEAN_VALUE).getTextContent();
-                isSoapService = Boolean.valueOf(value);
-            } else if (KEY_VALUE_SOAP_VERSION.equals(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent())) {
-                soapVersion = getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent();
+                properties.put(entry.getKey().substring(9), propertyValue);
+            } else if (KEY_VALUE_SOAP.equals(entry.getKey())) {
+                isSoapService = Boolean.valueOf(entry.getValue().toString());
+            } else if (KEY_VALUE_SOAP_VERSION.equals(entry.getKey())) {
+                soapVersion = entry.getValue().toString();
             }
         }
         final Element resources = getSingleChildElement(service, RESOURCES);

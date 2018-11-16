@@ -7,10 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.PolicyBackedService;
-import com.ca.apim.gateway.cagatewayconfig.beans.PolicyBackedServiceOperation;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
@@ -22,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -88,11 +86,11 @@ class ServiceLoaderTest {
     }
 
     private static Element createCommonXml(Document document, boolean isSoap) {
-        Element resourcesElement = null;
+        Element resourcesElement;
         Element policyResourceSetElement = createElementWithAttributesAndChildren(
                 document,
                 RESOURCE_SET,
-                ImmutableMap.of(ATTRIBUTE_TAG, ServiceLoader.TAG_VALUE_POLICY),
+                ImmutableMap.of(ATTRIBUTE_TAG, TAG_VALUE_POLICY),
                 createElementWithAttributesAndTextContent(
                         document,
                         RESOURCE,
@@ -101,14 +99,14 @@ class ServiceLoaderTest {
                 )
         );
 
-        Element wsdlResourceSetElement = null;
-        Map<String, Object> propertiesMap = null;
+        Element wsdlResourceSetElement;
+        Map<String, Object> propertiesMap;
         if(isSoap) {
-            propertiesMap = ImmutableMap.of("property.prop", "value", "property.ENV.prop", "value2", ServiceLoader.KEY_VALUE_SOAP, true, ServiceLoader.KEY_VALUE_SOAP_VERSION, "1.1");
+            propertiesMap = ImmutableMap.of("property.prop", "value", "property.ENV.prop", "value2", KEY_VALUE_SOAP, true, KEY_VALUE_SOAP_VERSION, "1.1");
             wsdlResourceSetElement = createElementWithAttributesAndChildren(
                     document,
                     RESOURCE_SET,
-                    ImmutableMap.of(ATTRIBUTE_ROOT_URL, "test.wsdl", ATTRIBUTE_TAG, ServiceLoader.TAG_VALUE_WSDL),
+                    ImmutableMap.of(ATTRIBUTE_ROOT_URL, "test.wsdl", ATTRIBUTE_TAG, TAG_VALUE_WSDL),
                     createElementWithAttributesAndTextContent(
                             document,
                             RESOURCE,
@@ -267,7 +265,7 @@ class ServiceLoaderTest {
                                 )
                         ),
                         buildPropertiesElement(
-                                ImmutableMap.of("property.prop", "value", "property.ENV.prop", "value2", ServiceLoader.KEY_VALUE_SOAP, true, ServiceLoader.KEY_VALUE_SOAP_VERSION, "1.1"),
+                                ImmutableMap.of("property.prop", "value", "property.ENV.prop", "value2", KEY_VALUE_SOAP, true, KEY_VALUE_SOAP_VERSION, "1.1"),
                                 document
                         )
                 ),
@@ -277,7 +275,7 @@ class ServiceLoaderTest {
                         createElementWithAttributesAndChildren(
                                 document,
                                 RESOURCE_SET,
-                                ImmutableMap.of(ATTRIBUTE_TAG, ServiceLoader.TAG_VALUE_POLICY),
+                                ImmutableMap.of(ATTRIBUTE_TAG, TAG_VALUE_POLICY),
                                 createElementWithAttributesAndTextContent(
                                         document,
                                         RESOURCE,
@@ -288,7 +286,7 @@ class ServiceLoaderTest {
                         createElementWithAttributesAndChildren(
                                 document,
                                 RESOURCE_SET,
-                                ImmutableMap.of(ATTRIBUTE_ROOT_URL, "test.wsdl", ATTRIBUTE_TAG, ServiceLoader.TAG_VALUE_WSDL),
+                                ImmutableMap.of(ATTRIBUTE_ROOT_URL, "test.wsdl", ATTRIBUTE_TAG, TAG_VALUE_WSDL),
                                 createElementWithAttributesAndTextContent(
                                         document,
                                         RESOURCE,
