@@ -60,29 +60,7 @@ public class ServiceLoader implements BundleEntityLoader {
         Service serviceEntity = new Service();
 
         if(isSoapService) {
-            List<Element> resourceSets = getChildElements(resources, RESOURCE_SET);
-            for(Element resourceSet : resourceSets) {
-                String tagValue = resourceSet.getAttribute(ATTRIBUTE_TAG);
-                final Element resource = getSingleChildElement(resourceSet, RESOURCE);
-                if(StringUtils.isEmpty(tagValue)) {
-                    throw new BundleLoadException("No tag attribute found under " + RESOURCE_SET);
-                } else if(TAG_VALUE_POLICY.equals(tagValue)) {
-                    serviceEntity.setPolicy(resource.getTextContent());
-                } else if(TAG_VALUE_WSDL.equals(tagValue)) {
-                    final String rootUrlForWsdl = resourceSet.getAttribute(ATTRIBUTE_ROOT_URL);
-                    final String wsdl = resource.getTextContent();
-
-                    if(StringUtils.isEmpty(wsdl) || StringUtils.isEmpty(rootUrlForWsdl)) {
-                        throw new BundleLoadException("No wsdl or rootUrl found under " + RESOURCE_SET);
-                    } else {
-                        WSDL wsdlBean = new WSDL();
-                        wsdlBean.setUrl(rootUrlForWsdl);
-                        wsdlBean.setWsdlXml(wsdl);
-                        wsdlBean.setSoapVersion(soapVersion);
-                        serviceEntity.setWsdl(wsdlBean);
-                    }
-                }
-            }
+            extraxtResourceSets(soapVersion, resources, serviceEntity);
         } else {
             final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
             final Element resource = getSingleChildElement(resourceSet, RESOURCE);
@@ -110,6 +88,32 @@ public class ServiceLoader implements BundleEntityLoader {
         serviceEntity.setProperties(properties);
 
         bundle.getServices().put(name, serviceEntity);
+    }
+
+    private void extraxtResourceSets(String soapVersion, Element resources, Service serviceEntity) {
+        List<Element> resourceSets = getChildElements(resources, RESOURCE_SET);
+        for(Element resourceSet : resourceSets) {
+            String tagValue = resourceSet.getAttribute(ATTRIBUTE_TAG);
+            final Element resource = getSingleChildElement(resourceSet, RESOURCE);
+            if(StringUtils.isEmpty(tagValue)) {
+                throw new BundleLoadException("No tag attribute found under " + RESOURCE_SET);
+            } else if(TAG_VALUE_POLICY.equals(tagValue)) {
+                serviceEntity.setPolicy(resource.getTextContent());
+            } else if(TAG_VALUE_WSDL.equals(tagValue)) {
+                final String rootUrlForWsdl = resourceSet.getAttribute(ATTRIBUTE_ROOT_URL);
+                final String wsdl = resource.getTextContent();
+
+                if(StringUtils.isEmpty(wsdl) || StringUtils.isEmpty(rootUrlForWsdl)) {
+                    throw new BundleLoadException("No wsdl or rootUrl found under " + RESOURCE_SET);
+                } else {
+                    WSDL wsdlBean = new WSDL();
+                    wsdlBean.setUrl(rootUrlForWsdl);
+                    wsdlBean.setWsdlXml(wsdl);
+                    wsdlBean.setSoapVersion(soapVersion);
+                    serviceEntity.setWsdl(wsdlBean);
+                }
+            }
+        }
     }
 
     @Override
