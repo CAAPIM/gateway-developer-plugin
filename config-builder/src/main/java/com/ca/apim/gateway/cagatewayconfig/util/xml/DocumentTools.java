@@ -13,6 +13,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -48,8 +49,14 @@ public class DocumentTools {
         }
 
         xPathFactory = XPathFactory.newInstance();
-        transformerFactory = TransformerFactory.newInstance();
-        transformerFactory.setAttribute("indent-number", 4);
+
+        try {
+            transformerFactory = TransformerFactory.newInstance();
+            transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            transformerFactory.setAttribute("indent-number", 4);
+        } catch (TransformerConfigurationException e) {
+            throw new DocumentToolsException("Unexpected exception creating TransformerFactory", e);
+        }
     }
 
     public Transformer getTransformer() {

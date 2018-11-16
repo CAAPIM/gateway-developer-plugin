@@ -6,8 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
@@ -20,9 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_NAME;
@@ -69,9 +66,7 @@ public class TestUtils {
         final List<Entity> entities = builder.build(bundle, BundleType.DEPLOYMENT, document);
         assertNotNull(entities);
         assertEquals(expectedEntityNames.size(), entities.size());
-        entities.forEach(e -> {
-            assertOnlyMappingEntity(entityType, expectedEntityNames, e);
-        });
+        entities.forEach(e -> assertOnlyMappingEntity(entityType, expectedEntityNames, e));
     }
 
     public static void assertOnlyMappingEntity(String entityType, List<String> expectedEntityNames, Entity e) {
@@ -185,6 +180,68 @@ public class TestUtils {
 
     public static Folder createRoot() {
         return createFolder(ROOT_FOLDER_NAME, ROOT_FOLDER_ID, null);
+    }
+
+    public static Element createServiceXml(Document document, boolean withProperties) {
+        Element element = createElementWithAttributesAndChildren(
+                document,
+                SERVICE,
+                ImmutableMap.of(ATTRIBUTE_ID, "id"),
+                createElementWithAttributesAndChildren(
+                        document,
+                        SERVICE_DETAIL,
+                        ImmutableMap.of(ATTRIBUTE_ID, "id", ATTRIBUTE_FOLDER_ID, "folder"),
+                        createElementWithTextContent(document, NAME, "service"),
+                        createElementWithChildren(
+                                document,
+                                SERVICE_MAPPINGS,
+                                createElementWithChildren(
+                                        document,
+                                        HTTP_MAPPING,
+                                        createElementWithTextContent(document, URL_PATTERN, "/service"),
+                                        createElementWithChildren(
+                                                document,
+                                                VERBS,
+                                                createElementWithTextContent(document, VERB, "GET"),
+                                                createElementWithTextContent(document, VERB, "POST"),
+                                                createElementWithTextContent(document, VERB, "PUT"),
+                                                createElementWithTextContent(document, VERB, "DELETE")
+                                        )
+                                )
+                        ),
+                        buildPropertiesElement(
+                                withProperties ? ImmutableMap.of("property.prop", "value", "property.ENV.prop", "value2") : Collections.emptyMap(),
+                                document
+                        )
+                ),
+                createElementWithChildren(
+                        document,
+                        RESOURCES,
+                        createElementWithAttributesAndChildren(
+                                document,
+                                RESOURCE_SET,
+                                ImmutableMap.of("tag", "policy"),
+                                createElementWithAttributesAndTextContent(
+                                        document,
+                                        RESOURCE,
+                                        ImmutableMap.of("type", "policy"),
+                                        "policy"
+                                )
+                        )
+                )
+        );
+
+        return createElementWithChildren(
+                document,
+                ITEM,
+                createElementWithTextContent(document, ID, "id"),
+                createElementWithTextContent(document, TYPE, EntityTypes.SERVICE_TYPE),
+                createElementWithChildren(
+                        document,
+                        RESOURCE,
+                        element
+                )
+        );
     }
 
     @NotNull

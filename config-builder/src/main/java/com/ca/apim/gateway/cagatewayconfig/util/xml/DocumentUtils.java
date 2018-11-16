@@ -219,9 +219,22 @@ public class DocumentUtils {
      * @throws DocumentParseException if any errors
      */
     public static Element stringToXML(DocumentTools documentTools, String string) throws DocumentParseException {
+        Document document = stringToXMLDocument(documentTools, string);
+        return document.getDocumentElement();
+    }
+
+    /**
+     * Generate dom Document from a XML String.
+     *
+     * @param documentTools DocumentTools instance used for parsing
+     * @param string xml String
+     * @return Xml Element
+     * @throws DocumentParseException if any errors
+     */
+    public static Document stringToXMLDocument(DocumentTools documentTools, String string) throws DocumentParseException {
         Document document = documentTools.parse(string);
         documentTools.cleanup(document);
-        return document.getDocumentElement();
+        return document;
     }
 
     /**

@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.util.properties;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -16,16 +17,28 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Properties;
 
 import static com.ca.apim.gateway.cagatewayexport.util.properties.PropertyFileUtils.loadExistingProperties;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(TemporaryFolderExtension.class)
 class PropertyFileUtilsTest {
 
     @Test
-    void loadExistingPropertiesNoProperties(TemporaryFolder temporaryFolder) {
+    void loadFileFailure(TemporaryFolder temporaryFolder) throws IOException {
+        File file = new File(temporaryFolder.getRoot(), "static.properties");
+        FileUtils.touch(file);
+        Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("---------"));
+
+        assertThrows(PropertyFileException.class, () -> loadExistingProperties(file));
+    }
+
+    @Test
+    void loadNonexistingFile(TemporaryFolder temporaryFolder) {
         assertTrue(loadExistingProperties(new File(temporaryFolder.getRoot(), "static.properties")).isEmpty());
     }
 

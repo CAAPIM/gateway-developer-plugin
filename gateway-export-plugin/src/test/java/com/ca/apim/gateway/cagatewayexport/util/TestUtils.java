@@ -7,13 +7,97 @@
 package com.ca.apim.gateway.cagatewayexport.util;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.RESOURCE;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithChildren;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+
 public class TestUtils {
+
+    public static Element createServiceXml(Document document, boolean withProperties) {
+        Element element = createElementWithAttributesAndChildren(
+                document,
+                SERVICE,
+                ImmutableMap.of(ATTRIBUTE_ID, "id"),
+                createElementWithAttributesAndChildren(
+                        document,
+                        SERVICE_DETAIL,
+                        ImmutableMap.of(ATTRIBUTE_ID, "id", ATTRIBUTE_FOLDER_ID, "folder"),
+                        createElementWithTextContent(document, NAME, "service"),
+                        createElementWithChildren(
+                                document,
+                                SERVICE_MAPPINGS,
+                                createElementWithChildren(
+                                        document,
+                                        HTTP_MAPPING,
+                                        createElementWithTextContent(document, URL_PATTERN, "/service"),
+                                        createElementWithChildren(
+                                                document,
+                                                VERBS,
+                                                createElementWithTextContent(document, VERB, "GET"),
+                                                createElementWithTextContent(document, VERB, "POST"),
+                                                createElementWithTextContent(document, VERB, "PUT"),
+                                                createElementWithTextContent(document, VERB, "DELETE")
+                                        )
+                                )
+                        ),
+                        buildPropertiesElement(
+                                withProperties ? ImmutableMap.of("property.prop", "value", "property.ENV.prop", "value2") : Collections.emptyMap(),
+                                document
+                        )
+                ),
+                createElementWithChildren(
+                        document,
+                        RESOURCES,
+                        createElementWithAttributesAndChildren(
+                                document,
+                                RESOURCE_SET,
+                                ImmutableMap.of("tag", "policy"),
+                                createElementWithAttributesAndTextContent(
+                                        document,
+                                        RESOURCE,
+                                        ImmutableMap.of("type", "policy"),
+                                        "policy"
+                                )
+                        )
+                )
+        );
+
+        return createElementWithChildren(
+                document,
+                ITEM,
+                createElementWithTextContent(document, ID, "id"),
+                createElementWithTextContent(document, TYPE, EntityTypes.SERVICE_TYPE),
+                createElementWithChildren(
+                        document,
+                        RESOURCE,
+                        element
+                )
+        );
+    }
+
+    @NotNull
+    public static Folder createFolder(String folderName, String folderId, Folder parent) {
+        Folder folder = new Folder();
+        folder.setName(folderName);
+        folder.setId(folderId);
+        folder.setParentFolder(parent);
+        return folder;
+    }
 
     public static Policy createPolicy(final String name, final String id, final String guid, final String parentFolderId, Element policyElement, String policyString) {
         return createPolicy(name, id, guid, parentFolderId, policyElement, policyString, null);
@@ -61,14 +145,6 @@ public class TestUtils {
         return encass;
     }
 
-    public static Folder createFolder(final String name, final String id, final Folder parentFolder) {
-        Folder folder = new Folder();
-        folder.setName(name);
-        folder.setId(id);
-        folder.setParentFolder(parentFolder);
-        return folder;
-    }
-
     public static PolicyBackedService createPolicyBackedService(final String name, final String id, String interfaceName, final Map<String, String> operations) {
         PolicyBackedService pbs = new PolicyBackedService();
         pbs.setName(name);
@@ -88,5 +164,4 @@ public class TestUtils {
         service.setPolicy(policy);
         return service;
     }
-
 }

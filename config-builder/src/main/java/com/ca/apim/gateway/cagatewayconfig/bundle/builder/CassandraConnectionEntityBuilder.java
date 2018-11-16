@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -82,7 +81,7 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
         cassandraElement.appendChild(createElementWithTextContent(document, SSL, connection.getSsl()));
 
         if (isNotEmpty(connection.getTlsCiphers())) {
-            String ciphers = Joiner.on(",").join(connection.getTlsCiphers());
+            String ciphers = String.join(",", connection.getTlsCiphers());
             cassandraElement.appendChild(createElementWithTextContent(document, TLS_CIPHERS, ciphers));
         }
         cassandraElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));

@@ -6,11 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.beans.PolicyType;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
@@ -49,7 +48,7 @@ class PolicyLoaderTest {
         f1.setPath(TEST_FOLDER_1);
         bundle.getFolders().put(TEST_FOLDER_1, f1);
 
-        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1));
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, null));
 
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
@@ -69,7 +68,7 @@ class PolicyLoaderTest {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();
 
-        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, "Unsupported", TEST_FOLDER_1));
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, "Unsupported", TEST_FOLDER_1, null));
 
         assertTrue(bundle.getPolicies().isEmpty());
     }
@@ -79,7 +78,7 @@ class PolicyLoaderTest {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();
 
-        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1)));
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, null)));
     }
 
     @Test
@@ -93,23 +92,97 @@ class PolicyLoaderTest {
         bundle.getFolders().put(TEST_FOLDER_1, f1);
         bundle.getFolders().put(TEST_FOLDER_1 + "_1", f1);
 
-        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1)));
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, null)));
     }
 
-    private static Element createPolicyBundleXml(Document document, String policyID, String policyName, String policyType, String folderID) {
+    @Test
+    void testGlobalPolicy() {
+        Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Bundle bundle = new Bundle();
+        Folder f1 = new Folder();
+        f1.setId(TEST_FOLDER_1);
+        f1.setName(TEST_FOLDER_1);
+        f1.setPath(TEST_FOLDER_1);
+        bundle.getFolders().put(TEST_FOLDER_1, f1);
+
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.GLOBAL.getType(), TEST_FOLDER_1, null));
+
+        assertFalse(bundle.getPolicies().isEmpty());
+        assertEquals(1, bundle.getPolicies().size());
+
+        String path = Paths.get(TEST_FOLDER_1, TEST_POLICY_NAME).toString();
+        Policy policy = bundle.getPolicies().get(path);
+        assertNotNull(policy);
+        assertEquals(TEST_POLICY_ID, policy.getId());
+        assertEquals(TEST_POLICY_NAME, policy.getName());
+        assertEquals(path, policy.getPath());
+        assertEquals(TEST_GUID, policy.getGuid());
+        assertEquals(f1, policy.getParentFolder());
+        assertTrue(policy instanceof GlobalPolicy);
+        assertTrue(bundle.getEntities(GlobalPolicy.class).values().contains(policy));
+    }
+
+
+    @Test
+    void testAuditPolicy() {
+        Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Bundle bundle = new Bundle();
+        Folder f1 = new Folder();
+        f1.setId(TEST_FOLDER_1);
+        f1.setName(TEST_FOLDER_1);
+        f1.setPath(TEST_FOLDER_1);
+        bundle.getFolders().put(TEST_FOLDER_1, f1);
+
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.INTERNAL.getType(), TEST_FOLDER_1, "audit-lookup"));
+
+        assertFalse(bundle.getPolicies().isEmpty());
+        assertEquals(1, bundle.getPolicies().size());
+
+        String path = Paths.get(TEST_FOLDER_1, TEST_POLICY_NAME).toString();
+        Policy policy = bundle.getPolicies().get(path);
+        assertNotNull(policy);
+        assertEquals(TEST_POLICY_ID, policy.getId());
+        assertEquals(TEST_POLICY_NAME, policy.getName());
+        assertEquals(path, policy.getPath());
+        assertEquals(TEST_GUID, policy.getGuid());
+        assertEquals(f1, policy.getParentFolder());
+        assertTrue(policy instanceof AuditPolicy);
+        assertTrue(bundle.getEntities(AuditPolicy.class).values().contains(policy));
+    }
+
+    @Test
+    void testAuditPolicyWithInvalidTags() {
+        Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Bundle bundle = new Bundle();
+        Folder f1 = new Folder();
+        f1.setId(TEST_FOLDER_1);
+        f1.setName(TEST_FOLDER_1);
+        f1.setPath(TEST_FOLDER_1);
+        bundle.getFolders().put(TEST_FOLDER_1, f1);
+
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.INTERNAL.getType(), TEST_FOLDER_1, "test"));
+
+        assertTrue(bundle.getPolicies().isEmpty());
+        assertTrue(bundle.getEntities(AuditPolicy.class).isEmpty());
+    }
+
+    private static Element createPolicyBundleXml(Document document, String policyID, String policyName, String policyType, String folderID, String tag) {
         Element element = createElementWithAttributesAndChildren(
                 document,
                 POLICY,
-                ImmutableMap.of(ATTRIBUTE_ID, policyID, ATTRIBUTE_GUID, TEST_GUID),
-                createElementWithAttributesAndChildren(
-                        document,
-                        POLICY_DETAIL,
-                        ImmutableMap.of(ATTRIBUTE_FOLDER_ID, folderID, ATTRIBUTE_GUID, TEST_GUID, ATTRIBUTE_ID, policyID),
-                        createElementWithTextContent(document, NAME, policyName),
-                        createElementWithTextContent(document, POLICY_TYPE, policyType)
-                )
+                ImmutableMap.of(ATTRIBUTE_ID, policyID, ATTRIBUTE_GUID, TEST_GUID)
         );
-
+        Element policyDetailElement = createElementWithAttributesAndChildren(
+                document,
+                POLICY_DETAIL,
+                ImmutableMap.of(ATTRIBUTE_FOLDER_ID, folderID, ATTRIBUTE_GUID, TEST_GUID, ATTRIBUTE_ID, policyID),
+                createElementWithTextContent(document, NAME, policyName),
+                createElementWithTextContent(document, POLICY_TYPE, policyType)
+        );
+        if (tag != null) {
+            BuilderUtils.buildAndAppendPropertiesElement(ImmutableMap.of(PropertyConstants.PROPERTY_TAG, tag), document, policyDetailElement);
+        }
+        element.appendChild(policyDetailElement);
         element.appendChild(
                 createElementWithChildren(
                         document,

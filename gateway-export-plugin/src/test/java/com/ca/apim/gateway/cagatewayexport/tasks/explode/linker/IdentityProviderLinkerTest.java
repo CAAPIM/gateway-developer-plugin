@@ -24,6 +24,29 @@ class IdentityProviderLinkerTest {
     private IdentityProviderLinker linker = new IdentityProviderLinker();
 
     @Test
+    void linkBindOnly() {
+        Bundle bundle = new Bundle();
+
+        final IdentityProvider identityProvider = new IdentityProvider.Builder()
+                .name("Test")
+                .type(IdentityProviderType.BIND_ONLY_LDAP)
+                .build();
+        linker.link(identityProvider, bundle, bundle);
+        assertNull(identityProvider.getIdentityProviderDetail());
+    }
+
+    @Test
+    void linkNoDetail() {
+        Bundle bundle = new Bundle();
+
+        final IdentityProvider identityProvider = createIdentityProvider();
+        identityProvider.setIdentityProviderDetail(null);
+
+        linker.link(identityProvider, bundle, bundle);
+        assertNull(identityProvider.getIdentityProviderDetail());
+    }
+
+    @Test
     void linkNoCert() {
         link();
     }
@@ -46,7 +69,6 @@ class IdentityProviderLinkerTest {
 
         final IdentityProvider identityProvider = createIdentityProvider(certId);
         linker.link(identityProvider, bundle, bundle);
-
 
         assertNotNull(identityProvider.getIdentityProviderDetail());
         assertTrue(identityProvider.getIdentityProviderDetail() instanceof FederatedIdentityProviderDetail);
