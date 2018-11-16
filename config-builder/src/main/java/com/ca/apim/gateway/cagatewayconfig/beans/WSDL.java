@@ -3,7 +3,8 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 public class WSDL {
 
     private String url;
-    private String wsdl;
+    private String soapVersion;
+    private String wsdlXml;
 
     public String getUrl() {
         return url;
@@ -13,11 +14,19 @@ public class WSDL {
         this.url = url;
     }
 
-    public String getWsdl() {
-        return wsdl;
+    public String getWsdlXml() {
+        return wsdlXml;
     }
 
-    public void setWsdl(String wsdl) {
-        this.wsdl = wsdl;
+    public void setWsdlXml(String wsdlXml) {
+        this.wsdlXml = wsdlXml;
+    }
+
+    public String getSoapVersion() {
+        return soapVersion;
+    }
+
+    public void setSoapVersion(String soapVersion) {
+        this.soapVersion = soapVersion;
     }
 }

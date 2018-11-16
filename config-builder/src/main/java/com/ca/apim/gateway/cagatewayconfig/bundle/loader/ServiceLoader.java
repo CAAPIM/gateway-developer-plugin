@@ -12,7 +12,6 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.WSDL;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -27,9 +26,10 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 @Singleton
 public class ServiceLoader implements BundleEntityLoader {
 
-    private static final String KEY_VALUE_SOAP = "soap";
-    private static final String TAG_VALUE_POLICY = "policy";
-    private static final String TAG_VALUE_WSDL = "wsdl";
+    static final String KEY_VALUE_SOAP = "soap";
+    static final String KEY_VALUE_SOAP_VERSION = "soapVersion";
+    static final String TAG_VALUE_POLICY = "policy";
+    static final String TAG_VALUE_WSDL = "wsdl";
 
     @Override
     public void load(Bundle bundle, Element element) {
@@ -40,9 +40,26 @@ public class ServiceLoader implements BundleEntityLoader {
         final String folderId = serviceDetails.getAttribute(ATTRIBUTE_FOLDER_ID);
         Element nameElement = getSingleChildElement(serviceDetails, NAME);
         final String name = EncodeDecodeUtils.encodePath(nameElement.getTextContent());
+        boolean isSoapService = false;
+        String soapVersion = null;
 
-        Element propertiesElement = getSingleChildElement(serviceDetails, PROPERTIES);
-        boolean isSoapService = getBooleanServicePropertyValue(propertiesElement, PROPERTY, BOOLEAN_VALUE, ATTRIBUTE_KEY, KEY_VALUE_SOAP);
+        Element servicePropertiesElement = getSingleChildElement(serviceDetails, PROPERTIES);
+        NodeList propertyNodes = servicePropertiesElement.getElementsByTagName(PROPERTY);
+        Map<String, Object> properties = new HashMap<>();
+        for (int i = 0; i < propertyNodes.getLength(); i++) {
+            if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.")) {
+                String propertyValue = null;
+                if (!propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.ENV.")) {
+                    propertyValue = getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent();
+                }
+                properties.put(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(9), propertyValue);
+            } else if (KEY_VALUE_SOAP.equals(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent())) {
+                String value = getSingleChildElement((Element) propertyNodes.item(i), BOOLEAN_VALUE).getTextContent();
+                isSoapService = Boolean.valueOf(value);
+            } else if (KEY_VALUE_SOAP_VERSION.equals(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent())) {
+                soapVersion = getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent();
+            }
+        }
         final Element resources = getSingleChildElement(service, RESOURCES);
         Service serviceEntity = new Service();
 
@@ -64,7 +81,8 @@ public class ServiceLoader implements BundleEntityLoader {
                     } else {
                         WSDL wsdlBean = new WSDL();
                         wsdlBean.setUrl(rootUrlForWsdl);
-                        wsdlBean.setWsdl(wsdl);
+                        wsdlBean.setWsdlXml(wsdl);
+                        wsdlBean.setSoapVersion(soapVersion);
                         serviceEntity.setWsdl(wsdlBean);
                     }
                 }
@@ -93,19 +111,6 @@ public class ServiceLoader implements BundleEntityLoader {
             httpMethods.add(verb.getTextContent());
         }
         serviceEntity.setHttpMethods(httpMethods);
-
-        Element servicePropertiesElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), PROPERTIES);
-        NodeList propertyNodes = servicePropertiesElement.getElementsByTagName(PROPERTY);
-        Map<String, Object> properties = new HashMap<>();
-        for (int i = 0; i < propertyNodes.getLength(); i++) {
-            if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.")) {
-                String propertyValue = null;
-                if (!propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.ENV.")) {
-                    propertyValue = getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent();
-                }
-                properties.put(propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(9), propertyValue);
-            }
-        }
         serviceEntity.setProperties(properties);
 
         bundle.getServices().put(name, serviceEntity);
@@ -114,53 +119,5 @@ public class ServiceLoader implements BundleEntityLoader {
     @Override
     public String getEntityType() {
         return EntityTypes.SERVICE_TYPE;
-    }
-
-    private boolean getBooleanServicePropertyValue(final Element entityItemElement, final String elementName, final String childElementName, final String attributeName, final String attributeValue) {
-        String value = getServicePropertyValue(entityItemElement, elementName, childElementName, attributeName, attributeValue);
-        if(value != null) {
-            return Boolean.parseBoolean(value);
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     *
-     * This Method returns value for mentioned key. e.g. if internal is passed then method will return false,
-     * for soapVersion it will return 1.1.
-     *<l7:Properties>
-     *      <l7:Property key="internal">
-     *          <l7:BooleanValue>false</l7:BooleanValue>
-     *      </l7:Property>
-     *      <l7:Property key="policyRevision">
-     *          <l7:LongValue>1</l7:LongValue>
-     *      </l7:Property>
-     *      <l7:Property key="soap">
-     *          <l7:BooleanValue>true</l7:BooleanValue>
-     *      </l7:Property>
-     *      <l7:Property key="soapVersion">
-     *          <l7:StringValue>1.1</l7:StringValue>
-     *      </l7:Property>
-     *      <l7:Property key="tracingEnabled">
-     *          <l7:BooleanValue>false</l7:BooleanValue>
-     *      </l7:Property>
-     *      <l7:Property key="wssProcessingEnabled">
-     *          <l7:BooleanValue>true</l7:BooleanValue>
-     *      </l7:Property>
-     *</l7:Properties>
-     *
-     * */
-    private String getServicePropertyValue(final Element entityItemElement, final String elementName, final String childElementName, final String attributeName, final String attributeValue) {
-        List<Element> childElements = getChildElements(entityItemElement, elementName);
-        String value = null;
-        for(Element child : childElements) {
-            final String key = child.getAttribute(attributeName);
-            if (attributeValue.equals(key)) {
-                value = DocumentUtils.getSingleChildElementTextContent(child, childElementName);
-                break;
-            }
-        }
-        return value;
     }
 }
