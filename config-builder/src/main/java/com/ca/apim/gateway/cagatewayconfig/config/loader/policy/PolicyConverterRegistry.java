@@ -35,6 +35,6 @@ public class PolicyConverterRegistry {
     public PolicyConverter getFromPolicyElement(String name, Element policy) {
         return policyConverters.stream()
                 .filter(converter -> converter.canConvert(name, policy))
-                .findFirst().orElse(getConverterFromFileName(XMLPolicyConverter.EXTENSION));
+                .findFirst().orElseGet(() -> getConverterFromFileName(XMLPolicyConverter.EXTENSION));
     }
 }
