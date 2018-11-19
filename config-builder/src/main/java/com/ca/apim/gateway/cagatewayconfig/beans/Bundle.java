@@ -203,29 +203,21 @@ public class Bundle {
         this.dependencyMap = dependencyMap;
     }
 
-    public void verifyExistingFolderPath(String folderPath, Bundle bundle) {
-        Boolean isValidImport = false;
+    public void verifyExistingFolderPath(String folderPath) {
+        boolean isValidImport = false;
 
-        // True because there isn't a specific directory. Only requires Root Node to exist.
+        // True because there isn't a specific directory.
         if (folderPath.equals("/")) {
             isValidImport = true;
         }
         
-        // Compares the folder tree path structure with specified Gateway connection folder path
-        String[] folderList = folderPath.split("/");
-        if (folderList.length > 0) {
-            String leafFolderName = folderList[folderList.length - 1];
-            Folder leafFolder = new Folder();
-            for (Folder folder : bundle.getFolders().values()) {
-                if (folder.getName().equals(leafFolderName)) {
-                    leafFolder = folder;
-                }
-            }
-
-            String leafFolderPath = "/" + leafFolder.getPath();
-            if (folderPath.equals(leafFolderPath)) {
-                isValidImport = true;
-            }
+        long matchingFolderPaths = getFolders().values()
+            .stream()
+            .filter(folder -> ("/" + folder.getPath()).equals(folderPath))
+            .count();
+        
+        if (matchingFolderPaths > 0) {
+            isValidImport = true;
         }
 
         if (!isValidImport) {

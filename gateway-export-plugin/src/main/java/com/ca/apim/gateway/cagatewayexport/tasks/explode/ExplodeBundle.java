@@ -46,7 +46,7 @@ public class ExplodeBundle {
         final BundleBuilder bundleBuilder = ExportPluginModule.getInjector().getInstance(BundleBuilder.class);
         Bundle bundle = bundleBuilder.buildBundle(bundleDocument.getDocumentElement());
 
-        bundle.verifyExistingFolderPath(folderPath, bundle);
+        bundle.verifyExistingFolderPath(folderPath);
 
         //filter out unwanted entities
         BundleFilter bundleFilter = ExportPluginModule.getInjector().getInstance(BundleFilter.class);
