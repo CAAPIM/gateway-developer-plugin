@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import org.jetbrains.annotations.NotNull;
 
@@ -221,7 +222,7 @@ public class Bundle {
         }
 
         if (!isValidImport) {
-            throw new RuntimeException("Unable to find specified folder \"" + folderPath + "\" in the Gateway connection folder path");
+            throw new BundleLoadException("Unable to find " + folderPath + " in the Gateway from the specified Gateway connection folder path");
         }
     }
 }

@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilder;
