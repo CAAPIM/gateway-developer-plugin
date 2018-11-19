@@ -5,16 +5,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class WSDL {
 
     @JsonIgnore
-    private String url;
+    private String rootUrl;
     private String soapVersion;
     private String wsdlXml;
 
-    public String getUrl() {
-        return url;
+    public String getRootUrl() {
+        return rootUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setRootUrl(String rootUrl) {
+        this.rootUrl = rootUrl;
     }
 
     public String getWsdlXml() {
