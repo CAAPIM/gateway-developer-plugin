@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -171,7 +172,7 @@ public class PolicyXMLSimplifier {
     private String getPolicyPath(Bundle bundle, Policy policyEntity) {
         Folder folder = bundle.getFolderTree().getFolderById(policyEntity.getParentFolder().getId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return Paths.get(folderPath.toString(), policyEntity.getName()).toString();
+        return FilenameUtils.separatorsToUnix(Paths.get(folderPath.toString(), policyEntity.getName()).toString());
     }
 
     interface AssertionProcessor {

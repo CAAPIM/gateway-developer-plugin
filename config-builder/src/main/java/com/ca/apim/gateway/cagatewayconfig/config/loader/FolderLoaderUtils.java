@@ -10,7 +10,6 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folderable;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -19,6 +18,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.io.FilenameUtils.separatorsToUnix;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class FolderLoaderUtils {
 
@@ -41,7 +43,7 @@ public class FolderLoaderUtils {
 
         folderableMap.forEach((folderablePath, folderable) -> {
             final String pathExcludingService = FilenameUtils.getFullPath(folderablePath);
-            if (StringUtils.isEmpty(pathExcludingService)) {
+            if (isEmpty(pathExcludingService)) {
                 //service is directly under the root dir
                 folderable.setParentFolder(rootFolder);
             } else {
@@ -82,9 +84,9 @@ public class FolderLoaderUtils {
         for (final Path p : paths) {
             Folder parentFolder = p.getParent() == null ?
                     rootFolder :
-                    folderMap.get(p.getParent().toString() + "/");
+                    folderMap.get(separatorsToUnix(p.getParent().toString()) + "/");
             folderMap.computeIfAbsent(
-                    p.toString() + "/",
+                    separatorsToUnix(p.toString() + File.separator),
                     key -> createFolder(p.getFileName().toString(), key, parentFolder)
             );
         }
@@ -95,11 +97,12 @@ public class FolderLoaderUtils {
         folder.setName(folderName);
         folder.setPath(folderPath);
         folder.setParentFolder(parentFolder);
+        folder.postLoad(folder.getPath(), null, null, null);
         return folder;
     }
 
     static String getPath(final File policy, final File policyRootDir) {
-        return policyRootDir.toURI().relativize(policy.toURI()).getPath();
+        return separatorsToUnix(policyRootDir.toURI().relativize(policy.toURI()).getPath());
     }
 
     private FolderLoaderUtils(){}

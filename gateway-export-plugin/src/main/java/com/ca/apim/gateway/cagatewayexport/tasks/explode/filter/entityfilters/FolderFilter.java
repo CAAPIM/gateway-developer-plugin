@@ -27,9 +27,9 @@ public class FolderFilter implements EntityFilter<Folder> {
         return bundle.getFolderTree().stream()
                 // keep all folders that are children of the given folder path
                 .filter(f -> {
-                    Path path = bundle.getFolderTree().getPath(f);
+                    String path = bundle.getFolderTree().getFormattedPath(f);
                     // Children folders have a path that starts with the folder path
-                    return ("/" + path.toString()).startsWith(folderPath);
+                    return ("/" + path).startsWith(folderPath);
                 }).collect(Collectors.toList());
     }
 
@@ -46,9 +46,9 @@ public class FolderFilter implements EntityFilter<Folder> {
         Stream<Folder> folderStream = bundle.getFolderTree().stream()
                 // keep all folders that are parents of the given folder path
                 .filter(f -> {
-                    Path path = bundle.getFolderTree().getPath(f);
+                    String path = bundle.getFolderTree().getFormattedPath(f);
                     // Parent folders have a path that is the beginning of the folder path
-                    return folderPathWithSuffix.startsWith("/" + path.toString() + "/");
+                    return folderPathWithSuffix.startsWith("/" + path + "/");
                 });
         return Stream.concat(Stream.of(bundle.getFolderTree().getRootFolder()), folderStream).collect(Collectors.toList());
     }

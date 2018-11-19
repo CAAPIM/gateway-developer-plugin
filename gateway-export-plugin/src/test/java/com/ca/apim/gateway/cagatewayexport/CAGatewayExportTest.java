@@ -78,7 +78,9 @@ class CAGatewayExportTest {
         File configDir = new File(exportDir, "config");
 
         Properties environmentProperties = new Properties();
-        environmentProperties.load(new FileReader(new File(configDir, "env.properties")));
+        try (FileReader reader = new FileReader(new File(configDir, "env.properties"))) {
+            environmentProperties.load(reader);
+        }
 
         assertTrue(environmentProperties.containsKey("empty-value"));
         assertTrue(environmentProperties.containsKey("message-variable"));
@@ -91,7 +93,9 @@ class CAGatewayExportTest {
         File passwordsFile = new File(configDir, "stored-passwords.properties");
         assertTrue(passwordsFile.exists());
         Properties passwordProperties = new Properties();
-        passwordProperties.load(new FileReader(passwordsFile));
+        try (FileReader reader = new FileReader(passwordsFile)) {
+            passwordProperties.load(reader);
+        }
         assertTrue(passwordProperties.containsKey("my-password"));
         assertFalse(passwordProperties.containsKey("another-password"));
         assertEquals(1, passwordProperties.size());

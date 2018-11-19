@@ -15,6 +15,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
+import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -125,7 +126,7 @@ class AuditPolicyLoaderTest {
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
 
-        String policyPath = Paths.get("gateway-solution", "audit-policies", NAME).toString();
+        String policyPath = FilenameUtils.separatorsToUnix(Paths.get("gateway-solution", "audit-policies", NAME).toString());
         assertNotNull(bundle.getPolicies().get(policyPath));
 
         Policy policy = bundle.getPolicies().get(policyPath);

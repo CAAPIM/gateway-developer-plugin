@@ -114,6 +114,7 @@ class CAGatewayDeveloperTest {
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-d-1.2.3-SNAPSHOT.req.bundle"));
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-a-1.2.3-SNAPSHOT.req.bundle"));
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_4_project-c-1.2.3-SNAPSHOT.req.bundle"));
+        tarArchiveInputStream.close();
     }
 
     private void validateBuildDir(String projectName, File buildDir) {

@@ -25,6 +25,8 @@ public class AuditPolicy extends Policy {
 
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
+        super.postLoad(entityKey, bundle, rootFolder, idGenerator);
+
         setPolicyType(INTERNAL);
         bundle.putAllPolicies(ImmutableMap.of(this.getPath(), this));
         checkRepeatedTags(bundle, INTERNAL);
