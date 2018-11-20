@@ -38,12 +38,14 @@ public class ExplodeBundle {
         this.entityLinkerRegistry = entityLinkerRegistry;
     }
 
-    void verifyExistingFolderPath(Bundle bundle, String folderPath) {
+    @SuppressWarnings("squid:S1075")
+    boolean bundleContainsFolderPath(Bundle bundle, String folderPath) {
         if (folderPath.equals("/")) {
-            return;
+            return true;
         } else if (bundle.getFolders().values().stream().noneMatch( folder -> ("/" + folder.getPath()).equals(folderPath)) ) {
-            throw new BundleLoadException("Unable to find " + folderPath + " in the Gateway from the specified Gateway connection folder path");
+            return false;
         }
+        return true;
     }
 
     void explodeBundle(String folderPath, FilterConfiguration filterConfiguration, File bundleFile, File explodeDirectory) throws DocumentParseException {
@@ -54,7 +56,10 @@ public class ExplodeBundle {
         final BundleBuilder bundleBuilder = ExportPluginModule.getInjector().getInstance(BundleBuilder.class);
         Bundle bundle = bundleBuilder.buildBundle(bundleDocument.getDocumentElement());
 
-        verifyExistingFolderPath(bundle, folderPath);
+        //checks if bundle has specified folderpath
+        if (!bundleContainsFolderPath(bundle, folderPath)) {
+            throw new BundleLoadException("Unable to find " + folderPath + " in the Gateway from the specified Gateway connection folder path");
+        }
 
         //filter out unwanted entities
         BundleFilter bundleFilter = ExportPluginModule.getInjector().getInstance(BundleFilter.class);
