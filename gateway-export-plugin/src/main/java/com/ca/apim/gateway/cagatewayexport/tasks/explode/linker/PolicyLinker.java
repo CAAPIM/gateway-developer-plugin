@@ -73,6 +73,6 @@ public class PolicyLinker implements EntityLinker<Policy> {
                     policy.getParentFolder().getId()));
         }
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return PathUtils.path(folderPath.toString(), policy.getName());
+        return PathUtils.unixPath(folderPath.toString(), policy.getName());
     }
 }

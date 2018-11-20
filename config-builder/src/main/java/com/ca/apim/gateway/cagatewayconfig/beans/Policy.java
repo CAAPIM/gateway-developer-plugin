@@ -180,6 +180,6 @@ public class Policy extends Folderable {
 
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
-        setPath(PathUtils.path(getPath()));
+        setPath(PathUtils.unixPath(getPath()));
     }
 }

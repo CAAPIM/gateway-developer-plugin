@@ -19,25 +19,25 @@ import static org.apache.commons.io.FilenameUtils.separatorsToUnix;
 public class PathUtils {
 
     // Constant to be used for the path separation, forcing to be the unix separator.
-    public static final String PATH_SEPARATOR = "/";
+    private static final String UNIX_PATH_SEPARATOR = "/";
 
     private PathUtils() {}
 
-    public static String path(@NotNull String first, String... more) {
+    public static String unixPath(@NotNull String first, String... more) {
         return separatorsToUnix(Paths.get(first, more).toString());
     }
 
-    public static String path(@NotNull Path path) {
+    public static String unixPath(@NotNull Path path) {
         return separatorsToUnix(path.toString());
     }
 
     @NotNull
-    public static String pathEndingWithSeparator(@NotNull String first, String... more) {
-        return separatorsToUnix(Paths.get(first, more).toString()) + PATH_SEPARATOR;
+    public static String unixPathEndingWithSeparator(@NotNull String first, String... more) {
+        return separatorsToUnix(Paths.get(first, more).toString()) + UNIX_PATH_SEPARATOR;
     }
 
     @NotNull
-    public static String pathEndingWithSeparator(@NotNull Path path) {
-        return separatorsToUnix(path.toString()) + PATH_SEPARATOR;
+    public static String unixPathEndingWithSeparator(@NotNull Path path) {
+        return separatorsToUnix(path.toString()) + UNIX_PATH_SEPARATOR;
     }
 }

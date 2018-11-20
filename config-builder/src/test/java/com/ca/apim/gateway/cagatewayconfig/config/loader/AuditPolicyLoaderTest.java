@@ -125,7 +125,7 @@ class AuditPolicyLoaderTest {
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
 
-        String policyPath = PathUtils.path("gateway-solution", "audit-policies", NAME);
+        String policyPath = PathUtils.unixPath("gateway-solution", "audit-policies", NAME);
         assertNotNull(bundle.getPolicies().get(policyPath));
 
         Policy policy = bundle.getPolicies().get(policyPath);

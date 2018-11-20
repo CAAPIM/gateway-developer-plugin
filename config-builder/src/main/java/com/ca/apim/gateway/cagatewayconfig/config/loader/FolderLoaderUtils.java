@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folderable;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils.path;
-import static com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils.pathEndingWithSeparator;
+import static com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils.unixPath;
+import static com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils.unixPathEndingWithSeparator;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class FolderLoaderUtils {
@@ -85,9 +86,9 @@ public class FolderLoaderUtils {
         for (final Path p : paths) {
             Folder parentFolder = p.getParent() == null ?
                     rootFolder :
-                    folderMap.get(pathEndingWithSeparator(p.getParent()));
+                    folderMap.get(unixPathEndingWithSeparator(p.getParent()));
             folderMap.computeIfAbsent(
-                    pathEndingWithSeparator(p),
+                    unixPathEndingWithSeparator(p),
                     key -> createFolder(p.getFileName().toString(), key, parentFolder)
             );
         }
@@ -104,9 +105,9 @@ public class FolderLoaderUtils {
     static String getPath(final File policy, final File policyRootDir) {
         String path = policyRootDir.toURI().relativize(policy.toURI()).getPath();
         if (policy.isFile() || path.isEmpty()) {
-            return path(path);
+            return PathUtils.unixPath(path);
         }
-        return pathEndingWithSeparator(path);
+        return PathUtils.unixPathEndingWithSeparator(path);
     }
 
     private FolderLoaderUtils(){}

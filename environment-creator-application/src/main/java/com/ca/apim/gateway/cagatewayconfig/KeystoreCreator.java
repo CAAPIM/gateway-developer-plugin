@@ -67,7 +67,7 @@ class KeystoreCreator {
             br.newLine();
             br.write("com.l7tech.keystore.type=" + keystoreHelper.getKeyStoreType());
             br.newLine();
-            br.write("com.l7tech.keystore.path=" + PathUtils.path(keyStoreFile.getAbsolutePath()));
+            br.write("com.l7tech.keystore.path=" + PathUtils.unixPath(keyStoreFile.getAbsolutePath()));
             br.newLine();
             br.write("com.l7tech.keystore.savePath=EMPTY");
             br.newLine();

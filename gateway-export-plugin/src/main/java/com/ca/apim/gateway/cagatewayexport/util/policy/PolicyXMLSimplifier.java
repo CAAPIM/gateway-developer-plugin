@@ -171,7 +171,7 @@ public class PolicyXMLSimplifier {
     private String getPolicyPath(Bundle bundle, Policy policyEntity) {
         Folder folder = bundle.getFolderTree().getFolderById(policyEntity.getParentFolder().getId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return PathUtils.path(folderPath.toString(), policyEntity.getName());
+        return PathUtils.unixPath(folderPath.toString(), policyEntity.getName());
     }
 
     interface AssertionProcessor {

@@ -86,7 +86,7 @@ public class PolicyLoader implements BundleEntityLoader {
     }
 
     private String getPath(Folder parentFolder, String name) {
-        return PathUtils.path(Paths.get(parentFolder.getPath()).resolve(name));
+        return PathUtils.unixPath(Paths.get(parentFolder.getPath()).resolve(name));
     }
 
     private Folder getFolder(Bundle bundle, String folderId) {

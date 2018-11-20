@@ -76,6 +76,6 @@ public class ServiceLinker implements EntityLinker<Service> {
     static String getServicePath(Bundle bundle, Service serviceEntity) {
         Folder folder = bundle.getFolderTree().getFolderById(serviceEntity.getParentFolder().getId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return PathUtils.path(folderPath.toString(), serviceEntity.getName());
+        return PathUtils.unixPath(folderPath.toString(), serviceEntity.getName());
     }
 }

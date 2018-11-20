@@ -64,7 +64,7 @@ public class FolderTree {
     }
 
     public String getFormattedPath(final Folder folder) {
-        return PathUtils.path(getPath(folder));
+        return PathUtils.unixPath(getPath(folder));
     }
 
     public Path getPath(final Folder folder) {

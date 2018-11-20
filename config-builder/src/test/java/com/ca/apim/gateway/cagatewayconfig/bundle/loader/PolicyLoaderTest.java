@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
@@ -19,7 +20,7 @@ import org.w3c.dom.Element;
 import java.util.UUID;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils.path;
+import static com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils.unixPath;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,7 +54,7 @@ class PolicyLoaderTest {
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
 
-        String path = path(TEST_FOLDER_1, TEST_POLICY_NAME);
+        String path = PathUtils.unixPath(TEST_FOLDER_1, TEST_POLICY_NAME);
         Policy policy = bundle.getPolicies().get(path);
         assertNotNull(policy);
         assertEquals(TEST_POLICY_ID, policy.getId());
@@ -110,7 +111,7 @@ class PolicyLoaderTest {
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
 
-        String path = path(TEST_FOLDER_1, TEST_POLICY_NAME);
+        String path = PathUtils.unixPath(TEST_FOLDER_1, TEST_POLICY_NAME);
         Policy policy = bundle.getPolicies().get(path);
         assertNotNull(policy);
         assertEquals(TEST_POLICY_ID, policy.getId());
@@ -138,7 +139,7 @@ class PolicyLoaderTest {
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
 
-        String path = path(TEST_FOLDER_1, TEST_POLICY_NAME);
+        String path = PathUtils.unixPath(TEST_FOLDER_1, TEST_POLICY_NAME);
         Policy policy = bundle.getPolicies().get(path);
         assertNotNull(policy);
         assertEquals(TEST_POLICY_ID, policy.getId());
