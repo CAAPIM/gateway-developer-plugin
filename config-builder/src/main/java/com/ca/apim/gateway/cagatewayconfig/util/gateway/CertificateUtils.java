@@ -52,10 +52,14 @@ public class CertificateUtils {
         } catch (CertificateException e) {
             throw new CertificateUtilsException("Error generating certificate from file", e);
         }
+        //Using BC as a provider will return null for an inputStream of faulty bytes
+        if (cert == null) {
+            throw new CertificateUtilsException("Error generating certificate from file.");
+        }
         return cert;
     }
 
-    public static Element createCertDataElementFromCert(X509Certificate cert, Document document) {
+    public static Element createCertDataElementFromCert(@NotNull X509Certificate cert, Document document) {
         try {
             return createCertDataElementFromCert(
                     cert.getIssuerDN().getName(),

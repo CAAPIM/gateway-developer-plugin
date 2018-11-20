@@ -9,6 +9,8 @@ package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +20,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.Security;
 import java.security.cert.CertificateFactory;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.*;
@@ -30,6 +32,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class CertificateUtilsTest {
 
     private TemporaryFolder rootProjectDir;
+
+    @BeforeAll
+    static void beforeAll() {
+        Security.insertProviderAt(new BouncyCastleProvider(), 1);
+    }
+
     @BeforeEach
     void setUp(final TemporaryFolder temporaryFolder) {
         rootProjectDir = temporaryFolder;
