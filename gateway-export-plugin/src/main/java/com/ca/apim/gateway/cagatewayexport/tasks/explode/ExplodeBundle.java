@@ -42,10 +42,8 @@ public class ExplodeBundle {
     boolean bundleContainsFolderPath(Bundle bundle, String folderPath) {
         if (folderPath.equals("/")) {
             return true;
-        } else if (bundle.getFolders().values().stream().noneMatch( folder -> ("/" + folder.getPath()).equals(folderPath)) ) {
-            return false;
         }
-        return true;
+        return bundle.getFolders().values().stream().anyMatch( folder -> ("/" + folder.getPath()).equals(folderPath));
     }
 
     void explodeBundle(String folderPath, FilterConfiguration filterConfiguration, File bundleFile, File explodeDirectory) throws DocumentParseException {
