@@ -195,7 +195,7 @@ public class TestUtils {
                 createElementWithAttributesAndTextContent(
                         document,
                         RESOURCE,
-                        ImmutableMap.of(ATTRIBUTE_TYPE, "policy"),
+                        ImmutableMap.of(ATTRIBUTE_TYPE, TAG_VALUE_POLICY),
                         "policy"
                 )
         );
@@ -204,7 +204,7 @@ public class TestUtils {
         Map<String, Object> propertiesMap;
         if(isSoap) {
             if(withProperties) {
-                propertiesMap = ImmutableMap.of("property.prop", "value", "property.ENV.prop", "value2", KEY_VALUE_SOAP, true, KEY_VALUE_SOAP_VERSION, "1.1");
+                propertiesMap = ImmutableMap.of(PREFIX_PROPERTY + "prop", "value", PREFIX_PROPERTY + PREFIX_ENV + "prop", "value2", KEY_VALUE_SOAP, true, KEY_VALUE_SOAP_VERSION, "1.1");
             } else {
                 propertiesMap = Collections.emptyMap();
             }
@@ -215,7 +215,7 @@ public class TestUtils {
                     createElementWithAttributesAndTextContent(
                             document,
                             RESOURCE,
-                            ImmutableMap.of(ATTRIBUTE_SOURCE_URL, "test.wsdl", ATTRIBUTE_TYPE, "wsdl"),
+                            ImmutableMap.of(ATTRIBUTE_SOURCE_URL, "test.wsdl", ATTRIBUTE_TYPE, TAG_VALUE_WSDL),
                             (isWsdlEmpty ? "" : "wsdl file")
                     )
             );
@@ -227,7 +227,7 @@ public class TestUtils {
             );
         } else {
             if(withProperties) {
-                propertiesMap = ImmutableMap.of("property.prop", "value", "property.ENV.prop", "value2");
+                propertiesMap = ImmutableMap.of(PREFIX_PROPERTY + "prop", "value", PREFIX_PROPERTY + PREFIX_ENV + "prop", "value2");
             } else {
                 propertiesMap = Collections.emptyMap();
             }
