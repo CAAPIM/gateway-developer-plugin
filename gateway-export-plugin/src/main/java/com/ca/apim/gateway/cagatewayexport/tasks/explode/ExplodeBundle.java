@@ -56,7 +56,7 @@ public class ExplodeBundle {
 
         //checks if bundle has specified folderpath
         if (!bundleContainsFolderPath(bundle, folderPath)) {
-            throw new BundleLoadException("Unable to find " + folderPath + " in the Gateway from the specified Gateway connection folder path");
+            throw new BundleLoadException("Specified folder " + folderPath + " does not exist in the target gateway.");
         }
 
         //filter out unwanted entities

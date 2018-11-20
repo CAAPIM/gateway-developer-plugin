@@ -214,7 +214,7 @@ class CAGatewayExportTest {
                 .withDebug(true)
                 .build());
 
-        assertTrue(exception.getMessage().contains("Unable to find"));
+        assertTrue(exception.getMessage().contains("does not exist in the target gateway."));
     }
 
 }
