@@ -6,12 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.util.properties;
 
-public class PropertyFileException extends RuntimeException {
-    public PropertyFileException(String message) {
-        super(message);
-    }
+class PropertyFileException extends RuntimeException {
 
-    public PropertyFileException(String message, Throwable cause) {
+    PropertyFileException(String message, Throwable cause) {
         super(message, cause);
     }
 }

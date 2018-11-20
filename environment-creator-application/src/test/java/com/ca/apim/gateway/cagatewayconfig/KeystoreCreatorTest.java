@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Properties;
 
 import static com.ca.apim.gateway.cagatewayconfig.KeystoreCreator.KEYSTORE_FILE_NAME;
@@ -113,6 +114,14 @@ class KeystoreCreatorTest {
 
         assertNotNull(properties.getProperty("com.l7tech.common.security.jceProviderEngine"));
         assertEquals("com.l7tech.security.prov.generic.GenericJceProviderEngine", properties.getProperty("com.l7tech.common.security.jceProviderEngine"));
+    }
+
+    @Test
+    void createKeystore_errorPropertiesFile() throws IOException {
+        final KeystoreHelper keystoreHelper = new KeystoreHelper();
+
+        Files.setPosixFilePermissions(systemProperties.toPath(), PosixFilePermissions.fromString("---------"));
+        assertThrows(KeyStoreCreationException.class, () -> KeystoreCreator.updateSystemPropertiesFile(keystoreHelper, keystoreFile, systemProperties.getPath()));
     }
 
     @NotNull

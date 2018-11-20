@@ -93,7 +93,12 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private void preparePolicy(Policy policy, Bundle bundle) {
-        Document policyDocument = stringToXML(policy.getPolicyXML());
+        Document policyDocument;
+        try {
+            policyDocument = stringToXMLDocument(documentTools, policy.getPolicyXML());
+        } catch (DocumentParseException e) {
+            throw new EntityBuilderException("Could not load policy: " + e.getMessage(), e);
+        }
         Element policyElement = policyDocument.getDocumentElement();
 
         prepareAssertion(policyElement, PolicyXMLElements.INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
@@ -333,17 +338,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
             });
         }
         return policyTags.get();
-    }
-
-    private Document stringToXML(String string) {
-        Document documentElement;
-        try {
-            documentElement = documentTools.parse(string);
-            documentTools.cleanup(documentElement);
-        } catch (DocumentParseException e) {
-            throw new EntityBuilderException("Could not load policy: " + e.getMessage(), e);
-        }
-        return documentElement;
     }
 
     private class PolicyTags {

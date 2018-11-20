@@ -21,14 +21,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
-public class GW7BuilderTest {
+class GW7BuilderTest {
 
     @Test
-    public void buildPackage() throws IOException {
+    void buildPackage() throws IOException {
         PipedInputStream in = new PipedInputStream();
         PipedOutputStream out = new PipedOutputStream(in);
 
-        new Thread(() -> new GW7Builder().buildPackage(out, Stream.of(new GW7Builder.PackageFile("/my/file/path", 3L, () -> new ByteArrayInputStream(new byte[]{1, 2, 3}))).collect(Collectors.toSet()))).start();
+        GW7Builder builder = new GW7Builder();
+        builder.buildPackage(
+                out,
+                Stream.of(
+                        new GW7Builder.PackageFile("/my/file/path", 3L, () -> new ByteArrayInputStream(new byte[]{1, 2, 3}))
+                ).collect(Collectors.toSet())
+        );
 
         TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new GZIPInputStream(in));
         TarArchiveEntry entry = tarArchiveInputStream.getNextTarEntry();
