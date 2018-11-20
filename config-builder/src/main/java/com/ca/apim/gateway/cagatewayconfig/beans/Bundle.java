@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import org.jetbrains.annotations.NotNull;
 
@@ -202,27 +201,5 @@ public class Bundle {
 
     public void setDependencyMap(Map<Dependency, List<Dependency>> dependencyMap) {
         this.dependencyMap = dependencyMap;
-    }
-
-    public void verifyExistingFolderPath(String folderPath) {
-        boolean isValidImport = false;
-
-        // True because there isn't a specific directory.
-        if (folderPath.equals("/")) {
-            isValidImport = true;
-        }
-        
-        long matchingFolderPaths = getFolders().values()
-            .stream()
-            .filter(folder -> ("/" + folder.getPath()).equals(folderPath))
-            .count();
-        
-        if (matchingFolderPaths > 0) {
-            isValidImport = true;
-        }
-
-        if (!isValidImport) {
-            throw new BundleLoadException("Unable to find " + folderPath + " in the Gateway from the specified Gateway connection folder path");
-        }
     }
 }

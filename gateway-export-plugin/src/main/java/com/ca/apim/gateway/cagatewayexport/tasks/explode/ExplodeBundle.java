@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilder;
@@ -37,6 +38,14 @@ public class ExplodeBundle {
         this.entityLinkerRegistry = entityLinkerRegistry;
     }
 
+    void verifyExistingFolderPath(Bundle bundle, String folderPath) {
+        if (folderPath.equals("/")) {
+            return;
+        } else if (bundle.getFolders().values().stream().noneMatch( folder -> ("/" + folder.getPath()).equals(folderPath)) ) {
+            throw new BundleLoadException("Unable to find " + folderPath + " in the Gateway from the specified Gateway connection folder path");
+        }
+    }
+
     void explodeBundle(String folderPath, FilterConfiguration filterConfiguration, File bundleFile, File explodeDirectory) throws DocumentParseException {
         final Document bundleDocument = documentTools.parse(bundleFile);
         documentTools.cleanup(bundleDocument);
@@ -45,7 +54,7 @@ public class ExplodeBundle {
         final BundleBuilder bundleBuilder = ExportPluginModule.getInjector().getInstance(BundleBuilder.class);
         Bundle bundle = bundleBuilder.buildBundle(bundleDocument.getDocumentElement());
 
-        bundle.verifyExistingFolderPath(folderPath);
+        verifyExistingFolderPath(bundle, folderPath);
 
         //filter out unwanted entities
         BundleFilter bundleFilter = ExportPluginModule.getInjector().getInstance(BundleFilter.class);
