@@ -1,0 +1,9 @@
+simple ldap:
+  type: BIND_ONLY_LDAP
+  identityProviderDetail:
+    serverUrls:
+      - ldap://host:port
+      - ldap://host:port2
+    useSslClientAuthentication: false
+    bindPatternPrefix: somePrefix
+    bindPatternSuffix: someSuffix

@@ -1,0 +1,69 @@
+<!--
+  ~ Copyright (c) 2018 CA. All rights reserved.
+  ~ This software may be modified and distributed under the terms
+  ~ of the MIT license.  See the LICENSE file for details.
+  -->
+
+<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:L7p="http://www.layer7tech.com/ws/policy">
+    <wsp:All wsp:Usage="Required">
+        <wsp:OneOrMore wsp:Usage="Required">
+            <L7p:XslTransformation>
+                <L7p:ResourceInfo staticResourceInfo="included">
+                    <L7p:Document stringValueReference="inline"><![CDATA[<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output indent="yes" omit-xml-declaration="yes"/>
+    <xsl:key match="*" name="nodes-by-name" use="name()"/>
+    <xsl:template match="/pet-store">
+        <pet-counts>
+            <xsl:for-each select="/pet-store/pet/*[count(.|key('nodes-by-name', name())[1]) = 1]">
+                <xsl:element name="{name()}">
+                    <xsl:value-of select="count(key('nodes-by-name', name()))"/>
+                </xsl:element>
+            </xsl:for-each>
+        </pet-counts>
+        <xsl:for-each select="/pet-store/pet/*/name">
+            <pet-names>
+                <xsl:value-of select="."/>
+            </pet-names>
+        </xsl:for-each>
+    </xsl:template>
+</xsl:stylesheet>]]></L7p:Document>
+                </L7p:ResourceInfo>
+                <L7p:TransformName stringValue=""/>
+                <L7p:XsltVersion stringValue="1.0"/>
+            </L7p:XslTransformation>
+            <L7p:CustomizeErrorResponse>
+                <L7p:Content stringValue="Invalid XML"/>
+                <L7p:ExtraHeaders nameValuePairArray="included"/>
+                <L7p:HttpStatus stringValue="400"/>
+            </L7p:CustomizeErrorResponse>
+        </wsp:OneOrMore>
+        <L7p:JsonTransformation>
+            <L7p:PrettyPrint booleanValue="true"/>
+            <L7p:RootTagString stringValue=""/>
+            <L7p:Target target="REQUEST"/>
+            <L7p:UseNumbersWhenPossible booleanValue="true"/>
+        </L7p:JsonTransformation>
+        <L7p:Regex>
+            <L7p:AutoTarget booleanValue="false"/>
+            <L7p:Regex stringValue="&quot;pet-counts&quot;: &quot;&quot;"/>
+            <L7p:Replace booleanValue="true"/>
+            <L7p:Replacement stringValue="&quot;pet-counts&quot;: {}"/>
+            <L7p:Target target="RESPONSE"/>
+        </L7p:Regex>
+        <L7p:Regex>
+            <L7p:AutoTarget booleanValue="false"/>
+            <L7p:Regex stringValue="&quot;pet-names&quot;: &quot;(.*)&quot;"/>
+            <L7p:Replace booleanValue="true"/>
+            <L7p:Replacement stringValue="&quot;pet-names&quot;: [&quot;$1&quot;]"/>
+            <L7p:Target target="RESPONSE"/>
+        </L7p:Regex>
+        <L7p:SetVariable>
+            <L7p:Expression>
+                { "test": "value" }
+            </L7p:Expression>
+            <L7p:ContentType stringValue="text/json; charset=utf-8"/>
+            <L7p:DataType variableDataType="message"/>
+            <L7p:VariableToSet stringValue="encass-messsage-input"/>
+        </L7p:SetVariable>
+    </wsp:All>
+</wsp:Policy>

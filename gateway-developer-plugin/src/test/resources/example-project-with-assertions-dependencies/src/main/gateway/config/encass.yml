@@ -1,0 +1,36 @@
+encass-policy:
+  policy: example project/encass-policy
+  arguments:
+  - name: "hello"
+    type: "string"
+  - name: "hello-again"
+    type: "message"
+  results:
+  - name: "goodbye"
+    type: "string"
+  - name: "goodbye-again"
+    type: "message"
+encass-policy-same-policy:
+  policy: example project/encass-policy
+  arguments:
+  - name: "hello"
+    type: "string"
+  - name: "hello-again"
+    type: "message"
+  results:
+  - name: "goodbye"
+    type: "string"
+  - name: "goodbye-again"
+    type: "message"
+example-_¯-¯_-slashed:
+  policy: example project/folder-_¯-¯_-slashed/example-_¯-¯_-slashed
+  arguments:
+  - name: "hello"
+    type: "string"
+  - name: "hello-again"
+    type: "message"
+  results:
+  - name: "goodbye"
+    type: "string"
+  - name: "goodbye-again"
+    type: "message"
