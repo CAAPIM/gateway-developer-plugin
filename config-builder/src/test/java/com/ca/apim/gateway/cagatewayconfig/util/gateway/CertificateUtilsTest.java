@@ -35,7 +35,7 @@ class CertificateUtilsTest {
 
     @BeforeAll
     static void beforeAll() {
-        Security.addProvider(new BouncyCastleProvider());
+        Security.insertProviderAt(new BouncyCastleProvider(), 1);
     }
 
     @BeforeEach
@@ -50,7 +50,7 @@ class CertificateUtilsTest {
                 () -> buildCertDataFromFile(
                         () -> Files.newInputStream(Paths.get(rootProjectDir.getRoot().toPath().toString(), "cert.cert")),
                         DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument(),
-                        CertificateFactory.getInstance("X.509", "BC")
+                        CertificateFactory.getInstance("X.509")
                 )
         );
     }
@@ -62,7 +62,7 @@ class CertificateUtilsTest {
                 () -> buildCertDataFromFile(
                         () -> new ByteArrayInputStream("certificate".getBytes()),
                         DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument(),
-                        CertificateFactory.getInstance("X.509", "BC")
+                        CertificateFactory.getInstance("X.509")
                 )
         );
     }
