@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import org.apache.commons.io.FilenameUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -86,7 +86,7 @@ public class PolicyLoader implements BundleEntityLoader {
     }
 
     private String getPath(Folder parentFolder, String name) {
-        return FilenameUtils.separatorsToUnix(Paths.get(parentFolder.getPath()).resolve(name).toString());
+        return PathUtils.path(Paths.get(parentFolder.getPath()).resolve(name));
     }
 
     private Folder getFolder(Bundle bundle, String folderId) {

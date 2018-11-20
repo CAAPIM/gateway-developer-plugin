@@ -6,13 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import org.jetbrains.annotations.Nullable;
-
 import javax.inject.Named;
-import java.io.File;
-
-import static org.apache.commons.io.FilenameUtils.separatorsToUnix;
 
 @Named("FOLDER")
 public class Folder extends Folderable {
@@ -21,8 +15,6 @@ public class Folder extends Folderable {
     public static final String ROOT_FOLDER_NAME = "Root Node";
     public static final Folder ROOT_FOLDER = new Folder(ROOT_FOLDER_ID, ROOT_FOLDER_NAME);
 
-    private String path;
-
     public Folder() {}
 
     public Folder(String id, String name) {
@@ -30,16 +22,4 @@ public class Folder extends Folderable {
         super.setName(name);
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    @Override
-    public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
-        this.path = separatorsToUnix(this.path);
-    }
 }

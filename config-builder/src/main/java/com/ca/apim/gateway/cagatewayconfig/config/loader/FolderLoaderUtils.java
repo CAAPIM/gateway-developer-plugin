@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.io.FilenameUtils.separatorsToUnix;
+import static com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils.path;
+import static com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils.pathEndingWithSeparator;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class FolderLoaderUtils {
@@ -84,9 +85,9 @@ public class FolderLoaderUtils {
         for (final Path p : paths) {
             Folder parentFolder = p.getParent() == null ?
                     rootFolder :
-                    folderMap.get(separatorsToUnix(p.getParent().toString()) + "/");
+                    folderMap.get(pathEndingWithSeparator(p.getParent()));
             folderMap.computeIfAbsent(
-                    separatorsToUnix(p.toString() + File.separator),
+                    pathEndingWithSeparator(p),
                     key -> createFolder(p.getFileName().toString(), key, parentFolder)
             );
         }
@@ -97,12 +98,15 @@ public class FolderLoaderUtils {
         folder.setName(folderName);
         folder.setPath(folderPath);
         folder.setParentFolder(parentFolder);
-        folder.postLoad(folder.getPath(), null, null, null);
         return folder;
     }
 
     static String getPath(final File policy, final File policyRootDir) {
-        return separatorsToUnix(policyRootDir.toURI().relativize(policy.toURI()).getPath());
+        String path = policyRootDir.toURI().relativize(policy.toURI()).getPath();
+        if (policy.isFile() || path.isEmpty()) {
+            return path(path);
+        }
+        return pathEndingWithSeparator(path);
     }
 
     private FolderLoaderUtils(){}

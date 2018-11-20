@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import org.apache.commons.io.FilenameUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -64,7 +64,7 @@ public class FolderTree {
     }
 
     public String getFormattedPath(final Folder folder) {
-        return FilenameUtils.separatorsToUnix(getPath(folder).toString());
+        return PathUtils.path(getPath(folder));
     }
 
     public Path getPath(final Folder folder) {

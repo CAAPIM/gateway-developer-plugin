@@ -35,8 +35,6 @@ public class Service extends Folderable {
     private Element serviceDetailsElement;
     @JsonIgnore
     private Element policyXML;
-    @JsonIgnore
-    private String path;
 
     public String getUrl() {
         return url;
@@ -82,12 +80,10 @@ public class Service extends Folderable {
         this.policyXML = policyXML;
     }
 
+    @Override
+    @JsonIgnore
     public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
+        return super.getPath();
     }
 
     @Override

@@ -12,6 +12,7 @@ public abstract class Folderable extends GatewayEntity {
 
     @JsonIgnore
     private Folder parentFolder;
+    private String path;
 
     public Folder getParentFolder() {
         return parentFolder;
@@ -25,4 +26,13 @@ public abstract class Folderable extends GatewayEntity {
     public String getParentFolderId() {
         return this.parentFolder != null ? this.parentFolder.getId() : null;
     }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
 }

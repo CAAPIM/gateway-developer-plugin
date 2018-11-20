@@ -8,19 +8,18 @@ package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -172,7 +171,7 @@ public class PolicyXMLSimplifier {
     private String getPolicyPath(Bundle bundle, Policy policyEntity) {
         Folder folder = bundle.getFolderTree().getFolderById(policyEntity.getParentFolder().getId());
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return FilenameUtils.separatorsToUnix(Paths.get(folderPath.toString(), policyEntity.getName()).toString());
+        return PathUtils.path(folderPath.toString(), policyEntity.getName());
     }
 
     interface AssertionProcessor {

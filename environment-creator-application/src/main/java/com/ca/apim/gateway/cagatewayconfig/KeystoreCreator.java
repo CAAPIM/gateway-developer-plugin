@@ -11,7 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeyStoreCreationException;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
-import org.apache.commons.io.FilenameUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -67,7 +67,7 @@ class KeystoreCreator {
             br.newLine();
             br.write("com.l7tech.keystore.type=" + keystoreHelper.getKeyStoreType());
             br.newLine();
-            br.write("com.l7tech.keystore.path=" + FilenameUtils.separatorsToUnix(keyStoreFile.getAbsolutePath()));
+            br.write("com.l7tech.keystore.path=" + PathUtils.path(keyStoreFile.getAbsolutePath()));
             br.newLine();
             br.write("com.l7tech.keystore.savePath=EMPTY");
             br.newLine();
