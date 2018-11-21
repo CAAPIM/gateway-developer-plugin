@@ -41,7 +41,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 
         //Add bundle configuration to the default configuration. This was transitive dependencies can be retrieved.
         createConfiguration(project, BUNDLE_CONFIGURATION);
-        // Add modular and custom asseriton dependencies configuration
+        // Add modular and custom assertion dependencies configuration
         createConfiguration(project, MODULAR_ASSERTION_CONFIGURATION);
         createConfiguration(project, CUSTOM_ASSERTION_CONFIGURATION);
 
