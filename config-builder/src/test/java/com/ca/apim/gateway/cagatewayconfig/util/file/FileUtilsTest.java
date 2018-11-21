@@ -38,6 +38,9 @@ class FileUtilsTest {
         Files.write(path, "Test".getBytes(Charset.defaultCharset()));
         InputStream stream = FileUtils.INSTANCE.getInputStream(path.toFile());
         assertNotNull(stream);
+        // this is required while running in windows env it' s not possible to delete folders with files inside
+        stream.close();
+        Files.delete(path);
     }
 
     @Test
@@ -47,10 +50,13 @@ class FileUtilsTest {
     }
 
     @Test
-    void getOutputStream() {
+    void getOutputStream() throws IOException {
         Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(),  "file.file");
         OutputStream stream = FileUtils.INSTANCE.getOutputStream(path.toFile());
         assertNotNull(stream);
+        // this is required while running in windows env it' s not possible to delete folders with files inside
+        stream.close();
+        Files.delete(path);
     }
 
     @Test

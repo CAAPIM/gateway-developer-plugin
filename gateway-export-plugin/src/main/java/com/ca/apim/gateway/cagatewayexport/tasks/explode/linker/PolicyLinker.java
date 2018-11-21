@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
@@ -18,7 +19,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -73,6 +73,6 @@ public class PolicyLinker implements EntityLinker<Policy> {
                     policy.getParentFolder().getId()));
         }
         Path folderPath = bundle.getFolderTree().getPath(folder);
-        return Paths.get(folderPath.toString(), policy.getName()).toString();
+        return PathUtils.unixPath(folderPath.toString(), policy.getName());
     }
 }

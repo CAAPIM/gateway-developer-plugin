@@ -12,6 +12,7 @@ import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,12 +25,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class FolderLoaderUtilsTest {
 
     @Test
-    void getPolicyAsStringTest() {
-        File root = new File("a");
+    @ExtendWith(TemporaryFolderExtension.class)
+    void getPolicyAsStringTest(TemporaryFolder temporaryFolder) throws IOException {
+
+        File root = new File(temporaryFolder.getRoot(), "a");
         File a = new File(root, "a");
         File b = new File(a, "b");
         File c = new File(b, "c");
+        c.mkdirs();
         File policy = new File(c, "policy.xml");
+        Files.touch(policy);
 
         String path = getPath(policy, root);
 

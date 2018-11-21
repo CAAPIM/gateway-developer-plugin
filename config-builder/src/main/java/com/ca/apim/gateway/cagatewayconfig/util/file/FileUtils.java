@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
 public class FileUtils {
 
     private static final Logger LOGGER = Logger.getLogger(FileUtils.class.getName());
+    public static final boolean POSIX_ENABLED = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
     public static final FileUtils INSTANCE = new FileUtils();
 
     public InputStream getInputStream(final File file) {

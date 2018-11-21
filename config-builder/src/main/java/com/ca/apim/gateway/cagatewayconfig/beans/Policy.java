@@ -7,11 +7,15 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import javax.inject.Named;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,7 +30,6 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 @Named("POLICY")
 public class Policy extends Folderable {
 
-    private String path;
     @JsonIgnore
     private String policyXML;
     @JsonIgnore
@@ -45,19 +48,9 @@ public class Policy extends Folderable {
         setName(builder.name);
         setId(builder.id);
         this.guid = builder.guid;
-        this.policyDocument = builder.policyXML;
         this.policyXML = builder.policy;
         this.tag = builder.tag;
-        this.policyType = builder.policyType;
         setParentFolder(builder.parentFolderId != null ? new Folder(builder.parentFolderId, null) : null);
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public String getPolicyXML() {
@@ -126,8 +119,6 @@ public class Policy extends Folderable {
         private String policy;
         private String tag;
         private String parentFolderId;
-        private PolicyType policyType;
-        private Element policyXML;
 
         public Builder setName(String name) {
             this.name = name;
@@ -151,16 +142,6 @@ public class Policy extends Folderable {
 
         public Builder setTag(String tag) {
             this.tag = tag;
-            return this;
-        }
-
-        public Builder setPolicyXML(Element policyXML) {
-            this.policyXML = policyXML;
-            return this;
-        }
-
-        public Builder setPolicyType(PolicyType policyType) {
-            this.policyType = policyType;
             return this;
         }
 
@@ -195,5 +176,10 @@ public class Policy extends Folderable {
         if (!errors.isEmpty()) {
             throw new ConfigLoadException(String.join("\n", errors));
         }
+    }
+
+    @Override
+    public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
+        setPath(PathUtils.unixPath(getPath()));
     }
 }

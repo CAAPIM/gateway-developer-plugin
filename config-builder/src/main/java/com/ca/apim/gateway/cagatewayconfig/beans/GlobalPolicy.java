@@ -26,6 +26,8 @@ public class GlobalPolicy extends Policy {
 
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
+        super.postLoad(entityKey, bundle, rootFolder, idGenerator);
+
         setPolicyType(GLOBAL);
         bundle.putAllPolicies(ImmutableMap.of(this.getPath(), this));
         checkRepeatedTags(bundle, GLOBAL);

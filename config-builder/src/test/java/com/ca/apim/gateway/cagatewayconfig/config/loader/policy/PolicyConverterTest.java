@@ -24,11 +24,11 @@ class PolicyConverterTest {
         File policy = new File("policy.ex.ten.sion");
         Assert.assertEquals("policy", policyConverter.removeExtension(policy.getName()));
 
-        policy = new File("/some/path/my.policy.ex.ten.sion");
-        Assert.assertEquals("/some/path/my.policy", policyConverter.removeExtension(policy.getPath()));
+        policy = new File(File.separator + " some" + File.separator + " path" + File.separator + " my.policy.ex.ten.sion");
+        Assert.assertEquals(File.separator + " some" + File.separator + " path" + File.separator + " my.policy", policyConverter.removeExtension(policy.getPath()));
 
-        policy = new File("/some/path/my.policy.ex.other.sion");
-        Assert.assertEquals("/some/path/my.policy.ex.other.sion", policyConverter.removeExtension(policy.getPath()));
+        policy = new File(File.separator + " some" + File.separator + " path" + File.separator + " my.policy.ex.other.sion");
+        Assert.assertEquals(File.separator + " some" + File.separator + " path" + File.separator + " my.policy.ex.other.sion", policyConverter.removeExtension(policy.getPath()));
 
         policy = new File(".ex.ten.sion");
         Assert.assertEquals("", policyConverter.removeExtension(policy.getName()));
