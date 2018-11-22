@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeyStoreCreationExcepti
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
+import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -91,37 +93,51 @@ class KeystoreCreatorTest {
         KeystoreCreator.updateSystemPropertiesFile(keystoreHelper, keystoreFile, systemProperties.getPath());
 
         assertTrue(systemProperties.exists());
-        Properties properties = new Properties();
-        properties.load(Files.newInputStream(systemProperties.toPath()));
+        try (InputStream stream = Files.newInputStream(systemProperties.toPath())){
+            Properties properties = new Properties();
+            properties.load(stream);
 
-        assertFalse(properties.isEmpty());
-        assertEquals(6, properties.size());
+            assertFalse(properties.isEmpty());
+            assertEquals(6, properties.size());
 
-        assertNotNull(properties.getProperty("com.l7tech.common.security.jceProviderEngineName"));
-        assertEquals("generic", properties.getProperty("com.l7tech.common.security.jceProviderEngineName"));
+            assertNotNull(properties.getProperty("com.l7tech.common.security.jceProviderEngineName"));
+            assertEquals("generic", properties.getProperty("com.l7tech.common.security.jceProviderEngineName"));
 
-        assertNotNull(properties.getProperty("com.l7tech.keystore.type"));
-        assertEquals(keystoreHelper.getKeyStoreType(), properties.getProperty("com.l7tech.keystore.type"));
+            assertNotNull(properties.getProperty("com.l7tech.keystore.type"));
+            assertEquals(keystoreHelper.getKeyStoreType(), properties.getProperty("com.l7tech.keystore.type"));
 
-        assertNotNull(properties.getProperty("com.l7tech.keystore.path"));
-        assertEquals(keystoreFile.getPath(), properties.getProperty("com.l7tech.keystore.path"));
+            assertNotNull(properties.getProperty("com.l7tech.keystore.path"));
+            assertEquals(FilenameUtils.separatorsToUnix(keystoreFile.getPath()), properties.getProperty("com.l7tech.keystore.path"));
 
-        assertNotNull(properties.getProperty("com.l7tech.keystore.savePath"));
-        assertEquals("EMPTY", properties.getProperty("com.l7tech.keystore.savePath"));
+            assertNotNull(properties.getProperty("com.l7tech.keystore.savePath"));
+            assertEquals("EMPTY", properties.getProperty("com.l7tech.keystore.savePath"));
 
-        assertNotNull(properties.getProperty("com.l7tech.keystore.password"));
-        assertEquals(new String(keystoreHelper.getKeystorePassword()), properties.getProperty("com.l7tech.keystore.password"));
+            assertNotNull(properties.getProperty("com.l7tech.keystore.password"));
+            assertEquals(new String(keystoreHelper.getKeystorePassword()), properties.getProperty("com.l7tech.keystore.password"));
 
-        assertNotNull(properties.getProperty("com.l7tech.common.security.jceProviderEngine"));
-        assertEquals("com.l7tech.security.prov.generic.GenericJceProviderEngine", properties.getProperty("com.l7tech.common.security.jceProviderEngine"));
+            assertNotNull(properties.getProperty("com.l7tech.common.security.jceProviderEngine"));
+            assertEquals("com.l7tech.security.prov.generic.GenericJceProviderEngine", properties.getProperty("com.l7tech.common.security.jceProviderEngine"));
+        }
+
+        Files.delete(systemProperties.toPath());
     }
 
     @Test
     void createKeystore_errorPropertiesFile() throws IOException {
         final KeystoreHelper keystoreHelper = new KeystoreHelper();
 
-        Files.setPosixFilePermissions(systemProperties.toPath(), PosixFilePermissions.fromString("---------"));
+        if (FileUtils.POSIX_ENABLED) {
+            Files.setPosixFilePermissions(systemProperties.toPath(), PosixFilePermissions.fromString("---------"));
+        } else {
+            systemProperties.setWritable(false);
+        }
         assertThrows(KeyStoreCreationException.class, () -> KeystoreCreator.updateSystemPropertiesFile(keystoreHelper, keystoreFile, systemProperties.getPath()));
+        if (FileUtils.POSIX_ENABLED) {
+            Files.setPosixFilePermissions(systemProperties.toPath(), PosixFilePermissions.fromString("rwxrwxrwx"));
+        } else {
+            systemProperties.setWritable(true);
+        }
+        Files.delete(systemProperties.toPath());
     }
 
     @NotNull

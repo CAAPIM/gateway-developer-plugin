@@ -20,6 +20,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils.createFolder;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils.getPath;
+
 @Singleton
 public class PolicyAndFolderLoader implements EntityLoader {
 
@@ -40,7 +43,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
         if (policyRootDir == null) return;
 
         final Map<String, Policy> policies = new HashMap<>();
-        loadPolicies(policyRootDir, policyRootDir, null, policies, bundle.getFolders());
+        loadPolicies(policyRootDir, policyRootDir, null, policies, bundle);
         bundle.putAllPolicies(policies);
     }
 
@@ -49,15 +52,15 @@ public class PolicyAndFolderLoader implements EntityLoader {
         throw new ConfigLoadException("Cannot load an individual policy");
     }
 
-    private void loadPolicies(final File currentDir, final File rootDir, Folder parentFolder, final Map<String, Policy> policies, Map<String, Folder> folders) {
-        Folder folder = folders.computeIfAbsent(FolderLoaderUtils.getPath(currentDir, rootDir), key -> FolderLoaderUtils.createFolder(currentDir.getName(), key, parentFolder));
+    private void loadPolicies(final File currentDir, final File rootDir, Folder parentFolder, final Map<String, Policy> policies, Bundle bundle) {
+        Folder folder = bundle.getFolders().computeIfAbsent(getPath(currentDir, rootDir), key -> createFolder(currentDir.getName(), key, parentFolder));
         final File[] children = currentDir.listFiles();
         if (children != null) {
             for (final File child : children) {
                 if (child.isDirectory()) {
-                    loadPolicies(child, rootDir, folder, policies, folders);
+                    loadPolicies(child, rootDir, folder, policies, bundle);
                 } else {
-                    Policy policy = loadPolicy(child, rootDir, folder);
+                    Policy policy = loadPolicy(child, rootDir, folder, bundle);
                     Policy existingPolicy = policies.put(policy.getPath(), policy);
                     if (existingPolicy != null) {
                         throw new ConfigLoadException("Found multiple policies with same path but different types. Policy Path: " + policy.getPath());
@@ -67,17 +70,18 @@ public class PolicyAndFolderLoader implements EntityLoader {
         }
     }
 
-    private Policy loadPolicy(final File policyFile, final File rootDir, Folder parentFolder) {
+    private Policy loadPolicy(final File policyFile, final File rootDir, Folder parentFolder, Bundle bundle) {
         PolicyConverter policyConverter = policyConverterRegistry.getConverterFromFileName(policyFile.getName());
 
         Policy policy = new Policy();
-        policy.setPath(policyConverter.removeExtension(FolderLoaderUtils.getPath(policyFile, rootDir)));
+        policy.setPath(policyConverter.removeExtension(getPath(policyFile, rootDir)));
         policy.setName(policyConverter.removeExtension(policyFile.getName()));
         policy.setParentFolder(parentFolder);
         policy.setGuid(idGenerator.generateGuid());
         policy.setId(idGenerator.generate());
 
         policy.setPolicyXML(policyConverter.getPolicyXML(policy, fileUtils.getFileAsString(policyFile)));
+        policy.postLoad(policy.getPath(), bundle, rootDir, this.idGenerator);
         return policy;
     }
 

@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,6 @@ import org.testcontainers.shaded.com.google.common.io.Files;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
@@ -125,7 +125,7 @@ class AuditPolicyLoaderTest {
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
 
-        String policyPath = Paths.get("gateway-solution", "audit-policies", NAME).toString();
+        String policyPath = PathUtils.unixPath("gateway-solution", "audit-policies", NAME);
         assertNotNull(bundle.getPolicies().get(policyPath));
 
         Policy policy = bundle.getPolicies().get(policyPath);
