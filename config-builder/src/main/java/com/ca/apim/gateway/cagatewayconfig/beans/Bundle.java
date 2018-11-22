@@ -199,6 +199,14 @@ public class Bundle {
         this.getScheduledTasks().putAll(scheduledTasks);
     }
 
+    public Map<String, JmsDestination> getJmsDestinations() {
+        return getEntities(JmsDestination.class);
+    }
+    
+    public void putAllJmsDestinations(@NotNull Map<String, JmsDestination> jmsDestinations) {
+        this.getJmsDestinations().putAll(jmsDestinations);
+    }
+    
     public FolderTree getFolderTree() {
         return folderTree;
     }

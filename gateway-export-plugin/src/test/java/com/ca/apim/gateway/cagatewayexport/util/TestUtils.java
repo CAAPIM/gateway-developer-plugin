@@ -164,4 +164,11 @@ public class TestUtils {
         service.setPolicy(policy);
         return service;
     }
+
+    public static JmsDestination createJmsDestination(String name, String id) {
+        JmsDestination jmsDestination = new JmsDestination();
+        jmsDestination.setName(name);
+        jmsDestination.setId(id);
+        return jmsDestination;
+    }
 }

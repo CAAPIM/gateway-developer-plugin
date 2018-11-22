@@ -37,6 +37,7 @@ public class PropertyConstants {
 
     // Property names
     public static final String PROPERTY_USER = "user";
+    public static final String PROPERTY_USERNAME = "username";
     public static final String PROPERTY_PASSWORD = "password";
     public static final String PROPERTY_MIN_POOL_SIZE = "minimumPoolSize";
     public static final String PROPERTY_MAX_POOL_SIZE = "maximumPoolSize";
@@ -49,5 +50,30 @@ public class PropertyConstants {
     public static final String TAG_VALUE_POLICY = "policy";
     public static final String TAG_VALUE_WSDL = "wsdl";
 
+    // JMS Destination property constants
+    // 1.0 JMS Destination Detail property constants
+    // username
+    // password
+    public static final String DESTINATION_TYPE = "type"; // Topic or Queue
+    public static final String REPLY_TYPE = "replyType";
+    public static final String REPLY_QUEUE_NAME = "replyToQueueName";
+    public static final String USE_REQUEST_CORRELATION_ID = "useRequestCorrelationId";
+    public static final String INBOUND_ACK_TYPE = "inbound.acknowledgementType";
+    public static final String INBOUND_FAILURE_QUEUE_NAME = "inbound.failureQueueName";
+    public static final String OUTBOUND_MESSAGE_TYPE = "outbound.MessageType";
+    public static final String INBOUND_MAX_SIZE = "inbound.maximumSize";
+    
+    // 2.0 JMS Connection property constants
+    public static final String JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME = "jndi.initialContextFactoryClassname";
+    public static final String JNDI_PROVIDER_URL = "jndi.providerUrl";
+    // username
+    // password
+    public static final String QUEUE_CONNECTION_FACTORY_NAME = "queue.connectionFactoryName";
+    public static final String CONNECTION_FACTORY_NAME = "connectionFactoryName";
+    public static final String TOPIC_CONNECTION_FACTORY_NAME = "topic.connectionFactoryName";
+    
+    // 3.0 JMS Context Properties Template property
+    // From 
+    
     private PropertyConstants() { }
 }
