@@ -6,8 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.gw7;
 
+import com.ca.apim.gateway.cagatewayconfig.tasks.gw7.GW7Builder.PackageFile;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -15,23 +17,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+
+import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterators.spliteratorUnknownSize;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * The Packages build a gw7 package that contains an apply environment script and enables templatized
  * bundles to have environment values applied to them.
  */
 class Packager {
+
     private static final String DIRECTORY_OPT_DOCKER_RC_D = "/opt/docker/rc.d/";
+    private static final String DIRECTORY_GATEWAY_MODULES = "/opt/SecureSpan/Gateway/runtime/modules/";
     private static final String BUNDLE_FILE_EXTENSION = "bundle";
     private static final String REQ_BUNDLE_FILE_EXTENSION = "req." + BUNDLE_FILE_EXTENSION;
-
 
     private final GW7Builder gw7Builder;
     private final FileUtils fileUtils;
@@ -47,30 +51,28 @@ class Packager {
      * @param gw7File           the file to output the gw7 package to
      * @param bundle            The bundle file for this solution
      * @param dependencyBundles Dependency bundles to put into the package. These will have their names prefixed so that they get loaded first
+     * @param containerApplicationDependencies Dependencies from the environment creator application
+     * @param modularAssertionDependencies optional dependent modular assertions
+     * @param customAssertionDependencies optional dependent custom assertions
      */
-    void buildPackage(File gw7File, File bundle, LinkedList<File> dependencyBundles, Set<File> containerApplicationDependencies) {
-        byte[] applyEnvBytes = getResourceBytes("/scripts/apply-environment.sh");
+    void buildPackage(File gw7File,
+                      File bundle,
+                      LinkedList<File> dependencyBundles,
+                      Set<File> containerApplicationDependencies,
+                      Set<File> modularAssertionDependencies,
+                      Set<File> customAssertionDependencies) {
 
-        AtomicInteger dependencyBundleCounter = new AtomicInteger(1);
         int numBundles = dependencyBundles.size() + 2;
-        Set<GW7Builder.PackageFile> packageFiles = Stream.of(
-                // adds dependency bundles
-                StreamSupport.stream(Spliterators.spliteratorUnknownSize(dependencyBundles.descendingIterator(), Spliterator.ORDERED), false) // reverses the order of the dependencyBundles
-                        .map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundleCounter.getAndIncrement()) + "_" + convertToReqBundle(f.getName()), f.length(), () -> fileUtils.getInputStream(f))),
-                //adds the deployment bundle
-                Stream.of(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundles.size() + 1) + "_" + convertToReqBundle(bundle.getName()), bundle.length(), () -> fileUtils.getInputStream(bundle))),
-                //apply-environment.sh script
-                Stream.<GW7Builder.PackageFile>builder()
-                        .add(new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh", applyEnvBytes.length, () -> new ByteArrayInputStream(applyEnvBytes), true))
-                        .build(),
-                //adds the apply environment jars
-                containerApplicationDependencies.stream().map(f -> new GW7Builder.PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment/" + f.getName(), f.length(), () -> fileUtils.getInputStream(f)))
-        )
-                .flatMap(Function.identity())
-                .collect(Collectors.toSet());
+        Set<PackageFile> packageFiles = Stream.of(
+                dependencyBundles(dependencyBundles, numBundles), // adds dependency bundles
+                deploymentBundle(bundle, dependencyBundles.size(), numBundles), // adds the deployment bundle
+                applyEnvironmentScript(), // apply-environment.sh script
+                fileDependencies(containerApplicationDependencies, DIRECTORY_OPT_DOCKER_RC_D + "apply-environment/"), // adds the apply environment jars
+                fileDependencies(modularAssertionDependencies, DIRECTORY_GATEWAY_MODULES + "assertions/"), // adds the dependent modular assertions
+                fileDependencies(customAssertionDependencies, DIRECTORY_GATEWAY_MODULES + "lib/") // adds the dependent custom assertions
+        ).flatMap(identity()).collect(toSet());
 
-        gw7Builder.buildPackage(fileUtils.getOutputStream(gw7File),
-                packageFiles);
+        gw7Builder.buildPackage(fileUtils.getOutputStream(gw7File), packageFiles);
     }
 
     private String convertToReqBundle(String bundleFile) {
@@ -83,6 +85,38 @@ class Packager {
         return paddingLevel > 0 ? String.format(format, currentBundleNumber) : String.valueOf(currentBundleNumber);
     }
 
+    private Stream<PackageFile> dependencyBundles(LinkedList<File> dependencyBundles, int numBundles) {
+        AtomicInteger dependencyBundleCounter = new AtomicInteger(1);
+
+        return stream(
+                spliteratorUnknownSize(
+                        dependencyBundles.descendingIterator(),
+                        ORDERED
+                ),
+                false
+        ) // reverses the order of the dependencyBundles
+                .map(f -> new PackageFile(
+                        DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, dependencyBundleCounter.getAndIncrement()) + "_" + convertToReqBundle(f.getName()), f.length(),
+                        () -> fileUtils.getInputStream(f))
+                );
+    }
+
+    @NotNull
+    private Stream<PackageFile> deploymentBundle(File deploymentBundleFile, int numDependencyBundles, int numBundles) {
+        return Stream.of(new PackageFile(
+                DIRECTORY_OPT_DOCKER_RC_D + "bundle/templatized/_" + getFileCounter(numBundles, numDependencyBundles + 1) + "_" + convertToReqBundle(deploymentBundleFile.getName()), deploymentBundleFile.length(),
+                () -> fileUtils.getInputStream(deploymentBundleFile))
+        );
+    }
+
+    private Stream<PackageFile> applyEnvironmentScript() {
+        byte[] applyEnvBytes = getResourceBytes("/scripts/apply-environment.sh");
+
+        return Stream.<PackageFile>builder()
+                .add(new PackageFile(DIRECTORY_OPT_DOCKER_RC_D + "apply-environment.sh", applyEnvBytes.length, () -> new ByteArrayInputStream(applyEnvBytes), true))
+                .build();
+    }
+
     private byte[] getResourceBytes(String resourcePath) {
         try (InputStream applyEnvStream = getClass().getResourceAsStream(resourcePath)) {
             if (applyEnvStream == null) {
@@ -93,4 +127,13 @@ class Packager {
             throw new PackageBuildException("Error loading " + resourcePath + " bytes: " + e.getMessage(), e);
         }
     }
+
+    @NotNull
+    private Stream<PackageFile> fileDependencies(Set<File> files, String path) {
+        return files.stream().map(f -> new PackageFile(
+                path + f.getName(), f.length(), () -> fileUtils.getInputStream(f))
+        );
+    }
+
+
 }

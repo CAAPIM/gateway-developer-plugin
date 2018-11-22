@@ -1,0 +1,21 @@
+<!--
+  ~ Copyright (c) 2018 CA. All rights reserved.
+  ~ This software may be modified and distributed under the terms
+  ~ of the MIT license.  See the LICENSE file for details.
+  -->
+
+<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:L7p="http://www.layer7tech.com/ws/policy">
+    <wsp:All wsp:Usage="Required">
+        <L7p:HardcodedResponse>
+            <L7p:ResponseBody>
+                <![CDATA[{
+   "you-say": ["Hello", "Gateway"],
+   "gateway-says": ["Hello", "User"],
+   "my-static-property": "${gateway.my-static-property}"
+   "another-property": "${gateway.another-property}"
+}]]>
+            </L7p:ResponseBody>
+            <L7p:ResponseContentType stringValue="text/json; charset=UTF-8"/>
+        </L7p:HardcodedResponse>
+    </wsp:All>
+</wsp:Policy>

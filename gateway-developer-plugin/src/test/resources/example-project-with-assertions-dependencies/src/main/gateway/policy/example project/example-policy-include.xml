@@ -1,0 +1,33 @@
+<!--
+  ~ Copyright (c) 2018 CA. All rights reserved.
+  ~ This software may be modified and distributed under the terms
+  ~ of the MIT license.  See the LICENSE file for details.
+  -->
+
+<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:L7p="http://www.layer7tech.com/ws/policy">
+    <wsp:All wsp:Usage="Required">
+        <L7p:SetVariable>
+            <L7p:Expression>
+                <![CDATA[{ "test": "value" }]]>
+            </L7p:Expression>
+            <L7p:ContentType stringValue="text/json; charset=utf-8"/>
+            <L7p:DataType variableDataType="message"/>
+            <L7p:VariableToSet stringValue="encass-messsage-input"/>
+        </L7p:SetVariable>
+        <L7p:Encapsulated encassName="encass-policy">
+            <L7p:Parameters mapValue="included">
+                <L7p:entry>
+                    <L7p:key stringValue="hello"/>
+                    <L7p:value stringValue="test"/>
+                </L7p:entry>
+                <L7p:entry>
+                    <L7p:key stringValue="hello-again"/>
+                    <L7p:value stringValue="encass-messsage-input"/>
+                </L7p:entry>
+            </L7p:Parameters>
+        </L7p:Encapsulated>
+        <L7p:Include>
+            <L7p:PolicyGuid policyPath="example project/encass-policy"/>
+        </L7p:Include>
+    </wsp:All>
+</wsp:Policy>
