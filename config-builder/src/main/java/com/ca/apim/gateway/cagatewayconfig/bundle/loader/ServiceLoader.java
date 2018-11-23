@@ -39,6 +39,8 @@ public class ServiceLoader implements BundleEntityLoader {
         final String name = EncodeDecodeUtils.encodePath(nameElement.getTextContent());
         boolean isSoapService = false;
         String soapVersion = null;
+        boolean wssProcessingEnabled = false;
+        Service serviceEntity = new Service();
 
         Element servicePropertiesElement = getSingleChildElement(serviceDetails, PROPERTIES);
         Map<String, Object> allProperties = BuilderUtils.mapPropertiesElements(servicePropertiesElement, PROPERTIES);
@@ -54,13 +56,15 @@ public class ServiceLoader implements BundleEntityLoader {
                 isSoapService = Boolean.valueOf(entry.getValue().toString());
             } else if (KEY_VALUE_SOAP_VERSION.equals(entry.getKey())) {
                 soapVersion = entry.getValue().toString();
+            } else if (KEY_VALUE_WSS_PROCESSING_ENABLED.equals(entry.getKey())) {
+                wssProcessingEnabled = Boolean.valueOf(entry.getValue().toString());
             }
         }
         final Element resources = getSingleChildElement(service, RESOURCES);
-        Service serviceEntity = new Service();
 
         if(isSoapService) {
             extractResourceSets(soapVersion, resources, serviceEntity);
+            serviceEntity.getWsdl().setWssProcessingEnabled(wssProcessingEnabled);
         } else {
             final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
             final Element resource = getSingleChildElement(resourceSet, RESOURCE);
@@ -76,8 +80,19 @@ public class ServiceLoader implements BundleEntityLoader {
 
         Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);
         Element httpMappingElement = getSingleChildElement(serviceMappingsElement, HTTP_MAPPING);
-        Element urlPatternElement = getSingleChildElement(httpMappingElement, URL_PATTERN);
-        serviceEntity.setUrl(urlPatternElement.getTextContent());
+
+        if(isSoapService) {
+            try {
+                Element urlPatternElement = getSingleChildElement(httpMappingElement, URL_PATTERN);
+                serviceEntity.setUrl(urlPatternElement.getTextContent());
+            } catch (BundleLoadException e) {
+
+            }
+        } else {
+            Element urlPatternElement = getSingleChildElement(httpMappingElement, URL_PATTERN);
+            serviceEntity.setUrl(urlPatternElement.getTextContent());
+        }
+
         Element verbsElement = getSingleChildElement(httpMappingElement, VERBS);
         NodeList verbs = verbsElement.getElementsByTagName(VERB);
         Set<String> httpMethods = new HashSet<>();

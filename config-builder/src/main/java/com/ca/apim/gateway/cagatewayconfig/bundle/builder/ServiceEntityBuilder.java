@@ -20,6 +20,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -70,20 +71,24 @@ public class ServiceEntityBuilder implements EntityBuilder {
         serviceDetailElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));
         serviceDetailElement.appendChild(buildServiceMappings(service, document));
 
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, false);
+
         if (service.getProperties() != null) {
-            Map<String, Object> properties = service.getProperties()
+            properties = service.getProperties()
                     .entrySet()
                     .stream()
                     .collect(Collectors
                             .toMap(p -> "property." + p.getKey(), p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + p.getKey() : p.getValue()));
-
-            if(isSoapService) {
-                properties.put(KEY_VALUE_SOAP, true);
-                properties.put(KEY_VALUE_SOAP_VERSION, wsdlBean.getSoapVersion());
-            }
-            buildAndAppendPropertiesElement(properties,
-                    document, serviceDetailElement);
         }
+
+        if(isSoapService) {
+            properties.put(KEY_VALUE_SOAP, true);
+            properties.put(KEY_VALUE_SOAP_VERSION, wsdlBean.getSoapVersion());
+            properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, wsdlBean.isWssProcessingEnabled());
+        }
+
+        buildAndAppendPropertiesElement(properties, document, serviceDetailElement);
 
         Element serviceElement = createElementWithAttribute(document, SERVICE, ATTRIBUTE_ID, id);
         serviceElement.appendChild(serviceDetailElement);
