@@ -52,12 +52,20 @@ public class ServiceLoader implements BundleEntityLoader {
                     propertyValue = entry.getValue();
                 }
                 properties.put(entry.getKey().substring(9), propertyValue);
-            } else if (KEY_VALUE_SOAP.equals(entry.getKey())) {
-                isSoapService = Boolean.valueOf(entry.getValue().toString());
-            } else if (KEY_VALUE_SOAP_VERSION.equals(entry.getKey())) {
-                soapVersion = entry.getValue().toString();
-            } else if (KEY_VALUE_WSS_PROCESSING_ENABLED.equals(entry.getKey())) {
-                wssProcessingEnabled = Boolean.valueOf(entry.getValue().toString());
+            } else {
+                switch(entry.getKey()) {
+                    case KEY_VALUE_SOAP:
+                        isSoapService = Boolean.valueOf(entry.getValue().toString());
+                        break;
+                    case KEY_VALUE_SOAP_VERSION:
+                        soapVersion = entry.getValue().toString();
+                        break;
+                    case KEY_VALUE_WSS_PROCESSING_ENABLED:
+                        wssProcessingEnabled = Boolean.valueOf(entry.getValue().toString());
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         final Element resources = getSingleChildElement(service, RESOURCES);
@@ -86,7 +94,7 @@ public class ServiceLoader implements BundleEntityLoader {
                 Element urlPatternElement = getSingleChildElement(httpMappingElement, URL_PATTERN);
                 serviceEntity.setUrl(urlPatternElement.getTextContent());
             } catch (BundleLoadException e) {
-
+                //It is okay to swallow this exception. As this url is optional for soap servie but mandatory for rest service.
             }
         } else {
             Element urlPatternElement = getSingleChildElement(httpMappingElement, URL_PATTERN);

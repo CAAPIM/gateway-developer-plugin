@@ -6,10 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
@@ -28,7 +25,8 @@ import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SERVICE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceEntityBuilderTest {
@@ -133,15 +131,7 @@ class ServiceEntityBuilderTest {
         Bundle bundle = new Bundle();
         Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
 
-        Service service1 = new Service();
-        service1.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
-        service1.setUrl("/my/service/url");
-        service1.setPolicy("/my/policy.xml");
-        service1.setParentFolder(serviceParentFolder);
-        service1.setProperties(new HashMap<String, Object>() {{
-            put("key1", "value1");
-            put("ENV.key.environment", "something");
-        }});
+        Service service1 = getService1(serviceParentFolder);
 
         Service service2 = new Service();
         service2.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
@@ -158,6 +148,81 @@ class ServiceEntityBuilderTest {
             put("my/service2", service2);
         }});
 
+        verifyMultipleServices(builder, bundle, service1, service2);
+    }
+
+    @Test
+    void buildOneSoapService() throws DocumentParseException {
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+
+        Bundle bundle = new Bundle();
+
+        Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/soap/policy.xml", "policy");
+
+        Service service = new Service();
+        service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
+        service.setUrl("/soap/service/url");
+        service.setPolicy("/soap/policy.xml");
+        service.setParentFolder(serviceParentFolder);
+        service.setProperties(new HashMap<String, Object>() {{
+            put("key1", "value1");
+            put("ENV.key.environment", "something");
+        }});
+        WSDL wsdlBean = new WSDL();
+        wsdlBean.setWssProcessingEnabled(true);
+        wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
+        wsdlBean.setSoapVersion("1.1");
+        wsdlBean.setWsdlXml("wsdl xml content");
+        service.setWsdl(wsdlBean);
+
+        bundle.putAllServices(new HashMap<String, Service>() {{
+            put("/v1/soap-service1", service);
+        }});
+
+        List<Entity> services = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        assertEquals(1, services.size());
+
+        Entity serviceEntity = services.get(0);
+
+        verifyService(service, serviceEntity, 1, "soap-service" + 1);
+    }
+
+    @Test
+    void buildTwoServicesOneSoapOneRest() throws DocumentParseException {
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+
+        Bundle bundle = new Bundle();
+        Folder service1ParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
+        Folder service2ParentFolder = setUpFolderAndPolicy(bundle, "/soap/policy.xml", "policy");
+
+        Service service1 = getService1(service1ParentFolder);
+
+        Service service2 = new Service();
+        service2.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
+        service2.setUrl("/soap/service/url");
+        service2.setPolicy("/soap/policy.xml");
+        service2.setParentFolder(service2ParentFolder);
+        service2.setProperties(new HashMap<String, Object>() {{
+            put("key2", "value2");
+            put("ENV.key.environment", "something");
+        }});
+        WSDL wsdlBean = new WSDL();
+        wsdlBean.setWssProcessingEnabled(true);
+        wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
+        wsdlBean.setSoapVersion("1.1");
+        wsdlBean.setWsdlXml("wsdl xml content");
+        service2.setWsdl(wsdlBean);
+
+        bundle.putAllServices(new HashMap<String, Service>() {{
+            put("my/v1/service1", service1);
+            put("my/service2", service2);
+        }});
+
+        verifyMultipleServices(builder, bundle, service1, service2);
+    }
+
+    private void verifyMultipleServices(ServiceEntityBuilder builder, Bundle bundle, Service service1, Service service2) throws DocumentParseException {
         List<Entity> services = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertEquals(2, services.size());
@@ -168,6 +233,20 @@ class ServiceEntityBuilderTest {
             verifyService(service2, services.get(0), 2, "service" + 2);
             verifyService(service1, services.get(1), 1, "service" + 1);
         }
+    }
+
+    @NotNull
+    private Service getService1(Folder serviceParentFolder) {
+        Service service1 = new Service();
+        service1.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
+        service1.setUrl("/my/service/url");
+        service1.setPolicy("/my/policy.xml");
+        service1.setParentFolder(serviceParentFolder);
+        service1.setProperties(new HashMap<String, Object>() {{
+            put("key1", "value1");
+            put("ENV.key.environment", "something");
+        }});
+        return service1;
     }
 
     @NotNull
@@ -221,22 +300,79 @@ class ServiceEntityBuilderTest {
 
         Element serviceProperties = getSingleElement(serviceDetails, PROPERTIES);
         NodeList propertyList = serviceProperties.getElementsByTagName(PROPERTY);
-        assertEquals(2, propertyList.getLength());
-        Node property1 = propertyList.item(0);
-        Node property2 = propertyList.item(1);
-        if (!("property.key" + serviceNumber).equals(property1.getAttributes().getNamedItem(ATTRIBUTE_KEY).getTextContent())) {
-            property2 = propertyList.item(0);
-            property1 = propertyList.item(1);
+        boolean isSoapService = service.getWsdl() != null;
+        if (isSoapService) {
+            assertEquals(5, propertyList.getLength());
+        } else {
+            assertEquals(3, propertyList.getLength());
         }
-        assertEquals("property.key" + serviceNumber, property1.getAttributes().getNamedItem(ATTRIBUTE_KEY).getTextContent());
-        assertEquals("property.ENV.key.environment", property2.getAttributes().getNamedItem(ATTRIBUTE_KEY).getTextContent());
-        assertEquals("value" + serviceNumber, getSingleElement((Element) property1, STRING_VALUE).getTextContent());
-        assertEquals("SERVICE_PROPERTY_ENV.key.environment", getSingleElement((Element) property2, STRING_VALUE).getTextContent());
+
+        final String propKey = "property.ENV.key.environment";
+        boolean checkPropKey1 = false, checkWssProcessingEnabled = false, checkSoap = false, checkSoapVersion = false, checkPropKey2 = false;
+        for (int counter = 0; counter < propertyList.getLength(); counter++) {
+            Node property = propertyList.item(counter);
+            if (property.getAttributes().getNamedItem(ATTRIBUTE_KEY).getTextContent().equals("property.key" + serviceNumber)) {
+                assertEquals("value" + serviceNumber, getSingleElement((Element) property, STRING_VALUE).getTextContent());
+                checkPropKey1 = true;
+            } else {
+                switch (property.getAttributes().getNamedItem(ATTRIBUTE_KEY).getTextContent()) {
+                    case KEY_VALUE_WSS_PROCESSING_ENABLED:
+                        if (isSoapService) {
+                            assertTrue(Boolean.parseBoolean(getSingleElement((Element) property, BOOLEAN_VALUE).getTextContent()));
+                        } else {
+                            assertFalse(Boolean.parseBoolean(getSingleElement((Element) property, BOOLEAN_VALUE).getTextContent()));
+                        }
+                        checkWssProcessingEnabled = true;
+                        break;
+                    case KEY_VALUE_SOAP:
+                        assertTrue(Boolean.parseBoolean(getSingleElement((Element) property, BOOLEAN_VALUE).getTextContent()));
+                        checkSoap = true;
+                        break;
+                    case KEY_VALUE_SOAP_VERSION:
+                        assertEquals("1.1", getSingleElement((Element) property, STRING_VALUE).getTextContent());
+                        checkSoapVersion = true;
+                        break;
+                    case propKey:
+                        assertEquals("SERVICE_PROPERTY_ENV.key.environment", getSingleElement((Element) property, STRING_VALUE).getTextContent());
+                        checkPropKey2 = true;
+                        break;
+                }
+            }
+        }
+        if (isSoapService) {
+            assertTrue(checkSoap);
+            assertTrue(checkSoapVersion);
+        }
+        assertTrue(checkPropKey1);
+        assertTrue(checkPropKey2);
+        assertTrue(checkWssProcessingEnabled);
+
 
         Element serviceResources = getSingleElement(serviceEntityXml, RESOURCES);
-        Element serviceResourceSet = getSingleElement(serviceResources, RESOURCE_SET);
-        Element serviceResource = getSingleElement(serviceResourceSet, RESOURCE);
-        assertEquals("policy", serviceResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
-        assertNotNull(serviceResource.getTextContent());
+        if(isSoapService) {
+            List<Element> serviceResourceSets = getChildElements(serviceResources, RESOURCE_SET);
+            Element serviceResource = null, wsdlResource = null;
+            for(Element serviceResourceSet : serviceResourceSets) {
+                String tagValue = serviceResourceSet.getAttribute(ATTRIBUTE_TAG);
+                switch (tagValue) {
+                    case TAG_VALUE_POLICY:
+                        serviceResource = getSingleChildElement(serviceResourceSet, RESOURCE);
+                        break;
+                    case TAG_VALUE_WSDL:
+                        wsdlResource = getSingleChildElement(serviceResourceSet, RESOURCE);
+                        break;
+                }
+            }
+
+            assertEquals(TAG_VALUE_POLICY, serviceResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
+            assertNotNull(serviceResource.getTextContent());
+            assertEquals(TAG_VALUE_WSDL, wsdlResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
+            assertNotNull(wsdlResource.getTextContent());
+        } else {
+            Element serviceResourceSet = getSingleElement(serviceResources, RESOURCE_SET);
+            Element serviceResource = getSingleElement(serviceResourceSet, RESOURCE);
+            assertEquals(TAG_VALUE_POLICY, serviceResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
+            assertNotNull(serviceResource.getTextContent());
+        }
     }
 }

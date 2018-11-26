@@ -71,8 +71,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         serviceDetailElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));
         serviceDetailElement.appendChild(buildServiceMappings(service, document));
 
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, false);
+        Map<String, Object> properties = null;
 
         if (service.getProperties() != null) {
             properties = service.getProperties()
@@ -82,6 +81,11 @@ public class ServiceEntityBuilder implements EntityBuilder {
                             .toMap(p -> "property." + p.getKey(), p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + p.getKey() : p.getValue()));
         }
 
+        if(properties == null) {
+            properties = new HashMap<>();
+        }
+
+        properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, false);
         if(isSoapService) {
             properties.put(KEY_VALUE_SOAP, true);
             properties.put(KEY_VALUE_SOAP_VERSION, wsdlBean.getSoapVersion());
