@@ -37,47 +37,13 @@ public class ServiceLoader implements BundleEntityLoader {
         final String folderId = serviceDetails.getAttribute(ATTRIBUTE_FOLDER_ID);
         Element nameElement = getSingleChildElement(serviceDetails, NAME);
         final String name = EncodeDecodeUtils.encodePath(nameElement.getTextContent());
-        boolean isSoapService = false;
-        String soapVersion = null;
-        boolean wssProcessingEnabled = false;
-        Service serviceEntity = new Service();
 
         Element servicePropertiesElement = getSingleChildElement(serviceDetails, PROPERTIES);
         Map<String, Object> allProperties = BuilderUtils.mapPropertiesElements(servicePropertiesElement, PROPERTIES);
         Map<String, Object> properties = new HashMap<>();
-        for (Map.Entry<String, Object> entry : allProperties.entrySet()) {
-            if (entry.getKey().startsWith("property.")) {
-                Object propertyValue = null;
-                if (!entry.getKey().startsWith("property.ENV.")) {
-                    propertyValue = entry.getValue();
-                }
-                properties.put(entry.getKey().substring(9), propertyValue);
-            } else {
-                switch(entry.getKey()) {
-                    case KEY_VALUE_SOAP:
-                        isSoapService = Boolean.valueOf(entry.getValue().toString());
-                        break;
-                    case KEY_VALUE_SOAP_VERSION:
-                        soapVersion = entry.getValue().toString();
-                        break;
-                    case KEY_VALUE_WSS_PROCESSING_ENABLED:
-                        wssProcessingEnabled = Boolean.valueOf(entry.getValue().toString());
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        final Element resources = getSingleChildElement(service, RESOURCES);
-
-        if(isSoapService) {
-            extractResourceSets(soapVersion, resources, serviceEntity);
-            serviceEntity.getWsdl().setWssProcessingEnabled(wssProcessingEnabled);
-        } else {
-            final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
-            final Element resource = getSingleChildElement(resourceSet, RESOURCE);
-            serviceEntity.setPolicy(resource.getTextContent());
-        }
+        Service serviceEntity = new Service();
+        populateServiceEntity(service, serviceEntity, allProperties, properties);
+        boolean isSoapService = serviceEntity.getWsdl() != null;
 
         serviceEntity.setName(name);
         serviceEntity.setId(id);
@@ -113,7 +79,46 @@ public class ServiceLoader implements BundleEntityLoader {
         bundle.getServices().put(name, serviceEntity);
     }
 
-    private void extractResourceSets(String soapVersion, Element resources, Service serviceEntity) {
+    private void populateServiceEntity(Element service, Service serviceEntity, Map<String, Object> allProperties, Map<String, Object> properties) {
+        boolean isSoapService = false;
+        String soapVersion = null;
+        boolean wssProcessingEnabled = false;
+        for (Map.Entry<String, Object> entry : allProperties.entrySet()) {
+            if (entry.getKey().startsWith("property.")) {
+                Object propertyValue = null;
+                if (!entry.getKey().startsWith("property.ENV.")) {
+                    propertyValue = entry.getValue();
+                }
+                properties.put(entry.getKey().substring(9), propertyValue);
+            } else {
+                switch(entry.getKey()) {
+                    case KEY_VALUE_SOAP:
+                        isSoapService = Boolean.valueOf(entry.getValue().toString());
+                        break;
+                    case KEY_VALUE_SOAP_VERSION:
+                        soapVersion = entry.getValue().toString();
+                        break;
+                    case KEY_VALUE_WSS_PROCESSING_ENABLED:
+                        wssProcessingEnabled = Boolean.valueOf(entry.getValue().toString());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        final Element resources = getSingleChildElement(service, RESOURCES);
+
+        if(isSoapService) {
+            extractResourceSetsForSoap(soapVersion, resources, serviceEntity);
+            serviceEntity.getWsdl().setWssProcessingEnabled(wssProcessingEnabled);
+        } else {
+            final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
+            final Element resource = getSingleChildElement(resourceSet, RESOURCE);
+            serviceEntity.setPolicy(resource.getTextContent());
+        }
+    }
+
+    private void extractResourceSetsForSoap(String soapVersion, Element resources, Service serviceEntity) {
         List<Element> resourceSets = getChildElements(resources, RESOURCE_SET);
         for(Element resourceSet : resourceSets) {
             String tagValue = resourceSet.getAttribute(ATTRIBUTE_TAG);
