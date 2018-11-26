@@ -72,6 +72,7 @@ class ServiceLoaderTest {
         assertEquals("folder", service.getParentFolder().getId());
         assertEquals("wsdl file", service.getWsdl().getWsdlXml());
         assertEquals("1.1", service.getWsdl().getSoapVersion());
+        assertTrue(service.getWsdl().isWssProcessingEnabled());
         Map<String, Object> expected = new HashMap<>();
         expected.put("prop", "value");
         expected.put("ENV.prop", null);

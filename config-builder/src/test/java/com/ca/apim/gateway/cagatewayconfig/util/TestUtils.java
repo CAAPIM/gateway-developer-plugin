@@ -204,7 +204,7 @@ public class TestUtils {
         Map<String, Object> propertiesMap;
         if(isSoap) {
             if(withProperties) {
-                propertiesMap = ImmutableMap.of(PREFIX_PROPERTY + "prop", "value", PREFIX_PROPERTY + PREFIX_ENV + "prop", "value2", KEY_VALUE_SOAP, true, KEY_VALUE_SOAP_VERSION, "1.1");
+                propertiesMap = ImmutableMap.of(PREFIX_PROPERTY + "prop", "value", PREFIX_PROPERTY + PREFIX_ENV + "prop", "value2", KEY_VALUE_SOAP, true, KEY_VALUE_SOAP_VERSION, "1.1", KEY_VALUE_WSS_PROCESSING_ENABLED, true);
             } else {
                 propertiesMap = Collections.emptyMap();
             }
