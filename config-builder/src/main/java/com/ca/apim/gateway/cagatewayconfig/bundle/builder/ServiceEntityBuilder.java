@@ -121,7 +121,9 @@ public class ServiceEntityBuilder implements EntityBuilder {
         Element httpMappingElement = document.createElement(HTTP_MAPPING);
         serviceMappingsElement.appendChild(httpMappingElement);
 
-        httpMappingElement.appendChild(createElementWithTextContent(document, URL_PATTERN, service.getUrl()));
+        if(service.getUrl() != null) {
+            httpMappingElement.appendChild(createElementWithTextContent(document, URL_PATTERN, service.getUrl()));
+        }
         Element verbsElement = document.createElement(VERBS);
         service.getHttpMethods().forEach(method -> {
             Element verb = document.createElement(VERB);
