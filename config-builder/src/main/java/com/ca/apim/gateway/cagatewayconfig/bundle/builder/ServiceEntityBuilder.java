@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.beans.WSDL;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
@@ -19,13 +20,15 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SERVICE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @Singleton
@@ -55,6 +58,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
     private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
         String processedName = EncodeDecodeUtils.decodePath(FilenameUtils.getBaseName(servicePath));
         Policy policy = bundle.getPolicies().get(service.getPolicy());
+        final WSDL wsdlBean = service.getWsdl();
+        boolean isSoapService = (wsdlBean != null);
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());
         }
@@ -66,25 +71,47 @@ public class ServiceEntityBuilder implements EntityBuilder {
         serviceDetailElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));
         serviceDetailElement.appendChild(buildServiceMappings(service, document));
 
+        Map<String, Object> properties = null;
+
         if (service.getProperties() != null) {
-            buildAndAppendPropertiesElement(service.getProperties()
-                            .entrySet()
-                            .stream()
-                            .collect(Collectors
-                                    .toMap(p -> "property." + p.getKey(), p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + p.getKey() : p.getValue())),
-                    document, serviceDetailElement);
+            properties = service.getProperties()
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors
+                            .toMap(p -> "property." + p.getKey(), p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + p.getKey() : p.getValue()));
         }
+
+        if(properties == null) {
+            properties = new HashMap<>();
+        }
+
+        properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, false);
+        if(isSoapService) {
+            properties.put(KEY_VALUE_SOAP, true);
+            properties.put(KEY_VALUE_SOAP_VERSION, wsdlBean.getSoapVersion());
+            properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, wsdlBean.isWssProcessingEnabled());
+        }
+
+        buildAndAppendPropertiesElement(properties, document, serviceDetailElement);
 
         Element serviceElement = createElementWithAttribute(document, SERVICE, ATTRIBUTE_ID, id);
         serviceElement.appendChild(serviceDetailElement);
 
         Element resourcesElement = document.createElement(RESOURCES);
-        Element resourceSetElement = createElementWithAttribute(document, RESOURCE_SET, "tag", "policy");
-        Element resourceElement = createElementWithAttribute(document, RESOURCE, "type", "policy");
-        resourceElement.setTextContent(documentFileUtils.elementToString(policy.getPolicyDocument()));
+        Element policyResourceSetElement = createElementWithAttribute(document, RESOURCE_SET, ATTRIBUTE_TAG, TAG_VALUE_POLICY);
+        Element policyResourceElement = createElementWithAttribute(document, RESOURCE, ATTRIBUTE_TYPE, TAG_VALUE_POLICY);
+        policyResourceElement.setTextContent(documentFileUtils.elementToString(policy.getPolicyDocument()));
+        policyResourceSetElement.appendChild(policyResourceElement);
+        resourcesElement.appendChild(policyResourceSetElement);
 
-        resourceSetElement.appendChild(resourceElement);
-        resourcesElement.appendChild(resourceSetElement);
+        if(isSoapService) {
+            Element wsdlResourceSetElement = createElementWithAttributes(document, RESOURCE_SET, ImmutableMap.of(ATTRIBUTE_TAG, TAG_VALUE_WSDL, ATTRIBUTE_ROOT_URL, wsdlBean.getRootUrl()));
+            Element wsdlResourceElement = createElementWithAttributes(document, RESOURCE, ImmutableMap.of(ATTRIBUTE_TYPE, TAG_VALUE_WSDL, ATTRIBUTE_SOURCE_URL, wsdlBean.getRootUrl()));
+            wsdlResourceElement.setTextContent(wsdlBean.getWsdlXml());
+            wsdlResourceSetElement.appendChild(wsdlResourceElement);
+            resourcesElement.appendChild(wsdlResourceSetElement);
+        }
+
         serviceElement.appendChild(resourcesElement);
         return new Entity(SERVICE_TYPE, processedName, id, serviceElement);
     }
@@ -94,7 +121,9 @@ public class ServiceEntityBuilder implements EntityBuilder {
         Element httpMappingElement = document.createElement(HTTP_MAPPING);
         serviceMappingsElement.appendChild(httpMappingElement);
 
-        httpMappingElement.appendChild(createElementWithTextContent(document, URL_PATTERN, service.getUrl()));
+        if(service.getUrl() != null) {
+            httpMappingElement.appendChild(createElementWithTextContent(document, URL_PATTERN, service.getUrl()));
+        }
         Element verbsElement = document.createElement(VERBS);
         service.getHttpMethods().forEach(method -> {
             Element verb = document.createElement(VERB);
