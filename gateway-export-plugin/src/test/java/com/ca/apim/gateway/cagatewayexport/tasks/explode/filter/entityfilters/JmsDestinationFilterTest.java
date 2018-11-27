@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class JmsDestinationFilterTest {
     
     @Test
-    void filterNoEntities() {
+    void testFilterNoEntities() {
         JmsDestinationFilter filter = new JmsDestinationFilter();
 
         Bundle filteredBundle = new Bundle();
@@ -38,7 +38,7 @@ class JmsDestinationFilterTest {
     }
 
     @Test
-    void filter() {
+    void testFilter() {
         JmsDestinationFilter filter = new JmsDestinationFilter();
 
         Bundle filteredBundle = new Bundle();
@@ -52,7 +52,6 @@ class JmsDestinationFilterTest {
         bundle.addEntity(TestUtils.createJmsDestination("jms2", "2"));
         bundle.addEntity(TestUtils.createJmsDestination("jms3", "3"));
         bundle.addEntity(TestUtils.createJmsDestination("jms4", "4"));
-
 
         FilterConfiguration filterConfiguration = new FilterConfiguration();
         List<JmsDestination> filteredEntities = filter.filter("/my/folder/path", filterConfiguration, bundle, filteredBundle);

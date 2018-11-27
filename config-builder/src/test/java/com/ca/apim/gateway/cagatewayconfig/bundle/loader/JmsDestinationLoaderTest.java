@@ -15,7 +15,13 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributesAndChildren;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithChildren;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
@@ -26,7 +32,7 @@ class JmsDestinationLoaderTest {
     private JmsDestinationLoader loader = new JmsDestinationLoader();
     
     @Test
-    void load() {
+    void testLoad() {
         Bundle bundle = new Bundle();
         loader.load(bundle, createJmsDestinationXml(
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument())
@@ -35,16 +41,53 @@ class JmsDestinationLoaderTest {
         assertFalse(bundle.getJmsDestinations().isEmpty());
         assertEquals(1, bundle.getJmsDestinations().size());
 
-        JmsDestination jmsDestination = bundle.getJmsDestinations().get("jms-1");
+        JmsDestination jmsDestination = bundle.getJmsDestinations().get("my-jms-endpoint");
         assertNotNull(jmsDestination);
-        assertEquals("jms-1", jmsDestination.getName());
+        assertEquals("my-jms-endpoint", jmsDestination.getName());
         assertEquals("id-1", jmsDestination.getId());
         assertTrue(jmsDestination.isInbound());
         assertFalse(jmsDestination.isTemplate());
         assertEquals("TIBCO EMS", jmsDestination.getProviderType());
+        assertEquals("com.tibco.tibjms.naming.TibjmsInitialContextFactory", jmsDestination.getInitialContextFactoryClassName());
+        assertEquals("tibjmsnaming://machinename:7222", jmsDestination.getJndiUrl());
+        assertEquals("my-jndi-username", jmsDestination.getJndiUsername());
+        assertEquals("my-jndi-password", jmsDestination.getJndiPassword());
+        assertNull(jmsDestination.getJndiPasswordRef());
+
+        assertPropertiesContent(ImmutableMap.of(
+                "additional-jndi-prop-name-1", "additional-jndi-prop-val-1",
+                "additional-jndi-prop-name-2", "additional-jndi-prop-val-2"),
+                jmsDestination.getJndiProperties());
+        
+        assertEquals("Queue", jmsDestination.getDestinationType());
+        assertEquals("my-qcf-name", jmsDestination.getConnectionFactoryName());
+        assertEquals("my-jms-destination-name", jmsDestination.getDestinationName());
+        assertEquals("my-destination-username", jmsDestination.getDestinationUsername());
+        assertEquals("my-destination-password", jmsDestination.getDestinationPassword());
+        assertNull(jmsDestination.getDestinationPasswordRef());
     }
     
     private static Element createJmsDestinationXml(Document document) {
+        final Map<String, Object> jmsDestinationDetailProperties = new HashMap<>();
+        jmsDestinationDetailProperties.put(DESTINATION_TYPE, "Queue");
+        jmsDestinationDetailProperties.put(PROPERTY_USERNAME, "my-destination-username");
+        jmsDestinationDetailProperties.put(PROPERTY_PASSWORD, "my-destination-password");
+
+        final Map<String, Object> jmsConnectionProperties = new HashMap<>();
+        jmsConnectionProperties.put(JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME, "com.tibco.tibjms.naming.TibjmsInitialContextFactory");
+        jmsConnectionProperties.put(JNDI_PROVIDER_URL, "tibjmsnaming://machinename:7222");
+        jmsConnectionProperties.put(CONNECTION_FACTORY_NAME, "my-qcf-name");
+        jmsConnectionProperties.put(PROPERTY_USERNAME, "my-destination-username");
+        jmsConnectionProperties.put(PROPERTY_PASSWORD, "my-destination-password");
+        
+        final Map<String, Object> contextPropertiesTemplate = new HashMap<>();
+        contextPropertiesTemplate.put("additional-jndi-prop-name-1", "additional-jndi-prop-val-1");
+        contextPropertiesTemplate.put("additional-jndi-prop-name-2", "additional-jndi-prop-val-2");
+        contextPropertiesTemplate.put("com.l7tech.server.jms.soapAction.msgPropName", "listProducts");
+        contextPropertiesTemplate.put("com.l7tech.server.jms.prop.foobar", "reserved");
+        contextPropertiesTemplate.put(JNDI_USERNAME, "my-jndi-username");
+        contextPropertiesTemplate.put(JNDI_PASSWORD,"my-jndi-password");
+        
         Element jmsDestinationEle = createElementWithAttributesAndChildren(
                 document,
                 JMS_DESTINATION,
@@ -53,17 +96,20 @@ class JmsDestinationLoaderTest {
                         document,
                         JMS_DESTINATION_DETAIL,
                         ImmutableMap.of(ATTRIBUTE_ID, "id-1"),
-                        createElementWithTextContent(document, NAME, "jms-1"),
+                        createElementWithTextContent(document, NAME, "my-jms-endpoint"),
+                        createElementWithTextContent(document, JMS_DESTINATION_NAME, "my-jms-destination-name"),
                         createElementWithTextContent(document, INBOUND, "true"),
-                        createElementWithTextContent(document, TEMPLATE, "false")
+                        createElementWithTextContent(document, TEMPLATE, "false"),
+                        buildPropertiesElement(jmsDestinationDetailProperties, document)
                 ),
                 createElementWithAttributesAndChildren(
                         document,
                         JMS_CONNECTION,
                         ImmutableMap.of(ATTRIBUTE_ID, "id-2"),
-                        // provider type is null for Generic JMS
                         createElementWithTextContent(document, JMS_PROVIDER_TYPE, "TIBCO EMS"),
-                        createElementWithTextContent(document, TEMPLATE, "false")
+                        createElementWithTextContent(document, TEMPLATE, "false"),
+                        buildPropertiesElement(jmsConnectionProperties, document),
+                        buildPropertiesElement(contextPropertiesTemplate, document, CONTEXT_PROPERTIES_TEMPLATE)
                 )
         );
 

@@ -169,6 +169,14 @@ public class TestUtils {
         JmsDestination jmsDestination = new JmsDestination();
         jmsDestination.setName(name);
         jmsDestination.setId(id);
+        jmsDestination.setIsInbound(false);
+        jmsDestination.setProviderType(null); // null for Generic JMS
+        jmsDestination.setIsInbound(false);
+        jmsDestination.setInitialContextFactoryClassName("org.apache.activemq.jndi.ActiveMQInitialContextFactory");
+        jmsDestination.setJndiUrl("tcp://qaactivemq:61616");
+        jmsDestination.setDestinationType("Queue");
+        jmsDestination.setConnectionFactoryName("my-qcf-name");
+        jmsDestination.setDestinationName("my-queue");
         return jmsDestination;
     }
 }

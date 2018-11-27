@@ -51,9 +51,6 @@ public class PropertyConstants {
     public static final String TAG_VALUE_WSDL = "wsdl";
 
     // JMS Destination property constants
-    // 1.0 JMS Destination Detail property constants
-    // username
-    // password
     public static final String DESTINATION_TYPE = "type"; // Topic or Queue
     public static final String REPLY_TYPE = "replyType";
     public static final String REPLY_QUEUE_NAME = "replyToQueueName";
@@ -63,9 +60,9 @@ public class PropertyConstants {
     public static final String OUTBOUND_MESSAGE_TYPE = "outbound.MessageType";
     public static final String INBOUND_MAX_SIZE = "inbound.maximumSize";
     
-    // 2.0 JMS Connection property constants
     public static final String JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME = "jndi.initialContextFactoryClassname";
     public static final String JNDI_PROVIDER_URL = "jndi.providerUrl";
+<<<<<<< HEAD
     // username
     // password
     public static final String QUEUE_CONNECTION_FACTORY_NAME = "queue.connectionFactoryName";
@@ -74,6 +71,11 @@ public class PropertyConstants {
     
     // 3.0 JMS Context Properties Template property
     // From 
+=======
+    public static final String JNDI_USERNAME = "java.naming.security.principal";
+    public static final String JNDI_PASSWORD = "java.naming.security.credentials";
+    public static final String CONNECTION_FACTORY_NAME = "queue.connectionFactoryName";
+>>>>>>> Add support for JMS Destination entity.
     
     private PropertyConstants() { }
 }

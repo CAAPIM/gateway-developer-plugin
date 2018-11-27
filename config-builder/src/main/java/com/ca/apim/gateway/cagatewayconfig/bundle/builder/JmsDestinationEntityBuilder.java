@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CASSANDRA_CONNECTION_TYPE;
@@ -30,7 +31,9 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
 @Singleton
+@SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public class JmsDestinationEntityBuilder implements EntityBuilder {
+    private static final String STORED_PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
     private static final Integer ORDER = 1500;
     
     private final IdGenerator idGenerator;
@@ -65,27 +68,31 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 JMS_DESTINATION_DETAIL,
                 ImmutableMap.of(ATTRIBUTE_ID, id),
                 createElementWithTextContent(document, NAME, name),
-                createElementWithTextContent(document, JMS_DESTINATION_NAME, "TODO"),
-                createElementWithTextContent(document, INBOUND, "TODO"),
+                createElementWithTextContent(document, JMS_DESTINATION_NAME, jmsDestination.getDestinationName()),
+                createElementWithTextContent(document, INBOUND, jmsDestination.isInbound()),
                 createElementWithTextContent(document, ENABLED, "TODO"),
-                createElementWithTextContent(document, TEMPLATE, jmsDestination.isTemplate()),
-                createElementWithTextContent(document, PROPERTIES, "TODO")
+                createElementWithTextContent(document, TEMPLATE, jmsDestination.isTemplate())
         );
         
         Map<String, Object> destinationDetailsProps = new HashMap<>();
-        // TODO (kpak)
-        destinationDetailsProps.put("username", "");
-        destinationDetailsProps.put("password", "");
-        destinationDetailsProps.put("replyType", "");
-        destinationDetailsProps.put("replyToQueueName", "");
-        destinationDetailsProps.put("useRequestCorrelationId", "");
-        destinationDetailsProps.put("inbound.acknowledgementType", "");
-        destinationDetailsProps.put("inbound.failureQueueName", "");
-        destinationDetailsProps.put("outbound.MessageType", "");
-        destinationDetailsProps.put("inbound.maximumSize", "");
+        destinationDetailsProps.put(DESTINATION_TYPE, jmsDestination.getDestinationType());
+        destinationDetailsProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
+        if (jmsDestination.getDestinationPasswordRef() != null) {
+            destinationDetailsProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
+        } else {
+            destinationDetailsProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
+        }
+        
+//        destinationDetailsProps.put("replyType", "");
+//        destinationDetailsProps.put("replyToQueueName", "");
+//        destinationDetailsProps.put("useRequestCorrelationId", "");
+//        destinationDetailsProps.put("inbound.acknowledgementType", "");
+//        destinationDetailsProps.put("inbound.failureQueueName", "");
+//        destinationDetailsProps.put("outbound.MessageType", "");
+//        destinationDetailsProps.put("inbound.maximumSize", "");
         buildAndAppendPropertiesElement(destinationDetailsProps, document, jmsDestinationDetailEle);
 
-        // Build JMS Connnection element.
+        // Build JMS Connection element.
         String jmsConnectionEleId = idGenerator.generate();
         Element jmsConnectionEle = createElementWithAttributesAndChildren(
                 document,
@@ -96,19 +103,25 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         );
 
         Map<String, Object> connectionProps = new HashMap<>();
-//        connectionProps.put(JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME, jmsDestination.getInitialContextFactoryClassname());
-//        connectionProps.put(JNDI_PROVIDER_URL, jmsDestination.getJndiUrl());
-//        connectionProps.put(QUEUE_CONNECTION_FACTORY_NAME, jmsDestination.getQueueFactoryUrl());
-//        connectionProps.put(CONNECTION_FACTORY_NAME, jmsDestination.getDestinationFactoryUrl());
-//        connectionProps.put(TOPIC_CONNECTION_FACTORY_NAME, jmsDestination.getTopicFactoryUrl());
-//        connectionProps.put(PROPERTY_USERNAME, jmsDestination.getUsername());
-//        connectionProps.put(PROPERTY_PASSWORD, jmsDestination.getPassword());
-        
+        connectionProps.put(JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME, jmsDestination.getInitialContextFactoryClassName());
+        connectionProps.put(JNDI_PROVIDER_URL, jmsDestination.getJndiUrl());
+        connectionProps.put(CONNECTION_FACTORY_NAME, jmsDestination.getConnectionFactoryName());
+        connectionProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
+        if (jmsDestination.getDestinationPasswordRef() != null) {
+            connectionProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
+        } else {
+            connectionProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
+        }
         buildAndAppendPropertiesElement(connectionProps, document, jmsConnectionEle);
 
-        Map<String, Object> contextPropertiesTemplateProps = new HashMap<>();
-        // TODO (kpak)
-
+        Map<String, Object> contextPropertiesTemplateProps = 
+                Optional.ofNullable(jmsDestination.getJndiProperties()).orElseGet(HashMap::new);
+        contextPropertiesTemplateProps.put(JNDI_USERNAME, jmsDestination.getJndiUsername());
+        if (jmsDestination.getJndiPasswordRef() != null) {
+            contextPropertiesTemplateProps.put(JNDI_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getJndiPasswordRef()));
+        } else {
+            contextPropertiesTemplateProps.put(JNDI_PASSWORD, jmsDestination.getJndiPassword());
+        }
         buildAndAppendPropertiesElement(contextPropertiesTemplateProps, document, jmsConnectionEle);
 
         // Build JMS Destination element.
