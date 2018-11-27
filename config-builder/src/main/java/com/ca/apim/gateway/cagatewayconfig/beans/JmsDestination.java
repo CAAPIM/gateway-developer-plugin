@@ -20,6 +20,7 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static java.util.Arrays.stream;
 
 @JsonInclude(NON_NULL)
 @Named("JMS_ENDPOINT")
@@ -42,7 +43,7 @@ public class JmsDestination extends GatewayEntity {
     private Map<String, Object> jndiProperties;
 
     // Destination
-    private String destinationType;
+    private DestinationType destinationType;
     private String connectionFactoryName;
     private String destinationName;
     private String destinationUsername;
@@ -148,11 +149,11 @@ public class JmsDestination extends GatewayEntity {
         this.jndiPassword = jndiPassword;
     }
 
-    public String getDestinationType() {
+    public DestinationType getDestinationType() {
         return destinationType;
     }
 
-    public void setDestinationType(String destinationType) {
+    public void setDestinationType(DestinationType destinationType) {
         this.destinationType = destinationType;
     }
 
@@ -199,7 +200,30 @@ public class JmsDestination extends GatewayEntity {
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         if (getJndiPasswordRef() != null && getJndiPassword() != null) {
-            throw new ConfigLoadException("Cannot specify both a password reference and a password for JMS destination: " + entityKey);
+            throw new ConfigLoadException("Cannot specify both a password reference and a password for JNDI password for JMS destination: " + entityKey);
+        }
+
+        if (getDestinationPasswordRef() != null && getDestinationPassword() != null) {
+            throw new ConfigLoadException("Cannot specify both a password reference and a password for Destination password for JMS destination: " + entityKey);
+        }
+    }
+    
+    public enum DestinationType {
+        QUEUE("Queue"),
+        TOPIC("Topic");
+        
+        private String type;
+        
+        DestinationType(String type) {
+            this.type = type;
+        }
+        
+        public String getType() {
+            return type;
+        }
+        
+        public static DestinationType fromType(String type) {
+            return stream(values()).filter(c -> c.type.equals(type)).findFirst().orElse(null);
         }
     }
     
@@ -215,7 +239,7 @@ public class JmsDestination extends GatewayEntity {
         private String jndiPasswordRef;
         private String jndiPassword;
         private Map<String, Object> jndiProperties;
-        private String destinationType;
+        private DestinationType destinationType;
         private String connectionFactoryName;
         private String destinationName;
         private String destinationUsername;
@@ -277,7 +301,7 @@ public class JmsDestination extends GatewayEntity {
             return this;
         }
 
-        public Builder destinationType(String destinationType) {
+        public Builder destinationType(DestinationType destinationType) {
             this.destinationType = destinationType;
             return this;
         }

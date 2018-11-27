@@ -63,7 +63,7 @@ class JmsDestinationLoaderTest {
                 "  jndiProperties:\n" +
                 "    additional-jndi-prop-name-1: \"additional-jndi-prop-val-1\"\n" +
                 "    additional-jndi-prop-name-2: \"additional-jndi-prop-val-2\"\n" +
-                "  destinationType: \"Queue\"\n" +
+                "  destinationType: \"QUEUE\"\n" +
                 "  connectionFactoryName: \"my-qcf-name\"\n" +
                 "  destinationName: \"my-jms-destination-name\"\n" +
                 "  destinationUsername: \"my-destination-username\"\n" +
@@ -87,7 +87,7 @@ class JmsDestinationLoaderTest {
                 "      \"additional-jndi-prop-name-1\" : \"additional-jndi-prop-val-1\",\n" +
                 "      \"additional-jndi-prop-name-2\" : \"additional-jndi-prop-val-2\"\n" +
                 "    },\n" +
-                "    \"destinationType\" : \"Queue\",\n" +
+                "    \"destinationType\" : \"QUEUE\",\n" +
                 "    \"connectionFactoryName\" : \"my-qcf-name\",\n" +
                 "    \"destinationName\" : \"my-jms-destination-name\",\n" +
                 "    \"destinationUsername\" : \"my-destination-username\",\n" +
@@ -101,13 +101,21 @@ class JmsDestinationLoaderTest {
     @Test
     void testLoadJmsDestinationMalformedYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
-                "  isInbound: true\n" +
+                "  isInbound true\n" + // Missing colon
                 "  isTemplate: false\n" +
                 "  providerType: \"TIBCO EMS\"\n" +
                 "  initialContextFactoryClassName: \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\"\n" +
                 "  jndiUrl: \"tibjmsnaming://machinename:7222\"\n" +
                 "  jndiUsername: \"my-jndi-username\"\n" +
-                "  jndiPasswordRef "; // Missing value
+                "  jndiPasswordRef: \"my-jndi-password-ref\"\n" +
+                "  jndiProperties:\n" +
+                "    additional-jndi-prop-name-1: \"additional-jndi-prop-val-1\"\n" +
+                "    additional-jndi-prop-name-2: \"additional-jndi-prop-val-2\"\n" +
+                "  destinationType: \"QUEUE\"\n" +
+                "  connectionFactoryName: \"my-qcf-name\"\n" +
+                "  destinationName: \"my-jms-destination-name\"\n" +
+                "  destinationUsername: \"my-destination-username\"\n" +
+                "  destinationPasswordRef: \"my-destination-password-ref\"\n";
 
         loadJmsDestination(yaml, "yml", JsonToolsException.class);
     }
@@ -122,15 +130,24 @@ class JmsDestinationLoaderTest {
                 "    \"initialContextFactoryClassName\" : \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\",\n" +
                 "    \"jndiUrl\" : \"tibjmsnaming://machinename:7222\",\n" +
                 "    \"jndiUsername\" : \"my-jndi-username\",\n" +
-                "    \"jndiPasswordRef\" : \"my-jndi-password-ref\"\n" +
-                // Missing closing '}'
-                "}\n";
+                "    \"jndiPasswordRef\" : \"my-jndi-password-ref\",\n" +
+                "    \"jndiProperties\" : {\n" +
+                "      \"additional-jndi-prop-name-1\" : \"additional-jndi-prop-val-1\",\n" +
+                "      \"additional-jndi-prop-name-2\" : \"additional-jndi-prop-val-2\"\n" +
+                "    },\n" +
+                "    \"destinationType\" : \"QUEUE\",\n" +
+                "    \"connectionFactoryName\" : \"my-qcf-name\",\n" +
+                "    \"destinationName\" : \"my-jms-destination-name\",\n" +
+                "    \"destinationUsername\" : \"my-destination-username\",\n" +
+                "    \"destinationPasswordRef\" : \"my-destination-password-ref\"\n" +
+                "    }\n";
+                // Missing last closing };
 
         loadJmsDestination(json, "json", JsonToolsException.class);
     }
 
     @Test
-    void testLoadJmsDestinationPasswordRefAndPasswordYaml() throws IOException {
+    void testLoadJmsDestination_JndiPasswordRefAndPasswordYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
                 "  isInbound: true\n" +
                 "  isTemplate: false\n" +
@@ -139,13 +156,21 @@ class JmsDestinationLoaderTest {
                 "  jndiUrl: \"tibjmsnaming://machinename:7222\"\n" +
                 "  jndiUsername: \"my-jndi-username\"\n" +
                 "  jndiPasswordRef: \"my-jndi-password-ref\"\n" +
-                "  jndiPassword: \"my-jndi-password\"\n";
+                "  jndiPassword: \"my-jndi-password\"\n" + // JNDI password defined twice.
+                "  jndiProperties:\n" +
+                "    additional-jndi-prop-name-1: \"additional-jndi-prop-val-1\"\n" +
+                "    additional-jndi-prop-name-2: \"additional-jndi-prop-val-2\"\n" +
+                "  destinationType: \"QUEUE\"\n" +
+                "  connectionFactoryName: \"my-qcf-name\"\n" +
+                "  destinationName: \"my-jms-destination-name\"\n" +
+                "  destinationUsername: \"my-destination-username\"\n" +
+                "  destinationPasswordRef: \"my-destination-password-ref\"\n";
 
         loadJmsDestination(yaml, "yml", ConfigLoadException.class);
     }
 
     @Test
-    void testLoadJmsDestinationPasswordRefAndPasswordJson() throws IOException {
+    void testLoadJmsDestination_DestinationPasswordRefAndPasswordJson() throws IOException {
         String json = "{\n" +
                 "    \"" + JMS_DESTINATION_NAME + "\" : {\n" +
                 "    \"isInbound\" : true,\n" +
@@ -155,7 +180,16 @@ class JmsDestinationLoaderTest {
                 "    \"jndiUrl\" : \"tibjmsnaming://machinename:7222\",\n" +
                 "    \"jndiUsername\" : \"my-jndi-username\",\n" +
                 "    \"jndiPasswordRef\" : \"my-jndi-password-ref\",\n" +
-                "    \"jndiPassword\" : \"my-jndi-password\"\n" +
+                "    \"jndiProperties\" : {\n" +
+                "      \"additional-jndi-prop-name-1\" : \"additional-jndi-prop-val-1\",\n" +
+                "      \"additional-jndi-prop-name-2\" : \"additional-jndi-prop-val-2\"\n" +
+                "    },\n" +
+                "    \"destinationType\" : \"QUEUE\",\n" +
+                "    \"connectionFactoryName\" : \"my-qcf-name\",\n" +
+                "    \"destinationName\" : \"my-jms-destination-name\",\n" +
+                "    \"destinationUsername\" : \"my-destination-username\",\n" +
+                "    \"destinationPasswordRef\" : \"my-destination-password-ref\",\n" +
+                "    \"destinationPassword\" : \"my-destination-password\"\n" + // Destination password defined twice.
                 "    }\n" +
                 "}\n";
 
@@ -204,13 +238,11 @@ class JmsDestinationLoaderTest {
                 "additional-jndi-prop-name-2", "additional-jndi-prop-val-2"),
                 jmsDestination.getJndiProperties());
         
-        assertEquals("Queue", jmsDestination.getDestinationType());
+        assertEquals(JmsDestination.DestinationType.QUEUE, jmsDestination.getDestinationType());
         assertEquals("my-qcf-name", jmsDestination.getConnectionFactoryName());
         assertEquals("my-jms-destination-name", jmsDestination.getDestinationName());
         assertEquals("my-destination-username", jmsDestination.getDestinationUsername());
         assertEquals("my-destination-password-ref", jmsDestination.getDestinationPasswordRef());
         assertNull(jmsDestination.getDestinationPassword());
-        
-        
     }
 }

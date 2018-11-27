@@ -174,7 +174,7 @@ public class TestUtils {
         jmsDestination.setIsInbound(false);
         jmsDestination.setInitialContextFactoryClassName("org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         jmsDestination.setJndiUrl("tcp://qaactivemq:61616");
-        jmsDestination.setDestinationType("Queue");
+        jmsDestination.setDestinationType(JmsDestination.DestinationType.QUEUE);
         jmsDestination.setConnectionFactoryName("my-qcf-name");
         jmsDestination.setDestinationName("my-queue");
         return jmsDestination;

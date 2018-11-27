@@ -59,7 +59,7 @@ class JmsDestinationLoaderTest {
                 "additional-jndi-prop-name-2", "additional-jndi-prop-val-2"),
                 jmsDestination.getJndiProperties());
         
-        assertEquals("Queue", jmsDestination.getDestinationType());
+        assertEquals(JmsDestination.DestinationType.QUEUE, jmsDestination.getDestinationType());
         assertEquals("my-qcf-name", jmsDestination.getConnectionFactoryName());
         assertEquals("my-jms-destination-name", jmsDestination.getDestinationName());
         assertEquals("my-destination-username", jmsDestination.getDestinationUsername());

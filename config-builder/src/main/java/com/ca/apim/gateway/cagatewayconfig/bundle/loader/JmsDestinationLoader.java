@@ -72,7 +72,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         jmsDestination.setJndiPassword(jndiPassword);
         jmsDestination.setJndiProperties(jndiProperties);
         
-        jmsDestination.setDestinationType(destinationType);
+        jmsDestination.setDestinationType(JmsDestination.DestinationType.fromType(destinationType));
         jmsDestination.setConnectionFactoryName(connectionFactoryName);
         jmsDestination.setDestinationName(destinationName);
         jmsDestination.setDestinationUsername(destinationUsername);
