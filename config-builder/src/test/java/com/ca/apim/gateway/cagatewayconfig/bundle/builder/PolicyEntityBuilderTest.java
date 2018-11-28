@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
@@ -24,11 +25,11 @@ import org.w3c.dom.Element;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_BY;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_TO;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.function.Function.identity;
@@ -98,7 +99,10 @@ class PolicyEntityBuilderTest {
         entities.stream().collect(toMap(Entity::getId, identity())).forEach((i,e) -> {
             assertEquals(EntityTypes.POLICY_TYPE, e.getType());
             assertNotNull(e.getXml());
-            assertTrue(e.getMappingProperties().isEmpty());
+            assertTrue(e.getMappingProperties().containsKey(MAP_BY));
+            assertEquals(MappingProperties.NAME, e.getMappingProperties().get(MAP_BY));
+            assertTrue(e.getMappingProperties().containsKey(MAP_TO));
+            assertEquals(e.getName(), e.getMappingProperties().get(MAP_TO));
             assertTrue("include".equals(e.getName()) || "policy".equals(e.getName()));
             assertTrue("includeID".equals(e.getId()) || "policyID".equals(e.getId()));
         });
