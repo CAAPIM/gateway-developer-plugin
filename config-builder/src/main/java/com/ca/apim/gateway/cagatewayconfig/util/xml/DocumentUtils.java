@@ -238,19 +238,6 @@ public class DocumentUtils {
     }
 
     /**
-     * Search in the children of the element specified all elements with the name specified
-     * and returns the specified attribute from all of them.
-     *
-     * @param entityItemElement element to search into
-     * @param elementName element name to search
-     * @param attribute attribute to search
-     * @return list of attribute value from elements found, empty if not found any
-     */
-    public static List<String> getChildElementsAttributeValues(final Element entityItemElement, final String elementName, final String attribute) {
-        return getChildElements(entityItemElement, elementName).stream().map(e -> e.getAttribute(attribute)).collect(toList());
-    }
-
-    /**
      * Returns a Iterable wrapper for {@link NodeList} to be used in foreach loops.
      *
      * @param nodeList node list

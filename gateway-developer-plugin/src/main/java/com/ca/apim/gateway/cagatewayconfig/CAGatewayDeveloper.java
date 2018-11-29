@@ -21,6 +21,8 @@ import java.io.File;
 public class CAGatewayDeveloper implements Plugin<Project> {
 
     private static final String BUNDLE_CONFIGURATION = "bundle";
+    private static final String MODULAR_ASSERTION_CONFIGURATION = "assertion";
+    private static final String CUSTOM_ASSERTION_CONFIGURATION = "customassertion";
     private static final String BUNDLE_FILE_EXTENSION = "bundle";
     private static final String BUILT_BUNDLE_DIRECTORY = "bundle";
     private static final String GATEWAY_BUILD_DIRECTORY = "gateway";
@@ -38,8 +40,10 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         project.afterEvaluate(p -> setDefaults(pluginConfig, project));
 
         //Add bundle configuration to the default configuration. This was transitive dependencies can be retrieved.
-        Configuration bundleConfiguration = project.getConfigurations().create(BUNDLE_CONFIGURATION);
-        project.getConfigurations().getByName("default").extendsFrom(bundleConfiguration);
+        createConfiguration(project, BUNDLE_CONFIGURATION);
+        // Add modular and custom assertion dependencies configuration
+        createConfiguration(project, MODULAR_ASSERTION_CONFIGURATION);
+        createConfiguration(project, CUSTOM_ASSERTION_CONFIGURATION);
 
         // This is the configuration for the apply environment application that gets bundled within .gw7 packages.
         project.getConfigurations().create(ENV_APPLICATION_CONFIGURATION);
@@ -66,6 +70,8 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, BUNDLE_FILE_EXTENSION))));
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getContainerApplicationDependencies().setFrom(project.getConfigurations().getByName(ENV_APPLICATION_CONFIGURATION));
+            t.getDependencyModularAssertions().setFrom(project.getConfigurations().getByName(MODULAR_ASSERTION_CONFIGURATION));
+            t.getDependencyCustomAssertions().setFrom(project.getConfigurations().getByName(CUSTOM_ASSERTION_CONFIGURATION));
         });
 
         // add build-bundle to the default build task
@@ -86,6 +92,11 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                             configurablePublishArtifact.setName(project.getName());
                             configurablePublishArtifact.setType(BUNDLE_FILE_EXTENSION);
                         }));
+    }
+
+    private void createConfiguration(Project project, String configurationName) {
+        Configuration configuration = project.getConfigurations().create(configurationName);
+        project.getConfigurations().getByName("default").extendsFrom(configuration);
     }
 
     @NotNull

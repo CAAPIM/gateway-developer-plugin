@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -59,6 +61,10 @@ public class FolderTree {
 
     private Stream<Folder> expand(final Folder folder) {
         return Stream.of(folder).flatMap(f -> Stream.concat(Stream.of(f), folderChildrenMap.getOrDefault(f.getId(), Collections.emptySet()).stream().flatMap(this::expand)));
+    }
+
+    public String getFormattedPath(final Folder folder) {
+        return PathUtils.unixPath(getPath(folder));
     }
 
     public Path getPath(final Folder folder) {

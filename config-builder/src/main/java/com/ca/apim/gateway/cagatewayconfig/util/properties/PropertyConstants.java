@@ -34,5 +34,11 @@ public class PropertyConstants {
     public static final String PROPERTY_TAG = "tag";
     public static final String PROPERTY_SUBTAG = "subtag";
 
+    public static final String KEY_VALUE_SOAP = "soap";
+    public static final String KEY_VALUE_SOAP_VERSION = "soapVersion";
+    public static final String KEY_VALUE_WSS_PROCESSING_ENABLED = "wssProcessingEnabled";
+    public static final String TAG_VALUE_POLICY = "policy";
+    public static final String TAG_VALUE_WSDL = "wsdl";
+
     private PropertyConstants() { }
 }

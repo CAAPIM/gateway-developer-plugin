@@ -22,6 +22,9 @@ public class BundleElementNames {
     public static final String ATTRIBUTE_ALIAS = "alias";
     public static final String ATTRIBUTE_KEYSTORE_ID = "keystoreId";
     public static final String ATTRIBUTE_KEY_ALGORITHM = "keyAlgorithm";
+    public static final String ATTRIBUTE_TAG = "tag";
+    public static final String ATTRIBUTE_ROOT_URL = "rootUrl";
+    public static final String ATTRIBUTE_SOURCE_URL = "sourceUrl";
 
     // Common Elements
     public static final String NAME = "l7:Name";

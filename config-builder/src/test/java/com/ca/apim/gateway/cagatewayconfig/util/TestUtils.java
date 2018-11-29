@@ -6,7 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
@@ -19,7 +20,10 @@ import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_NAME;
@@ -182,15 +186,66 @@ public class TestUtils {
         return createFolder(ROOT_FOLDER_NAME, ROOT_FOLDER_ID, null);
     }
 
-    public static Element createServiceXml(Document document, boolean withProperties) {
+    public static Element createServiceXml(Document document, boolean withProperties, boolean isSoap, boolean isTagEmpty, boolean isWsdlEmpty) {
+        Element resourcesElement;
+        Element policyResourceSetElement = createElementWithAttributesAndChildren(
+                document,
+                RESOURCE_SET,
+                ImmutableMap.of(ATTRIBUTE_TAG, TAG_VALUE_POLICY),
+                createElementWithAttributesAndTextContent(
+                        document,
+                        RESOURCE,
+                        ImmutableMap.of(ATTRIBUTE_TYPE, TAG_VALUE_POLICY),
+                        "policy"
+                )
+        );
+
+        Element wsdlResourceSetElement;
+        Map<String, Object> propertiesMap;
+        if(isSoap) {
+            if(withProperties) {
+                propertiesMap = ImmutableMap.of(PREFIX_PROPERTY + "prop", "value", PREFIX_PROPERTY + PREFIX_ENV + "prop", "value2", KEY_VALUE_SOAP, true, KEY_VALUE_SOAP_VERSION, "1.1", KEY_VALUE_WSS_PROCESSING_ENABLED, true);
+            } else {
+                propertiesMap = Collections.emptyMap();
+            }
+            wsdlResourceSetElement = createElementWithAttributesAndChildren(
+                    document,
+                    RESOURCE_SET,
+                    ImmutableMap.of(ATTRIBUTE_ROOT_URL, "test.wsdl", ATTRIBUTE_TAG, (isTagEmpty ? "" : TAG_VALUE_WSDL)),
+                    createElementWithAttributesAndTextContent(
+                            document,
+                            RESOURCE,
+                            ImmutableMap.of(ATTRIBUTE_SOURCE_URL, "test.wsdl", ATTRIBUTE_TYPE, TAG_VALUE_WSDL),
+                            (isWsdlEmpty ? "" : "wsdl file")
+                    )
+            );
+            resourcesElement = createElementWithChildren(
+                    document,
+                    RESOURCES,
+                    policyResourceSetElement,
+                    wsdlResourceSetElement
+            );
+        } else {
+            if(withProperties) {
+                propertiesMap = ImmutableMap.of(PREFIX_PROPERTY + "prop", "value", PREFIX_PROPERTY + PREFIX_ENV + "prop", "value2");
+            } else {
+                propertiesMap = Collections.emptyMap();
+            }
+            resourcesElement = createElementWithChildren(
+                    document,
+                    RESOURCES,
+                    policyResourceSetElement
+            );
+        }
+
         Element element = createElementWithAttributesAndChildren(
                 document,
                 SERVICE,
-                ImmutableMap.of(ATTRIBUTE_ID, "id"),
+                ImmutableMap.of(ATTRIBUTE_ID, (isSoap ? "soapId" : "id")),
                 createElementWithAttributesAndChildren(
                         document,
                         SERVICE_DETAIL,
-                        ImmutableMap.of(ATTRIBUTE_ID, "id", ATTRIBUTE_FOLDER_ID, "folder"),
+                        ImmutableMap.of(ATTRIBUTE_ID, (isSoap ? "soapId" : "id"), ATTRIBUTE_FOLDER_ID, "folder"),
                         createElementWithTextContent(document, NAME, "service"),
                         createElementWithChildren(
                                 document,
@@ -198,7 +253,7 @@ public class TestUtils {
                                 createElementWithChildren(
                                         document,
                                         HTTP_MAPPING,
-                                        createElementWithTextContent(document, URL_PATTERN, "/service"),
+                                        createElementWithTextContent(document, URL_PATTERN, (isSoap ? "/soap-service" : "/service")),
                                         createElementWithChildren(
                                                 document,
                                                 VERBS,
@@ -210,31 +265,17 @@ public class TestUtils {
                                 )
                         ),
                         buildPropertiesElement(
-                                withProperties ? ImmutableMap.of("property.prop", "value", "property.ENV.prop", "value2") : Collections.emptyMap(),
+                                propertiesMap,
                                 document
                         )
                 ),
-                createElementWithChildren(
-                        document,
-                        RESOURCES,
-                        createElementWithAttributesAndChildren(
-                                document,
-                                RESOURCE_SET,
-                                ImmutableMap.of("tag", "policy"),
-                                createElementWithAttributesAndTextContent(
-                                        document,
-                                        RESOURCE,
-                                        ImmutableMap.of("type", "policy"),
-                                        "policy"
-                                )
-                        )
-                )
+                resourcesElement
         );
 
         return createElementWithChildren(
                 document,
                 ITEM,
-                createElementWithTextContent(document, ID, "id"),
+                createElementWithTextContent(document, ID, (isSoap ? "soapId" : "id")),
                 createElementWithTextContent(document, TYPE, EntityTypes.SERVICE_TYPE),
                 createElementWithChildren(
                         document,

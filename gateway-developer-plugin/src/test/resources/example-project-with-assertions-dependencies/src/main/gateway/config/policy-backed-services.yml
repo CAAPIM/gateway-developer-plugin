@@ -1,0 +1,7 @@
+my-pbs:
+  interfaceName: "com.l7tech.objectmodel.polback.BackgroundTask"
+  operations:
+  - policy: "example project/example-pbs"
+    operationName: "run"
+  - policy: "example project/folder-_¯-¯_-slashed/example-_¯-¯_-slashed"
+    operationName: "another"

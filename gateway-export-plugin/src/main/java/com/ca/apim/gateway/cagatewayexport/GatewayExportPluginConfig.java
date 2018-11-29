@@ -10,6 +10,7 @@ import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Input;
 
 import java.util.Map;
 
@@ -18,12 +19,14 @@ public class GatewayExportPluginConfig {
     private final RegularFileProperty rawBundle;
     private final RegularFileProperty sanitizedBundle;
     private final Property<Map> exportEntities;
+    private Property<String> folderPath;
 
     public GatewayExportPluginConfig(Project project) {
         solutionDir = project.getLayout().directoryProperty();
         rawBundle = project.getLayout().fileProperty();
         sanitizedBundle = project.getLayout().fileProperty();
         exportEntities = project.getObjects().property(Map.class);
+        folderPath = project.getObjects().property(String.class);
     }
 
     DirectoryProperty getSolutionDir() {
@@ -40,5 +43,15 @@ public class GatewayExportPluginConfig {
 
     Property<Map> getExportEntities() {
         return exportEntities;
+    }
+
+    /**
+     * The path of the folder to export.
+     *
+     * @return the folder to export from the gateway
+     */
+    @Input
+    public Property<String> getFolderPath() {
+        return folderPath;
     }
 }

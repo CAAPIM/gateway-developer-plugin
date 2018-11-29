@@ -25,6 +25,8 @@ public class PackageTask extends DefaultTask {
 
     private ConfigurableFileCollection dependencyBundles;
     private ConfigurableFileCollection containerApplicationDependencies;
+    private ConfigurableFileCollection dependencyModularAssertions;
+    private ConfigurableFileCollection dependencyCustomAssertions;
     private RegularFileProperty into;
     private RegularFileProperty bundle;
 
@@ -44,6 +46,8 @@ public class PackageTask extends DefaultTask {
         bundle = newInputFile();
         dependencyBundles = getProject().files();
         containerApplicationDependencies = getProject().files();
+        dependencyModularAssertions = getProject().files();
+        dependencyCustomAssertions = getProject().files();
 
         this.fileUtils = fileUtils;
         this.gw7Builder = gw7Builder;
@@ -64,6 +68,16 @@ public class PackageTask extends DefaultTask {
         return containerApplicationDependencies;
     }
 
+    @InputFiles
+    public ConfigurableFileCollection getDependencyModularAssertions() {
+        return dependencyModularAssertions;
+    }
+
+    @InputFiles
+    public ConfigurableFileCollection getDependencyCustomAssertions() {
+        return dependencyCustomAssertions;
+    }
+
     @OutputFile
     public RegularFileProperty getInto() {
         return into;
@@ -72,6 +86,13 @@ public class PackageTask extends DefaultTask {
     @TaskAction
     public void perform() {
         Packager packager = new Packager(fileUtils, gw7Builder);
-        packager.buildPackage(into.getAsFile().get(), bundle.getAsFile().get(), new LinkedList<>(dependencyBundles.getAsFileTree().getFiles()), containerApplicationDependencies.getFiles());
+        packager.buildPackage(
+                into.getAsFile().get(),
+                bundle.getAsFile().get(),
+                new LinkedList<>(dependencyBundles.getAsFileTree().getFiles()),
+                containerApplicationDependencies.getFiles(),
+                dependencyModularAssertions.getFiles(),
+                dependencyCustomAssertions.getFiles()
+        );
     }
 }

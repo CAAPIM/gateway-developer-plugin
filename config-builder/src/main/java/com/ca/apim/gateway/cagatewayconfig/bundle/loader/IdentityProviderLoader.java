@@ -96,7 +96,7 @@ public class IdentityProviderLoader implements BundleEntityLoader {
         if (federatedIdentityProviderDetailXml == null) {
             return null;
         }
-        final List<String> certReferences = getChildElementsAttributeValues(
+        final List<String> certReferences = getChildElementAttributeValues(
                 getSingleChildElement(federatedIdentityProviderDetailXml, CERTIFICATE_REFERENCES), REFERENCE, ATTRIBUTE_ID
         );
         return new FederatedIdentityProviderDetail(new HashSet<>(certReferences));

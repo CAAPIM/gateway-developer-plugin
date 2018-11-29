@@ -11,7 +11,6 @@ import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.FileUtils;
-import org.gradle.internal.impldep.org.junit.Assert;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -29,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CAGatewayDeveloperTest {
@@ -50,7 +50,7 @@ class CAGatewayDeveloperTest {
                 .build();
 
         LOGGER.log(Level.INFO, result.getOutput());
-        Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
         validateBuildDir(projectFolder, buildDir);
@@ -71,12 +71,12 @@ class CAGatewayDeveloperTest {
                 .build();
 
         LOGGER.log(Level.INFO, result.getOutput());
-        Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
 
         File buildGatewayDir = new File(testProjectDir, "dist");
-        Assert.assertTrue(buildGatewayDir.isDirectory());
+        assertTrue(buildGatewayDir.isDirectory());
         File builtBundleFile = new File(buildGatewayDir, projectFolder + projectVersion + ".bundle");
-        Assert.assertTrue(builtBundleFile.isFile());
+        assertTrue(builtBundleFile.isFile());
     }
 
     @Test
@@ -94,8 +94,8 @@ class CAGatewayDeveloperTest {
                 .build();
 
         LOGGER.log(Level.INFO, result.getOutput());
-        Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-a:build")).getOutcome());
-        Assert.assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-b:build")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-a:build")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-b:build")).getOutcome());
 
         validateBuildDir("project-a", new File(new File(testProjectDir, "project-a"), "build"));
         validateBuildDir("project-b", new File(new File(testProjectDir, "project-b"), "build"));
@@ -114,17 +114,51 @@ class CAGatewayDeveloperTest {
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-d-1.2.3-SNAPSHOT.req.bundle"));
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-a-1.2.3-SNAPSHOT.req.bundle"));
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_4_project-c-1.2.3-SNAPSHOT.req.bundle"));
+        tarArchiveInputStream.close();
     }
 
-    private void validateBuildDir(String projectName, File buildDir) {
-        Assert.assertTrue(buildDir.isDirectory());
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectWithAssertionsDependencies(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project-with-assertions-dependencies";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
+
+        File buildDir = new File(testProjectDir, "build");
+        File gw7 = validateBuildDir(projectFolder, buildDir);
+
+        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(gw7)));
+        TarArchiveEntry entry;
+        Set<String> entries = new HashSet<>();
+        while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
+            entries.add(entry.getName());
+        }
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_my-bundle-1.0.00.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions-dependencies-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
+        assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/assertions/Test-2.0.0.aar"));
+    }
+
+    private File validateBuildDir(String projectName, File buildDir) {
+        assertTrue(buildDir.isDirectory());
         File buildGatewayDir = new File(buildDir, "gateway");
-        Assert.assertTrue(buildGatewayDir.isDirectory());
+        assertTrue(buildGatewayDir.isDirectory());
         File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
-        Assert.assertTrue(buildGatewayBundlesDir.isDirectory());
+        assertTrue(buildGatewayBundlesDir.isDirectory());
         File builtBundleFile = new File(buildGatewayBundlesDir, projectName + projectVersion + ".bundle");
-        Assert.assertTrue(builtBundleFile.isFile());
+        assertTrue(builtBundleFile.isFile());
         File gw7PackageFile = new File(buildGatewayDir, projectName + projectVersion + ".gw7");
-        Assert.assertTrue(gw7PackageFile.isFile());
+        assertTrue(gw7PackageFile.isFile());
+        return gw7PackageFile;
     }
 }

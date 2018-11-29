@@ -17,8 +17,9 @@ import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.*;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.ByteArrayInputStream;
@@ -41,6 +42,7 @@ class ServiceLoaderTest {
 
     private final String SERVICE_NAME_1 = "example";
     private final String SERVICE_NAME_2 = "projectName/v1/subfolder/example-project";
+    private final String SERVICE_NAME_3 = "project/v1/SOAP/SoapService";   //SOAP
 
     @BeforeEach
     void before() {
@@ -72,7 +74,21 @@ class ServiceLoaderTest {
                 "        \"properties\": {\n" +
                 "            \"key\": \"value\",\n" +
                 "            \"key.1\": \"value.1\"\n" +
-                "        }" +
+                "        }\n" +
+                "    },\n" +
+                "    \"" + SERVICE_NAME_3 + "\": {\n" +
+                "        \"url\": \"/soaptest\",\n" +
+                "        \"policy\": \"project/SOAP/SoapService\",\n" +
+                "        \"httpMethods\": [\n" +
+                "            \"POST\"\n" +
+                "        ],\n" +
+                "        \"properties\": {},\n" +
+                "        \"wsdl\": {\n" +
+                "            \"rootUrl\": \"/path/to/wsdl/SoapService.wsdl\",\n" +
+                "            \"soapVersion\": \"1.1\",\n" +
+                "            \"wssProcessingEnabled\": true,\n" +
+                "            \"wsdlXml\": \"wsdl xml content\"\n" +
+                "        }\n" +
                 "    }\n" +
                 "}";
         File configFolder = temporaryFolder.createDirectory("config");
@@ -112,7 +128,18 @@ class ServiceLoaderTest {
                 "  url: \"/example-project\"\n" +
                 "  properties:\n" +
                 "    key: \"value\"\n" +
-                "    key.1: \"value.1\"";
+                "    key.1: \"value.1\"\n" +
+                SERVICE_NAME_3 + ":\n" +
+                "  url: \"/soaptest\"\n" +
+                "  policy: project/SOAP/SoapService\n" +
+                "  httpMethods:\n" +
+                "  - POST\n" +
+                "  properties: {}\n" +
+                "  wsdl:\n" +
+                "    rootUrl: \"/path/to/wsdl/SoapService.wsdl\"\n" +
+                "    soapVersion: \"1.1\"\n" +
+                "    wssProcessingEnabled: true\n" +
+                "    wsdlXml: wsdl xml content";
         File configFolder = temporaryFolder.createDirectory("config");
         File servicesFile = new File(configFolder, "services.yml");
         Files.touch(servicesFile);
@@ -187,7 +214,7 @@ class ServiceLoaderTest {
         Service service1 = bundle.getServices().get(SERVICE_NAME_1);
         Service service2 = bundle.getServices().get(SERVICE_NAME_2);
 
-        assertEquals(2, bundle.getServices().size());
+        assertEquals(3, bundle.getServices().size());
         assertEquals("/example", service1.getUrl());
         assertEquals("/example-project", service2.getUrl());
 

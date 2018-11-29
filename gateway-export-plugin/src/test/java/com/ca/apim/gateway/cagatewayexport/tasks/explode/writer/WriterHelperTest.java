@@ -127,6 +127,7 @@ class WriterHelperTest {
         final FileInputStream stream = FileUtils.openInputStream(propertiesFile);
         final Properties writtenProperties = new Properties();
         writtenProperties.load(stream);
+        stream.close();
 
         // assert contents and match with the expected ones
         // contents are removed from the map and properties to ensure both have exact the same content
@@ -292,6 +293,7 @@ class WriterHelperTest {
         final InputStream currentFile = newInputStream(Paths.get(this.getClass().getClassLoader().getResource("config/" + name + "." + extension).toURI()));
         final File destCurrentFile = new File(new File(testProjectDir, "config"), name + "." + extension);
         FileUtils.copyInputStreamToFile(currentFile, destCurrentFile);
+        currentFile.close();
     }
 
     @Test

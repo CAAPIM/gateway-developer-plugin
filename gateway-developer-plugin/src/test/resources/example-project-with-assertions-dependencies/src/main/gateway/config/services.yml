@@ -1,0 +1,25 @@
+example project/example:
+  policy: "example project/example"
+  httpMethods:
+  - GET
+  - POST
+  - PUT
+  - DELETE
+  url: "/example"
+example project/example-project:
+  policy: "example project/example-project"
+  httpMethods:
+  - POST
+  - PUT
+  url: "/example-project"
+  properties:
+    key: "value"
+    key.1: "value.1"
+example project/_¯example_¯policy_¯slash:
+  policy: "example project/_¯example_¯policy_¯slash"
+  httpMethods:
+  - GET
+  - POST
+  - PUT
+  - DELETE
+  url: "/example2"

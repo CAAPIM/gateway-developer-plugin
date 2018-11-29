@@ -50,7 +50,7 @@ public class CAGatewayExport implements Plugin<Project> {
         sanitizeTask.dependsOn(exportTask);
 
         ExplodeBundleTask explodeBundleTask = project.getTasks().create("export", ExplodeBundleTask.class, t -> {
-            t.getFolderPath().set(gatewayConnectionProperties.getFolderPath());
+            t.getFolderPath().set(pluginConfig.getFolderPath());
             t.getInputBundleFile().set(pluginConfig.getSanitizedBundle());
             t.getExportDir().set(pluginConfig.getSolutionDir());
             t.getExportEntities().set(pluginConfig.getExportEntities());

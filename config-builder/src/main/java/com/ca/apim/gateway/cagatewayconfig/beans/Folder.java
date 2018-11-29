@@ -15,21 +15,11 @@ public class Folder extends Folderable {
     public static final String ROOT_FOLDER_NAME = "Root Node";
     public static final Folder ROOT_FOLDER = new Folder(ROOT_FOLDER_ID, ROOT_FOLDER_NAME);
 
-    private String path;
-
     public Folder() {}
 
     public Folder(String id, String name) {
         super.setId(id);
         super.setName(name);
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
 }

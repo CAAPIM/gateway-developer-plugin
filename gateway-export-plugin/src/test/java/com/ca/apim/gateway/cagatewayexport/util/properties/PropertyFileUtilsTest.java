@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Properties;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.POSIX_ENABLED;
 import static com.ca.apim.gateway.cagatewayexport.util.properties.PropertyFileUtils.loadExistingProperties;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,11 +31,17 @@ class PropertyFileUtilsTest {
 
     @Test
     void loadFileFailure(TemporaryFolder temporaryFolder) throws IOException {
+        // this test does not run in windows machines because it's not possible to change file permissions to simulate reading failure.
+        if (!POSIX_ENABLED) {
+            return;
+        }
+
         File file = new File(temporaryFolder.getRoot(), "static.properties");
         FileUtils.touch(file);
         Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("---------"));
-
         assertThrows(PropertyFileException.class, () -> loadExistingProperties(file));
+        Files.setPosixFilePermissions(file.toPath(), PosixFilePermissions.fromString("rwxrwxrwx"));
+        Files.delete(file.toPath());
     }
 
     @Test
