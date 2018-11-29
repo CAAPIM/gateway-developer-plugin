@@ -122,6 +122,12 @@ public class BuilderUtils {
         }));
     }
 
+    // Inserting service / policy name after "ENV." for environment variables
+    public static String insertNameToEnvironmentVariable(String environmentVariable, String name) {
+        StringBuilder stringBuilder = new StringBuilder(environmentVariable).insert(4, name + ".");
+        return stringBuilder.toString();
+    }
+
     private static Object extractPropertyValue(final String key, final Element valueElement) {
         switch (valueElement.getNodeName()) {
             case STRING_VALUE: return valueElement.getTextContent();

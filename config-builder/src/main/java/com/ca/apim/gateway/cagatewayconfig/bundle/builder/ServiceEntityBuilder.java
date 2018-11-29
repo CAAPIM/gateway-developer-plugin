@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SERVICE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.insertNameToEnvironmentVariable;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
@@ -54,6 +55,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
     private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
         String processedName = EncodeDecodeUtils.decodePath(FilenameUtils.getBaseName(servicePath));
+        service.setName(processedName);
+
         Policy policy = bundle.getPolicies().get(service.getPolicy());
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());
@@ -71,7 +74,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
                             .entrySet()
                             .stream()
                             .collect(Collectors
-                                    .toMap(p -> "property." + p.getKey(), p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + p.getKey() : p.getValue())),
+                                    .toMap(p -> "property." + p.getKey(),
+                                        p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + insertNameToEnvironmentVariable(p.getKey(), service.getName()) : p.getValue())),
                     document, serviceDetailElement);
         }
 
