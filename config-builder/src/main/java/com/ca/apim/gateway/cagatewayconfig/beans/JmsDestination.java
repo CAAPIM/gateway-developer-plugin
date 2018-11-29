@@ -30,8 +30,8 @@ import static java.util.Arrays.stream;
 public class JmsDestination extends GatewayEntity {
     
     // Basics
-    private boolean isInbound;
-    private boolean isTemplate;
+    private boolean isInbound; // (kpak) Remove. Check for existence of inboundDetail or outboundDetail.
+    private boolean isTemplate;  // (kpak) Remove. Move to OutboundJmsDestinationDetail
     private String providerType;
     
     // JNDI
@@ -51,8 +51,10 @@ public class JmsDestination extends GatewayEntity {
     private String destinationPassword;
     
     // Inbound
+    private InboundJmsDestinationDetail inboundDetail;
     
     // Outbound
+    private OutboundJmsDestinationDetail outboundDetail;
     
     public JmsDestination() {
     }
@@ -75,6 +77,8 @@ public class JmsDestination extends GatewayEntity {
         destinationUsername = builder.destinationUsername;
         destinationPasswordRef = builder.destinationPasswordRef;
         destinationPassword = builder.destinationPassword;
+        inboundDetail = builder.inboundDetail;
+        outboundDetail = builder.outboundDetail;
     }
 
     public boolean isInbound() {
@@ -197,6 +201,22 @@ public class JmsDestination extends GatewayEntity {
         this.destinationPassword = destinationPassword;
     }
 
+    public InboundJmsDestinationDetail getInboundDetail() {
+        return inboundDetail;
+    }
+
+    public void setInboundDetail(InboundJmsDestinationDetail inboundDetail) {
+        this.inboundDetail = inboundDetail;
+    }
+
+    public OutboundJmsDestinationDetail getOutboundDetail() {
+        return outboundDetail;
+    }
+
+    public void setOutboundDetail(OutboundJmsDestinationDetail outboundDetail) {
+        this.outboundDetail = outboundDetail;
+    }
+
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         if (getJndiPasswordRef() != null && getJndiPassword() != null) {
@@ -206,6 +226,10 @@ public class JmsDestination extends GatewayEntity {
         if (getDestinationPasswordRef() != null && getDestinationPassword() != null) {
             throw new ConfigLoadException("Cannot specify both a password reference and a password for Destination password for JMS destination: " + entityKey);
         }
+        
+        // (kpak) - implement
+        // One of inbound or outbound set
+        // outbound: one of session or connection pooling set
     }
     
     public enum DestinationType {
@@ -245,6 +269,8 @@ public class JmsDestination extends GatewayEntity {
         private String destinationUsername;
         private String destinationPasswordRef;
         private String destinationPassword;
+        private InboundJmsDestinationDetail inboundDetail;
+        private OutboundJmsDestinationDetail outboundDetail;
 
         public Builder name(String name) {
             this.name = name;
@@ -328,6 +354,16 @@ public class JmsDestination extends GatewayEntity {
 
         public Builder destinationPassword(String destinationPassword) {
             this.destinationPassword = destinationPassword;
+            return this;
+        }
+
+        public Builder inboundDetail(InboundJmsDestinationDetail inboundDetail) {
+            this.inboundDetail = inboundDetail;
+            return this;
+        }
+
+        public Builder outboundDetail(OutboundJmsDestinationDetail outboundDetail) {
+            this.outboundDetail = outboundDetail;
             return this;
         }
         

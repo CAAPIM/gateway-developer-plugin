@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.collect.ImmutableMap;
@@ -23,7 +24,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CASSANDRA_CONNECTION_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.JMS_DESTINATION_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
@@ -48,7 +50,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 return bundle.getJmsDestinations().entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, e.getKey(), idGenerator.generate()))
+                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(JMS_DESTINATION_TYPE, e.getKey(), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return bundle.getJmsDestinations().entrySet().stream().map(e ->
@@ -61,6 +63,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
 
     private Entity buildEntity(Bundle bundle, String name, JmsDestination jmsDestination, Document document) {
         String id = idGenerator.generate();
+        boolean isInbound = jmsDestination.isInbound();
         
         // Build JMS Destination element.
         Element jmsDestinationDetailEle = createElementWithAttributesAndChildren(
@@ -69,28 +72,85 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 ImmutableMap.of(ATTRIBUTE_ID, id),
                 createElementWithTextContent(document, NAME, name),
                 createElementWithTextContent(document, JMS_DESTINATION_NAME, jmsDestination.getDestinationName()),
-                createElementWithTextContent(document, INBOUND, jmsDestination.isInbound()),
-                createElementWithTextContent(document, ENABLED, "TODO"),
-                createElementWithTextContent(document, TEMPLATE, jmsDestination.isTemplate())
+                createElementWithTextContent(document, INBOUND, isInbound),
+                createElementWithTextContent(document, ENABLED, true), // (kpak) - implement
+                createElementWithTextContent(document, TEMPLATE, jmsDestination.isTemplate()) // (kpak) - remove
         );
         
-        Map<String, Object> destinationDetailsProps = new HashMap<>();
-        destinationDetailsProps.put(DESTINATION_TYPE, jmsDestination.getDestinationType());
-        destinationDetailsProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
+        Map<String, Object> jmsDestinationDetailsProps = new HashMap<>();
+        jmsDestinationDetailsProps.put(DESTINATION_TYPE, jmsDestination.getDestinationType());
+        jmsDestinationDetailsProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
         if (jmsDestination.getDestinationPasswordRef() != null) {
-            destinationDetailsProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
+            jmsDestinationDetailsProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
         } else {
-            destinationDetailsProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
+            jmsDestinationDetailsProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
+        }
+
+        Map<String, Object> contextPropertiesTemplateProps =
+                Optional.ofNullable(jmsDestination.getJndiProperties()).orElseGet(HashMap::new);
+        contextPropertiesTemplateProps.put(JNDI_USERNAME, jmsDestination.getJndiUsername());
+        if (jmsDestination.getJndiPasswordRef() != null) {
+            contextPropertiesTemplateProps.put(JNDI_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getJndiPasswordRef()));
+        } else {
+            contextPropertiesTemplateProps.put(JNDI_PASSWORD, jmsDestination.getJndiPassword());
         }
         
-//        destinationDetailsProps.put("replyType", "");
-//        destinationDetailsProps.put("replyToQueueName", "");
-//        destinationDetailsProps.put("useRequestCorrelationId", "");
-//        destinationDetailsProps.put("inbound.acknowledgementType", "");
-//        destinationDetailsProps.put("inbound.failureQueueName", "");
-//        destinationDetailsProps.put("outbound.MessageType", "");
-//        destinationDetailsProps.put("inbound.maximumSize", "");
-        buildAndAppendPropertiesElement(destinationDetailsProps, document, jmsDestinationDetailEle);
+        if (!isInbound) {
+            OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
+            OutboundJmsDestinationDetail.ReplyType replyType = outboundDetail.getReplyType();
+            jmsDestinationDetailsProps.put(REPLY_TYPE, replyType);
+            
+            if (SPECIFIED_QUEUE.equals(replyType)) {
+                jmsDestinationDetailsProps.put(REPLY_QUEUE_NAME, outboundDetail.getReplyToQueueName());
+            }
+            
+            jmsDestinationDetailsProps.put(USE_REQUEST_CORRELATION_ID, outboundDetail.useRequestCorrelationId());
+            jmsDestinationDetailsProps.put(OUTBOUND_MESSAGE_TYPE, outboundDetail.getMessageFormat());
+
+            OutboundJmsDestinationDetail.PoolingType poolingType = outboundDetail.getPoolingType();
+            if (OutboundJmsDestinationDetail.PoolingType.CONNECTION.equals(poolingType)) {
+                contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, true);
+
+                OutboundJmsDestinationDetail.ConnectionPoolingSettings connectionPoolingSettings = 
+                        outboundDetail.getConnectionPoolingSettings();
+                if (connectionPoolingSettings != null) {
+                    if (connectionPoolingSettings.getSize() != null) {
+                        contextPropertiesTemplateProps.put(CONNECTION_POOL_SIZE, connectionPoolingSettings.getSize());
+                    }
+
+                    if (connectionPoolingSettings.getMinIdle() != null) {
+                        contextPropertiesTemplateProps.put(CONNECTION_POOL_MIN_IDLE, connectionPoolingSettings.getMinIdle());
+                    }
+
+                    if (connectionPoolingSettings.getMaxWaitMs() != null) {
+                        contextPropertiesTemplateProps.put(CONNECTION_POOL_MAX_WAIT, connectionPoolingSettings.getMaxWaitMs());
+                    }
+                }
+            } else {
+                contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, false);
+                OutboundJmsDestinationDetail.SessionPoolingSettings sessionPoolingSettings = 
+                        outboundDetail.getSessionPoolingSettings();
+                if (sessionPoolingSettings != null) {
+                    if (sessionPoolingSettings.getSize() != null) {
+                        contextPropertiesTemplateProps.put(SESSION_POOL_SIZE, sessionPoolingSettings.getSize());
+                    }
+
+                    if (sessionPoolingSettings.getMaxIdle() != null) {
+                        contextPropertiesTemplateProps.put(SESSION_POOL_MAX_IDLE, sessionPoolingSettings.getMaxIdle());
+                    }
+
+                    if (sessionPoolingSettings.getMaxWaitMs() != null) {
+                        contextPropertiesTemplateProps.put(SESSION_POOL_MAX_WAIT, sessionPoolingSettings.getMaxWaitMs());
+                    }
+                }
+            }
+        } else {
+            // (kpak) - inbound
+            // destinationDetailsProps.put("inbound.acknowledgementType", "");
+            // destinationDetailsProps.put("inbound.failureQueueName", "");
+            // destinationDetailsProps.put("inbound.maximumSize", "");
+        }
+        buildAndAppendPropertiesElement(jmsDestinationDetailsProps, document, jmsDestinationDetailEle);
 
         // Build JMS Connection element.
         String jmsConnectionEleId = idGenerator.generate();
@@ -102,26 +162,17 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 createElementWithTextContent(document, TEMPLATE, jmsDestination.isTemplate())
         );
 
-        Map<String, Object> connectionProps = new HashMap<>();
-        connectionProps.put(JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME, jmsDestination.getInitialContextFactoryClassName());
-        connectionProps.put(JNDI_PROVIDER_URL, jmsDestination.getJndiUrl());
-        connectionProps.put(CONNECTION_FACTORY_NAME, jmsDestination.getConnectionFactoryName());
-        connectionProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
+        Map<String, Object> jmsConnectionProps = new HashMap<>();
+        jmsConnectionProps.put(JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME, jmsDestination.getInitialContextFactoryClassName());
+        jmsConnectionProps.put(JNDI_PROVIDER_URL, jmsDestination.getJndiUrl());
+        jmsConnectionProps.put(CONNECTION_FACTORY_NAME, jmsDestination.getConnectionFactoryName());
+        jmsConnectionProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
         if (jmsDestination.getDestinationPasswordRef() != null) {
-            connectionProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
+            jmsConnectionProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
         } else {
-            connectionProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
+            jmsConnectionProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
         }
-        buildAndAppendPropertiesElement(connectionProps, document, jmsConnectionEle);
-
-        Map<String, Object> contextPropertiesTemplateProps = 
-                Optional.ofNullable(jmsDestination.getJndiProperties()).orElseGet(HashMap::new);
-        contextPropertiesTemplateProps.put(JNDI_USERNAME, jmsDestination.getJndiUsername());
-        if (jmsDestination.getJndiPasswordRef() != null) {
-            contextPropertiesTemplateProps.put(JNDI_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getJndiPasswordRef()));
-        } else {
-            contextPropertiesTemplateProps.put(JNDI_PASSWORD, jmsDestination.getJndiPassword());
-        }
+        buildAndAppendPropertiesElement(jmsConnectionProps, document, jmsConnectionEle);
         buildAndAppendPropertiesElement(contextPropertiesTemplateProps, document, jmsConnectionEle);
 
         // Build JMS Destination element.

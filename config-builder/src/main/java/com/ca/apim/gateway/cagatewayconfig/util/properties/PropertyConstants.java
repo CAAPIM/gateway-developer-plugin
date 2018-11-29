@@ -51,15 +51,31 @@ public class PropertyConstants {
     public static final String TAG_VALUE_WSDL = "wsdl";
 
     // JMS Destination property constants
+    public static final String JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME = "jndi.initialContextFactoryClassname";
+    public static final String JNDI_PROVIDER_URL = "jndi.providerUrl";
+    public static final String JNDI_USERNAME = "java.naming.security.principal";
+    public static final String JNDI_PASSWORD = "java.naming.security.credentials";
+
     public static final String DESTINATION_TYPE = "type"; // Topic or Queue
+    public static final String CONNECTION_FACTORY_NAME = "queue.connectionFactoryName";
+    
     public static final String REPLY_TYPE = "replyType";
     public static final String REPLY_QUEUE_NAME = "replyToQueueName";
     public static final String USE_REQUEST_CORRELATION_ID = "useRequestCorrelationId";
+    public static final String OUTBOUND_MESSAGE_TYPE = "outbound.MessageType";
+    public static final String CONNECTION_POOL_ENABLED = "com.l7tech.server.jms.prop.connection.pool.enable";
+    public static final String CONNECTION_POOL_SIZE = "com.l7tech.server.jms.prop.connection.pool.size";
+    public static final String CONNECTION_POOL_MIN_IDLE = "com.l7tech.server.jms.prop.connection.min.idle";
+    public static final String CONNECTION_POOL_MAX_WAIT = "com.l7tech.server.jms.prop.connection.pool.max.wait";
+    public static final String SESSION_POOL_SIZE = "com.l7tech.server.jms.prop.session.pool.size";
+    public static final String SESSION_POOL_MAX_IDLE = "com.l7tech.server.jms.prop.max.session.idle";
+    public static final String SESSION_POOL_MAX_WAIT = "com.l7tech.server.jms.prop.session.pool.max.wait";
+    
     public static final String INBOUND_ACK_TYPE = "inbound.acknowledgementType";
     public static final String INBOUND_FAILURE_QUEUE_NAME = "inbound.failureQueueName";
-    public static final String OUTBOUND_MESSAGE_TYPE = "outbound.MessageType";
     public static final String INBOUND_MAX_SIZE = "inbound.maximumSize";
     
+<<<<<<< HEAD
     public static final String JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME = "jndi.initialContextFactoryClassname";
     public static final String JNDI_PROVIDER_URL = "jndi.providerUrl";
 <<<<<<< HEAD
@@ -77,5 +93,7 @@ public class PropertyConstants {
     public static final String CONNECTION_FACTORY_NAME = "queue.connectionFactoryName";
 >>>>>>> Add support for JMS Destination entity.
     
+=======
+>>>>>>> Add outbound details. Still in progress.
     private PropertyConstants() { }
 }

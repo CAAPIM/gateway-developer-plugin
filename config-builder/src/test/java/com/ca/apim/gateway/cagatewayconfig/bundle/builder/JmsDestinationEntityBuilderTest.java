@@ -54,5 +54,5 @@ class JmsDestinationEntityBuilderTest {
         return jmsDestination;
     }
     
-    // TODO
+    // (kpak) - add more tests here
 }

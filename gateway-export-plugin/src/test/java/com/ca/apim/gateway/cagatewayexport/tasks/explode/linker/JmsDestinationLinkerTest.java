@@ -24,7 +24,7 @@ class JmsDestinationLinkerTest {
     
     private JmsDestinationLinker linker = new JmsDestinationLinker();
 
-    // TODO - Test private key(s), and service. 
+    // (kpak) - Test private key(s), and service. 
 
     @Test
     void testGetEntityClass() {

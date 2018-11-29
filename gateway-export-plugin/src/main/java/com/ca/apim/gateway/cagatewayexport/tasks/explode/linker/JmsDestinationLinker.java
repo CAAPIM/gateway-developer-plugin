@@ -33,7 +33,7 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
         linkJndiStoredPassword(entity, bundle);
         linkDestinationStoredPassword(entity, bundle);
         
-        // TODO: link private key(s), service
+        // (kpak): link private key(s), service
     }
     
     private void linkJndiStoredPassword(JmsDestination entity, Bundle bundle) {
