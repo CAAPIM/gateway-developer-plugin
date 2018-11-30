@@ -15,7 +15,7 @@ public class GatewayConnectionProperties {
     private Property<String> userName;
     private Property<String> userPass;
 
-    GatewayConnectionProperties(Project project) {
+    public GatewayConnectionProperties(Project project) {
         url = project.getObjects().property(String.class);
         userName = project.getObjects().property(String.class);
         userPass = project.getObjects().property(String.class);
