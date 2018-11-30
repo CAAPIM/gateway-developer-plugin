@@ -14,13 +14,11 @@ public class GatewayConnectionProperties {
     private Property<String> url;
     private Property<String> userName;
     private Property<String> userPass;
-    private Property<String> folderPath;
 
     public GatewayConnectionProperties(Project project) {
         url = project.getObjects().property(String.class);
         userName = project.getObjects().property(String.class);
         userPass = project.getObjects().property(String.class);
-        folderPath = project.getObjects().property(String.class);
     }
 
     /**
@@ -52,15 +50,4 @@ public class GatewayConnectionProperties {
     public Property<String> getUserPass() {
         return userPass;
     }
-
-    /**
-     * The path of the folder to export.
-     *
-     * @return the folder to export from the gateway
-     */
-    @Input
-    public Property<String> getFolderPath() {
-        return folderPath;
-    }
-
 }
