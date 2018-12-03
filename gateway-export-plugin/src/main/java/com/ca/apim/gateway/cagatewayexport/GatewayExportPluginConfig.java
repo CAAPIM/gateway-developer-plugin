@@ -19,7 +19,7 @@ public class GatewayExportPluginConfig {
     private final RegularFileProperty rawBundle;
     private final RegularFileProperty sanitizedBundle;
     private final Property<Map> exportEntities;
-    private Property<String> folderPath;
+    private final Property<String> folderPath;
 
     public GatewayExportPluginConfig(Project project) {
         solutionDir = project.getLayout().directoryProperty();
