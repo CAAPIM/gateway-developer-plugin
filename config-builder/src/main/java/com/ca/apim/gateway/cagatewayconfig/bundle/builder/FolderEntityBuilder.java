@@ -44,12 +44,14 @@ public class FolderEntityBuilder implements EntityBuilder {
         }
         String decodedName = EncodeDecodeUtils.decodePath(name);
         folder.appendChild(createElementWithTextContent(document, NAME, decodedName));
-        Entity entity = new Entity(FOLDER_TYPE, decodedName, id, folder);
-
-        //Set the root folder mapping to new or existing
+        final Entity entity;
         if (parentFolderId == null) {
-            entity.setMappingAction(NEW_OR_EXISTING);
+            //No need to map root folder by name
+            entity = new Entity(FOLDER_TYPE, decodedName, id, folder);
+        } else {
+            entity = EntityBuilderHelper.getEntityWithNameMapping(FOLDER_TYPE, decodedName, id, folder);
         }
+        entity.setMappingAction(NEW_OR_EXISTING);
         return entity;
     }
 

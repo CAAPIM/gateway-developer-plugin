@@ -42,6 +42,46 @@ class ScheduledTaskLoaderTest {
     }
 
     @Test
+    void loadScheduledTaskNoProperties() {
+        Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Element scheduledTaskElem = createElementWithAttributesAndChildren(
+                document,
+                SCHEDULED_TASK,
+                ImmutableMap.of(ATTRIBUTE_ID, "id"),
+                createElementWithTextContent(document, NAME, "Test"),
+                createElementWithTextContent(document, ONE_NODE, false),
+                createElementWithTextContent(document, JOB_TYPE, "One time"),
+                createElementWithTextContent(document, JOB_STATUS, "Scheduled"),
+                createElementWithTextContent(document, EXECUTE_ON_CREATE, false),
+                createElementWithTextContent(document, EXECUTION_DATE, "someDate")
+        );
+
+        Element sheduledTaskElement = createElementWithChildren(
+                document,
+                ITEM,
+                createElementWithChildren(
+                        document,
+                        RESOURCE,
+                        scheduledTaskElem
+                )
+        );
+        Bundle bundle = new Bundle();
+        loader.load(bundle, sheduledTaskElement);
+        final ScheduledTask entity = bundle.getScheduledTasks().get("Test");
+
+        assertNotNull(entity);
+        assertEquals("id", entity.getId());
+        assertEquals("Test", entity.getName());
+        assertFalse(entity.getIsOneNode());
+        assertEquals("One time", entity.getJobType());
+        assertEquals("someDate", entity.getExecutionDate());
+        assertNull(entity.getCronExpression());
+        assertEquals("Scheduled", entity.getJobStatus());
+        assertFalse(entity.getShouldExecuteOnCreate());
+        assertEquals(0, entity.getProperties().size());
+    }
+
+    @Test
     void loadRecurringScheduledTask() {
         Bundle bundle = new Bundle();
         loader.load(bundle, createScheduledTaskXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), false));
