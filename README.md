@@ -22,9 +22,8 @@ repositories {
     mavenCentral()
 }
 
-// The Gateway Connection Config is needed by the gateway-export plugin in order to export from a gateway
-GatewayConnection {
-    url = 'https://<gateway-host>:8443/restman'
+// The Gateway Export Config is needed by the gateway-export plugin in order to export from a gateway
+GatewayExportConfig {
     folderPath = '/my-solution-folder'
 }
 ```
