@@ -26,6 +26,11 @@ repositories {
 GatewayExportConfig {
     folderPath = '/my-solution-folder'
 }
+
+// The Gateway Connection Config is required if setting mentioned in main [build.gradle](https://github.com/ca-api-gateway-examples/gateway-developer-example/blob/master/build.gradle) is not applicable to this folder.
+GatewayConnection {
+    url = 'https://<gateway-host>:8443/restman'
+}
 ```
 
 After this is added run `./gradlew build` in order to build a bundle and deployment package from a gateway solution located in `src/main/Gateway`. 
