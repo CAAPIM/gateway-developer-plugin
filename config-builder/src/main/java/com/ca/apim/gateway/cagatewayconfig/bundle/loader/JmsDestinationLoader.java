@@ -10,6 +10,11 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail;
 import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ConnectionPoolingSettings;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.MessageFormat;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ReplyType;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.SessionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
@@ -38,7 +43,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         final String name = getSingleChildElementTextContent(jmsDestinationDetailEle, NAME);
         final boolean isInbound = toBoolean(getSingleChildElementTextContent(jmsDestinationDetailEle, INBOUND));
         final boolean isTemplate = toBoolean(getSingleChildElementTextContent(jmsDestinationDetailEle, TEMPLATE));
-        final Map<String, Object> jmsDestinationDetailsProps = mapPropertiesElements(getSingleChildElement(jmsDestinationDetailEle, PROPERTIES, false), PROPERTIES);
+        final Map<String, Object> jmsDestinationDetailProps = mapPropertiesElements(getSingleChildElement(jmsDestinationDetailEle, PROPERTIES, false), PROPERTIES);
         
         final Element jmsConnectionEle = getSingleChildElement(jmsDestinationEle, JMS_CONNECTION);
         final String providerType = getSingleChildElementTextContent(jmsConnectionEle, JMS_PROVIDER_TYPE);
@@ -57,11 +62,11 @@ public class JmsDestinationLoader implements BundleEntityLoader {
                         !"com.l7tech.server.jms.soapAction.msgPropName".equals(map.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        final String destinationType = (String) jmsDestinationDetailsProps.remove(DESTINATION_TYPE);
+        final String destinationType = (String) jmsDestinationDetailProps.remove(DESTINATION_TYPE);
         final String connectionFactoryName = (String) jmsConnectionProps.remove(CONNECTION_FACTORY_NAME);
         final String destinationName = getSingleChildElementTextContent(jmsDestinationDetailEle, JMS_DESTINATION_NAME);
-        final String destinationUsername = (String) jmsDestinationDetailsProps.remove(PROPERTY_USERNAME);
-        final String destinationPassword = (String) jmsDestinationDetailsProps.remove(PROPERTY_PASSWORD);
+        final String destinationUsername = (String) jmsDestinationDetailProps.remove(PROPERTY_USERNAME);
+        final String destinationPassword = (String) jmsDestinationDetailProps.remove(PROPERTY_PASSWORD);
         
         JmsDestination jmsDestination = new JmsDestination();
         jmsDestination.setId(id);
@@ -81,44 +86,46 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         jmsDestination.setDestinationUsername(destinationUsername);
         jmsDestination.setDestinationPassword(destinationPassword);
 
-        jmsDestination.setInboundDetail(this.loadInboundDetail(jmsDestinationDetailsProps));
-        jmsDestination.setOutboundDetail(this.loadOutboundDetail(isTemplate, jmsDestinationDetailsProps, contextPropertiesTemplateProps));
+        if (isInbound) {
+            jmsDestination.setInboundDetail(this.loadInboundDetail(jmsDestinationDetailProps));
+        } else {
+            jmsDestination.setOutboundDetail(this.loadOutboundDetail(isTemplate, jmsDestinationDetailProps, contextPropertiesTemplateProps));
+        }
         
         bundle.getJmsDestinations().put(name, jmsDestination);
     }
 
-    private InboundJmsDestinationDetail loadInboundDetail(Map<String, Object> jmsDestinationDetailsProps) {
-        InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
+    private InboundJmsDestinationDetail loadInboundDetail(Map<String, Object> jmsDestinationDetailProps) {
         // (kpak) - implement
-        return inboundDetail;
+        return new InboundJmsDestinationDetail();
     }
     
     private OutboundJmsDestinationDetail loadOutboundDetail(
             boolean isTemplate,
-            Map<String, Object> jmsDestinationDetailsProps,
+            Map<String, Object> jmsDestinationDetailProps,
             Map<String, Object> contextPropertiesTemplateProps) {
         
-        final OutboundJmsDestinationDetail.ReplyType replyType = OutboundJmsDestinationDetail.ReplyType.fromType(
-                (String) jmsDestinationDetailsProps.remove(REPLY_TYPE));
-        final String replyQueueName = (String) jmsDestinationDetailsProps.remove(REPLY_QUEUE_NAME);
-        final boolean useRequestCorrelationId = toBoolean((String) jmsDestinationDetailsProps.remove(USE_REQUEST_CORRELATION_ID)); // (kpak): Boolean or String?
-        final OutboundJmsDestinationDetail.MessageFormat messageFormat = OutboundJmsDestinationDetail.MessageFormat.fromFormat(
-                (String) jmsDestinationDetailsProps.remove(OUTBOUND_MESSAGE_TYPE));
+        final ReplyType replyType = ReplyType.fromType(
+                (String) jmsDestinationDetailProps.remove(REPLY_TYPE));
+        final String replyQueueName = (String) jmsDestinationDetailProps.remove(REPLY_QUEUE_NAME);
+        final boolean useRequestCorrelationId = toBoolean((String) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID)); // (kpak): Boolean or String?
+        final MessageFormat messageFormat = MessageFormat.fromFormat(
+                (String) jmsDestinationDetailProps.remove(OUTBOUND_MESSAGE_TYPE));
         
-        OutboundJmsDestinationDetail.PoolingType poolingType;
-        OutboundJmsDestinationDetail.ConnectionPoolingSettings connectionPoolingSettings = null;
-        OutboundJmsDestinationDetail.SessionPoolingSettings sessionPoolingSettings = null;
+        PoolingType poolingType;
+        ConnectionPoolingSettings connectionPoolingSettings = null;
+        SessionPoolingSettings sessionPoolingSettings = null;
 
         final boolean isConnectionPool = toBoolean((String) contextPropertiesTemplateProps.remove(CONNECTION_POOL_ENABLED)); // (kpak): Boolean or String?
         if (isConnectionPool) {
-            poolingType = OutboundJmsDestinationDetail.PoolingType.CONNECTION;
-            connectionPoolingSettings = new OutboundJmsDestinationDetail.ConnectionPoolingSettings(
+            poolingType = PoolingType.CONNECTION;
+            connectionPoolingSettings = new ConnectionPoolingSettings(
                     (Integer) contextPropertiesTemplateProps.remove(CONNECTION_POOL_SIZE),
                     (Integer) contextPropertiesTemplateProps.remove(CONNECTION_POOL_MIN_IDLE),
                     (Integer) contextPropertiesTemplateProps.remove(CONNECTION_POOL_MAX_WAIT));
         } else {
-            poolingType = OutboundJmsDestinationDetail.PoolingType.SESSION;
-            sessionPoolingSettings = new OutboundJmsDestinationDetail.SessionPoolingSettings(
+            poolingType = PoolingType.SESSION;
+            sessionPoolingSettings = new SessionPoolingSettings(
                     (Integer) contextPropertiesTemplateProps.remove(SESSION_POOL_SIZE),
                     (Integer) contextPropertiesTemplateProps.remove(SESSION_POOL_MAX_IDLE),
                     (Integer) contextPropertiesTemplateProps.remove(SESSION_POOL_MAX_WAIT));

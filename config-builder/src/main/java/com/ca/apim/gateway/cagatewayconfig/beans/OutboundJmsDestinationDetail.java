@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import static java.util.Arrays.stream;
 
-@JsonTypeName("Outbound")
 public class OutboundJmsDestinationDetail {
     
     private boolean isTemplate;
@@ -149,6 +148,9 @@ public class OutboundJmsDestinationDetail {
         private Integer minIdle;
         private Integer maxWaitMs;
 
+        public ConnectionPoolingSettings() {
+        }
+        
         public ConnectionPoolingSettings(Integer size, Integer minIdle, Integer maxWaitMs) {
             this.size = size;
             this.minIdle = minIdle;

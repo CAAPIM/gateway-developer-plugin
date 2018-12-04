@@ -9,6 +9,10 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ConnectionPoolingSettings;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ReplyType;
+import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.SessionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.collect.ImmutableMap;
@@ -24,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.JMS_DESTINATION_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
@@ -77,13 +82,13 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 createElementWithTextContent(document, TEMPLATE, jmsDestination.isTemplate()) // (kpak) - remove
         );
         
-        Map<String, Object> jmsDestinationDetailsProps = new HashMap<>();
-        jmsDestinationDetailsProps.put(DESTINATION_TYPE, jmsDestination.getDestinationType());
-        jmsDestinationDetailsProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
+        Map<String, Object> jmsDestinationDetailProps = new HashMap<>();
+        jmsDestinationDetailProps.put(DESTINATION_TYPE, jmsDestination.getDestinationType());
+        jmsDestinationDetailProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
         if (jmsDestination.getDestinationPasswordRef() != null) {
-            jmsDestinationDetailsProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
+            jmsDestinationDetailProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
         } else {
-            jmsDestinationDetailsProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
+            jmsDestinationDetailProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
         }
 
         Map<String, Object> contextPropertiesTemplateProps =
@@ -97,22 +102,20 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         
         if (!isInbound) {
             OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
-            OutboundJmsDestinationDetail.ReplyType replyType = outboundDetail.getReplyType();
-            jmsDestinationDetailsProps.put(REPLY_TYPE, replyType);
+            ReplyType replyType = outboundDetail.getReplyType();
+            jmsDestinationDetailProps.put(REPLY_TYPE, replyType);
             
             if (SPECIFIED_QUEUE.equals(replyType)) {
-                jmsDestinationDetailsProps.put(REPLY_QUEUE_NAME, outboundDetail.getReplyToQueueName());
+                jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, outboundDetail.getReplyToQueueName());
             }
-            
-            jmsDestinationDetailsProps.put(USE_REQUEST_CORRELATION_ID, outboundDetail.useRequestCorrelationId());
-            jmsDestinationDetailsProps.put(OUTBOUND_MESSAGE_TYPE, outboundDetail.getMessageFormat());
 
-            OutboundJmsDestinationDetail.PoolingType poolingType = outboundDetail.getPoolingType();
-            if (OutboundJmsDestinationDetail.PoolingType.CONNECTION.equals(poolingType)) {
+            jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, outboundDetail.useRequestCorrelationId());
+            jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, outboundDetail.getMessageFormat());
+
+            PoolingType poolingType = outboundDetail.getPoolingType();
+            if (CONNECTION.equals(poolingType)) {
                 contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, true);
-
-                OutboundJmsDestinationDetail.ConnectionPoolingSettings connectionPoolingSettings = 
-                        outboundDetail.getConnectionPoolingSettings();
+                ConnectionPoolingSettings connectionPoolingSettings = outboundDetail.getConnectionPoolingSettings();
                 if (connectionPoolingSettings != null) {
                     if (connectionPoolingSettings.getSize() != null) {
                         contextPropertiesTemplateProps.put(CONNECTION_POOL_SIZE, connectionPoolingSettings.getSize());
@@ -128,8 +131,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 }
             } else {
                 contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, false);
-                OutboundJmsDestinationDetail.SessionPoolingSettings sessionPoolingSettings = 
-                        outboundDetail.getSessionPoolingSettings();
+                SessionPoolingSettings sessionPoolingSettings = outboundDetail.getSessionPoolingSettings();
                 if (sessionPoolingSettings != null) {
                     if (sessionPoolingSettings.getSize() != null) {
                         contextPropertiesTemplateProps.put(SESSION_POOL_SIZE, sessionPoolingSettings.getSize());
@@ -150,7 +152,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             // destinationDetailsProps.put("inbound.failureQueueName", "");
             // destinationDetailsProps.put("inbound.maximumSize", "");
         }
-        buildAndAppendPropertiesElement(jmsDestinationDetailsProps, document, jmsDestinationDetailEle);
+        buildAndAppendPropertiesElement(jmsDestinationDetailProps, document, jmsDestinationDetailEle);
 
         // Build JMS Connection element.
         String jmsConnectionEleId = idGenerator.generate();

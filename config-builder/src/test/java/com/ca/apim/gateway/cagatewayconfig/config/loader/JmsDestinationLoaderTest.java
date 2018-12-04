@@ -51,7 +51,7 @@ class JmsDestinationLoaderTest {
     }
     
     @Test
-    void testLoadJmsDestinationYaml() throws IOException {
+    void testLoadInboundJmsDestinationYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
                 "  isInbound: true\n" + 
                 "  isTemplate: false\n" +
@@ -69,13 +69,13 @@ class JmsDestinationLoaderTest {
                 "  destinationUsername: \"my-destination-username\"\n" +
                 "  destinationPasswordRef: \"my-destination-password-ref\"\n";
         
-        loadJmsDestination(yaml, "yml", null);
+        loadJmsDestination(yaml, true, "yml", null);
     }
 
     @Test
-    void testLoadJmsDestinationJson() throws IOException {
+    void testLoadOutboundJmsDestinationJson() throws IOException {
         String json = "{\n" +
-                "    \"" + JMS_DESTINATION_NAME + "\" : {\n" +
+                "  \"" + JMS_DESTINATION_NAME + "\" : {\n" +
                 "    \"isInbound\" : true,\n" +
                 "    \"isTemplate\" : false,\n" +
                 "    \"providerType\" : \"TIBCO EMS\",\n" +
@@ -91,15 +91,28 @@ class JmsDestinationLoaderTest {
                 "    \"connectionFactoryName\" : \"my-qcf-name\",\n" +
                 "    \"destinationName\" : \"my-jms-destination-name\",\n" +
                 "    \"destinationUsername\" : \"my-destination-username\",\n" +
-                "    \"destinationPasswordRef\" : \"my-destination-password-ref\"\n" +
+                "    \"destinationPasswordRef\" : \"my-destination-password-ref\",\n" +
+                "    \"outboundDetail\" : {\n" +
+                "      \"isTemplate\" : false,\n" +
+                "      \"replyType\" : \"SPECIFIED_QUEUE\",\n" +
+                "      \"replyToQueueName\" : \"my-reply-Q\",\n" +
+                "      \"useRequestCorrelationId\" : false,\n" +
+                "      \"messageFormat\" : \"BYTES\",\n" +
+                "      \"poolingType\" : \"CONNECTION\",\n" +
+                "      \"connectionPoolingSettings\" : {\n" +
+                "        \"size\" : 10,\n" +
+                "        \"minIdle\" : 5,\n" +
+                "        \"maxWaitMs\" : 10000\n" +
+                "      }\n" +
                 "    }\n" +
+                "  }\n" +
                 "}\n";
 
-        loadJmsDestination(json, "json", null);
+        loadJmsDestination(json, false, "json", null);
     }
     
     @Test
-    void testLoadJmsDestinationMalformedYaml() throws IOException {
+    void testLoadInboundJmsDestinationMalformedYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
                 "  isInbound true\n" + // Missing colon
                 "  isTemplate: false\n" +
@@ -117,13 +130,13 @@ class JmsDestinationLoaderTest {
                 "  destinationUsername: \"my-destination-username\"\n" +
                 "  destinationPasswordRef: \"my-destination-password-ref\"\n";
 
-        loadJmsDestination(yaml, "yml", JsonToolsException.class);
+        loadJmsDestination(yaml, true, "yml", JsonToolsException.class);
     }
 
     @Test
-    void testLoadJmsDestinationMalformedJson() throws IOException {
+    void testLoadOutboundJmsDestinationMalformedJson() throws IOException {
         String json = "{\n" +
-                "    \"" + JMS_DESTINATION_NAME + "\" : {\n" +
+                "  \"" + JMS_DESTINATION_NAME + "\" : {\n" +
                 "    \"isInbound\" : true,\n" +
                 "    \"isTemplate\" : false,\n" +
                 "    \"providerType\" : \"TIBCO EMS\",\n" +
@@ -139,15 +152,28 @@ class JmsDestinationLoaderTest {
                 "    \"connectionFactoryName\" : \"my-qcf-name\",\n" +
                 "    \"destinationName\" : \"my-jms-destination-name\",\n" +
                 "    \"destinationUsername\" : \"my-destination-username\",\n" +
-                "    \"destinationPasswordRef\" : \"my-destination-password-ref\"\n" +
-                "    }\n";
+                "    \"destinationPasswordRef\" : \"my-destination-password-ref\",\n" +
+                "    \"outboundDetail\" : {\n" +
+                "      \"isTemplate\" : false,\n" +
+                "      \"replyType\" : \"SPECIFIED_QUEUE\",\n" +
+                "      \"replyToQueueName\" : \"my-reply-Q\",\n" +
+                "      \"useRequestCorrelationId\" : false,\n" +
+                "      \"messageFormat\" : \"BYTES\",\n" +
+                "      \"poolingType\" : \"CONNECTION\",\n" +
+                "      \"connectionPoolingSettings\" : {\n" +
+                "        \"size\" : 10,\n" +
+                "        \"minIdle\" : 5,\n" +
+                "        \"maxWaitMs\" : 10000\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n";
                 // Missing last closing };
 
-        loadJmsDestination(json, "json", JsonToolsException.class);
+        loadJmsDestination(json, false, "json", JsonToolsException.class);
     }
 
     @Test
-    void testLoadJmsDestination_JndiPasswordRefAndPasswordYaml() throws IOException {
+    void testLoadInboundJmsDestination_JndiPasswordRefAndPasswordYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
                 "  isInbound: true\n" +
                 "  isTemplate: false\n" +
@@ -166,11 +192,11 @@ class JmsDestinationLoaderTest {
                 "  destinationUsername: \"my-destination-username\"\n" +
                 "  destinationPasswordRef: \"my-destination-password-ref\"\n";
 
-        loadJmsDestination(yaml, "yml", ConfigLoadException.class);
+        loadJmsDestination(yaml, true,"yml", ConfigLoadException.class);
     }
 
     @Test
-    void testLoadJmsDestination_DestinationPasswordRefAndPasswordJson() throws IOException {
+    void testLoadOutboundJmsDestination_DestinationPasswordRefAndPasswordJson() throws IOException {
         String json = "{\n" +
                 "    \"" + JMS_DESTINATION_NAME + "\" : {\n" +
                 "    \"isInbound\" : true,\n" +
@@ -189,14 +215,27 @@ class JmsDestinationLoaderTest {
                 "    \"destinationName\" : \"my-jms-destination-name\",\n" +
                 "    \"destinationUsername\" : \"my-destination-username\",\n" +
                 "    \"destinationPasswordRef\" : \"my-destination-password-ref\",\n" +
-                "    \"destinationPassword\" : \"my-destination-password\"\n" + // Destination password defined twice.
+                "    \"destinationPassword\" : \"my-destination-password\",\n" + // Destination password defined twice.
+                "    \"outboundDetail\" : {\n" +
+                "      \"isTemplate\" : false,\n" +
+                "      \"replyType\" : \"SPECIFIED_QUEUE\",\n" +
+                "      \"replyToQueueName\" : \"my-reply-Q\",\n" +
+                "      \"useRequestCorrelationId\" : false,\n" +
+                "      \"messageFormat\" : \"BYTES\",\n" +
+                "      \"poolingType\" : \"CONNECTION\",\n" +
+                "      \"connectionPoolingSettings\" : {\n" +
+                "        \"size\" : 10,\n" +
+                "        \"minIdle\" : 5,\n" +
+                "        \"maxWaitMs\" : 10000\n" +
+                "      }\n" +
                 "    }\n" +
+                "  }\n" +
                 "}\n";
 
-        loadJmsDestination(json, "json", ConfigLoadException.class);
+        loadJmsDestination(json, false, "json", ConfigLoadException.class);
     }
     
-    private void loadJmsDestination(String content, String fileType, Class<? extends Exception> expectException) throws IOException {
+    private void loadJmsDestination(String content, boolean isInbound, String fileType, Class<? extends Exception> expectException) throws IOException {
         final EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(JmsDestination.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File jmsDestinationsFile = new File(configFolder, "jms-destinations." + fileType);
