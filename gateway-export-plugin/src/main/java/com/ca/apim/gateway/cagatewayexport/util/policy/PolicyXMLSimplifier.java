@@ -52,7 +52,7 @@ public class PolicyXMLSimplifier {
         } catch (DocumentParseException e) {
             LOGGER.log(Level.FINE, "Base64ResponseBody missing from hardcoded assertion.");
             return;
-    }
+        }
         String base64Expression = base64ResponseBodyElement.getAttribute(STRING_VALUE);
         byte[] decoded = base64Decode(base64Expression);
 
