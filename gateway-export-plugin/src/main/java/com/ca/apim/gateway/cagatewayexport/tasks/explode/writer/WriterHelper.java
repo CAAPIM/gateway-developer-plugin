@@ -82,7 +82,7 @@ class WriterHelper {
      * @param properties Properties to be written
      * @param fileName name of the file
      */
-    static void writePropertiesFile(File rootFolder, DocumentFileUtils documentFileUtils, Properties properties, String fileName) {
+    static synchronized void writePropertiesFile(File rootFolder, DocumentFileUtils documentFileUtils, Properties properties, String fileName) {
         if (properties.isEmpty()) {
             return;
         }
@@ -102,7 +102,6 @@ class WriterHelper {
                     .forEach(e -> currentProperties.put(e.getKey(), e.getValue()));
             properties = currentProperties;
         }
-
         try (OutputStream outputStream = new StripFirstLineStream(new FileOutputStream(propertiesFile))) {
             properties.store(outputStream, null);
         } catch (IOException e) {

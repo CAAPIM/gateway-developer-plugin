@@ -95,6 +95,14 @@ public class Bundle {
         return getEntities(EnvironmentProperty.class);
     }
 
+    public Map<String, ServiceEnvironmentProperty> getServiceEnvironmentProperties() {
+        return getEntities(ServiceEnvironmentProperty.class);
+    }
+
+    public Map<String, ContextVariableEnvironmentProperty> getContextVariableEnvironmentProperties() {
+        return getEntities(ContextVariableEnvironmentProperty.class);
+    }
+
     public void putAllPolicyBackedServices(@NotNull Map<String, PolicyBackedService> policyBackedServices) {
         this.getPolicyBackedServices().putAll(policyBackedServices);
     }

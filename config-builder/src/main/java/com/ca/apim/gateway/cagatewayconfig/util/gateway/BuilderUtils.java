@@ -123,8 +123,8 @@ public class BuilderUtils {
     }
 
     // Inserting service / policy name after "ENV." for environment variables
-    public static String insertNameToEnvironmentVariable(String environmentVariable, String name) {
-        StringBuilder stringBuilder = new StringBuilder(environmentVariable).insert(4, name + ".");
+    public static String insertPrefixToEnvironmentVariable(String environmentVariable, String prefix) {
+        StringBuilder stringBuilder = new StringBuilder(environmentVariable).insert(4, prefix + ".");
         return stringBuilder.toString();
     }
 

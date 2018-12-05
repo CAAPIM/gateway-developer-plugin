@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SERVICE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.insertNameToEnvironmentVariable;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.insertPrefixToEnvironmentVariable;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
@@ -82,7 +82,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
                     .stream()
                     .collect(Collectors
                             .toMap(p -> "property." + p.getKey(), 
-                                p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + insertNameToEnvironmentVariable(p.getKey(), service.getName()) : p.getValue()));
+                                p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + insertPrefixToEnvironmentVariable(p.getKey(), service.getName()) : p.getValue()));
         }
 
         if(properties == null) {

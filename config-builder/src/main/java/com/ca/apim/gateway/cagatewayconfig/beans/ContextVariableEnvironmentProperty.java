@@ -13,23 +13,23 @@ import javax.inject.Named;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
 
-@Named("SERVICE_ENVIRONMENT_PROPERTY")
+@Named("CONTEXT_VARIABLE_ENVIRONMENT_PROPERTY")
 @ConfigurationFile(name = "env", type = PROPERTIES)
-@EnvironmentType("SERVICE_PROPERTY")
-public class ServiceEnvironmentProperty extends PropertiesEntity {
+@EnvironmentType("CONTEXT_VARIABLE_PROPERTY")
+public class ContextVariableEnvironmentProperty extends PropertiesEntity {
 
     private String value;
 
-    public ServiceEnvironmentProperty() { }
+    public ContextVariableEnvironmentProperty() { }
 
-    public ServiceEnvironmentProperty(final String name, final String value) {
+    public ContextVariableEnvironmentProperty(final String name, final String value) {
         this.setName(name);
         this.value = value;
     }
 
     @Override
     public String getKey() {
-        return "service.property." + getName();
+        return "contextVariable.property." + getName();
     }
 
     @Override

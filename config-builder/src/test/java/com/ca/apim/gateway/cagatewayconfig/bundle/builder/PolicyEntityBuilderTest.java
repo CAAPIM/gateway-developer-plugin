@@ -108,8 +108,9 @@ class PolicyEntityBuilderTest {
     void testPrepareSetVariableAssertionNoENV() throws DocumentParseException {
         Element setVariableAssertionElement = createSetVariableAssertion(document, "my-var", "base64Text");
         document.appendChild(setVariableAssertionElement);
+        String prefix = "prefix";
 
-        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertionElement);
+        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertionElement);
 
         Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
         assertEquals("my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -123,8 +124,9 @@ class PolicyEntityBuilderTest {
     void testPrepareSetVariableAssertionENV() throws DocumentParseException {
         Element setVariableAssertionElement = createSetVariableAssertion(document, "ENV.my-var", "base64Text");
         document.appendChild(setVariableAssertionElement);
+        String prefix = "prefix";
 
-        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertionElement);
+        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertionElement);
 
         Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
         assertEquals("ENV.my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -141,8 +143,9 @@ class PolicyEntityBuilderTest {
         Element expression = document.createElement(EXPRESSION);
         expression.appendChild(document.createCDATASection("ashdkjsah"));
         setVariableAssertion.appendChild(expression);
+        String prefix = "prefix";
 
-        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertion));
+        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertion));
     }
 
     @Test
@@ -152,7 +155,9 @@ class PolicyEntityBuilderTest {
         Element variableToSet = document.createElement(VARIABLE_TO_SET);
         variableToSet.setAttribute(PolicyEntityBuilder.STRING_VALUE, "my.var");
         setVariableAssertion.appendChild(variableToSet);
-        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertion);
+        String prefix = "prefix";
+
+        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertion);
 
         Element nameElement = getSingleElement(setVariableAssertion, VARIABLE_TO_SET);
         assertEquals("my.var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -165,8 +170,9 @@ class PolicyEntityBuilderTest {
     void testPrepareSetVariableAssertionNotENVEmptyValue() throws DocumentParseException {
         Element setVariableAssertionElement = createSetVariableAssertion(document, "my-var", null);
         document.appendChild(setVariableAssertionElement);
+        String prefix = "prefix";
 
-        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertionElement);
+        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertionElement);
 
         Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
         assertEquals("my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -186,8 +192,9 @@ class PolicyEntityBuilderTest {
         Element variableToSet = document.createElement(VARIABLE_TO_SET);
         variableToSet.setAttribute(PolicyEntityBuilder.STRING_VALUE, "my-var");
         setVariableAssertion.appendChild(variableToSet);
+        String prefix = "prefix";
 
-        PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertion);
+        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertion);
 
         Element nameElement = getSingleElement(setVariableAssertion, VARIABLE_TO_SET);
         assertEquals("my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -207,8 +214,9 @@ class PolicyEntityBuilderTest {
         Element variableToSet = document.createElement(VARIABLE_TO_SET);
         variableToSet.setAttribute(PolicyEntityBuilder.STRING_VALUE, "my-var");
         setVariableAssertion.appendChild(variableToSet);
+        String prefix = "prefix";
 
-        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareSetVariableAssertion(document, setVariableAssertion));
+        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertion));
     }
 
     @Test

@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.insertPrefixToEnvironmentVariable;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
@@ -35,10 +36,10 @@ public class PolicyXMLSimplifier {
 
     private static final Logger LOGGER = Logger.getLogger(PolicyWriter.class.getName());
 
-    public void simplifyPolicyXML(Element policyElement, Bundle bundle, Bundle resultantBundle) {
+    public void simplifyPolicyXML(Element policyElement, String policyName, Bundle bundle, Bundle resultantBundle) {
         findAndSimplifyAssertion(policyElement, INCLUDE, element -> simplifyIncludeAssertion(bundle, element));
         findAndSimplifyAssertion(policyElement, ENCAPSULATED, element -> simplifyEncapsulatedAssertion(bundle, element));
-        findAndSimplifyAssertion(policyElement, SET_VARIABLE, element -> simplifySetVariable(element, resultantBundle));
+        findAndSimplifyAssertion(policyElement, SET_VARIABLE, element -> simplifySetVariable(policyName, element, resultantBundle));
         findAndSimplifyAssertion(policyElement, HARDCODED_RESPONSE, this::simplifyHardcodedResponse);
         findAndSimplifyAssertion(policyElement, AUTHENTICATION, element -> simplifyAuthenticationAssertion(bundle, element));
     }
@@ -51,7 +52,7 @@ public class PolicyXMLSimplifier {
         } catch (DocumentParseException e) {
             LOGGER.log(Level.FINE, "Base64ResponseBody missing from hardcoded assertion.");
             return;
-        }
+    }
         String base64Expression = base64ResponseBodyElement.getAttribute(STRING_VALUE);
         byte[] decoded = base64Decode(base64Expression);
 
@@ -70,7 +71,7 @@ public class PolicyXMLSimplifier {
     }
 
     @VisibleForTesting
-    void simplifySetVariable(Element element, Bundle resultantBundle) throws DocumentParseException {
+    void simplifySetVariable(String policyName, Element element, Bundle resultantBundle) throws DocumentParseException {
         Element base64ExpressionElement = getSingleElement(element, BASE_64_EXPRESSION);
         String base64Expression = base64ExpressionElement.getAttribute(STRING_VALUE);
         byte[] decodedValue = base64Decode(base64Expression);
@@ -81,12 +82,12 @@ public class PolicyXMLSimplifier {
             if (variableName.startsWith("ENV.gateway.")) {
                 throw new LinkerException("Cannot have local environment property start with the prefix `ENV.gateway.`. Property: " + variableName);
             }
-            EnvironmentProperty environmentProperty = new EnvironmentProperty(variableName.substring(4), new String(decodedValue), EnvironmentProperty.Type.LOCAL);
-            EnvironmentProperty existingEnvironmentProperty = resultantBundle.getEntities(EnvironmentProperty.class).get(environmentProperty.getId());
-            if (existingEnvironmentProperty != null) {
+            ContextVariableEnvironmentProperty contextVarEnvironmentProperty = new ContextVariableEnvironmentProperty(insertPrefixToEnvironmentVariable(variableName, policyName).substring(4), new String(decodedValue));
+            ContextVariableEnvironmentProperty existingContextVarEnvironmentProperty = resultantBundle.getEntities(ContextVariableEnvironmentProperty.class).get(contextVarEnvironmentProperty.getName());
+            if (existingContextVarEnvironmentProperty != null) {
                 throw new LinkerException("Found duplicate environment property: `" + variableName.substring(4) + "`. Cannot have multiple environment properties with the same name.");
             }
-            resultantBundle.getEntities(EnvironmentProperty.class).put(environmentProperty.getId(), environmentProperty);
+            resultantBundle.getEntities(ContextVariableEnvironmentProperty.class).put(contextVarEnvironmentProperty.getName(), contextVarEnvironmentProperty);
         } else {
             Element expressionElement = element.getOwnerDocument().createElement(EXPRESSION);
             expressionElement.appendChild(element.getOwnerDocument().createCDATASection(new String(decodedValue)));

@@ -46,7 +46,7 @@ public class ServiceLinker implements EntityLinker<Service> {
     public void link(Service service, Bundle bundle, Bundle targetBundle) {
         try {
             Element policyElement = DocumentUtils.stringToXML(documentTools, service.getPolicy());
-            policyXMLSimplifier.simplifyPolicyXML(policyElement, bundle, targetBundle);
+            policyXMLSimplifier.simplifyPolicyXML(policyElement, service.getPolicy(), bundle, targetBundle);
             service.setPolicyXML(policyElement);
         } catch (DocumentParseException e) {
             throw new WriteException("Exception linking and simplifying service: " + service.getName() + " Message: " + e.getMessage(), e);
@@ -61,7 +61,7 @@ public class ServiceLinker implements EntityLinker<Service> {
                 ServiceEnvironmentProperty serviceEnvironmentProperty = new ServiceEnvironmentProperty(
                         service.getName() + "." + propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(13),
                         getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent());
-                targetBundle.getEntities(ServiceEnvironmentProperty.class).put(serviceEnvironmentProperty.getId(), serviceEnvironmentProperty);
+                targetBundle.getEntities(ServiceEnvironmentProperty.class).put(serviceEnvironmentProperty.getName(), serviceEnvironmentProperty);
             }
         }
     }
