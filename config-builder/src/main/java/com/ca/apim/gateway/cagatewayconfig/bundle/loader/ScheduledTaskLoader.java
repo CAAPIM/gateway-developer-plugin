@@ -33,7 +33,7 @@ public class ScheduledTaskLoader implements BundleEntityLoader {
         final String executionDate = getSingleChildElementTextContent(scheduledTask, EXECUTION_DATE);
         final String cronExpression = getSingleChildElementTextContent(scheduledTask, CRON_EXPRESSION);
         final boolean shouldExecuteOnCreate = toBoolean(getSingleChildElementTextContent(scheduledTask, EXECUTE_ON_CREATE));
-        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(scheduledTask, PROPERTIES), PROPERTIES);
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(scheduledTask, PROPERTIES, true), PROPERTIES);
 
         ScheduledTask task = new ScheduledTask();
         task.setId(scheduledTask.getAttribute(ATTRIBUTE_ID));

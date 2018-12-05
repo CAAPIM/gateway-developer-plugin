@@ -22,10 +22,14 @@ repositories {
     mavenCentral()
 }
 
-// The Gateway Connection Config is needed by the gateway-export plugin in order to export from a gateway
+// The Gateway Export Config is needed by the gateway-export plugin in order to export from a gateway
+GatewayExportConfig {
+    folderPath = '/my-solution-folder'
+}
+
+// The Gateway Connection Config is required if setting mentioned in main [build.gradle](https://github.com/ca-api-gateway-examples/gateway-developer-example/blob/master/build.gradle) is not applicable to this folder.
 GatewayConnection {
     url = 'https://<gateway-host>:8443/restman'
-    folderPath = '/my-solution-folder'
 }
 ```
 

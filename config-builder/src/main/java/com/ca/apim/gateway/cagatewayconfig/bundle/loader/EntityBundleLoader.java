@@ -44,7 +44,7 @@ public class EntityBundleLoader {
         try {
             bundleDocument = documentTools.parse(dependencyBundlePath);
         } catch (DocumentParseException e) {
-            throw new BundleLoadException("Could not parse dependency bundle: " + e.getMessage(), e);
+            throw new BundleLoadException("Could not parse dependency bundle '" + dependencyBundlePath + "': " + e.getMessage(), e);
         }
 
         final NodeList nodeList = bundleDocument.getElementsByTagName(ITEM);
