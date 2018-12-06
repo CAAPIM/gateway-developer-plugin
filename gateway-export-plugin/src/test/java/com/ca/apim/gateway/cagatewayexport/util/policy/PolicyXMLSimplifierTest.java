@@ -55,9 +55,9 @@ class PolicyXMLSimplifierTest {
         Element setVariableAssertion = createSetVariableAssertionElement("ENV.test", Base64.encodeBase64String("test".getBytes()));
 
         Bundle resultantBundle = new Bundle();
-        ContextVariableEnvironmentProperty property = new ContextVariableEnvironmentProperty("test", "test");
-        resultantBundle.getContextVariableEnvironmentProperties().put(property.getName(), property);
         String policyName = "policyName";
+        ContextVariableEnvironmentProperty property = new ContextVariableEnvironmentProperty(policyName + ".test", "test");
+        resultantBundle.getContextVariableEnvironmentProperties().put(property.getName(), property);
 
         assertThrows(LinkerException.class, () -> policyXMLSimplifier.simplifySetVariable(policyName, setVariableAssertion, resultantBundle));
     }
