@@ -8,6 +8,8 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.ContextVariableEnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.ServiceEnvironmentProperty;
 import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import org.junit.jupiter.api.Test;
@@ -46,7 +48,7 @@ class BundleDetemplatizerTest {
             "                        </l7:ServiceMappings>\n" +
             "                        <l7:Properties>\n" +
             "                            <l7:Property key=\"property.ENV.myEnvironmentVariable\">\n" +
-            "                                <l7:StringValue>SERVICE_PROPERTY_ENV.myEnvironmentVariable</l7:StringValue>\n" +
+            "                                <l7:StringValue>SERVICE_PROPERTY_ENV.my-gateway-api.myEnvironmentVariable</l7:StringValue>\n" +
             "                            </l7:Property>\n" +
             "                        </l7:Properties>\n" +
             "                    </l7:ServiceDetail>\n" +
@@ -82,12 +84,14 @@ class BundleDetemplatizerTest {
 
     @Test
     void detemplatizeBundleString() {
-        Map<String,EnvironmentProperty> env = new HashMap<>();
-        env.put("myEnvironmentVariable", new EnvironmentProperty("myEnvironmentVariable","abc", Type.LOCAL));
-        env.put("anotherEnvVar", new EnvironmentProperty("anotherEnvVar", "qwe", Type.LOCAL));
+        Map<String,ServiceEnvironmentProperty> serviceEnv = new HashMap<>();
+        serviceEnv.put("my-gateway-api.myEnvironmentVariable", new ServiceEnvironmentProperty("my-gateway-api.myEnvironmentVariable","abc"));
+        Map<String,ContextVariableEnvironmentProperty> contextEnv = new HashMap<>();
+        contextEnv.put("anotherEnvVar", new ContextVariableEnvironmentProperty("my-gateway-api.anotherEnvVar", "qwe"));
         String testIdpGoid = "8263a394a3782fa4984bcffc2363b8cc";
         Bundle bundle = new Bundle();
-        bundle.putAllEnvironmentProperties(env);
+        bundle.putAllServiceEnvironmentProperties(serviceEnv);
+        bundle.putAllContextVariableEnvironmentProperties(contextEnv);
         bundle.putAllIdentityProviders(ImmutableMap.of("test-IDP", new IdentityProvider.Builder().id(testIdpGoid).build()));
 
         BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(bundle);
@@ -155,10 +159,10 @@ class BundleDetemplatizerTest {
 
     @Test
     void detemplatizeBundleStringMissingEnv() {
-        Map<String,EnvironmentProperty> env = new HashMap<>();
-        env.put("myEnvironmentVariable", new EnvironmentProperty("myEnvironmentVariable","abc", Type.LOCAL));
+        Map<String,ContextVariableEnvironmentProperty> env = new HashMap<>();
+        env.put("myEnvironmentVariable", new ContextVariableEnvironmentProperty("myEnvironmentVariable","abc"));
         Bundle bundle = new Bundle();
-        bundle.putAllEnvironmentProperties(env);
+        bundle.putAllContextVariableEnvironmentProperties(env);
 
         BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(bundle);
         assertThrows(BundleDetemplatizeException.class, () -> bundleDetemplatizer.detemplatizeBundleString(bundleXml));

@@ -91,6 +91,14 @@ public class Bundle {
         this.getEntities(EnvironmentProperty.class).putAll(properties);
     }
 
+    public void putAllServiceEnvironmentProperties(@NotNull Map<String, ServiceEnvironmentProperty> properties) {
+        this.getEntities(ServiceEnvironmentProperty.class).putAll(properties);
+    }
+
+    public void putAllContextVariableEnvironmentProperties(@NotNull Map<String, ContextVariableEnvironmentProperty> properties) {
+        this.getEntities(ContextVariableEnvironmentProperty.class).putAll(properties);
+    }
+
     public Map<String, EnvironmentProperty> getEnvironmentProperties() {
         return getEntities(EnvironmentProperty.class);
     }

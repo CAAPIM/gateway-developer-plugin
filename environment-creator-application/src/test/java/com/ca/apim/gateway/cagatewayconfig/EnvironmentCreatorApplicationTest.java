@@ -123,8 +123,8 @@ class EnvironmentCreatorApplicationTest {
                         "      }\n" +
                         "  }")
                 .put("ENV.PASSWORD.my_password", "my_secret_password")
-                .put("ENV.PROPERTY.myEnvironmentVariable", "my-service-property-value")
-                .put("ENV.PROPERTY.anotherEnvVar", "context-variable-value")
+                .put("ENV.SERVICE_PROPERTY.my-gateway-api.myEnvironmentVariable", "my-service-property-value")
+                .put("ENV.CONTEXT_VARIABLE_PROPERTY.anotherEnvVar", "context-variable-value")
                 .build();
 
         new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath()).run();

@@ -136,7 +136,7 @@ class PolicyEntityBuilderTest {
         assertEquals("ENV.my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
 
         Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
-        assertEquals("ENV.my-var", expressionElement.getAttribute(PolicyEntityBuilder.ENV_PARAM_NAME));
+        assertEquals("ENV." + prefix + ".my-var", expressionElement.getAttribute(PolicyEntityBuilder.ENV_PARAM_NAME));
         assertFalse(expressionElement.hasAttribute(PolicyEntityBuilder.STRING_VALUE));
     }
 

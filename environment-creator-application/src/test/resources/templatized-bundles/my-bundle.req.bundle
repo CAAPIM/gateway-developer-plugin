@@ -28,7 +28,7 @@
                         </l7:ServiceMappings>
                         <l7:Properties>
                             <l7:Property key="property.ENV.myEnvironmentVariable">
-                                <l7:StringValue>SERVICE_PROPERTY_ENV.myEnvironmentVariable</l7:StringValue>
+                                <l7:StringValue>SERVICE_PROPERTY_ENV.my-gateway-api.myEnvironmentVariable</l7:StringValue>
                             </l7:Property>
                         </l7:Properties>
                     </l7:ServiceDetail>

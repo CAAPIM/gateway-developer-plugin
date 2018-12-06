@@ -333,7 +333,7 @@ class ServiceEntityBuilderTest {
                         checkSoapVersion = true;
                         break;
                     case propKey:
-                        assertEquals("SERVICE_PROPERTY_ENV.key.environment", getSingleElement((Element) property, STRING_VALUE).getTextContent());
+                        assertEquals("SERVICE_PROPERTY_ENV." + expectedServiceName + ".key.environment", getSingleElement((Element) property, STRING_VALUE).getTextContent());
                         checkPropKey2 = true;
                         break;
                 }
