@@ -72,7 +72,11 @@ public class EncassEntityBuilder implements EntityBuilder {
                 buildResults(encass, document)
         );
 
-        buildAndAppendPropertiesElement(ImmutableMap.of(PALETTE_FOLDER, INTERNAL_ASSERTIONS), document, encassAssertionElement);
+        buildAndAppendPropertiesElement(
+                encass.getProperties() == null ?
+                        ImmutableMap.of(PALETTE_FOLDER, INTERNAL_ASSERTIONS) :
+                        encass.getProperties(),
+                document, encassAssertionElement);
 
         return new Entity(ENCAPSULATED_ASSERTION_TYPE, name, id, encassAssertionElement);
     }

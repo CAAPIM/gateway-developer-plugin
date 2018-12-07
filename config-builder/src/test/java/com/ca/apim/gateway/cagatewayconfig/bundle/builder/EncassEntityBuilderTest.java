@@ -15,11 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.stream.Collectors.toList;
@@ -99,6 +97,12 @@ class EncassEntityBuilderTest {
         assertEquals(encassGuid, getSingleChildElementTextContent(xml, GUID));
         assertNotNull(getSingleChildElement(xml, POLICY_REFERENCE));
         assertEquals(policyId, getSingleChildElement(xml, POLICY_REFERENCE).getAttribute(ATTRIBUTE_ID));
+        assertNotNull(getSingleChildElement(xml, PROPERTIES));
+        Map<String, Object> props = mapPropertiesElements(getSingleChildElement(xml, PROPERTIES), PROPERTIES);
+        assertEquals(3, props.size());
+        assertEquals("internalAssertions", props.get("paletteFolder"));
+        assertEquals("someImage", props.get("paletteIconResourceName"));
+        assertEquals("false", props.get("allowTracing"));
         Element arguments = getSingleChildElement(xml, ENCAPSULATED_ARGUMENTS);
         assertNotNull(arguments);
         List<Element> argumentElements = getChildElements(arguments, ENCAPSULATED_ASSERTION_ARGUMENT);
@@ -151,6 +155,10 @@ class EncassEntityBuilderTest {
         result2.setType("message");
         encass.getResults().add(result1);
         encass.getResults().add(result2);
+        encass.setProperties(ImmutableMap.of(
+                "paletteFolder", "internalAssertions",
+                "paletteIconResourceName", "someImage",
+                "allowTracing", "false"));
         return encass;
     }
 

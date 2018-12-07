@@ -62,7 +62,13 @@ class EncassLoaderTest {
                 "  - name: \"goodbye\"\n" +
                 "    type: \"string\"\n" +
                 "  - name: \"goodbye-again\"\n" +
-                "    type: \"message\"\n";
+                "    type: \"message\"\n" +
+                "  properties:\n" +
+                "    paletteFolder: \"policyLogic\"\n" +
+                "    paletteIconResourceName: \"OversizedElement16.gif\"\n" +
+                "    allowTracing: \"false\"\n" +
+                "    description: \"some description\"\n" +
+                "    passMetricsToParent: \"false\"\n";
         load(yaml, "yml", false);
     }
 
@@ -90,7 +96,14 @@ class EncassLoaderTest {
                 "            \"name\": \"goodbye-again\",\n" +
                 "            \"type\": \"message\"\n" +
                 "         }\n" +
-                "      ]\n" +
+                "      ],\n" +
+                "      \"properties\": {\n" +
+                "         \"paletteFolder\": \"policyLogic\",\n" +
+                "         \"paletteIconResourceName\": \"OversizedElement16.gif\",\n" +
+                "         \"allowTracing\": \"false\",\n" +
+                "         \"description\": \"some description\",\n" +
+                "         \"passMetricsToParent\": \"false\"\n" +
+                "      }\n" +
                 "   }\n" +
                 "}";
         load(json, "json", false);
@@ -179,6 +192,12 @@ class EncassLoaderTest {
         assertEquals(2, encass.getResults().size());
         encass.getResults().forEach(e -> assertTrue((e.getName().equals("goodbye") && e.getType().equals("string")) ||
                 (e.getName().equals("goodbye-again") && e.getType().equals("message"))));
+        assertEquals(5, encass.getProperties().size());
+        assertEquals("policyLogic", encass.getProperties().get("paletteFolder"));
+        assertEquals("OversizedElement16.gif", encass.getProperties().get("paletteIconResourceName"));
+        assertEquals("false", encass.getProperties().get("allowTracing"));
+        assertEquals("some description", encass.getProperties().get("description"));
+        assertEquals("false", encass.getProperties().get("passMetricsToParent"));
     }
 
 }

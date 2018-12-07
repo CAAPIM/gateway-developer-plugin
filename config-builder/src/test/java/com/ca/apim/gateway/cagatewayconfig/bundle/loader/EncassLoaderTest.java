@@ -17,6 +17,7 @@ import org.w3c.dom.Element;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.function.Function.identity;
@@ -89,6 +90,8 @@ class EncassLoaderTest {
         EncassResult result = entity.getResults().iterator().next();
         assertEquals("result", result.getName());
         assertEquals("string", result.getType());
+        assertEquals("internalAssertions", entity.getProperties().get("paletteFolder"));
+        assertNull(entity.getProperties().get("policyGuid"));
     }
 
     private static Element createEncassXml(Document document) {
@@ -135,6 +138,10 @@ class EncassLoaderTest {
                         )
                 )
         );
+        buildAndAppendPropertiesElement(ImmutableMap.of(
+                "paletteFolder", "internalAssertions",
+                "policyGuid", "some-guid"),
+                document, encassElement);
 
         return createElementWithChildren(
                 document,
