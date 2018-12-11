@@ -54,7 +54,6 @@ class JmsDestinationLoaderTest {
     void testLoadInboundJmsDestinationYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
                 "  isInbound: true\n" + 
-                "  isTemplate: false\n" +
                 "  providerType: \"TIBCO EMS\"\n" +
                 "  initialContextFactoryClassName: \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\"\n" +
                 "  jndiUrl: \"tibjmsnaming://machinename:7222\"\n" + 
@@ -76,8 +75,7 @@ class JmsDestinationLoaderTest {
     void testLoadOutboundJmsDestinationJson() throws IOException {
         String json = "{\n" +
                 "  \"" + JMS_DESTINATION_NAME + "\" : {\n" +
-                "    \"isInbound\" : true,\n" +
-                "    \"isTemplate\" : false,\n" +
+                "    \"isInbound\" : false,\n" +
                 "    \"providerType\" : \"TIBCO EMS\",\n" +
                 "    \"initialContextFactoryClassName\" : \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\",\n" +
                 "    \"jndiUrl\" : \"tibjmsnaming://machinename:7222\",\n" +
@@ -115,7 +113,6 @@ class JmsDestinationLoaderTest {
     void testLoadInboundJmsDestinationMalformedYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
                 "  isInbound true\n" + // Missing colon
-                "  isTemplate: false\n" +
                 "  providerType: \"TIBCO EMS\"\n" +
                 "  initialContextFactoryClassName: \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\"\n" +
                 "  jndiUrl: \"tibjmsnaming://machinename:7222\"\n" +
@@ -137,8 +134,7 @@ class JmsDestinationLoaderTest {
     void testLoadOutboundJmsDestinationMalformedJson() throws IOException {
         String json = "{\n" +
                 "  \"" + JMS_DESTINATION_NAME + "\" : {\n" +
-                "    \"isInbound\" : true,\n" +
-                "    \"isTemplate\" : false,\n" +
+                "    \"isInbound\" : false,\n" +
                 "    \"providerType\" : \"TIBCO EMS\",\n" +
                 "    \"initialContextFactoryClassName\" : \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\",\n" +
                 "    \"jndiUrl\" : \"tibjmsnaming://machinename:7222\",\n" +
@@ -176,7 +172,6 @@ class JmsDestinationLoaderTest {
     void testLoadInboundJmsDestination_JndiPasswordRefAndPasswordYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
                 "  isInbound: true\n" +
-                "  isTemplate: false\n" +
                 "  providerType: \"TIBCO EMS\"\n" +
                 "  initialContextFactoryClassName: \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\"\n" +
                 "  jndiUrl: \"tibjmsnaming://machinename:7222\"\n" +
@@ -199,8 +194,7 @@ class JmsDestinationLoaderTest {
     void testLoadOutboundJmsDestination_DestinationPasswordRefAndPasswordJson() throws IOException {
         String json = "{\n" +
                 "    \"" + JMS_DESTINATION_NAME + "\" : {\n" +
-                "    \"isInbound\" : true,\n" +
-                "    \"isTemplate\" : false,\n" +
+                "    \"isInbound\" : false,\n" +
                 "    \"providerType\" : \"TIBCO EMS\",\n" +
                 "    \"initialContextFactoryClassName\" : \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\",\n" +
                 "    \"jndiUrl\" : \"tibjmsnaming://machinename:7222\",\n" +
@@ -250,21 +244,20 @@ class JmsDestinationLoaderTest {
         } else {
             loadJmsDestinations(loader, bundle, rootProjectDir);
         }
-        checkJmsDestination(bundle);
+        checkJmsDestination(bundle, isInbound);
     }
 
     private static void loadJmsDestinations(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
         loader.load(bundle, rootProjectDir.getRoot());
     }
 
-    private static void checkJmsDestination(Bundle bundle) {
+    private static void checkJmsDestination(Bundle bundle, boolean isInbound) {
         assertFalse(bundle.getJmsDestinations().isEmpty(), "No JMS destinations loaded");
         assertEquals(1, bundle.getJmsDestinations().size(), () -> "Expected 1 JMS destinations, found " + bundle.getJmsDestinations().size());
         
         JmsDestination jmsDestination = bundle.getJmsDestinations().get(JMS_DESTINATION_NAME);
         assertNotNull(jmsDestination);
-        assertTrue(jmsDestination.isInbound());
-        assertFalse(jmsDestination.isTemplate());
+        assertEquals(isInbound, jmsDestination.isInbound());
         assertEquals("TIBCO EMS", jmsDestination.getProviderType());
         assertEquals("com.tibco.tibjms.naming.TibjmsInitialContextFactory", jmsDestination.getInitialContextFactoryClassName());
         assertEquals("tibjmsnaming://machinename:7222", jmsDestination.getJndiUrl());
@@ -283,5 +276,9 @@ class JmsDestinationLoaderTest {
         assertEquals("my-destination-username", jmsDestination.getDestinationUsername());
         assertEquals("my-destination-password-ref", jmsDestination.getDestinationPasswordRef());
         assertNull(jmsDestination.getDestinationPassword());
+        
+        if (isInbound) {
+            // (kpak) - test
+        }
     }
 }

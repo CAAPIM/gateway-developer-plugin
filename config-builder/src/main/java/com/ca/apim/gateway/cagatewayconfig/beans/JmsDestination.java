@@ -31,7 +31,6 @@ public class JmsDestination extends GatewayEntity {
     
     // Basics
     private boolean isInbound; // (kpak) Remove. Check for existence of inboundDetail or outboundDetail.
-    private boolean isTemplate;  // (kpak) Remove. Move to OutboundJmsDestinationDetail
     private String providerType;
     
     // JNDI
@@ -63,7 +62,6 @@ public class JmsDestination extends GatewayEntity {
         setName(builder.name);
         setId(builder.id);
         isInbound = builder.isInbound;
-        isTemplate = builder.isTemplate;
         providerType = builder.providerType;
         initialContextFactoryClassName = builder.initialContextFactoryClassName;
         jndiUrl = builder.jndiUrl;
@@ -87,14 +85,6 @@ public class JmsDestination extends GatewayEntity {
 
     public void setIsInbound(boolean isInbound) {
         this.isInbound = isInbound;
-    }
-
-    public boolean isTemplate() {
-        return isTemplate;
-    }
-
-    public void setIsTemplate(boolean isTemplate) {
-        this.isTemplate = isTemplate;
     }
 
     public String getProviderType() {
@@ -255,7 +245,6 @@ public class JmsDestination extends GatewayEntity {
         private String name;
         private String id;
         private boolean isInbound;
-        private boolean isTemplate;
         private String providerType;
         private String initialContextFactoryClassName;
         private String jndiUrl;
@@ -284,11 +273,6 @@ public class JmsDestination extends GatewayEntity {
 
         public Builder isInbound(boolean isInbound) {
             this.isInbound = isInbound;
-            return this;
-        }
-
-        public Builder isTemplate(boolean isTemplate) {
-            this.isTemplate = isTemplate;
             return this;
         }
 

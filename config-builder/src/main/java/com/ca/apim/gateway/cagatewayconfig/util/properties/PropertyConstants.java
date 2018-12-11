@@ -56,12 +56,26 @@ public class PropertyConstants {
     public static final String JNDI_USERNAME = "java.naming.security.principal";
     public static final String JNDI_PASSWORD = "java.naming.security.credentials";
 
-    public static final String DESTINATION_TYPE = "type"; // Topic or Queue
+    public static final String DESTINATION_TYPE = "type";
     public static final String CONNECTION_FACTORY_NAME = "queue.connectionFactoryName";
     
     public static final String REPLY_TYPE = "replyType";
     public static final String REPLY_QUEUE_NAME = "replyToQueueName";
     public static final String USE_REQUEST_CORRELATION_ID = "useRequestCorrelationId";
+
+    // JMS Destination - inbound specific
+    public static final String INBOUND_ACKNOWLEDGEMENT_TYPE = "inbound.acknowledgementType";
+    public static final String IS_HARDWIRED_SERVICE = "com.l7tech.server.jms.prop.hardwired.service.bool";
+    public static final String HARDWIRED_SERVICE_ID = "com.l7tech.server.jms.prop.hardwired.service.id";
+    public static final String SOAP_ACTION_MSG_PROP_NAME = "com.l7tech.server.jms.soapAction.msgPropName";
+    public static final String CONTENT_TYPE_SOURCE = "com.l7tech.server.jms.prop.contentType.source";
+    public static final String CONTENT_TYPE_VALUE = "com.l7tech.server.jms.prop.contentType.value";
+    public static final String INBOUND_FAILURE_QUEUE_NAME = "inbound.failureQueueName";
+    public static final String IS_DEDICATED_CONSUMER_CONNECTION = "com.l7tech.server.jms.prop.dedicated.consumer.bool";
+    public static final String DEDICATED_CONSUMER_CONNECTION_SIZE = "com.l7tech.server.jms.prop.dedicated.consumer.size";
+    public static final String INBOUND_MAX_SIZE = "inbound.maximumSize"; 
+    
+    // JMS Destination - outbound specific
     public static final String OUTBOUND_MESSAGE_TYPE = "outbound.MessageType";
     public static final String CONNECTION_POOL_ENABLED = "com.l7tech.server.jms.prop.connection.pool.enable";
     public static final String CONNECTION_POOL_SIZE = "com.l7tech.server.jms.prop.connection.pool.size";
@@ -71,6 +85,7 @@ public class PropertyConstants {
     public static final String SESSION_POOL_MAX_IDLE = "com.l7tech.server.jms.prop.max.session.idle";
     public static final String SESSION_POOL_MAX_WAIT = "com.l7tech.server.jms.prop.session.pool.max.wait";
     
+<<<<<<< HEAD
     public static final String INBOUND_ACK_TYPE = "inbound.acknowledgementType";
     public static final String INBOUND_FAILURE_QUEUE_NAME = "inbound.failureQueueName";
     public static final String INBOUND_MAX_SIZE = "inbound.maximumSize";
@@ -95,5 +110,7 @@ public class PropertyConstants {
     
 =======
 >>>>>>> Add outbound details. Still in progress.
+=======
+>>>>>>> Add inbound details. Still in progress.
     private PropertyConstants() { }
 }

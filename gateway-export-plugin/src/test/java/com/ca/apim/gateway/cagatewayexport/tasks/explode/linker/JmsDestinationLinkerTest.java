@@ -6,12 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
-import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ServiceResolutionSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.junit.jupiter.api.Test;
 
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createFolder;
+import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createService;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JmsDestinationLinkerTest {
@@ -24,7 +25,7 @@ class JmsDestinationLinkerTest {
     
     private JmsDestinationLinker linker = new JmsDestinationLinker();
 
-    // (kpak) - Test private key(s), and service. 
+    // (kpak) - Test private key(s) 
 
     @Test
     void testGetEntityClass() {
@@ -130,6 +131,59 @@ class JmsDestinationLinkerTest {
         assertNull(jmsDestination.getJndiPassword());
         assertNull(jmsDestination.getDestinationPasswordRef());
         assertNull(jmsDestination.getDestinationPassword());
+    }
+    
+    @Test
+    void testLinkInboundAssociatedService() {
+        Bundle bundle = new Bundle();
+        Folder folder1 = createFolder("my-folder", "F1", null);
+        Service service1 = createService("associated-service-name", "associated-service-id", folder1, null, "");
+        bundle.addEntity(service1);
+
+        final JmsDestination jmsDestination = createJmsDestination(null,null);
+        jmsDestination.setIsInbound(true);
+        ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings(
+                "associated-service-id", null, null, null);
+        InboundJmsDestinationDetail inboundDetails = new InboundJmsDestinationDetail(
+                InboundJmsDestinationDetail.AcknowledgeType.ON_TAKE,
+                JmsDestinationDetail.ReplyType.NO_REPLY,
+                null,
+                false,
+                serviceResolutionSettings,
+                null,
+                true,
+                null,
+                null);
+        jmsDestination.setInboundDetail(inboundDetails);
+        
+        linker.link(jmsDestination, bundle, bundle);
+
+        assertNotNull(jmsDestination.getInboundDetail());
+        assertNotNull(jmsDestination.getInboundDetail().getServiceResolutionSettings());
+        assertEquals("associated-service-id", jmsDestination.getInboundDetail().getServiceResolutionSettings().getServiceRef());
+    }
+    
+    @Test
+    void testLinkMissingInboundAssociatedService() {
+        Bundle bundle = new Bundle();
+        
+        final JmsDestination jmsDestination = createJmsDestination(null,null);
+        jmsDestination.setIsInbound(true);
+        ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings(
+                "associated-service-id", null, null, null);
+        InboundJmsDestinationDetail inboundDetails = new InboundJmsDestinationDetail(
+                InboundJmsDestinationDetail.AcknowledgeType.ON_TAKE,
+                JmsDestinationDetail.ReplyType.NO_REPLY,
+                null,
+                false,
+                serviceResolutionSettings,
+                null,
+                true,
+                null,
+                null);
+        jmsDestination.setInboundDetail(inboundDetails);
+
+        assertThrows(LinkerException.class, () -> linker.link(jmsDestination, new Bundle(), new Bundle()));
     }
     
     private static JmsDestination createJmsDestination(

@@ -8,12 +8,15 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail;
+import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType;
+import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ContentTypeSource;
+import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ServiceResolutionSettings;
 import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
+import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ConnectionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.MessageFormat;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType;
-import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ReplyType;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.SessionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
@@ -42,6 +45,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         final Element jmsDestinationDetailEle = getSingleChildElement(jmsDestinationEle, JMS_DESTINATION_DETAIL);
         final String name = getSingleChildElementTextContent(jmsDestinationDetailEle, NAME);
         final boolean isInbound = toBoolean(getSingleChildElementTextContent(jmsDestinationDetailEle, INBOUND));
+        final boolean isEnabled = toBoolean(getSingleChildElementTextContent(jmsDestinationDetailEle, ENABLED));
         final boolean isTemplate = toBoolean(getSingleChildElementTextContent(jmsDestinationDetailEle, TEMPLATE));
         final Map<String, Object> jmsDestinationDetailProps = mapPropertiesElements(getSingleChildElement(jmsDestinationDetailEle, PROPERTIES, false), PROPERTIES);
         
@@ -72,7 +76,6 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         jmsDestination.setId(id);
         jmsDestination.setName(name);
         jmsDestination.setIsInbound(isInbound);
-        jmsDestination.setIsTemplate(isTemplate); // (kpak) - remove
         jmsDestination.setProviderType(providerType);
         jmsDestination.setInitialContextFactoryClassName(initialContextFactoryClassName);
         jmsDestination.setJndiUrl(jndiUrl);
@@ -87,7 +90,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         jmsDestination.setDestinationPassword(destinationPassword);
 
         if (isInbound) {
-            jmsDestination.setInboundDetail(this.loadInboundDetail(jmsDestinationDetailProps));
+            jmsDestination.setInboundDetail(this.loadInboundDetail(isEnabled, jmsDestinationDetailProps, contextPropertiesTemplateProps));
         } else {
             jmsDestination.setOutboundDetail(this.loadOutboundDetail(isTemplate, jmsDestinationDetailProps, contextPropertiesTemplateProps));
         }
@@ -95,9 +98,38 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         bundle.getJmsDestinations().put(name, jmsDestination);
     }
 
-    private InboundJmsDestinationDetail loadInboundDetail(Map<String, Object> jmsDestinationDetailProps) {
-        // (kpak) - implement
-        return new InboundJmsDestinationDetail();
+    private InboundJmsDestinationDetail loadInboundDetail(
+            boolean isEnabled,
+            Map<String, Object> jmsDestinationDetailProps,
+            Map<String, Object> contextPropertiesTemplateProps) {
+        
+        final AcknowledgeType acknowledgeType = AcknowledgeType.fromType(
+                (String) jmsDestinationDetailProps.remove(INBOUND_ACKNOWLEDGEMENT_TYPE));
+        final ReplyType replyType = ReplyType.fromType(
+                (String) jmsDestinationDetailProps.remove(REPLY_TYPE));
+        final String replyToQueueName = (String) jmsDestinationDetailProps.remove(REPLY_QUEUE_NAME);
+        final boolean useRequestCorrelationId = toBoolean((String) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID));
+        
+        final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings(
+                (String) contextPropertiesTemplateProps.remove(HARDWIRED_SERVICE_ID),
+                (String) contextPropertiesTemplateProps.remove(SOAP_ACTION_MSG_PROP_NAME),
+                ContentTypeSource.fromType((String) contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE)),
+                (String) contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE));
+        
+        String failureQueueName = (String) jmsDestinationDetailProps.remove(INBOUND_FAILURE_QUEUE_NAME);
+        Integer numOfConsumerConnections = (Integer) contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE);
+        Integer maxMessageSizeBytes = (Integer) jmsDestinationDetailProps.remove(INBOUND_MAX_SIZE);
+        
+        return new InboundJmsDestinationDetail(
+                acknowledgeType,
+                replyType,
+                replyToQueueName,
+                useRequestCorrelationId,
+                serviceResolutionSettings,
+                failureQueueName,
+                isEnabled,
+                numOfConsumerConnections,
+                maxMessageSizeBytes);
     }
     
     private OutboundJmsDestinationDetail loadOutboundDetail(
@@ -108,7 +140,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         final ReplyType replyType = ReplyType.fromType(
                 (String) jmsDestinationDetailProps.remove(REPLY_TYPE));
         final String replyQueueName = (String) jmsDestinationDetailProps.remove(REPLY_QUEUE_NAME);
-        final boolean useRequestCorrelationId = toBoolean((String) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID)); // (kpak): Boolean or String?
+        final boolean useRequestCorrelationId = toBoolean((String) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID));
         final MessageFormat messageFormat = MessageFormat.fromFormat(
                 (String) jmsDestinationDetailProps.remove(OUTBOUND_MESSAGE_TYPE));
         
@@ -116,7 +148,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         ConnectionPoolingSettings connectionPoolingSettings = null;
         SessionPoolingSettings sessionPoolingSettings = null;
 
-        final boolean isConnectionPool = toBoolean((String) contextPropertiesTemplateProps.remove(CONNECTION_POOL_ENABLED)); // (kpak): Boolean or String?
+        final boolean isConnectionPool = toBoolean((String) contextPropertiesTemplateProps.remove(CONNECTION_POOL_ENABLED));
         if (isConnectionPool) {
             poolingType = PoolingType.CONNECTION;
             connectionPoolingSettings = new ConnectionPoolingSettings(

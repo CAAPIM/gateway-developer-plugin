@@ -20,9 +20,9 @@ import org.w3c.dom.Element;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.MessageFormat.BYTES;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
-import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -60,7 +60,6 @@ class JmsDestinationLoaderTest {
         assertEquals("my-jms-endpoint", jmsDestination.getName());
         assertEquals("id-1", jmsDestination.getId());
         assertEquals(isInbound, jmsDestination.isInbound());
-        assertFalse(jmsDestination.isTemplate());
         assertEquals("TIBCO EMS", jmsDestination.getProviderType());
         assertEquals("com.tibco.tibjms.naming.TibjmsInitialContextFactory", jmsDestination.getInitialContextFactoryClassName());
         assertEquals("tibjmsnaming://machinename:7222", jmsDestination.getJndiUrl());
@@ -98,6 +97,7 @@ class JmsDestinationLoaderTest {
         OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
         assertNotNull(outboundDetail);
         
+        assertFalse(outboundDetail.isTemplate());
         assertEquals(SPECIFIED_QUEUE, outboundDetail.getReplyType());
         assertEquals("my-reply-Q", outboundDetail.getReplyToQueueName());
         assertFalse(outboundDetail.useRequestCorrelationId());

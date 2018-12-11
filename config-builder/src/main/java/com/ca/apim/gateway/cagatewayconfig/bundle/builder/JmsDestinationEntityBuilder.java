@@ -6,17 +6,17 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
-import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ServiceResolutionSettings;
+import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ConnectionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType;
-import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ReplyType;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.SessionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -28,8 +28,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.ON_COMPLETION;
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
-import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.JMS_DESTINATION_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -77,9 +78,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 ImmutableMap.of(ATTRIBUTE_ID, id),
                 createElementWithTextContent(document, NAME, name),
                 createElementWithTextContent(document, JMS_DESTINATION_NAME, jmsDestination.getDestinationName()),
-                createElementWithTextContent(document, INBOUND, isInbound),
-                createElementWithTextContent(document, ENABLED, true), // (kpak) - implement
-                createElementWithTextContent(document, TEMPLATE, jmsDestination.isTemplate()) // (kpak) - remove
+                createElementWithTextContent(document, INBOUND, isInbound)
         );
         
         Map<String, Object> jmsDestinationDetailProps = new HashMap<>();
@@ -99,9 +98,89 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         } else {
             contextPropertiesTemplateProps.put(JNDI_PASSWORD, jmsDestination.getJndiPassword());
         }
-        
-        if (!isInbound) {
+
+        boolean isEnabled = true;
+        boolean isTemplate = false;
+
+        if (isInbound) {
+            InboundJmsDestinationDetail inboundDetail = jmsDestination.getInboundDetail();
+            isEnabled = inboundDetail.isEnabled();
+            
+            jmsDestinationDetailProps.put(INBOUND_ACKNOWLEDGEMENT_TYPE, inboundDetail.getAcknowledgeType());
+            ReplyType replyType = inboundDetail.getReplyType();
+            jmsDestinationDetailProps.put(REPLY_TYPE, replyType);
+            
+            if (SPECIFIED_QUEUE.equals(replyType)) {
+                jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, inboundDetail.getReplyToQueueName());
+            }
+
+            jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, inboundDetail.useRequestCorrelationId());
+
+            ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
+            if (serviceResolutionSettings != null) {
+                String serviceRef = serviceResolutionSettings.getServiceRef();
+                if (serviceRef != null) {
+                    Service service = bundle.getServices().get(serviceRef);
+                    if (service == null) {
+                        throw new EntityBuilderException("Could not find associated Service for inbound JMS Destination: " + name + ". Service Path: " + serviceRef);
+
+                    }
+                    contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, true);
+                    contextPropertiesTemplateProps.put(HARDWIRED_SERVICE_ID, service.getId());
+                } else {
+                    contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, false);
+                }
+
+                putToMapIfValueIsNotNull(
+                        contextPropertiesTemplateProps,
+                        SOAP_ACTION_MSG_PROP_NAME,
+                        serviceResolutionSettings.getSoapActionMessagePropertyName());
+
+                String contentTypeSource;
+                switch (serviceResolutionSettings.getContentTypeSource()) {
+                    case NONE:
+                        contentTypeSource = "";
+                        break;
+                    case FREE_FORM:
+                        contentTypeSource = "com.l7tech.server.jms.prop.contentType.freeform";
+                        break;
+                    case JMS_PROPERTY:
+                        contentTypeSource = "com.l7tech.server.jms.prop.contentType.header";
+                        break;
+                    default:
+                        contentTypeSource = "";
+                        break;
+                }
+                contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, contentTypeSource);
+                
+                String contentType = serviceResolutionSettings.getContentType();
+                if (contentType == null) {
+                    contentType = "";
+                }
+                contextPropertiesTemplateProps.put(CONTENT_TYPE_VALUE, contentType);
+            }
+            
+            if (ON_COMPLETION.equals(inboundDetail.getAcknowledgeType())){
+                putToMapIfValueIsNotNull(
+                        jmsDestinationDetailProps,
+                        INBOUND_FAILURE_QUEUE_NAME,
+                        inboundDetail.getFailureQueueName());
+            }
+
+            contextPropertiesTemplateProps.put(IS_DEDICATED_CONSUMER_CONNECTION, true);
+            Integer numOfConsumerConnections = inboundDetail.getNumOfConsumerConnections();
+            if (numOfConsumerConnections == null) {
+                numOfConsumerConnections = new Integer(5);
+            }
+            contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, numOfConsumerConnections);
+            
+            putToMapIfValueIsNotNull(
+                    jmsDestinationDetailProps,
+                    INBOUND_MAX_SIZE,
+                    inboundDetail.getMaxMessageSizeBytes());
+        } else {
             OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
+            isTemplate = outboundDetail.isTemplate();
             ReplyType replyType = outboundDetail.getReplyType();
             jmsDestinationDetailProps.put(REPLY_TYPE, replyType);
             
@@ -146,12 +225,10 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                     }
                 }
             }
-        } else {
-            // (kpak) - inbound
-            // destinationDetailsProps.put("inbound.acknowledgementType", "");
-            // destinationDetailsProps.put("inbound.failureQueueName", "");
-            // destinationDetailsProps.put("inbound.maximumSize", "");
         }
+
+        jmsDestinationDetailEle.appendChild(createElementWithTextContent(document, ENABLED, isEnabled));
+        jmsDestinationDetailEle.appendChild(createElementWithTextContent(document, TEMPLATE, isTemplate));
         buildAndAppendPropertiesElement(jmsDestinationDetailProps, document, jmsDestinationDetailEle);
 
         // Build JMS Connection element.
@@ -161,7 +238,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 JMS_CONNECTION,
                 ImmutableMap.of(ATTRIBUTE_ID, jmsConnectionEleId),
                 createElementWithTextContent(document, DESTINATION_TYPE, jmsDestination.getProviderType()),
-                createElementWithTextContent(document, TEMPLATE, jmsDestination.isTemplate())
+                createElementWithTextContent(document, TEMPLATE, isTemplate)
         );
 
         Map<String, Object> jmsConnectionProps = new HashMap<>();
@@ -191,5 +268,14 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
     @Override
     public @NotNull Integer getOrder() {
         return ORDER;
+    }
+
+    private static void putToMapIfValueIsNotNull(
+            @NotNull Map<String, Object> map,
+            @NotNull String key,
+            @Nullable Object value) {
+        if (value != null) {
+            map.put(key, value);
+        }
     }
 }

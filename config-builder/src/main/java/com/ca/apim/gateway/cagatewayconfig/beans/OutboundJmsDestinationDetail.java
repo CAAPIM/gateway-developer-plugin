@@ -6,16 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
 import static java.util.Arrays.stream;
 
-public class OutboundJmsDestinationDetail {
+public class OutboundJmsDestinationDetail extends JmsDestinationDetail {
     
     private boolean isTemplate;
-    private ReplyType replyType;
-    private String replyToQueueName;
-    private boolean useRequestCorrelationId;
     private MessageFormat messageFormat;
     private PoolingType poolingType;
     private SessionPoolingSettings sessionPoolingSettings;
@@ -33,10 +28,8 @@ public class OutboundJmsDestinationDetail {
             PoolingType poolingType,
             SessionPoolingSettings sessionPoolingSettings,
             ConnectionPoolingSettings connectionPoolingSettings) {
+        super(replyType, replyToQueueName, useRequestCorrelationId);
         this.isTemplate = isTemplate;
-        this.replyType = replyType;
-        this.replyToQueueName = replyToQueueName;
-        this.useRequestCorrelationId = useRequestCorrelationId;
         this.messageFormat = messageFormat;
         this.poolingType = poolingType;
         this.sessionPoolingSettings = sessionPoolingSettings;
@@ -49,30 +42,6 @@ public class OutboundJmsDestinationDetail {
 
     public void setIsTemplate(boolean isTemplate) {
         this.isTemplate = isTemplate;
-    }
-
-    public ReplyType getReplyType() {
-        return replyType;
-    }
-
-    public void setReplyType(ReplyType replyType) {
-        this.replyType = replyType;
-    }
-
-    public String getReplyToQueueName() {
-        return replyToQueueName;
-    }
-
-    public void setReplyToQueueName(String replyToQueueName) {
-        this.replyToQueueName = replyToQueueName;
-    }
-
-    public boolean useRequestCorrelationId() {
-        return useRequestCorrelationId;
-    }
-
-    public void setUseRequestCorrelationId(boolean useRequestCorrelationId) {
-        this.useRequestCorrelationId = useRequestCorrelationId;
     }
 
     public MessageFormat getMessageFormat() {
@@ -179,26 +148,6 @@ public class OutboundJmsDestinationDetail {
 
         public void setMaxWaitMs(Integer maxWaitMs) {
             this.maxWaitMs = maxWaitMs;
-        }
-    }
-    
-    public enum ReplyType {
-        AUTOMATIC("AUTOMATIC"),
-        NO_REPLY("NO_REPLY"),
-        SPECIFIED_QUEUE("REPLY_TO_OTHER");
-        
-        private String type;
-
-        ReplyType(String type) {
-            this.type = type;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public static ReplyType fromType(String type) {
-            return stream(values()).filter(c -> c.type.equals(type)).findFirst().orElse(null);
         }
     }
 

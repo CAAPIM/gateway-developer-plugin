@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,8 +33,9 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
     public void link(JmsDestination entity, Bundle bundle, Bundle targetBundle) {
         linkJndiStoredPassword(entity, bundle);
         linkDestinationStoredPassword(entity, bundle);
+        linkInboundAssociatedService(entity, bundle);
         
-        // (kpak): link private key(s), service
+        // (kpak): link private key(s)
     }
     
     private void linkJndiStoredPassword(JmsDestination entity, Bundle bundle) {
@@ -81,6 +83,29 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
                     }
                 }
             }
+        }
+    }
+    
+    private void linkInboundAssociatedService(JmsDestination entity, Bundle bundle) {
+        if (!entity.isInbound() ||
+                entity.getInboundDetail() == null ||
+                entity.getInboundDetail().getServiceResolutionSettings() == null ||
+                entity.getInboundDetail().getServiceResolutionSettings().getServiceRef() == null ||
+                entity.getInboundDetail().getServiceResolutionSettings().getServiceRef().isEmpty() ) {
+            return;
+        }
+        
+        final String serviceRef = entity.getInboundDetail().getServiceResolutionSettings().getServiceRef();
+
+        // (kpak) - match by name or Id?
+        final Service service =
+                bundle.getEntities(Service.class).values()
+                        .stream()
+                        .filter(e -> e.getId().equals(serviceRef))
+                        .findFirst()
+                        .orElse(null);
+        if (service == null) {
+            throw new LinkerException("Could not find associated Service for inbound JMS Destination: " + entity.getName() + ". Service Path: " + serviceRef);
         }
     }
     
