@@ -17,10 +17,9 @@ import org.w3c.dom.Element;
 
 import java.util.*;
 
-import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EncassEntityBuilder.DEFAULT_PALETTE_FOLDER_LOCATION;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PALETTE_FOLDER;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,10 +100,13 @@ class EncassEntityBuilderTest {
         assertEquals(policyId, getSingleChildElement(xml, POLICY_REFERENCE).getAttribute(ATTRIBUTE_ID));
         assertNotNull(getSingleChildElement(xml, PROPERTIES));
         Map<String, Object> props = mapPropertiesElements(getSingleChildElement(xml, PROPERTIES), PROPERTIES);
-        assertEquals(3, props.size());
+        assertEquals(5, props.size());
         assertEquals(DEFAULT_PALETTE_FOLDER_LOCATION, props.get(PALETTE_FOLDER));
-        assertEquals("someImage", props.get("paletteIconResourceName"));
-        assertEquals("false", props.get("allowTracing"));
+        assertEquals("someImage", props.get(PALETTE_ICON_RESOURCE_NAME));
+        assertEquals("false", props.get(ALLOW_TRACING));
+        assertEquals("someDescription", props.get(DESCRIPTION));
+        assertEquals("false", props.get(PASS_METRICS_TO_PARENT));
+
         Element arguments = getSingleChildElement(xml, ENCAPSULATED_ARGUMENTS);
         assertNotNull(arguments);
         List<Element> argumentElements = getChildElements(arguments, ENCAPSULATED_ASSERTION_ARGUMENT);
@@ -159,8 +161,10 @@ class EncassEntityBuilderTest {
         encass.getResults().add(result2);
         encass.setProperties(ImmutableMap.of(
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
-                "paletteIconResourceName", "someImage",
-                "allowTracing", "false"));
+                PALETTE_ICON_RESOURCE_NAME, "someImage",
+                ALLOW_TRACING, "false",
+                DESCRIPTION, "someDescription",
+                PASS_METRICS_TO_PARENT, "false"));
         return encass;
     }
 

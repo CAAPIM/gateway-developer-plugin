@@ -29,6 +29,11 @@ public class PropertyConstants {
     //Encass property constants
     public static final String POLICY_GUID_PROP = "policyGuid";
     public static final String PALETTE_FOLDER = "paletteFolder";
+    public static final String PALETTE_ICON_RESOURCE_NAME = "paletteIconResourceName";
+    public static final String ALLOW_TRACING = "allowTracing";
+    public static final String PASS_METRICS_TO_PARENT = "passMetricsToParent";
+    public static final String DESCRIPTION = "description";
+    public static final String DEFAULT_PALETTE_FOLDER_LOCATION = "internalAssertions";
 
     // Property names
     public static final String PROPERTY_USER = "user";

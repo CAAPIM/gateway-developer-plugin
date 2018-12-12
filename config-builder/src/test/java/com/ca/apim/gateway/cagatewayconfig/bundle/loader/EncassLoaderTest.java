@@ -19,6 +19,9 @@ import java.util.UUID;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.DEFAULT_PALETTE_FOLDER_LOCATION;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PALETTE_FOLDER;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.POLICY_GUID_PROP;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -90,8 +93,8 @@ class EncassLoaderTest {
         EncassResult result = entity.getResults().iterator().next();
         assertEquals("result", result.getName());
         assertEquals("string", result.getType());
-        assertEquals("internalAssertions", entity.getProperties().get("paletteFolder"));
-        assertNull(entity.getProperties().get("policyGuid"));
+        assertEquals(DEFAULT_PALETTE_FOLDER_LOCATION, entity.getProperties().get(PALETTE_FOLDER));
+        assertNull(entity.getProperties().get(POLICY_GUID_PROP));
     }
 
     private static Element createEncassXml(Document document) {
@@ -139,8 +142,8 @@ class EncassLoaderTest {
                 )
         );
         buildAndAppendPropertiesElement(ImmutableMap.of(
-                "paletteFolder", "internalAssertions",
-                "policyGuid", "some-guid"),
+                PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
+                POLICY_GUID_PROP, "some-guid"),
                 document, encassElement);
 
         return createElementWithChildren(

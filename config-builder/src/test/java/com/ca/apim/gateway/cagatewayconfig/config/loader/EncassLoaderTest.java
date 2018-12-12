@@ -28,6 +28,7 @@ import java.io.IOException;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -64,11 +65,11 @@ class EncassLoaderTest {
                 "  - name: \"goodbye-again\"\n" +
                 "    type: \"message\"\n" +
                 "  properties:\n" +
-                "    paletteFolder: \"policyLogic\"\n" +
-                "    paletteIconResourceName: \"OversizedElement16.gif\"\n" +
-                "    allowTracing: \"false\"\n" +
-                "    description: \"some description\"\n" +
-                "    passMetricsToParent: \"false\"\n";
+                "    " + PALETTE_FOLDER + ": \"policyLogic\"\n" +
+                "    " + PALETTE_ICON_RESOURCE_NAME + ": \"OversizedElement16.gif\"\n" +
+                "    " + ALLOW_TRACING + ": \"false\"\n" +
+                "    " + DESCRIPTION + ": \"some description\"\n" +
+                "    " + PASS_METRICS_TO_PARENT + ": \"false\"\n";
         load(yaml, "yml", false);
     }
 
@@ -98,11 +99,11 @@ class EncassLoaderTest {
                 "         }\n" +
                 "      ],\n" +
                 "      \"properties\": {\n" +
-                "         \"paletteFolder\": \"policyLogic\",\n" +
-                "         \"paletteIconResourceName\": \"OversizedElement16.gif\",\n" +
-                "         \"allowTracing\": \"false\",\n" +
-                "         \"description\": \"some description\",\n" +
-                "         \"passMetricsToParent\": \"false\"\n" +
+                "         \"" + PALETTE_FOLDER + "\": \"policyLogic\",\n" +
+                "         \"" + PALETTE_ICON_RESOURCE_NAME + "\": \"OversizedElement16.gif\",\n" +
+                "         \"" + ALLOW_TRACING + "\": \"false\",\n" +
+                "         \"" + DESCRIPTION + "\": \"some description\",\n" +
+                "         \"" + PASS_METRICS_TO_PARENT + "\": \"false\"\n" +
                 "      }\n" +
                 "   }\n" +
                 "}";
@@ -193,11 +194,11 @@ class EncassLoaderTest {
         encass.getResults().forEach(e -> assertTrue((e.getName().equals("goodbye") && e.getType().equals("string")) ||
                 (e.getName().equals("goodbye-again") && e.getType().equals("message"))));
         assertEquals(5, encass.getProperties().size());
-        assertEquals("policyLogic", encass.getProperties().get("paletteFolder"));
-        assertEquals("OversizedElement16.gif", encass.getProperties().get("paletteIconResourceName"));
-        assertEquals("false", encass.getProperties().get("allowTracing"));
-        assertEquals("some description", encass.getProperties().get("description"));
-        assertEquals("false", encass.getProperties().get("passMetricsToParent"));
+        assertEquals("policyLogic", encass.getProperties().get(PALETTE_FOLDER));
+        assertEquals("OversizedElement16.gif", encass.getProperties().get(PALETTE_ICON_RESOURCE_NAME));
+        assertEquals("false", encass.getProperties().get(ALLOW_TRACING));
+        assertEquals("some description", encass.getProperties().get(DESCRIPTION));
+        assertEquals("false", encass.getProperties().get(PASS_METRICS_TO_PARENT));
     }
 
 }
