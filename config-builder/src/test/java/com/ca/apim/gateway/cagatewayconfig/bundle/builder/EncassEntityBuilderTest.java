@@ -102,7 +102,7 @@ class EncassEntityBuilderTest {
         assertNotNull(getSingleChildElement(xml, PROPERTIES));
         Map<String, Object> props = mapPropertiesElements(getSingleChildElement(xml, PROPERTIES), PROPERTIES);
         assertEquals(3, props.size());
-        assertEquals("internalAssertions", props.get("paletteFolder"));
+        assertEquals(DEFAULT_PALETTE_FOLDER_LOCATION, props.get(PALETTE_FOLDER));
         assertEquals("someImage", props.get("paletteIconResourceName"));
         assertEquals("false", props.get("allowTracing"));
         Element arguments = getSingleChildElement(xml, ENCAPSULATED_ARGUMENTS);
