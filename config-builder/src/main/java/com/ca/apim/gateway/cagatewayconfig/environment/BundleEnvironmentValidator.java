@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig;
+package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
@@ -35,11 +35,11 @@ class BundleEnvironmentValidator {
 
     /**
      * Validate that all required environment is available in the environment bundle
-     *
-     * @param bundleName       The name of the bundle to look for environment requirements in
+     *  @param bundleName       The name of the bundle to look for environment requirements in
      * @param deploymentBundle The deployment bundle to look for enviornment requirements in
+     * @param mode The generation mode, where its coming from.
      */
-    void validateEnvironmentProvided(String bundleName, String deploymentBundle) {
+    void validateEnvironmentProvided(String bundleName, String deploymentBundle, EnvironmentBundleCreationMode mode) {
         Document deploymentBundleDocument;
         try {
             deploymentBundleDocument = documentTools.parse(deploymentBundle);
@@ -52,21 +52,29 @@ class BundleEnvironmentValidator {
         mappingElements.forEach(mapping -> {
             Element propertiesElement = getSingleChildElement(mapping, PROPERTIES, true);
             if (propertiesElement != null) {
-                List<Element> propertyElements = getChildElements(propertiesElement, PROPERTY);
-                if (propertyElements.stream().anyMatch(p -> FAIL_ON_NEW.equals(p.getAttribute(ATTRIBUTE_KEY)) && Boolean.valueOf(getSingleChildElementTextContent(p, BOOLEAN_VALUE)))) {
-                    boolean mapByName = propertyElements.stream().anyMatch(p -> MAP_BY.equals(p.getAttribute(ATTRIBUTE_KEY)) && MappingProperties.NAME.equals(getSingleChildElementTextContent(p, STRING_VALUE)));
-                    if (!mapByName) {
-                        throw new DeploymentBundleException("Expected mapping to be map by name: " + documentFileUtils.elementToString(mapping));
-                    }
-                    List<Element> mapToProperties = propertyElements.stream().filter(p -> MAP_TO.equals(p.getAttribute(ATTRIBUTE_KEY))).collect(Collectors.toList());
-                    String mapToName = getSingleChildElementTextContent(mapToProperties.get(0), STRING_VALUE);
-                    findInBundle(environmentBundle, mapping.getAttribute(ATTRIBUTE_TYPE), mapToName);
-                }
+                validateElement(mode, mapping, propertiesElement);
             }
         });
     }
 
-    private void findInBundle(Bundle bundle, String type, String name) {
+    private void validateElement(EnvironmentBundleCreationMode mode, Element mapping, Element propertiesElement) {
+        List<Element> propertyElements = getChildElements(propertiesElement, PROPERTY);
+        if (propertyElements.stream().anyMatch(p -> FAIL_ON_NEW.equals(p.getAttribute(ATTRIBUTE_KEY)) && Boolean.valueOf(getSingleChildElementTextContent(p, BOOLEAN_VALUE)))) {
+            boolean mapByName = propertyElements.stream().anyMatch(p -> MAP_BY.equals(p.getAttribute(ATTRIBUTE_KEY)) && MappingProperties.NAME.equals(getSingleChildElementTextContent(p, STRING_VALUE)));
+            if (!mapByName) {
+                throw new DeploymentBundleException("Expected mapping to be map by name: " + documentFileUtils.elementToString(mapping));
+            }
+            List<Element> mapToProperties = propertyElements.stream().filter(p -> MAP_TO.equals(p.getAttribute(ATTRIBUTE_KEY))).collect(Collectors.toList());
+            String mapToName = getSingleChildElementTextContent(mapToProperties.get(0), STRING_VALUE);
+
+            String type = mapping.getAttribute(ATTRIBUTE_TYPE);
+            if (mode.isRequired(type)) {
+                findInBundle(environmentBundle, type, mapToName, mode);
+            }
+        }
+    }
+
+    private void findInBundle(Bundle bundle, String type, String name, EnvironmentBundleCreationMode mode) {
         switch (type) {
             case EntityTypes.CLUSTER_PROPERTY_TYPE:
                 if (bundle.getEnvironmentProperties().get(PREFIX_GATEWAY + name) == null) {

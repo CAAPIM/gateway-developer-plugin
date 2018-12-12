@@ -4,13 +4,14 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig;
+package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.APPLICATION;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,7 +28,7 @@ class BundleEnvironmentValidatorTest {
                 "    </l7:References>\n" +
                 "    <l7:Mappings>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
     }
 
@@ -56,7 +57,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -83,7 +84,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myPassword"));
@@ -114,7 +115,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -141,7 +142,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myConnection"));
@@ -172,7 +173,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -199,7 +200,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myIDP"));
@@ -230,7 +231,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -257,7 +258,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myProperty"));
@@ -288,7 +289,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -315,7 +316,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myCert"));

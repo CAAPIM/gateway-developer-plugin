@@ -53,6 +53,10 @@ public class JsonTools {
     }
 
     public ObjectWriter getObjectWriter() {
+        return getObjectWriter(this.outputType);
+    }
+
+    public ObjectWriter getObjectWriter(String outputType) {
         return getObjectMapper(outputType).writer().withDefaultPrettyPrinter();
     }
 

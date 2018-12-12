@@ -52,6 +52,11 @@ public class PolicyAndFolderLoader implements EntityLoader {
         throw new ConfigLoadException("Cannot load an individual policy");
     }
 
+    @Override
+    public Object loadSingle(String name, File entitiesFile) {
+        throw new ConfigLoadException("Cannot load an individual policy");
+    }
+
     private void loadPolicies(final File currentDir, final File rootDir, Folder parentFolder, final Map<String, Policy> policies, Bundle bundle) {
         Folder folder = bundle.getFolders().computeIfAbsent(getPath(currentDir, rootDir), key -> createFolder(currentDir.getName(), key, parentFolder));
         final File[] children = currentDir.listFiles();

@@ -9,8 +9,11 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 
 import java.io.File;
+import java.util.Map;
 
 public interface EntityLoader {
+
+    Object loadSingle(String name, File entitiesFile);
     void load(Bundle bundle, File rootDir);
     void load(Bundle bundle, String name, String value);
 

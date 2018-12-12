@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implements EntityLoader {
@@ -27,9 +29,8 @@ public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implement
         this.idGenerator = idGenerator;
     }
 
-    @Override
-    public void load(Bundle bundle, File rootDir) {
-        File propertiesFile = new File(rootDir, this.getFilePath());
+    private Map<String, Object> load(final File propertiesFile) {
+        Map<String, Object> propertiesMap = new LinkedHashMap<>();
         if (propertiesFile.exists()) {
             Properties properties = new Properties();
             try (InputStream inStream = fileUtils.getInputStream(propertiesFile)) {
@@ -37,8 +38,20 @@ public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implement
             } catch (IOException e) {
                 throw new ConfigLoadException("Could not load properties file (" + propertiesFile + "): " + e.getMessage(), e);
             }
-            properties.forEach((k, v) -> putToBundle(bundle, rootDir, k.toString(), v.toString()));
+            properties.forEach((k, v) -> propertiesMap.put(k.toString(), v.toString()));
         }
+        return propertiesMap;
+    }
+
+    @Override
+    public Object loadSingle(String name, File entitiesFile) {
+        return load(entitiesFile).get(name);
+    }
+
+    @Override
+    public void load(Bundle bundle, File rootDir) {
+        File propertiesFile = new File(rootDir, this.getFilePath());
+        load(propertiesFile).forEach((k, v) -> putToBundle(bundle, rootDir, k, v.toString()));
     }
 
     @Override
