@@ -17,6 +17,7 @@ import com.google.common.annotations.VisibleForTesting;
 import javax.inject.Named;
 import java.io.File;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -33,6 +34,7 @@ public class Encass extends GatewayEntity {
     private String policy;
     private Set<EncassArgument> arguments;
     private Set<EncassResult> results;
+    private Map<String, Object> properties;
     @JsonIgnore
     private String guid;
     @JsonIgnore
@@ -54,6 +56,14 @@ public class Encass extends GatewayEntity {
 
     public void setResults(Set<EncassResult> results) {
         this.results = results;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
     }
 
     public String getGuid() {
