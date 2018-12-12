@@ -69,7 +69,12 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
 
     private Entity buildEntity(Bundle bundle, String name, JmsDestination jmsDestination, Document document) {
         String id = idGenerator.generate();
-        boolean isInbound = jmsDestination.isInbound();
+        boolean isInbound;
+        if (jmsDestination.getInboundDetail() != null) {
+            isInbound = true;
+        } else {
+            isInbound = false;
+        } 
         
         // Build JMS Destination element.
         Element jmsDestinationDetailEle = createElementWithAttributesAndChildren(
@@ -82,7 +87,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         );
         
         Map<String, Object> jmsDestinationDetailProps = new HashMap<>();
-        jmsDestinationDetailProps.put(DESTINATION_TYPE, jmsDestination.getDestinationType());
+        jmsDestinationDetailProps.put(DESTINATION_TYPE, jmsDestination.getDestinationType().getType());
         jmsDestinationDetailProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
         if (jmsDestination.getDestinationPasswordRef() != null) {
             jmsDestinationDetailProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
@@ -106,9 +111,9 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             InboundJmsDestinationDetail inboundDetail = jmsDestination.getInboundDetail();
             isEnabled = inboundDetail.isEnabled();
             
-            jmsDestinationDetailProps.put(INBOUND_ACKNOWLEDGEMENT_TYPE, inboundDetail.getAcknowledgeType());
+            jmsDestinationDetailProps.put(INBOUND_ACKNOWLEDGEMENT_TYPE, inboundDetail.getAcknowledgeType().getType());
             ReplyType replyType = inboundDetail.getReplyType();
-            jmsDestinationDetailProps.put(REPLY_TYPE, replyType);
+            jmsDestinationDetailProps.put(REPLY_TYPE, replyType.getType());
             
             if (SPECIFIED_QUEUE.equals(replyType)) {
                 jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, inboundDetail.getReplyToQueueName());
@@ -170,7 +175,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             contextPropertiesTemplateProps.put(IS_DEDICATED_CONSUMER_CONNECTION, true);
             Integer numOfConsumerConnections = inboundDetail.getNumOfConsumerConnections();
             if (numOfConsumerConnections == null) {
-                numOfConsumerConnections = new Integer(5);
+                numOfConsumerConnections = 1; // Default consumer size is 1.
             }
             contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, numOfConsumerConnections);
             
@@ -182,14 +187,14 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
             isTemplate = outboundDetail.isTemplate();
             ReplyType replyType = outboundDetail.getReplyType();
-            jmsDestinationDetailProps.put(REPLY_TYPE, replyType);
+            jmsDestinationDetailProps.put(REPLY_TYPE, replyType.getType());
             
             if (SPECIFIED_QUEUE.equals(replyType)) {
                 jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, outboundDetail.getReplyToQueueName());
             }
 
             jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, outboundDetail.useRequestCorrelationId());
-            jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, outboundDetail.getMessageFormat());
+            jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, outboundDetail.getMessageFormat().getType());
 
             PoolingType poolingType = outboundDetail.getPoolingType();
             if (CONNECTION.equals(poolingType)) {

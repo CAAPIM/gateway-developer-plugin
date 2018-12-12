@@ -18,25 +18,7 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
     private Integer maxMessageSizeBytes; // null = default, -1 = Do not override,  0 = Unlimited.
     
     public InboundJmsDestinationDetail() {
-    }
-    
-    public InboundJmsDestinationDetail(
-            AcknowledgeType acknowledgeType,
-            ReplyType replyType,
-            String replyToQueueName,
-            boolean useRequestCorrelationId,
-            ServiceResolutionSettings serviceResolutionSettings,
-            String failureQueueName,
-            boolean isEnabled,
-            Integer numOfConsumerConnections,
-            Integer maxMessageSizeBytes) {
-        super(replyType, replyToQueueName, useRequestCorrelationId);
-        this.acknowledgeType = acknowledgeType;
-        this.serviceResolutionSettings = serviceResolutionSettings;
-        this.failureQueueName = failureQueueName;
-        this.isEnabled = isEnabled;
-        this.numOfConsumerConnections = numOfConsumerConnections;
-        this.maxMessageSizeBytes = maxMessageSizeBytes;
+        super();
     }
 
     public AcknowledgeType getAcknowledgeType() {
@@ -67,7 +49,7 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
         return isEnabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setIsEnabled(boolean enabled) {
         isEnabled = enabled;
     }
 
@@ -93,17 +75,9 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
         private ContentTypeSource contentTypeSource;
         private String contentType;
         
-        public ServiceResolutionSettings(
-                String serviceRef,
-                String soapActionMessagePropertyName,
-                ContentTypeSource contentTypeSource,
-                String contentType) {
-            this.serviceRef = serviceRef;
-            this.soapActionMessagePropertyName = soapActionMessagePropertyName;
-            this.contentTypeSource = contentTypeSource;
-            this.contentType = contentType;
+        public ServiceResolutionSettings() {
         }
-
+        
         public String getServiceRef() {
             return serviceRef;
         }

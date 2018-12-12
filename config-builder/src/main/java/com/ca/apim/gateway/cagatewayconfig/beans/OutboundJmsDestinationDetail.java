@@ -17,23 +17,7 @@ public class OutboundJmsDestinationDetail extends JmsDestinationDetail {
     private ConnectionPoolingSettings connectionPoolingSettings;
 
     public OutboundJmsDestinationDetail() {
-    }
-    
-    public OutboundJmsDestinationDetail(
-            boolean isTemplate,
-            ReplyType replyType,
-            String replyToQueueName,
-            boolean useRequestCorrelationId,
-            MessageFormat messageFormat,
-            PoolingType poolingType,
-            SessionPoolingSettings sessionPoolingSettings,
-            ConnectionPoolingSettings connectionPoolingSettings) {
-        super(replyType, replyToQueueName, useRequestCorrelationId);
-        this.isTemplate = isTemplate;
-        this.messageFormat = messageFormat;
-        this.poolingType = poolingType;
-        this.sessionPoolingSettings = sessionPoolingSettings;
-        this.connectionPoolingSettings = connectionPoolingSettings;
+        super();
     }
 
     public boolean isTemplate() {
@@ -81,6 +65,9 @@ public class OutboundJmsDestinationDetail extends JmsDestinationDetail {
         private Integer maxIdle;
         private Integer maxWaitMs;
 
+        public SessionPoolingSettings() {
+        }
+        
         public SessionPoolingSettings(Integer size, Integer maxIdle, Integer maxWaitMs) {
             this.size = size;
             this.maxIdle = maxIdle;

@@ -18,6 +18,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.ON_TAKE;
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.AUTOMATIC;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.RESOURCE;
@@ -169,14 +171,17 @@ public class TestUtils {
         JmsDestination jmsDestination = new JmsDestination();
         jmsDestination.setName(name);
         jmsDestination.setId(id);
-        jmsDestination.setIsInbound(false);
         jmsDestination.setProviderType(null); // null for Generic JMS
-        jmsDestination.setIsInbound(false);
         jmsDestination.setInitialContextFactoryClassName("org.apache.activemq.jndi.ActiveMQInitialContextFactory");
         jmsDestination.setJndiUrl("tcp://qaactivemq:61616");
         jmsDestination.setDestinationType(JmsDestination.DestinationType.QUEUE);
         jmsDestination.setConnectionFactoryName("my-qcf-name");
         jmsDestination.setDestinationName("my-queue");
+        InboundJmsDestinationDetail inboundDetails = new InboundJmsDestinationDetail();
+        inboundDetails.setAcknowledgeType(ON_TAKE);
+        inboundDetails.setReplyType(AUTOMATIC);
+        inboundDetails.setUseRequestCorrelationId(false);
+        jmsDestination.setInboundDetail(inboundDetails);
         return jmsDestination;
     }
 }

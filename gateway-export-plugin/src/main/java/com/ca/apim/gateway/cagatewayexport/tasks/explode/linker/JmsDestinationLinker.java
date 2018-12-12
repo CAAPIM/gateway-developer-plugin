@@ -87,8 +87,7 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
     }
     
     private void linkInboundAssociatedService(JmsDestination entity, Bundle bundle) {
-        if (!entity.isInbound() ||
-                entity.getInboundDetail() == null ||
+        if (entity.getInboundDetail() == null || 
                 entity.getInboundDetail().getServiceResolutionSettings() == null ||
                 entity.getInboundDetail().getServiceResolutionSettings().getServiceRef() == null ||
                 entity.getInboundDetail().getServiceResolutionSettings().getServiceRef().isEmpty() ) {

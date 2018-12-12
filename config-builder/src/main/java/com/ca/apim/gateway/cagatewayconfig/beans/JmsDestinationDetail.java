@@ -16,15 +16,6 @@ public class JmsDestinationDetail {
 
     JmsDestinationDetail() {
     }
-    
-    JmsDestinationDetail(
-            ReplyType replyType,
-            String replyToQueueName,
-            boolean useRequestCorrelationId) {
-        this.replyType = replyType;
-        this.replyToQueueName = replyToQueueName;
-        this.useRequestCorrelationId = useRequestCorrelationId;
-    }
             
     public ReplyType getReplyType() {
         return replyType;

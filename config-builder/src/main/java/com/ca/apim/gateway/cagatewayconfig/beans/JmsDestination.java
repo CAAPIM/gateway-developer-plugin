@@ -30,7 +30,6 @@ import static java.util.Arrays.stream;
 public class JmsDestination extends GatewayEntity {
     
     // Basics
-    private boolean isInbound; // (kpak) Remove. Check for existence of inboundDetail or outboundDetail.
     private String providerType;
     
     // JNDI
@@ -55,13 +54,17 @@ public class JmsDestination extends GatewayEntity {
     // Outbound
     private OutboundJmsDestinationDetail outboundDetail;
     
+    // (kpak) - add support for providers with more configuration settings:
+    // TIBCO EMS
+    // WebSphere MQ over LDAP
+    // private Map<String, Object> additionalProperties;
+    
     public JmsDestination() {
     }
     
     private JmsDestination(Builder builder) {
         setName(builder.name);
         setId(builder.id);
-        isInbound = builder.isInbound;
         providerType = builder.providerType;
         initialContextFactoryClassName = builder.initialContextFactoryClassName;
         jndiUrl = builder.jndiUrl;
@@ -78,15 +81,7 @@ public class JmsDestination extends GatewayEntity {
         inboundDetail = builder.inboundDetail;
         outboundDetail = builder.outboundDetail;
     }
-
-    public boolean isInbound() {
-        return isInbound;
-    }
-
-    public void setIsInbound(boolean isInbound) {
-        this.isInbound = isInbound;
-    }
-
+    
     public String getProviderType() {
         return providerType;
     }
@@ -216,10 +211,14 @@ public class JmsDestination extends GatewayEntity {
         if (getDestinationPasswordRef() != null && getDestinationPassword() != null) {
             throw new ConfigLoadException("Cannot specify both a password reference and a password for Destination password for JMS destination: " + entityKey);
         }
+
+        if (this.inboundDetail == null && this.outboundDetail == null) {
+            throw new ConfigLoadException("Must specify inbound or outbound details for JMS destination: " + entityKey);
+        }
         
-        // (kpak) - implement
-        // One of inbound or outbound set
-        // outbound: one of session or connection pooling set
+        if (this.inboundDetail != null && this.outboundDetail != null) {
+            throw new ConfigLoadException("Cannot specify both an inbound and an outbound details for JMS destination: " + entityKey);
+        }
     }
     
     public enum DestinationType {
@@ -244,7 +243,6 @@ public class JmsDestination extends GatewayEntity {
     public static class Builder {
         private String name;
         private String id;
-        private boolean isInbound;
         private String providerType;
         private String initialContextFactoryClassName;
         private String jndiUrl;
@@ -268,11 +266,6 @@ public class JmsDestination extends GatewayEntity {
         
         public Builder id(String id) {
             this.id = id;
-            return this;
-        }
-
-        public Builder isInbound(boolean isInbound) {
-            this.isInbound = isInbound;
             return this;
         }
 

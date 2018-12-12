@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail;
 import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -15,6 +16,8 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.ON_TAKE;
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.AUTOMATIC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,11 +34,11 @@ class JmsDestinationEntityBuilderTest {
         assertTrue(entities.isEmpty());
     }
     
-    //@Test (kpak - fixme)
+    @Test
     void testBuildWithConnection_checkBundleContainsJmsDestination() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of("jms-1", buildJdbcConnection()));
+        bundle.putAllJmsDestinations(ImmutableMap.of("jms-1", buildJmsDetination()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
@@ -43,14 +46,21 @@ class JmsDestinationEntityBuilderTest {
         assertEquals(1, entities.size());
     }
 
-    private static JmsDestination buildJdbcConnection() {
+    private static JmsDestination buildJmsDetination() {
         JmsDestination jmsDestination = new JmsDestination();
-        jmsDestination.setIsInbound(true);
+        jmsDestination.setName("jms-1");
+        jmsDestination.setId("jms-1");
         jmsDestination.setProviderType("TIBCO EMS");
         jmsDestination.setInitialContextFactoryClassName("com.tibco.tibjms.naming.TibjmsInitialContextFactory");
         jmsDestination.setJndiUrl("tibjmsnaming://machinename:7222");
-        
-        // (kpak) - set all config in test jmsDestination.
+        jmsDestination.setDestinationType(JmsDestination.DestinationType.QUEUE);
+        jmsDestination.setConnectionFactoryName("my-qcf-name");
+        jmsDestination.setDestinationName("my-queue");
+        InboundJmsDestinationDetail inboundDetails = new InboundJmsDestinationDetail();
+        inboundDetails.setAcknowledgeType(ON_TAKE);
+        inboundDetails.setReplyType(AUTOMATIC);
+        inboundDetails.setUseRequestCorrelationId(false);
+        jmsDestination.setInboundDetail(inboundDetails);
         return jmsDestination;
     }
     

@@ -59,7 +59,6 @@ class JmsDestinationLoaderTest {
         assertNotNull(jmsDestination);
         assertEquals("my-jms-endpoint", jmsDestination.getName());
         assertEquals("id-1", jmsDestination.getId());
-        assertEquals(isInbound, jmsDestination.isInbound());
         assertEquals("TIBCO EMS", jmsDestination.getProviderType());
         assertEquals("com.tibco.tibjms.naming.TibjmsInitialContextFactory", jmsDestination.getInitialContextFactoryClassName());
         assertEquals("tibjmsnaming://machinename:7222", jmsDestination.getJndiUrl());
@@ -87,11 +86,10 @@ class JmsDestinationLoaderTest {
     }
     
     private void checkInboundJmsDestination(JmsDestination jmsDestination) {
-        
+        // (kpak) - implement
     }
 
     private void checkOutboundJmsDestination(JmsDestination jmsDestination) {
-        assertFalse(jmsDestination.isInbound());
         assertNull(jmsDestination.getInboundDetail());
 
         OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
@@ -102,7 +100,6 @@ class JmsDestinationLoaderTest {
         assertEquals("my-reply-Q", outboundDetail.getReplyToQueueName());
         assertFalse(outboundDetail.useRequestCorrelationId());
         assertEquals(BYTES, outboundDetail.getMessageFormat());
-
 
         assertEquals(CONNECTION, outboundDetail.getPoolingType());
         ConnectionPoolingSettings connectionPoolingSettings = outboundDetail.getConnectionPoolingSettings();
@@ -181,7 +178,7 @@ class JmsDestinationLoaderTest {
     }
     
     private static void populateInboundJmsDestinationXml() {
-        
+        // (kpak) - implement
     }
     
     private static void populateOutboundJmsDestinationXml(Map<String, Object> jmsDestinationDetailProps, Map<String, Object> contextPropertiesTemplateProps) {

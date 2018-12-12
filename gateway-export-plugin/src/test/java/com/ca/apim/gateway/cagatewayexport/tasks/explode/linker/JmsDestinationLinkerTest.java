@@ -11,6 +11,8 @@ import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.Ser
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.junit.jupiter.api.Test;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.*;
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.*;
 import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createService;
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,7 +23,6 @@ class JmsDestinationLinkerTest {
     private static final String PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
     private static final String JNDI_STORED_PASSWORD_NAME = "jndi.password.name";
     private static final String DESTINATION_STORED_PASSWORD_NAME = "destination.password.name";
-    
     
     private JmsDestinationLinker linker = new JmsDestinationLinker();
 
@@ -141,20 +142,15 @@ class JmsDestinationLinkerTest {
         bundle.addEntity(service1);
 
         final JmsDestination jmsDestination = createJmsDestination(null,null);
-        jmsDestination.setIsInbound(true);
-        ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings(
-                "associated-service-id", null, null, null);
-        InboundJmsDestinationDetail inboundDetails = new InboundJmsDestinationDetail(
-                InboundJmsDestinationDetail.AcknowledgeType.ON_TAKE,
-                JmsDestinationDetail.ReplyType.NO_REPLY,
-                null,
-                false,
-                serviceResolutionSettings,
-                null,
-                true,
-                null,
-                null);
-        jmsDestination.setInboundDetail(inboundDetails);
+        final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings();
+        serviceResolutionSettings.setServiceRef("associated-service-id");
+        final InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
+        inboundDetail.setAcknowledgeType(ON_TAKE);
+        inboundDetail.setReplyType(NO_REPLY);
+        inboundDetail.setUseRequestCorrelationId(false);
+        inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
+        inboundDetail.setIsEnabled(true);
+        jmsDestination.setInboundDetail(inboundDetail);
         
         linker.link(jmsDestination, bundle, bundle);
 
@@ -168,22 +164,17 @@ class JmsDestinationLinkerTest {
         Bundle bundle = new Bundle();
         
         final JmsDestination jmsDestination = createJmsDestination(null,null);
-        jmsDestination.setIsInbound(true);
-        ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings(
-                "associated-service-id", null, null, null);
-        InboundJmsDestinationDetail inboundDetails = new InboundJmsDestinationDetail(
-                InboundJmsDestinationDetail.AcknowledgeType.ON_TAKE,
-                JmsDestinationDetail.ReplyType.NO_REPLY,
-                null,
-                false,
-                serviceResolutionSettings,
-                null,
-                true,
-                null,
-                null);
-        jmsDestination.setInboundDetail(inboundDetails);
+        final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings();
+        serviceResolutionSettings.setServiceRef("associated-service-id");
+        final InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
+        inboundDetail.setAcknowledgeType(ON_TAKE);
+        inboundDetail.setReplyType(NO_REPLY);
+        inboundDetail.setUseRequestCorrelationId(false);
+        inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
+        inboundDetail.setIsEnabled(true);
+        jmsDestination.setInboundDetail(inboundDetail);
 
-        assertThrows(LinkerException.class, () -> linker.link(jmsDestination, new Bundle(), new Bundle()));
+        assertThrows(LinkerException.class, () -> linker.link(jmsDestination, bundle, bundle));
     }
     
     private static JmsDestination createJmsDestination(
