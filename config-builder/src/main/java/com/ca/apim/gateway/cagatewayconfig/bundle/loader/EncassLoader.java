@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.POLICY_GUID_PROP;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @Singleton
@@ -35,7 +36,7 @@ public class EncassLoader implements BundleEntityLoader {
         final String guid = getSingleChildElementTextContent(encassElement, GUID);
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(encassElement, PROPERTIES, true), PROPERTIES);
         //Removing redundant policyGuid, since encass already has a reference to policyId
-        properties.remove("policyGuid");
+        properties.remove(POLICY_GUID_PROP);
 
         Encass encass = new Encass();
         encass.setGuid(guid);

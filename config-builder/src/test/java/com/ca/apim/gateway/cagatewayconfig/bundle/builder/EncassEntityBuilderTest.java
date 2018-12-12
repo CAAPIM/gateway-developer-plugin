@@ -17,8 +17,10 @@ import org.w3c.dom.Element;
 
 import java.util.*;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EncassEntityBuilder.DEFAULT_PALETTE_FOLDER_LOCATION;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PALETTE_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -156,7 +158,7 @@ class EncassEntityBuilderTest {
         encass.getResults().add(result1);
         encass.getResults().add(result2);
         encass.setProperties(ImmutableMap.of(
-                "paletteFolder", "internalAssertions",
+                PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
                 "paletteIconResourceName", "someImage",
                 "allowTracing", "false"));
         return encass;

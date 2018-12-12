@@ -26,6 +26,10 @@ public class PropertyConstants {
     public static final String TRUSTED_SIGNING_SERVER_CERTS = "trustedForSigningServerCerts";
     public static final String TRUSTED_AS_SAML_ISSUER = "trustedAsSamlIssuer";
 
+    //Encass property constants
+    public static final String POLICY_GUID_PROP = "policyGuid";
+    public static final String PALETTE_FOLDER = "paletteFolder";
+
     // Property names
     public static final String PROPERTY_USER = "user";
     public static final String PROPERTY_PASSWORD = "password";
