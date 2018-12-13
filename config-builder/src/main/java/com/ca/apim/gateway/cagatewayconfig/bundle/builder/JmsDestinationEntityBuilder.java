@@ -69,12 +69,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
 
     private Entity buildEntity(Bundle bundle, String name, JmsDestination jmsDestination, Document document) {
         String id = idGenerator.generate();
-        boolean isInbound;
-        if (jmsDestination.getInboundDetail() != null) {
-            isInbound = true;
-        } else {
-            isInbound = false;
-        } 
+        boolean isInbound = jmsDestination.getInboundDetail() != null;
         
         // Build JMS Destination element.
         Element jmsDestinationDetailEle = createElementWithAttributesAndChildren(
@@ -108,128 +103,11 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         boolean isTemplate = false;
 
         if (isInbound) {
-            InboundJmsDestinationDetail inboundDetail = jmsDestination.getInboundDetail();
-            isEnabled = inboundDetail.isEnabled();
-            
-            jmsDestinationDetailProps.put(INBOUND_ACKNOWLEDGEMENT_TYPE, inboundDetail.getAcknowledgeType().getType());
-            ReplyType replyType = inboundDetail.getReplyType();
-            jmsDestinationDetailProps.put(REPLY_TYPE, replyType.getType());
-            
-            if (SPECIFIED_QUEUE.equals(replyType)) {
-                jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, inboundDetail.getReplyToQueueName());
-            }
-
-            jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, inboundDetail.useRequestCorrelationId());
-
-            ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
-            if (serviceResolutionSettings != null) {
-                String serviceRef = serviceResolutionSettings.getServiceRef();
-                if (serviceRef != null) {
-                    Service service = bundle.getServices().get(serviceRef);
-                    if (service == null) {
-                        throw new EntityBuilderException("Could not find associated Service for inbound JMS Destination: " + name + ". Service Path: " + serviceRef);
-
-                    }
-                    contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, true);
-                    contextPropertiesTemplateProps.put(HARDWIRED_SERVICE_ID, service.getId());
-                } else {
-                    contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, false);
-                }
-
-                putToMapIfValueIsNotNull(
-                        contextPropertiesTemplateProps,
-                        SOAP_ACTION_MSG_PROP_NAME,
-                        serviceResolutionSettings.getSoapActionMessagePropertyName());
-
-                String contentTypeSource;
-                switch (serviceResolutionSettings.getContentTypeSource()) {
-                    case NONE:
-                        contentTypeSource = "";
-                        break;
-                    case FREE_FORM:
-                        contentTypeSource = "com.l7tech.server.jms.prop.contentType.freeform";
-                        break;
-                    case JMS_PROPERTY:
-                        contentTypeSource = "com.l7tech.server.jms.prop.contentType.header";
-                        break;
-                    default:
-                        contentTypeSource = "";
-                        break;
-                }
-                contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, contentTypeSource);
-                
-                String contentType = serviceResolutionSettings.getContentType();
-                if (contentType == null) {
-                    contentType = "";
-                }
-                contextPropertiesTemplateProps.put(CONTENT_TYPE_VALUE, contentType);
-            }
-            
-            if (ON_COMPLETION.equals(inboundDetail.getAcknowledgeType())){
-                putToMapIfValueIsNotNull(
-                        jmsDestinationDetailProps,
-                        INBOUND_FAILURE_QUEUE_NAME,
-                        inboundDetail.getFailureQueueName());
-            }
-
-            contextPropertiesTemplateProps.put(IS_DEDICATED_CONSUMER_CONNECTION, true);
-            Integer numOfConsumerConnections = inboundDetail.getNumOfConsumerConnections();
-            if (numOfConsumerConnections == null) {
-                numOfConsumerConnections = 1; // Default consumer size is 1.
-            }
-            contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, numOfConsumerConnections);
-            
-            putToMapIfValueIsNotNull(
-                    jmsDestinationDetailProps,
-                    INBOUND_MAX_SIZE,
-                    inboundDetail.getMaxMessageSizeBytes());
+            isEnabled = jmsDestination.getInboundDetail().isEnabled();
+            this.buildInboundDestination(bundle, name, jmsDestination, jmsDestinationDetailProps, contextPropertiesTemplateProps);
         } else {
-            OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
-            isTemplate = outboundDetail.isTemplate();
-            ReplyType replyType = outboundDetail.getReplyType();
-            jmsDestinationDetailProps.put(REPLY_TYPE, replyType.getType());
-            
-            if (SPECIFIED_QUEUE.equals(replyType)) {
-                jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, outboundDetail.getReplyToQueueName());
-            }
-
-            jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, outboundDetail.useRequestCorrelationId());
-            jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, outboundDetail.getMessageFormat().getType());
-
-            PoolingType poolingType = outboundDetail.getPoolingType();
-            if (CONNECTION.equals(poolingType)) {
-                contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, true);
-                ConnectionPoolingSettings connectionPoolingSettings = outboundDetail.getConnectionPoolingSettings();
-                if (connectionPoolingSettings != null) {
-                    if (connectionPoolingSettings.getSize() != null) {
-                        contextPropertiesTemplateProps.put(CONNECTION_POOL_SIZE, connectionPoolingSettings.getSize());
-                    }
-
-                    if (connectionPoolingSettings.getMinIdle() != null) {
-                        contextPropertiesTemplateProps.put(CONNECTION_POOL_MIN_IDLE, connectionPoolingSettings.getMinIdle());
-                    }
-
-                    if (connectionPoolingSettings.getMaxWaitMs() != null) {
-                        contextPropertiesTemplateProps.put(CONNECTION_POOL_MAX_WAIT, connectionPoolingSettings.getMaxWaitMs());
-                    }
-                }
-            } else {
-                contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, false);
-                SessionPoolingSettings sessionPoolingSettings = outboundDetail.getSessionPoolingSettings();
-                if (sessionPoolingSettings != null) {
-                    if (sessionPoolingSettings.getSize() != null) {
-                        contextPropertiesTemplateProps.put(SESSION_POOL_SIZE, sessionPoolingSettings.getSize());
-                    }
-
-                    if (sessionPoolingSettings.getMaxIdle() != null) {
-                        contextPropertiesTemplateProps.put(SESSION_POOL_MAX_IDLE, sessionPoolingSettings.getMaxIdle());
-                    }
-
-                    if (sessionPoolingSettings.getMaxWaitMs() != null) {
-                        contextPropertiesTemplateProps.put(SESSION_POOL_MAX_WAIT, sessionPoolingSettings.getMaxWaitMs());
-                    }
-                }
-            }
+            isTemplate = jmsDestination.getOutboundDetail().isTemplate();
+            this.buildOutboundDestination(jmsDestination, jmsDestinationDetailProps, contextPropertiesTemplateProps);
         }
 
         if (jmsDestination.getAdditionalProperties() != null && !jmsDestination.getAdditionalProperties().isEmpty()) {
@@ -273,6 +151,122 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         return EntityBuilderHelper.getEntityWithNameMapping(EntityTypes.JMS_DESTINATION_TYPE, name, id, jmsDestinationEle);
     }
     
+    private void buildInboundDestination (
+            final Bundle bundle,
+            final String name,
+            final JmsDestination jmsDestination,
+            final Map<String, Object> jmsDestinationDetailProps,
+            final Map<String, Object> contextPropertiesTemplateProps) {
+
+        InboundJmsDestinationDetail inboundDetail = jmsDestination.getInboundDetail();
+        jmsDestinationDetailProps.put(INBOUND_ACKNOWLEDGEMENT_TYPE, inboundDetail.getAcknowledgeType().getType());
+        ReplyType replyType = inboundDetail.getReplyType();
+        jmsDestinationDetailProps.put(REPLY_TYPE, replyType.getType());
+
+        if (SPECIFIED_QUEUE.equals(replyType)) {
+            jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, inboundDetail.getReplyToQueueName());
+        }
+
+        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, inboundDetail.useRequestCorrelationId());
+
+        ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
+        if (serviceResolutionSettings != null) {
+            String serviceRef = serviceResolutionSettings.getServiceRef();
+            if (serviceRef != null) {
+                Service service = bundle.getServices().get(serviceRef);
+                if (service == null) {
+                    throw new EntityBuilderException("Could not find associated Service for inbound JMS Destination: " + name + ". Service Path: " + serviceRef);
+                }
+                contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, true);
+                contextPropertiesTemplateProps.put(HARDWIRED_SERVICE_ID, service.getId());
+            } else {
+                contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, false);
+            }
+
+            putToMapIfValueIsNotNull(
+                    contextPropertiesTemplateProps,
+                    SOAP_ACTION_MSG_PROP_NAME,
+                    serviceResolutionSettings.getSoapActionMessagePropertyName());
+
+            String contentTypeSource;
+            switch (serviceResolutionSettings.getContentTypeSource()) {
+                case NONE:
+                    contentTypeSource = "";
+                    break;
+                case FREE_FORM:
+                    contentTypeSource = "com.l7tech.server.jms.prop.contentType.freeform";
+                    break;
+                case JMS_PROPERTY:
+                    contentTypeSource = "com.l7tech.server.jms.prop.contentType.header";
+                    break;
+                default:
+                    contentTypeSource = "";
+                    break;
+            }
+            contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, contentTypeSource);
+
+            String contentType = serviceResolutionSettings.getContentType();
+            if (contentType == null) {
+                contentType = "";
+            }
+            contextPropertiesTemplateProps.put(CONTENT_TYPE_VALUE, contentType);
+        }
+
+        if (ON_COMPLETION.equals(inboundDetail.getAcknowledgeType())){
+            putToMapIfValueIsNotNull(
+                    jmsDestinationDetailProps,
+                    INBOUND_FAILURE_QUEUE_NAME,
+                    inboundDetail.getFailureQueueName());
+        }
+
+        contextPropertiesTemplateProps.put(IS_DEDICATED_CONSUMER_CONNECTION, true);
+        Integer numOfConsumerConnections = inboundDetail.getNumOfConsumerConnections();
+        if (numOfConsumerConnections == null) {
+            numOfConsumerConnections = 1; // Default consumer size is 1.
+        }
+        contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, numOfConsumerConnections);
+
+        putToMapIfValueIsNotNull(
+                jmsDestinationDetailProps,
+                INBOUND_MAX_SIZE,
+                inboundDetail.getMaxMessageSizeBytes());
+    }
+
+    private void buildOutboundDestination (
+            final JmsDestination jmsDestination,
+            final Map<String, Object> jmsDestinationDetailProps,
+            final Map<String, Object> contextPropertiesTemplateProps) {
+
+        OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
+        ReplyType replyType = outboundDetail.getReplyType();
+        jmsDestinationDetailProps.put(REPLY_TYPE, replyType.getType());
+
+        if (SPECIFIED_QUEUE.equals(replyType)) {
+            jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, outboundDetail.getReplyToQueueName());
+        }
+
+        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, outboundDetail.useRequestCorrelationId());
+        jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, outboundDetail.getMessageFormat().getType());
+
+        PoolingType poolingType = outboundDetail.getPoolingType();
+        if (CONNECTION.equals(poolingType)) {
+            contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, true);
+            ConnectionPoolingSettings connectionPoolingSettings = outboundDetail.getConnectionPoolingSettings();
+            if (connectionPoolingSettings != null) {
+                putToMapIfValueIsNotNull(contextPropertiesTemplateProps, CONNECTION_POOL_SIZE, connectionPoolingSettings.getSize());
+                putToMapIfValueIsNotNull(contextPropertiesTemplateProps, CONNECTION_POOL_MIN_IDLE, connectionPoolingSettings.getMinIdle());
+                putToMapIfValueIsNotNull(contextPropertiesTemplateProps, CONNECTION_POOL_MAX_WAIT, connectionPoolingSettings.getMaxWaitMs());
+            }
+        } else {
+            contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, false);
+            SessionPoolingSettings sessionPoolingSettings = outboundDetail.getSessionPoolingSettings();
+            if (sessionPoolingSettings != null) {
+                putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_SIZE, sessionPoolingSettings.getSize());
+                putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_MAX_IDLE, sessionPoolingSettings.getMaxIdle());
+                putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_MAX_WAIT, sessionPoolingSettings.getMaxWaitMs()); 
+            }
+        }
+    }
     @Override
     public @NotNull Integer getOrder() {
         return ORDER;
