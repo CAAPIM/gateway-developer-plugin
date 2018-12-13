@@ -54,10 +54,12 @@ public class JmsDestination extends GatewayEntity {
     // Outbound
     private OutboundJmsDestinationDetail outboundDetail;
     
-    // (kpak) - add support for providers with more configuration settings:
-    // TIBCO EMS
-    // WebSphere MQ over LDAP
-    // private Map<String, Object> additionalProperties;
+    // Contains provider specific settings. 
+    // For example, additional properties for providers:
+    // - TIBCO EMS 
+    // - WebSphere MQ over LDAP
+    // (kpak) - implement
+    private Map<String, Object> additionalProperties;
     
     public JmsDestination() {
     }
@@ -202,6 +204,14 @@ public class JmsDestination extends GatewayEntity {
         this.outboundDetail = outboundDetail;
     }
 
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
+
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         if (getJndiPasswordRef() != null && getJndiPassword() != null) {
@@ -258,6 +268,7 @@ public class JmsDestination extends GatewayEntity {
         private String destinationPassword;
         private InboundJmsDestinationDetail inboundDetail;
         private OutboundJmsDestinationDetail outboundDetail;
+        private Map<String, Object> additionalProperties;
 
         public Builder name(String name) {
             this.name = name;
@@ -344,6 +355,10 @@ public class JmsDestination extends GatewayEntity {
             return this;
         }
         
+        public Builder additionalProperties(Map<String, Object> additionalProperties) {
+            this.additionalProperties = additionalProperties;
+            return this;
+        }
         public JmsDestination build() {
             return new JmsDestination(this);
         }

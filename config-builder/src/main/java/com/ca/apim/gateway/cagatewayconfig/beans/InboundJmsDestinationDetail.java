@@ -76,6 +76,7 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
         private String contentType;
         
         public ServiceResolutionSettings() {
+            // default constructor.
         }
         
         public String getServiceRef() {

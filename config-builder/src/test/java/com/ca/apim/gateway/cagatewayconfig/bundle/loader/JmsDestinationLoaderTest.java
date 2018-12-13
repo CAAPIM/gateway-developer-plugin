@@ -6,9 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
-import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ServiceResolutionSettings;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ConnectionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -20,6 +19,8 @@ import org.w3c.dom.Element;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.*;
+import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ContentTypeSource.FREE_FORM;
 import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.MessageFormat.BYTES;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
@@ -79,36 +80,10 @@ class JmsDestinationLoaderTest {
         assertNull(jmsDestination.getDestinationPasswordRef());
         
         if (isInbound) {
-            checkInboundJmsDestination(jmsDestination);
+            verifyInboundJmsDestination(jmsDestination);
         } else {
-            checkOutboundJmsDestination(jmsDestination);
+            verifyOutboundJmsDestination(jmsDestination);
         }
-    }
-    
-    private void checkInboundJmsDestination(JmsDestination jmsDestination) {
-        // (kpak) - implement
-    }
-
-    private void checkOutboundJmsDestination(JmsDestination jmsDestination) {
-        assertNull(jmsDestination.getInboundDetail());
-
-        OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
-        assertNotNull(outboundDetail);
-        
-        assertFalse(outboundDetail.isTemplate());
-        assertEquals(SPECIFIED_QUEUE, outboundDetail.getReplyType());
-        assertEquals("my-reply-Q", outboundDetail.getReplyToQueueName());
-        assertFalse(outboundDetail.useRequestCorrelationId());
-        assertEquals(BYTES, outboundDetail.getMessageFormat());
-
-        assertEquals(CONNECTION, outboundDetail.getPoolingType());
-        ConnectionPoolingSettings connectionPoolingSettings = outboundDetail.getConnectionPoolingSettings();
-        assertNotNull(connectionPoolingSettings);
-        assertNull(outboundDetail.getSessionPoolingSettings());
-                
-        assertEquals(new Integer(10), connectionPoolingSettings.getSize());
-        assertEquals(new Integer(5), connectionPoolingSettings.getMinIdle());
-        assertEquals(new Integer(10000), connectionPoolingSettings.getMaxWaitMs());
     }
     
     private static Element createJmsDestinationXml(Document document, boolean isInbound) {
@@ -133,9 +108,9 @@ class JmsDestinationLoaderTest {
         contextPropertiesTemplateProps.put(JNDI_PASSWORD,"my-jndi-password");
 
         if (isInbound) {
-            populateInboundJmsDestinationXml();
+            loadInboundJmsDestinationXml(jmsDestinationDetailProps, contextPropertiesTemplateProps);
         } else {
-            populateOutboundJmsDestinationXml(jmsDestinationDetailProps, contextPropertiesTemplateProps);
+            loadOutboundJmsDestinationXml(jmsDestinationDetailProps, contextPropertiesTemplateProps);
         }
         
         Element jmsDestinationEle = createElementWithAttributesAndChildren(
@@ -149,6 +124,7 @@ class JmsDestinationLoaderTest {
                         createElementWithTextContent(document, NAME, "my-jms-endpoint"),
                         createElementWithTextContent(document, JMS_DESTINATION_NAME, "my-jms-destination-name"),
                         createElementWithTextContent(document, INBOUND, isInbound),
+                        createElementWithTextContent(document, ENABLED, true),
                         createElementWithTextContent(document, TEMPLATE, false), 
                         buildPropertiesElement(jmsDestinationDetailProps, document)
                 ),
@@ -177,11 +153,52 @@ class JmsDestinationLoaderTest {
         );
     }
     
-    private static void populateInboundJmsDestinationXml() {
-        // (kpak) - implement
+    private static void loadInboundJmsDestinationXml(
+            Map<String, Object> jmsDestinationDetailProps,
+            Map<String, Object> contextPropertiesTemplateProps) {
+
+        jmsDestinationDetailProps.put(INBOUND_ACKNOWLEDGEMENT_TYPE, "ON_COMPLETION");
+        jmsDestinationDetailProps.put(REPLY_TYPE, "REPLY_TO_OTHER");
+        jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, "my-reply-Q");
+        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, Boolean.FALSE.toString());
+
+        contextPropertiesTemplateProps.put(HARDWIRED_SERVICE_ID, "/folder1/service1");
+        contextPropertiesTemplateProps.put(SOAP_ACTION_MSG_PROP_NAME, "my-jms-soap-action-prop-name");
+        contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, "FREE_FORM");
+        contextPropertiesTemplateProps.put(CONTENT_TYPE_VALUE, "text/yaml");
+        
+        jmsDestinationDetailProps.put(INBOUND_FAILURE_QUEUE_NAME, "my-failure-Q");
+        contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, 5);
+        jmsDestinationDetailProps.put(INBOUND_MAX_SIZE, 2048);
+    }
+
+    private void verifyInboundJmsDestination(JmsDestination jmsDestination) {
+        assertNull(jmsDestination.getOutboundDetail());
+
+        InboundJmsDestinationDetail inboundDetail = jmsDestination.getInboundDetail();
+        assertNotNull(inboundDetail);
+
+        assertEquals(ON_COMPLETION, inboundDetail.getAcknowledgeType());
+        assertEquals(SPECIFIED_QUEUE, inboundDetail.getReplyType());
+        assertEquals("my-reply-Q", inboundDetail.getReplyToQueueName());
+        assertFalse(inboundDetail.useRequestCorrelationId());
+
+        ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
+        assertNotNull(serviceResolutionSettings);
+        assertEquals("/folder1/service1", serviceResolutionSettings.getServiceRef());
+        assertEquals("my-jms-soap-action-prop-name", serviceResolutionSettings.getSoapActionMessagePropertyName());
+        assertEquals(FREE_FORM, serviceResolutionSettings.getContentTypeSource());
+        assertEquals("text/yaml", serviceResolutionSettings.getContentType());
+
+        assertEquals("my-failure-Q", inboundDetail.getFailureQueueName());
+        assertEquals(new Integer(5), inboundDetail.getNumOfConsumerConnections());
+        assertEquals(new Integer(2048), inboundDetail.getMaxMessageSizeBytes());
     }
     
-    private static void populateOutboundJmsDestinationXml(Map<String, Object> jmsDestinationDetailProps, Map<String, Object> contextPropertiesTemplateProps) {
+    private static void loadOutboundJmsDestinationXml(
+            Map<String, Object> jmsDestinationDetailProps,
+            Map<String, Object> contextPropertiesTemplateProps) {
+        
         jmsDestinationDetailProps.put(REPLY_TYPE, "REPLY_TO_OTHER");
         jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, "my-reply-Q");
         jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, Boolean.FALSE.toString());
@@ -191,5 +208,27 @@ class JmsDestinationLoaderTest {
         contextPropertiesTemplateProps.put(CONNECTION_POOL_SIZE, 10);
         contextPropertiesTemplateProps.put(CONNECTION_POOL_MIN_IDLE, 5);
         contextPropertiesTemplateProps.put(CONNECTION_POOL_MAX_WAIT, 10000);
+    }
+
+    private void verifyOutboundJmsDestination(JmsDestination jmsDestination) {
+        assertNull(jmsDestination.getInboundDetail());
+
+        OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
+        assertNotNull(outboundDetail);
+
+        assertFalse(outboundDetail.isTemplate());
+        assertEquals(SPECIFIED_QUEUE, outboundDetail.getReplyType());
+        assertEquals("my-reply-Q", outboundDetail.getReplyToQueueName());
+        assertFalse(outboundDetail.useRequestCorrelationId());
+        assertEquals(BYTES, outboundDetail.getMessageFormat());
+
+        assertEquals(CONNECTION, outboundDetail.getPoolingType());
+        ConnectionPoolingSettings connectionPoolingSettings = outboundDetail.getConnectionPoolingSettings();
+        assertNotNull(connectionPoolingSettings);
+        assertNull(outboundDetail.getSessionPoolingSettings());
+
+        assertEquals(new Integer(10), connectionPoolingSettings.getSize());
+        assertEquals(new Integer(5), connectionPoolingSettings.getMinIdle());
+        assertEquals(new Integer(10000), connectionPoolingSettings.getMaxWaitMs());
     }
 }
