@@ -8,13 +8,10 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail;
-import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ServiceResolutionSettings;
 import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
-import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ConnectionPoolingSettings;
-import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.MessageFormat;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
@@ -35,7 +32,10 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ContentTypeSource.*;
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.*;
+import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.MessageFormat.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
@@ -59,14 +59,12 @@ class JmsDestinationLoaderTest {
         rootProjectDir = temporaryFolder;
     }
     
-    // (kpak) - add more tests
-    
     @Test
-    void testLoadInboundJmsDestinationYaml() throws IOException {
+    void testLoad_GenericInboundYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
-                "  providerType: \"TIBCO EMS\"\n" +
-                "  initialContextFactoryClassName: \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\"\n" +
-                "  jndiUrl: \"tibjmsnaming://machinename:7222\"\n" + 
+                "  providerType: null\n" +
+                "  initialContextFactoryClassName: \"com.sun.jndi.ldap.LdapCtxFactory\"\n" +
+                "  jndiUrl: \"ldap://smldap:389/dc=l7tech,dc=com\"\n" +
                 "  jndiUsername: \"my-jndi-username\"\n" +
                 "  jndiPasswordRef: \"my-jndi-password-ref\"\n" +
                 "  jndiProperties:\n" +
@@ -83,7 +81,7 @@ class JmsDestinationLoaderTest {
                 "    replyToQueueName: \"my-reply-Q\"\n" +
                 "    useRequestCorrelationId: false\n" +
                 "    serviceResolutionSettings:\n" +
-                "      serviceRef: \"my-associated-service\"\n" +
+                "      serviceRef: \"my-folder/my-service\"\n" +
                 "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
                 "      contentTypeSource: \"FREE_FORM\"\n" +
                 "      contentType: \"text/yaml\"\n" +
@@ -91,17 +89,17 @@ class JmsDestinationLoaderTest {
                 "    isEnabled: true\n" +
                 "    numOfConsumerConnections: 5\n" +
                 "    maxMessageSizeBytes: 2048\n";
-        
+
         loadJmsDestination(yaml, true, "yml", null);
     }
 
     @Test
-    void testLoadOutboundJmsDestinationJson() throws IOException {
+    void testLoad_GenericOutboundJson() throws IOException {
         String json = "{\n" +
                 "  \"" + JMS_DESTINATION_NAME + "\" : {\n" +
-                "    \"providerType\" : \"TIBCO EMS\",\n" +
-                "    \"initialContextFactoryClassName\" : \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\",\n" +
-                "    \"jndiUrl\" : \"tibjmsnaming://machinename:7222\",\n" +
+                "    \"providerType\" : null,\n" +
+                "    \"initialContextFactoryClassName\" : \"com.sun.jndi.ldap.LdapCtxFactory\",\n" +
+                "    \"jndiUrl\" : \"ldap://smldap:389/dc=l7tech,dc=com\",\n" +
                 "    \"jndiUsername\" : \"my-jndi-username\",\n" +
                 "    \"jndiPasswordRef\" : \"my-jndi-password-ref\",\n" +
                 "    \"jndiProperties\" : {\n" +
@@ -133,7 +131,105 @@ class JmsDestinationLoaderTest {
     }
     
     @Test
-    void testLoadInboundJmsDestinationMalformedYaml() throws IOException {
+    void testLoad_TibcoEmsInboundYaml() throws IOException {
+        String yaml = JMS_DESTINATION_NAME + ":\n" +
+                "  providerType: \"TIBCO EMS\"\n" +
+                "  initialContextFactoryClassName: \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\"\n" +
+                "  jndiUrl: \"tibjmsnaming://machinename:7222\"\n" + 
+                "  jndiUsername: \"my-jndi-username\"\n" +
+                "  jndiPasswordRef: \"my-jndi-password-ref\"\n" +
+                "  jndiProperties:\n" +
+                "    additional-jndi-prop-name-1: \"additional-jndi-prop-val-1\"\n" +
+                "    additional-jndi-prop-name-2: \"additional-jndi-prop-val-2\"\n" +
+                "  destinationType: \"QUEUE\"\n" +
+                "  connectionFactoryName: \"my-qcf-name\"\n" +
+                "  destinationName: \"my-jms-destination-name\"\n" +
+                "  destinationUsername: \"my-destination-username\"\n" +
+                "  destinationPasswordRef: \"my-destination-password-ref\"\n" +
+                "  inboundDetail:\n" +
+                "    acknowledgeType: \"ON_COMPLETION\"\n" +
+                "    replyType: \"SPECIFIED_QUEUE\"\n" +
+                "    replyToQueueName: \"my-reply-Q\"\n" +
+                "    useRequestCorrelationId: false\n" +
+                "    serviceResolutionSettings:\n" +
+                "      serviceRef: \"my-folder/my-service\"\n" +
+                "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
+                "      contentTypeSource: \"FREE_FORM\"\n" +
+                "      contentType: \"text/yaml\"\n" +
+                "    failureQueueName: \"my-failure-Q\"\n" +
+                "    isEnabled: true\n" +
+                "    numOfConsumerConnections: 5\n" +
+                "    maxMessageSizeBytes: 2048\n" +
+                "  additionalProperties:\n" +
+                // JNDI settings
+                "    com.tibco.tibjms.naming.security_protocol: \"ssl\"\n" +
+                "    com.tibco.tibjms.naming.ssl_auth_only: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
+                "    com.tibco.tibjms.naming.ssl_enable_verify_host: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
+                "    com.tibco.tibjms.naming.ssl_trusted_certs: \"com.l7tech.server.jms.prop.trustedcert.listx509\"\n" +
+                "    com.tibco.tibjms.naming.ssl_enable_verify_hostname: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
+                "    com.l7tech.server.jms.prop.jndi.ssgKeyAlias: \"key1\"\n" +
+                "    com.l7tech.server.jms.prop.jndi.ssgKeystoreId: \"00000000000000000000000000000002\"\n" +
+                "    com.tibco.tibjms.naming.ssl_identity: \"com.l7tech.server.jms.prop.keystore 00000000000000000000000000000002 key1\"\n" +
+                "    com.tibco.tibjms.naming.ssl_password: \"com.l7tech.server.jms.prop.keystore.password 00000000000000000000000000000002 key1\"\n" +
+                // Destination settings
+                "    com.l7tech.server.jms.prop.customizer.class: \"com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer\"\n" +
+                "    com.tibco.tibjms.ssl.auth_only: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
+                "    com.tibco.tibjms.ssl.enable_verify_host: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
+                "    com.tibco.tibjms.ssl.trusted_certs: \"com.l7tech.server.jms.prop.trustedcert.listx509\"\n" +
+                "    com.tibco.tibjms.ssl.enable_verify_hostname: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
+                "    com.l7tech.server.jms.prop.queue.ssgKeyAlias: \"key2\"\n" +
+                "    com.l7tech.server.jms.prop.queue.ssgKeystoreId: \"00000000000000000000000000000002\"\n" +
+                "    com.tibco.tibjms.ssl.identity: \"com.l7tech.server.jms.prop.keystore.bytes 00000000000000000000000000000002 key2\"\n" +
+                "    com.tibco.tibjms.ssl.password: \"com.l7tech.server.jms.prop.keystore.password 00000000000000000000000000000002 key2\"\n" +
+                "    acknowledgeType: \"ON_COMPLETION\"\n";
+        
+        
+        loadJmsDestination(yaml, true, "yml", null);
+    }
+
+    @Test
+    void testLoad_WebsphereMqOverLdapOutboundJson() throws IOException {
+        String json = "{\n" +
+                "  \"" + JMS_DESTINATION_NAME + "\" : {\n" +
+                "    \"providerType\" : \"WebSphere MQ over LDAP\",\n" +
+                "    \"initialContextFactoryClassName\" : \"com.sun.jndi.ldap.LdapCtxFactory\",\n" +
+                "    \"jndiUrl\" : \"ldap://smldap:389/dc=l7tech,dc=com\",\n" +
+                "    \"jndiUsername\" : \"my-jndi-username\",\n" +
+                "    \"jndiPasswordRef\" : \"my-jndi-password-ref\",\n" +
+                "    \"jndiProperties\" : {\n" +
+                "      \"additional-jndi-prop-name-1\" : \"additional-jndi-prop-val-1\",\n" +
+                "      \"additional-jndi-prop-name-2\" : \"additional-jndi-prop-val-2\"\n" +
+                "    },\n" +
+                "    \"destinationType\" : \"QUEUE\",\n" +
+                "    \"connectionFactoryName\" : \"my-qcf-name\",\n" +
+                "    \"destinationName\" : \"my-jms-destination-name\",\n" +
+                "    \"destinationUsername\" : \"my-destination-username\",\n" +
+                "    \"destinationPasswordRef\" : \"my-destination-password-ref\",\n" +
+                "    \"outboundDetail\" : {\n" +
+                "      \"isTemplate\" : false,\n" +
+                "      \"replyType\" : \"SPECIFIED_QUEUE\",\n" +
+                "      \"replyToQueueName\" : \"my-reply-Q\",\n" +
+                "      \"useRequestCorrelationId\" : false,\n" +
+                "      \"messageFormat\" : \"BYTES\",\n" +
+                "      \"poolingType\" : \"CONNECTION\",\n" +
+                "      \"connectionPoolingSettings\" : {\n" +
+                "        \"size\" : 10,\n" +
+                "        \"minIdle\" : 5,\n" +
+                "        \"maxWaitMs\" : 10000\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"additionalProperties\" : {\n" +
+                "      \"additional-jndi-prop-name-1\" : \"additional-jndi-prop-val-1\",\n" +
+                "      \"additional-jndi-prop-name-2\" : \"additional-jndi-prop-val-2\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+
+        loadJmsDestination(json, false, "json", null);
+    }
+    
+    @Test
+    void testLoad_MalformedYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
                 "  providerType \"TIBCO EMS\"\n" + // missing colon
                 "  initialContextFactoryClassName: \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\"\n" +
@@ -154,7 +250,7 @@ class JmsDestinationLoaderTest {
                 "    replyToQueueName: \"my-reply-Q\"\n" +
                 "    useRequestCorrelationId: false\n" +
                 "    serviceResolutionSettings:\n" +
-                "      serviceRef: \"my-associated-service\"\n" +
+                "      serviceRef: \"my-folder/my-service\"\n" +
                 "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
                 "      contentTypeSource: \"FREE_FORM\"\n" +
                 "      contentType: \"text/yaml\"\n" +
@@ -167,7 +263,7 @@ class JmsDestinationLoaderTest {
     }
 
     @Test
-    void testLoadOutboundJmsDestinationMalformedJson() throws IOException {
+    void testLoad_MalformedJson() throws IOException {
         String json = "{\n" +
                 "  \"" + JMS_DESTINATION_NAME + "\" : {\n" +
                 "    \"providerType\" : \"TIBCO EMS\",\n" +
@@ -204,7 +300,7 @@ class JmsDestinationLoaderTest {
     }
 
     @Test
-    void testLoadInboundJmsDestination_JndiPasswordRefAndPasswordYaml() throws IOException {
+    void testLoad_BothJndiPasswordRefAndPasswordYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
                 "  providerType: \"TIBCO EMS\"\n" +
                 "  initialContextFactoryClassName: \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\"\n" +
@@ -226,7 +322,7 @@ class JmsDestinationLoaderTest {
                 "    replyToQueueName: \"my-reply-Q\"\n" +
                 "    useRequestCorrelationId: false\n" +
                 "    serviceResolutionSettings:\n" +
-                "      serviceRef: \"my-associated-service\"\n" +
+                "      serviceRef: \"my-folder/my-service\"\n" +
                 "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
                 "      contentTypeSource: \"FREE_FORM\"\n" +
                 "      contentType: \"text/yaml\"\n" +
@@ -239,7 +335,7 @@ class JmsDestinationLoaderTest {
     }
 
     @Test
-    void testLoadOutboundJmsDestination_DestinationPasswordRefAndPasswordJson() throws IOException {
+    void testLoad_BothDestinationPasswordRefAndPasswordJson() throws IOException {
         String json = "{\n" +
                 "    \"" + JMS_DESTINATION_NAME + "\" : {\n" +
                 "    \"providerType\" : \"TIBCO EMS\",\n" +
@@ -275,6 +371,51 @@ class JmsDestinationLoaderTest {
 
         loadJmsDestination(json, false, "json", ConfigLoadException.class);
     }
+
+    @Test
+    void testLoad_BothInboundAndOutboundYaml() throws IOException {
+        String yaml = JMS_DESTINATION_NAME + ":\n" +
+                "  providerType: \"TIBCO EMS\"\n" +
+                "  initialContextFactoryClassName: \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\"\n" +
+                "  jndiUrl: \"tibjmsnaming://machinename:7222\"\n" +
+                "  jndiUsername: \"my-jndi-username\"\n" +
+                "  jndiPasswordRef: \"my-jndi-password-ref\"\n" +
+                "  jndiProperties:\n" +
+                "    additional-jndi-prop-name-1: \"additional-jndi-prop-val-1\"\n" +
+                "    additional-jndi-prop-name-2: \"additional-jndi-prop-val-2\"\n" +
+                "  destinationType: \"QUEUE\"\n" +
+                "  connectionFactoryName: \"my-qcf-name\"\n" +
+                "  destinationName: \"my-jms-destination-name\"\n" +
+                "  destinationUsername: \"my-destination-username\"\n" +
+                "  destinationPasswordRef: \"my-destination-password-ref\"\n" +
+                "  inboundDetail:\n" +
+                "    acknowledgeType: \"ON_COMPLETION\"\n" +
+                "    replyType: \"SPECIFIED_QUEUE\"\n" +
+                "    replyToQueueName: \"my-reply-Q\"\n" +
+                "    useRequestCorrelationId: false\n" +
+                "    serviceResolutionSettings:\n" +
+                "      serviceRef: \"my-folder/my-service\"\n" +
+                "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
+                "      contentTypeSource: \"FREE_FORM\"\n" +
+                "      contentType: \"text/yaml\"\n" +
+                "    failureQueueName: \"my-failure-Q\"\n" +
+                "    isEnabled: true\n" +
+                "    numOfConsumerConnections: 5\n" +
+                "    maxMessageSizeBytes: 2048\n" +
+                "  outboundDetail:\n" + // Inbound and Outbound details defined.
+                "    isTemplate: false\n" +
+                "    replyType: \"SPECIFIED_QUEUE\"\n" +
+                "    replyToQueueName: \"my-reply-Q\"\n" +
+                "    useRequestCorrelationId: false\n" +
+                "    messageFormat: \"BYTES\"\n" +
+                "    poolingType: \"CONNECTION\"\n" +
+                "    connectionPoolingSettings:\n" +
+                "      size: 10\n" +
+                "      minIdle: 5\n" +
+                "      maxWaitMs: 10000\n";
+
+        loadJmsDestination(yaml, true,"yml", ConfigLoadException.class);
+    }
     
     private void loadJmsDestination(String content, boolean isInbound, String fileType, Class<? extends Exception> expectException) throws IOException {
         final EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(JmsDestination.class));
@@ -304,9 +445,25 @@ class JmsDestinationLoaderTest {
         
         JmsDestination jmsDestination = bundle.getJmsDestinations().get(JMS_DESTINATION_NAME);
         assertNotNull(jmsDestination);
-        assertEquals("TIBCO EMS", jmsDestination.getProviderType());
-        assertEquals("com.tibco.tibjms.naming.TibjmsInitialContextFactory", jmsDestination.getInitialContextFactoryClassName());
-        assertEquals("tibjmsnaming://machinename:7222", jmsDestination.getJndiUrl());
+
+        String providerType = jmsDestination.getProviderType();
+        if (providerType == null) {
+            assertEquals("com.sun.jndi.ldap.LdapCtxFactory", jmsDestination.getInitialContextFactoryClassName());
+            assertEquals("ldap://smldap:389/dc=l7tech,dc=com", jmsDestination.getJndiUrl());
+            assertNull(jmsDestination.getAdditionalProperties());
+        } else if ("TIBCO EMS".equals(providerType)){
+            assertEquals("com.tibco.tibjms.naming.TibjmsInitialContextFactory", jmsDestination.getInitialContextFactoryClassName());
+            assertEquals("tibjmsnaming://machinename:7222", jmsDestination.getJndiUrl());
+            assertNotNull(jmsDestination.getAdditionalProperties());
+            assertFalse(jmsDestination.getAdditionalProperties().isEmpty());
+        } else if ("WebSphere MQ over LDAP".equals(providerType)) {
+            assertEquals("com.sun.jndi.ldap.LdapCtxFactory", jmsDestination.getInitialContextFactoryClassName());
+            assertEquals("ldap://smldap:389/dc=l7tech,dc=com", jmsDestination.getJndiUrl());
+            assertNotNull(jmsDestination.getAdditionalProperties());
+            assertFalse(jmsDestination.getAdditionalProperties().isEmpty());
+        } else {
+            fail("Unexpected provider type.");
+        }
         assertEquals("my-jndi-username", jmsDestination.getJndiUsername());
         assertEquals("my-jndi-password-ref", jmsDestination.getJndiPasswordRef());
         assertNull(jmsDestination.getJndiPassword());
@@ -328,13 +485,14 @@ class JmsDestinationLoaderTest {
             assertNotNull(inboundDetail);
             assertNull(jmsDestination.getOutboundDetail());
             
-            assertEquals(AcknowledgeType.ON_COMPLETION, inboundDetail.getAcknowledgeType());
-            assertEquals(ReplyType.SPECIFIED_QUEUE, inboundDetail.getReplyType());
+            assertEquals(ON_COMPLETION, inboundDetail.getAcknowledgeType());
+            assertEquals(SPECIFIED_QUEUE, inboundDetail.getReplyType());
             assertEquals("my-reply-Q", inboundDetail.getReplyToQueueName());
             assertFalse(inboundDetail.useRequestCorrelationId());
             
             ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
-            assertEquals("my-associated-service", serviceResolutionSettings.getServiceRef());
+            assertNotNull(serviceResolutionSettings);
+            assertEquals("my-folder/my-service", serviceResolutionSettings.getServiceRef());
             assertEquals("my-jms-soap-action-prop-name", serviceResolutionSettings.getSoapActionMessagePropertyName());
             assertEquals(FREE_FORM, serviceResolutionSettings.getContentTypeSource());
             assertEquals("text/yaml", serviceResolutionSettings.getContentType());
@@ -344,15 +502,15 @@ class JmsDestinationLoaderTest {
             assertEquals(new Integer(5), inboundDetail.getNumOfConsumerConnections());
             assertEquals(new Integer(2048), inboundDetail.getMaxMessageSizeBytes());
         } else {
-            OutboundJmsDestinationDetail outboundDetail  = jmsDestination.getOutboundDetail();
+            OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
             assertNotNull(outboundDetail);
             assertNull(jmsDestination.getInboundDetail());
             
             assertFalse(outboundDetail.isTemplate());
-            assertEquals(ReplyType.SPECIFIED_QUEUE, outboundDetail.getReplyType());
+            assertEquals(SPECIFIED_QUEUE, outboundDetail.getReplyType());
             assertEquals("my-reply-Q", outboundDetail.getReplyToQueueName());
             assertFalse(outboundDetail.useRequestCorrelationId());
-            assertEquals(MessageFormat.BYTES, outboundDetail.getMessageFormat());
+            assertEquals(BYTES, outboundDetail.getMessageFormat());
             assertEquals(CONNECTION, outboundDetail.getPoolingType());
             
             ConnectionPoolingSettings connectionPoolingSettings = outboundDetail.getConnectionPoolingSettings();
