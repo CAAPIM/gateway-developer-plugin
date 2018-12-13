@@ -46,7 +46,7 @@ public class ServiceLinker implements EntityLinker<Service> {
     public void link(Service service, Bundle bundle, Bundle targetBundle) {
         try {
             Element policyElement = DocumentUtils.stringToXML(documentTools, service.getPolicy());
-            policyXMLSimplifier.simplifyPolicyXML(policyElement, service.getPolicy(), bundle, targetBundle);
+            policyXMLSimplifier.simplifyPolicyXML(policyElement, service.getName(), bundle, targetBundle);
             service.setPolicyXML(policyElement);
         } catch (DocumentParseException e) {
             throw new WriteException("Exception linking and simplifying service: " + service.getName() + " Message: " + e.getMessage(), e);
