@@ -159,7 +159,23 @@ class CAGatewayDeveloperTest {
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
+                .withArguments(
+                        "build-environment-bundle",
+                        "--stacktrace",
+                        "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=7layer",
+                        "-DldapConfig={" +
+                                "    \"type\": \"BIND_ONLY_LDAP\"," +
+                                "    \"identityProviderDetail\": {" +
+                                "      \"serverUrls\": [" +
+                                "        \"ldaps://1.2.3.4:636\"" +
+                                "      ]," +
+                                "      \"useSslClientAuthentication\": true," +
+                                "      \"bindPatternPrefix\": \"\"," +
+                                "      \"bindPatternSuffix\": \"\"" +
+                                "    }" +
+                                "  }",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.yml")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build();
@@ -178,13 +194,70 @@ class CAGatewayDeveloperTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testExampleProjectGeneratingEnvironmentWithMissingValues(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
-        String projectFolder = "example-project-generating-environment-missing-values";
+        String projectFolder = "example-project-generating-environment";
         File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
         FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
 
         assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
+                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=",
+                        "-DldapConfig=",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.yml")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingEnvironmentWithInvalidFilePath(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project-generating-environment";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=",
+                        "-DldapConfig=",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.ymla")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingEnvironmentJsonWithoutExpectedEntity(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project-generating-environment";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=",
+                        "-DldapConfig=",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections-wrong.yml")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingEnvironmentMalformedFile(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project-generating-environment";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=",
+                        "-DldapConfig=",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections-malformed.yml")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build());
