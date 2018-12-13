@@ -55,10 +55,9 @@ public class JmsDestination extends GatewayEntity {
     private OutboundJmsDestinationDetail outboundDetail;
     
     // Contains provider specific settings. 
-    // For example, additional properties for providers:
+    // For example, for providers:
     // - TIBCO EMS 
     // - WebSphere MQ over LDAP
-    // (kpak) - implement
     private Map<String, Object> additionalProperties;
     
     public JmsDestination() {

@@ -232,6 +232,9 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             }
         }
 
+        if (jmsDestination.getAdditionalProperties() != null && !jmsDestination.getAdditionalProperties().isEmpty()) {
+            contextPropertiesTemplateProps.putAll(jmsDestination.getAdditionalProperties());
+        }
         jmsDestinationDetailEle.appendChild(createElementWithTextContent(document, ENABLED, isEnabled));
         jmsDestinationDetailEle.appendChild(createElementWithTextContent(document, TEMPLATE, isTemplate));
         buildAndAppendPropertiesElement(jmsDestinationDetailProps, document, jmsDestinationDetailEle);

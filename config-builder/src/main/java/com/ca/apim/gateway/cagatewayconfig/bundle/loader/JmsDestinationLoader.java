@@ -94,6 +94,14 @@ public class JmsDestinationLoader implements BundleEntityLoader {
             jmsDestination.setOutboundDetail(this.loadOutboundDetail(isTemplate, jmsDestinationDetailProps, contextPropertiesTemplateProps));
         }
         
+        if (!contextPropertiesTemplateProps.isEmpty()) {
+            // Any remaining items in contextPropertiesTemplateProps is copied to 
+            // additional properties.
+            // Items remaining in contextPropertiesTemplateProps should be settings for
+            // none generic JMS providers.
+            jmsDestination.setAdditionalProperties(contextPropertiesTemplateProps);
+        }
+        
         bundle.getJmsDestinations().put(name, jmsDestination);
     }
 

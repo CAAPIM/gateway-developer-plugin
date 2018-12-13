@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.VariableUtils.extractVariableName;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.ServiceLinker.getServicePath;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Singleton
@@ -35,7 +36,7 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
         linkDestinationStoredPassword(entity, bundle);
         linkInboundAssociatedService(entity, bundle);
         
-        // (kpak): link private key(s)
+        // (kpak) - link private key(s)
     }
     
     private void linkJndiStoredPassword(JmsDestination entity, Bundle bundle) {
@@ -96,7 +97,6 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
         
         final String serviceRef = entity.getInboundDetail().getServiceResolutionSettings().getServiceRef();
 
-        // (kpak) - match by name or Id?
         final Service service =
                 bundle.getEntities(Service.class).values()
                         .stream()
@@ -106,6 +106,8 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
         if (service == null) {
             throw new LinkerException("Could not find associated Service for inbound JMS Destination: " + entity.getName() + ". Service Path: " + serviceRef);
         }
+        
+        entity.getInboundDetail().getServiceResolutionSettings().setServiceRef(getServicePath(bundle, service));
     }
     
     @NotNull

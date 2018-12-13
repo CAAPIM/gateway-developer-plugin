@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ServiceResolutionSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.*;
@@ -25,8 +26,6 @@ class JmsDestinationLinkerTest {
     private static final String DESTINATION_STORED_PASSWORD_NAME = "destination.password.name";
     
     private JmsDestinationLinker linker = new JmsDestinationLinker();
-
-    // (kpak) - Test private key(s) 
 
     @Test
     void testGetEntityClass() {
@@ -103,7 +102,7 @@ class JmsDestinationLinkerTest {
     }
 
     @Test
-    void testLinkNullJndiStoredPassword() {
+    void testLinkNoJndiStoredPassword() {
         Bundle bundle = new Bundle();
         bundle.addEntity(createStoredPassword(DESTINATION_STORED_PASSWORD_NAME));
         
@@ -119,7 +118,7 @@ class JmsDestinationLinkerTest {
     }
 
     @Test
-    void testLinkNullDestinationStoredPassword() {
+    void testLinkNoDestinationStoredPassword() {
         Bundle bundle = new Bundle();
         bundle.addEntity(createStoredPassword(JNDI_STORED_PASSWORD_NAME));
 
@@ -133,17 +132,37 @@ class JmsDestinationLinkerTest {
         assertNull(jmsDestination.getDestinationPasswordRef());
         assertNull(jmsDestination.getDestinationPassword());
     }
+
+    @Test
+    void testLinkNoDestinationAndJndiStoredPasswords() {
+        Bundle bundle = new Bundle();
+
+        final JmsDestination jmsDestination = createJmsDestination(
+                null,
+                null);
+        linker.link(jmsDestination, bundle, bundle);
+
+        assertNull(jmsDestination.getJndiPasswordRef());
+        assertNull(jmsDestination.getJndiPassword());
+        assertNull(jmsDestination.getDestinationPasswordRef());
+        assertNull(jmsDestination.getDestinationPassword());
+    }
     
     @Test
     void testLinkInboundAssociatedService() {
         Bundle bundle = new Bundle();
-        Folder folder1 = createFolder("my-folder", "F1", null);
-        Service service1 = createService("associated-service-name", "associated-service-id", folder1, null, "");
-        bundle.addEntity(service1);
+
+        Folder folder = createFolder("my-folder-name", "my-folder-id", Folder.ROOT_FOLDER);
+        Service service = createService("my-service-name", "my-service-id", folder, null, "");
+        FolderTree folderTree = new FolderTree(ImmutableSet.of(folder, folder.getParentFolder()));
+
+        bundle.setFolderTree(folderTree);
+        bundle.addEntity(folder);
+        bundle.addEntity(service);
 
         final JmsDestination jmsDestination = createJmsDestination(null,null);
         final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings();
-        serviceResolutionSettings.setServiceRef("associated-service-id");
+        serviceResolutionSettings.setServiceRef("my-service-id");
         final InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
         inboundDetail.setAcknowledgeType(ON_TAKE);
         inboundDetail.setReplyType(NO_REPLY);
@@ -156,7 +175,7 @@ class JmsDestinationLinkerTest {
 
         assertNotNull(jmsDestination.getInboundDetail());
         assertNotNull(jmsDestination.getInboundDetail().getServiceResolutionSettings());
-        assertEquals("associated-service-id", jmsDestination.getInboundDetail().getServiceResolutionSettings().getServiceRef());
+        assertEquals("my-folder-name/my-service-name", jmsDestination.getInboundDetail().getServiceResolutionSettings().getServiceRef());
     }
     
     @Test
@@ -176,6 +195,28 @@ class JmsDestinationLinkerTest {
 
         assertThrows(LinkerException.class, () -> linker.link(jmsDestination, bundle, bundle));
     }
+
+    @Test
+    void testLinkNoInboundAssociatedService() {
+        Bundle bundle = new Bundle();
+
+        final JmsDestination jmsDestination = createJmsDestination(null,null);
+        final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings();
+        final InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
+        inboundDetail.setAcknowledgeType(ON_TAKE);
+        inboundDetail.setReplyType(NO_REPLY);
+        inboundDetail.setUseRequestCorrelationId(false);
+        inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
+        inboundDetail.setIsEnabled(true);
+        jmsDestination.setInboundDetail(inboundDetail);
+
+        linker.link(jmsDestination, bundle, bundle);
+        assertNotNull(jmsDestination.getInboundDetail());
+        assertNotNull(jmsDestination.getInboundDetail().getServiceResolutionSettings());
+        assertNull(jmsDestination.getInboundDetail().getServiceResolutionSettings().getServiceRef());
+    }
+
+    // (kpak) - test private key(s) 
     
     private static JmsDestination createJmsDestination(
             String jndiPassword, String destinationPassword) {

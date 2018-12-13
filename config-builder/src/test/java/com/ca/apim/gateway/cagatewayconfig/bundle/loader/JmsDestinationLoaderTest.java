@@ -37,6 +37,8 @@ class JmsDestinationLoaderTest {
     
     private JmsDestinationLoader loader = new JmsDestinationLoader();
     
+    // (kpak) - add more tests
+    
     @Test
     void testLoadInboundJmsDestination() {
         loadJmsDestination(true);

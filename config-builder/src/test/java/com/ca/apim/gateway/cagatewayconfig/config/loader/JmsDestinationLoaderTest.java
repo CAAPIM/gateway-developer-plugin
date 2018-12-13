@@ -59,6 +59,8 @@ class JmsDestinationLoaderTest {
         rootProjectDir = temporaryFolder;
     }
     
+    // (kpak) - add more tests
+    
     @Test
     void testLoadInboundJmsDestinationYaml() throws IOException {
         String yaml = JMS_DESTINATION_NAME + ":\n" +
