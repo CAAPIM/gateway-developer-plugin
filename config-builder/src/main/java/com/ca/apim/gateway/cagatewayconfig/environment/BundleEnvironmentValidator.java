@@ -69,12 +69,12 @@ class BundleEnvironmentValidator {
 
             String type = mapping.getAttribute(ATTRIBUTE_TYPE);
             if (mode.isRequired(type)) {
-                findInBundle(environmentBundle, type, mapToName, mode);
+                findInBundle(environmentBundle, type, mapToName);
             }
         }
     }
 
-    private void findInBundle(Bundle bundle, String type, String name, EnvironmentBundleCreationMode mode) {
+    private void findInBundle(Bundle bundle, String type, String name) {
         switch (type) {
             case EntityTypes.CLUSTER_PROPERTY_TYPE:
                 if (bundle.getEnvironmentProperties().get(PREFIX_GATEWAY + name) == null) {

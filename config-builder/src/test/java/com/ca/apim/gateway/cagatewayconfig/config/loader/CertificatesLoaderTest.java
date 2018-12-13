@@ -52,6 +52,23 @@ class CertificatesLoaderTest {
     }
 
     @Test
+    void loadSingle() throws IOException {
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
+        createCertificates("cert1.cer");
+        Object certContent = loader.loadSingle("cert1", new File(certsDir, "cert1.cer"));
+
+        assertNotNull(certContent);
+        assertTrue(certContent instanceof String);
+    }
+
+    @Test
+    void loadSingleInvalidExtension() throws IOException {
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
+        createCertificates("cert1.cerT");
+        assertThrows(ConfigLoadException.class, () -> loader.loadSingle("cert1", new File(certsDir, "cert1.cerT")));
+    }
+
+    @Test
     void loadNoCerts() {
         CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
         Bundle bundle = new Bundle();

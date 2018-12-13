@@ -1,0 +1,44 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+plugins {
+    id 'com.ca.apim.gateway.gateway-developer-plugin'
+}
+
+group 'com.ca'
+version '1.2.3-SNAPSHOT'
+
+repositories {
+    flatDir {
+        dirs "lib"
+    }
+    maven {
+        url "file:///" + project.property('jarDir')
+    }
+    mavenCentral()
+}
+
+dependencies {
+    bundle group: 'my-bundle', name: 'my-bundle', version: '1.0.00', ext: 'bundle'
+}
+
+GatewaySourceConfig {
+    environmentConfig = [
+            "PASSWORD.gateway": "7layer",
+            "IDENTITY_PROVIDER.Tacoma MSAD": "{\n" +
+                    "    \"type\": \"BIND_ONLY_LDAP\",\n" +
+                    "    \"identityProviderDetail\": {\n" +
+                    "      \"serverUrls\": [\n" +
+                    "        \"ldaps://1.2.3.4:636\"\n" +
+                    "      ],\n" +
+                    "      \"useSslClientAuthentication\": true,\n" +
+                    "      \"bindPatternPrefix\": \"\",\n" +
+                    "      \"bindPatternSuffix\": \"\"\n" +
+                    "    }\n" +
+                    "  }",
+            "JDBC_CONNECTION.MySQL": file("./src/main/gateway/config/jdbc-connections.yml")
+    ]
+}

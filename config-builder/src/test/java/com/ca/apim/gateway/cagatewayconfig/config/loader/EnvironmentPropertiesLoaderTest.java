@@ -26,8 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createPropertiesLoader;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
@@ -59,8 +60,24 @@ class EnvironmentPropertiesLoaderTest {
     }
 
     @Test
+    void loadSinglePropertyFromFile() throws IOException {
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        final File configFolder = rootProjectDir.createDirectory("config");
+        final File identityProvidersFile = new File(configFolder, "env.properties");
+        Files.touch(identityProvidersFile);
+
+        when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream("Prop1=value1\nProp2=value2\nProp3=Gateway".getBytes()));
+        Object prop1 = loader.loadSingle("Prop1", identityProvidersFile);
+
+        assertNotNull(prop1);
+        assertTrue(prop1 instanceof String);
+        assertEquals("value1", prop1);
+        assertNull(loader.loadSingle("Prop111", identityProvidersFile));
+    }
+
+    @Test
     void loadFromEnvironment() {
-        PropertiesLoaderBase loader = EntityLoaderUtils.createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
 
         final Bundle bundle = new Bundle();
         loader.load(bundle, PROP_1, "value1");
@@ -76,7 +93,7 @@ class EnvironmentPropertiesLoaderTest {
 
     @Test
     void tryLoadNonexistentFile() {
-        PropertiesLoaderBase loader = EntityLoaderUtils.createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
 
         final Bundle bundle = new Bundle();
         loader.load(bundle, rootProjectDir.getRoot());
@@ -108,7 +125,7 @@ class EnvironmentPropertiesLoaderTest {
 
     @Test
     void tryLoadPropertiesFromNonexistentFile() throws IOException {
-        PropertiesLoaderBase loader = EntityLoaderUtils.createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "env.properties");
         Files.touch(identityProvidersFile);
@@ -122,7 +139,7 @@ class EnvironmentPropertiesLoaderTest {
     }
 
     private Bundle loadProperties(String content) throws IOException {
-        PropertiesLoaderBase loader = EntityLoaderUtils.createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "env.properties");
         Files.touch(identityProvidersFile);

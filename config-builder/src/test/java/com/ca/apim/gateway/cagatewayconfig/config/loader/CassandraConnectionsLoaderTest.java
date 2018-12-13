@@ -99,7 +99,7 @@ class CassandraConnectionsLoaderTest {
                 "  - \"TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384\"\n" +
                 "  properties:\n" +
                 "    keepAlive: \"true\"";
-        loadCassandraConnection(yaml, "yml", false);
+        loadCassandraConnection(yaml, "yml", false, false);
     }
 
     @Test
@@ -154,7 +154,112 @@ class CassandraConnectionsLoaderTest {
                 "                                      }\n" +
                 "                                    }\n" +
                 "}";
-        loadCassandraConnection(json, "json", false);
+        loadCassandraConnection(json, "json", false, false);
+    }
+
+    @Test
+    void loadSingleCassandraConnectionYaml() throws IOException {
+        String yaml = CONNECTION_NAME + ":\n" +
+                "  keyspace: \"Test\"\n" +
+                "  contactPoint: \"Test\"\n" +
+                "  port: 9042\n" +
+                "  username: \"test\"\n" +
+                "  storedPasswordName: \"gateway\"\n" +
+                "  compression: \"LZ4\"\n" +
+                "  ssl: true\n" +
+                "  tlsCiphers:\n" +
+                "  - \"TLS_RSA_WITH_AES_128_CBC_SHA256\"\n" +
+                "  - \"TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384\"\n" +
+                "  - \"TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA\"\n" +
+                "  - \"TLS_RSA_WITH_AES_128_GCM_SHA256\"\n" +
+                "  - \"TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256\"\n" +
+                "  - \"TLS_DHE_RSA_WITH_AES_128_CBC_SHA256\"\n" +
+                "  - \"TLS_RSA_WITH_AES_256_GCM_SHA384\"\n" +
+                "  - \"TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384\"\n" +
+                "  - \"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA\"\n" +
+                "  - \"TLS_RSA_WITH_AES_256_CBC_SHA\"\n" +
+                "  - \"TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256\"\n" +
+                "  - \"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384\"\n" +
+                "  - \"TLS_DHE_RSA_WITH_AES_256_GCM_SHA384\"\n" +
+                "  - \"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256\"\n" +
+                "  - \"TLS_DHE_RSA_WITH_AES_128_GCM_SHA256\"\n" +
+                "  - \"TLS_ECDH_RSA_WITH_AES_256_CBC_SHA\"\n" +
+                "  - \"TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA\"\n" +
+                "  - \"TLS_RSA_WITH_AES_128_CBC_SHA\"\n" +
+                "  - \"TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384\"\n" +
+                "  - \"TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256\"\n" +
+                "  - \"TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA\"\n" +
+                "  - \"TLS_RSA_WITH_AES_256_CBC_SHA256\"\n" +
+                "  - \"TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384\"\n" +
+                "  - \"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256\"\n" +
+                "  - \"TLS_DHE_RSA_WITH_AES_256_CBC_SHA256\"\n" +
+                "  - \"TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA\"\n" +
+                "  - \"TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256\"\n" +
+                "  - \"TLS_DHE_RSA_WITH_AES_256_CBC_SHA\"\n" +
+                "  - \"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\"\n" +
+                "  - \"TLS_ECDH_RSA_WITH_AES_128_CBC_SHA\"\n" +
+                "  - \"TLS_DHE_RSA_WITH_AES_128_CBC_SHA\"\n" +
+                "  - \"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA\"\n" +
+                "  - \"TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256\"\n" +
+                "  - \"TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384\"\n" +
+                "  properties:\n" +
+                "    keepAlive: \"true\"";
+        loadCassandraConnection(yaml, "yml", false, true);
+    }
+
+    @Test
+    void loadSingleCassandraConnectionJson() throws IOException {
+        String json = "{\n" +
+                "  \"" + CONNECTION_NAME + "\" : {\n" +
+                "                                      \"keyspace\": \"Test\",\n" +
+                "                                      \"contactPoint\": \"Test\",\n" +
+                "                                      \"port\": 9042,\n" +
+                "                                      \"username\": \"test\",\n" +
+                "                                      \"storedPasswordName\": \"gateway\",\n" +
+                "                                      \"compression\": \"LZ4\",\n" +
+                "                                      \"ssl\": true,\n" +
+                "                                      \"tlsCiphers\": [\n" +
+                "                                        \"TLS_RSA_WITH_AES_128_CBC_SHA256\",\n" +
+                "                                        \"TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384\",\n" +
+                "                                        \"TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA\",\n" +
+                "                                        \"TLS_RSA_WITH_AES_128_GCM_SHA256\",\n" +
+                "                                        \"TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256\",\n" +
+                "                                        \"TLS_DHE_RSA_WITH_AES_128_CBC_SHA256\",\n" +
+                "                                        \"TLS_RSA_WITH_AES_256_GCM_SHA384\",\n" +
+                "                                        \"TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384\",\n" +
+                "                                        \"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA\",\n" +
+                "                                        \"TLS_RSA_WITH_AES_256_CBC_SHA\",\n" +
+                "                                        \"TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256\",\n" +
+                "                                        \"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384\",\n" +
+                "                                        \"TLS_DHE_RSA_WITH_AES_256_GCM_SHA384\",\n" +
+                "                                        \"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256\",\n" +
+                "                                        \"TLS_DHE_RSA_WITH_AES_128_GCM_SHA256\",\n" +
+                "                                        \"TLS_ECDH_RSA_WITH_AES_256_CBC_SHA\",\n" +
+                "                                        \"TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA\",\n" +
+                "                                        \"TLS_RSA_WITH_AES_128_CBC_SHA\",\n" +
+                "                                        \"TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384\",\n" +
+                "                                        \"TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256\",\n" +
+                "                                        \"TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA\",\n" +
+                "                                        \"TLS_RSA_WITH_AES_256_CBC_SHA256\",\n" +
+                "                                        \"TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384\",\n" +
+                "                                        \"TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256\",\n" +
+                "                                        \"TLS_DHE_RSA_WITH_AES_256_CBC_SHA256\",\n" +
+                "                                        \"TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA\",\n" +
+                "                                        \"TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256\",\n" +
+                "                                        \"TLS_DHE_RSA_WITH_AES_256_CBC_SHA\",\n" +
+                "                                        \"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\",\n" +
+                "                                        \"TLS_ECDH_RSA_WITH_AES_128_CBC_SHA\",\n" +
+                "                                        \"TLS_DHE_RSA_WITH_AES_128_CBC_SHA\",\n" +
+                "                                        \"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA\",\n" +
+                "                                        \"TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256\",\n" +
+                "                                        \"TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384\"\n" +
+                "                                      ],\n" +
+                "                                      \"properties\": {\n" +
+                "                                        \"keepAlive\": \"true\"\n" +
+                "                                      }\n" +
+                "                                    }\n" +
+                "}";
+        loadCassandraConnection(json, "json", false, true);
     }
 
     @Test
@@ -204,7 +309,7 @@ class CassandraConnectionsLoaderTest {
                 "  - \"TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384\"\n" +
                 "  properties:\n" +
                 "    keepAlive: \"true\"";
-        loadCassandraConnection(yaml, "yml", true);
+        loadCassandraConnection(yaml, "yml", true, false);
     }
 
     @Test
@@ -259,10 +364,10 @@ class CassandraConnectionsLoaderTest {
                 "                                      }\n" +
                 "                                    \n" +
                 "  }\n";
-        loadCassandraConnection(json, "json", true);
+        loadCassandraConnection(json, "json", true, false);
     }
 
-    private void loadCassandraConnection(String content, String fileTyoe, boolean expectException) throws IOException {
+    private void loadCassandraConnection(String content, String fileTyoe, boolean expectException, boolean single) throws IOException {
         EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(CassandraConnection.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File cassandraConnectionsFile = new File(configFolder, "cassandra-connections." + fileTyoe);
@@ -273,11 +378,12 @@ class CassandraConnectionsLoaderTest {
         final Bundle bundle = new Bundle();
         if (expectException) {
             assertThrows(JsonToolsException.class, () -> loadCassandraConnections(loader, bundle, rootProjectDir));
-            return;
+        } else if (single) {
+            assertNotNull(loader.loadSingle(CONNECTION_NAME, cassandraConnectionsFile));
         } else {
             loadCassandraConnections(loader, bundle, rootProjectDir);
+            checkCassandraConnection(bundle);
         }
-        checkCassandraConnection(bundle);
     }
 
     private static void loadCassandraConnections(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {

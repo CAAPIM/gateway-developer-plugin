@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.APPLICATION;
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -320,5 +321,62 @@ class BundleEnvironmentValidatorTest {
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myCert"));
+    }
+
+    @Test
+    void validateEnvironmentProvidedMissingPrivateKey() {
+        Bundle environmentBundle = new Bundle();
+        environmentBundle.getPrivateKeys().put("test1", new PrivateKey());
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+        Executable validateBundle = () -> bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
+                "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:References>" +
+                "    </l7:References>\n" +
+                "    <l7:Mappings>" +
+                "        <l7:Mapping action=\"NewOrExisting\" srcId=\"00000000000000000000000000000005:test\" type=\"SSG_KEY_ENTRY\">\n" +
+                "            <l7:Properties>\n" +
+                "                <l7:Property key=\"MapBy\">\n" +
+                "                    <l7:StringValue>name</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"MapTo\">\n" +
+                "                    <l7:StringValue>test</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"FailOnNew\">\n" +
+                "                    <l7:BooleanValue>true</l7:BooleanValue>\n" +
+                "                </l7:Property>\n" +
+                "            </l7:Properties>\n" +
+                "        </l7:Mapping>" +
+                "    </l7:Mappings>\n" +
+                "</l7:Bundle>", APPLICATION);
+
+        MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
+        assertTrue(exception.getMessage().contains("test"));
+    }
+
+    @Test
+    void validateEnvironmentProvidedMissingPrivateKeyNoErrorOnPluginMode() {
+        Bundle environmentBundle = new Bundle();
+        environmentBundle.getPrivateKeys().put("test1", new PrivateKey());
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+        bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
+                "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:References>" +
+                "    </l7:References>\n" +
+                "    <l7:Mappings>" +
+                "        <l7:Mapping action=\"NewOrExisting\" srcId=\"00000000000000000000000000000005:test\" type=\"SSG_KEY_ENTRY\">\n" +
+                "            <l7:Properties>\n" +
+                "                <l7:Property key=\"MapBy\">\n" +
+                "                    <l7:StringValue>name</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"MapTo\">\n" +
+                "                    <l7:StringValue>test</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"FailOnNew\">\n" +
+                "                    <l7:BooleanValue>true</l7:BooleanValue>\n" +
+                "                </l7:Property>\n" +
+                "            </l7:Properties>\n" +
+                "        </l7:Mapping>" +
+                "    </l7:Mappings>\n" +
+                "</l7:Bundle>", PLUGIN);
     }
 }
