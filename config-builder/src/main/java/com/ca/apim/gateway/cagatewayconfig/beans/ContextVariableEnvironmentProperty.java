@@ -16,38 +16,18 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @Named("CONTEXT_VARIABLE_ENVIRONMENT_PROPERTY")
 @ConfigurationFile(name = "env", type = PROPERTIES)
 @EnvironmentType("CONTEXT_VARIABLE_PROPERTY")
-public class ContextVariableEnvironmentProperty extends PropertiesEntity {
+public class ContextVariableEnvironmentProperty extends GenericEnvironmentProperty {
 
     private String value;
 
     public ContextVariableEnvironmentProperty() { }
 
     public ContextVariableEnvironmentProperty(final String name, final String value) {
-        this.setName(name);
-        this.value = value;
+        super(name, value);
     }
 
     @Override
     public String getKey() {
         return "contextVariable.property." + getName();
-    }
-
-    @Override
-    public void setKey(String key) {
-        setName(key);
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return getId();
     }
 }

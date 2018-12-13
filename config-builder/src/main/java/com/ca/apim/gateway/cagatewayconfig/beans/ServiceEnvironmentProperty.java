@@ -16,38 +16,18 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @Named("SERVICE_ENVIRONMENT_PROPERTY")
 @ConfigurationFile(name = "env", type = PROPERTIES)
 @EnvironmentType("SERVICE_PROPERTY")
-public class ServiceEnvironmentProperty extends PropertiesEntity {
+public class ServiceEnvironmentProperty extends GenericEnvironmentProperty {
 
     private String value;
 
     public ServiceEnvironmentProperty() { }
 
     public ServiceEnvironmentProperty(final String name, final String value) {
-        this.setName(name);
-        this.value = value;
+        super(name, value);
     }
 
     @Override
     public String getKey() {
         return "service.property." + getName();
-    }
-
-    @Override
-    public void setKey(String key) {
-        setName(key);
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return getId();
     }
 }
