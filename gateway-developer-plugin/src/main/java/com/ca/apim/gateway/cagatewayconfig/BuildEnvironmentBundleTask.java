@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
@@ -29,6 +30,7 @@ import java.util.function.Consumer;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule.getInstance;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.JSON;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -63,7 +65,7 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     public void perform() {
         final Map envConfig = ofNullable(environmentConfig.getOrNull()).orElseThrow(() -> new MissingEnvironmentException("Environment configuration was not specified into gradle configuration file."));
         final Map<String, String> environmentValues = new HashMap<>();
-        envConfig.entrySet().forEach((Consumer<Entry>) e -> environmentValues.put("ENV." + e.getKey().toString(), getEnvValue(e.getKey().toString(), e.getValue())));
+        envConfig.entrySet().forEach((Consumer<Entry>) e -> environmentValues.put(PREFIX_ENV + e.getKey().toString(), getEnvValue(e.getKey().toString(), e.getValue())));
 
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
         final String bundleFileName = getProject().getName() + '-' + getProject().getVersion() + "-environment.bundle";
