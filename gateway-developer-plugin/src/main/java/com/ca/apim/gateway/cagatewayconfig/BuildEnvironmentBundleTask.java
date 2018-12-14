@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
