@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ class CertificatesLoaderTest {
     void load() throws IOException {
         createCertificates("cert1.cer", "cert2.cer", "cert3.cer");
 
-        CertificatesLoader loader = new CertificatesLoader();
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
         Bundle bundle = new Bundle();
         loader.load(bundle, rootProjectDir.getRoot());
 
@@ -51,8 +52,25 @@ class CertificatesLoaderTest {
     }
 
     @Test
+    void loadSingle() throws IOException {
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
+        createCertificates("cert1.cer");
+        Object certContent = loader.loadSingle("cert1", new File(certsDir, "cert1.cer"));
+
+        assertNotNull(certContent);
+        assertTrue(certContent instanceof String);
+    }
+
+    @Test
+    void loadSingleInvalidExtension() throws IOException {
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
+        createCertificates("cert1.cerT");
+        assertThrows(ConfigLoadException.class, () -> loader.loadSingle("cert1", new File(certsDir, "cert1.cerT")));
+    }
+
+    @Test
     void loadNoCerts() {
-        CertificatesLoader loader = new CertificatesLoader();
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
         Bundle bundle = new Bundle();
         loader.load(bundle, rootProjectDir.getRoot());
 
@@ -63,14 +81,14 @@ class CertificatesLoaderTest {
     void loadInvalidCert() throws IOException {
         createCertificates("cert1.cert");
 
-        CertificatesLoader loader = new CertificatesLoader();
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
         Bundle bundle = new Bundle();
         assertThrows(ConfigLoadException.class, () -> loader.load(bundle, rootProjectDir.getRoot()));
     }
 
     @Test
     void loadFromEnvironment() {
-        CertificatesLoader loader = new CertificatesLoader();
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
         Bundle bundle = new Bundle();
         loader.load(bundle, "cert1.cer", "CERTIFICATE");
 
@@ -81,7 +99,7 @@ class CertificatesLoaderTest {
 
     @Test
     void loadFromEnvironmentInvalidName() {
-        CertificatesLoader loader = new CertificatesLoader();
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
         Bundle bundle = new Bundle();
         assertThrows(ConfigLoadException.class, () -> loader.load(bundle, "cert1.cert", "CERTIFICATE"));
     }

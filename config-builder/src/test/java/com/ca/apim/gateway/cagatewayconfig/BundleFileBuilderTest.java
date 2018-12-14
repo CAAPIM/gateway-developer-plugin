@@ -92,6 +92,11 @@ class BundleFileBuilderTest {
         }
 
         @Override
+        public Object loadSingle(String name, File entitiesFile) {
+            return null;
+        }
+
+        @Override
         public String getEntityType() {
             return "POLICY_TEST";
         }

@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig;
+package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;

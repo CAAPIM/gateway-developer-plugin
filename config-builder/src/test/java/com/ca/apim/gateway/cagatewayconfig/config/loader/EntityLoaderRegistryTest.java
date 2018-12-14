@@ -51,6 +51,11 @@ class EntityLoaderRegistryTest {
 
     public static class TestEntityLoader implements EntityLoader {
         @Override
+        public Object loadSingle(String name, File entitiesFile) {
+            return null;
+        }
+
+        @Override
         public void load(Bundle bundle, File rootDir) {
             //
         }

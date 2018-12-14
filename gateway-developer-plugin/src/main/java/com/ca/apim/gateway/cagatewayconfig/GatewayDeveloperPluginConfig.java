@@ -8,14 +8,20 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.Property;
+
+import java.util.Map;
 
 public class GatewayDeveloperPluginConfig {
+
     private final DirectoryProperty solutionDir;
     private DirectoryProperty builtBundleDir;
+    private final Property<Map> environmentConfig;
 
     public GatewayDeveloperPluginConfig(Project project) {
         solutionDir = project.getLayout().directoryProperty();
         builtBundleDir = project.getLayout().directoryProperty();
+        environmentConfig = project.getObjects().property(Map.class);
     }
 
     DirectoryProperty getSolutionDir() {
@@ -24,5 +30,9 @@ public class GatewayDeveloperPluginConfig {
 
     DirectoryProperty getBuiltBundleDir() {
         return builtBundleDir;
+    }
+
+    Property<Map> getEnvironmentConfig() {
+        return environmentConfig;
     }
 }

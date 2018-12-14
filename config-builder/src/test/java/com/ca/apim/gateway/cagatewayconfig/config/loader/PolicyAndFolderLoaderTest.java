@@ -22,9 +22,8 @@ import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
 import java.io.File;
@@ -70,6 +69,12 @@ class PolicyAndFolderLoaderTest {
         Assert.assertEquals(parentFolder, loadedPolicy.getParentFolder());
     }
 
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testLoadSingle(TemporaryFolder temporaryFolder) {
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator());
+        assertThrows(ConfigLoadException.class, () -> policyAndFolderLoader.loadSingle("Policy", temporaryFolder.getRoot()));
+    }
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)

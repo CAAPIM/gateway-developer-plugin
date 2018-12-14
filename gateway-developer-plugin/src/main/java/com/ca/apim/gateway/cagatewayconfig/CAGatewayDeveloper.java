@@ -9,14 +9,20 @@ package com.ca.apim.gateway.cagatewayconfig;
 import com.ca.apim.gateway.cagatewayconfig.tasks.gw7.PackageTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.dsl.ArtifactHandler;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact;
 import org.gradle.api.internal.provider.DefaultProvider;
+import org.gradle.api.provider.Provider;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.function.Supplier;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public class CAGatewayDeveloper implements Plugin<Project> {
 
@@ -53,7 +59,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         project.getDependencies().add(ENV_APPLICATION_CONFIGURATION, "com.ca.apim.gateway:environment-creator-application:" + (version != null ? version : "+"));
 
         // Create build-bundle task
-        final BuildBundleTask buildBundleTask = project.getTasks().create("build-bundle", BuildBundleTask.class, t -> {
+        final BuildDeploymentBundleTask buildDeploymentBundleTask = project.getTasks().create("build-bundle", BuildDeploymentBundleTask.class, t -> {
             t.dependsOn(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getFrom().set(new DefaultProvider<>(() -> {
                 Directory dir = pluginConfig.getSolutionDir().get();
@@ -63,11 +69,18 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             t.getDependencies().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
 
+        // Create build-environment-bundle task
+        final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create("build-environment-bundle", BuildEnvironmentBundleTask.class, t -> {
+            t.getInto().set(pluginConfig.getBuiltBundleDir());
+            t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
+        });
+        buildEnvironmentBundleTask.dependsOn(buildDeploymentBundleTask);
+
         // Create package task
         final PackageTask packageGW7Task = project.getTasks().create("package-gw7", PackageTask.class, t -> {
-            t.dependsOn(buildBundleTask);
-            t.getInto().set(new DefaultProvider<RegularFile>(() -> () -> new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), getBuiltArtifactName(project, "gw7"))));
-            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, BUNDLE_FILE_EXTENSION))));
+            t.dependsOn(buildDeploymentBundleTask);
+            t.getInto().set(new DefaultProvider<RegularFile>(() -> () -> new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), getBuiltArtifactName(project, EMPTY,"gw7"))));
+            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, EMPTY, BUNDLE_FILE_EXTENSION))));
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getContainerApplicationDependencies().setFrom(project.getConfigurations().getByName(ENV_APPLICATION_CONFIGURATION));
             t.getDependencyModularAssertions().setFrom(project.getConfigurations().getByName(MODULAR_ASSERTION_CONFIGURATION));
@@ -75,23 +88,41 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         });
 
         // add build-bundle to the default build task
-        project.afterEvaluate(p -> project.getTasks().getByPath("build").dependsOn(buildBundleTask, packageGW7Task));
+        project.afterEvaluate(p -> project.getTasks().getByPath("build").dependsOn(buildDeploymentBundleTask, packageGW7Task));
 
-        // add the built bundle to the default artifacts
-        project.artifacts(artifactHandler -> artifactHandler
-                .add("default", new LazyPublishArtifact(packageGW7Task.getBundle(), null) {
-                            //We need to override this because gradle does not fully lazily load artifacts. Once we move to gradle 5 this will no longer be needed
-                            @Override
-                            public String getType() {
-                                return BUNDLE_FILE_EXTENSION;
-                            }
-                        },
-                        configurablePublishArtifact -> {
-                            configurablePublishArtifact.builtBy(buildBundleTask);
-                            configurablePublishArtifact.setExtension(BUNDLE_FILE_EXTENSION);
-                            configurablePublishArtifact.setName(project.getName());
-                            configurablePublishArtifact.setType(BUNDLE_FILE_EXTENSION);
-                        }));
+        // add the deployment bundle to the default artifacts
+        project.artifacts(artifactHandler -> addBundleArtifact(artifactHandler, packageGW7Task.getBundle(), buildDeploymentBundleTask, project::getName, "deployment"));
+        // the environment bundle is only added after task finish
+        buildEnvironmentBundleTask.doLast(task -> project.artifacts(artifactHandler -> addBundleArtifact(
+                artifactHandler,
+                pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, "-environment", BUNDLE_FILE_EXTENSION))),
+                task,
+                project::getName,
+                "environment")));
+    }
+
+    private void addBundleArtifact(
+            ArtifactHandler artifactHandler,
+            Provider<RegularFile> bundle,
+            Task generatedTask,
+            Supplier<String> nameSupplier,
+            String classifier) {
+        artifactHandler.add(
+                "default",
+                new LazyPublishArtifact(bundle, null) {
+                    // We need to override this because gradle does not fully lazily load artifacts. Once we move to gradle 5 this will no longer be needed
+                    @Override
+                    public String getType() {
+                        return BUNDLE_FILE_EXTENSION;
+                    }
+                },
+                configurablePublishArtifact -> {
+                    configurablePublishArtifact.builtBy(generatedTask);
+                    configurablePublishArtifact.setExtension(BUNDLE_FILE_EXTENSION);
+                    configurablePublishArtifact.setName(nameSupplier.get());
+                    configurablePublishArtifact.setType(BUNDLE_FILE_EXTENSION);
+                    configurablePublishArtifact.setClassifier(classifier);
+                });
     }
 
     private void createConfiguration(Project project, String configurationName) {
@@ -100,8 +131,8 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     }
 
     @NotNull
-    private String getBuiltArtifactName(@NotNull Project project, String bundleRequiredFileExtension) {
-        return project.getName() + '-' + project.getVersion() + "." + bundleRequiredFileExtension;
+    private String getBuiltArtifactName(@NotNull Project project, String classifier, String bundleRequiredFileExtension) {
+        return project.getName() + '-' + project.getVersion() + classifier + "." + bundleRequiredFileExtension;
     }
 
     private void setDefaults(GatewayDeveloperPluginConfig pluginConfig, Project project) {

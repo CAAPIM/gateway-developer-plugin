@@ -14,6 +14,8 @@ import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.testkit.runner.UnexpectedBuildFailure;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -28,8 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CAGatewayDeveloperTest {
     private static final Logger LOGGER = Logger.getLogger(CAGatewayDeveloperTest.class.getName());
@@ -149,7 +150,128 @@ class CAGatewayDeveloperTest {
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/assertions/Test-2.0.0.aar"));
     }
 
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project-generating-environment";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments(
+                        "build-environment-bundle",
+                        "--stacktrace",
+                        "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=7layer",
+                        "-DldapConfig={" +
+                                "    \"type\": \"BIND_ONLY_LDAP\"," +
+                                "    \"identityProviderDetail\": {" +
+                                "      \"serverUrls\": [" +
+                                "        \"ldaps://1.2.3.4:636\"" +
+                                "      ]," +
+                                "      \"useSslClientAuthentication\": true," +
+                                "      \"bindPatternPrefix\": \"\"," +
+                                "      \"bindPatternSuffix\": \"\"" +
+                                "    }" +
+                                "  }",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.yml")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
+
+        File buildDir = new File(testProjectDir, "build");
+        File buildGatewayDir = validateBuildDirExceptGW7File(projectFolder, buildDir);
+
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), projectFolder + projectVersion + "-environment.bundle");
+        assertTrue(builtBundleFile.isFile());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingEnvironmentWithMissingValues(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project-generating-environment";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=",
+                        "-DldapConfig=",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.yml")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingEnvironmentWithInvalidFilePath(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project-generating-environment";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=",
+                        "-DldapConfig=",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.ymla")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingEnvironmentJsonWithoutExpectedEntity(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project-generating-environment";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=",
+                        "-DldapConfig=",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections-wrong.yml")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingEnvironmentMalformedFile(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project-generating-environment";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=",
+                        "-DldapConfig=",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections-malformed.yml")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build());
+    }
+
     private File validateBuildDir(String projectName, File buildDir) {
+        File buildGatewayDir = validateBuildDirExceptGW7File(projectName, buildDir);
+        File gw7PackageFile = new File(buildGatewayDir, projectName + projectVersion + ".gw7");
+        assertTrue(gw7PackageFile.isFile());
+        return gw7PackageFile;
+    }
+
+    @NotNull
+    private File validateBuildDirExceptGW7File(String projectName, File buildDir) {
         assertTrue(buildDir.isDirectory());
         File buildGatewayDir = new File(buildDir, "gateway");
         assertTrue(buildGatewayDir.isDirectory());
@@ -157,8 +279,6 @@ class CAGatewayDeveloperTest {
         assertTrue(buildGatewayBundlesDir.isDirectory());
         File builtBundleFile = new File(buildGatewayBundlesDir, projectName + projectVersion + ".bundle");
         assertTrue(builtBundleFile.isFile());
-        File gw7PackageFile = new File(buildGatewayDir, projectName + projectVersion + ".gw7");
-        assertTrue(gw7PackageFile.isFile());
-        return gw7PackageFile;
+        return buildGatewayDir;
     }
 }

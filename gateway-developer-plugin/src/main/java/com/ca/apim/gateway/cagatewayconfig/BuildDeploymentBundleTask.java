@@ -15,9 +15,10 @@ import org.gradle.api.tasks.*;
 import javax.inject.Inject;
 
 /**
- * The BuildBundle task will take local source files and create a bundle document that can be bootstrapped into a gateway container
+ * The BuildDeploymentBundle task will take local source files and create a deployment bundle document that can be bootstrapped into a gateway container
+ * or pushed via restman to an appliance gateway.
  */
-public class BuildBundleTask extends DefaultTask {
+public class BuildDeploymentBundleTask extends DefaultTask {
 
     private DirectoryProperty from;
     private DirectoryProperty into;
@@ -27,7 +28,7 @@ public class BuildBundleTask extends DefaultTask {
      * Creates a new BuildBundle task to build a bundle from local source files
      */
     @Inject
-    public BuildBundleTask() {
+    public BuildDeploymentBundleTask() {
         into = newOutputDirectory();
         from = newInputDirectory();
         dependencies = getProject().files();
