@@ -87,8 +87,8 @@ public class Bundle {
         return getEntities(ClusterProperty.class);
     }
 
-    public void putAllEnvironmentProperties(@NotNull Map<String, EnvironmentProperty> properties) {
-        this.getEntities(EnvironmentProperty.class).putAll(properties);
+    public void putAllGlobalEnvironmentProperties(@NotNull Map<String, GlobalEnvironmentProperty> properties) {
+        this.getEntities(GlobalEnvironmentProperty.class).putAll(properties);
     }
 
     public void putAllServiceEnvironmentProperties(@NotNull Map<String, ServiceEnvironmentProperty> properties) {
@@ -99,8 +99,8 @@ public class Bundle {
         this.getEntities(ContextVariableEnvironmentProperty.class).putAll(properties);
     }
 
-    public Map<String, EnvironmentProperty> getEnvironmentProperties() {
-        return getEntities(EnvironmentProperty.class);
+    public Map<String, GlobalEnvironmentProperty> getGlobalEnvironmentProperties() {
+        return getEntities(GlobalEnvironmentProperty.class);
     }
 
     public Map<String, ServiceEnvironmentProperty> getServiceEnvironmentProperties() {

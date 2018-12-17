@@ -7,10 +7,8 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
 import com.ca.apim.gateway.cagatewayconfig.beans.ContextVariableEnvironmentProperty;
 import com.ca.apim.gateway.cagatewayconfig.beans.ServiceEnvironmentProperty;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;

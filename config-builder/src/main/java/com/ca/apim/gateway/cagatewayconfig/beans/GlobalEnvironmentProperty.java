@@ -13,19 +13,19 @@ import javax.inject.Named;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
 
-@Named("CONTEXT_VARIABLE_ENVIRONMENT_PROPERTY")
+@Named("ENVIRONMENT_PROPERTY")
 @ConfigurationFile(name = "env", type = PROPERTIES)
-@EnvironmentType("CONTEXT_VARIABLE_PROPERTY")
-public class ContextVariableEnvironmentProperty extends GenericEnvironmentProperty {
+@EnvironmentType("PROPERTY")
+public class GlobalEnvironmentProperty extends GenericEnvironmentProperty {
 
-    public ContextVariableEnvironmentProperty() { }
+    public GlobalEnvironmentProperty() { }
 
-    public ContextVariableEnvironmentProperty(final String name, final String value) {
+    public GlobalEnvironmentProperty(final String name, final String value) {
         super(name, value);
     }
 
     @Override
     public String getKey() {
-        return "contextVariable.property." + getName();
+        return "gateway." + getName();
     }
 }

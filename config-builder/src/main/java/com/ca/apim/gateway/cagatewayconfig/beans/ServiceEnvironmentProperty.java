@@ -18,8 +18,6 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @EnvironmentType("SERVICE_PROPERTY")
 public class ServiceEnvironmentProperty extends GenericEnvironmentProperty {
 
-    private String value;
-
     public ServiceEnvironmentProperty() { }
 
     public ServiceEnvironmentProperty(final String name, final String value) {

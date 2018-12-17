@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
@@ -32,7 +31,7 @@ class ServiceLinkerTest {
     void linkNoServiceProperties() {
         Bundle bundle = new Bundle();
         link(bundle, false);
-        assertTrue(bundle.getEnvironmentProperties().isEmpty());
+        assertTrue(bundle.getServiceEnvironmentProperties().isEmpty());
     }
 
     @Test

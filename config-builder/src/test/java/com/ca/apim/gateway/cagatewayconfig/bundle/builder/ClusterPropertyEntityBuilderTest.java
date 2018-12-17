@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.ClusterProperty;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.GlobalEnvironmentProperty;
 import com.ca.apim.gateway.cagatewayconfig.beans.PropertiesEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type.LOCAL;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertOnlyMappingEntity;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.testDeploymentBundleWithOnlyMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CLUSTER_PROPERTY_TYPE;
@@ -41,7 +40,7 @@ class ClusterPropertyEntityBuilderTest {
     private static final String ENV_PROP_2 = PREFIX_GATEWAY + "envprop2";
     private static final String STATIC_PROP_1 = "staticprop1";
     private static final String STATIC_PROP_2 = "staticprop2";
-    private static final Map<String, EnvironmentProperty> ENV_PROPS = ImmutableMap.of(ENV_PROP_1, new EnvironmentProperty(ENV_PROP_1, reverse(ENV_PROP_1), LOCAL), ENV_PROP_2, new EnvironmentProperty(ENV_PROP_2, reverse(ENV_PROP_2), LOCAL));
+    private static final Map<String, GlobalEnvironmentProperty> ENV_PROPS = ImmutableMap.of(ENV_PROP_1, new GlobalEnvironmentProperty(ENV_PROP_1, reverse(ENV_PROP_1)), ENV_PROP_2, new GlobalEnvironmentProperty(ENV_PROP_2, reverse(ENV_PROP_2)));
     private static final Map<String, ClusterProperty> STATIC_PROPS = ImmutableMap.of(STATIC_PROP_1, new ClusterProperty(STATIC_PROP_1, reverse(STATIC_PROP_1)), STATIC_PROP_2, new ClusterProperty(STATIC_PROP_2, reverse(STATIC_PROP_2)));
 
     @Test
@@ -56,7 +55,7 @@ class ClusterPropertyEntityBuilderTest {
     void buildDeploymentBundleWithOnlyEnvProps() {
         ClusterPropertyEntityBuilder builder = new ClusterPropertyEntityBuilder(ID_GENERATOR);
         Bundle bundle = new Bundle();
-        bundle.putAllEnvironmentProperties(ENV_PROPS);
+        bundle.putAllGlobalEnvironmentProperties(ENV_PROPS);
 
         testDeploymentBundleWithOnlyMapping(
                 builder,
@@ -81,7 +80,7 @@ class ClusterPropertyEntityBuilderTest {
         ClusterPropertyEntityBuilder builder = new ClusterPropertyEntityBuilder(ID_GENERATOR);
         Bundle bundle = new Bundle();
         bundle.putAllStaticProperties(STATIC_PROPS);
-        bundle.putAllEnvironmentProperties(ENV_PROPS);
+        bundle.putAllGlobalEnvironmentProperties(ENV_PROPS);
 
         final List<Entity> entities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertExpectedProperties(entities, ImmutableMap.<String, PropertiesEntity>builder().putAll(STATIC_PROPS).putAll(ENV_PROPS).build());
@@ -92,7 +91,7 @@ class ClusterPropertyEntityBuilderTest {
         ClusterPropertyEntityBuilder builder = new ClusterPropertyEntityBuilder(ID_GENERATOR);
         Bundle bundle = new Bundle();
         bundle.putAllStaticProperties(STATIC_PROPS);
-        bundle.putAllEnvironmentProperties(ENV_PROPS);
+        bundle.putAllGlobalEnvironmentProperties(ENV_PROPS);
 
         final List<Entity> entities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertExpectedProperties(entities, ImmutableMap.<String, PropertiesEntity>builder().putAll(ENV_PROPS).build());
@@ -105,7 +104,7 @@ class ClusterPropertyEntityBuilderTest {
         bundle.putAllStaticProperties(STATIC_PROPS);
         //Duplicate prop envprop1 in both static and env props
         bundle.getStaticProperties().put("envprop1", new ClusterProperty("envprop1", "some value"));
-        bundle.putAllEnvironmentProperties(ENV_PROPS);
+        bundle.putAllGlobalEnvironmentProperties(ENV_PROPS);
 
         assertThrows(EntityBuilderException.class, () -> builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }

@@ -14,6 +14,7 @@ public class GenericEnvironmentProperty extends PropertiesEntity {
 
     public GenericEnvironmentProperty(final String name, final String value) {
         this.setName(name);
+        this.setId(name);
         this.value = value;
     }
 
