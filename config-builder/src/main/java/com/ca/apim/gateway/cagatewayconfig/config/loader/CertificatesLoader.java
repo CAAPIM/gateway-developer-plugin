@@ -7,9 +7,11 @@
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import org.apache.commons.io.IOUtils;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,6 +29,13 @@ import static org.apache.commons.io.FilenameUtils.getBaseName;
  */
 @Singleton
 public class CertificatesLoader implements EntityLoader {
+
+    private FileUtils fileUtils;
+
+    @Inject
+    CertificatesLoader(FileUtils fileUtils) {
+        this.fileUtils = fileUtils;
+    }
 
     @Override
     public void load(Bundle bundle, File rootDir) {
@@ -54,6 +63,14 @@ public class CertificatesLoader implements EntityLoader {
         } else {
             throw new ConfigLoadException(name + " must have a valid certificate extension.");
         }
+    }
+
+    @Override
+    public Object loadSingle(String name, File entitiesFile) {
+        if (!checkCertFormat(entitiesFile.getName())) {
+            throw new ConfigLoadException(name + " must have a valid certificate extension.");
+        }
+        return fileUtils.getFileAsString(entitiesFile);
     }
 
     private boolean checkCertFormat(String certFileName) {

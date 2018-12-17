@@ -4,12 +4,14 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig;
+package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.APPLICATION;
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,7 +28,7 @@ class BundleEnvironmentValidatorTest {
                 "    </l7:References>\n" +
                 "    <l7:Mappings>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
     }
 
@@ -55,7 +57,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -82,7 +84,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myPassword"));
@@ -113,7 +115,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -140,7 +142,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myConnection"));
@@ -171,7 +173,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -198,7 +200,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myIDP"));
@@ -229,7 +231,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -256,7 +258,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myProperty"));
@@ -287,7 +289,7 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
     }
 
     @Test
@@ -314,9 +316,218 @@ class BundleEnvironmentValidatorTest {
                 "            </l7:Properties>\n" +
                 "        </l7:Mapping>" +
                 "    </l7:Mappings>\n" +
-                "</l7:Bundle>");
+                "</l7:Bundle>", APPLICATION);
 
         MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
         assertTrue(exception.getMessage().contains("myCert"));
+    }
+
+    @Test
+    void validateEnvironmentProvidedMissingTrustedCertOnPluginMode() {
+        Bundle environmentBundle = new Bundle();
+        environmentBundle.getTrustedCerts().put("myOtherCert", new TrustedCert());
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+        Executable validateBundle = () -> bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
+                "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:References>" +
+                "    </l7:References>\n" +
+                "    <l7:Mappings>" +
+                "        <l7:Mapping action=\"NewOrExisting\" srcId=\"89dbda0631bd25a08c73c96aebec7f5a\" type=\"TRUSTED_CERT\">\n" +
+                "            <l7:Properties>\n" +
+                "                <l7:Property key=\"MapBy\">\n" +
+                "                    <l7:StringValue>name</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"MapTo\">\n" +
+                "                    <l7:StringValue>myCert</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"FailOnNew\">\n" +
+                "                    <l7:BooleanValue>true</l7:BooleanValue>\n" +
+                "                </l7:Property>\n" +
+                "            </l7:Properties>\n" +
+                "        </l7:Mapping>" +
+                "    </l7:Mappings>\n" +
+                "</l7:Bundle>", PLUGIN);
+
+        MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
+        assertTrue(exception.getMessage().contains("myCert"));
+    }
+
+    @Test
+    void validateEnvironmentProvidedMissingPrivateKey() {
+        Bundle environmentBundle = new Bundle();
+        environmentBundle.getPrivateKeys().put("test1", new PrivateKey());
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+        Executable validateBundle = () -> bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
+                "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:References>" +
+                "    </l7:References>\n" +
+                "    <l7:Mappings>" +
+                "        <l7:Mapping action=\"NewOrExisting\" srcId=\"00000000000000000000000000000005:test\" type=\"SSG_KEY_ENTRY\">\n" +
+                "            <l7:Properties>\n" +
+                "                <l7:Property key=\"MapBy\">\n" +
+                "                    <l7:StringValue>name</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"MapTo\">\n" +
+                "                    <l7:StringValue>test</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"FailOnNew\">\n" +
+                "                    <l7:BooleanValue>true</l7:BooleanValue>\n" +
+                "                </l7:Property>\n" +
+                "            </l7:Properties>\n" +
+                "        </l7:Mapping>" +
+                "    </l7:Mappings>\n" +
+                "</l7:Bundle>", APPLICATION);
+
+        MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
+        assertTrue(exception.getMessage().contains("test"));
+    }
+
+    @Test
+    void validateEnvironmentProvidedMissingPrivateKeyNoErrorOnPluginMode() {
+        Bundle environmentBundle = new Bundle();
+        environmentBundle.getPrivateKeys().put("test1", new PrivateKey());
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+        bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
+                "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:References>" +
+                "    </l7:References>\n" +
+                "    <l7:Mappings>" +
+                "        <l7:Mapping action=\"NewOrExisting\" srcId=\"00000000000000000000000000000005:test\" type=\"SSG_KEY_ENTRY\">\n" +
+                "            <l7:Properties>\n" +
+                "                <l7:Property key=\"MapBy\">\n" +
+                "                    <l7:StringValue>name</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"MapTo\">\n" +
+                "                    <l7:StringValue>test</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"FailOnNew\">\n" +
+                "                    <l7:BooleanValue>true</l7:BooleanValue>\n" +
+                "                </l7:Property>\n" +
+                "            </l7:Properties>\n" +
+                "        </l7:Mapping>" +
+                "    </l7:Mappings>\n" +
+                "</l7:Bundle>", PLUGIN);
+    }
+
+    @Test
+    void validateEnvironmentProvidedCassandra() {
+        Bundle environmentBundle = new Bundle();
+        environmentBundle.getCassandraConnections().put("cassandra", new CassandraConnection());
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+
+        bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
+                "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:References>" +
+                "    </l7:References>\n" +
+                "    <l7:Mappings>" +
+                "        <l7:Mapping action=\"NewOrExisting\" srcId=\"89dbda0631bd25a08c73c96aebec7f5a\" type=\"CASSANDRA_CONFIGURATION\">\n" +
+                "            <l7:Properties>\n" +
+                "                <l7:Property key=\"MapBy\">\n" +
+                "                    <l7:StringValue>name</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"MapTo\">\n" +
+                "                    <l7:StringValue>cassandra</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"FailOnNew\">\n" +
+                "                    <l7:BooleanValue>true</l7:BooleanValue>\n" +
+                "                </l7:Property>\n" +
+                "            </l7:Properties>\n" +
+                "        </l7:Mapping>" +
+                "    </l7:Mappings>\n" +
+                "</l7:Bundle>", APPLICATION);
+    }
+
+    @Test
+    void validateEnvironmentProvidedMissingCassandra() {
+        Bundle environmentBundle = new Bundle();
+        environmentBundle.getCassandraConnections().put("cassandra1", new CassandraConnection());
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+        Executable validateBundle = () -> bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
+                "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:References>" +
+                "    </l7:References>\n" +
+                "    <l7:Mappings>" +
+                "        <l7:Mapping action=\"NewOrExisting\" srcId=\"89dbda0631bd25a08c73c96aebec7f5a\" type=\"CASSANDRA_CONFIGURATION\">\n" +
+                "            <l7:Properties>\n" +
+                "                <l7:Property key=\"MapBy\">\n" +
+                "                    <l7:StringValue>name</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"MapTo\">\n" +
+                "                    <l7:StringValue>cassandra</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"FailOnNew\">\n" +
+                "                    <l7:BooleanValue>true</l7:BooleanValue>\n" +
+                "                </l7:Property>\n" +
+                "            </l7:Properties>\n" +
+                "        </l7:Mapping>" +
+                "    </l7:Mappings>\n" +
+                "</l7:Bundle>", APPLICATION);
+
+        MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
+        assertTrue(exception.getMessage().contains("cassandra"));
+    }
+
+    @Test
+    void validateEnvironmentProvidedMissingUnknownEntity() {
+        Bundle environmentBundle = new Bundle();
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+        Executable validateBundle = () -> bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
+                "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:References>" +
+                "    </l7:References>\n" +
+                "    <l7:Mappings>" +
+                "        <l7:Mapping action=\"NewOrExisting\" srcId=\"89dbda0631bd25a08c73c96aebec7f5a\" type=\"GENERIC\">\n" +
+                "            <l7:Properties>\n" +
+                "                <l7:Property key=\"MapBy\">\n" +
+                "                    <l7:StringValue>name</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"MapTo\">\n" +
+                "                    <l7:StringValue>entity</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"FailOnNew\">\n" +
+                "                    <l7:BooleanValue>true</l7:BooleanValue>\n" +
+                "                </l7:Property>\n" +
+                "            </l7:Properties>\n" +
+                "        </l7:Mapping>" +
+                "    </l7:Mappings>\n" +
+                "</l7:Bundle>", APPLICATION);
+
+        MissingEnvironmentException exception = assertThrows(MissingEnvironmentException.class, validateBundle);
+        assertTrue(exception.getMessage().contains("entity"));
+    }
+
+    @Test
+    void validateWithWrongMappingType() {
+        Bundle environmentBundle = new Bundle();
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+        Executable validateBundle = () -> bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "" +
+                "<l7:Bundle xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\">\n" +
+                "    <l7:References>" +
+                "    </l7:References>\n" +
+                "    <l7:Mappings>" +
+                "        <l7:Mapping action=\"NewOrExisting\" srcId=\"89dbda0631bd25a08c73c96aebec7f5a\" type=\"CASSANDRA_CONFIGURATION\">\n" +
+                "            <l7:Properties>\n" +
+                "                <l7:Property key=\"MapBy\">\n" +
+                "                    <l7:StringValue>id</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"MapTo\">\n" +
+                "                    <l7:StringValue>entity</l7:StringValue>\n" +
+                "                </l7:Property>\n" +
+                "                <l7:Property key=\"FailOnNew\">\n" +
+                "                    <l7:BooleanValue>true</l7:BooleanValue>\n" +
+                "                </l7:Property>\n" +
+                "            </l7:Properties>\n" +
+                "        </l7:Mapping>" +
+                "    </l7:Mappings>\n" +
+                "</l7:Bundle>", APPLICATION);
+
+        assertThrows(DeploymentBundleException.class, validateBundle);
+    }
+
+    @Test
+    void validateWithInvalidXML() {
+        Bundle environmentBundle = new Bundle();
+        BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
+        assertThrows(DeploymentBundleException.class, () -> bundleEnvironmentValidator.validateEnvironmentProvided("myBundle", "bundle", APPLICATION));
     }
 }

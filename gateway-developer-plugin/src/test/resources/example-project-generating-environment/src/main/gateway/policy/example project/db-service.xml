@@ -1,0 +1,16 @@
+<wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:L7p="http://www.layer7tech.com/ws/policy">
+    <wsp:All wsp:Usage="Required">
+        <L7p:Authentication>
+            <L7p:IdentityProviderName stringValue="Tacoma MSAD"/>
+        </L7p:Authentication>
+        <L7p:JdbcQuery>
+            <L7p:ConnectionName stringValue="MySQL"/>
+            <L7p:ConvertVariablesToStrings booleanValue="false"/>
+            <L7p:GenerateXmlResult booleanValue="true"/>
+            <L7p:SqlQuery stringValue="select * from cluster_info;"/>
+        </L7p:JdbcQuery>
+        <L7p:HardcodedResponse>
+            <L7p:ResponseBody><![CDATA[${jdbcQuery.xmlResult}]]></L7p:ResponseBody>
+        </L7p:HardcodedResponse>
+    </wsp:All>
+</wsp:Policy>

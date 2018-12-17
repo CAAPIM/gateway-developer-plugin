@@ -12,9 +12,11 @@ import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+import com.fasterxml.jackson.databind.type.MapType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class EntityLoaderUtils {
@@ -65,5 +67,12 @@ public class EntityLoaderUtils {
                 return entityInfo.getEntityClass();
             }
         };
+    }
+
+    public static <B> Map<String, B> loadEntitiesFromFile(JsonTools jsonTools, Class<? extends GatewayEntity> entityClass,  File entitiesFile) {
+        final String fileType = jsonTools.getTypeFromFile(entitiesFile);
+        final MapType type = jsonTools.getObjectMapper(fileType).getTypeFactory().constructMapType(LinkedHashMap.class, String.class, entityClass);
+
+        return jsonTools.readDocumentFile(entitiesFile, type);
     }
 }

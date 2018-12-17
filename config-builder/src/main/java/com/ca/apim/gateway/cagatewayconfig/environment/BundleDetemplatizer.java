@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig;
+package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 
@@ -71,7 +71,7 @@ class BundleDetemplatizer {
 
     private Map<String, String> createIdProviderNameGoid(Bundle bundle) {
         Map<String, String> idProviders = bundle.getIdentityProviders().entrySet().stream().collect(toMap(
-                Map.Entry::getKey,
+                Entry::getKey,
                 e -> e.getValue().getId()));
         idProviders.put(INTERNAL_IDP_NAME, INTERNAL_IDP_ID);
         return idProviders;

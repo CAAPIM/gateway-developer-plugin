@@ -17,13 +17,18 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.DEFAULT_PALETTE_FOLDER_LOCATION;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PALETTE_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.lang.Boolean.FALSE;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
@@ -31,8 +36,6 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 @Singleton
 public class EncassEntityBuilder implements EntityBuilder {
 
-    private static final String PALETTE_FOLDER = "paletteFolder";
-    private static final String INTERNAL_ASSERTIONS = "internalAssertions";
     private static final int ORDER = 300;
 
     private final IdGenerator idGenerator;
@@ -72,7 +75,9 @@ public class EncassEntityBuilder implements EntityBuilder {
                 buildResults(encass, document)
         );
 
-        buildAndAppendPropertiesElement(ImmutableMap.of(PALETTE_FOLDER, INTERNAL_ASSERTIONS), document, encassAssertionElement);
+        final Map<String, Object> properties = Optional.ofNullable(encass.getProperties()).orElse(new HashMap<>());
+        properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
+        buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
 
         return new Entity(ENCAPSULATED_ASSERTION_TYPE, name, id, encassAssertionElement);
     }

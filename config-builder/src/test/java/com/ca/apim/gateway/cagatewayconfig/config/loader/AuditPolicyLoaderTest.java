@@ -16,6 +16,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +56,7 @@ class AuditPolicyLoaderTest {
         String yaml = "'" + NAME + "':\n" +
                 "  path: \"gateway-solution/audit-policies/" + NAME + "\"\n" +
                 "  tag: \"audit-sink\"";
-        load(yaml, "yml", null);
+        load(yaml, "yml", null, false);
     }
 
     @Test
@@ -66,7 +67,26 @@ class AuditPolicyLoaderTest {
                 "    \"tag\": \"audit-sink\"\n" +
                 "  }\n" +
                 "}";
-        load(json, "json", null);
+        load(json, "json", null, false);
+    }
+
+    @Test
+    void loadSingleFromYaml() throws IOException {
+        String yaml = "'" + NAME + "':\n" +
+                "  path: \"gateway-solution/audit-policies/" + NAME + "\"\n" +
+                "  tag: \"audit-sink\"";
+        load(yaml, "yml", null, true);
+    }
+
+    @Test
+    void loadSingleFromJson() throws IOException {
+        String json = "{\n" +
+                "  \"" + NAME + "\": {\n" +
+                "    \"path\": \"gateway-solution/audit-policies/" + NAME + "\",\n" +
+                "    \"tag\": \"audit-sink\"\n" +
+                "  }\n" +
+                "}";
+        load(json, "json", null, true);
     }
 
     @Test
@@ -74,7 +94,7 @@ class AuditPolicyLoaderTest {
         String yaml = "'" + NAME + "':\n" +
                 "  path \"gateway-solution/audit-policies/" + NAME + "\"\n" +
                 "  tag \"audit-sink\"";
-        load(yaml, "yml", JsonToolsException.class);
+        load(yaml, "yml", JsonToolsException.class, false);
     }
 
     @Test
@@ -85,7 +105,7 @@ class AuditPolicyLoaderTest {
                 "    \"tag\": \"audit-sink\"\n" +
                 "  \n" +
                 "";
-        load(json, "json", JsonToolsException.class);
+        load(json, "json", JsonToolsException.class, false);
     }
 
     @Test
@@ -96,10 +116,10 @@ class AuditPolicyLoaderTest {
                 "'[Internal Audit Sink Policy 1]':\n" +
                 "  path: \"gateway-solution/audit-policies/[Internal Audit Sink Policy 1]\"\n" +
                 "  tag: \"audit-sink\"";
-        load(yaml, "yml", ConfigLoadException.class);
+        load(yaml, "yml", ConfigLoadException.class, false);
     }
 
-    private void load(String content, String fileType, Class<? extends Exception> expectException) throws IOException {
+    private void load(String content, String fileType, Class<? extends Exception> expectException, boolean single) throws IOException {
         EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(AuditPolicy.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "audit-policies." + fileType);
@@ -110,11 +130,12 @@ class AuditPolicyLoaderTest {
         final Bundle bundle = new Bundle();
         if (expectException != null) {
             assertThrows(expectException, () -> load(loader, bundle, rootProjectDir));
-            return;
+        } else if (single) {
+            assertNotNull(loader.loadSingle(NAME, identityProvidersFile));
         } else {
             load(loader, bundle, rootProjectDir);
+            check(bundle);
         }
-        check(bundle);
     }
 
     private static void load(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {

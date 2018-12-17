@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
@@ -57,6 +58,7 @@ class ConfigBuilderModuleTest {
         assertNotNull(injector.getInstance(SSLSocketFactory.class), "SSLSocketFactory is not available");
         assertNotNull(injector.getInstance(CertificateFactory.class), "CertificateFactory is not available");
         assertNotNull(injector.getInstance(KeystoreHelper.class), "KeystoreHelper is not available");
+        assertNotNull(injector.getInstance(EnvironmentBundleCreator.class), "EnvironmentBundleCreator is not available");
     }
 
     @Test

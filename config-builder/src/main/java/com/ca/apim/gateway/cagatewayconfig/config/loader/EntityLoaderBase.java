@@ -11,15 +11,15 @@ import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.loadEntitiesFromFile;
 
 /**
  * Base loader for all entities with information stored in yaml or json files.
@@ -36,6 +36,10 @@ public abstract class EntityLoaderBase<B extends GatewayEntity> implements Entit
         this.idGenerator = idGenerator;
     }
 
+    public Object loadSingle(String name, File entitiesFile) {
+        return loadEntitiesFromFile(jsonTools, this.getBeanClass(), entitiesFile).get(name);
+    }
+
     @Override
     public void load(final Bundle bundle, final File rootDir) {
         final File entitiesFile = jsonTools.getDocumentFileFromConfigDir(rootDir, getFileName());
@@ -43,10 +47,7 @@ public abstract class EntityLoaderBase<B extends GatewayEntity> implements Entit
             // no file
             return;
         }
-        final String fileType = jsonTools.getTypeFromFile(entitiesFile);
-        final MapType type = jsonTools.getObjectMapper(fileType).getTypeFactory().constructMapType(LinkedHashMap.class, String.class, this.getBeanClass());
-
-        final Map<String, B> entities = jsonTools.readDocumentFile(entitiesFile, type);
+        final Map<String, B> entities = loadEntitiesFromFile(jsonTools, this.getBeanClass(), entitiesFile);
         if (entities != null) {
             entities.forEach((k,e) -> e.postLoad(k, bundle, rootDir, idGenerator));
             putToBundle(bundle, entities);

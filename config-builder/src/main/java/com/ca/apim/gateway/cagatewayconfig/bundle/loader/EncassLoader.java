@@ -15,10 +15,13 @@ import org.w3c.dom.NodeList;
 import javax.inject.Singleton;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.POLICY_GUID_PROP;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 @Singleton
@@ -31,10 +34,14 @@ public class EncassLoader implements BundleEntityLoader {
         final String policyId = getSingleChildElementAttribute(encassElement, POLICY_REFERENCE, ATTRIBUTE_ID);
         final String name = getSingleChildElementTextContent(encassElement, NAME);
         final String guid = getSingleChildElementTextContent(encassElement, GUID);
+        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(encassElement, PROPERTIES, true), PROPERTIES);
+        //Removing redundant policyGuid, since encass already has a reference to policyId
+        properties.remove(POLICY_GUID_PROP);
 
         Encass encass = new Encass();
         encass.setGuid(guid);
         encass.setName(name);
+        encass.setProperties(properties);
 
         String policyPath = getPath(bundle, policyId);
         encass.setId(encassElement.getAttribute(ATTRIBUTE_ID));

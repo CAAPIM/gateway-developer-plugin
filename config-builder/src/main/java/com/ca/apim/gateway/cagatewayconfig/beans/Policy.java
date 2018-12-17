@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Named;
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -157,7 +158,7 @@ public class Policy extends Folderable {
 
     static void checkRepeatedTags(Bundle bundle, PolicyType policyType) {
         Set<String> errors = new HashSet<>();
-        bundle.getPolicies().values()
+        new HashMap<>(bundle.getPolicies()).values()
                 .stream()
                 .filter(p -> p.getTag() != null)
                 .collect(groupingBy(Policy::getTag, Collectors.mapping(identity(), toList())))

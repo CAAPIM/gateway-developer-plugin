@@ -15,6 +15,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
+import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
@@ -95,6 +96,8 @@ public class ConfigBuilderModule extends AbstractModule {
         reflections.getSubTypesOf(PolicyConverter.class).forEach(l -> policyConverterBinder.addBinding().to(l));
         bind(PolicyConverterRegistry.class);
 
+        // bind the environment bundle creator
+        bind(EnvironmentBundleCreator.class);
     }
 
     public static Injector getInjector() {
