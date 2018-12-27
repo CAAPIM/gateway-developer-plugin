@@ -31,6 +31,7 @@ import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 import static org.apache.commons.lang3.time.DateFormatUtils.format;
 import static org.apache.commons.lang3.time.DateUtils.parseDateStrictly;
 import static org.w3c.dom.Node.ELEMENT_NODE;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 
 public class BuilderUtils {
 
@@ -122,9 +123,14 @@ public class BuilderUtils {
         }));
     }
 
-    // Inserting service / policy name after "ENV." for environment variables
+    /**
+     *
+     * @param environmentVariable must begin with 'ENV.'
+     * @param prefix service / policy name to be inserted after 'ENV.' in environmentVariable
+     * @return String of environmental variable with a prefix
+     */
     public static String insertPrefixToEnvironmentVariable(String environmentVariable, String prefix) {
-        StringBuilder stringBuilder = new StringBuilder(environmentVariable).insert(4, prefix + ".");
+        StringBuilder stringBuilder = new StringBuilder(environmentVariable).insert(PREFIX_ENV.length(), prefix + ".");
         return stringBuilder.toString();
     }
 

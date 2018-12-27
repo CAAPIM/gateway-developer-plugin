@@ -6,22 +6,20 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-public class GenericEnvironmentProperty extends PropertiesEntity {
+public abstract class EnvironmentProperty extends PropertiesEntity {
 
     private String value;
 
-    public GenericEnvironmentProperty() { }
+    public EnvironmentProperty() { }
 
-    public GenericEnvironmentProperty(final String name, final String value) {
+    public EnvironmentProperty(final String name, final String value) {
         this.setName(name);
         this.setId(name);
         this.value = value;
     }
 
     @Override
-    public String getKey() {
-        return getName();
-    }
+    public abstract String getKey();
 
     @Override
     public void setKey(String key) {

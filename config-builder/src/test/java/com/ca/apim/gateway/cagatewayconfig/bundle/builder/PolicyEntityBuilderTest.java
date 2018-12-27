@@ -35,6 +35,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.junit.jupiter.api.Assertions.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 
 class PolicyEntityBuilderTest {
 
@@ -136,7 +137,7 @@ class PolicyEntityBuilderTest {
         assertEquals("ENV.my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
 
         Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
-        assertEquals("ENV." + prefix + ".my-var", expressionElement.getAttribute(PolicyEntityBuilder.ENV_PARAM_NAME));
+        assertEquals(PREFIX_ENV + prefix + ".my-var", expressionElement.getAttribute(PolicyEntityBuilder.ENV_PARAM_NAME));
         assertFalse(expressionElement.hasAttribute(PolicyEntityBuilder.STRING_VALUE));
     }
 

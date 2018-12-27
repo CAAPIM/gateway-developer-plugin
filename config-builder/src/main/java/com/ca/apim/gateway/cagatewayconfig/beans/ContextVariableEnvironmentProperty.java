@@ -16,7 +16,7 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @Named("CONTEXT_VARIABLE_ENVIRONMENT_PROPERTY")
 @ConfigurationFile(name = "env", type = PROPERTIES)
 @EnvironmentType("CONTEXT_VARIABLE_PROPERTY")
-public class ContextVariableEnvironmentProperty extends GenericEnvironmentProperty {
+public class ContextVariableEnvironmentProperty extends EnvironmentProperty {
 
     public ContextVariableEnvironmentProperty() { }
 

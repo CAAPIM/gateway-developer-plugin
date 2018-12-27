@@ -16,7 +16,7 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @Named("ENVIRONMENT_PROPERTY")
 @ConfigurationFile(name = "env", type = PROPERTIES)
 @EnvironmentType("PROPERTY")
-public class GlobalEnvironmentProperty extends GenericEnvironmentProperty {
+public class GlobalEnvironmentProperty extends EnvironmentProperty {
 
     public GlobalEnvironmentProperty() { }
 
