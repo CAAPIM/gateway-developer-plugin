@@ -172,7 +172,7 @@ class EnvironmentCreatorApplicationTest {
 
         ImmutableMap<String, String> environmentProperties = ImmutableMap.<String, String>builder()
                 .put("ENV.SERVICE_PROPERTY.my-gateway-api.myEnvironmentVariable", "my-service-property-value")
-                .put("ENV.CONTEXT_VARIABLE_PROPERTY.anotherEnavVar", "context-variable-value")
+                .put("ENV.CONTEXT_VARIABLE_PROPERTY.anotherEnvVar", "context-variable-value")
                 .put("ENV.SERVICE_PROPERTY.my-gateway-api.environmentVariableNotInBundle", "my-service-property-value")
                 .put("ENV.CONTEXT_VARIABLE_PROPERTY.environmentVariableNotInBundle", "context-variable-value")
                 .build();
