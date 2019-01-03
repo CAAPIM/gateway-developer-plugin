@@ -62,10 +62,12 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         
         final Map<String, Object> jndiProperties = contextPropertiesTemplateProps.entrySet().stream()
                 .filter(map -> 
-                        !map.getKey().startsWith("com.l7tech.server.jms.prop.") && 
+                        !map.getKey().startsWith("com.l7tech.server.jms.prop.") &&
+                        !map.getKey().startsWith("com.tibco.tibjms.") &&
                         !"com.l7tech.server.jms.soapAction.msgPropName".equals(map.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
+        contextPropertiesTemplateProps.keySet().removeAll(jndiProperties.keySet());
+        
         final String destinationType = (String) jmsDestinationDetailProps.remove(DESTINATION_TYPE);
         final String connectionFactoryName = (String) jmsConnectionProps.remove(CONNECTION_FACTORY_NAME);
         final String destinationName = getSingleChildElementTextContent(jmsDestinationDetailEle, JMS_DESTINATION_NAME);

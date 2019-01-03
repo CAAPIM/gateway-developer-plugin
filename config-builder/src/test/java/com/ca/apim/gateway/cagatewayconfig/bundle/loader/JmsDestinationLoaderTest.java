@@ -35,68 +35,87 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JmsDestinationLoaderTest {
     
-    private JmsDestinationLoader loader = new JmsDestinationLoader();
-    
-    // (kpak) - add more tests
+    private static final String PROVIDER_TYPE_GENERIC = null;
+    private static final String PROVIDER_TYPE_TIBCO_EMS = "TIBCO EMS";
+    private static final String PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP = "WebSphere MQ over LDAP";
     
     @Test
-    void testLoadInboundJmsDestination() {
-        loadJmsDestination(true);
-    }
-    
-    @Test 
-    void testLoadOutboundJmsDestination() {
-        loadJmsDestination(false);
-    }
-    
-    private void loadJmsDestination(boolean isInbound) {
+    void testLoadInbound() {
+        JmsDestinationLoader loader = new JmsDestinationLoader();
         Bundle bundle = new Bundle();
         loader.load(bundle, createJmsDestinationXml(
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), isInbound)
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, PROVIDER_TYPE_GENERIC)
+        );
+        
+        assertFalse(bundle.getJmsDestinations().isEmpty());
+        assertEquals(1, bundle.getJmsDestinations().size());
+
+        JmsDestination jmsDestination = bundle.getJmsDestinations().get("my-jms-endpoint");
+        verifyCommonSettings(jmsDestination);
+        verifyGenericProviderSettings(jmsDestination);
+        verifyInboundSettings(jmsDestination);
+    }
+    
+    @Test
+    void testLoadOutbound() {
+        JmsDestinationLoader loader = new JmsDestinationLoader();
+        Bundle bundle = new Bundle();
+        loader.load(bundle, createJmsDestinationXml(
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), false, PROVIDER_TYPE_GENERIC)
+        );
+        
+        assertFalse(bundle.getJmsDestinations().isEmpty());
+        assertEquals(1, bundle.getJmsDestinations().size());
+
+        JmsDestination jmsDestination = bundle.getJmsDestinations().get("my-jms-endpoint");
+        verifyCommonSettings(jmsDestination);
+        verifyGenericProviderSettings(jmsDestination);
+        verifyOutboundSettings(jmsDestination);
+    }
+
+    @Test
+    void testLoadTibcoEmsProvider() {
+        JmsDestinationLoader loader = new JmsDestinationLoader();
+        Bundle bundle = new Bundle();
+        loader.load(bundle, createJmsDestinationXml(
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, PROVIDER_TYPE_TIBCO_EMS)
         );
 
         assertFalse(bundle.getJmsDestinations().isEmpty());
         assertEquals(1, bundle.getJmsDestinations().size());
 
         JmsDestination jmsDestination = bundle.getJmsDestinations().get("my-jms-endpoint");
-        assertNotNull(jmsDestination);
-        assertEquals("my-jms-endpoint", jmsDestination.getName());
-        assertEquals("id-1", jmsDestination.getId());
-        assertEquals("TIBCO EMS", jmsDestination.getProviderType());
-        assertEquals("com.tibco.tibjms.naming.TibjmsInitialContextFactory", jmsDestination.getInitialContextFactoryClassName());
-        assertEquals("tibjmsnaming://machinename:7222", jmsDestination.getJndiUrl());
-        assertEquals("my-jndi-username", jmsDestination.getJndiUsername());
-        assertEquals("my-jndi-password", jmsDestination.getJndiPassword());
-        assertNull(jmsDestination.getJndiPasswordRef());
-
-        assertPropertiesContent(ImmutableMap.of(
-                "additional-jndi-prop-name-1", "additional-jndi-prop-val-1",
-                "additional-jndi-prop-name-2", "additional-jndi-prop-val-2"),
-                jmsDestination.getJndiProperties());
-        
-        assertEquals(JmsDestination.DestinationType.QUEUE, jmsDestination.getDestinationType());
-        assertEquals("my-qcf-name", jmsDestination.getConnectionFactoryName());
-        assertEquals("my-jms-destination-name", jmsDestination.getDestinationName());
-        assertEquals("my-destination-username", jmsDestination.getDestinationUsername());
-        assertEquals("my-destination-password", jmsDestination.getDestinationPassword());
-        assertNull(jmsDestination.getDestinationPasswordRef());
-        
-        if (isInbound) {
-            verifyInboundJmsDestination(jmsDestination);
-        } else {
-            verifyOutboundJmsDestination(jmsDestination);
-        }
+        verifyCommonSettings(jmsDestination);
+        verifyInboundSettings(jmsDestination);
+        verifyTibcoEmsProviderSettings(jmsDestination);
     }
     
-    private static Element createJmsDestinationXml(Document document, boolean isInbound) {
+    @Test
+    void testLoadGenericWebShpereMqOverLdapProvider() {
+        JmsDestinationLoader loader = new JmsDestinationLoader();
+        Bundle bundle = new Bundle();
+        loader.load(bundle, createJmsDestinationXml(
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP)
+        );
+
+        assertFalse(bundle.getJmsDestinations().isEmpty());
+        assertEquals(1, bundle.getJmsDestinations().size());
+
+        JmsDestination jmsDestination = bundle.getJmsDestinations().get("my-jms-endpoint");
+        verifyCommonSettings(jmsDestination);
+        verifyInboundSettings(jmsDestination);
+        verifyWebShpereMqOverLdapProviderSettings(jmsDestination);
+    }
+    
+    private static Element createJmsDestinationXml(Document document, boolean isInbound, String providerType) {
         final Map<String, Object> jmsDestinationDetailProps = new HashMap<>();
         jmsDestinationDetailProps.put(DESTINATION_TYPE, "Queue");
         jmsDestinationDetailProps.put(PROPERTY_USERNAME, "my-destination-username");
         jmsDestinationDetailProps.put(PROPERTY_PASSWORD, "my-destination-password");
 
         final Map<String, Object> jmsConnectionProps = new HashMap<>();
-        jmsConnectionProps.put(JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME, "com.tibco.tibjms.naming.TibjmsInitialContextFactory");
-        jmsConnectionProps.put(JNDI_PROVIDER_URL, "tibjmsnaming://machinename:7222");
+        jmsConnectionProps.put(JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME, "my-jndi-initial-context-factory-classname");
+        jmsConnectionProps.put(JNDI_PROVIDER_URL, "my-jndi-provider-url");
         jmsConnectionProps.put(CONNECTION_FACTORY_NAME, "my-qcf-name");
         jmsConnectionProps.put(PROPERTY_USERNAME, "my-destination-username");
         jmsConnectionProps.put(PROPERTY_PASSWORD, "my-destination-password");
@@ -104,8 +123,6 @@ class JmsDestinationLoaderTest {
         final Map<String, Object> contextPropertiesTemplateProps = new HashMap<>();
         contextPropertiesTemplateProps.put("additional-jndi-prop-name-1", "additional-jndi-prop-val-1");
         contextPropertiesTemplateProps.put("additional-jndi-prop-name-2", "additional-jndi-prop-val-2");
-        contextPropertiesTemplateProps.put("com.l7tech.server.jms.soapAction.msgPropName", "listProducts");
-        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.foobar", "reserved");
         contextPropertiesTemplateProps.put(JNDI_USERNAME, "my-jndi-username");
         contextPropertiesTemplateProps.put(JNDI_PASSWORD,"my-jndi-password");
 
@@ -115,30 +132,42 @@ class JmsDestinationLoaderTest {
             loadOutboundJmsDestinationXml(jmsDestinationDetailProps, contextPropertiesTemplateProps);
         }
         
+        if(PROVIDER_TYPE_TIBCO_EMS.equals(providerType)) {
+            loadTibcoEmsProviderXml(contextPropertiesTemplateProps);
+        } else if(PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP.equals(providerType)) {
+            loadWebsphereMqOverLdapProviderXml(contextPropertiesTemplateProps);
+        }
+        
+        Element jmsDestinationDetailEle = createElementWithAttributesAndChildren(
+                document,
+                JMS_DESTINATION_DETAIL,
+                ImmutableMap.of(ATTRIBUTE_ID, "id-1"),
+                createElementWithTextContent(document, NAME, "my-jms-endpoint"),
+                createElementWithTextContent(document, JMS_DESTINATION_NAME, "my-jms-destination-name"),
+                createElementWithTextContent(document, INBOUND, isInbound),
+                createElementWithTextContent(document, ENABLED, true),
+                createElementWithTextContent(document, TEMPLATE, false),
+                buildPropertiesElement(jmsDestinationDetailProps, document)
+        );
+        
+        Element jmsConnectionEle = createElementWithAttributesAndChildren(
+                document,
+                JMS_CONNECTION,
+                ImmutableMap.of(ATTRIBUTE_ID, "id-2")
+        );
+        if (providerType != null) {
+            jmsConnectionEle.appendChild(createElementWithTextContent(document, JMS_PROVIDER_TYPE, providerType));
+        }
+        jmsConnectionEle.appendChild(createElementWithTextContent(document, TEMPLATE, false));
+        jmsConnectionEle.appendChild(buildPropertiesElement(jmsConnectionProps, document));
+        jmsConnectionEle.appendChild(buildPropertiesElement(contextPropertiesTemplateProps, document, CONTEXT_PROPERTIES_TEMPLATE));
+        
         Element jmsDestinationEle = createElementWithAttributesAndChildren(
                 document,
                 JMS_DESTINATION,
                 ImmutableMap.of(ATTRIBUTE_ID, "id-1"),
-                createElementWithAttributesAndChildren(
-                        document,
-                        JMS_DESTINATION_DETAIL,
-                        ImmutableMap.of(ATTRIBUTE_ID, "id-1"),
-                        createElementWithTextContent(document, NAME, "my-jms-endpoint"),
-                        createElementWithTextContent(document, JMS_DESTINATION_NAME, "my-jms-destination-name"),
-                        createElementWithTextContent(document, INBOUND, isInbound),
-                        createElementWithTextContent(document, ENABLED, true),
-                        createElementWithTextContent(document, TEMPLATE, false), 
-                        buildPropertiesElement(jmsDestinationDetailProps, document)
-                ),
-                createElementWithAttributesAndChildren(
-                        document,
-                        JMS_CONNECTION,
-                        ImmutableMap.of(ATTRIBUTE_ID, "id-2"),
-                        createElementWithTextContent(document, JMS_PROVIDER_TYPE, "TIBCO EMS"),
-                        createElementWithTextContent(document, TEMPLATE, false),
-                        buildPropertiesElement(jmsConnectionProps, document),
-                        buildPropertiesElement(contextPropertiesTemplateProps, document, CONTEXT_PROPERTIES_TEMPLATE)
-                )
+                jmsDestinationDetailEle,
+                jmsConnectionEle
         );
 
         return createElementWithChildren(
@@ -174,7 +203,119 @@ class JmsDestinationLoaderTest {
         jmsDestinationDetailProps.put(INBOUND_MAX_SIZE, 2048);
     }
 
-    private void verifyInboundJmsDestination(JmsDestination jmsDestination) {
+    private static void loadOutboundJmsDestinationXml(
+            Map<String, Object> jmsDestinationDetailProps,
+            Map<String, Object> contextPropertiesTemplateProps) {
+
+        jmsDestinationDetailProps.put(REPLY_TYPE, "REPLY_TO_OTHER");
+        jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, "my-reply-Q");
+        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, Boolean.FALSE.toString());
+        jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, "ALWAYS_BINARY");
+
+        contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, Boolean.TRUE.toString());
+        contextPropertiesTemplateProps.put(CONNECTION_POOL_SIZE, 10);
+        contextPropertiesTemplateProps.put(CONNECTION_POOL_MIN_IDLE, 5);
+        contextPropertiesTemplateProps.put(CONNECTION_POOL_MAX_WAIT, 10000);
+    }
+
+    private static void loadTibcoEmsProviderXml(Map<String, Object> contextPropertiesTemplateProps) {
+        // JNDI
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.naming.security_protocol", "ssl");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.naming.ssl_auth_only", "com.l7tech.server.jms.prop.boolean.true");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.naming.ssl_enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.naming.ssl_trusted_certs","com.l7tech.server.jms.prop.trustedcert.listx509");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.naming.ssl_enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.jndi.ssgKeyAlias", "key1");
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.jndi.ssgKeystoreId", "00000000000000000000000000000002");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.naming.ssl_identity", "com.l7tech.server.jms.prop.keystore 00000000000000000000000000000002    key1");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.naming.ssl_password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key1");
+
+        // Destination
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.ssl.auth_only", "com.l7tech.server.jms.prop.boolean.true");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.ssl.enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.ssl.trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.ssl.enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key2");
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.ssl.identity", "com.l7tech.server.jms.prop.keystore.bytes   00000000000000000000000000000002    key2");
+        contextPropertiesTemplateProps.put("com.tibco.tibjms.ssl.password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key2");
+    }
+    
+    private static void loadWebsphereMqOverLdapProviderXml(Map<String, Object> contextPropertiesTemplateProps) {
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.customizer.class","com.l7tech.server.transport.jms.prov.MQSeriesCustomizer");
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.queue.useClientAuth", true);
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key1");
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
+    }
+    
+    // Check settings common to all provider types.
+    private static void verifyCommonSettings(JmsDestination jmsDestination) {
+        assertNotNull(jmsDestination);
+        assertEquals("my-jms-endpoint", jmsDestination.getName());
+        assertEquals("id-1", jmsDestination.getId());
+
+        assertEquals("my-jndi-initial-context-factory-classname", jmsDestination.getInitialContextFactoryClassName());
+        assertEquals("my-jndi-provider-url", jmsDestination.getJndiUrl());
+        assertEquals("my-jndi-username", jmsDestination.getJndiUsername());
+        assertEquals("my-jndi-password", jmsDestination.getJndiPassword());
+        assertNull(jmsDestination.getJndiPasswordRef());
+
+        assertPropertiesContent(ImmutableMap.of(
+                "additional-jndi-prop-name-1", "additional-jndi-prop-val-1",
+                "additional-jndi-prop-name-2", "additional-jndi-prop-val-2"),
+                jmsDestination.getJndiProperties());
+        
+        assertEquals(JmsDestination.DestinationType.QUEUE, jmsDestination.getDestinationType());
+        assertEquals("my-qcf-name", jmsDestination.getConnectionFactoryName());
+        assertEquals("my-jms-destination-name", jmsDestination.getDestinationName());
+        assertEquals("my-destination-username", jmsDestination.getDestinationUsername());
+        assertEquals("my-destination-password", jmsDestination.getDestinationPassword());
+        assertNull(jmsDestination.getDestinationPasswordRef());
+    }
+
+    private static void verifyGenericProviderSettings(JmsDestination jmsDestination) {
+        assertEquals(PROVIDER_TYPE_GENERIC, jmsDestination.getProviderType());
+        assertNull(jmsDestination.getAdditionalProperties());
+    }
+
+    private static void verifyTibcoEmsProviderSettings(JmsDestination jmsDestination) {
+        assertEquals(PROVIDER_TYPE_TIBCO_EMS, jmsDestination.getProviderType());
+        
+        Map<String, Object> expectedAdditionalProps = new HashMap<>();
+        expectedAdditionalProps.put("com.tibco.tibjms.naming.security_protocol", "ssl");
+        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_auth_only", "com.l7tech.server.jms.prop.boolean.true");
+        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
+        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_trusted_certs","com.l7tech.server.jms.prop.trustedcert.listx509");
+        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
+        expectedAdditionalProps.put("com.l7tech.server.jms.prop.jndi.ssgKeyAlias", "key1");
+        expectedAdditionalProps.put("com.l7tech.server.jms.prop.jndi.ssgKeystoreId", "00000000000000000000000000000002");
+        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_identity", "com.l7tech.server.jms.prop.keystore 00000000000000000000000000000002    key1");
+        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key1");
+        expectedAdditionalProps.put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer");
+        expectedAdditionalProps.put("com.tibco.tibjms.ssl.auth_only", "com.l7tech.server.jms.prop.boolean.true");
+        expectedAdditionalProps.put("com.tibco.tibjms.ssl.enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
+        expectedAdditionalProps.put("com.tibco.tibjms.ssl.trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
+        expectedAdditionalProps.put("com.tibco.tibjms.ssl.enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
+        expectedAdditionalProps.put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key2");
+        expectedAdditionalProps.put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
+        expectedAdditionalProps.put("com.tibco.tibjms.ssl.identity", "com.l7tech.server.jms.prop.keystore.bytes   00000000000000000000000000000002    key2");
+        expectedAdditionalProps.put("com.tibco.tibjms.ssl.password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key2");
+        
+        assertPropertiesContent(expectedAdditionalProps, jmsDestination.getAdditionalProperties());
+    }
+
+    private static void verifyWebShpereMqOverLdapProviderSettings(JmsDestination jmsDestination) {
+        assertEquals(PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP, jmsDestination.getProviderType());
+        assertPropertiesContent(ImmutableMap.of(
+                "com.l7tech.server.jms.prop.customizer.class","com.l7tech.server.transport.jms.prov.MQSeriesCustomizer", 
+                "com.l7tech.server.jms.prop.queue.useClientAuth", true,
+                "com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key1",
+                "com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002"),
+                jmsDestination.getAdditionalProperties());
+    }
+    
+    private static void verifyInboundSettings(JmsDestination jmsDestination) {
         assertNull(jmsDestination.getOutboundDetail());
 
         InboundJmsDestinationDetail inboundDetail = jmsDestination.getInboundDetail();
@@ -196,23 +337,8 @@ class JmsDestinationLoaderTest {
         assertEquals(new Integer(5), inboundDetail.getNumOfConsumerConnections());
         assertEquals(new Integer(2048), inboundDetail.getMaxMessageSizeBytes());
     }
-    
-    private static void loadOutboundJmsDestinationXml(
-            Map<String, Object> jmsDestinationDetailProps,
-            Map<String, Object> contextPropertiesTemplateProps) {
-        
-        jmsDestinationDetailProps.put(REPLY_TYPE, "REPLY_TO_OTHER");
-        jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, "my-reply-Q");
-        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, Boolean.FALSE.toString());
-        jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, "ALWAYS_BINARY");
 
-        contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, Boolean.TRUE.toString());
-        contextPropertiesTemplateProps.put(CONNECTION_POOL_SIZE, 10);
-        contextPropertiesTemplateProps.put(CONNECTION_POOL_MIN_IDLE, 5);
-        contextPropertiesTemplateProps.put(CONNECTION_POOL_MAX_WAIT, 10000);
-    }
-
-    private void verifyOutboundJmsDestination(JmsDestination jmsDestination) {
+    private void verifyOutboundSettings(JmsDestination jmsDestination) {
         assertNull(jmsDestination.getInboundDetail());
 
         OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
