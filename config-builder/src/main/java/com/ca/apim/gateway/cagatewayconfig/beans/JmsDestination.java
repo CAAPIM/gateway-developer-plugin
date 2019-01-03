@@ -81,6 +81,7 @@ public class JmsDestination extends GatewayEntity {
         destinationPassword = builder.destinationPassword;
         inboundDetail = builder.inboundDetail;
         outboundDetail = builder.outboundDetail;
+        additionalProperties = builder.additionalProperties;
     }
     
     public String getProviderType() {
