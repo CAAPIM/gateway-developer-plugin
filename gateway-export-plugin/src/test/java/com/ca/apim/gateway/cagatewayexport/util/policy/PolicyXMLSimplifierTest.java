@@ -172,7 +172,6 @@ class PolicyXMLSimplifierTest {
                 "wsp:Policy",
                 createIncludeAssertionElement(document, policyID)
         );
-
         policyXMLSimplifier.simplifyPolicyXML(policyXML, policy.getName(), bundle, bundle);
     }
 
