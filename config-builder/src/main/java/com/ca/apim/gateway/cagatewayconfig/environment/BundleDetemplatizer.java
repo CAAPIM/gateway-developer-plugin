@@ -30,10 +30,11 @@ class BundleDetemplatizer {
 
     CharSequence detemplatizeBundleString(CharSequence bundleString) {
         //prefer to use string replacement instead of loading and parsing the bundle. This should perform faster and we are only replacing a limited amount of the bundle so it should be OK to do so.
-        Map<String, String> environmentVariables = bundle.getEnvironmentProperties().entrySet().stream().collect(toMap(Entry::getKey, e -> e.getValue().getValue()));
+        Map<String, String> contextVariableEnvironmentVariables = bundle.getContextVariableEnvironmentProperties().entrySet().stream().collect(toMap(Entry::getKey, e -> e.getValue().getValue()));
+        Map<String, String> serviceEnvironmentVariables = bundle.getServiceEnvironmentProperties().entrySet().stream().collect(toMap(Entry::getKey, e -> e.getValue().getValue()));
 
         //Replaces variables in set context variable assertions
-        bundleString = replaceVariableInBundle(bundleString, environmentVariables,
+        bundleString = replaceVariableInBundle(bundleString, contextVariableEnvironmentVariables,
                 "L7p:Base64Expression ENV_PARAM_NAME=\\\"ENV\\.(.+?)\\\"",
                 v -> "L7p:Base64Expression stringValue=\"" + Base64.getEncoder().encodeToString(v.getBytes()) + "\"");
 
@@ -43,7 +44,7 @@ class BundleDetemplatizer {
                 v -> ID_PROV_OID + " " + GOID_VALUE + "=\"" + v + "\"");
 
         //Replaces service property variables
-        bundleString = replaceVariableInBundle(bundleString, environmentVariables,
+        bundleString = replaceVariableInBundle(bundleString, serviceEnvironmentVariables,
                 "l7:StringValue>SERVICE_PROPERTY_ENV\\.(.+?)<",
                 v -> "l7:StringValue>" + v + "<").toString();
         return bundleString;

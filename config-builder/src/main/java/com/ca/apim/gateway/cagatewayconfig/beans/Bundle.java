@@ -87,12 +87,28 @@ public class Bundle {
         return getEntities(ClusterProperty.class);
     }
 
-    public void putAllEnvironmentProperties(@NotNull Map<String, EnvironmentProperty> properties) {
-        this.getEntities(EnvironmentProperty.class).putAll(properties);
+    public void putAllGlobalEnvironmentProperties(@NotNull Map<String, GlobalEnvironmentProperty> properties) {
+        this.getEntities(GlobalEnvironmentProperty.class).putAll(properties);
     }
 
-    public Map<String, EnvironmentProperty> getEnvironmentProperties() {
-        return getEntities(EnvironmentProperty.class);
+    public void putAllServiceEnvironmentProperties(@NotNull Map<String, ServiceEnvironmentProperty> properties) {
+        this.getEntities(ServiceEnvironmentProperty.class).putAll(properties);
+    }
+
+    public void putAllContextVariableEnvironmentProperties(@NotNull Map<String, ContextVariableEnvironmentProperty> properties) {
+        this.getEntities(ContextVariableEnvironmentProperty.class).putAll(properties);
+    }
+
+    public Map<String, GlobalEnvironmentProperty> getGlobalEnvironmentProperties() {
+        return getEntities(GlobalEnvironmentProperty.class);
+    }
+
+    public Map<String, ServiceEnvironmentProperty> getServiceEnvironmentProperties() {
+        return getEntities(ServiceEnvironmentProperty.class);
+    }
+
+    public Map<String, ContextVariableEnvironmentProperty> getContextVariableEnvironmentProperties() {
+        return getEntities(ContextVariableEnvironmentProperty.class);
     }
 
     public void putAllPolicyBackedServices(@NotNull Map<String, PolicyBackedService> policyBackedServices) {

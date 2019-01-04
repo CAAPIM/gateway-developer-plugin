@@ -123,8 +123,8 @@ class EnvironmentCreatorApplicationTest {
                         "      }\n" +
                         "  }")
                 .put("ENV.PASSWORD.my_password", "my_secret_password")
-                .put("ENV.PROPERTY.myEnvironmentVariable", "my-service-property-value")
-                .put("ENV.PROPERTY.anotherEnvVar", "context-variable-value")
+                .put("ENV.SERVICE_PROPERTY.my-gateway-api.myEnvironmentVariable", "my-service-property-value")
+                .put("ENV.CONTEXT_VARIABLE_PROPERTY.anotherEnvVar", "context-variable-value")
                 .build();
 
         new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath()).run();
@@ -156,5 +156,27 @@ class EnvironmentCreatorApplicationTest {
         File deploymentBundleFile = new File(testDetemplatizedBundlesFolder, "my-bundle.req.bundle");
         assertTrue(deploymentBundleFile.exists());
         System.out.println(new String(Files.readAllBytes(deploymentBundleFile.toPath())));
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testEnvironmentPropertiesNotFoundInBundle(TemporaryFolder temporaryFolder) throws URISyntaxException, IOException {
+        File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "templatized-bundles");
+        File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
+        File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
+        File privateKeyFolder = new File(temporaryFolder.getRoot(), "privateKeys");
+
+        assertTrue(testDetemplatizedBundlesFolder.mkdirs());
+
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templatized-bundles")).toURI()), testTemplatizedBundlesFolder);
+
+        ImmutableMap<String, String> environmentProperties = ImmutableMap.<String, String>builder()
+                .put("ENV.SERVICE_PROPERTY.my-gateway-api.myEnvironmentVariable", "my-service-property-value")
+                .put("ENV.CONTEXT_VARIABLE_PROPERTY.anotherEnvVar", "context-variable-value")
+                .put("ENV.SERVICE_PROPERTY.my-gateway-api.environmentVariableNotInBundle", "my-service-property-value")
+                .put("ENV.CONTEXT_VARIABLE_PROPERTY.environmentVariableNotInBundle", "context-variable-value")
+                .build();
+
+        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath()).run();
     }
 }

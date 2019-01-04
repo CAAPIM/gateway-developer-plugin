@@ -43,19 +43,19 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 bundle.getStaticProperties().entrySet().stream().map(propertyEntry -> {
-                    if (bundle.getEnvironmentProperties().containsKey(PREFIX_GATEWAY + propertyEntry.getKey())) {
+                    if (bundle.getGlobalEnvironmentProperties().containsKey(PREFIX_GATEWAY + propertyEntry.getKey())) {
                         throw new EntityBuilderException("The Cluster property: '" + propertyEntry.getKey() + "' is defined in both static.properties and env.properties");
                     }
                     return buildClusterPropertyEntity(propertyEntry.getKey(), propertyEntry.getValue(), document);
                 }).forEach(streamBuilder);
-                bundle.getEnvironmentProperties().entrySet().stream()
+                bundle.getGlobalEnvironmentProperties().entrySet().stream()
                         .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
                         .map(propertyEntry ->
                                 EntityBuilderHelper.getEntityWithOnlyMapping(CLUSTER_PROPERTY_TYPE, propertyEntry.getKey().substring(PREFIX_GATEWAY.length()), idGenerator.generate())
                         ).forEach(streamBuilder);
                 break;
             case ENVIRONMENT:
-                bundle.getEnvironmentProperties().entrySet().stream()
+                bundle.getGlobalEnvironmentProperties().entrySet().stream()
                         .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
                         .map(propertyEntry ->
                                 buildClusterPropertyEntity(propertyEntry.getKey().substring(PREFIX_GATEWAY.length()), propertyEntry.getValue(), document)

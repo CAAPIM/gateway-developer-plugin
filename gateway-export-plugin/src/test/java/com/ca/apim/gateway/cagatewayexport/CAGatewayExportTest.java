@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayexport;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.io.FileUtils;
+import org.apache.tools.ant.types.Environment;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -82,9 +83,9 @@ class CAGatewayExportTest {
             environmentProperties.load(reader);
         }
 
-        assertTrue(environmentProperties.containsKey("empty-value"));
-        assertTrue(environmentProperties.containsKey("message-variable"));
-        assertTrue(environmentProperties.containsKey("local.env.var"));
+        assertTrue(environmentProperties.containsKey("contextVariable.property.environment-variable.empty-value"));
+        assertTrue(environmentProperties.containsKey("contextVariable.property.environment-variable.message-variable"));
+        assertTrue(environmentProperties.containsKey("contextVariable.property.environment-variable.local.env.var"));
         assertTrue(environmentProperties.containsKey("gateway.ENV.my-global-property"));
         assertTrue(environmentProperties.containsKey("gateway.ENV.another.global"));
 

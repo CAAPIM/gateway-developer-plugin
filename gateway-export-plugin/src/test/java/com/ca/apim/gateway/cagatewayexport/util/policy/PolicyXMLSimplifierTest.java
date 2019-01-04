@@ -1,7 +1,6 @@
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -29,9 +28,10 @@ class PolicyXMLSimplifierTest {
     @Test
     void simplifySetVariable() throws DocumentParseException {
         Element setVariableAssertion = createSetVariableAssertionElement("my-var", "dGVzdGluZyBzaW1wbGlmeSBzZXQgdmFyaWFibGUgYXNzZXJ0aW9u");
+        String policyName = "policyName";
 
         Bundle resultantBundle = new Bundle();
-        policyXMLSimplifier.simplifySetVariable(setVariableAssertion, resultantBundle);
+        policyXMLSimplifier.simplifySetVariable(policyName, setVariableAssertion, resultantBundle);
 
         Element expressionElement = getSingleElement(setVariableAssertion, EXPRESSION);
         assertEquals("testing simplify set variable assertion", expressionElement.getFirstChild().getTextContent());
@@ -43,9 +43,10 @@ class PolicyXMLSimplifierTest {
     @Test
     void simplifySetVariableInvalid() {
         Element setVariableAssertion = createSetVariableAssertionElement("ENV.gateway.test", Base64.encodeBase64String("test".getBytes()));
+        String policyName = "policyName";
 
         Bundle resultantBundle = new Bundle();
-        assertThrows(LinkerException.class, () -> policyXMLSimplifier.simplifySetVariable(setVariableAssertion, resultantBundle));
+        assertThrows(LinkerException.class, () -> policyXMLSimplifier.simplifySetVariable(policyName, setVariableAssertion, resultantBundle));
     }
 
     @Test
@@ -53,18 +54,21 @@ class PolicyXMLSimplifierTest {
         Element setVariableAssertion = createSetVariableAssertionElement("ENV.test", Base64.encodeBase64String("test".getBytes()));
 
         Bundle resultantBundle = new Bundle();
-        EnvironmentProperty property = new EnvironmentProperty("test", "test", Type.LOCAL);
-        resultantBundle.getEnvironmentProperties().put(property.getId(), property);
-        assertThrows(LinkerException.class, () -> policyXMLSimplifier.simplifySetVariable(setVariableAssertion, resultantBundle));
+        String policyName = "policyName";
+        ContextVariableEnvironmentProperty property = new ContextVariableEnvironmentProperty(policyName + ".test", "test");
+        resultantBundle.getContextVariableEnvironmentProperties().put(property.getName(), property);
+
+        assertThrows(LinkerException.class, () -> policyXMLSimplifier.simplifySetVariable(policyName, setVariableAssertion, resultantBundle));
     }
 
     @Test
     void simplifySetVariableWithBadEndingUnit() throws DocumentParseException {
         //The default Base64 decoder in java cannot decode this, but the commons-codec decoder can.
         Element setVariableAssertion = createSetVariableAssertionElement("my-var2", "ew0KICAgICAgICAgICAgICAgICJlcnJvciI6ImludmFsaWRfbWV0aG9kIiwNCiAgICAgICAgICAgICAgICAiZXJyb3JfZGVzY3JpcHRpb24iOiIke3JlcXVlc3QuaHR0cC5tZXRob2R9IG5vdCBwZXJtaXR0ZWQiDQogICAgICAgICAgICAgICAgfQ=");
+        String policyName = "policyName";
 
         Bundle resultantBundle = new Bundle();
-        policyXMLSimplifier.simplifySetVariable(setVariableAssertion, resultantBundle);
+        policyXMLSimplifier.simplifySetVariable(policyName, setVariableAssertion, resultantBundle);
 
         Element expressionElement = getSingleElement(setVariableAssertion, EXPRESSION);
         assertEquals("{\r\n" +
@@ -168,8 +172,7 @@ class PolicyXMLSimplifierTest {
                 "wsp:Policy",
                 createIncludeAssertionElement(document, policyID)
         );
-
-        policyXMLSimplifier.simplifyPolicyXML(policyXML, bundle, bundle);
+        policyXMLSimplifier.simplifyPolicyXML(policyXML, policy.getName(), bundle, bundle);
     }
 
     @Test

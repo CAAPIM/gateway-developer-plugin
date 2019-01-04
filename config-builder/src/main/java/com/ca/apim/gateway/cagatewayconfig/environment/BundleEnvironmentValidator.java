@@ -77,8 +77,8 @@ class BundleEnvironmentValidator {
     private void findInBundle(Bundle bundle, String type, String name) {
         switch (type) {
             case EntityTypes.CLUSTER_PROPERTY_TYPE:
-                if (bundle.getEnvironmentProperties().get(PREFIX_GATEWAY + name) == null) {
-                    throw new MissingEnvironmentException("Missing environment value for property: " + name);
+                if (bundle.getGlobalEnvironmentProperties().get(PREFIX_GATEWAY + name) == null) {
+                    throw new MissingEnvironmentException("Missing global environment value for property: " + name);
                 }
                 break;
             case EntityTypes.ID_PROVIDER_CONFIG_TYPE:

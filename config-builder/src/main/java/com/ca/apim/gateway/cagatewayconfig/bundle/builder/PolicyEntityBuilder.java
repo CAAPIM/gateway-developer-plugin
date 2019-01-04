@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.insertPrefixToEnvironmentVariable;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
@@ -103,7 +104,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
         prepareAssertion(policyElement, PolicyXMLElements.INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
         prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement));
-        prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyDocument, assertionElement));
+        prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policy.getName(), policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
         policy.setPolicyDocument(policyElement);
@@ -115,7 +116,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    static void prepareSetVariableAssertion(Document policyDocument, Element assertionElement) {
+    static void prepareSetVariableAssertion(String policyName, Document policyDocument, Element assertionElement) {
         Element nameElement;
         try {
             nameElement = getSingleElement(assertionElement, VARIABLE_TO_SET);
@@ -126,7 +127,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String variableName = nameElement.getAttribute(STRING_VALUE);
         if (variableName.startsWith(PREFIX_ENV)) {
             assertionElement.insertBefore(
-                    createElementWithAttribute(policyDocument, BASE_64_EXPRESSION, ENV_PARAM_NAME, variableName),
+                    createElementWithAttribute(policyDocument, BASE_64_EXPRESSION, ENV_PARAM_NAME, insertPrefixToEnvironmentVariable(variableName, policyName)),
                     assertionElement.getFirstChild()
             );
         } else {

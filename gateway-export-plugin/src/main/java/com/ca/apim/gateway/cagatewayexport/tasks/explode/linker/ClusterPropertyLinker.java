@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.ClusterProperty;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.GlobalEnvironmentProperty;
 
 import javax.inject.Singleton;
 import java.io.File;
@@ -35,8 +35,8 @@ public class ClusterPropertyLinker implements EntitiesLinker {
 
         for (ClusterProperty clusterProperty : clusterPropertyMap.values()) {
             if (!staticProperties.containsKey(clusterProperty.getName())) {
-                EnvironmentProperty prop = new EnvironmentProperty(clusterProperty.getName(), clusterProperty.getValue(), EnvironmentProperty.Type.GLOBAL);
-                filteredBundle.getEntities(EnvironmentProperty.class).put(prop.getId(), prop);
+                GlobalEnvironmentProperty prop = new GlobalEnvironmentProperty(clusterProperty.getName(), clusterProperty.getValue());
+                filteredBundle.getEntities(GlobalEnvironmentProperty.class).put(prop.getName(), prop);
                 idsToRemove.add(clusterProperty.getId());
             }
         }

@@ -7,8 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
+import com.ca.apim.gateway.cagatewayconfig.beans.ServiceEnvironmentProperty;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -47,7 +46,7 @@ public class ServiceLinker implements EntityLinker<Service> {
     public void link(Service service, Bundle bundle, Bundle targetBundle) {
         try {
             Element policyElement = DocumentUtils.stringToXML(documentTools, service.getPolicy());
-            policyXMLSimplifier.simplifyPolicyXML(policyElement, bundle, targetBundle);
+            policyXMLSimplifier.simplifyPolicyXML(policyElement, service.getName(), bundle, targetBundle);
             service.setPolicyXML(policyElement);
         } catch (DocumentParseException e) {
             throw new WriteException("Exception linking and simplifying service: " + service.getName() + " Message: " + e.getMessage(), e);
@@ -56,12 +55,13 @@ public class ServiceLinker implements EntityLinker<Service> {
 
         Element servicePropertiesElement = getSingleChildElement(service.getServiceDetailsElement(), PROPERTIES);
         NodeList propertyNodes = servicePropertiesElement.getElementsByTagName(PROPERTY);
+
         for (int i = 0; i < propertyNodes.getLength(); i++) {
             if (propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().startsWith("property.ENV.")) {
-                EnvironmentProperty environmentProperty = new EnvironmentProperty(
-                        propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(13),
-                        getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent(), Type.SERVICE);
-                targetBundle.getEntities(EnvironmentProperty.class).put(environmentProperty.getId(), environmentProperty);
+                ServiceEnvironmentProperty serviceEnvironmentProperty = new ServiceEnvironmentProperty(
+                        service.getName() + "." + propertyNodes.item(i).getAttributes().getNamedItem("key").getTextContent().substring(13),
+                        getSingleChildElement((Element) propertyNodes.item(i), STRING_VALUE).getTextContent());
+                targetBundle.getEntities(ServiceEnvironmentProperty.class).put(serviceEnvironmentProperty.getName(), serviceEnvironmentProperty);
             }
         }
     }

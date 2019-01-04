@@ -7,7 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.GlobalEnvironmentProperty;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -51,7 +51,7 @@ class EnvironmentPropertiesLoaderTest {
     void loadEmptyFile() throws IOException {
         final Bundle bundle = loadProperties("");
 
-        assertTrue(bundle.getEnvironmentProperties().isEmpty());
+        assertTrue(bundle.getGlobalEnvironmentProperties().isEmpty());
     }
 
     @Test
@@ -61,7 +61,7 @@ class EnvironmentPropertiesLoaderTest {
 
     @Test
     void loadSinglePropertyFromFile() throws IOException {
-        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(GlobalEnvironmentProperty.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "env.properties");
         Files.touch(identityProvidersFile);
@@ -77,55 +77,56 @@ class EnvironmentPropertiesLoaderTest {
 
     @Test
     void loadFromEnvironment() {
-        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(GlobalEnvironmentProperty.class));
 
         final Bundle bundle = new Bundle();
         loader.load(bundle, PROP_1, "value1");
 
-        assertFalse(bundle.getEnvironmentProperties().isEmpty());
-        assertEquals(1, bundle.getEnvironmentProperties().size());
+        assertFalse(bundle.getGlobalEnvironmentProperties().isEmpty());
+        assertEquals(1, bundle.getGlobalEnvironmentProperties().size());
 
         // Prop1
-        final EnvironmentProperty prop1 = bundle.getEnvironmentProperties().get(PROP_1);
+        final GlobalEnvironmentProperty prop1 = bundle.getGlobalEnvironmentProperties().get(PROP_1);
         assertNotNull(prop1);
         assertEquals("value1", prop1.getValue());
     }
 
     @Test
     void tryLoadNonexistentFile() {
-        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(GlobalEnvironmentProperty.class));
 
         final Bundle bundle = new Bundle();
         loader.load(bundle, rootProjectDir.getRoot());
-        assertTrue(bundle.getEnvironmentProperties().isEmpty());
+        assertTrue(bundle.getGlobalEnvironmentProperties().isEmpty());
     }
 
     @Test
     void loadFileWithSpecifiedProperties() throws IOException {
         final Bundle bundle = loadProperties("Prop1=value1\nProp2=value2\nProp3=Gateway");
 
-        assertFalse(bundle.getEnvironmentProperties().isEmpty());
-        assertEquals(3, bundle.getEnvironmentProperties().size());
+        assertFalse(bundle.getGlobalEnvironmentProperties().isEmpty());
+        assertEquals(3, bundle.getGlobalEnvironmentProperties().size());
 
         // Prop1
-        final EnvironmentProperty prop1 = bundle.getEnvironmentProperties().get(PROP_1);
+        final GlobalEnvironmentProperty prop1 = bundle.getGlobalEnvironmentProperties().get(PROP_1);
         assertNotNull(prop1);
         assertEquals("value1", prop1.getValue());
 
         // Prop2
-        final EnvironmentProperty prop2 = bundle.getEnvironmentProperties().get(PROP_2);
+        final GlobalEnvironmentProperty prop2 = bundle.getGlobalEnvironmentProperties().get(PROP_2);
         assertNotNull(prop2);
         assertEquals("value2", prop2.getValue());
 
         // Prop3
-        final EnvironmentProperty prop3 = bundle.getEnvironmentProperties().get(PROP_3);
+        final GlobalEnvironmentProperty prop3 = bundle.getGlobalEnvironmentProperties().get(PROP_3);
         assertNotNull(prop3);
         assertEquals("Gateway", prop3.getValue());
     }
 
     @Test
     void tryLoadPropertiesFromNonexistentFile() throws IOException {
-        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(GlobalEnvironmentProperty.class));
+
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "env.properties");
         Files.touch(identityProvidersFile);
@@ -139,7 +140,8 @@ class EnvironmentPropertiesLoaderTest {
     }
 
     private Bundle loadProperties(String content) throws IOException {
-        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(EnvironmentProperty.class));
+        PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(GlobalEnvironmentProperty.class));
+
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "env.properties");
         Files.touch(identityProvidersFile);

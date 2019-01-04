@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty.Type;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
@@ -32,20 +31,19 @@ class ServiceLinkerTest {
     void linkNoServiceProperties() {
         Bundle bundle = new Bundle();
         link(bundle, false);
-        assertTrue(bundle.getEnvironmentProperties().isEmpty());
+        assertTrue(bundle.getServiceEnvironmentProperties().isEmpty());
     }
 
     @Test
     void linkWithServiceProperties() {
         Bundle bundle = new Bundle();
         link(bundle, true);
-        assertFalse(bundle.getEnvironmentProperties().isEmpty());
-        assertEquals(1, bundle.getEnvironmentProperties().size());
-        EnvironmentProperty property = bundle.getEnvironmentProperties().get("SERVICE:prop");
+        assertFalse(bundle.getServiceEnvironmentProperties().isEmpty());
+        assertEquals(1, bundle.getServiceEnvironmentProperties().size());
+        ServiceEnvironmentProperty property = bundle.getServiceEnvironmentProperties().get("service.prop");
         assertNotNull(property);
         assertEquals("value2", property.getValue());
-        assertEquals("service.property.prop", property.getKey());
-        assertEquals(Type.SERVICE, property.getType());
+        assertEquals("service.property.service.prop", property.getKey());
     }
 
     private void link(Bundle bundle, boolean serviceProperties) {

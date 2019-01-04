@@ -6,44 +6,20 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.config.EntityConfigException;
-import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
-import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
-
-import javax.inject.Named;
-
-import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
-
-@Named("ENVIRONMENT_PROPERTY")
-@ConfigurationFile(name = "env", type = PROPERTIES)
-@EnvironmentType("PROPERTY")
-public class EnvironmentProperty extends PropertiesEntity {
+public abstract class EnvironmentProperty extends PropertiesEntity {
 
     private String value;
-    private Type type;
 
     public EnvironmentProperty() { }
 
-    public EnvironmentProperty(final String name, final String value, final Type type) {
+    public EnvironmentProperty(final String name, final String value) {
         this.setName(name);
+        this.setId(name);
         this.value = value;
-        this.type = type;
-        this.setId(type + ":" + name);
     }
 
     @Override
-    public String getKey() {
-        switch (type) {
-            case LOCAL:
-                return getName();
-            case GLOBAL:
-                return "gateway." + getName();
-            case SERVICE:
-                return "service.property." + getName();
-            default:
-                throw new EntityConfigException("Unknown Environment Property Type: " + getType());
-        }
-    }
+    public abstract String getKey();
 
     @Override
     public void setKey(String key) {
@@ -59,16 +35,8 @@ public class EnvironmentProperty extends PropertiesEntity {
         this.value = value;
     }
 
-    public Type getType() {
-        return type;
-    }
-
     @Override
     public String toString() {
         return getId();
-    }
-
-    public enum Type {
-        LOCAL, GLOBAL, SERVICE
     }
 }

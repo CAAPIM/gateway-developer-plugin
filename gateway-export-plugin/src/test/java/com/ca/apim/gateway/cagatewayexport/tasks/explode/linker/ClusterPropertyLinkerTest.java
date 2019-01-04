@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.ClusterProperty;
-import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.GlobalEnvironmentProperty;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 import com.ca.apim.gateway.cagatewayexport.util.properties.OrderedProperties;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -52,7 +52,7 @@ class ClusterPropertyLinkerTest {
         clusterPropertyLinker.link(bundle, null, temporaryFolder.getRoot());
 
         assertEquals(0, bundle.getEntities(ClusterProperty.class).size());
-        assertEquals(4, bundle.getEntities(EnvironmentProperty.class).size());
+        assertEquals(4, bundle.getEntities(GlobalEnvironmentProperty.class).size());
 
         verifyEnvironmentProperties();
     }
@@ -74,7 +74,7 @@ class ClusterPropertyLinkerTest {
         clusterPropertyLinker.link(bundle, null, temporaryFolder.getRoot());
 
         assertEquals(2, bundle.getEntities(ClusterProperty.class).size());
-        assertEquals(2, bundle.getEntities(EnvironmentProperty.class).size());
+        assertEquals(2, bundle.getEntities(GlobalEnvironmentProperty.class).size());
 
         // static.properties are considered ClusterProperties
         assertEquals("my.name", bundle.getEntities(ClusterProperty.class).get("1").getName());
@@ -88,12 +88,9 @@ class ClusterPropertyLinkerTest {
     }
 
     private void verifyEnvironmentProperties() {
-        assertTrue(bundle.getEntities(EnvironmentProperty.class).containsKey("GLOBAL:ENV.my.name"));
-        assertEquals("ENV.my.name", bundle.getEntities(EnvironmentProperty.class).get("GLOBAL:ENV.my.name").getName());
-        assertEquals(EnvironmentProperty.Type.GLOBAL, bundle.getEntities(EnvironmentProperty.class).get("GLOBAL:ENV.my.name").getType());
-        assertTrue(bundle.getEntities(EnvironmentProperty.class).containsKey("GLOBAL:ENV.hello"));
-        assertEquals("ENV.hello", bundle.getEntities(EnvironmentProperty.class).get("GLOBAL:ENV.hello").getName());
-        assertEquals(EnvironmentProperty.Type.GLOBAL, bundle.getEntities(EnvironmentProperty.class).get("GLOBAL:ENV.hello").getType());
-
+        assertTrue(bundle.getEntities(GlobalEnvironmentProperty.class).containsKey("ENV.my.name"));
+        assertEquals("ENV.my.name", bundle.getEntities(GlobalEnvironmentProperty.class).get("ENV.my.name").getName());
+        assertTrue(bundle.getEntities(GlobalEnvironmentProperty.class).containsKey("ENV.hello"));
+        assertEquals("ENV.hello", bundle.getEntities(GlobalEnvironmentProperty.class).get("ENV.hello").getName());
     }
 }

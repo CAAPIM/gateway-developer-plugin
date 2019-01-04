@@ -53,7 +53,7 @@ public class PolicyLinker implements EntityLinker<Policy> {
     public void link(Policy policy, Bundle bundle, Bundle targetBundle) {
         try {
             Element policyElement = DocumentUtils.stringToXML(documentTools, policy.getPolicyXML());
-            policyXMLSimplifier.simplifyPolicyXML(policyElement, bundle, targetBundle);
+            policyXMLSimplifier.simplifyPolicyXML(policyElement, policy.getName(), bundle, targetBundle);
             policy.setPolicyDocument(policyElement);
         } catch (DocumentParseException e) {
             throw new WriteException("Exception linking and simplifying policy: " + policy.getName() + " Message: " + e.getMessage(), e);
