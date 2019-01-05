@@ -16,7 +16,11 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
-import java.util.LinkedList;
+import java.io.File;
+import java.util.Set;
+
+import static com.ca.apim.gateway.cagatewayconfig.DependencyUtils.*;
+import static org.apache.commons.collections4.SetUtils.union;
 
 /**
  * The BuildBundle task will take local source files and create a bundle document that can be bootstrapped into a gateway container
@@ -86,13 +90,15 @@ public class PackageTask extends DefaultTask {
     @TaskAction
     public void perform() {
         Packager packager = new Packager(fileUtils, gw7Builder);
+        final Set<File> bundleDependencies = dependencyBundles.getAsFileTree().getFiles();
+
         packager.buildPackage(
                 into.getAsFile().get(),
                 bundle.getAsFile().get(),
-                new LinkedList<>(dependencyBundles.getAsFileTree().getFiles()),
+                filterBundleFiles(bundleDependencies),
                 containerApplicationDependencies.getFiles(),
-                dependencyModularAssertions.getFiles(),
-                dependencyCustomAssertions.getFiles()
+                union(dependencyModularAssertions.getFiles(), filterModularAssertionFiles(bundleDependencies)),
+                union(dependencyCustomAssertions.getFiles(), filterJarFiles(bundleDependencies))
         );
     }
 }

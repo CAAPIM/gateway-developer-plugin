@@ -14,6 +14,8 @@ import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 
+import static com.ca.apim.gateway.cagatewayconfig.DependencyUtils.filterBundleFiles;
+
 /**
  * The BuildDeploymentBundle task will take local source files and create a deployment bundle document that can be bootstrapped into a gateway container
  * or pushed via restman to an appliance gateway.
@@ -53,6 +55,6 @@ public class BuildDeploymentBundleTask extends DefaultTask {
     @TaskAction
     public void perform() {
         BundleFileBuilder bundleFileBuilder = ConfigBuilderModule.getInjector().getInstance(BundleFileBuilder.class);
-        bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(), dependencies.getFiles(), getProject().getName() + '-' + getProject().getVersion());
+        bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(), filterBundleFiles(dependencies.getFiles()), getProject().getName() + '-' + getProject().getVersion());
     }
 }

@@ -152,6 +152,43 @@ class CAGatewayDeveloperTest {
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
+    void testMultiProjectWithAssertionsDependencies(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "multi-project-with-assertions-dependencies";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-a:build")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-b:build")).getOutcome());
+
+        validateBuildDir("project-a", new File(new File(testProjectDir, "project-a"), "build"));
+        validateBuildDir("project-b", new File(new File(testProjectDir, "project-b"), "build"));
+        validateBuildDir("project-c", new File(new File(testProjectDir, "project-c"), "build"));
+
+        File projectC_GW7 = new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "project-c" + projectVersion + ".gw7");
+
+        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(projectC_GW7)));
+        TarArchiveEntry entry;
+        Set<String> entries = new HashSet<>();
+        while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
+            entries.add(entry.getName());
+        }
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-a-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-b-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-c-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
+        tarArchiveInputStream.close();
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
     void testExampleProjectGeneratingEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
         String projectFolder = "example-project-generating-environment";
         File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
