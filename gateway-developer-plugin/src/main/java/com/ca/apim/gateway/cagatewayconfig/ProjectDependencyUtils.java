@@ -18,15 +18,15 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.toCollection;
 
 /**
- * Utility methods for dependency handling.
+ * Utility methods for project dependencies handling.
  */
-public class DependencyUtils {
+public class ProjectDependencyUtils {
 
     private static final String BUNDLE = ".bundle";
     private static final String AAR = ".aar";
     private static final String JAR = ".jar";
 
-    private DependencyUtils() { }
+    private ProjectDependencyUtils() { }
 
     /**
      * Filter only bundle files.

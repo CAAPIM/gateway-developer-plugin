@@ -19,7 +19,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.util.Set;
 
-import static com.ca.apim.gateway.cagatewayconfig.DependencyUtils.*;
+import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.*;
 import static org.apache.commons.collections4.SetUtils.union;
 
 /**

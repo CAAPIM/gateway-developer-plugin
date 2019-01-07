@@ -14,7 +14,7 @@ import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 
-import static com.ca.apim.gateway.cagatewayconfig.DependencyUtils.filterBundleFiles;
+import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
 
 /**
  * The BuildDeploymentBundle task will take local source files and create a deployment bundle document that can be bootstrapped into a gateway container
