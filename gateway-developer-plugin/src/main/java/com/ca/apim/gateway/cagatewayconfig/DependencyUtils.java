@@ -22,9 +22,9 @@ import static java.util.stream.Collectors.toCollection;
  */
 public class DependencyUtils {
 
-    private static final String BUNDLE = "bundle";
-    private static final String AAR = "aar";
-    private static final String JAR = "jar";
+    private static final String BUNDLE = ".bundle";
+    private static final String AAR = ".aar";
+    private static final String JAR = ".jar";
 
     private DependencyUtils() { }
 
