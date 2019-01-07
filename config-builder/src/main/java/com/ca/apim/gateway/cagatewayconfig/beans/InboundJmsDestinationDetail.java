@@ -15,7 +15,7 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
     private String failureQueueName;
     private boolean isEnabled;
     private Integer numOfConsumerConnections;
-    private Integer maxMessageSizeBytes; // null = default, -1 = Do not override,  0 = Unlimited.
+    private Integer maxMessageSizeBytes = -1; // -1 = Do not override,  0 = Unlimited.
     
     public InboundJmsDestinationDetail() {
         super();

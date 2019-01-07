@@ -178,10 +178,10 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 if (service == null) {
                     throw new EntityBuilderException("Could not find associated Service for inbound JMS Destination: " + name + ". Service Path: " + serviceRef);
                 }
-                contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, true);
+                contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, Boolean.TRUE.toString());
                 contextPropertiesTemplateProps.put(HARDWIRED_SERVICE_ID, service.getId());
             } else {
-                contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, false);
+                contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, Boolean.FALSE.toString());
             }
 
             putToMapIfValueIsNotNull(
@@ -220,7 +220,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                     inboundDetail.getFailureQueueName());
         }
 
-        contextPropertiesTemplateProps.put(IS_DEDICATED_CONSUMER_CONNECTION, true);
+        contextPropertiesTemplateProps.put(IS_DEDICATED_CONSUMER_CONNECTION, Boolean.TRUE.toString());
         Integer numOfConsumerConnections = inboundDetail.getNumOfConsumerConnections();
         if (numOfConsumerConnections == null) {
             numOfConsumerConnections = 1; // Default consumer size is 1.
@@ -251,7 +251,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
 
         PoolingType poolingType = outboundDetail.getPoolingType();
         if (CONNECTION.equals(poolingType)) {
-            contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, true);
+            contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, Boolean.TRUE.toString());
             ConnectionPoolingSettings connectionPoolingSettings = outboundDetail.getConnectionPoolingSettings();
             if (connectionPoolingSettings != null) {
                 putToMapIfValueIsNotNull(contextPropertiesTemplateProps, CONNECTION_POOL_SIZE, connectionPoolingSettings.getSize());
@@ -259,7 +259,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 putToMapIfValueIsNotNull(contextPropertiesTemplateProps, CONNECTION_POOL_MAX_WAIT, connectionPoolingSettings.getMaxWaitMs());
             }
         } else {
-            contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, false);
+            contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, Boolean.FALSE.toString());
             SessionPoolingSettings sessionPoolingSettings = outboundDetail.getSessionPoolingSettings();
             if (sessionPoolingSettings != null) {
                 putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_SIZE, sessionPoolingSettings.getSize());
