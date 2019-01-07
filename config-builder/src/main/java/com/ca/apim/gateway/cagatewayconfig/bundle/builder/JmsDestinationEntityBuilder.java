@@ -33,6 +33,7 @@ import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.Rep
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.JMS_DESTINATION_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributesAndChildren;
@@ -138,7 +139,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             jmsConnectionProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
         }
         buildAndAppendPropertiesElement(jmsConnectionProps, document, jmsConnectionEle);
-        buildAndAppendPropertiesElement(contextPropertiesTemplateProps, document, jmsConnectionEle);
+        jmsConnectionEle.appendChild(buildPropertiesElement(contextPropertiesTemplateProps, document, CONTEXT_PROPERTIES_TEMPLATE));
 
         // Build JMS Destination element.
         Element jmsDestinationEle = createElementWithAttributesAndChildren(

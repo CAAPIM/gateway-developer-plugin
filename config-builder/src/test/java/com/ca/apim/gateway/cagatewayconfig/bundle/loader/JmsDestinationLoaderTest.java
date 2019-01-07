@@ -282,25 +282,26 @@ class JmsDestinationLoaderTest {
     private static void verifyTibcoEmsProviderSettings(JmsDestination jmsDestination) {
         assertEquals(PROVIDER_TYPE_TIBCO_EMS, jmsDestination.getProviderType());
         
-        Map<String, Object> expectedAdditionalProps = new HashMap<>();
-        expectedAdditionalProps.put("com.tibco.tibjms.naming.security_protocol", "ssl");
-        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_auth_only", "com.l7tech.server.jms.prop.boolean.true");
-        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
-        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_trusted_certs","com.l7tech.server.jms.prop.trustedcert.listx509");
-        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
-        expectedAdditionalProps.put("com.l7tech.server.jms.prop.jndi.ssgKeyAlias", "key1");
-        expectedAdditionalProps.put("com.l7tech.server.jms.prop.jndi.ssgKeystoreId", "00000000000000000000000000000002");
-        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_identity", "com.l7tech.server.jms.prop.keystore 00000000000000000000000000000002    key1");
-        expectedAdditionalProps.put("com.tibco.tibjms.naming.ssl_password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key1");
-        expectedAdditionalProps.put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer");
-        expectedAdditionalProps.put("com.tibco.tibjms.ssl.auth_only", "com.l7tech.server.jms.prop.boolean.true");
-        expectedAdditionalProps.put("com.tibco.tibjms.ssl.enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
-        expectedAdditionalProps.put("com.tibco.tibjms.ssl.trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
-        expectedAdditionalProps.put("com.tibco.tibjms.ssl.enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
-        expectedAdditionalProps.put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key2");
-        expectedAdditionalProps.put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
-        expectedAdditionalProps.put("com.tibco.tibjms.ssl.identity", "com.l7tech.server.jms.prop.keystore.bytes   00000000000000000000000000000002    key2");
-        expectedAdditionalProps.put("com.tibco.tibjms.ssl.password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key2");
+        Map<String, Object> expectedAdditionalProps = new HashMap<String, Object>() {{ 
+            put("com.tibco.tibjms.naming.security_protocol", "ssl");
+            put("com.tibco.tibjms.naming.ssl_auth_only", "com.l7tech.server.jms.prop.boolean.true");
+            put("com.tibco.tibjms.naming.ssl_enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
+            put("com.tibco.tibjms.naming.ssl_trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
+            put("com.tibco.tibjms.naming.ssl_enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
+            put("com.l7tech.server.jms.prop.jndi.ssgKeyAlias", "key1");
+            put("com.l7tech.server.jms.prop.jndi.ssgKeystoreId", "00000000000000000000000000000002");
+            put("com.tibco.tibjms.naming.ssl_identity", "com.l7tech.server.jms.prop.keystore 00000000000000000000000000000002    key1");
+            put("com.tibco.tibjms.naming.ssl_password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key1");
+            put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer");
+            put("com.tibco.tibjms.ssl.auth_only", "com.l7tech.server.jms.prop.boolean.true");
+            put("com.tibco.tibjms.ssl.enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
+            put("com.tibco.tibjms.ssl.trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
+            put("com.tibco.tibjms.ssl.enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
+            put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key2");
+            put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
+            put("com.tibco.tibjms.ssl.identity", "com.l7tech.server.jms.prop.keystore.bytes   00000000000000000000000000000002    key2");
+            put("com.tibco.tibjms.ssl.password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key2"); 
+        }};
         
         assertPropertiesContent(expectedAdditionalProps, jmsDestination.getAdditionalProperties());
     }
