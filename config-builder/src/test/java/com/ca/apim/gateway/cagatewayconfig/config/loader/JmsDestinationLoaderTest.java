@@ -86,7 +86,6 @@ class JmsDestinationLoaderTest {
                 "      contentTypeSource: \"FREE_FORM\"\n" +
                 "      contentType: \"text/yaml\"\n" +
                 "    failureQueueName: \"my-failure-Q\"\n" +
-                "    isEnabled: true\n" +
                 "    numOfConsumerConnections: 5\n" +
                 "    maxMessageSizeBytes: 2048\n";
 
@@ -157,7 +156,6 @@ class JmsDestinationLoaderTest {
                 "      contentTypeSource: \"FREE_FORM\"\n" +
                 "      contentType: \"text/yaml\"\n" +
                 "    failureQueueName: \"my-failure-Q\"\n" +
-                "    isEnabled: true\n" +
                 "    numOfConsumerConnections: 5\n" +
                 "    maxMessageSizeBytes: 2048\n" +
                 "  additionalProperties:\n" +
@@ -255,7 +253,6 @@ class JmsDestinationLoaderTest {
                 "      contentTypeSource: \"FREE_FORM\"\n" +
                 "      contentType: \"text/yaml\"\n" +
                 "    failureQueueName: \"my-failure-Q\"\n" +
-                "    isEnabled: true\n" +
                 "    numOfConsumerConnections: 5\n" +
                 "    maxMessageSizeBytes: 2048\n";
 
@@ -327,7 +324,6 @@ class JmsDestinationLoaderTest {
                 "      contentTypeSource: \"FREE_FORM\"\n" +
                 "      contentType: \"text/yaml\"\n" +
                 "    failureQueueName: \"my-failure-Q\"\n" +
-                "    isEnabled: true\n" +
                 "    numOfConsumerConnections: 5\n" +
                 "    maxMessageSizeBytes: 2048\n";
 
@@ -399,7 +395,6 @@ class JmsDestinationLoaderTest {
                 "      contentTypeSource: \"FREE_FORM\"\n" +
                 "      contentType: \"text/yaml\"\n" +
                 "    failureQueueName: \"my-failure-Q\"\n" +
-                "    isEnabled: true\n" +
                 "    numOfConsumerConnections: 5\n" +
                 "    maxMessageSizeBytes: 2048\n" +
                 "  outboundDetail:\n" + // Inbound and Outbound details defined.
@@ -498,7 +493,6 @@ class JmsDestinationLoaderTest {
             assertEquals("text/yaml", serviceResolutionSettings.getContentType());
             
             assertEquals("my-failure-Q", inboundDetail.getFailureQueueName());
-            assertTrue(inboundDetail.isEnabled());
             assertEquals(new Integer(5), inboundDetail.getNumOfConsumerConnections());
             assertEquals(new Integer(2048), inboundDetail.getMaxMessageSizeBytes());
         } else {

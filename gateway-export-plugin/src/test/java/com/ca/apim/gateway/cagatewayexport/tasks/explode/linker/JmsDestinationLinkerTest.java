@@ -168,7 +168,6 @@ class JmsDestinationLinkerTest {
         inboundDetail.setReplyType(NO_REPLY);
         inboundDetail.setUseRequestCorrelationId(false);
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
-        inboundDetail.setIsEnabled(true);
         jmsDestination.setInboundDetail(inboundDetail);
         
         linker.link(jmsDestination, bundle, bundle);
@@ -190,7 +189,6 @@ class JmsDestinationLinkerTest {
         inboundDetail.setReplyType(NO_REPLY);
         inboundDetail.setUseRequestCorrelationId(false);
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
-        inboundDetail.setIsEnabled(true);
         jmsDestination.setInboundDetail(inboundDetail);
 
         assertThrows(LinkerException.class, () -> linker.link(jmsDestination, bundle, bundle));
@@ -207,7 +205,6 @@ class JmsDestinationLinkerTest {
         inboundDetail.setReplyType(NO_REPLY);
         inboundDetail.setUseRequestCorrelationId(false);
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
-        inboundDetail.setIsEnabled(true);
         jmsDestination.setInboundDetail(inboundDetail);
 
         linker.link(jmsDestination, bundle, bundle);

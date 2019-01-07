@@ -99,12 +99,10 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         } else {
             contextPropertiesTemplateProps.put(JNDI_PASSWORD, jmsDestination.getJndiPassword());
         }
-
-        boolean isEnabled = true;
+        
         boolean isTemplate = false;
 
         if (isInbound) {
-            isEnabled = jmsDestination.getInboundDetail().isEnabled();
             this.buildInboundDestination(bundle, name, jmsDestination, jmsDestinationDetailProps, contextPropertiesTemplateProps);
         } else {
             isTemplate = jmsDestination.getOutboundDetail().isTemplate();
@@ -114,7 +112,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         if (jmsDestination.getAdditionalProperties() != null && !jmsDestination.getAdditionalProperties().isEmpty()) {
             contextPropertiesTemplateProps.putAll(jmsDestination.getAdditionalProperties());
         }
-        jmsDestinationDetailEle.appendChild(createElementWithTextContent(document, ENABLED, isEnabled));
+        jmsDestinationDetailEle.appendChild(createElementWithTextContent(document, ENABLED, true));
         jmsDestinationDetailEle.appendChild(createElementWithTextContent(document, TEMPLATE, isTemplate));
         buildAndAppendPropertiesElement(jmsDestinationDetailProps, document, jmsDestinationDetailEle);
 

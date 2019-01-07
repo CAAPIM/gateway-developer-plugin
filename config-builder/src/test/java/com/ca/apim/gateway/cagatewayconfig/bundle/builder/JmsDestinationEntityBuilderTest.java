@@ -128,6 +128,7 @@ class JmsDestinationEntityBuilderTest {
         assertEquals(entity.getId(), jmsDestinationEle.getAttribute(ATTRIBUTE_ID));
         assertEquals(entity.getId(), jmsDestinationDetailEle.getAttribute(ATTRIBUTE_ID));
         assertEquals("my-jms-endpoint", getSingleChildElementTextContent(jmsDestinationDetailEle, NAME));
+        assertEquals("true", getSingleChildElementTextContent(jmsDestinationDetailEle, ENABLED));
 
         Map<String, Object> jmsDestinationDetailProps = 
                 mapPropertiesElements(getSingleChildElement(jmsDestinationDetailEle, PROPERTIES, false), PROPERTIES);
@@ -161,7 +162,6 @@ class JmsDestinationEntityBuilderTest {
         JmsDestination jmsDestination = buildCommon();
         
         InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
-        inboundDetail.setIsEnabled(true);
         inboundDetail.setAcknowledgeType(ON_TAKE);
         inboundDetail.setReplyType(AUTOMATIC);
 
@@ -199,7 +199,6 @@ class JmsDestinationEntityBuilderTest {
                 mapPropertiesElements(getSingleChildElement(jmsConnectionEle, CONTEXT_PROPERTIES_TEMPLATE, false), CONTEXT_PROPERTIES_TEMPLATE);
         assertNotNull(contextPropertiesTemplateProps);
 
-        assertEquals("true", getSingleChildElementTextContent(jmsDestinationDetailEle, ENABLED));
         assertEquals("true", getSingleChildElementTextContent(jmsDestinationDetailEle, INBOUND));
         
         assertEquals("AUTOMATIC", jmsDestinationDetailProps.remove(INBOUND_ACKNOWLEDGEMENT_TYPE));

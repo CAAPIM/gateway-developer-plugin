@@ -13,7 +13,6 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
     private AcknowledgeType acknowledgeType;
     private ServiceResolutionSettings serviceResolutionSettings;
     private String failureQueueName;
-    private boolean isEnabled;
     private Integer numOfConsumerConnections;
     private Integer maxMessageSizeBytes = -1; // -1 = Do not override,  0 = Unlimited.
     
@@ -44,15 +43,7 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
     public void setFailureQueueName(String failureQueueName) {
         this.failureQueueName = failureQueueName;
     }
-
-    public boolean isEnabled() {
-        return isEnabled;
-    }
-
-    public void setIsEnabled(boolean enabled) {
-        isEnabled = enabled;
-    }
-
+    
     public Integer getNumOfConsumerConnections() {
         return numOfConsumerConnections;
     }

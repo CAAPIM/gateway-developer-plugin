@@ -45,7 +45,6 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         final Element jmsDestinationDetailEle = getSingleChildElement(jmsDestinationEle, JMS_DESTINATION_DETAIL);
         final String name = getSingleChildElementTextContent(jmsDestinationDetailEle, NAME);
         final boolean isInbound = toBoolean(getSingleChildElementTextContent(jmsDestinationDetailEle, INBOUND));
-        final boolean isEnabled = toBoolean(getSingleChildElementTextContent(jmsDestinationDetailEle, ENABLED));
         final boolean isTemplate = toBoolean(getSingleChildElementTextContent(jmsDestinationDetailEle, TEMPLATE));
         final Map<String, Object> jmsDestinationDetailProps = mapPropertiesElements(getSingleChildElement(jmsDestinationDetailEle, PROPERTIES, false), PROPERTIES);
         
@@ -91,7 +90,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         jmsDestination.setDestinationPassword(destinationPassword);
 
         if (isInbound) {
-            jmsDestination.setInboundDetail(this.loadInboundDetail(isEnabled, jmsDestinationDetailProps, contextPropertiesTemplateProps));
+            jmsDestination.setInboundDetail(this.loadInboundDetail(jmsDestinationDetailProps, contextPropertiesTemplateProps));
         } else {
             jmsDestination.setOutboundDetail(this.loadOutboundDetail(isTemplate, jmsDestinationDetailProps, contextPropertiesTemplateProps));
         }
@@ -108,7 +107,6 @@ public class JmsDestinationLoader implements BundleEntityLoader {
     }
 
     private InboundJmsDestinationDetail loadInboundDetail(
-            boolean isEnabled,
             Map<String, Object> jmsDestinationDetailProps,
             Map<String, Object> contextPropertiesTemplateProps) {
         final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings();
@@ -124,7 +122,6 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         inboundDetail.setUseRequestCorrelationId(toBoolean((String) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID)));
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
         inboundDetail.setFailureQueueName((String) jmsDestinationDetailProps.remove(INBOUND_FAILURE_QUEUE_NAME));
-        inboundDetail.setIsEnabled(isEnabled);
         inboundDetail.setNumOfConsumerConnections((Integer) contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE));
         inboundDetail.setMaxMessageSizeBytes((Integer) jmsDestinationDetailProps.remove(INBOUND_MAX_SIZE));
         return inboundDetail;
