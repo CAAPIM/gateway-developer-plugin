@@ -12,26 +12,25 @@ import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 
 import javax.inject.Singleton;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.VariableUtils.extractVariableName;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerConstants.ENCRYPTED_PASSWORD_PREFIX;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerConstants.STORED_PASSWORD_PATTERN;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Singleton
 public class JdbcConnectionLinker implements EntityLinker<JdbcConnection> {
 
-    private Pattern secpassPattern = Pattern.compile("secpass.(.+?).plaintext");
-
     @Override
     public void link(JdbcConnection entity, Bundle bundle, Bundle targetBundle) {
         if (entity.getPassword() != null) {
-            if (entity.getPassword().startsWith("$L7C2$")) {
+            if (entity.getPassword().startsWith(ENCRYPTED_PASSWORD_PREFIX)) {
                 // Ignore passwords that are L7C2 encoded. We can't decode them anyways.
                 entity.setPassword(null);
             } else {
                 String storedPasswordReference = extractVariableName(entity.getPassword());
                 if (!isEmpty(storedPasswordReference)) {
-                    Matcher matcher = secpassPattern.matcher(storedPasswordReference);
+                    Matcher matcher = STORED_PASSWORD_PATTERN.matcher(storedPasswordReference);
                     if (matcher.matches()) {
                         // the middle string between secpass and plaintext will be the stored password name
                         String storedPasswordName = matcher.group(1);

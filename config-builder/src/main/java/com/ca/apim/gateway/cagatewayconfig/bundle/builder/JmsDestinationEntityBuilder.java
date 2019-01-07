@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.ON_COMPLETION;
 import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.STORED_PASSWORD_REF_FORMAT;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.JMS_DESTINATION_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
@@ -42,7 +43,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 @Singleton
 @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public class JmsDestinationEntityBuilder implements EntityBuilder {
-    private static final String STORED_PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
     private static final Integer ORDER = 1500;
     
     private final IdGenerator idGenerator;

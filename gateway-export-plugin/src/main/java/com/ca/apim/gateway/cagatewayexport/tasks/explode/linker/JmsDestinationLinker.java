@@ -15,17 +15,16 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.VariableUtils.extractVariableName;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerConstants.ENCRYPTED_PASSWORD_PREFIX;
+import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerConstants.STORED_PASSWORD_PATTERN;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.ServiceLinker.getServicePath;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Singleton
 public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
 
-    private static final Pattern secpassPattern = Pattern.compile("secpass.(.+?).plaintext");
-    
     @Override
     public Class<JmsDestination> getEntityClass() {
         return JmsDestination.class;
@@ -43,13 +42,13 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
     private void linkJndiStoredPassword(JmsDestination entity, Bundle bundle) {
         // JNDI password
         if (entity.getJndiPassword() != null) {
-            if (entity.getJndiPassword().startsWith("$L7C2$")) {
+            if (entity.getJndiPassword().startsWith(ENCRYPTED_PASSWORD_PREFIX)) {
                 // Ignore passwords that are L7C2 encoded. We can't decode them anyways.
                 entity.setJndiPassword(null);
             } else {
                 String storedPasswordReference = extractVariableName(entity.getJndiPassword());
                 if (!isEmpty(storedPasswordReference)) {
-                    Matcher matcher = secpassPattern.matcher(storedPasswordReference);
+                    Matcher matcher = STORED_PASSWORD_PATTERN.matcher(storedPasswordReference);
                     if (matcher.matches()) {
                         // the middle string between secpass and plaintext will be the stored password name
                         String storedPasswordName = matcher.group(1);
@@ -67,13 +66,13 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
     private void linkDestinationStoredPassword(JmsDestination entity, Bundle bundle) {
         // Destination password
         if (entity.getDestinationPassword() != null) {
-            if (entity.getDestinationPassword().startsWith("$L7C2$")) {
+            if (entity.getDestinationPassword().startsWith(ENCRYPTED_PASSWORD_PREFIX)) {
                 // Ignore passwords that are L7C2 encoded. We can't decode them anyways.
                 entity.setDestinationPassword(null);
             } else {
                 String storedPasswordReference = extractVariableName(entity.getDestinationPassword());
                 if (!isEmpty(storedPasswordReference)) {
-                    Matcher matcher = secpassPattern.matcher(storedPasswordReference);
+                    Matcher matcher = STORED_PASSWORD_PATTERN.matcher(storedPasswordReference);
                     if (matcher.matches()) {
                         // the middle string between secpass and plaintext will be the stored password name
                         String storedPasswordName = matcher.group(1);

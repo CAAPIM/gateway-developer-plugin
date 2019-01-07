@@ -11,13 +11,13 @@ import com.ca.apim.gateway.cagatewayconfig.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import org.junit.jupiter.api.Test;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.STORED_PASSWORD_REF_FORMAT;
 import static org.junit.jupiter.api.Assertions.*;
 
 class JdbcConnectionLinkerTest {
 
     private static final String GATEWAY = "gateway";
     private static final String GATEWAY_WITH_DOTS = "gateway.gateway";
-    private static final String PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
 
     private JdbcConnectionLinker linker = new JdbcConnectionLinker();
 
@@ -35,7 +35,7 @@ class JdbcConnectionLinkerTest {
         Bundle bundle = new Bundle();
         bundle.addEntity(createStoredPassword(passwordVar));
 
-        final JdbcConnection jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, passwordVar));
+        final JdbcConnection jdbcConnection = createJdbcConnection(String.format(STORED_PASSWORD_REF_FORMAT, passwordVar));
         linker.link(jdbcConnection, bundle, bundle);
 
         assertNotNull(jdbcConnection.getPasswordRef());
@@ -45,7 +45,7 @@ class JdbcConnectionLinkerTest {
 
     @Test
     void linkMissingPassword() {
-        final JdbcConnection jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, GATEWAY));
+        final JdbcConnection jdbcConnection = createJdbcConnection(String.format(STORED_PASSWORD_REF_FORMAT, GATEWAY));
         assertThrows(LinkerException.class, () -> linker.link(jdbcConnection, new Bundle(), new Bundle()));
     }
 
@@ -62,7 +62,7 @@ class JdbcConnectionLinkerTest {
         Bundle bundle = new Bundle();
         bundle.addEntity(createStoredPassword(GATEWAY + GATEWAY));
 
-        final JdbcConnection jdbcConnection = createJdbcConnection(String.format(PASSWORD_REF_FORMAT, GATEWAY));
+        final JdbcConnection jdbcConnection = createJdbcConnection(String.format(STORED_PASSWORD_REF_FORMAT, GATEWAY));
         assertThrows(LinkerException.class, () -> linker.link(jdbcConnection, bundle, bundle));
     }
 
