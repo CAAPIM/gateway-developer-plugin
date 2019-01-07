@@ -30,40 +30,58 @@ import static java.util.Arrays.stream;
 public class JmsDestination extends GatewayEntity {
     
     // Basics
-    private String providerType;
+    private final String providerType;
     
     // JNDI
-    private String initialContextFactoryClassName;
-    private String jndiUrl;
-    private String jndiUsername;
+    private final String initialContextFactoryClassName;
+    private final String jndiUrl;
+    private final String jndiUsername;
     private String jndiPasswordRef;
     private String jndiPassword;
-    private Map<String, Object> jndiProperties;
+    private final Map<String, Object> jndiProperties;
 
     // Destination
-    private DestinationType destinationType;
-    private String connectionFactoryName;
-    private String destinationName;
-    private String destinationUsername;
+    private final DestinationType destinationType;
+    private final String connectionFactoryName;
+    private final String destinationName;
+    private final String destinationUsername;
     private String destinationPasswordRef;
     private String destinationPassword;
     
     // Inbound
-    private InboundJmsDestinationDetail inboundDetail;
+    private final InboundJmsDestinationDetail inboundDetail;
     
     // Outbound
-    private OutboundJmsDestinationDetail outboundDetail;
+    private final OutboundJmsDestinationDetail outboundDetail;
     
     // Contains provider specific settings. 
     // For example, for providers:
     // - TIBCO EMS 
     // - WebSphere MQ over LDAP
-    private Map<String, Object> additionalProperties;
+    private final Map<String, Object> additionalProperties;
     
     public JmsDestination() {
+        super();
+        providerType = null;
+        initialContextFactoryClassName = null;
+        jndiUrl = null;
+        jndiUsername = null;
+        jndiPasswordRef = null;
+        jndiPassword = null;
+        jndiProperties = null;
+        destinationType = null;
+        connectionFactoryName = null;
+        destinationName = null;
+        destinationUsername = null;
+        destinationPasswordRef = null;
+        destinationPassword = null;
+        inboundDetail = null;
+        outboundDetail = null;
+        additionalProperties = null;
     }
     
     private JmsDestination(Builder builder) {
+        super();
         setName(builder.name);
         setId(builder.id);
         providerType = builder.providerType;
