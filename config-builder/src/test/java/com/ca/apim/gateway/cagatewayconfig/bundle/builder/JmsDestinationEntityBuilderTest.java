@@ -52,7 +52,7 @@ class JmsDestinationEntityBuilderTest {
     void checkJmsDestination_Inbound() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildInbound()));
+        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildInbound().build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, entities.size());
@@ -63,7 +63,7 @@ class JmsDestinationEntityBuilderTest {
     void checkJmsDestination_Outbound() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildOutbound()));
+        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildOutbound().build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, entities.size());
@@ -74,7 +74,7 @@ class JmsDestinationEntityBuilderTest {
     void checkJmsDestination_TibcoEmsProvider() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildTibcoEmsProvider()));
+        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildTibcoEmsProvider().build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, entities.size());
@@ -85,7 +85,7 @@ class JmsDestinationEntityBuilderTest {
     void checkJmsDestination_WebShpereOverLdapProvider() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildWebShpereMqOverLdapProvider()));
+        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildWebShpereMqOverLdapProvider().build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, entities.size());
@@ -93,7 +93,7 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @NotNull
-    private static JmsDestination buildCommon() {
+    private static JmsDestination.Builder buildCommon() {
         return new JmsDestination.Builder()
                 .name("my-jms-endpoint")
                 .id("id-1")
@@ -109,8 +109,7 @@ class JmsDestinationEntityBuilderTest {
                 .connectionFactoryName("my-qcf-name")
                 .destinationName("my-dest-name")
                 .destinationUsername("my-destination-username")
-                .destinationPassword("my-plaintext-destination-password")
-                .build();
+                .destinationPassword("my-plaintext-destination-password");
     }
 
     private static void verifyCommon(Entity entity) {
@@ -158,8 +157,8 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @NotNull
-    private static JmsDestination buildInbound() {
-        JmsDestination jmsDestination = buildCommon();
+    private static JmsDestination.Builder buildInbound() {
+        JmsDestination.Builder builder = buildCommon();
         
         InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
         inboundDetail.setAcknowledgeType(ON_TAKE);
@@ -169,9 +168,9 @@ class JmsDestinationEntityBuilderTest {
         serviceResolutionSettings.setContentTypeSource(JMS_PROPERTY);
         serviceResolutionSettings.setContentType("my-content-type-jms-prop");
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
-        
-        jmsDestination.setInboundDetail(inboundDetail);
-        return jmsDestination;
+
+        builder.inboundDetail(inboundDetail);
+        return builder;
     }
 
     private static void verifyInbound(Entity entity) {
@@ -213,17 +212,14 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @NotNull
-    private static JmsDestination buildOutbound() {
-        JmsDestination jmsDestination = buildCommon();
-
+    private static JmsDestination.Builder buildOutbound() {
         OutboundJmsDestinationDetail outboundDetail = new OutboundJmsDestinationDetail();
         outboundDetail.setIsTemplate(false);
         outboundDetail.setReplyType(NO_REPLY);
         outboundDetail.setMessageFormat(BYTES);
         outboundDetail.setPoolingType(CONNECTION);
         
-        jmsDestination.setOutboundDetail(outboundDetail);
-        return jmsDestination;
+        return buildCommon().outboundDetail(outboundDetail);
     }
 
     private static void verifyOutbound(Entity entity) {
@@ -260,31 +256,30 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @NotNull
-    private static JmsDestination buildTibcoEmsProvider() {
-        JmsDestination jmsDestination = buildOutbound();
-        
-        jmsDestination.setProviderType(PROVIDER_TYPE_TIBCO_EMS);
-        jmsDestination.setAdditionalProperties(new HashMap<String, Object>() {{
-            put("com.tibco.tibjms.naming.security_protocol", "ssl");
-            put("com.tibco.tibjms.naming.ssl_auth_only", "com.l7tech.server.jms.prop.boolean.true");
-            put("com.tibco.tibjms.naming.ssl_enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
-            put("com.tibco.tibjms.naming.ssl_trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
-            put("com.tibco.tibjms.naming.ssl_enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
-            put("com.l7tech.server.jms.prop.jndi.ssgKeyAlias", "key1");
-            put("com.l7tech.server.jms.prop.jndi.ssgKeystoreId", "00000000000000000000000000000002");
-            put("com.tibco.tibjms.naming.ssl_identity", "com.l7tech.server.jms.prop.keystore 00000000000000000000000000000002    key1");
-            put("com.tibco.tibjms.naming.ssl_password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key1");
-            put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer");
-            put("com.tibco.tibjms.ssl.auth_only", "com.l7tech.server.jms.prop.boolean.true");
-            put("com.tibco.tibjms.ssl.enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
-            put("com.tibco.tibjms.ssl.trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
-            put("com.tibco.tibjms.ssl.enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
-            put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key2");
-            put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
-            put("com.tibco.tibjms.ssl.identity", "com.l7tech.server.jms.prop.keystore.bytes   00000000000000000000000000000002    key2");
-            put("com.tibco.tibjms.ssl.password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key2");
-        }});
-        return jmsDestination;
+    private static JmsDestination.Builder buildTibcoEmsProvider() {
+        return buildOutbound()
+                .providerType(PROVIDER_TYPE_TIBCO_EMS)
+                .additionalProperties(new HashMap<String, Object>() {
+                    {
+                        put("com.tibco.tibjms.naming.security_protocol", "ssl");
+                        put("com.tibco.tibjms.naming.ssl_auth_only", "com.l7tech.server.jms.prop.boolean.true");
+                        put("com.tibco.tibjms.naming.ssl_enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
+                        put("com.tibco.tibjms.naming.ssl_trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
+                        put("com.tibco.tibjms.naming.ssl_enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
+                        put("com.l7tech.server.jms.prop.jndi.ssgKeyAlias", "key1");
+                        put("com.l7tech.server.jms.prop.jndi.ssgKeystoreId", "00000000000000000000000000000002");
+                        put("com.tibco.tibjms.naming.ssl_identity", "com.l7tech.server.jms.prop.keystore 00000000000000000000000000000002    key1");
+                        put("com.tibco.tibjms.naming.ssl_password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key1");
+                        put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer");
+                        put("com.tibco.tibjms.ssl.auth_only", "com.l7tech.server.jms.prop.boolean.true");
+                        put("com.tibco.tibjms.ssl.enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
+                        put("com.tibco.tibjms.ssl.trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
+                        put("com.tibco.tibjms.ssl.enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
+                        put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key2");
+                        put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
+                        put("com.tibco.tibjms.ssl.identity", "com.l7tech.server.jms.prop.keystore.bytes   00000000000000000000000000000002    key2");
+                        put("com.tibco.tibjms.ssl.password", "com.l7tech.server.jms.prop.keystore.password    00000000000000000000000000000002    key2");
+                    }});
     }
 
     private static void verifyTibcoEmsProvider(Entity entity) {
@@ -333,17 +328,15 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @NotNull
-    private static JmsDestination buildWebShpereMqOverLdapProvider() {
-        JmsDestination jmsDestination = buildOutbound();
-        
-        jmsDestination.setProviderType(PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP);
-        jmsDestination.setAdditionalProperties(new HashMap<String, Object>() {{
-            put("com.l7tech.server.jms.prop.customizer.class","com.l7tech.server.transport.jms.prov.MQSeriesCustomizer");
-            put("com.l7tech.server.jms.prop.queue.useClientAuth", "true");
-            put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key1");
-            put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
-        }});
-        return jmsDestination;
+    private static JmsDestination.Builder buildWebShpereMqOverLdapProvider() {
+        return buildOutbound()
+                .providerType(PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP)
+                .additionalProperties(new HashMap<String, Object>() {{
+                        put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.MQSeriesCustomizer");
+                        put("com.l7tech.server.jms.prop.queue.useClientAuth", "true");
+                        put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key1");
+                        put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
+                    }});
     }
 
     private static void verifyWebShpereMqOverLdapProvider(Entity entity) {

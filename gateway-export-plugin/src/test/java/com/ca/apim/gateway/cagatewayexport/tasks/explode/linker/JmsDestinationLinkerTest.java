@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ServiceResolutionSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 
@@ -160,7 +161,6 @@ class JmsDestinationLinkerTest {
         bundle.addEntity(folder);
         bundle.addEntity(service);
 
-        final JmsDestination jmsDestination = createJmsDestination(null,null);
         final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings();
         serviceResolutionSettings.setServiceRef("my-service-id");
         final InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
@@ -168,7 +168,10 @@ class JmsDestinationLinkerTest {
         inboundDetail.setReplyType(NO_REPLY);
         inboundDetail.setUseRequestCorrelationId(false);
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
-        jmsDestination.setInboundDetail(inboundDetail);
+
+        final JmsDestination jmsDestination = createJmsDestinationBuilder(null,null)
+                .inboundDetail(inboundDetail)
+                .build();
         
         linker.link(jmsDestination, bundle, bundle);
 
@@ -181,7 +184,6 @@ class JmsDestinationLinkerTest {
     void testLinkMissingInboundAssociatedService() {
         Bundle bundle = new Bundle();
         
-        final JmsDestination jmsDestination = createJmsDestination(null,null);
         final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings();
         serviceResolutionSettings.setServiceRef("associated-service-id");
         final InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
@@ -189,7 +191,10 @@ class JmsDestinationLinkerTest {
         inboundDetail.setReplyType(NO_REPLY);
         inboundDetail.setUseRequestCorrelationId(false);
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
-        jmsDestination.setInboundDetail(inboundDetail);
+
+        final JmsDestination jmsDestination = createJmsDestinationBuilder(null,null)
+                .inboundDetail(inboundDetail)
+                .build();
 
         assertThrows(LinkerException.class, () -> linker.link(jmsDestination, bundle, bundle));
     }
@@ -197,15 +202,17 @@ class JmsDestinationLinkerTest {
     @Test
     void testLinkNoInboundAssociatedService() {
         Bundle bundle = new Bundle();
-
-        final JmsDestination jmsDestination = createJmsDestination(null,null);
+        
         final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings();
         final InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
         inboundDetail.setAcknowledgeType(ON_TAKE);
         inboundDetail.setReplyType(NO_REPLY);
         inboundDetail.setUseRequestCorrelationId(false);
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
-        jmsDestination.setInboundDetail(inboundDetail);
+
+        final JmsDestination jmsDestination = createJmsDestinationBuilder(null,null)
+                .inboundDetail(inboundDetail)
+                .build();
 
         linker.link(jmsDestination, bundle, bundle);
         assertNotNull(jmsDestination.getInboundDetail());
@@ -214,18 +221,27 @@ class JmsDestinationLinkerTest {
     }
 
     // (kpak) - test private key(s) 
-    
+
+    @NotNull
     private static JmsDestination createJmsDestination(
-            String jndiPassword, String destinationPassword) {
+            String jndiPassword,
+            String destinationPassword) {
+        return createJmsDestinationBuilder(jndiPassword, destinationPassword).build();
+    }
+
+    @NotNull
+    private static JmsDestination.Builder createJmsDestinationBuilder(
+            String jndiPassword,
+            String destinationPassword) {
         return new JmsDestination.Builder()
                 .name("jms-connection")
                 .jndiUsername("jndi-user")
                 .jndiPassword(jndiPassword)
                 .destinationUsername("destination-user")
-                .destinationPassword(destinationPassword)
-                .build();
+                .destinationPassword(destinationPassword);
     }
-
+    
+    @NotNull
     private static StoredPassword createStoredPassword(String name) {
         return new StoredPassword
                 .Builder()

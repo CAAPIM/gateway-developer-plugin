@@ -168,20 +168,20 @@ public class TestUtils {
     }
 
     public static JmsDestination createJmsDestination(String name, String id) {
-        JmsDestination jmsDestination = new JmsDestination();
-        jmsDestination.setName(name);
-        jmsDestination.setId(id);
-        jmsDestination.setProviderType(null); // null for Generic JMS
-        jmsDestination.setInitialContextFactoryClassName("org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-        jmsDestination.setJndiUrl("tcp://qaactivemq:61616");
-        jmsDestination.setDestinationType(JmsDestination.DestinationType.QUEUE);
-        jmsDestination.setConnectionFactoryName("my-qcf-name");
-        jmsDestination.setDestinationName("my-queue");
         InboundJmsDestinationDetail inboundDetails = new InboundJmsDestinationDetail();
         inboundDetails.setAcknowledgeType(ON_TAKE);
         inboundDetails.setReplyType(AUTOMATIC);
         inboundDetails.setUseRequestCorrelationId(false);
-        jmsDestination.setInboundDetail(inboundDetails);
-        return jmsDestination;
+                
+        return new JmsDestination.Builder()
+                .name(name)
+                .id(id)
+                .providerType(null) // null for Generic JMS
+                .initialContextFactoryClassName("org.apache.activemq.jndi.ActiveMQInitialContextFactory")
+                .jndiUrl("tcp://qaactivemq:61616")
+                .destinationType(JmsDestination.DestinationType.QUEUE)
+                .connectionFactoryName("my-qcf-name")
+                .destinationName("my-queue")
+                .inboundDetail(inboundDetails).build();
     }
 }

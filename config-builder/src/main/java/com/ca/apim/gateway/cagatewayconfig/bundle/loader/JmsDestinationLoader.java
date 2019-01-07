@@ -73,26 +73,25 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         final String destinationUsername = (String) jmsDestinationDetailProps.remove(PROPERTY_USERNAME);
         final String destinationPassword = (String) jmsDestinationDetailProps.remove(PROPERTY_PASSWORD);
         
-        JmsDestination jmsDestination = new JmsDestination();
-        jmsDestination.setId(id);
-        jmsDestination.setName(name);
-        jmsDestination.setProviderType(providerType);
-        jmsDestination.setInitialContextFactoryClassName(initialContextFactoryClassName);
-        jmsDestination.setJndiUrl(jndiUrl);
-        jmsDestination.setJndiUsername(jndiUsername);
-        jmsDestination.setJndiPassword(jndiPassword);
-        jmsDestination.setJndiProperties(jndiProperties);
-        
-        jmsDestination.setDestinationType(JmsDestination.DestinationType.fromType(destinationType));
-        jmsDestination.setConnectionFactoryName(connectionFactoryName);
-        jmsDestination.setDestinationName(destinationName);
-        jmsDestination.setDestinationUsername(destinationUsername);
-        jmsDestination.setDestinationPassword(destinationPassword);
+        JmsDestination.Builder builder = new JmsDestination.Builder()
+                .id(id)
+                .name(name)
+                .providerType(providerType)
+                .initialContextFactoryClassName(initialContextFactoryClassName)
+                .jndiUrl(jndiUrl)
+                .jndiUsername(jndiUsername)
+                .jndiPassword(jndiPassword)
+                .jndiProperties(jndiProperties)
+                .destinationType(JmsDestination.DestinationType.fromType(destinationType))
+                .connectionFactoryName(connectionFactoryName)
+                .destinationName(destinationName)
+                .destinationUsername(destinationUsername)
+                .destinationPassword(destinationPassword);
 
         if (isInbound) {
-            jmsDestination.setInboundDetail(this.loadInboundDetail(jmsDestinationDetailProps, contextPropertiesTemplateProps));
+            builder.inboundDetail(this.loadInboundDetail(jmsDestinationDetailProps, contextPropertiesTemplateProps));
         } else {
-            jmsDestination.setOutboundDetail(this.loadOutboundDetail(isTemplate, jmsDestinationDetailProps, contextPropertiesTemplateProps));
+            builder.outboundDetail(this.loadOutboundDetail(isTemplate, jmsDestinationDetailProps, contextPropertiesTemplateProps));
         }
         
         if (!contextPropertiesTemplateProps.isEmpty()) {
@@ -100,10 +99,10 @@ public class JmsDestinationLoader implements BundleEntityLoader {
             // additional properties.
             // Items remaining in contextPropertiesTemplateProps should be settings for
             // none generic JMS providers.
-            jmsDestination.setAdditionalProperties(contextPropertiesTemplateProps);
+            builder.additionalProperties(contextPropertiesTemplateProps);
         }
         
-        bundle.getJmsDestinations().put(name, jmsDestination);
+        bundle.getJmsDestinations().put(name, builder.build());
     }
 
     private InboundJmsDestinationDetail loadInboundDetail(
