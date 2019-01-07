@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
@@ -90,8 +91,7 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
     private void linkInboundAssociatedService(JmsDestination entity, Bundle bundle) {
         if (entity.getInboundDetail() == null || 
                 entity.getInboundDetail().getServiceResolutionSettings() == null ||
-                entity.getInboundDetail().getServiceResolutionSettings().getServiceRef() == null ||
-                entity.getInboundDetail().getServiceResolutionSettings().getServiceRef().isEmpty() ) {
+                StringUtils.isEmpty(entity.getInboundDetail().getServiceResolutionSettings().getServiceRef())) {
             return;
         }
         
