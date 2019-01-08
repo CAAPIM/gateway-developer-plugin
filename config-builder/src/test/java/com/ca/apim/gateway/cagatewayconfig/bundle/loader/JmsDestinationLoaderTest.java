@@ -244,7 +244,7 @@ class JmsDestinationLoaderTest {
     
     private static void loadWebsphereMqOverLdapProviderXml(Map<String, Object> contextPropertiesTemplateProps) {
         contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.customizer.class","com.l7tech.server.transport.jms.prov.MQSeriesCustomizer");
-        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.queue.useClientAuth", true);
+        contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.queue.useClientAuth", Boolean.TRUE.toString());
         contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key1");
         contextPropertiesTemplateProps.put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
     }
