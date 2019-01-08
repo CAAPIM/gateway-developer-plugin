@@ -26,7 +26,9 @@ import static java.util.Arrays.stream;
 @Named("JMS_ENDPOINT")
 @ConfigurationFile(name = "jms-destinations", type= JSON_YAML)
 @EnvironmentType("JMS_DESTINATION")
-@SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
+// sonarcloud believes this is a hardcoded password
+// sonarcloud believes variables declared in builder class duplicates variables declared in entity class
+@SuppressWarnings({"squid:S2068", "common-java:DuplicatedBlocks"})
 public class JmsDestination extends GatewayEntity {
     
     // Basics
@@ -252,7 +254,6 @@ public class JmsDestination extends GatewayEntity {
         }
     }
 
-    @SuppressWarnings("common-java:DuplicatedBlocks") // sonarcloud believes variables declared in builder class duplicates variables declared in entity class.
     public static class Builder {
         private String name;
         private String id;
