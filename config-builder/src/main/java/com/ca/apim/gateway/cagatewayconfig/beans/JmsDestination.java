@@ -251,7 +251,8 @@ public class JmsDestination extends GatewayEntity {
             return stream(values()).filter(c -> c.type.equals(type)).findFirst().orElse(null);
         }
     }
-    
+
+    @SuppressWarnings("common-java:DuplicatedBlocks") // sonarcloud believes variables declared in builder class duplicates variables declared in entity class.
     public static class Builder {
         private String name;
         private String id;
