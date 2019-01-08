@@ -31,10 +31,10 @@ class EntityBuilderHelper {
         return entity;
     }
 
-    static Entity getEntityWithPathMapping(String type, String name, String id, Element element) {
-        Entity entity = new Entity(type, name, id, element);
+    static Entity getEntityWithPathMapping(String type, String path, String id, Element element) {
+        Entity entity = new Entity(type, path, id, element);
         entity.setMappingProperty(MAP_BY, MappingProperties.PATH);
-        entity.setMappingProperty(MAP_TO, name);
+        entity.setMappingProperty(MAP_TO, path);
         return entity;
     }
 }
