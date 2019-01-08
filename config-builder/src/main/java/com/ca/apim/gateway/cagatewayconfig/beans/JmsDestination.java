@@ -30,54 +30,38 @@ import static java.util.Arrays.stream;
 public class JmsDestination extends GatewayEntity {
     
     // Basics
-    private final String providerType;
+    private String providerType;
     
     // JNDI
-    private final String initialContextFactoryClassName;
-    private final String jndiUrl;
-    private final String jndiUsername;
+    private String initialContextFactoryClassName;
+    private String jndiUrl;
+    private String jndiUsername;
     private String jndiPasswordRef;
     private String jndiPassword;
-    private final Map<String, Object> jndiProperties;
+    private Map<String, Object> jndiProperties;
 
     // Destination
-    private final DestinationType destinationType;
-    private final String connectionFactoryName;
-    private final String destinationName;
-    private final String destinationUsername;
+    private DestinationType destinationType;
+    private String connectionFactoryName;
+    private String destinationName;
+    private String destinationUsername;
     private String destinationPasswordRef;
     private String destinationPassword;
     
     // Inbound
-    private final InboundJmsDestinationDetail inboundDetail;
+    private InboundJmsDestinationDetail inboundDetail;
     
     // Outbound
-    private final OutboundJmsDestinationDetail outboundDetail;
+    private OutboundJmsDestinationDetail outboundDetail;
     
     // Contains provider specific settings. 
     // For example, for providers:
     // - TIBCO EMS 
     // - WebSphere MQ over LDAP
-    private final Map<String, Object> additionalProperties;
+    private Map<String, Object> additionalProperties;
     
     public JmsDestination() {
         super();
-        providerType = null;
-        initialContextFactoryClassName = null;
-        jndiUrl = null;
-        jndiUsername = null;
-        jndiPasswordRef = null;
-        jndiPassword = null;
-        jndiProperties = null;
-        destinationType = null;
-        connectionFactoryName = null;
-        destinationName = null;
-        destinationUsername = null;
-        destinationPasswordRef = null;
-        destinationPassword = null;
-        inboundDetail = null;
-        outboundDetail = null;
-        additionalProperties = null;
     }
     
     private JmsDestination(Builder builder) {
@@ -106,20 +90,40 @@ public class JmsDestination extends GatewayEntity {
         return providerType;
     }
 
+    public void setProviderType(String providerType) {
+        this.providerType = providerType;
+    }
+
     public String getInitialContextFactoryClassName() {
         return initialContextFactoryClassName;
     }
-    
+
+    public void setInitialContextFactoryClassName(String initialContextFactoryClassName) {
+        this.initialContextFactoryClassName = initialContextFactoryClassName;
+    }
+
     public Map<String, Object> getJndiProperties() {
         return jndiProperties;
+    }
+
+    public void setJndiProperties(Map<String, Object> jndiProperties) {
+        this.jndiProperties = jndiProperties;
     }
 
     public String getJndiUrl() {
         return jndiUrl;
     }
 
+    public void setJndiUrl(String jndiUrl) {
+        this.jndiUrl = jndiUrl;
+    }
+
     public String getJndiUsername() {
         return jndiUsername;
+    }
+
+    public void setJndiUsername(String jndiUsername) {
+        this.jndiUsername = jndiUsername;
     }
 
     public String getJndiPasswordRef() {
@@ -142,16 +146,32 @@ public class JmsDestination extends GatewayEntity {
         return destinationType;
     }
 
+    public void setDestinationType(DestinationType destinationType) {
+        this.destinationType = destinationType;
+    }
+
     public String getConnectionFactoryName() {
         return connectionFactoryName;
+    }
+
+    public void setConnectionFactoryName(String connectionFactoryName) {
+        this.connectionFactoryName = connectionFactoryName;
     }
 
     public String getDestinationName() {
         return destinationName;
     }
 
+    public void setDestinationName(String destinationName) {
+        this.destinationName = destinationName;
+    }
+
     public String getDestinationUsername() {
         return destinationUsername;
+    }
+
+    public void setDestinationUsername(String destinationUsername) {
+        this.destinationUsername = destinationUsername;
     }
 
     public String getDestinationPasswordRef() {
@@ -174,12 +194,24 @@ public class JmsDestination extends GatewayEntity {
         return inboundDetail;
     }
 
+    public void setInboundDetail(InboundJmsDestinationDetail inboundDetail) {
+        this.inboundDetail = inboundDetail;
+    }
+
     public OutboundJmsDestinationDetail getOutboundDetail() {
         return outboundDetail;
     }
 
+    public void setOutboundDetail(OutboundJmsDestinationDetail outboundDetail) {
+        this.outboundDetail = outboundDetail;
+    }
+
     public Map<String, Object> getAdditionalProperties() {
         return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+        this.additionalProperties = additionalProperties;
     }
 
     @Override

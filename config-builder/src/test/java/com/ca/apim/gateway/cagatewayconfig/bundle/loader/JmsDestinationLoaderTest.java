@@ -310,7 +310,7 @@ class JmsDestinationLoaderTest {
         assertEquals(PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP, jmsDestination.getProviderType());
         assertPropertiesContent(ImmutableMap.of(
                 "com.l7tech.server.jms.prop.customizer.class","com.l7tech.server.transport.jms.prov.MQSeriesCustomizer", 
-                "com.l7tech.server.jms.prop.queue.useClientAuth", true,
+                "com.l7tech.server.jms.prop.queue.useClientAuth", "true",
                 "com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key1",
                 "com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002"),
                 jmsDestination.getAdditionalProperties());
