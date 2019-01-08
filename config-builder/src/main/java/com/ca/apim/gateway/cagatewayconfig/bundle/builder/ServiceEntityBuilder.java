@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.WSDL;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.google.common.collect.ImmutableMap;
@@ -117,7 +118,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         serviceElement.appendChild(resourcesElement);
-        return new Entity(SERVICE_TYPE, processedName, id, serviceElement);
+        return EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, "/" + servicePath, id, serviceElement);
     }
 
     private Element buildServiceMappings(Service service, Document document) {
