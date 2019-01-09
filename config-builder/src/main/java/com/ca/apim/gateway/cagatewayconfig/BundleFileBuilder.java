@@ -23,6 +23,7 @@ import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,7 +49,7 @@ class BundleFileBuilder {
         this.entityBundleLoader = entityBundleLoader;
     }
 
-    void buildBundle(File rootDir, File outputDir, Set<File> dependencies, String name) {
+    void buildBundle(File rootDir, File outputDir, List<File> dependencies, String name) {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
