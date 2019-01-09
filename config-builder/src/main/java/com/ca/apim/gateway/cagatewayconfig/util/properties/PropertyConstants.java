@@ -73,8 +73,8 @@ public class PropertyConstants {
     public static final String INBOUND_FAILURE_QUEUE_NAME = "inbound.failureQueueName";
     public static final String IS_DEDICATED_CONSUMER_CONNECTION = "com.l7tech.server.jms.prop.dedicated.consumer.bool";
     public static final String DEDICATED_CONSUMER_CONNECTION_SIZE = "com.l7tech.server.jms.prop.dedicated.consumer.size";
-    public static final String INBOUND_MAX_SIZE = "inbound.maximumSize"; 
-    
+    public static final String INBOUND_MAX_SIZE = "inbound.maximumSize";
+
     // JMS Destination - outbound specific
     public static final String OUTBOUND_MESSAGE_TYPE = "outbound.MessageType";
     public static final String CONNECTION_POOL_ENABLED = "com.l7tech.server.jms.prop.connection.pool.enable";
@@ -85,32 +85,5 @@ public class PropertyConstants {
     public static final String SESSION_POOL_MAX_IDLE = "com.l7tech.server.jms.prop.max.session.idle";
     public static final String SESSION_POOL_MAX_WAIT = "com.l7tech.server.jms.prop.session.pool.max.wait";
     
-<<<<<<< HEAD
-    public static final String INBOUND_ACK_TYPE = "inbound.acknowledgementType";
-    public static final String INBOUND_FAILURE_QUEUE_NAME = "inbound.failureQueueName";
-    public static final String INBOUND_MAX_SIZE = "inbound.maximumSize";
-    
-<<<<<<< HEAD
-    public static final String JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME = "jndi.initialContextFactoryClassname";
-    public static final String JNDI_PROVIDER_URL = "jndi.providerUrl";
-<<<<<<< HEAD
-    // username
-    // password
-    public static final String QUEUE_CONNECTION_FACTORY_NAME = "queue.connectionFactoryName";
-    public static final String CONNECTION_FACTORY_NAME = "connectionFactoryName";
-    public static final String TOPIC_CONNECTION_FACTORY_NAME = "topic.connectionFactoryName";
-    
-    // 3.0 JMS Context Properties Template property
-    // From 
-=======
-    public static final String JNDI_USERNAME = "java.naming.security.principal";
-    public static final String JNDI_PASSWORD = "java.naming.security.credentials";
-    public static final String CONNECTION_FACTORY_NAME = "queue.connectionFactoryName";
->>>>>>> Add support for JMS Destination entity.
-    
-=======
->>>>>>> Add outbound details. Still in progress.
-=======
->>>>>>> Add inbound details. Still in progress.
     private PropertyConstants() { }
 }
