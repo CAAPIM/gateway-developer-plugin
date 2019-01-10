@@ -45,6 +45,10 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 public class JmsDestinationEntityBuilder implements EntityBuilder {
     private static final Integer ORDER = 1500;
     
+    private static final String INBOUND_CONTENT_TYPE_SOURCE_NONE = "";
+    private static final String INBOUND_CONTENT_TYPE_SOURCE_FREE_FORM = "com.l7tech.server.jms.prop.contentType.freeform";
+    private static final String INBOUND_CONTENT_TYPE_SOURCE_JMS_PROPERTY = "com.l7tech.server.jms.prop.contentType.header";
+    
     private final IdGenerator idGenerator;
     
     @Inject
@@ -185,25 +189,8 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                     contextPropertiesTemplateProps,
                     SOAP_ACTION_MSG_PROP_NAME,
                     serviceResolutionSettings.getSoapActionMessagePropertyName());
-
-            String contentTypeSource = "";
-            if (serviceResolutionSettings.getContentTypeSource() != null) {
-                switch (serviceResolutionSettings.getContentTypeSource()) {
-                    case NONE:
-                        contentTypeSource = "";
-                        break;
-                    case FREE_FORM:
-                        contentTypeSource = "com.l7tech.server.jms.prop.contentType.freeform";
-                        break;
-                    case JMS_PROPERTY:
-                        contentTypeSource = "com.l7tech.server.jms.prop.contentType.header";
-                        break;
-                    default:
-                        contentTypeSource = "";
-                        break;
-                }
-            }
-            contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, contentTypeSource);
+            
+            contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, this.getContentTypeSource(serviceResolutionSettings));
 
             String contentType = serviceResolutionSettings.getContentType();
             if (contentType == null) {
@@ -232,6 +219,29 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 inboundDetail.getMaxMessageSizeBytes());
     }
 
+    private String getContentTypeSource(ServiceResolutionSettings serviceResolutionSettings) {
+        if (serviceResolutionSettings.getContentTypeSource() == null) {
+            return INBOUND_CONTENT_TYPE_SOURCE_NONE;
+        }
+        
+        String contentTypeSource ;
+        switch (serviceResolutionSettings.getContentTypeSource()) {
+            case NONE:
+                contentTypeSource = INBOUND_CONTENT_TYPE_SOURCE_NONE;
+                break;
+            case FREE_FORM:
+                contentTypeSource = INBOUND_CONTENT_TYPE_SOURCE_FREE_FORM;
+                break;
+            case JMS_PROPERTY:
+                contentTypeSource = INBOUND_CONTENT_TYPE_SOURCE_JMS_PROPERTY;
+                break;
+            default:
+                contentTypeSource = INBOUND_CONTENT_TYPE_SOURCE_NONE;
+                break;
+        }
+        return contentTypeSource;
+    }
+    
     private void buildOutboundDestination (
             final JmsDestination jmsDestination,
             final Map<String, Object> jmsDestinationDetailProps,
@@ -267,6 +277,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             }
         }
     }
+    
     @Override
     public @NotNull Integer getOrder() {
         return ORDER;
