@@ -206,9 +206,9 @@ class JmsDestinationEntityBuilderTest {
         assertEquals("com.l7tech.server.jms.prop.contentType.header", contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE));
         assertEquals("my-content-type-jms-prop", contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE));
         
-        assertEquals(-1, jmsDestinationDetailProps.remove(INBOUND_MAX_SIZE));
+        assertEquals(-1L, jmsDestinationDetailProps.remove(INBOUND_MAX_SIZE));
         assertEquals("true", contextPropertiesTemplateProps.remove(IS_DEDICATED_CONSUMER_CONNECTION));
-        assertEquals(1, contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE));
+        assertEquals("1", contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE));
     }
     
     @NotNull

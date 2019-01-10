@@ -552,7 +552,7 @@ class JmsDestinationLoaderTest {
             
             assertEquals("my-failure-Q", inboundDetail.getFailureQueueName());
             assertEquals(new Integer(5), inboundDetail.getNumOfConsumerConnections());
-            assertEquals(new Integer(2048), inboundDetail.getMaxMessageSizeBytes());
+            assertEquals(new Long(2048L), inboundDetail.getMaxMessageSizeBytes());
         } else {
             OutboundJmsDestinationDetail outboundDetail = jmsDestination.getOutboundDetail();
             assertNotNull(outboundDetail);

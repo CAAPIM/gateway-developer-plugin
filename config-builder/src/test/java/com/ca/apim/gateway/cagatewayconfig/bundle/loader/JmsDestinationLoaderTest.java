@@ -199,8 +199,8 @@ class JmsDestinationLoaderTest {
         contextPropertiesTemplateProps.put(CONTENT_TYPE_VALUE, "text/yaml");
         
         jmsDestinationDetailProps.put(INBOUND_FAILURE_QUEUE_NAME, "my-failure-Q");
-        contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, 5);
-        jmsDestinationDetailProps.put(INBOUND_MAX_SIZE, 2048);
+        contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, "5");
+        jmsDestinationDetailProps.put(INBOUND_MAX_SIZE, 2048L);
     }
 
     private static void loadOutboundJmsDestinationXml(
@@ -213,9 +213,9 @@ class JmsDestinationLoaderTest {
         jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, "ALWAYS_BINARY");
 
         contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, Boolean.TRUE.toString());
-        contextPropertiesTemplateProps.put(CONNECTION_POOL_SIZE, 10);
-        contextPropertiesTemplateProps.put(CONNECTION_POOL_MIN_IDLE, 5);
-        contextPropertiesTemplateProps.put(CONNECTION_POOL_MAX_WAIT, 10000);
+        contextPropertiesTemplateProps.put(CONNECTION_POOL_SIZE, "10");
+        contextPropertiesTemplateProps.put(CONNECTION_POOL_MIN_IDLE, "5");
+        contextPropertiesTemplateProps.put(CONNECTION_POOL_MAX_WAIT, "10000");
     }
 
     private static void loadTibcoEmsProviderXml(Map<String, Object> contextPropertiesTemplateProps) {
@@ -336,7 +336,7 @@ class JmsDestinationLoaderTest {
 
         assertEquals("my-failure-Q", inboundDetail.getFailureQueueName());
         assertEquals(new Integer(5), inboundDetail.getNumOfConsumerConnections());
-        assertEquals(new Integer(2048), inboundDetail.getMaxMessageSizeBytes());
+        assertEquals(new Long(2048L), inboundDetail.getMaxMessageSizeBytes());
     }
 
     private void verifyOutboundSettings(JmsDestination jmsDestination) {

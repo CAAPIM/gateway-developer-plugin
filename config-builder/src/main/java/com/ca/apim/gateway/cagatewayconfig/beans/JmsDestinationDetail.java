@@ -6,8 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.Arrays.stream;
 
+@JsonInclude(NON_NULL)
 public class JmsDestinationDetail {
 
     private ReplyType replyType;

@@ -122,7 +122,6 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 document,
                 JMS_CONNECTION,
                 ImmutableMap.of(ATTRIBUTE_ID, jmsConnectionEleId),
-                createElementWithTextContent(document, DESTINATION_TYPE, jmsDestination.getProviderType()),
                 createElementWithTextContent(document, TEMPLATE, isTemplate)
         );
 
@@ -187,20 +186,22 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                     SOAP_ACTION_MSG_PROP_NAME,
                     serviceResolutionSettings.getSoapActionMessagePropertyName());
 
-            String contentTypeSource;
-            switch (serviceResolutionSettings.getContentTypeSource()) {
-                case NONE:
-                    contentTypeSource = "";
-                    break;
-                case FREE_FORM:
-                    contentTypeSource = "com.l7tech.server.jms.prop.contentType.freeform";
-                    break;
-                case JMS_PROPERTY:
-                    contentTypeSource = "com.l7tech.server.jms.prop.contentType.header";
-                    break;
-                default:
-                    contentTypeSource = "";
-                    break;
+            String contentTypeSource = "";
+            if (serviceResolutionSettings.getContentTypeSource() != null) {
+                switch (serviceResolutionSettings.getContentTypeSource()) {
+                    case NONE:
+                        contentTypeSource = "";
+                        break;
+                    case FREE_FORM:
+                        contentTypeSource = "com.l7tech.server.jms.prop.contentType.freeform";
+                        break;
+                    case JMS_PROPERTY:
+                        contentTypeSource = "com.l7tech.server.jms.prop.contentType.header";
+                        break;
+                    default:
+                        contentTypeSource = "";
+                        break;
+                }
             }
             contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, contentTypeSource);
 
@@ -223,7 +224,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         if (numOfConsumerConnections == null) {
             numOfConsumerConnections = 1; // Default consumer size is 1.
         }
-        contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, numOfConsumerConnections);
+        contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, Integer.toString(numOfConsumerConnections));
 
         putToMapIfValueIsNotNull(
                 jmsDestinationDetailProps,

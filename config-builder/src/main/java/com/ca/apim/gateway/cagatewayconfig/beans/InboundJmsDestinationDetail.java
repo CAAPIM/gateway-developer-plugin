@@ -14,7 +14,7 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
     private ServiceResolutionSettings serviceResolutionSettings;
     private String failureQueueName;
     private Integer numOfConsumerConnections;
-    private Integer maxMessageSizeBytes = -1; // -1 = Do not override,  0 = Unlimited.
+    private Long maxMessageSizeBytes = -1L; // -1 = Do not override,  0 = Unlimited.
     
     public InboundJmsDestinationDetail() {
         super();
@@ -52,11 +52,11 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
         this.numOfConsumerConnections = numOfConsumerConnections;
     }
 
-    public Integer getMaxMessageSizeBytes() {
+    public Long getMaxMessageSizeBytes() {
         return maxMessageSizeBytes;
     }
 
-    public void setMaxMessageSizeBytes(Integer maxMessageSizeBytes) {
+    public void setMaxMessageSizeBytes(Long maxMessageSizeBytes) {
         this.maxMessageSizeBytes = maxMessageSizeBytes;
     }
 

@@ -19,6 +19,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.Me
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.SessionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -121,8 +122,9 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         inboundDetail.setUseRequestCorrelationId((Boolean) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID));
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
         inboundDetail.setFailureQueueName((String) jmsDestinationDetailProps.remove(INBOUND_FAILURE_QUEUE_NAME));
-        inboundDetail.setNumOfConsumerConnections((Integer) contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE));
-        inboundDetail.setMaxMessageSizeBytes((Integer) jmsDestinationDetailProps.remove(INBOUND_MAX_SIZE));
+        inboundDetail.setNumOfConsumerConnections(convertToInteger(contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE)));
+        inboundDetail.setMaxMessageSizeBytes((Long)jmsDestinationDetailProps.remove(INBOUND_MAX_SIZE));
+        
         return inboundDetail;
     }
     
@@ -137,16 +139,23 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         final boolean isConnectionPool = toBoolean((String) contextPropertiesTemplateProps.remove(CONNECTION_POOL_ENABLED));
         if (isConnectionPool) {
             poolingType = PoolingType.CONNECTION;
-            connectionPoolingSettings = new ConnectionPoolingSettings(
-                    (Integer) contextPropertiesTemplateProps.remove(CONNECTION_POOL_SIZE),
-                    (Integer) contextPropertiesTemplateProps.remove(CONNECTION_POOL_MIN_IDLE),
-                    (Integer) contextPropertiesTemplateProps.remove(CONNECTION_POOL_MAX_WAIT));
+            
+            Integer poolSize = convertToInteger(contextPropertiesTemplateProps.remove(CONNECTION_POOL_SIZE));
+            Integer poolMinIdle = convertToInteger(contextPropertiesTemplateProps.remove(CONNECTION_POOL_MIN_IDLE));
+            Integer poolMaxWait = convertToInteger(contextPropertiesTemplateProps.remove(CONNECTION_POOL_MAX_WAIT));
+            if (poolSize != null || poolMinIdle != null || poolMaxWait != null) {
+                connectionPoolingSettings = new ConnectionPoolingSettings(poolSize, poolMinIdle, poolMaxWait);
+            }
         } else {
             poolingType = PoolingType.SESSION;
-            sessionPoolingSettings = new SessionPoolingSettings(
-                    (Integer) contextPropertiesTemplateProps.remove(SESSION_POOL_SIZE),
-                    (Integer) contextPropertiesTemplateProps.remove(SESSION_POOL_MAX_IDLE),
-                    (Integer) contextPropertiesTemplateProps.remove(SESSION_POOL_MAX_WAIT));
+
+            Integer poolSize = convertToInteger(contextPropertiesTemplateProps.remove(SESSION_POOL_SIZE));
+            Integer poolMaxIdle = convertToInteger(contextPropertiesTemplateProps.remove(SESSION_POOL_MAX_IDLE));
+            Integer poolMaxWait = convertToInteger(contextPropertiesTemplateProps.remove(SESSION_POOL_MAX_WAIT));
+
+            if (poolSize != null || poolMaxIdle != null || poolMaxWait != null) {
+                sessionPoolingSettings = new SessionPoolingSettings(poolSize, poolMaxIdle, poolMaxWait);
+            }
         }
         
         final OutboundJmsDestinationDetail outboundDetail = new OutboundJmsDestinationDetail();
@@ -164,5 +173,13 @@ public class JmsDestinationLoader implements BundleEntityLoader {
     @Override
     public String getEntityType() {
         return EntityTypes.JMS_DESTINATION_TYPE;
+    }
+    
+    @Nullable
+    private static Integer convertToInteger(Object value) {
+        if (value == null) {
+            return null;
+        }
+        return Integer.valueOf((String) value);
     }
 }
