@@ -6,6 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.Arrays.stream;
 
 public class OutboundJmsDestinationDetail extends JmsDestinationDetail {
@@ -60,6 +63,7 @@ public class OutboundJmsDestinationDetail extends JmsDestinationDetail {
         this.connectionPoolingSettings = connectionPoolingSettings;
     }
 
+    @JsonInclude(NON_NULL)
     public static class SessionPoolingSettings {
         private Integer size;
         private Integer maxIdle;
@@ -98,7 +102,8 @@ public class OutboundJmsDestinationDetail extends JmsDestinationDetail {
             this.maxWaitMs = maxWaitMs;
         }
     }
-    
+
+    @JsonInclude(NON_NULL)
     public static class ConnectionPoolingSettings {
         private Integer size;
         private Integer minIdle;

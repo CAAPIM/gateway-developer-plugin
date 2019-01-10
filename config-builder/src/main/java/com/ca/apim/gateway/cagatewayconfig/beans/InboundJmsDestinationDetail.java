@@ -6,6 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.Arrays.stream;
 
 public class InboundJmsDestinationDetail extends JmsDestinationDetail {
@@ -60,6 +63,7 @@ public class InboundJmsDestinationDetail extends JmsDestinationDetail {
         this.maxMessageSizeBytes = maxMessageSizeBytes;
     }
 
+    @JsonInclude(NON_NULL)
     public static class ServiceResolutionSettings {
         private String serviceRef;
         private String soapActionMessagePropertyName;
