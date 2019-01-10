@@ -191,7 +191,7 @@ class JmsDestinationLoaderTest {
         jmsDestinationDetailProps.put(INBOUND_ACKNOWLEDGEMENT_TYPE, "ON_COMPLETION");
         jmsDestinationDetailProps.put(REPLY_TYPE, "REPLY_TO_OTHER");
         jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, "my-reply-Q");
-        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, Boolean.FALSE.toString());
+        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, Boolean.FALSE);
 
         contextPropertiesTemplateProps.put(HARDWIRED_SERVICE_ID, "/folder1/service1");
         contextPropertiesTemplateProps.put(SOAP_ACTION_MSG_PROP_NAME, "my-jms-soap-action-prop-name");
@@ -209,7 +209,7 @@ class JmsDestinationLoaderTest {
 
         jmsDestinationDetailProps.put(REPLY_TYPE, "REPLY_TO_OTHER");
         jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, "my-reply-Q");
-        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, Boolean.FALSE.toString());
+        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, Boolean.FALSE);
         jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, "ALWAYS_BINARY");
 
         contextPropertiesTemplateProps.put(CONNECTION_POOL_ENABLED, Boolean.TRUE.toString());

@@ -207,7 +207,6 @@ class JmsDestinationLoaderTest {
         }};
 
         assertPropertiesContent(expectedAdditionalProps, jmsDestination.getAdditionalProperties());
-        
     }
 
     @Test
@@ -445,6 +444,30 @@ class JmsDestinationLoaderTest {
                 "      maxWaitMs: 10000\n";
 
         loadJmsDestination(yaml, true,"yml", ConfigLoadException.class);
+    }
+
+    @Test
+    void testLoad_MissingInboundAndOutboundYaml() throws IOException {
+        String json = "{\n" +
+                "  \"" + JMS_DESTINATION_NAME + "\" : {\n" +
+                "    \"providerType\" : \"TIBCO EMS\",\n" +
+                "    \"initialContextFactoryClassName\" : \"com.tibco.tibjms.naming.TibjmsInitialContextFactory\",\n" +
+                "    \"jndiUrl\" : \"tibjmsnaming://machinename:7222\",\n" +
+                "    \"jndiUsername\" : \"my-jndi-username\",\n" +
+                "    \"jndiPasswordRef\" : \"my-jndi-password-ref\",\n" +
+                "    \"jndiProperties\" : {\n" +
+                "      \"additional-jndi-prop-name-1\" : \"additional-jndi-prop-val-1\",\n" +
+                "      \"additional-jndi-prop-name-2\" : \"additional-jndi-prop-val-2\"\n" +
+                "    },\n" +
+                "    \"destinationType\" : \"QUEUE\",\n" +
+                "    \"connectionFactoryName\" : \"my-qcf-name\",\n" +
+                "    \"destinationName\" : \"my-jms-destination-name\",\n" +
+                "    \"destinationUsername\" : \"my-destination-username\",\n" +
+                "    \"destinationPasswordRef\" : \"my-destination-password-ref\"\n" +
+                "  }\n" +
+                "}\n";
+
+        loadJmsDestination(json, false, "json", ConfigLoadException.class);
     }
     
     private JmsDestination loadJmsDestination(String content, boolean isInbound, String fileType, Class<? extends Exception> expectException) throws IOException {

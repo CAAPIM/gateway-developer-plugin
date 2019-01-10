@@ -111,6 +111,11 @@ class BundleEnvironmentValidator {
                     throw new MissingEnvironmentException("Missing environment value for Cassandra Connection: " + name);
                 }
                 break;
+            case EntityTypes.JMS_DESTINATION_TYPE:
+                if (bundle.getJmsDestinations().get(name) == null) {
+                    throw new MissingEnvironmentException("Missing environment value for JMS Destination: " + name);
+                }
+                break;
             default:
                 throw new MissingEnvironmentException("Missing environment value for " + type + ": " + name);
         }

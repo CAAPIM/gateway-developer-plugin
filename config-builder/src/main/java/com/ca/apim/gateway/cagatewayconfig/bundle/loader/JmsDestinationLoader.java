@@ -61,9 +61,9 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         
         final Map<String, Object> jndiProperties = contextPropertiesTemplateProps.entrySet().stream()
                 .filter(map -> 
-                        !map.getKey().startsWith("com.l7tech.server.jms.prop.") &&
+                        !map.getKey().startsWith(JMS_PROPS_PREFIX) &&
                         !map.getKey().startsWith("com.tibco.tibjms.") &&
-                        !"com.l7tech.server.jms.soapAction.msgPropName".equals(map.getKey()))
+                        !SOAP_ACTION_MSG_PROP_NAME.equals(map.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         contextPropertiesTemplateProps.keySet().removeAll(jndiProperties.keySet());
         
@@ -118,7 +118,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         inboundDetail.setAcknowledgeType(AcknowledgeType.fromType((String) jmsDestinationDetailProps.remove(INBOUND_ACKNOWLEDGEMENT_TYPE)));
         inboundDetail.setReplyType(ReplyType.fromType((String) jmsDestinationDetailProps.remove(REPLY_TYPE)));
         inboundDetail.setReplyToQueueName((String) jmsDestinationDetailProps.remove(REPLY_QUEUE_NAME));
-        inboundDetail.setUseRequestCorrelationId(toBoolean((String) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID)));
+        inboundDetail.setUseRequestCorrelationId((Boolean) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID));
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
         inboundDetail.setFailureQueueName((String) jmsDestinationDetailProps.remove(INBOUND_FAILURE_QUEUE_NAME));
         inboundDetail.setNumOfConsumerConnections((Integer) contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE));
@@ -153,7 +153,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         outboundDetail.setIsTemplate(isTemplate);
         outboundDetail.setReplyType(ReplyType.fromType((String) jmsDestinationDetailProps.remove(REPLY_TYPE)));
         outboundDetail.setReplyToQueueName((String) jmsDestinationDetailProps.remove(REPLY_QUEUE_NAME));
-        outboundDetail.setUseRequestCorrelationId(toBoolean((String) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID)));
+        outboundDetail.setUseRequestCorrelationId((Boolean) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID));
         outboundDetail.setMessageFormat(MessageFormat.fromFormat((String) jmsDestinationDetailProps.remove(OUTBOUND_MESSAGE_TYPE)));
         outboundDetail.setPoolingType(poolingType);
         outboundDetail.setSessionPoolingSettings(sessionPoolingSettings);
