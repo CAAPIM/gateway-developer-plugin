@@ -33,6 +33,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     private static final String BUILT_BUNDLE_DIRECTORY = "bundle";
     private static final String GATEWAY_BUILD_DIRECTORY = "gateway";
     private static final String ENV_APPLICATION_CONFIGURATION = "environment-creator-application";
+    private static final String BUILD_ENVIRONMENT_BUNDLE = "build-environment-bundle";
 
     @Override
     public void apply(@NotNull final Project project) {
@@ -70,7 +71,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         });
 
         // Create build-environment-bundle task
-        final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create("build-environment-bundle", BuildEnvironmentBundleTask.class, t -> {
+        final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create(BUILD_ENVIRONMENT_BUNDLE, BuildEnvironmentBundleTask.class, t -> {
             t.getInto().set(pluginConfig.getBuiltBundleDir());
             t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
         });
@@ -92,13 +93,15 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 
         // add the deployment bundle to the default artifacts
         project.artifacts(artifactHandler -> addBundleArtifact(artifactHandler, packageGW7Task.getBundle(), buildDeploymentBundleTask, project::getName, "deployment"));
-        // the environment bundle is only added after task finish
-        buildEnvironmentBundleTask.doLast(task -> project.artifacts(artifactHandler -> addBundleArtifact(
+        // add the environment bundle to the artifacts only if the environment bundle task was triggered
+        if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_ENVIRONMENT_BUNDLE)) {
+            project.artifacts(artifactHandler -> addBundleArtifact(
                 artifactHandler,
                 pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, "-environment", BUNDLE_FILE_EXTENSION))),
-                task,
+                buildEnvironmentBundleTask,
                 project::getName,
-                "environment")));
+                "environment"));
+        }
     }
 
     private void addBundleArtifact(
