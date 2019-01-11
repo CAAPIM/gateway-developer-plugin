@@ -17,11 +17,13 @@ public class GatewayDeveloperPluginConfig {
     private final DirectoryProperty solutionDir;
     private DirectoryProperty builtBundleDir;
     private final Property<Map> environmentConfig;
+    private DirectoryProperty builtEnvironmentBundleDir;
 
     public GatewayDeveloperPluginConfig(Project project) {
         solutionDir = project.getLayout().directoryProperty();
         builtBundleDir = project.getLayout().directoryProperty();
         environmentConfig = project.getObjects().property(Map.class);
+        builtEnvironmentBundleDir = project.getLayout().directoryProperty();
     }
 
     DirectoryProperty getSolutionDir() {
@@ -34,5 +36,9 @@ public class GatewayDeveloperPluginConfig {
 
     Property<Map> getEnvironmentConfig() {
         return environmentConfig;
+    }
+
+    DirectoryProperty getBuiltEnvironmentBundleDir() {
+        return builtEnvironmentBundleDir;
     }
 }
