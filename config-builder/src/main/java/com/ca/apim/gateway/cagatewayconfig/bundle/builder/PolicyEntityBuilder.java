@@ -321,7 +321,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
-        return EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE, "/" + policy.getPath(), id, policyElement);
+        return EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE, EncodeDecodeUtils.decodePath(policy.getPath()), id, policyElement);
     }
 
     private PolicyTags getPolicyTags(Policy policy, Bundle bundle) {
