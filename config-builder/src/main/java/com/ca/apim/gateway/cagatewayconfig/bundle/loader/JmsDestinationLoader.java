@@ -19,6 +19,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.Me
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.SessionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -33,6 +34,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static org.apache.commons.lang3.BooleanUtils.toBoolean;
+import static org.apache.commons.lang3.ObjectUtils.anyNotNull;
 
 @Singleton
 public class JmsDestinationLoader implements BundleEntityLoader {
@@ -109,11 +111,26 @@ public class JmsDestinationLoader implements BundleEntityLoader {
     private InboundJmsDestinationDetail loadInboundDetail(
             Map<String, Object> jmsDestinationDetailProps,
             Map<String, Object> contextPropertiesTemplateProps) {
-        final ServiceResolutionSettings serviceResolutionSettings = new ServiceResolutionSettings();
-        serviceResolutionSettings.setServiceRef((String) contextPropertiesTemplateProps.remove(HARDWIRED_SERVICE_ID));
-        serviceResolutionSettings.setSoapActionMessagePropertyName((String) contextPropertiesTemplateProps.remove(SOAP_ACTION_MSG_PROP_NAME));
-        serviceResolutionSettings.setContentTypeSource(ContentTypeSource.fromType((String) contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE)));
-        serviceResolutionSettings.setContentType((String) contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE)); 
+        final boolean isHardwiredService = toBoolean((String) contextPropertiesTemplateProps.remove(IS_HARDWIRED_SERVICE));
+        String serviceRef = null;
+        if (isHardwiredService) {
+            serviceRef = (String) contextPropertiesTemplateProps.remove(HARDWIRED_SERVICE_ID);
+        }
+        final String soapActionMsgPropName = (String) contextPropertiesTemplateProps.remove(SOAP_ACTION_MSG_PROP_NAME);
+        final ContentTypeSource contentTypeSource = ContentTypeSource.fromType((String) contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE));
+        String contentType = (String) contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE);
+        if (StringUtils.isEmpty(contentType)) {
+            contentType = null;
+        }
+
+        ServiceResolutionSettings serviceResolutionSettings = null;
+        if (anyNotNull(serviceRef, soapActionMsgPropName, contentTypeSource, contentType)) {
+            serviceResolutionSettings = new ServiceResolutionSettings();
+            serviceResolutionSettings.setServiceRef(serviceRef);
+            serviceResolutionSettings.setSoapActionMessagePropertyName(soapActionMsgPropName);
+            serviceResolutionSettings.setContentTypeSource(contentTypeSource);
+            serviceResolutionSettings.setContentType(contentType);
+        }
         
         final InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
         inboundDetail.setAcknowledgeType(AcknowledgeType.fromType((String) jmsDestinationDetailProps.remove(INBOUND_ACKNOWLEDGEMENT_TYPE)));
@@ -124,6 +141,9 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         inboundDetail.setFailureQueueName((String) jmsDestinationDetailProps.remove(INBOUND_FAILURE_QUEUE_NAME));
         inboundDetail.setNumOfConsumerConnections(convertToInteger(contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE)));
         inboundDetail.setMaxMessageSizeBytes((Long)jmsDestinationDetailProps.remove(INBOUND_MAX_SIZE));
+        
+        // Cleanup. Remove items from contextPropertiesTemplateProps that are not used.
+        contextPropertiesTemplateProps.remove(IS_DEDICATED_CONSUMER_CONNECTION); // This is always true.
         
         return inboundDetail;
     }
@@ -143,7 +163,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
             Integer poolSize = convertToInteger(contextPropertiesTemplateProps.remove(CONNECTION_POOL_SIZE));
             Integer poolMinIdle = convertToInteger(contextPropertiesTemplateProps.remove(CONNECTION_POOL_MIN_IDLE));
             Integer poolMaxWait = convertToInteger(contextPropertiesTemplateProps.remove(CONNECTION_POOL_MAX_WAIT));
-            if (poolSize != null || poolMinIdle != null || poolMaxWait != null) {
+            if (anyNotNull(poolSize, poolMinIdle, poolMaxWait)) {
                 connectionPoolingSettings = new ConnectionPoolingSettings(poolSize, poolMinIdle, poolMaxWait);
             }
         } else {
@@ -152,8 +172,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
             Integer poolSize = convertToInteger(contextPropertiesTemplateProps.remove(SESSION_POOL_SIZE));
             Integer poolMaxIdle = convertToInteger(contextPropertiesTemplateProps.remove(SESSION_POOL_MAX_IDLE));
             Integer poolMaxWait = convertToInteger(contextPropertiesTemplateProps.remove(SESSION_POOL_MAX_WAIT));
-
-            if (poolSize != null || poolMaxIdle != null || poolMaxWait != null) {
+            if (anyNotNull(poolSize, poolMaxIdle, poolMaxWait)) {
                 sessionPoolingSettings = new SessionPoolingSettings(poolSize, poolMaxIdle, poolMaxWait);
             }
         }
@@ -167,6 +186,13 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         outboundDetail.setPoolingType(poolingType);
         outboundDetail.setSessionPoolingSettings(sessionPoolingSettings);
         outboundDetail.setConnectionPoolingSettings(connectionPoolingSettings);
+
+
+        // Cleanup. Remove items from contextPropertiesTemplateProps that are not used.
+        contextPropertiesTemplateProps.remove(IS_HARDWIRED_SERVICE); // Not relevant for outbound.
+        contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE); // Not relevant for outbound.
+        contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE); // // Not relevant for outbound.
+        
         return outboundDetail;
     }
     

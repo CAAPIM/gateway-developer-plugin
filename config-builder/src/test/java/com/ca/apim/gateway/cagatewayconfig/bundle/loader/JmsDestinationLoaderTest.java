@@ -193,6 +193,7 @@ class JmsDestinationLoaderTest {
         jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, "my-reply-Q");
         jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, Boolean.FALSE);
 
+        contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, "true");
         contextPropertiesTemplateProps.put(HARDWIRED_SERVICE_ID, "/folder1/service1");
         contextPropertiesTemplateProps.put(SOAP_ACTION_MSG_PROP_NAME, "my-jms-soap-action-prop-name");
         contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, "FREE_FORM");
