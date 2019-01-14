@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -30,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CAGatewayDeveloperTest {
@@ -94,6 +96,30 @@ class CAGatewayDeveloperTest {
                 .withDebug(true)
                 .build();
 
+        assertMultiProject(testProjectDir, result);
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testMultiProjectBuildingEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "multi-project";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build", ":project-c:build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        assertMultiProject(testProjectDir, result);
+        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + "-environment.bundle");
+        assertTrue(projectC_EnvBundle.exists());
+        assertFalse(readFileToString(projectC_EnvBundle, Charset.defaultCharset()).isEmpty());
+    }
+
+    private void assertMultiProject(File testProjectDir, BuildResult result) throws IOException {
         LOGGER.log(Level.INFO, result.getOutput());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-a:build")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-b:build")).getOutcome());
