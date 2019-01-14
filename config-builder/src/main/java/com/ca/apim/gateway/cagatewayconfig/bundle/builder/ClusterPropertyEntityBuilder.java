@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CLUSTER_PROPERTY_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.FAIL_ON_EXISTING;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
@@ -74,9 +73,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
 
     private Entity buildClusterPropertyEntity(String name, PropertiesEntity value, Document document) {
         String id = idGenerator.generate();
-        Entity entity = EntityBuilderHelper.getEntityWithNameMapping(CLUSTER_PROPERTY_TYPE, name, id, buildClusterPropertyElement(name, id, value.getValue(), document));
-        entity.setMappingProperty(FAIL_ON_EXISTING, true);
-        return entity;
+        return EntityBuilderHelper.getEntityWithNameMapping(CLUSTER_PROPERTY_TYPE, name, id, buildClusterPropertyElement(name, id, value.getValue(), document));
     }
 
     private static Element buildClusterPropertyElement(String name, String id, String value, Document document) {
