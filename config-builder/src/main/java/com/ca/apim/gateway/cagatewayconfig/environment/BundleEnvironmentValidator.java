@@ -75,49 +75,41 @@ class BundleEnvironmentValidator {
     }
 
     private void findInBundle(Bundle bundle, String type, String name) {
+        Object entity;
         switch (type) {
             case EntityTypes.CLUSTER_PROPERTY_TYPE:
-                if (bundle.getGlobalEnvironmentProperties().get(PREFIX_GATEWAY + name) == null) {
+                entity = bundle.getGlobalEnvironmentProperties().get(PREFIX_GATEWAY + name);
+                if (entity == null) {
                     throw new MissingEnvironmentException("Missing global environment value for property: " + name);
                 }
                 break;
             case EntityTypes.ID_PROVIDER_CONFIG_TYPE:
-                if (bundle.getIdentityProviders().get(name) == null) {
-                    throw new MissingEnvironmentException("Missing environment value for Identity Provider: " + name);
-                }
+                entity = bundle.getIdentityProviders().get(name);
                 break;
             case EntityTypes.JDBC_CONNECTION:
-                if (bundle.getJdbcConnections().get(name) == null) {
-                    throw new MissingEnvironmentException("Missing environment value for JDBC Connection: " + name);
-                }
+                entity = bundle.getJdbcConnections().get(name);
                 break;
             case EntityTypes.STORED_PASSWORD_TYPE:
-                if (bundle.getStoredPasswords().get(name) == null) {
-                    throw new MissingEnvironmentException("Missing environment value for Password: " + name);
-                }
+                entity = bundle.getStoredPasswords().get(name);
                 break;
             case EntityTypes.TRUSTED_CERT_TYPE:
-                if (bundle.getTrustedCerts().get(name) == null) {
-                    throw new MissingEnvironmentException("Missing environment value for Trusted Certificate: " + name);
-                }
+                entity = bundle.getTrustedCerts().get(name);
                 break;
             case EntityTypes.PRIVATE_KEY_TYPE:
-                if (bundle.getPrivateKeys().get(name) == null) {
-                    throw new MissingEnvironmentException("Missing environment value for Private Key: " + name);
-                }
+                entity = bundle.getPrivateKeys().get(name);
                 break;
             case EntityTypes.CASSANDRA_CONNECTION_TYPE:
-                if (bundle.getCassandraConnections().get(name) == null) {
-                    throw new MissingEnvironmentException("Missing environment value for Cassandra Connection: " + name);
-                }
+                entity = bundle.getCassandraConnections().get(name);
                 break;
             case EntityTypes.JMS_DESTINATION_TYPE:
-                if (bundle.getJmsDestinations().get(name) == null) {
-                    throw new MissingEnvironmentException("Missing environment value for JMS Destination: " + name);
-                }
+                entity = bundle.getJmsDestinations().get(name);
                 break;
             default:
-                throw new MissingEnvironmentException("Missing environment value for " + type + ": " + name);
+                throw new MissingEnvironmentException("Unexpected entity type " + type);
+        }
+
+        if (entity == null) {
+            throw new MissingEnvironmentException("Missing environment value for " + type + ": " + name);
         }
     }
 }

@@ -11,7 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,7 +61,7 @@ class BundleDetemplatizer {
         return this.replaceVariableInBundle(bundle, mapToCheck, variableFinderRegex, (varName, value) -> replacementFunction.apply(value));
     }
 
-    private StringBuffer replaceVariableInBundle(CharSequence bundle, Map<String, String> mapToCheck, String variableFinderRegex, BiFunction<String, String, String> replacementFunction) {
+    private StringBuffer replaceVariableInBundle(CharSequence bundle, Map<String, String> mapToCheck, String variableFinderRegex, BinaryOperator<String> replacementFunction) {
         Pattern setVariablePattern;
         Matcher setVariableMatcher;
         setVariablePattern = Pattern.compile(variableFinderRegex);
