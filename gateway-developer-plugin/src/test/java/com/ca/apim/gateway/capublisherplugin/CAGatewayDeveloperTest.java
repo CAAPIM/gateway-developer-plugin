@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -31,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import static java.nio.charset.Charset.defaultCharset;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -116,7 +116,7 @@ class CAGatewayDeveloperTest {
         assertMultiProject(testProjectDir, result);
         File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + "-environment.bundle");
         assertTrue(projectC_EnvBundle.exists());
-        assertFalse(readFileToString(projectC_EnvBundle, Charset.defaultCharset()).isEmpty());
+        assertFalse(readFileToString(projectC_EnvBundle, defaultCharset()).isEmpty());
     }
 
     private void assertMultiProject(File testProjectDir, BuildResult result) throws IOException {
