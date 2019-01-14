@@ -42,6 +42,7 @@ public class PolicyXMLSimplifier {
         findAndSimplifyAssertion(policyElement, SET_VARIABLE, element -> simplifySetVariable(policyName, element, resultantBundle));
         findAndSimplifyAssertion(policyElement, HARDCODED_RESPONSE, this::simplifyHardcodedResponse);
         findAndSimplifyAssertion(policyElement, AUTHENTICATION, element -> simplifyAuthenticationAssertion(bundle, element));
+        findAndSimplifyAssertion(policyElement, JMS_ROUTING_ASSERTION, element -> simplifyJmsRoutingAssertion(bundle, element));
     }
 
     @VisibleForTesting
@@ -154,6 +155,18 @@ public class PolicyXMLSimplifier {
         }
     }
 
+    @VisibleForTesting
+    void simplifyJmsRoutingAssertion(Bundle bundle, Element jmsRoutingAssertionElement) throws DocumentParseException {
+        final Element jmsEndpointGoidEle = getSingleElement(jmsRoutingAssertionElement, JMS_ENDPOINT_OID);
+        final String jmsEndpointGoid = jmsEndpointGoidEle.getAttribute(GOID_VALUE);
+        final Optional<JmsDestination> jmsDestination = bundle.getEntities(JmsDestination.class).values().stream().filter(e -> e.getId().equals(jmsEndpointGoid)).findAny();
+        if (!jmsDestination.isPresent()) {
+            LOGGER.log(Level.WARNING, "Could not find referenced JMS Destination with id: {0}", jmsEndpointGoid);
+        }
+        // Remove Goid reference to JMS destination. JMS Routing assertion already has a reference to JMS destination entity by name.
+        jmsRoutingAssertionElement.removeChild(jmsEndpointGoidEle);
+    }
+    
     private void findAndSimplifyAssertion(Element policyElement, String assertionTagName, AssertionProcessor simplifier) {
         NodeList includeReferences = policyElement.getElementsByTagName(assertionTagName);
         for (int i = 0; i < includeReferences.getLength(); i++) {

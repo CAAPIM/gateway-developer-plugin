@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,6 +44,12 @@ class BundleDetemplatizer {
                 ID_PROV_NAME + " " + STRING_VALUE + "=\\\"(.+?)\\\"",
                 v -> ID_PROV_OID + " " + GOID_VALUE + "=\"" + v + "\"");
 
+        //Add Jms Destination GOID in JMS Routing assertions.
+        bundleString = replaceVariableInBundle(bundleString, createJmsDestinationNameGoid(bundle),
+                "&lt;" + JMS_ENDPOINT_NAME + " " + STRING_VALUE +"=\\\"(.+?)\\\"",
+                (varname, goid) -> "&lt;" + JMS_ENDPOINT_OID + " " + GOID_VALUE + "=\"" + goid + "\"/&gt;" +
+                        "&lt;" + JMS_ENDPOINT_NAME + " " + STRING_VALUE + "=\"" + varname + "\"");
+        
         //Replaces service property variables
         bundleString = replaceVariableInBundle(bundleString, serviceEnvironmentVariables,
                 "l7:StringValue>SERVICE_PROPERTY_ENV\\.(.+?)<",
@@ -51,6 +58,10 @@ class BundleDetemplatizer {
     }
 
     private StringBuffer replaceVariableInBundle(CharSequence bundle, Map<String, String> mapToCheck, String variableFinderRegex, UnaryOperator<String> replacementFunction) {
+        return this.replaceVariableInBundle(bundle, mapToCheck, variableFinderRegex, (varName, value) -> replacementFunction.apply(value));
+    }
+
+    private StringBuffer replaceVariableInBundle(CharSequence bundle, Map<String, String> mapToCheck, String variableFinderRegex, BiFunction<String, String, String> replacementFunction) {
         Pattern setVariablePattern;
         Matcher setVariableMatcher;
         setVariablePattern = Pattern.compile(variableFinderRegex);
@@ -63,7 +74,7 @@ class BundleDetemplatizer {
             if (value == null) {
                 throw new BundleDetemplatizeException("Missing environment value for property: " + varName);
             }
-            setVariableMatcher.appendReplacement(replacedBundle, replacementFunction.apply(value));
+            setVariableMatcher.appendReplacement(replacedBundle, replacementFunction.apply(varName, value));
         }
         setVariableMatcher.appendTail(replacedBundle);
         return replacedBundle;
@@ -75,5 +86,11 @@ class BundleDetemplatizer {
                 e -> e.getValue().getId()));
         idProviders.put(INTERNAL_IDP_NAME, INTERNAL_IDP_ID);
         return idProviders;
+    }
+
+    private Map<String, String> createJmsDestinationNameGoid(Bundle bundle) {
+        return bundle.getJmsDestinations().entrySet().stream().collect(toMap(
+                Entry::getKey,
+                e -> e.getValue().getId()));
     }
 }

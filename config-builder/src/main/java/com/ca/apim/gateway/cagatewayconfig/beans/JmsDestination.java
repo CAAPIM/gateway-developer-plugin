@@ -233,6 +233,8 @@ public class JmsDestination extends GatewayEntity {
         if (this.inboundDetail != null && this.outboundDetail != null) {
             throw new ConfigLoadException("Cannot specify both an inbound and an outbound details for JMS destination: " + entityKey);
         }
+
+        setId(idGenerator.generate());
     }
     
     public enum DestinationType {

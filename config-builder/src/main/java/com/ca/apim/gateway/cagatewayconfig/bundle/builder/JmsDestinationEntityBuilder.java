@@ -73,7 +73,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildEntity(Bundle bundle, String name, JmsDestination jmsDestination, Document document) {
-        String id = idGenerator.generate();
+        String id = jmsDestination.getId();
         boolean isInbound = jmsDestination.getInboundDetail() != null;
         
         // Build JMS Destination element.
