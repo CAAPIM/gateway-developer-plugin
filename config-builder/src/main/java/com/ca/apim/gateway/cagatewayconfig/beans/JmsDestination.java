@@ -65,7 +65,11 @@ public class JmsDestination extends GatewayEntity {
     public JmsDestination() {
         super();
     }
-    
+
+    //Defaults
+    public static final int DEFAULT_DEDICATED_CONSUMER_CONNECTION_SIZE = 1;
+    public static final long DEFAULT_MAX_INBOUND_MESSAGE_SIZE = -1L;    // -1 = default - Do not override,  0 = Unlimited.
+
     private JmsDestination(Builder builder) {
         super();
         setName(builder.name);

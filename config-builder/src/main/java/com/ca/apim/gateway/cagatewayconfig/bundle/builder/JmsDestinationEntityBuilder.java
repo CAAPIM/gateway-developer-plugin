@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.ON_COMPLETION;
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.STORED_PASSWORD_REF_FORMAT;
@@ -209,13 +210,13 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         contextPropertiesTemplateProps.put(IS_DEDICATED_CONSUMER_CONNECTION, Boolean.TRUE.toString());
         Integer numOfConsumerConnections = inboundDetail.getNumOfConsumerConnections();
         if (numOfConsumerConnections == null) {
-            numOfConsumerConnections = 1; // Default consumer size is 1.
+            numOfConsumerConnections = DEFAULT_DEDICATED_CONSUMER_CONNECTION_SIZE;
         }
         contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, Integer.toString(numOfConsumerConnections));
 
         Long maxInboundMessageSize = inboundDetail.getMaxMessageSizeBytes();
         if (maxInboundMessageSize == null) {
-            maxInboundMessageSize = -1L; // -1 = default - Do not override,  0 = Unlimited.
+            maxInboundMessageSize = DEFAULT_MAX_INBOUND_MESSAGE_SIZE;
         }
         jmsDestinationDetailProps.put(INBOUND_MAX_SIZE, maxInboundMessageSize);
     }

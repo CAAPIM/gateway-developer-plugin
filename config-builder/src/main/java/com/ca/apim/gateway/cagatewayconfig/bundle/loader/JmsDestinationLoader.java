@@ -28,6 +28,7 @@ import javax.inject.Singleton;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
@@ -38,9 +39,7 @@ import static org.apache.commons.lang3.ObjectUtils.anyNotNull;
 
 @Singleton
 public class JmsDestinationLoader implements BundleEntityLoader {
-    private static final int DEFAULT_DEDICATED_CONSUMER_CONNECTION_SIZE = 1;
-    private static final long DEFAULT_MAX_INBOUND_MESSAGE_SIZE = -1;
-    
+
     @Override
     public void load(Bundle bundle, Element element) {
         
@@ -78,7 +77,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         final String destinationUsername = (String) jmsDestinationDetailProps.remove(PROPERTY_USERNAME);
         final String destinationPassword = (String) jmsDestinationDetailProps.remove(PROPERTY_PASSWORD);
         
-        JmsDestination.Builder builder = new JmsDestination.Builder()
+        Builder builder = new Builder()
                 .id(id)
                 .name(name)
                 .providerType(providerType)
@@ -87,7 +86,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
                 .jndiUsername(jndiUsername)
                 .jndiPassword(jndiPassword)
                 .jndiProperties(jndiProperties)
-                .destinationType(JmsDestination.DestinationType.fromType(destinationType))
+                .destinationType(DestinationType.fromType(destinationType))
                 .connectionFactoryName(connectionFactoryName)
                 .destinationName(destinationName)
                 .destinationUsername(destinationUsername)
