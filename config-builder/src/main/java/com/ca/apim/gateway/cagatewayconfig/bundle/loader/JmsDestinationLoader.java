@@ -38,6 +38,8 @@ import static org.apache.commons.lang3.ObjectUtils.anyNotNull;
 
 @Singleton
 public class JmsDestinationLoader implements BundleEntityLoader {
+    private static final int DEFAULT_DEDICATED_CONSUMER_CONNECTION_SIZE = 1;
+    private static final long DEFAULT_MAX_INBOUND_MESSAGE_SIZE = -1;
     
     @Override
     public void load(Bundle bundle, Element element) {
@@ -139,8 +141,14 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         inboundDetail.setUseRequestCorrelationId((Boolean) jmsDestinationDetailProps.remove(USE_REQUEST_CORRELATION_ID));
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
         inboundDetail.setFailureQueueName((String) jmsDestinationDetailProps.remove(INBOUND_FAILURE_QUEUE_NAME));
-        inboundDetail.setNumOfConsumerConnections(convertToInteger(contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE)));
-        inboundDetail.setMaxMessageSizeBytes((Long)jmsDestinationDetailProps.remove(INBOUND_MAX_SIZE));
+        int dedicatedConsumerConnectionSize = convertToInteger(contextPropertiesTemplateProps.remove(DEDICATED_CONSUMER_CONNECTION_SIZE));
+        if (DEFAULT_DEDICATED_CONSUMER_CONNECTION_SIZE != dedicatedConsumerConnectionSize) {
+            inboundDetail.setNumOfConsumerConnections(dedicatedConsumerConnectionSize);
+        }
+        Long maxInboundMessageSize = (Long) jmsDestinationDetailProps.remove(INBOUND_MAX_SIZE);
+        if (DEFAULT_MAX_INBOUND_MESSAGE_SIZE != maxInboundMessageSize) {
+            inboundDetail.setMaxMessageSizeBytes(maxInboundMessageSize);
+        }
         
         // Cleanup. Remove items from contextPropertiesTemplateProps that are not used.
         contextPropertiesTemplateProps.remove(IS_DEDICATED_CONSUMER_CONNECTION); // This is always true.

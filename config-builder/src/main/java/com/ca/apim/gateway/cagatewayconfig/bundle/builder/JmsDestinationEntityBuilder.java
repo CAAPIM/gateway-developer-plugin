@@ -213,10 +213,11 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         }
         contextPropertiesTemplateProps.put(DEDICATED_CONSUMER_CONNECTION_SIZE, Integer.toString(numOfConsumerConnections));
 
-        putToMapIfValueIsNotNull(
-                jmsDestinationDetailProps,
-                INBOUND_MAX_SIZE,
-                inboundDetail.getMaxMessageSizeBytes());
+        Long maxInboundMessageSize = inboundDetail.getMaxMessageSizeBytes();
+        if (maxInboundMessageSize == null) {
+            maxInboundMessageSize = -1L; // -1 = default - Do not override,  0 = Unlimited.
+        }
+        jmsDestinationDetailProps.put(INBOUND_MAX_SIZE, maxInboundMessageSize);
     }
 
     private String getContentTypeSource(ServiceResolutionSettings serviceResolutionSettings) {
