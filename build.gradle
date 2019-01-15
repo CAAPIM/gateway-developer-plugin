@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 plugins {
-    id "org.sonarqube" version "2.6.2"
+    id "org.sonarqube" version "2.7"
     id "com.srcclr.gradle" version "3.0.3" apply false
     id "com.jfrog.bintray" version "1.8.4" apply false
 }
