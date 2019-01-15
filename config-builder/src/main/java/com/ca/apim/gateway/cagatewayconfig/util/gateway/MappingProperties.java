@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 public class MappingProperties {
 
     public static final String NAME = "name";
+    public static final String PATH = "path";
 
     public static final String MAP_BY = "MapBy";
     public static final String MAP_TO = "MapTo";

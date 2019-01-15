@@ -47,7 +47,7 @@ class PolicyEntityBuilderTest {
     @BeforeEach
     void beforeEach() {
         policy = new Policy();
-        policy.setPath("/test/policy/path.xml");
+        policy.setPath("test/policy/path.xml");
         bundle = new Bundle();
         bundle.setDependencies(new HashSet<>());
         document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
@@ -72,14 +72,15 @@ class PolicyEntityBuilderTest {
         policy.setParentFolder(Folder.ROOT_FOLDER);
         policy.setGuid("policyGuid");
         policy.setId("policyID");
-        policy.setName("policy");
+        policy.setName(policy.getPath());
         Encass encass = new Encass();
         encass.setGuid("encass");
         bundle.getEncasses().put(TEST_ENCASS, encass);
         bundle.getPolicies().put("Policy", policy);
         Policy include = new Policy();
         include.setParentFolder(Folder.ROOT_FOLDER);
-        include.setName("include");
+        include.setPath("test/policy/include");
+        include.setName(include.getPath());
         include.setId("includeID");
         include.setGuid("includeGuid");
         include.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -101,10 +102,10 @@ class PolicyEntityBuilderTest {
             assertEquals(EntityTypes.POLICY_TYPE, e.getType());
             assertNotNull(e.getXml());
             assertTrue(e.getMappingProperties().containsKey(MAP_BY));
-            assertEquals(MappingProperties.NAME, e.getMappingProperties().get(MAP_BY));
+            assertEquals(MappingProperties.PATH, e.getMappingProperties().get(MAP_BY));
             assertTrue(e.getMappingProperties().containsKey(MAP_TO));
             assertEquals(e.getName(), e.getMappingProperties().get(MAP_TO));
-            assertTrue("include".equals(e.getName()) || "policy".equals(e.getName()));
+            assertTrue("test/policy/include".equals(e.getName()) || "test/policy/path.xml".equals(e.getName()));
             assertTrue("includeID".equals(e.getId()) || "policyID".equals(e.getId()));
         });
     }
@@ -499,6 +500,7 @@ class PolicyEntityBuilderTest {
         PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
 
         Policy policyToBuild = new Policy();
+        policyToBuild.setPath("/path");
         policyToBuild.setName("path");
         policyToBuild.setId("policy-id");
         policyToBuild.setGuid("policy-guid-123");
@@ -517,6 +519,7 @@ class PolicyEntityBuilderTest {
 
         Policy policyToBuild = new Policy();
         policyToBuild.setName("policy-_¯-¯_");
+        policyToBuild.setPath("policy-_¯-¯_");
         policyToBuild.setId("policy-id");
         policyToBuild.setGuid("policy-guid-123");
         Folder parentFolder = new Folder();
@@ -557,7 +560,7 @@ class PolicyEntityBuilderTest {
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/global.xml");
-        policyToBuild.setName("global");
+        policyToBuild.setName(policyToBuild.getPath());
         policyToBuild.setId("global-policy-id");
         policyToBuild.setGuid("global-policy-guid-123");
         policyToBuild.setTag("global-policy");
@@ -588,7 +591,7 @@ class PolicyEntityBuilderTest {
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/internal.xml");
-        policyToBuild.setName("internal");
+        policyToBuild.setName(policyToBuild.getPath());
         policyToBuild.setId("internal-policy-id");
         policyToBuild.setGuid("internal-policy-guid-123");
         policyToBuild.setTag("internal-policy");
