@@ -8,3 +8,10 @@ dependencies {
     bundle project(':project-a')
     bundle project(':project-d')
 }
+
+GatewaySourceConfig {
+    environmentConfig = [
+            "PASSWORD.gateway": "test",
+            "PROPERTY.gateway.log_levels":  "com.l7tech.server.policy.level = FINEST"
+    ]
+}
