@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - oraclejdk9
+  - oraclejdk11
 addons:
   sonarcloud:
     organization: "ca-api-gateway"
@@ -8,7 +8,7 @@ addons:
       secure: $SONAR_TOKEN
 #  srcclr: true
 script:
-  - ./gradlew sonarqube -q
+  - ./gradlew sonarqube
 branches:
   only:
   - master
