@@ -32,12 +32,11 @@ public class PolicyConverterRegistry {
         boolean isValidPolicyExtension = policyConverters.stream()
             .anyMatch(converter -> fileName.endsWith(converter.getPolicyTypeExtension()));
 
-        if (isValidPolicyExtension) {
-            return true;
-        } else {
-            LOGGER.log(Level.FINE, "Unknown policy file extension for file: " + fileName);
-            return false;
+        if (!isValidPolicyExtension) {
+            LOGGER.log(Level.WARNING, "Unknown policy file extension for file: " + fileName);
         }
+
+        return isValidPolicyExtension;
     }
 
     @NotNull
