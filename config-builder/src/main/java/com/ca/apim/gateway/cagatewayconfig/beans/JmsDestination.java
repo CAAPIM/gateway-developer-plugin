@@ -34,6 +34,10 @@ public class JmsDestination extends GatewayEntity {
     public static final String PROVIDER_TYPE_GENERIC = null;
     public static final String PROVIDER_TYPE_TIBCO_EMS = "TIBCO EMS";
     public static final String PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP = "WebSphere MQ over LDAP";
+
+    // Defaults
+    public static final int DEFAULT_DEDICATED_CONSUMER_CONNECTION_SIZE = 1;
+    public static final long DEFAULT_MAX_INBOUND_MESSAGE_SIZE = -1L;    // -1 = default - Do not override,  0 = Unlimited.
     
     // Basics
     private String providerType;
@@ -69,11 +73,7 @@ public class JmsDestination extends GatewayEntity {
     public JmsDestination() {
         super();
     }
-
-    //Defaults
-    public static final int DEFAULT_DEDICATED_CONSUMER_CONNECTION_SIZE = 1;
-    public static final long DEFAULT_MAX_INBOUND_MESSAGE_SIZE = -1L;    // -1 = default - Do not override,  0 = Unlimited.
-
+    
     private JmsDestination(Builder builder) {
         super();
         setName(builder.name);
