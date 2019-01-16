@@ -10,20 +10,25 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 
+@Singleton
 public class EnvironmentBundleBuilder {
 
-    private final Bundle bundle;
     private final EntityLoaderRegistry entityLoaderRegistry;
 
-    public EnvironmentBundleBuilder(Map<String, String> environmentProperties, EntityLoaderRegistry entityLoaderRegistry) {
-        bundle = new Bundle();
+    @Inject
+    EnvironmentBundleBuilder(EntityLoaderRegistry entityLoaderRegistry) {
         this.entityLoaderRegistry = entityLoaderRegistry;
-        environmentProperties.entrySet().stream().filter(e -> e.getKey().startsWith("ENV.")).forEach(e -> addEnvToBundle(e.getKey(), e.getValue()));
     }
 
-    private void addEnvToBundle(String key, String value) {
+    void build(Bundle bundle, Map<String, String> environmentProperties) {
+        environmentProperties.entrySet().stream().filter(e -> e.getKey().startsWith("ENV.")).forEach(e -> addEnvToBundle(bundle, e.getKey(), e.getValue()));
+    }
+
+    private void addEnvToBundle(Bundle bundle, String key, String value) {
         if (key.startsWith("ENV.")) {
             String environmentKey = key.substring(4);
             int typeEndIndex = environmentKey.indexOf('.');
@@ -36,9 +41,5 @@ public class EnvironmentBundleBuilder {
                 }
             }
         }
-    }
-
-    public Bundle getBundle() {
-        return bundle;
     }
 }

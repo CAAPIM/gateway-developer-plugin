@@ -6,9 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.xml;
 
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -17,18 +19,18 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.closeQuietly;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Tools used to parse and process XML documents
@@ -145,4 +147,28 @@ public class DocumentTools {
         }
     }
 
+    public String elementToString(Element element) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        printXML(element, byteArrayOutputStream, false);
+        try {
+            return byteArrayOutputStream.toString(UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new DocumentFileUtilsException("Error writing xml: " + e.getMessage(), e);
+        } finally {
+            closeQuietly(byteArrayOutputStream);
+        }
+    }
+
+    public void printXML(final Element node, final OutputStream outStream, boolean addNamespace) {
+        if (addNamespace) {
+            node.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
+        }
+
+        final Transformer transformer = getTransformer();
+        try (OutputStreamWriter writer = new OutputStreamWriter(outStream, UTF_8)) {
+            transformer.transform(new DOMSource(node), new StreamResult(writer));
+        } catch (TransformerException | IOException e) {
+            throw new DocumentFileUtilsException("Exception writing xml element to stream.", e);
+        }
+    }
 }

@@ -37,7 +37,7 @@ public class DocumentFileUtils {
         OutputStream fos = null;
         try {
             fos = Files.newOutputStream(path);
-            printXML(element, fos, addNamespace);
+            documentTools.printXML(element, fos, addNamespace);
         } catch (IOException e) {
             throw new DocumentFileUtilsException("Error writing to file '" + path + "': " + e.getMessage(), e);
         } finally {
@@ -71,31 +71,6 @@ public class DocumentFileUtils {
             }
         } else if (!folderPath.toFile().isDirectory()) {
             throw new DocumentFileUtilsException("Wanted to create folder but found a file: " + folderPath);
-        }
-    }
-
-    public String elementToString(Element element) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        printXML(element, byteArrayOutputStream, false);
-        try {
-            return byteArrayOutputStream.toString(UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new DocumentFileUtilsException("Error writing xml: " + e.getMessage(), e);
-        } finally {
-            closeQuietly(byteArrayOutputStream);
-        }
-    }
-
-    public void printXML(final Element node, final OutputStream outStream, boolean addNamespace) {
-        if (addNamespace) {
-            node.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
-        }
-
-        final Transformer transformer = documentTools.getTransformer();
-        try (OutputStreamWriter writer = new OutputStreamWriter(outStream, UTF_8)) {
-            transformer.transform(new DOMSource(node), new StreamResult(writer));
-        } catch (TransformerException | IOException e) {
-            throw new DocumentFileUtilsException("Exception writing xml element to stream.", e);
         }
     }
 }

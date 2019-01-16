@@ -34,6 +34,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     private static final String GATEWAY_BUILD_DIRECTORY = "gateway";
     private static final String ENV_APPLICATION_CONFIGURATION = "environment-creator-application";
     private static final String BUILD_ENVIRONMENT_BUNDLE = "build-environment-bundle";
+    private static final String BUILD_FULL_BUNDLE = "build-full-bundle";
 
     @Override
     public void apply(@NotNull final Project project) {
@@ -42,9 +43,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Add the base plugin to add standard lifecycle tasks: https://docs.gradle.org/current/userguide/standard_plugins.html#sec:base_plugins
         project.getPlugins().apply("base");
 
-        final GatewayDeveloperPluginConfig pluginConfig = project.getExtensions().create("GatewaySourceConfig", GatewayDeveloperPluginConfig.class, project);
-        // Set Defaults
-        project.afterEvaluate(p -> setDefaults(pluginConfig, project));
+        final GatewayDeveloperPluginConfig pluginConfig = createPluginConfig(project);
 
         //Add bundle configuration to the default configuration. This was transitive dependencies can be retrieved.
         createConfiguration(project, BUNDLE_CONFIGURATION);
@@ -52,15 +51,37 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         createConfiguration(project, MODULAR_ASSERTION_CONFIGURATION);
         createConfiguration(project, CUSTOM_ASSERTION_CONFIGURATION);
 
+        configureEnvironmentApplication(project);
+
+        final BuildDeploymentBundleTask buildDeploymentBundleTask = createBuildDeploymentBundleTask(project, pluginConfig);
+        final BuildEnvironmentBundleTask buildEnvironmentBundleTask = createBuildEnvironmentBundleTask(project, pluginConfig, buildDeploymentBundleTask);
+        final BuildFullBundleTask buildFullBundleTask = createBuildFullBundleTask(project, pluginConfig, buildDeploymentBundleTask);
+        final PackageTask packageGW7Task = createPackageTask(project, pluginConfig, buildDeploymentBundleTask);
+
+        configureGeneratedArtifacts(project, pluginConfig, buildDeploymentBundleTask, buildEnvironmentBundleTask, buildFullBundleTask, packageGW7Task);
+    }
+
+    @NotNull
+    private static GatewayDeveloperPluginConfig createPluginConfig(@NotNull Project project) {
+        final GatewayDeveloperPluginConfig pluginConfig = project.getExtensions().create("GatewaySourceConfig", GatewayDeveloperPluginConfig.class, project);
+        // Set Defaults
+        project.afterEvaluate(p -> setDefaults(pluginConfig, project));
+        return pluginConfig;
+    }
+
+    private static void configureEnvironmentApplication(@NotNull Project project) {
         // This is the configuration for the apply environment application that gets bundled within .gw7 packages.
         project.getConfigurations().create(ENV_APPLICATION_CONFIGURATION);
 
         //Attempt to use the same version of the environment creator application as this plugin.
-        String version = this.getClass().getPackage().getImplementationVersion();
+        String version = CAGatewayDeveloper.class.getPackage().getImplementationVersion();
         project.getDependencies().add(ENV_APPLICATION_CONFIGURATION, "com.ca.apim.gateway:environment-creator-application:" + (version != null ? version : "+"));
+    }
 
+    @NotNull
+    private static BuildDeploymentBundleTask createBuildDeploymentBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig) {
         // Create build-bundle task
-        final BuildDeploymentBundleTask buildDeploymentBundleTask = project.getTasks().create("build-bundle", BuildDeploymentBundleTask.class, t -> {
+        return project.getTasks().create("build-bundle", BuildDeploymentBundleTask.class, t -> {
             t.dependsOn(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getFrom().set(new DefaultProvider<>(() -> {
                 Directory dir = pluginConfig.getSolutionDir().get();
@@ -69,16 +90,34 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             t.getInto().set(pluginConfig.getBuiltBundleDir());
             t.getDependencies().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
+    }
 
+    @NotNull
+    private static BuildEnvironmentBundleTask createBuildEnvironmentBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
         // Create build-environment-bundle task
         final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create(BUILD_ENVIRONMENT_BUNDLE, BuildEnvironmentBundleTask.class, t -> {
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
             t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
         });
         buildEnvironmentBundleTask.dependsOn(buildDeploymentBundleTask);
+        return buildEnvironmentBundleTask;
+    }
 
+    private static BuildFullBundleTask createBuildFullBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
+        // Create build-full-bundle task
+        final BuildFullBundleTask buildFullBundleTask = project.getTasks().create(BUILD_FULL_BUNDLE, BuildFullBundleTask.class, t -> {
+            t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
+            t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
+            t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
+        });
+        buildFullBundleTask.dependsOn(buildDeploymentBundleTask);
+        return buildFullBundleTask;
+    }
+
+    @NotNull
+    private static PackageTask createPackageTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
         // Create package task
-        final PackageTask packageGW7Task = project.getTasks().create("package-gw7", PackageTask.class, t -> {
+        return project.getTasks().create("package-gw7", PackageTask.class, t -> {
             t.dependsOn(buildDeploymentBundleTask);
             t.getInto().set(new DefaultProvider<RegularFile>(() -> () -> new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), getBuiltArtifactName(project, EMPTY,"gw7"))));
             t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, EMPTY, BUNDLE_FILE_EXTENSION))));
@@ -87,7 +126,14 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             t.getDependencyModularAssertions().setFrom(project.getConfigurations().getByName(MODULAR_ASSERTION_CONFIGURATION));
             t.getDependencyCustomAssertions().setFrom(project.getConfigurations().getByName(CUSTOM_ASSERTION_CONFIGURATION));
         });
+    }
 
+    private static void configureGeneratedArtifacts(@NotNull Project project,
+                                                    GatewayDeveloperPluginConfig pluginConfig,
+                                                    BuildDeploymentBundleTask buildDeploymentBundleTask,
+                                                    BuildEnvironmentBundleTask buildEnvironmentBundleTask,
+                                                    BuildFullBundleTask buildFullBundleTask,
+                                                    PackageTask packageGW7Task) {
         // add build-bundle to the default build task
         project.afterEvaluate(p -> project.getTasks().getByPath("build").dependsOn(buildDeploymentBundleTask, packageGW7Task));
 
@@ -102,9 +148,18 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                 project::getName,
                 "environment"));
         }
+        // add the full bundle to the artifacts only if the full bundle task was triggered
+        if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_FULL_BUNDLE)) {
+            project.artifacts(artifactHandler -> addBundleArtifact(
+                    artifactHandler,
+                    pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, "-full", BUNDLE_FILE_EXTENSION))),
+                    buildFullBundleTask,
+                    project::getName,
+                    "full"));
+        }
     }
 
-    private void addBundleArtifact(
+    private static void addBundleArtifact(
             ArtifactHandler artifactHandler,
             Provider<RegularFile> bundle,
             Task generatedTask,
@@ -128,17 +183,17 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                 });
     }
 
-    private void createConfiguration(Project project, String configurationName) {
+    private static void createConfiguration(Project project, String configurationName) {
         Configuration configuration = project.getConfigurations().create(configurationName);
         project.getConfigurations().getByName("default").extendsFrom(configuration);
     }
 
     @NotNull
-    private String getBuiltArtifactName(@NotNull Project project, String classifier, String bundleRequiredFileExtension) {
+    private static String getBuiltArtifactName(@NotNull Project project, String classifier, String bundleRequiredFileExtension) {
         return project.getName() + '-' + project.getVersion() + classifier + "." + bundleRequiredFileExtension;
     }
 
-    private void setDefaults(GatewayDeveloperPluginConfig pluginConfig, Project project) {
+    private static void setDefaults(GatewayDeveloperPluginConfig pluginConfig, Project project) {
         if (!pluginConfig.getSolutionDir().isPresent()) {
             pluginConfig.getSolutionDir().set(new File(project.getProjectDir(), "src/main/gateway"));
         }
