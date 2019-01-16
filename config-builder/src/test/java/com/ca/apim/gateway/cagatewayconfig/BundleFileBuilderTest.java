@@ -53,7 +53,7 @@ class BundleFileBuilderTest {
     @Test
     void buildBundleNoSource() {
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
-        bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptySet(), "my-bundle");
+        bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptyList(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
     }
@@ -65,7 +65,7 @@ class BundleFileBuilderTest {
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
-        bundleFileBuilder.buildBundle(new File("input"), new File("output"), Collections.emptySet(), "my-bundle");
+        bundleFileBuilder.buildBundle(new File("input"), new File("output"), Collections.emptyList(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
     }
