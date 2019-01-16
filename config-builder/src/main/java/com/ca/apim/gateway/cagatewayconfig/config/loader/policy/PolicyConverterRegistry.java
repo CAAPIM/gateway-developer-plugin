@@ -22,7 +22,6 @@ public class PolicyConverterRegistry {
     private final Set<PolicyConverter> policyConverters;
     private static final Logger LOGGER = Logger.getLogger(PolicyConverterRegistry.class.getName());
 
-
     @Inject
     public PolicyConverterRegistry(final Set<PolicyConverter> converters) {
         this.policyConverters = unmodifiableSet(converters);
@@ -30,8 +29,10 @@ public class PolicyConverterRegistry {
 
     @NotNull
     public boolean isValidPolicyExtension(String fileName) {
-        if (policyConverters.stream()
-                .anyMatch(converter -> fileName.endsWith(converter.getPolicyTypeExtension()))) {
+        boolean isValidPolicyExtension = policyConverters.stream()
+            .anyMatch(converter -> fileName.endsWith(converter.getPolicyTypeExtension()));
+
+        if (isValidPolicyExtension) {
             return true;
         } else {
             LOGGER.log(Level.FINE, "Unknown policy file extension for file: " + fileName);
