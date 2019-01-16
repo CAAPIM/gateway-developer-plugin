@@ -66,7 +66,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         final Map<String, Object> jndiProperties = contextPropertiesTemplateProps.entrySet().stream()
                 .filter(map -> 
                         !map.getKey().startsWith(JMS_PROPS_PREFIX) &&
-                        !map.getKey().startsWith("com.tibco.tibjms.") &&
+                        !map.getKey().startsWith(TIBCO_JMS_PREFIX) &&
                         !SOAP_ACTION_MSG_PROP_NAME.equals(map.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         contextPropertiesTemplateProps.keySet().removeAll(jndiProperties.keySet());
@@ -85,19 +85,23 @@ public class JmsDestinationLoader implements BundleEntityLoader {
                 .jndiUrl(jndiUrl)
                 .jndiUsername(jndiUsername)
                 .jndiPassword(jndiPassword)
-                .jndiProperties(jndiProperties)
-                .destinationType(DestinationType.fromType(destinationType))
+                .destinationType(JmsDestination.DestinationType.fromType(destinationType))
                 .connectionFactoryName(connectionFactoryName)
                 .destinationName(destinationName)
                 .destinationUsername(destinationUsername)
                 .destinationPassword(destinationPassword);
 
+        if (!jndiProperties.isEmpty()) {
+            builder.jndiProperties(jndiProperties);
+        }
+        
         if (isInbound) {
             builder.inboundDetail(this.loadInboundDetail(jmsDestinationDetailProps, contextPropertiesTemplateProps));
         } else {
             builder.outboundDetail(this.loadOutboundDetail(isTemplate, jmsDestinationDetailProps, contextPropertiesTemplateProps));
         }
         
+        this.removeKeystoreGoidRefs(providerType, contextPropertiesTemplateProps);
         if (!contextPropertiesTemplateProps.isEmpty()) {
             // Any remaining items in contextPropertiesTemplateProps is copied to 
             // additional properties.
@@ -121,7 +125,7 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         final ContentTypeSource contentTypeSource = ContentTypeSource.fromType((String) contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE));
         String contentType = (String) contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE);
         if (StringUtils.isEmpty(contentType)) {
-            contentType = null;
+            contentType = null; // Empty string is default. Set it to null for default value.
         }
 
         ServiceResolutionSettings serviceResolutionSettings = null;
@@ -194,13 +198,27 @@ public class JmsDestinationLoader implements BundleEntityLoader {
         outboundDetail.setSessionPoolingSettings(sessionPoolingSettings);
         outboundDetail.setConnectionPoolingSettings(connectionPoolingSettings);
 
-
         // Cleanup. Remove items from contextPropertiesTemplateProps that are not used.
         contextPropertiesTemplateProps.remove(IS_HARDWIRED_SERVICE); // Not relevant for outbound.
         contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE); // Not relevant for outbound.
-        contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE); // // Not relevant for outbound.
+        contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE); // Not relevant for outbound.
         
         return outboundDetail;
+    }
+    
+    private void removeKeystoreGoidRefs(String providerType, Map<String, Object> contextPropertiesTemplateProps) {
+        if (PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP.equals(providerType)) {
+            // Just keep key alias, remove the rest.
+            contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_KEYSTORE_ID);
+        } else if (PROVIDER_TYPE_TIBCO_EMS.equals(providerType)) {
+            // Just keep key alias, remove the rest.
+            contextPropertiesTemplateProps.remove(JNDI_CLIENT_AUT_KEYSTORE_ID);
+            contextPropertiesTemplateProps.remove(JNDI_CLIENT_AUT_AUTH_IDENTITY);
+            contextPropertiesTemplateProps.remove(JNDI_CLIENT_AUT_AUTH_PASSWORD);
+            contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_KEYSTORE_ID);
+            contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_IDENTITY);
+            contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_PASSWORD);
+        }
     }
     
     @Override

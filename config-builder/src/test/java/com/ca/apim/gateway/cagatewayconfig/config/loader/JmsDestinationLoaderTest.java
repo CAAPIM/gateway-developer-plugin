@@ -36,6 +36,8 @@ import java.util.Map;
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ContentTypeSource.*;
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination.PROVIDER_TYPE_TIBCO_EMS;
+import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination.PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP;
 import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.MessageFormat.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
@@ -168,19 +170,13 @@ class JmsDestinationLoaderTest {
                 "    com.tibco.tibjms.naming.ssl_trusted_certs: \"com.l7tech.server.jms.prop.trustedcert.listx509\"\n" +
                 "    com.tibco.tibjms.naming.ssl_enable_verify_hostname: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
                 "    com.l7tech.server.jms.prop.jndi.ssgKeyAlias: \"key1\"\n" +
-                "    com.l7tech.server.jms.prop.jndi.ssgKeystoreId: \"00000000000000000000000000000002\"\n" +
-                "    com.tibco.tibjms.naming.ssl_identity: \"com.l7tech.server.jms.prop.keystore 00000000000000000000000000000002 key1\"\n" +
-                "    com.tibco.tibjms.naming.ssl_password: \"com.l7tech.server.jms.prop.keystore.password 00000000000000000000000000000002 key1\"\n" +
                 // Destination settings
                 "    com.l7tech.server.jms.prop.customizer.class: \"com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer\"\n" +
                 "    com.tibco.tibjms.ssl.auth_only: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
                 "    com.tibco.tibjms.ssl.enable_verify_host: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
                 "    com.tibco.tibjms.ssl.trusted_certs: \"com.l7tech.server.jms.prop.trustedcert.listx509\"\n" +
                 "    com.tibco.tibjms.ssl.enable_verify_hostname: \"com.l7tech.server.jms.prop.boolean.true\"\n" +
-                "    com.l7tech.server.jms.prop.queue.ssgKeyAlias: \"key2\"\n" +
-                "    com.l7tech.server.jms.prop.queue.ssgKeystoreId: \"00000000000000000000000000000002\"\n" +
-                "    com.tibco.tibjms.ssl.identity: \"com.l7tech.server.jms.prop.keystore.bytes 00000000000000000000000000000002 key2\"\n" +
-                "    com.tibco.tibjms.ssl.password: \"com.l7tech.server.jms.prop.keystore.password 00000000000000000000000000000002 key2\"\n";
+                "    com.l7tech.server.jms.prop.queue.ssgKeyAlias: \"key2\"\n";
         
         JmsDestination jmsDestination = loadJmsDestination(yaml, true, "yml", null);
         assertNotNull(jmsDestination);
@@ -192,18 +188,12 @@ class JmsDestinationLoaderTest {
             put("com.tibco.tibjms.naming.ssl_trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
             put("com.tibco.tibjms.naming.ssl_enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
             put("com.l7tech.server.jms.prop.jndi.ssgKeyAlias", "key1");
-            put("com.l7tech.server.jms.prop.jndi.ssgKeystoreId", "00000000000000000000000000000002");
-            put("com.tibco.tibjms.naming.ssl_identity", "com.l7tech.server.jms.prop.keystore 00000000000000000000000000000002 key1");
-            put("com.tibco.tibjms.naming.ssl_password", "com.l7tech.server.jms.prop.keystore.password 00000000000000000000000000000002 key1");
             put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer");
             put("com.tibco.tibjms.ssl.auth_only", "com.l7tech.server.jms.prop.boolean.true");
             put("com.tibco.tibjms.ssl.enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
             put("com.tibco.tibjms.ssl.trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
             put("com.tibco.tibjms.ssl.enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
             put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key2");
-            put("com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002");
-            put("com.tibco.tibjms.ssl.identity", "com.l7tech.server.jms.prop.keystore.bytes 00000000000000000000000000000002 key2");
-            put("com.tibco.tibjms.ssl.password", "com.l7tech.server.jms.prop.keystore.password 00000000000000000000000000000002 key2");
         }};
 
         assertPropertiesContent(expectedAdditionalProps, jmsDestination.getAdditionalProperties());
@@ -244,7 +234,6 @@ class JmsDestinationLoaderTest {
                 // Destination settings
                 "      \"com.l7tech.server.jms.prop.customizer.class\" : \"com.l7tech.server.transport.jms.prov.MQSeriesCustomizer\",\n" +
                 "      \"com.l7tech.server.jms.prop.queue.useClientAuth\" : \"true\",\n" +
-                "      \"com.l7tech.server.jms.prop.queue.ssgKeystoreId\" : \"00000000000000000000000000000002\",\n" +
                 "      \"com.l7tech.server.jms.prop.queue.ssgKeyAlias\" : \"key1\"\n" +
                 "    }\n" +
                 "  }\n" +
@@ -255,7 +244,6 @@ class JmsDestinationLoaderTest {
         assertPropertiesContent(ImmutableMap.of(
                 "com.l7tech.server.jms.prop.customizer.class","com.l7tech.server.transport.jms.prov.MQSeriesCustomizer",
                 "com.l7tech.server.jms.prop.queue.useClientAuth", "true",
-                "com.l7tech.server.jms.prop.queue.ssgKeystoreId", "00000000000000000000000000000002",
                 "com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key1"),
                 jmsDestination.getAdditionalProperties());
     }
@@ -504,12 +492,12 @@ class JmsDestinationLoaderTest {
             assertEquals("com.sun.jndi.ldap.LdapCtxFactory", jmsDestination.getInitialContextFactoryClassName());
             assertEquals("ldap://smldap:389/dc=l7tech,dc=com", jmsDestination.getJndiUrl());
             assertNull(jmsDestination.getAdditionalProperties());
-        } else if ("TIBCO EMS".equals(providerType)){
+        } else if (PROVIDER_TYPE_TIBCO_EMS.equals(providerType)){
             assertEquals("com.tibco.tibjms.naming.TibjmsInitialContextFactory", jmsDestination.getInitialContextFactoryClassName());
             assertEquals("tibjmsnaming://machinename:7222", jmsDestination.getJndiUrl());
             assertNotNull(jmsDestination.getAdditionalProperties());
             assertFalse(jmsDestination.getAdditionalProperties().isEmpty());
-        } else if ("WebSphere MQ over LDAP".equals(providerType)) {
+        } else if (PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP.equals(providerType)) {
             assertEquals("com.sun.jndi.ldap.LdapCtxFactory", jmsDestination.getInitialContextFactoryClassName());
             assertEquals("ldap://smldap:389/dc=l7tech,dc=com", jmsDestination.getJndiUrl());
             assertNotNull(jmsDestination.getAdditionalProperties());

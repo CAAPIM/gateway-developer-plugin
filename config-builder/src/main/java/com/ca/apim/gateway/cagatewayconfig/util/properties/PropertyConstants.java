@@ -64,6 +64,7 @@ public class PropertyConstants {
     public static final String USE_REQUEST_CORRELATION_ID = "useRequestCorrelationId";
 
     public static final String JMS_PROPS_PREFIX = "com.l7tech.server.jms.prop.";
+    public static final String TIBCO_JMS_PREFIX = "com.tibco.tibjms.";
     
     // JMS Destination - inbound specific
     public static final String INBOUND_ACKNOWLEDGEMENT_TYPE = "inbound.acknowledgementType";
@@ -77,6 +78,16 @@ public class PropertyConstants {
     public static final String DEDICATED_CONSUMER_CONNECTION_SIZE = JMS_PROPS_PREFIX + "dedicated.consumer.size";
     public static final String INBOUND_MAX_SIZE = "inbound.maximumSize";
 
+    public static final String JNDI_CLIENT_AUT_KEYSTORE_ID = JMS_PROPS_PREFIX + "jndi.ssgKeystoreId";
+    public static final String JNDI_CLIENT_AUT_KEYSTORE_ALIAS = JMS_PROPS_PREFIX + "jndi.ssgKeyAlias";
+    public static final String JNDI_CLIENT_AUT_AUTH_IDENTITY = TIBCO_JMS_PREFIX + "naming.ssl_identity";
+    public static final String JNDI_CLIENT_AUT_AUTH_PASSWORD = TIBCO_JMS_PREFIX + "naming.ssl_password";
+
+    public static final String DESTINATION_CLIENT_AUTH_KEYSTORE_ID = JMS_PROPS_PREFIX + "queue.ssgKeystoreId";
+    public static final String DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS = JMS_PROPS_PREFIX + "queue.ssgKeyAlias";
+    public static final String DESTINATION_CLIENT_AUTH_IDENTITY = TIBCO_JMS_PREFIX + "ssl.identity";
+    public static final String DESTINATION_CLIENT_AUTH_PASSWORD = TIBCO_JMS_PREFIX + "ssl.password";
+    
     // JMS Destination - outbound specific
     public static final String OUTBOUND_MESSAGE_TYPE = "outbound.MessageType";
     public static final String CONNECTION_POOL_ENABLED = JMS_PROPS_PREFIX + "connection.pool.enable";

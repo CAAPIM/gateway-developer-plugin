@@ -15,6 +15,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.Se
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
@@ -73,6 +74,11 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         }
     }
 
+    @Override
+    public @NotNull Integer getOrder() {
+        return ORDER;
+    }
+    
     private Entity buildEntity(Bundle bundle, String name, JmsDestination jmsDestination, Document document) {
         String id = jmsDestination.getId();
         boolean isInbound = jmsDestination.getInboundDetail() != null;
@@ -90,12 +96,8 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         Map<String, Object> jmsDestinationDetailProps = new HashMap<>();
         jmsDestinationDetailProps.put(DESTINATION_TYPE, jmsDestination.getDestinationType().getType());
         jmsDestinationDetailProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
-        if (jmsDestination.getDestinationPasswordRef() != null) {
-            jmsDestinationDetailProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
-        } else {
-            jmsDestinationDetailProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
-        }
-
+        jmsDestinationDetailProps.put(PROPERTY_PASSWORD, this.getPassword(bundle, jmsDestination.getDestinationPasswordRef(), jmsDestination.getDestinationPassword()));
+        
         Map<String, Object> contextPropertiesTemplateProps =
                 Optional.ofNullable(jmsDestination.getJndiProperties()).orElseGet(HashMap::new);
         contextPropertiesTemplateProps.put(JNDI_USERNAME, jmsDestination.getJndiUsername());
@@ -114,8 +116,10 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             this.buildOutboundDestination(jmsDestination, jmsDestinationDetailProps, contextPropertiesTemplateProps);
         }
 
+        String providerType = jmsDestination.getProviderType();
         if (jmsDestination.getAdditionalProperties() != null && !jmsDestination.getAdditionalProperties().isEmpty()) {
             contextPropertiesTemplateProps.putAll(jmsDestination.getAdditionalProperties());
+            buildPrivateKeyReferences(bundle, providerType, contextPropertiesTemplateProps);
         }
         jmsDestinationDetailEle.appendChild(createElementWithTextContent(document, ENABLED, true));
         jmsDestinationDetailEle.appendChild(createElementWithTextContent(document, TEMPLATE, isTemplate));
@@ -126,20 +130,20 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         Element jmsConnectionEle = createElementWithAttributesAndChildren(
                 document,
                 JMS_CONNECTION,
-                ImmutableMap.of(ATTRIBUTE_ID, jmsConnectionEleId),
-                createElementWithTextContent(document, TEMPLATE, isTemplate)
+                ImmutableMap.of(ATTRIBUTE_ID, jmsConnectionEleId)
         );
+        
+        if (StringUtils.isNotEmpty(providerType)) {
+            jmsConnectionEle.appendChild(createElementWithTextContent(document, JMS_PROVIDER_TYPE, providerType));
+        }
+        createElementWithTextContent(document, TEMPLATE, isTemplate);
 
         Map<String, Object> jmsConnectionProps = new HashMap<>();
         jmsConnectionProps.put(JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME, jmsDestination.getInitialContextFactoryClassName());
         jmsConnectionProps.put(JNDI_PROVIDER_URL, jmsDestination.getJndiUrl());
         jmsConnectionProps.put(CONNECTION_FACTORY_NAME, jmsDestination.getConnectionFactoryName());
         jmsConnectionProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
-        if (jmsDestination.getDestinationPasswordRef() != null) {
-            jmsConnectionProps.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getDestinationPasswordRef()));
-        } else {
-            jmsConnectionProps.put(PROPERTY_PASSWORD, jmsDestination.getDestinationPassword());
-        }
+        jmsConnectionProps.put(PROPERTY_PASSWORD, this.getPassword(bundle, jmsDestination.getDestinationPasswordRef(), jmsDestination.getDestinationPassword()));
         buildAndAppendPropertiesElement(jmsConnectionProps, document, jmsConnectionEle);
         jmsConnectionEle.appendChild(buildPropertiesElement(contextPropertiesTemplateProps, document, CONTEXT_PROPERTIES_TEMPLATE));
 
@@ -152,6 +156,53 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         jmsDestinationEle.appendChild(jmsConnectionEle);
 
         return EntityBuilderHelper.getEntityWithNameMapping(EntityTypes.JMS_DESTINATION_TYPE, name, id, jmsDestinationEle);
+    }
+    
+    private String getPassword(final Bundle bundle, final String passwordRef, final String plaintext) {
+        if (passwordRef != null) {
+            if (bundle.getStoredPasswords().get(passwordRef) == null) {
+                throw new EntityBuilderException("JMS destination is referencing missing stored password '" + passwordRef +"'");
+            }
+            return String.format(STORED_PASSWORD_REF_FORMAT, passwordRef);
+        } else {
+            return plaintext;
+        }
+    }
+    
+    private void buildPrivateKeyReferences(
+            final Bundle bundle,
+            final String providerType,
+            final Map<String, Object> contextPropertiesTemplateProps) {
+        String alias = (String) contextPropertiesTemplateProps.get(DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS);
+        if (StringUtils.isNotEmpty(alias)) {
+            if (null == bundle.getPrivateKeys().get(alias)) {
+                throw new EntityBuilderException("Jms destination is referencing missing private key '" + alias + "'");
+            }
+            
+            contextPropertiesTemplateProps.put(DESTINATION_CLIENT_AUTH_KEYSTORE_ID, KeyStoreType.GENERIC.getId());
+            
+            if(PROVIDER_TYPE_TIBCO_EMS.equals(providerType)) {
+                contextPropertiesTemplateProps.put(DESTINATION_CLIENT_AUTH_IDENTITY, 
+                        "com.l7tech.server.jms.prop.keystore.bytes\t" + KeyStoreType.GENERIC.getId() + "\t" + alias);
+                contextPropertiesTemplateProps.put(DESTINATION_CLIENT_AUTH_PASSWORD, 
+                        "com.l7tech.server.jms.prop.keystore.password\t" + KeyStoreType.GENERIC.getId() + "\t" + alias);
+            }
+        }
+
+        alias = (String) contextPropertiesTemplateProps.get(JNDI_CLIENT_AUT_KEYSTORE_ALIAS);
+        if (StringUtils.isNotEmpty(alias)) {
+            if (null == bundle.getPrivateKeys().get(alias)) {
+                throw new EntityBuilderException("Jms destination is referencing missing private key '" + alias + "'");
+            }
+            
+            if(PROVIDER_TYPE_TIBCO_EMS.equals(providerType)) {
+                contextPropertiesTemplateProps.put(JNDI_CLIENT_AUT_KEYSTORE_ID, KeyStoreType.GENERIC.getId());
+                contextPropertiesTemplateProps.put(JNDI_CLIENT_AUT_AUTH_IDENTITY,
+                        "com.l7tech.server.jms.prop.keystore\t" + KeyStoreType.GENERIC.getId() + "\t" + alias);
+                contextPropertiesTemplateProps.put(JNDI_CLIENT_AUT_AUTH_PASSWORD,
+                        "com.l7tech.server.jms.prop.keystore.password\t" + KeyStoreType.GENERIC.getId() + "\t" + alias);
+            }
+        }
     }
     
     private void buildInboundDestination (
@@ -278,11 +329,6 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_MAX_WAIT, sessionPoolingSettings.getMaxWaitMs()); 
             }
         }
-    }
-    
-    @Override
-    public @NotNull Integer getOrder() {
-        return ORDER;
     }
 
     private static void putToMapIfValueIsNotNull(

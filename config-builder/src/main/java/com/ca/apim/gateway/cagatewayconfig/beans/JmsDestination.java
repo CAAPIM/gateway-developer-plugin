@@ -30,6 +30,10 @@ import static java.util.Arrays.stream;
 // sonarcloud believes variables declared in builder class duplicates variables declared in entity class
 @SuppressWarnings({"squid:S2068", "common-java:DuplicatedBlocks"})
 public class JmsDestination extends GatewayEntity {
+
+    public static final String PROVIDER_TYPE_GENERIC = null;
+    public static final String PROVIDER_TYPE_TIBCO_EMS = "TIBCO EMS";
+    public static final String PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP = "WebSphere MQ over LDAP";
     
     // Basics
     private String providerType;

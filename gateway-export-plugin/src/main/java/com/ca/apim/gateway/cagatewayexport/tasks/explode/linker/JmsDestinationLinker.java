@@ -6,20 +6,23 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
-import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.VariableUtils.extractVariableName;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerConstants.ENCRYPTED_PASSWORD_PREFIX;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerConstants.STORED_PASSWORD_PATTERN;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.ServiceLinker.getServicePath;
+import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Singleton
@@ -35,8 +38,7 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
         linkJndiStoredPassword(entity, bundle);
         linkDestinationStoredPassword(entity, bundle);
         linkInboundAssociatedService(entity, bundle);
-        
-        // (kpak) - link private key(s)
+        verifyPrivateKeys(entity, bundle);
     }
     
     private void linkJndiStoredPassword(JmsDestination entity, Bundle bundle) {
@@ -103,7 +105,7 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
                         .findFirst()
                         .orElse(null);
         if (service == null) {
-            throw new LinkerException("Could not find associated Service for inbound JMS Destination: " + entity.getName() + ". Service Path: " + serviceRef);
+            throw new LinkerException("Could not find associated Service for inbound JMS Destination: " + entity.getName() + ". Service path: " + serviceRef);
         }
         
         entity.getInboundDetail().getServiceResolutionSettings().setServiceRef(getServicePath(bundle, service));
@@ -118,9 +120,31 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
                         .findFirst()
                         .orElse(null);
         if (storedPassword == null) {
-            throw new LinkerException("Could not find Stored Password for JMS Destination: " + entity.getName() + ". Password Name: " + storedPasswordName);
+            throw new LinkerException("Could not find Stored Password for JMS Destination: " + entity.getName() + ". Password name: " + storedPasswordName);
         }
 
         return storedPassword;
+    }
+    
+    private void verifyPrivateKeys(JmsDestination entity, Bundle bundle) {
+        // Verify that referenced private keys exists in the bundle.
+        Set<Object> aliases = ofNullable(entity.getAdditionalProperties()).orElseGet(HashMap::new)
+                .entrySet().stream()
+                .filter(map ->
+                        JNDI_CLIENT_AUT_KEYSTORE_ALIAS.equals(map.getKey()) || 
+                                DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS.equals(map.getKey()))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toSet());
+        
+        if (aliases.isEmpty()) {
+            return;
+        }
+        
+        for (Object alias : aliases) {
+            String cast = (String) alias;
+            if (null == bundle.getEntities(PrivateKey.class).get((cast))) {
+                throw new LinkerException("Could not find Private Key for JMS Destination: " + entity.getName() + ". Private Key alias: " + cast);   
+            }
+        }
     }
 }
