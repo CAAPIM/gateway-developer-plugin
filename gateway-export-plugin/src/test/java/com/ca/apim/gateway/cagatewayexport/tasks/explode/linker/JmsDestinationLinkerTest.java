@@ -9,12 +9,17 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ServiceResolutionSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 
+import java.util.HashMap;
+
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.JNDI_CLIENT_AUT_KEYSTORE_ALIAS;
 import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.createService;
 import static org.junit.jupiter.api.Assertions.*;
@@ -220,7 +225,63 @@ class JmsDestinationLinkerTest {
         assertNull(jmsDestination.getInboundDetail().getServiceResolutionSettings().getServiceRef());
     }
 
-    // (kpak) - test private key(s) 
+    @Test
+    void testLinkJndiClientAuthPrivateKey() {
+        Bundle bundle = new Bundle();
+        bundle.addEntity(createPrivateKey("key1"));
+
+        final JmsDestination jmsDestination = createJmsDestinationBuilder(null, null)
+                .additionalProperties(new HashMap<String, Object>() {{
+                        put(JNDI_CLIENT_AUT_KEYSTORE_ALIAS, "key1");
+                    }})
+                .build();
+
+        linker.link(jmsDestination, bundle, bundle);
+        assertEquals(ImmutableMap.of(JNDI_CLIENT_AUT_KEYSTORE_ALIAS, "key1"),
+                jmsDestination.getAdditionalProperties());
+    }
+
+    @Test
+    void testLinkMissingJndiClientAuthPrivateKey() {
+        Bundle bundle = new Bundle();
+
+        final JmsDestination jmsDestination = createJmsDestinationBuilder(null, null)
+                .additionalProperties(new HashMap<String, Object>() {{
+                    put(JNDI_CLIENT_AUT_KEYSTORE_ALIAS, "missing-key1");
+                }})
+                .build();
+
+        assertThrows(LinkerException.class, () -> linker.link(jmsDestination, bundle, bundle));
+    }
+
+    @Test
+    void testLinkDestinationClientAuthPrivateKey() {
+        Bundle bundle = new Bundle();
+        bundle.addEntity(createPrivateKey("key2"));
+
+        final JmsDestination jmsDestination = createJmsDestinationBuilder(null, null)
+                .additionalProperties(new HashMap<String, Object>() {{
+                    put(DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS, "key2");
+                }})
+                .build();
+
+        linker.link(jmsDestination, bundle, bundle);
+        assertEquals(ImmutableMap.of(DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS, "key2"),
+                jmsDestination.getAdditionalProperties());
+    }
+
+    @Test
+    void testLinkMissingDestinationClientAuthPrivateKey() {
+        Bundle bundle = new Bundle();
+
+        final JmsDestination jmsDestination = createJmsDestinationBuilder(null, null)
+                .additionalProperties(new HashMap<String, Object>() {{
+                    put(DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS, "missing-key2");
+                }})
+                .build();
+
+        assertThrows(LinkerException.class, () -> linker.link(jmsDestination, bundle, bundle));
+    }
 
     @NotNull
     private static JmsDestination createJmsDestination(
@@ -247,6 +308,15 @@ class JmsDestinationLinkerTest {
                 .Builder()
                 .id(ID_GENERATOR.generate())
                 .name(name)
+                .build();
+    }
+
+    @NotNull
+    private static PrivateKey createPrivateKey(String alias) {
+        return new PrivateKey
+                .Builder()
+                .setId(ID_GENERATOR.generate())
+                .setAlias(alias)
                 .build();
     }
 }

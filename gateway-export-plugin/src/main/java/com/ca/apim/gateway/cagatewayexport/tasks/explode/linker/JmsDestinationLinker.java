@@ -141,9 +141,15 @@ public class JmsDestinationLinker implements EntityLinker<JmsDestination> {
         }
         
         for (Object alias : aliases) {
-            String cast = (String) alias;
-            if (null == bundle.getEntities(PrivateKey.class).get((cast))) {
-                throw new LinkerException("Could not find Private Key for JMS Destination: " + entity.getName() + ". Private Key alias: " + cast);   
+            PrivateKey privateKey =
+                    bundle.getEntities(PrivateKey.class).values()
+                            .stream()
+                            .filter(e -> e.getName().equals(alias))
+                            .findFirst()
+                            .orElse(null);
+
+            if (null == privateKey) {
+                throw new LinkerException("Could not find Private Key for JMS Destination: " + entity.getName() + ". Private Key alias: " + alias);
             }
         }
     }
