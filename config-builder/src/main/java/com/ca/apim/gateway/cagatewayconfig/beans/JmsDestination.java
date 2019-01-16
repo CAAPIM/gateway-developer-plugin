@@ -265,24 +265,24 @@ public class JmsDestination extends GatewayEntity {
     }
 
     public static class Builder {
-        private String name;
-        private String id;
-        private String providerType;
-        private String initialContextFactoryClassName;
-        private String jndiUrl;
-        private String jndiUsername;
-        private String jndiPasswordRef;
-        private String jndiPassword;
-        private Map<String, Object> jndiProperties;
-        private DestinationType destinationType;
-        private String connectionFactoryName;
-        private String destinationName;
-        private String destinationUsername;
-        private String destinationPasswordRef;
-        private String destinationPassword;
-        private InboundJmsDestinationDetail inboundDetail;
-        private OutboundJmsDestinationDetail outboundDetail;
         private Map<String, Object> additionalProperties;
+        private OutboundJmsDestinationDetail outboundDetail;
+        private InboundJmsDestinationDetail inboundDetail;
+        private String destinationPassword;
+        private String destinationPasswordRef;
+        private String destinationUsername;
+        private String destinationName;
+        private String connectionFactoryName;
+        private DestinationType destinationType;
+        private Map<String, Object> jndiProperties;
+        private String jndiPassword;
+        private String jndiPasswordRef;
+        private String jndiUsername;
+        private String jndiUrl;
+        private String initialContextFactoryClassName;
+        private String providerType;
+        private String id;
+        private String name;
 
         public Builder name(String name) {
             this.name = name;
