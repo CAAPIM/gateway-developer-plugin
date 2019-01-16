@@ -109,8 +109,10 @@ class PolicyAndFolderLoaderTest {
         Files.touch(policy);
 
         Bundle bundle = new Bundle();
+        policyAndFolderLoader.load(bundle, temporaryFolder.getRoot());
 
-        assertThrows(PolicyConverterException.class, () -> policyAndFolderLoader.load(bundle, temporaryFolder.getRoot()));
+        Policy loadedPolicy = bundle.getPolicies().get("policy");
+        Assert.assertNull(loadedPolicy);
     }
 
     @Test
