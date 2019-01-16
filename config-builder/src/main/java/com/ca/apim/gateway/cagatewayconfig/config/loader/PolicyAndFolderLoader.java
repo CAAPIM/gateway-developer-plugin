@@ -64,7 +64,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
             for (final File child : children) {
                 if (child.isDirectory()) {
                     loadPolicies(child, rootDir, folder, policies, bundle);
-                } else {
+                } else if (policyConverterRegistry.isValidPolicyExtension(child.getName())) {
                     Policy policy = loadPolicy(child, rootDir, folder, bundle);
                     Policy existingPolicy = policies.put(policy.getPath(), policy);
                     if (existingPolicy != null) {
@@ -77,7 +77,6 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
     private Policy loadPolicy(final File policyFile, final File rootDir, Folder parentFolder, Bundle bundle) {
         PolicyConverter policyConverter = policyConverterRegistry.getConverterFromFileName(policyFile.getName());
-
         Policy policy = new Policy();
         policy.setPath(policyConverter.removeExtension(getPath(policyFile, rootDir)));
         policy.setName(policyConverter.removeExtension(policyFile.getName()));

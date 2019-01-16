@@ -12,16 +12,31 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.util.Collections.unmodifiableSet;
 
 @Singleton
 public class PolicyConverterRegistry {
     private final Set<PolicyConverter> policyConverters;
+    private static final Logger LOGGER = Logger.getLogger(PolicyConverterRegistry.class.getName());
+
 
     @Inject
     public PolicyConverterRegistry(final Set<PolicyConverter> converters) {
         this.policyConverters = unmodifiableSet(converters);
+    }
+
+    @NotNull
+    public boolean isValidPolicyExtension(String fileName) {
+        if (policyConverters.stream()
+                .anyMatch(converter -> fileName.endsWith(converter.getPolicyTypeExtension()))) {
+            return true;
+        } else {
+            LOGGER.log(Level.FINE, "Unknown policy file extension for file: " + fileName);
+            return false;
+        }
     }
 
     @NotNull
