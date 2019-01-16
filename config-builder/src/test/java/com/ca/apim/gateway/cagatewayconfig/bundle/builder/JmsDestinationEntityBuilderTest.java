@@ -8,15 +8,20 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.ON_TAKE;
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ContentTypeSource.JMS_PROPERTY;
@@ -33,11 +38,11 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static org.junit.jupiter.api.Assertions.*;
 
 class JmsDestinationEntityBuilderTest {
-
+    private static final String JMS_DESTINATION_ENTITY_NAME = "my-jms-endpoint";
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
 
     @Test
-    void testBuildFromEmptyBundle_noJmsDestination() {
+    void buildFromEmptyBundle_noConnections() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final List<Entity> entities = builder.build(new Bundle(), EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
@@ -45,10 +50,38 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @Test
-    void checkJmsDestination_Inbound() {
+    void buildEmptyDeploymentBundle() {
+        TestUtils.testDeploymentBundleWithOnlyMapping(
+                new JmsDestinationEntityBuilder(ID_GENERATOR),
+                new Bundle(),
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                EntityTypes.JMS_DESTINATION_TYPE,
+                Collections.emptyList()
+        );
+    }
+
+    @Test
+    void buildDeploymentBundle() {
+        final Bundle bundle = new Bundle();
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildOutbound(bundle, true, true).build()));
+
+        TestUtils.testDeploymentBundleWithOnlyMapping(
+                new JmsDestinationEntityBuilder(ID_GENERATOR),
+                bundle,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                EntityTypes.JMS_DESTINATION_TYPE,
+                Stream.of(JMS_DESTINATION_ENTITY_NAME).collect(Collectors.toList())
+        );
+    }
+    
+    @Test
+    void buildJmsDestination_Inbound() {
+        // (kpak) - update inbound entity to specify an associated service.
+        // (kpak) - add a test for missing associated service in the bundle.
+        
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildInbound().build()));
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildInbound(bundle).build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, entities.size());
@@ -56,10 +89,10 @@ class JmsDestinationEntityBuilderTest {
     }
 
     @Test
-    void checkJmsDestination_Outbound() {
+    void buildJmsDestination_Outbound() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildOutbound().build()));
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildOutbound(bundle, true, true).build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, entities.size());
@@ -67,10 +100,28 @@ class JmsDestinationEntityBuilderTest {
     }
 
     @Test
-    void checkJmsDestination_TibcoEmsProvider() {
+    void buildJmsDestination_MissingJndiStoredPassword() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildTibcoEmsProvider(bundle).build()));
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildOutbound(bundle, false, true).build()));
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+    }
+
+    @Test
+    void buildJmsDestination_MissingDestinationStoredPassword() {
+        JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
+        final Bundle bundle = new Bundle();
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildOutbound(bundle, true, false).build()));
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+    }
+    
+    @Test
+    void buildJmsDestination_TibcoEmsProvider() {
+        JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
+        final Bundle bundle = new Bundle();
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildTibcoEmsProvider(bundle, true, true).build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, entities.size());
@@ -78,26 +129,70 @@ class JmsDestinationEntityBuilderTest {
     }
 
     @Test
-    void checkJmsDestination_WebShpereOverLdapProvider() {
+    void buildJmsDestination_TibcoEmsProvider_MissingJndiClientAuthPrivateKey() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of("my-jms-endpoint", buildWebShpereMqOverLdapProvider(bundle).build()));
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildTibcoEmsProvider(bundle, false, true).build()));
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+    }
+
+    @Test
+    void buildJmsDestination_TibcoEmsProvider_MissingDestinationClientAuthPrivateKey() {
+        JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
+        final Bundle bundle = new Bundle();
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildTibcoEmsProvider(bundle, true, false).build()));
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+    }
+    
+    @Test
+    void buildJmsDestination_WebShpereOverLdapProvider() {
+        JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
+        final Bundle bundle = new Bundle();
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildWebShpereMqOverLdapProvider(bundle, true).build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, entities.size());
         verifyWebShpereMqOverLdapProvider(entities.get(0));
     }
+
+    @Test
+    void buildJmsDestination_WebShpereOverLdapProvider_MissingDestinationClientAuthPrivateKey() {
+        JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
+        final Bundle bundle = new Bundle();
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildWebShpereMqOverLdapProvider(bundle, false).build()));
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+    }
     
-    // (kpak): Add tests for missing stored password, missing private key, missing service.
     @NotNull
-    private static JmsDestination.Builder buildCommon() {
+    private static JmsDestination.Builder buildCommon(Bundle bundle,
+                                                      boolean includeJndiStoredPasswordToBundle,
+                                                      boolean includeDestStoredPasswordToBundle) {
+        if (includeJndiStoredPasswordToBundle) {
+            bundle.getStoredPasswords().put("my-jndi-password",
+                    new StoredPassword.Builder()
+                            .id("my-jndi-password-id")
+                            .name("my-jndi-password")
+                            .build());
+        }
+
+        if (includeDestStoredPasswordToBundle) {
+            bundle.getStoredPasswords().put("my-destination-password",
+                    new StoredPassword.Builder()
+                            .id("my-destination-password-id")
+                            .name("my-destination-password")
+                            .build());
+        }
+        
         return new JmsDestination.Builder()
-                .name("my-jms-endpoint")
+                .name(JMS_DESTINATION_ENTITY_NAME)
                 .id("id-1")
                 .initialContextFactoryClassName("my-jndi-initial-context-factory-classname")
                 .jndiUrl("my-jndi-url")
                 .jndiUsername("my-jndi-username")
-                .jndiPassword("my-plaintext-jndi-password")
+                .jndiPasswordRef("my-jndi-password")
                 .jndiProperties(new HashMap<String, Object>() {{
                     put("additional-jndi-prop-name-1", "additional-jndi-prop-val-1");
                     put("additional-jndi-prop-name-2", "additional-jndi-prop-val-2");
@@ -106,11 +201,14 @@ class JmsDestinationEntityBuilderTest {
                 .connectionFactoryName("my-qcf-name")
                 .destinationName("my-dest-name")
                 .destinationUsername("my-destination-username")
-                .destinationPassword("my-plaintext-destination-password");
+                .destinationPasswordRef("my-destination-password");
     }
 
     private static void verifyCommon(Entity entity) {
         assertNotNull(entity);
+        assertEquals(JMS_DESTINATION_ENTITY_NAME, entity.getName());
+        assertEquals(EntityTypes.JMS_DESTINATION_TYPE, entity.getType());
+        assertNotNull(entity.getId());
         
         Element jmsDestinationEle = entity.getXml();
         assertNotNull(jmsDestinationEle);
@@ -123,7 +221,7 @@ class JmsDestinationEntityBuilderTest {
         
         assertEquals(entity.getId(), jmsDestinationEle.getAttribute(ATTRIBUTE_ID));
         assertEquals(entity.getId(), jmsDestinationDetailEle.getAttribute(ATTRIBUTE_ID));
-        assertEquals("my-jms-endpoint", getSingleChildElementTextContent(jmsDestinationDetailEle, NAME));
+        assertEquals(JMS_DESTINATION_ENTITY_NAME, getSingleChildElementTextContent(jmsDestinationDetailEle, NAME));
         assertEquals("true", getSingleChildElementTextContent(jmsDestinationDetailEle, ENABLED));
 
         Map<String, Object> jmsDestinationDetailProps = 
@@ -141,21 +239,21 @@ class JmsDestinationEntityBuilderTest {
         assertEquals("my-jndi-initial-context-factory-classname", jmsConnectionProps.remove(JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME));
         assertEquals("my-jndi-url", jmsConnectionProps.remove(JNDI_PROVIDER_URL));
         assertEquals("my-jndi-username", contextPropertiesTemplateProps.remove(JNDI_USERNAME));
-        assertEquals("my-plaintext-jndi-password", contextPropertiesTemplateProps.remove(JNDI_PASSWORD));
+        assertEquals("${secpass.my-jndi-password.plaintext}", contextPropertiesTemplateProps.remove(JNDI_PASSWORD));
         assertEquals("additional-jndi-prop-val-1", contextPropertiesTemplateProps.remove("additional-jndi-prop-name-1"));
         assertEquals("additional-jndi-prop-val-2", contextPropertiesTemplateProps.remove("additional-jndi-prop-name-2"));
 
         assertEquals("Topic", jmsDestinationDetailProps.remove(DESTINATION_TYPE));
         assertEquals("my-dest-name", getSingleChildElementTextContent(jmsDestinationDetailEle, JMS_DESTINATION_NAME));
         assertEquals("my-destination-username", jmsDestinationDetailProps.remove(PROPERTY_USERNAME));
-        assertEquals("my-plaintext-destination-password", jmsDestinationDetailProps.remove(PROPERTY_PASSWORD));
+        assertEquals("${secpass.my-destination-password.plaintext}", jmsDestinationDetailProps.remove(PROPERTY_PASSWORD));
         assertEquals("my-destination-username", jmsConnectionProps.remove(PROPERTY_USERNAME));
-        assertEquals("my-plaintext-destination-password", jmsConnectionProps.remove(PROPERTY_PASSWORD));
+        assertEquals("${secpass.my-destination-password.plaintext}", jmsConnectionProps.remove(PROPERTY_PASSWORD));
     }
     
     @NotNull
-    private static JmsDestination.Builder buildInbound() {
-        JmsDestination.Builder builder = buildCommon();
+    private static JmsDestination.Builder buildInbound(Bundle bundle) {
+        JmsDestination.Builder builder = buildCommon(bundle, true, true);
         
         InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
         inboundDetail.setAcknowledgeType(ON_TAKE);
@@ -209,14 +307,16 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @NotNull
-    private static JmsDestination.Builder buildOutbound() {
+    private static JmsDestination.Builder buildOutbound(Bundle bundle,
+                                                        boolean includeJndiStoredPasswordToBundle,
+                                                        boolean includeDestStoredPasswordToBundle) {
         OutboundJmsDestinationDetail outboundDetail = new OutboundJmsDestinationDetail();
         outboundDetail.setIsTemplate(false);
         outboundDetail.setReplyType(NO_REPLY);
         outboundDetail.setMessageFormat(BYTES);
         outboundDetail.setPoolingType(CONNECTION);
         
-        return buildCommon().outboundDetail(outboundDetail);
+        return buildCommon(bundle, includeJndiStoredPasswordToBundle, includeDestStoredPasswordToBundle).outboundDetail(outboundDetail);
     }
 
     private static void verifyOutbound(Entity entity) {
@@ -253,22 +353,30 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @NotNull
-    private static JmsDestination.Builder buildTibcoEmsProvider(Bundle bundle) {
-        bundle.getPrivateKeys().put("key1",
-                new PrivateKey.Builder()
-                        .setId("key1-id")
-                        .setAlias("key1")
-                        .setKeystore(KeyStoreType.GENERIC)
-                        .build());
-
-        bundle.getPrivateKeys().put("key2",
-                new PrivateKey.Builder()
-                        .setId("key2-id")
-                        .setAlias("key2")
-                        .setKeystore(KeyStoreType.GENERIC)
-                        .build());
+    private static JmsDestination.Builder buildTibcoEmsProvider(
+            Bundle bundle,
+            boolean includeJndiClientAuthPrivateKeyToBundle,
+            boolean includeDestClientAuthPrivateKeyToBundle) {
         
-        return buildOutbound()
+        if (includeJndiClientAuthPrivateKeyToBundle) {
+            bundle.getPrivateKeys().put("key1",
+                    new PrivateKey.Builder()
+                            .setId("key1-id")
+                            .setAlias("key1")
+                            .setKeystore(KeyStoreType.GENERIC)
+                            .build());
+        }
+
+        if (includeDestClientAuthPrivateKeyToBundle) {
+            bundle.getPrivateKeys().put("key2",
+                    new PrivateKey.Builder()
+                            .setId("key2-id")
+                            .setAlias("key2")
+                            .setKeystore(KeyStoreType.GENERIC)
+                            .build());
+        }
+        
+        return buildOutbound(bundle, true, true)
                 .providerType(PROVIDER_TYPE_TIBCO_EMS)
                 .additionalProperties(new HashMap<String, Object>() {
                     {
@@ -277,13 +385,13 @@ class JmsDestinationEntityBuilderTest {
                         put("com.tibco.tibjms.naming.ssl_enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
                         put("com.tibco.tibjms.naming.ssl_trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
                         put("com.tibco.tibjms.naming.ssl_enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
-                        put("com.l7tech.server.jms.prop.jndi.ssgKeyAlias", "key1");
+                        put(JNDI_CLIENT_AUT_KEYSTORE_ALIAS, "key1");
                         put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer");
                         put("com.tibco.tibjms.ssl.auth_only", "com.l7tech.server.jms.prop.boolean.true");
                         put("com.tibco.tibjms.ssl.enable_verify_host", "com.l7tech.server.jms.prop.boolean.true");
                         put("com.tibco.tibjms.ssl.trusted_certs", "com.l7tech.server.jms.prop.trustedcert.listx509");
                         put("com.tibco.tibjms.ssl.enable_verify_hostname", "com.l7tech.server.jms.prop.boolean.true");
-                        put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key2");
+                        put(DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS, "key2");
                     }});
     }
 
@@ -317,36 +425,38 @@ class JmsDestinationEntityBuilderTest {
         assertEquals("com.l7tech.server.jms.prop.boolean.true", contextPropertiesTemplateProps.remove("com.tibco.tibjms.naming.ssl_enable_verify_host"));
         assertEquals("com.l7tech.server.jms.prop.trustedcert.listx509", contextPropertiesTemplateProps.remove("com.tibco.tibjms.naming.ssl_trusted_certs"));
         assertEquals("com.l7tech.server.jms.prop.boolean.true", contextPropertiesTemplateProps.remove("com.tibco.tibjms.naming.ssl_enable_verify_hostname"));
-        assertEquals("key1", contextPropertiesTemplateProps.remove("com.l7tech.server.jms.prop.jndi.ssgKeyAlias"));
-        assertEquals(KeyStoreType.GENERIC.getId(), contextPropertiesTemplateProps.remove("com.l7tech.server.jms.prop.jndi.ssgKeystoreId"));
-        assertEquals("com.l7tech.server.jms.prop.keystore\t" +  KeyStoreType.GENERIC.getId() + "\tkey1", contextPropertiesTemplateProps.remove("com.tibco.tibjms.naming.ssl_identity"));
-        assertEquals("com.l7tech.server.jms.prop.keystore.password\t" +  KeyStoreType.GENERIC.getId() + "\tkey1", contextPropertiesTemplateProps.remove("com.tibco.tibjms.naming.ssl_password"));
+        assertEquals("key1", contextPropertiesTemplateProps.remove(JNDI_CLIENT_AUT_KEYSTORE_ALIAS));
+        assertEquals(KeyStoreType.GENERIC.getId(), contextPropertiesTemplateProps.remove(JNDI_CLIENT_AUT_KEYSTORE_ID));
+        assertEquals("com.l7tech.server.jms.prop.keystore\t" +  KeyStoreType.GENERIC.getId() + "\tkey1", contextPropertiesTemplateProps.remove(JNDI_CLIENT_AUT_AUTH_IDENTITY));
+        assertEquals("com.l7tech.server.jms.prop.keystore.password\t" +  KeyStoreType.GENERIC.getId() + "\tkey1", contextPropertiesTemplateProps.remove(JNDI_CLIENT_AUT_AUTH_PASSWORD));
         assertEquals("com.l7tech.server.transport.jms.prov.TibcoConnectionFactoryCustomizer", contextPropertiesTemplateProps.remove("com.l7tech.server.jms.prop.customizer.class"));
         assertEquals("com.l7tech.server.jms.prop.boolean.true", contextPropertiesTemplateProps.remove("com.tibco.tibjms.ssl.auth_only"));
         assertEquals("com.l7tech.server.jms.prop.boolean.true", contextPropertiesTemplateProps.remove("com.tibco.tibjms.ssl.enable_verify_host"));
         assertEquals("com.l7tech.server.jms.prop.trustedcert.listx509", contextPropertiesTemplateProps.remove("com.tibco.tibjms.ssl.trusted_certs"));
         assertEquals("com.l7tech.server.jms.prop.boolean.true", contextPropertiesTemplateProps.remove("com.tibco.tibjms.ssl.enable_verify_hostname"));
-        assertEquals("key2", contextPropertiesTemplateProps.remove("com.l7tech.server.jms.prop.queue.ssgKeyAlias"));
-        assertEquals(KeyStoreType.GENERIC.getId(), contextPropertiesTemplateProps.remove("com.l7tech.server.jms.prop.queue.ssgKeystoreId"));
-        assertEquals("com.l7tech.server.jms.prop.keystore.bytes\t" + KeyStoreType.GENERIC.getId() + "\tkey2", contextPropertiesTemplateProps.remove("com.tibco.tibjms.ssl.identity"));
-        assertEquals("com.l7tech.server.jms.prop.keystore.password\t" + KeyStoreType.GENERIC.getId() + "\tkey2", contextPropertiesTemplateProps.remove("com.tibco.tibjms.ssl.password"));
+        assertEquals("key2", contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS));
+        assertEquals(KeyStoreType.GENERIC.getId(), contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_KEYSTORE_ID));
+        assertEquals("com.l7tech.server.jms.prop.keystore.bytes\t" + KeyStoreType.GENERIC.getId() + "\tkey2", contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_IDENTITY));
+        assertEquals("com.l7tech.server.jms.prop.keystore.password\t" + KeyStoreType.GENERIC.getId() + "\tkey2", contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_PASSWORD));
     }
     
     @NotNull
-    private static JmsDestination.Builder buildWebShpereMqOverLdapProvider(Bundle bundle) {
-        bundle.getPrivateKeys().put("key1",
-                new PrivateKey.Builder()
-                        .setId("key1-id")
-                        .setAlias("key1")
-                        .setKeystore(KeyStoreType.GENERIC)
-                        .build());
+    private static JmsDestination.Builder buildWebShpereMqOverLdapProvider(Bundle bundle, boolean includeDestClientAuthPrivateKeyToBundle) {
+        if (includeDestClientAuthPrivateKeyToBundle) {
+            bundle.getPrivateKeys().put("key1",
+                    new PrivateKey.Builder()
+                            .setId("key1-id")
+                            .setAlias("key1")
+                            .setKeystore(KeyStoreType.GENERIC)
+                            .build());
+        }
         
-        return buildOutbound()
+        return buildOutbound(bundle, true, true)
                 .providerType(PROVIDER_TYPE_WEBSPHERE_MQ_OVER_LDAP)
                 .additionalProperties(new HashMap<String, Object>() {{
                         put("com.l7tech.server.jms.prop.customizer.class", "com.l7tech.server.transport.jms.prov.MQSeriesCustomizer");
                         put("com.l7tech.server.jms.prop.queue.useClientAuth", "true");
-                        put("com.l7tech.server.jms.prop.queue.ssgKeyAlias", "key1");
+                        put(DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS, "key1");
                     }});
     }
 
@@ -369,7 +479,7 @@ class JmsDestinationEntityBuilderTest {
         
         assertEquals("com.l7tech.server.transport.jms.prov.MQSeriesCustomizer", contextPropertiesTemplateProps.remove("com.l7tech.server.jms.prop.customizer.class"));
         assertEquals("true", contextPropertiesTemplateProps.remove("com.l7tech.server.jms.prop.queue.useClientAuth"));
-        assertEquals(KeyStoreType.GENERIC.getId(), contextPropertiesTemplateProps.remove("com.l7tech.server.jms.prop.queue.ssgKeystoreId"));
-        assertEquals("key1", contextPropertiesTemplateProps.remove("com.l7tech.server.jms.prop.queue.ssgKeyAlias"));
+        assertEquals(KeyStoreType.GENERIC.getId(), contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_KEYSTORE_ID));
+        assertEquals("key1", contextPropertiesTemplateProps.remove(DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS));
     }
 }

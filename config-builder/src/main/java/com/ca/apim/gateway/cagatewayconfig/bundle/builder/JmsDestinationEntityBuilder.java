@@ -101,11 +101,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         Map<String, Object> contextPropertiesTemplateProps =
                 Optional.ofNullable(jmsDestination.getJndiProperties()).orElseGet(HashMap::new);
         contextPropertiesTemplateProps.put(JNDI_USERNAME, jmsDestination.getJndiUsername());
-        if (jmsDestination.getJndiPasswordRef() != null) {
-            contextPropertiesTemplateProps.put(JNDI_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jmsDestination.getJndiPasswordRef()));
-        } else {
-            contextPropertiesTemplateProps.put(JNDI_PASSWORD, jmsDestination.getJndiPassword());
-        }
+        contextPropertiesTemplateProps.put(JNDI_PASSWORD, this.getPassword(bundle, jmsDestination.getJndiPasswordRef(), jmsDestination.getJndiPassword()));
         
         boolean isTemplate = false;
 
