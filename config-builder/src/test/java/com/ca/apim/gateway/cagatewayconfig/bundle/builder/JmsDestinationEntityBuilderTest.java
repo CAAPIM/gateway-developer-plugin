@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 import org.w3c.dom.Element;
 
 import java.util.Collections;
@@ -76,18 +77,24 @@ class JmsDestinationEntityBuilderTest {
     
     @Test
     void buildJmsDestination_Inbound() {
-        // (kpak) - update inbound entity to specify an associated service.
-        // (kpak) - add a test for missing associated service in the bundle.
-        
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
         final Bundle bundle = new Bundle();
-        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildInbound(bundle).build()));
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildInbound(bundle, true).build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, entities.size());
         verifyInbound(entities.get(0));
     }
 
+    @Test
+    void buildJmsDestination_Inbound_MissingAssociatedService() {
+        JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
+        final Bundle bundle = new Bundle();
+        bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildInbound(bundle, false).build()));
+
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+    }
+    
     @Test
     void buildJmsDestination_Outbound() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
@@ -168,9 +175,9 @@ class JmsDestinationEntityBuilderTest {
     
     @NotNull
     private static JmsDestination.Builder buildCommon(Bundle bundle,
-                                                      boolean includeJndiStoredPasswordToBundle,
-                                                      boolean includeDestStoredPasswordToBundle) {
-        if (includeJndiStoredPasswordToBundle) {
+                                                      boolean includeJndiStoredPasswordInBundle,
+                                                      boolean includeDestStoredPasswordInBundle) {
+        if (includeJndiStoredPasswordInBundle) {
             bundle.getStoredPasswords().put("my-jndi-password",
                     new StoredPassword.Builder()
                             .id("my-jndi-password-id")
@@ -178,7 +185,7 @@ class JmsDestinationEntityBuilderTest {
                             .build());
         }
 
-        if (includeDestStoredPasswordToBundle) {
+        if (includeDestStoredPasswordInBundle) {
             bundle.getStoredPasswords().put("my-destination-password",
                     new StoredPassword.Builder()
                             .id("my-destination-password-id")
@@ -252,7 +259,27 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @NotNull
-    private static JmsDestination.Builder buildInbound(Bundle bundle) {
+    private static JmsDestination.Builder buildInbound(Bundle bundle, boolean includeAssociatedServiceInBundle) {
+        if (includeAssociatedServiceInBundle) {
+            Folder folder = new Folder();
+            folder.setName("my-folder-name");
+            folder.setId("my-folder-id");
+            folder.setParentFolder(Folder.ROOT_FOLDER);
+            
+            Service service = new Service();
+            service.setName("my-service-name");
+            service.setId("my-service-id");
+            service.setParentFolder(folder);
+            service.setServiceDetailsElement(null);
+            service.setPolicy("");
+            
+            FolderTree folderTree = new FolderTree(ImmutableSet.of(folder, folder.getParentFolder()));
+
+            bundle.setFolderTree(folderTree);
+            bundle.addEntity(folder);
+            bundle.addEntity(service);
+        }
+        
         JmsDestination.Builder builder = buildCommon(bundle, true, true);
         
         InboundJmsDestinationDetail inboundDetail = new InboundJmsDestinationDetail();
@@ -262,6 +289,7 @@ class JmsDestinationEntityBuilderTest {
         InboundJmsDestinationDetail.ServiceResolutionSettings serviceResolutionSettings = new InboundJmsDestinationDetail.ServiceResolutionSettings();
         serviceResolutionSettings.setContentTypeSource(JMS_PROPERTY);
         serviceResolutionSettings.setContentType("my-content-type-jms-prop");
+        serviceResolutionSettings.setServiceRef("my-service-id");
         inboundDetail.setServiceResolutionSettings(serviceResolutionSettings);
 
         builder.inboundDetail(inboundDetail);
@@ -297,7 +325,8 @@ class JmsDestinationEntityBuilderTest {
         
         assertEquals("AUTOMATIC", jmsDestinationDetailProps.remove(INBOUND_ACKNOWLEDGEMENT_TYPE));
         assertEquals("AUTOMATIC", jmsDestinationDetailProps.remove(REPLY_TYPE));
-        assertEquals("false", contextPropertiesTemplateProps.remove(IS_HARDWIRED_SERVICE));
+        assertEquals("true", contextPropertiesTemplateProps.remove(IS_HARDWIRED_SERVICE));
+        assertEquals("my-service-id", contextPropertiesTemplateProps.remove(HARDWIRED_SERVICE_ID));
         assertEquals("com.l7tech.server.jms.prop.contentType.header", contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE));
         assertEquals("my-content-type-jms-prop", contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE));
         
@@ -308,15 +337,15 @@ class JmsDestinationEntityBuilderTest {
     
     @NotNull
     private static JmsDestination.Builder buildOutbound(Bundle bundle,
-                                                        boolean includeJndiStoredPasswordToBundle,
-                                                        boolean includeDestStoredPasswordToBundle) {
+                                                        boolean includeJndiStoredPasswordInBundle,
+                                                        boolean includeDestStoredPasswordInBundle) {
         OutboundJmsDestinationDetail outboundDetail = new OutboundJmsDestinationDetail();
         outboundDetail.setIsTemplate(false);
         outboundDetail.setReplyType(NO_REPLY);
         outboundDetail.setMessageFormat(BYTES);
         outboundDetail.setPoolingType(CONNECTION);
         
-        return buildCommon(bundle, includeJndiStoredPasswordToBundle, includeDestStoredPasswordToBundle).outboundDetail(outboundDetail);
+        return buildCommon(bundle, includeJndiStoredPasswordInBundle, includeDestStoredPasswordInBundle).outboundDetail(outboundDetail);
     }
 
     private static void verifyOutbound(Entity entity) {
@@ -355,10 +384,10 @@ class JmsDestinationEntityBuilderTest {
     @NotNull
     private static JmsDestination.Builder buildTibcoEmsProvider(
             Bundle bundle,
-            boolean includeJndiClientAuthPrivateKeyToBundle,
-            boolean includeDestClientAuthPrivateKeyToBundle) {
+            boolean includeJndiClientAuthPrivateKeyInBundle,
+            boolean includeDestClientAuthPrivateKeyInBundle) {
         
-        if (includeJndiClientAuthPrivateKeyToBundle) {
+        if (includeJndiClientAuthPrivateKeyInBundle) {
             bundle.getPrivateKeys().put("key1",
                     new PrivateKey.Builder()
                             .setId("key1-id")
@@ -367,7 +396,7 @@ class JmsDestinationEntityBuilderTest {
                             .build());
         }
 
-        if (includeDestClientAuthPrivateKeyToBundle) {
+        if (includeDestClientAuthPrivateKeyInBundle) {
             bundle.getPrivateKeys().put("key2",
                     new PrivateKey.Builder()
                             .setId("key2-id")
@@ -441,8 +470,8 @@ class JmsDestinationEntityBuilderTest {
     }
     
     @NotNull
-    private static JmsDestination.Builder buildWebShpereMqOverLdapProvider(Bundle bundle, boolean includeDestClientAuthPrivateKeyToBundle) {
-        if (includeDestClientAuthPrivateKeyToBundle) {
+    private static JmsDestination.Builder buildWebShpereMqOverLdapProvider(Bundle bundle, boolean includeDestClientAuthPrivateKeyInBundle) {
+        if (includeDestClientAuthPrivateKeyInBundle) {
             bundle.getPrivateKeys().put("key1",
                     new PrivateKey.Builder()
                             .setId("key1-id")
