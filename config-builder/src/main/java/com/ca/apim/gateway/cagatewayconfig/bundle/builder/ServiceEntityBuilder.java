@@ -11,8 +11,8 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.WSDL;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
@@ -37,11 +37,11 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
     private static final Integer ORDER = 400;
     private final IdGenerator idGenerator;
-    private final DocumentFileUtils documentFileUtils;
+    private final DocumentTools documentTools;
 
     @Inject
-    ServiceEntityBuilder(DocumentFileUtils documentFileUtils, IdGenerator idGenerator) {
-        this.documentFileUtils = documentFileUtils;
+    ServiceEntityBuilder(DocumentTools documentTools, IdGenerator idGenerator) {
+        this.documentTools = documentTools;
         this.idGenerator = idGenerator;
     }
 
@@ -104,7 +104,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         Element resourcesElement = document.createElement(RESOURCES);
         Element policyResourceSetElement = createElementWithAttribute(document, RESOURCE_SET, ATTRIBUTE_TAG, TAG_VALUE_POLICY);
         Element policyResourceElement = createElementWithAttribute(document, RESOURCE, ATTRIBUTE_TYPE, TAG_VALUE_POLICY);
-        policyResourceElement.setTextContent(documentFileUtils.elementToString(policy.getPolicyDocument()));
+        policyResourceElement.setTextContent(documentTools.elementToString(policy.getPolicyDocument()));
         policyResourceSetElement.appendChild(policyResourceElement);
         resourcesElement.appendChild(policyResourceSetElement);
 

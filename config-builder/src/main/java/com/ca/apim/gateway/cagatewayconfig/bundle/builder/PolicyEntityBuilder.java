@@ -316,7 +316,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Element resourcesElement = document.createElement(RESOURCES);
         Element resourceSetElement = createElementWithAttribute(document, RESOURCE_SET, PROPERTY_TAG, POLICY);
         Element resourceElement = createElementWithAttribute(document, RESOURCE, TYPE, POLICY);
-        resourceElement.setTextContent(documentFileUtils.elementToString(policy.getPolicyDocument()));
+        resourceElement.setTextContent(documentTools.elementToString(policy.getPolicyDocument()));
 
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);

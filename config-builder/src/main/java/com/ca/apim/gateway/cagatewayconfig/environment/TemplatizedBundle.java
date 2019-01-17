@@ -26,33 +26,35 @@ interface TemplatizedBundle {
      */
     class FileTemplatizedBundle implements TemplatizedBundle {
 
-        private File file;
+        private final File newFile;
+        private final File originalFile;
 
-        FileTemplatizedBundle(File file) {
-            this.file = file;
+        FileTemplatizedBundle(File originalFile, File newFile) {
+            this.newFile = newFile;
+            this.originalFile = originalFile;
         }
 
         @Override
         public String getContents() {
             try {
-                return new String(Files.readAllBytes(this.file.toPath()));
+                return new String(Files.readAllBytes(this.originalFile.toPath()));
             } catch (IOException e) {
-                throw new BundleDetemplatizeException("Could not read bundle file: " + file.getName(), e);
+                throw new BundleDetemplatizeException("Could not read bundle file: " + originalFile.getName(), e);
             }
         }
 
         @Override
         public void writeContents(String content) {
             try {
-                Files.write(file.toPath(), content.getBytes());
+                Files.write(newFile.toPath(), content.getBytes());
             } catch (IOException e) {
-                throw new BundleDetemplatizeException("Could not write detemplatized bundle to: " + file.getName(), e);
+                throw new BundleDetemplatizeException("Could not write detemplatized bundle to: " + newFile.getName(), e);
             }
         }
 
         @Override
         public String getName() {
-            return this.file.getName();
+            return this.originalFile.getName();
         }
     }
 

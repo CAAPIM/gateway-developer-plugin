@@ -104,7 +104,7 @@ class DocumentFileUtilsTest {
 
     @Test
     void elementToString() {
-        String xml = DocumentFileUtils.INSTANCE.elementToString(sampleElement());
+        String xml = DocumentTools.INSTANCE.elementToString(sampleElement());
         assertNotNull(xml);
     }
 

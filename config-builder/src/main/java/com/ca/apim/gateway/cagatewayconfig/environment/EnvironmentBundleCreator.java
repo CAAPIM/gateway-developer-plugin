@@ -14,7 +14,6 @@ import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.FileTem
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
-import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -72,8 +71,8 @@ public class EnvironmentBundleCreator {
         }
     }
 
-    public String createFullBundleAsString(Map<String, String> environmentProperties,
-                                   List<File> deploymentBundles) {
+    private String createFullBundleAsString(Map<String, String> environmentProperties,
+                                            List<File> deploymentBundles) {
         Bundle fullBundle = entityBundleLoader.load(deploymentBundles);
         environmentBundleBuilder.build(fullBundle, environmentProperties);
 
@@ -100,7 +99,7 @@ public class EnvironmentBundleCreator {
         File[] templatizedBundles = ofNullable(templatizedFolder.listFiles((dir, name) -> name.endsWith(".bundle"))).orElse(new File[0]);
         processDeploymentBundles(
                 environmentBundle,
-                stream(templatizedBundles).map(FileTemplatizedBundle::new).collect(toList()),
+                stream(templatizedBundles).map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName()))).collect(toList()),
                 mode
         );
 

@@ -31,11 +31,11 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_BY;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_TO;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.junit.jupiter.api.Assertions.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 
 class PolicyEntityBuilderTest {
 
@@ -68,7 +68,7 @@ class PolicyEntityBuilderTest {
         policyElement.appendChild(encassElement);
         document.appendChild(policyElement);
 
-        policy.setPolicyXML(DocumentFileUtils.INSTANCE.elementToString(document.getDocumentElement()));
+        policy.setPolicyXML(DocumentTools.INSTANCE.elementToString(document.getDocumentElement()));
         policy.setParentFolder(Folder.ROOT_FOLDER);
         policy.setGuid("policyGuid");
         policy.setId("policyID");

@@ -62,7 +62,7 @@ class BundleEnvironmentValidator {
         if (propertyElements.stream().anyMatch(p -> FAIL_ON_NEW.equals(p.getAttribute(ATTRIBUTE_KEY)) && Boolean.valueOf(getSingleChildElementTextContent(p, BOOLEAN_VALUE)))) {
             boolean mapByName = propertyElements.stream().anyMatch(p -> MAP_BY.equals(p.getAttribute(ATTRIBUTE_KEY)) && MappingProperties.NAME.equals(getSingleChildElementTextContent(p, STRING_VALUE)));
             if (!mapByName) {
-                throw new DeploymentBundleException("Expected mapping to be map by name: " + documentFileUtils.elementToString(mapping));
+                throw new DeploymentBundleException("Expected mapping to be map by name: " + documentTools.elementToString(mapping));
             }
             List<Element> mapToProperties = propertyElements.stream().filter(p -> MAP_TO.equals(p.getAttribute(ATTRIBUTE_KEY))).collect(Collectors.toList());
             String mapToName = getSingleChildElementTextContent(mapToProperties.get(0), STRING_VALUE);

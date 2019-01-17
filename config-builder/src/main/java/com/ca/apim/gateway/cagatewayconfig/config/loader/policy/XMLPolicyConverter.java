@@ -7,7 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.config.loader.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;
@@ -21,11 +21,11 @@ import java.io.PipedOutputStream;
 public class XMLPolicyConverter implements PolicyConverter {
     public static final String EXTENSION = ".xml";
 
-    private final DocumentFileUtils documentFileUtils;
+    private final DocumentTools documentTools;
 
     @Inject
-    public XMLPolicyConverter(DocumentFileUtils documentFileUtils) {
-        this.documentFileUtils = documentFileUtils;
+    public XMLPolicyConverter(DocumentTools documentTools) {
+        this.documentTools = documentTools;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class XMLPolicyConverter implements PolicyConverter {
     // Should not close the input stream since we are returning it. It should be auto closed by the caller
     public InputStream convertFromPolicyElement(Element policy) {
         final PipedOutputStream out = new PipedOutputStream();
-        new Thread(() -> documentFileUtils.printXML(policy, out, false)).start();
+        new Thread(() -> documentTools.printXML(policy, out, false)).start();
         try {
             return new PipedInputStream(out);
         } catch (IOException e) {

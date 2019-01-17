@@ -127,7 +127,13 @@ class EnvironmentCreatorApplicationTest {
                 .put("ENV.CONTEXT_VARIABLE_PROPERTY.anotherEnvVar", "context-variable-value")
                 .build();
 
-        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath()).run();
+        new EnvironmentCreatorApplication(
+                environmentProperties,
+                testTemplatizedBundlesFolder.getPath(),
+                testDetemplatizedBundlesFolder.getPath(),
+                keyStoreFolder.getPath(),
+                privateKeyFolder.getPath()
+        ).run();
 
         File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
         assertTrue(environmentBundleFile.exists());

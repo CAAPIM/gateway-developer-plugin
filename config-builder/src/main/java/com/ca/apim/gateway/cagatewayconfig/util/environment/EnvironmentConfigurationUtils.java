@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentExcepti
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ public class EnvironmentConfigurationUtils {
     private final JsonTools jsonTools;
     private final EntityLoaderRegistry entityLoaderRegistry;
 
+    @Inject
     EnvironmentConfigurationUtils(JsonTools jsonTools, EntityLoaderRegistry entityLoaderRegistry) {
         this.jsonTools = jsonTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
