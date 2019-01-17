@@ -7,8 +7,6 @@ addons:
     token:
       secure: $SONAR_TOKEN
 #  srcclr: true
-script:
-  - ./gradlew sonarqube
 branches:
   only:
   - master
