@@ -33,7 +33,7 @@ public class PolicyConverterRegistry {
             .anyMatch(converter -> fileName.endsWith(converter.getPolicyTypeExtension()));
 
         if (!isValidPolicyExtension) {
-            LOGGER.log(Level.WARNING, "Unknown policy file extension for file: " + fileName);
+            LOGGER.log(Level.WARNING, "Unknown policy file extension for file: {0}", fileName);
         }
 
         return isValidPolicyExtension;
