@@ -9,12 +9,14 @@ package com.ca.apim.gateway.cagatewayconfig.util.xml;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
@@ -235,6 +237,25 @@ public class DocumentUtils {
         Document document = documentTools.parse(string);
         documentTools.cleanup(document);
         return document;
+    }
+
+    /**
+     * Copy a list of child nodes from one element to other document, appending into specified element.
+     *
+     * @param from element source of nodes
+     * @param nodeName name of the nodes that will be copied
+     * @param destination destination document where the nodes have to be copied
+     * @param appendInto element to append new nodes into
+     * @param approvingFunction function to be applied to the element prior to cloning to check if there is approved for cloning and copying
+     */
+    public static void copyNodes(Element from, String nodeName, Document destination, Element appendInto, @Nullable Function<Element, Boolean> approvingFunction) {
+        getChildElements(from, nodeName).forEach(child -> {
+            if (approvingFunction == null || approvingFunction.apply(child)) {
+                final Node cloned = child.cloneNode(true);
+                destination.adoptNode(cloned);
+                appendInto.appendChild(cloned);
+            }
+        });
     }
 
     /**

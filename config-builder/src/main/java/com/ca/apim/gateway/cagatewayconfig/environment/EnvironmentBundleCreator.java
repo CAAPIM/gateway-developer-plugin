@@ -9,11 +9,13 @@ package com.ca.apim.gateway.cagatewayconfig.environment;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.FileTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,12 +25,16 @@ import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.Arrays.stream;
 import static java.util.Optional.ofNullable;
@@ -42,21 +48,21 @@ public class EnvironmentBundleCreator {
 
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
-    private final EntityBundleLoader entityBundleLoader;
     private final EnvironmentBundleBuilder environmentBundleBuilder;
     private final BundleEntityBuilder bundleEntityBuilder;
+    private final FileUtils fileUtils;
 
     @Inject
     EnvironmentBundleCreator(DocumentTools documentTools,
                              DocumentFileUtils documentFileUtils,
-                             EntityBundleLoader entityBundleLoader,
                              EnvironmentBundleBuilder environmentBundleBuilder,
-                             BundleEntityBuilder bundleEntityBuilder) {
+                             BundleEntityBuilder bundleEntityBuilder,
+                             FileUtils fileUtils) {
         this.documentTools = documentTools;
         this.documentFileUtils = documentFileUtils;
-        this.entityBundleLoader = entityBundleLoader;
         this.environmentBundleBuilder = environmentBundleBuilder;
         this.bundleEntityBuilder = bundleEntityBuilder;
+        this.fileUtils = fileUtils;
     }
 
     public void createFullBundle(Map<String, String> environmentProperties,
@@ -73,18 +79,46 @@ public class EnvironmentBundleCreator {
 
     private String createFullBundleAsString(Map<String, String> environmentProperties,
                                             List<File> deploymentBundles) {
-        Bundle fullBundle = entityBundleLoader.load(deploymentBundles);
-        environmentBundleBuilder.build(fullBundle, environmentProperties);
+        // load all deployment bundles to strings
+        List<TemplatizedBundle> templatizedBundles = deploymentBundles.stream().map(f -> new StringTemplatizedBundle(f.getName(), fileUtils.getFileAsString(f))).collect(toList());
 
-        final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
-        final Document document = documentBuilder.newDocument();
-        Element bundleElement = bundleEntityBuilder.build(fullBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
-        String bundleString = documentTools.elementToString(bundleElement);
+        // generate the environment one
+        Bundle environmentBundle = new Bundle();
+        environmentBundleBuilder.build(environmentBundle, environmentProperties);
 
         // validate and detemplatize
-        TemplatizedBundle templatizedBundle = new StringTemplatizedBundle("full-bundle.bundle", bundleString);
-        processTemplatizedBundle(templatizedBundle, new BundleEnvironmentValidator(fullBundle), new BundleDetemplatizer(fullBundle), PLUGIN);
-        return templatizedBundle.getContents();
+        processDeploymentBundles(environmentBundle, templatizedBundles, PLUGIN);
+
+        // generate the environment bundle
+        final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
+        final Document document = documentBuilder.newDocument();
+        Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
+        Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
+        Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
+
+        // store Set of elements previously added so avoiding repetition in the resulting bundle
+        Set<String> addedElements = new HashSet<>();
+
+        // merge the deployment bundles into the environment one to get the full bundle
+        templatizedBundles.forEach(tb -> {
+            try {
+                final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
+                copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> addedElements.add(buildBundleItemKey(item)));
+                copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> addedElements.contains(buildBundleMappingKey(mapping)));
+            } catch (DocumentParseException e) {
+                throw new EntityBuilderException("Unable to read bundle " + tb.getName(), e);
+            }
+        });
+
+        return documentTools.elementToString(bundleElement);
+    }
+
+    private static String buildBundleItemKey(Element item) {
+        return getSingleChildElementTextContent(item, ID) + ":" + getSingleChildElementTextContent(item, TYPE);
+    }
+
+    private static String buildBundleMappingKey(Element mapping) {
+        return mapping.getAttribute(ATTRIBUTE_SRCID) + ":" + mapping.getAttribute(ATTRIBUTE_TYPE);
     }
 
     public Bundle createEnvironmentBundle(Map<String, String> environmentProperties,
