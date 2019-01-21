@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
+import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -21,7 +21,6 @@ import javax.inject.Inject;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
-import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule.getInstance;
 
 /**
@@ -61,9 +60,9 @@ public class BuildFullBundleTask extends DefaultTask {
     public void perform() {
         final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrNull());
 
-        final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
+        final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
         final String bundleFileName = getProject().getName() + '-' + getProject().getVersion() + "-full.bundle";
-        environmentBundleCreator.createFullBundle(
+        fullBundleCreator.createFullBundle(
                 environmentValues,
                 filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),
                 into.getAsFile().get().getPath(),
