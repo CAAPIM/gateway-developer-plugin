@@ -106,10 +106,11 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     private static BuildFullBundleTask createBuildFullBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
         // Create build-full-bundle task
         final BuildFullBundleTask buildFullBundleTask = project.getTasks().create(BUILD_FULL_BUNDLE, BuildFullBundleTask.class, t -> {
-            t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
             t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
+        project.afterEvaluate(p ->
+                buildFullBundleTask.getOutputBundle().set(new File(pluginConfig.getBuiltEnvironmentBundleDir().getAsFile().get(), p.getName() + '-' + p.getVersion() + "-full.bundle")));
         buildFullBundleTask.dependsOn(buildDeploymentBundleTask);
         return buildFullBundleTask;
     }

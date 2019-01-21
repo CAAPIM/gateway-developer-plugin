@@ -22,8 +22,8 @@ import java.io.File;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.processDeploymentBundles;
-import static java.util.Arrays.stream;
-import static java.util.Optional.ofNullable;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static java.util.stream.Collectors.toList;
 
 @Singleton
@@ -53,11 +53,9 @@ public class EnvironmentBundleCreator {
         Bundle environmentBundle = new Bundle();
         environmentBundleBuilder.build(environmentBundle, environmentProperties);
 
-        File templatizedFolder = new File(templatizedBundleFolderPath);
-        File[] templatizedBundles = ofNullable(templatizedFolder.listFiles((dir, name) -> name.endsWith(".bundle"))).orElse(new File[0]);
         processDeploymentBundles(
                 environmentBundle,
-                stream(templatizedBundles).map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName()))).collect(toList()),
+                collectFiles(templatizedBundleFolderPath, BUNDLE_EXTENSION).stream().map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName()))).collect(toList()),
                 mode
         );
 

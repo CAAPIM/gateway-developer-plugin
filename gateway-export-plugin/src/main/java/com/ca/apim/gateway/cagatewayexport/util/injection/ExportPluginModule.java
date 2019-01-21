@@ -20,6 +20,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
+import com.ca.apim.gateway.cagatewayexport.util.http.GatewayClient;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.AbstractModule;
@@ -58,6 +59,7 @@ public class ExportPluginModule extends AbstractModule {
         bind(JsonTools.class).toInstance(JsonTools.INSTANCE);
         bind(DocumentFileUtils.class).toInstance(DocumentFileUtils.INSTANCE);
         bind(PolicyXMLSimplifier.class).toInstance(PolicyXMLSimplifier.INSTANCE);
+        bind(GatewayClient.class).toInstance(GatewayClient.INSTANCE);
 
         // bind all entity linkers to the module
         Multibinder<EntitiesLinker> linkersBinder = newSetBinder(binder(), EntitiesLinker.class);
@@ -94,6 +96,10 @@ public class ExportPluginModule extends AbstractModule {
 
     public static Injector getInjector() {
         return ofNullable(injector).orElseGet(ExportPluginModule::create);
+    }
+
+    public static <T> T getInstance(Class<T> serviceClass) {
+        return getInjector().getInstance(serviceClass);
     }
 
     @VisibleForTesting

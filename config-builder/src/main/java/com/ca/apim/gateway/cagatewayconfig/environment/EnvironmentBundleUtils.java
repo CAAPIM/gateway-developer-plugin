@@ -9,13 +9,15 @@ package com.ca.apim.gateway.cagatewayconfig.environment;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import org.w3c.dom.Element;
 
+import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.ATTRIBUTE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Optional.ofNullable;
 
 class EnvironmentBundleUtils {
 

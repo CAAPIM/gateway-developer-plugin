@@ -7,32 +7,39 @@
 package com.ca.apim.gateway.cagatewayexport.util.http;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContextBuilder;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.logging.Level;
+import java.security.cert.X509Certificate;
 import java.util.logging.Logger;
 
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.Base64.getEncoder;
+import static java.util.logging.Level.FINE;
+import static java.util.logging.Level.SEVERE;
+import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.http.auth.AuthScope.ANY;
+import static org.apache.http.impl.client.HttpClientBuilder.create;
 
 public class GatewayClient {
 
@@ -43,91 +50,88 @@ public class GatewayClient {
     public static final GatewayClient INSTANCE = new GatewayClient();
 
     /**
-     * Make API Calls using the given API Caller.
+     * Make API Calls using the given RequestBuilder to get request configuration.
      *
-     * @param apiCaller The API Caller to make API calls from
-     * @param userName  The user name for the gateway user.
-     * @param password  The password for the gateway user.
-     */
-    public void makeGatewayAPICallsNoReturn(final APICallVoid apiCaller, final String userName, final String password) {
-        makeGatewayAPICallsWithReturn(c -> {
-            apiCaller.apply(c);
-            return Void.TYPE;
-        }, userName, password);
-    }
-
-    /**
-     * Make API Calls using the given API Caller.
-     *
-     * @param apiCaller The API Caller to make API calls from
-     * @param userName  The user name for the gateway user.
-     * @param password  The password for the gateway user.
-     * @param <R>       The return type of the APICaller
+     * @param requestBuilder The Request Builder where method and URI have to be previously set
+     * @param userName       The user name for the gateway user.
+     * @param password       The password for the gateway user.
      * @return Returns the result from the api caller
      */
-    public <R> R makeGatewayAPICallsWithReturn(final APICall<R> apiCaller, final String userName, final String password) {
-        try (CloseableHttpClient client = GatewayClient.buildHTTPSClient(userName, password)) {
-            return apiCaller.apply(client);
+    public InputStream makeGatewayAPICall(final RequestBuilder requestBuilder, final String userName, final String password) {
+        try (CloseableHttpClient client = buildHTTPSClient(userName, password)) {
+            return makeAPICall(client, requestBuilder);
         } catch (IOException e) {
             throw new GatewayClientException("Exception making API calls", e);
         }
     }
 
-    /**
-     * Makes an API call using the given http client
-     *
-     * @param client The http client to make the API call using
-     * @param uri    The uri of the API
-     * @return The response body stream from the API response
-     */
-    public InputStream makeAPICall(final HttpClient client, final String uri) {
-        final HttpResponse response;
-        final HttpGet httpGet = new HttpGet(uri);
-
+    private static InputStream makeAPICall(final HttpClient client, final RequestBuilder requestBuilder) throws IOException {
         // Generate a random passphrase with any type of char and using a secure random generator, in order to encrypt the secrets.
         final String encodedPassphrase = random(64, 0, 0, true, true, null, RANDOM);
-        httpGet.addHeader(KEY_PASSPHRASE_HEADER, getEncoder().encodeToString(encodedPassphrase.getBytes(defaultCharset())));
+        requestBuilder.addHeader(KEY_PASSPHRASE_HEADER, getEncoder().encodeToString(encodedPassphrase.getBytes(defaultCharset())));
+
+        final HttpResponse response;
+        final HttpUriRequest request = requestBuilder.build();
+        final String uri = request.getURI().toString();
 
         try {
-            response = client.execute(httpGet);
+            response = client.execute(request);
         } catch (IOException e) {
-            throw new GatewayClientException("Could not make an API Call to: " + uri, e);
+            throw new GatewayClientException("Could not make an API Call (" + request.getMethod() + ") to: " + uri, e);
         }
 
         final int statusCode = response.getStatusLine().getStatusCode();
 
-        LOGGER.log(Level.FINE, "Status code is: {0} for uri: {1}", new Object[]{statusCode, uri});
-        final InputStream inputStream;
+        LOGGER.log(FINE, "Status code is: {0} for uri: {1}", new Object[]{ statusCode,  uri });
+        final InputStream responseStream;
         try {
-            inputStream = response.getEntity().getContent();
+            responseStream = response.getEntity().getContent();
         } catch (IOException e) {
-            throw new GatewayClientException("Could not retrieve response body from API Call to: " + uri, e);
+            throw new GatewayClientException("Could not retrieve response body from API Call (" + request.getMethod() + ") to: " + uri, e);
         }
-        if (HttpStatus.SC_OK != statusCode) {
-            throw new GatewayClientException("API Call to gateway returned status " + statusCode + " for uri: " + uri);
+
+        byte[] responseBytes = toByteArray(responseStream);
+        if (SC_OK != statusCode) {
+            throw new GatewayClientException("API Call (" + request.getMethod() + ") to gateway returned status " + statusCode + " for uri: " + uri + "\nResponse:\n\n" +new String(responseBytes));
         }
-        return inputStream;
+        return new ByteArrayInputStream(responseBytes);
     }
 
     private static CloseableHttpClient buildHTTPSClient(final String userName, final String password) {
         final CredentialsProvider provider = new BasicCredentialsProvider();
         final UsernamePasswordCredentials credentials
                 = new UsernamePasswordCredentials(userName, password);
-        provider.setCredentials(AuthScope.ANY, credentials);
+        provider.setCredentials(ANY, credentials);
         final SSLContext sslContext;
         try {
-            sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (arg0, arg1) -> true).build();
+            sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (chain, authType) -> true).build();
+            sslContext.init(null,
+                    new TrustManager[]{new X509TrustManager() {
+                        @Override
+                        @SuppressWarnings("squid:S4424")
+                        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
+                            //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
+                        }
+
+                        @Override
+                        @SuppressWarnings("squid:S4424")
+                        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
+                            //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
+                        }
+
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return new X509Certificate[0];
+                        }
+                    }}, null);
         } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
             throw new GatewayClientException("Unexpected exception building a gateway https client", e);
         }
-        return HttpClientBuilder.create().setDefaultCredentialsProvider(provider).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).setSSLContext(sslContext).build();
+        return create()
+                .setDefaultCredentialsProvider(provider)
+                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+                .setSSLContext(sslContext)
+                .build();
     }
 
-    public interface APICallVoid {
-        void apply(HttpClient httpClient) throws IOException;
-    }
-
-    public interface APICall<R> {
-        R apply(HttpClient httpClient) throws IOException;
-    }
 }

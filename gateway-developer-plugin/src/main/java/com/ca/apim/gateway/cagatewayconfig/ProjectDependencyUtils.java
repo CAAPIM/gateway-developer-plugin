@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.BUNDLE_EXTENSION;
 import static java.util.stream.Collectors.toCollection;
 
 /**
@@ -22,7 +23,6 @@ import static java.util.stream.Collectors.toCollection;
  */
 public class ProjectDependencyUtils {
 
-    private static final String BUNDLE = ".bundle";
     private static final String AAR = ".aar";
     private static final String JAR = ".jar";
 
@@ -36,7 +36,7 @@ public class ProjectDependencyUtils {
      */
     @SuppressWarnings("squid:S1319") // we need linkedlist here explicitly
     public static LinkedList<File> filterBundleFiles(Collection<File> files) {
-        return filter(files, BUNDLE, LinkedList::new);
+        return filter(files, BUNDLE_EXTENSION, LinkedList::new);
     }
 
     /**
