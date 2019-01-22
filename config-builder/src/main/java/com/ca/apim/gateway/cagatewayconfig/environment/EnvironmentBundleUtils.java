@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Element;
 
 import java.io.File;
@@ -19,7 +20,10 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Optional.ofNullable;
 
-class EnvironmentBundleUtils {
+/**
+ * Utility methods for generating bundles with environment configurations.
+ */
+public class EnvironmentBundleUtils {
 
     private static final Logger logger = Logger.getLogger(EnvironmentBundleUtils.class.getName());
 
@@ -48,11 +52,13 @@ class EnvironmentBundleUtils {
         templatizedBundle.writeContents(detemplatizedBundle.toString());
     }
 
-    static String buildBundleItemKey(Element item) {
+    @VisibleForTesting
+    public static String buildBundleItemKey(Element item) {
         return getSingleChildElementTextContent(item, ID) + ":" + getSingleChildElementTextContent(item, TYPE);
     }
 
-    static String buildBundleMappingKey(Element mapping) {
+    @VisibleForTesting
+    public static String buildBundleMappingKey(Element mapping) {
         return mapping.getAttribute(ATTRIBUTE_SRCID) + ":" + mapping.getAttribute(ATTRIBUTE_TYPE);
     }
 }

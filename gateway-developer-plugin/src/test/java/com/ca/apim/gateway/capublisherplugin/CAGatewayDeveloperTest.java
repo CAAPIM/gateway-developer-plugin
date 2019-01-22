@@ -6,6 +6,9 @@
 
 package com.ca.apim.gateway.capublisherplugin;
 
+import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -18,6 +21,7 @@ import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,7 +34,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleItemKey;
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleMappingKey;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.nio.charset.Charset.defaultCharset;
+import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -343,5 +352,89 @@ class CAGatewayDeveloperTest {
         File builtBundleFile = new File(buildGatewayBundlesDir, projectName + projectVersion + ".bundle");
         assertTrue(builtBundleFile.isFile());
         return buildGatewayDir;
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingFullBundle(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException, DocumentParseException {
+        String projectFolder = "example-project-generating-environment";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments(
+                        "build-full-bundle",
+                        "--stacktrace",
+                        "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DpasswordGateway=7layer",
+                        "-DldapConfig={" +
+                                "    \"type\": \"BIND_ONLY_LDAP\"," +
+                                "    \"identityProviderDetail\": {" +
+                                "      \"serverUrls\": [" +
+                                "        \"ldaps://1.2.3.4:636\"" +
+                                "      ]," +
+                                "      \"useSslClientAuthentication\": true," +
+                                "      \"bindPatternPrefix\": \"\"," +
+                                "      \"bindPatternSuffix\": \"\"" +
+                                "    }" +
+                                "  }",
+                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.yml")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-full-bundle")).getOutcome());
+
+        File buildDir = new File(testProjectDir, "build");
+        File buildGatewayDir = validateBuildDirExceptGW7File(projectFolder, buildDir);
+
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), projectFolder + projectVersion + ".bundle");
+        assertTrue(builtBundleFile.isFile());
+        final Element bundleElement = DocumentTools.INSTANCE.parse(builtBundleFile).getDocumentElement();
+        final Set<String> bundleItemsIds = getChildElements(getSingleChildElement(bundleElement, REFERENCES), ITEM).stream().map(EnvironmentBundleUtils::buildBundleItemKey).collect(toSet());
+        final Set<String> bundleMappingsIds = getChildElements(getSingleChildElement(bundleElement, MAPPINGS), MAPPING).stream().map(EnvironmentBundleUtils::buildBundleMappingKey).collect(toSet());
+        final Element dependencyBundle = DocumentTools.INSTANCE.parse(new File(new File(testProjectDir, "lib"), "my-bundle-1.0.00.bundle")).getDocumentElement();
+        bundleItemsIds.addAll(getChildElements(getSingleChildElement(dependencyBundle, REFERENCES), ITEM).stream().map(EnvironmentBundleUtils::buildBundleItemKey).collect(toSet()));
+        bundleMappingsIds.addAll(getChildElements(getSingleChildElement(dependencyBundle, MAPPINGS), MAPPING).stream().map(EnvironmentBundleUtils::buildBundleMappingKey).collect(toSet()));
+
+        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), projectFolder + projectVersion + "-full.bundle");
+        assertTrue(builtFullBundleFile.isFile());
+
+        final Element fullBundleElement = DocumentTools.INSTANCE.parse(builtFullBundleFile).getDocumentElement();
+        getChildElements(getSingleChildElement(fullBundleElement, REFERENCES), ITEM).forEach(e -> {
+            boolean isFromDeployment = bundleItemsIds.remove(buildBundleItemKey(e));
+            if (!isFromDeployment) {
+                String type = getSingleChildElementTextContent(e, TYPE);
+                String entityName = getSingleChildElementTextContent(e, NAME);
+                switch (type) {
+                    case "SECURE_PASSWORD": assertEquals("gateway", entityName); break;
+                    case "ID_PROVIDER_CONFIG": assertEquals("Tacoma MSAD", entityName); break;
+                    case "JDBC_CONNECTION": assertEquals("MySQL", entityName); break;
+                    case "SSG_CONNECTOR": break;
+                    default:
+                        fail("Unexpected environment value:\n" + DocumentTools.INSTANCE.elementToString(e));
+                }
+            }
+        });
+        assertTrue(bundleItemsIds.isEmpty(), "Items on deployment bundle not found on full bundle: " + bundleItemsIds.toString());
+
+        getChildElements(getSingleChildElement(fullBundleElement, MAPPINGS), MAPPING).forEach(e -> {
+            boolean isFromDeployment = bundleMappingsIds.remove(buildBundleMappingKey(e));
+            if (!isFromDeployment) {
+                String type = e.getAttribute(ATTRIBUTE_TYPE);
+                switch (type) {
+                    case "SECURE_PASSWORD":
+                    case "ID_PROVIDER_CONFIG":
+                    case "JDBC_CONNECTION":
+                    case "SSG_CONNECTOR": break;
+                    default:
+                        fail("Unexpected environment mapping: " + DocumentTools.INSTANCE.elementToString(e));
+                }
+            }
+        });
+        assertTrue(bundleItemsIds.isEmpty(), "Mappings on deployment bundle not found on full bundle: " + bundleMappingsIds.toString());
     }
 }

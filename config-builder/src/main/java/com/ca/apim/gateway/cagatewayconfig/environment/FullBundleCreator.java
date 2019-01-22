@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
@@ -89,14 +88,18 @@ public class FullBundleCreator {
         Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
 
         // store Set of elements previously added so avoiding repetition in the resulting bundle
-        Set<String> addedElements = new HashSet<>();
+        Set<String> addedItems = new HashSet<>();
+        Set<String> addedMappings = new HashSet<>();
 
         // merge the deployment bundles into the environment one to get the full bundle
         templatizedBundles.forEach(tb -> {
             try {
                 final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
-                copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> addedElements.add(buildBundleItemKey(item)));
-                copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> addedElements.contains(buildBundleMappingKey(mapping)));
+                copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
+                copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
+                    final String key = buildBundleMappingKey(mapping);
+                    return addedItems.contains(key) && addedMappings.add(key);
+                });
             } catch (DocumentParseException e) {
                 throw new EntityBuilderException("Unable to read bundle " + tb.getName(), e);
             }
