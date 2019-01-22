@@ -17,6 +17,7 @@ import org.w3c.dom.NodeList;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
@@ -248,9 +249,9 @@ public class DocumentUtils {
      * @param appendInto element to append new nodes into
      * @param approvingFunction function to be applied to the element prior to cloning to check if there is approved for cloning and copying
      */
-    public static void copyNodes(Element from, String nodeName, Document destination, Element appendInto, @Nullable Function<Element, Boolean> approvingFunction) {
+    public static void copyNodes(Element from, String nodeName, Document destination, Element appendInto, @Nullable Predicate<Element> approvingFunction) {
         getChildElements(from, nodeName).forEach(child -> {
-            if (approvingFunction == null || approvingFunction.apply(child)) {
+            if (approvingFunction == null || approvingFunction.test(child)) {
                 final Node cloned = child.cloneNode(true);
                 destination.adoptNode(cloned);
                 appendInto.appendChild(cloned);

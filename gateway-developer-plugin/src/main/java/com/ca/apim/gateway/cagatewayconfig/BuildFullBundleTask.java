@@ -8,8 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;

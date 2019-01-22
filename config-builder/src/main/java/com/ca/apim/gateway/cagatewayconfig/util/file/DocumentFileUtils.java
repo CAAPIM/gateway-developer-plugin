@@ -9,16 +9,12 @@ package com.ca.apim.gateway.cagatewayconfig.util.file;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Element;
 
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.closeQuietly;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class DocumentFileUtils {
 

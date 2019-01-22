@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -27,7 +26,6 @@ class BundleEnvironmentValidator {
 
     private final Bundle environmentBundle;
     private DocumentTools documentTools = DocumentTools.INSTANCE;
-    private DocumentFileUtils documentFileUtils = DocumentFileUtils.INSTANCE;
 
     BundleEnvironmentValidator(Bundle environmentBundle) {
         this.environmentBundle = environmentBundle;

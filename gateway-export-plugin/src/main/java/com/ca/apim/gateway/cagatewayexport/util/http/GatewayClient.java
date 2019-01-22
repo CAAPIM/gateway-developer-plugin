@@ -19,8 +19,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.ssl.SSLContextBuilder;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,13 +26,12 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.ConnectionUtils.initSSLContext;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.Base64.getEncoder;
 import static java.util.logging.Level.FINE;
-import static java.util.logging.Level.SEVERE;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang3.RandomStringUtils.random;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -105,25 +102,7 @@ public class GatewayClient {
         final SSLContext sslContext;
         try {
             sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (chain, authType) -> true).build();
-            sslContext.init(null,
-                    new TrustManager[]{new X509TrustManager() {
-                        @Override
-                        @SuppressWarnings("squid:S4424")
-                        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
-                            //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
-                        }
-
-                        @Override
-                        @SuppressWarnings("squid:S4424")
-                        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
-                            //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
-                        }
-
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                    }}, null);
+            initSSLContext(sslContext);
         } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
             throw new GatewayClientException("Unexpected exception building a gateway https client", e);
         }
