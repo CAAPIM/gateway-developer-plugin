@@ -50,6 +50,7 @@ public class BundleElementNames {
     public static final String ID = "l7:Id";
     public static final String TYPE = "l7:Type";
     public static final String GUID = "l7:Guid";
+    public static final String ENABLED = "l7:Enabled";
 
     // Service
     public static final String SERVICE = "l7:Service";
@@ -97,7 +98,6 @@ public class BundleElementNames {
 
     // Listen Port Elements
     public static final String LISTEN_PORT = "l7:ListenPort";
-    public static final String ENABLED = "l7:Enabled";
     public static final String PROTOCOL = "l7:Protocol";
     public static final String PORT = "l7:Port";
     public static final String ENABLED_FEATURES = "l7:EnabledFeatures";
@@ -160,6 +160,16 @@ public class BundleElementNames {
     public static final String CRON_EXPRESSION = "l7:CronExpression";
     public static final String EXECUTE_ON_CREATE = "l7:ExecuteOnCreate";
 
+    // JMS Destination
+    public static final String JMS_DESTINATION = "l7:JMSDestination";
+    public static final String JMS_DESTINATION_DETAIL = "l7:JMSDestinationDetail";
+    public static final String JMS_DESTINATION_NAME = "l7:DestinationName";
+    public static final String INBOUND = "l7:Inbound";
+    public static final String TEMPLATE = "l7:Template";
+    public static final String JMS_CONNECTION = "l7:JMSConnection";
+    public static final String JMS_PROVIDER_TYPE = "l7:ProviderType";
+    public static final String CONTEXT_PROPERTIES_TEMPLATE = "l7:ContextPropertiesTemplate";
+    
     private BundleElementNames() {
         //
     }

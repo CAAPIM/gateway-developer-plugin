@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.STORED_PASSWORD_REF_FORMAT;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -34,7 +35,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 @Singleton
 public class JdbcConnectionEntityBuilder implements EntityBuilder {
 
-    private static final String STORED_PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
     private static final Integer ORDER = 1000;
 
     private final IdGenerator idGenerator;

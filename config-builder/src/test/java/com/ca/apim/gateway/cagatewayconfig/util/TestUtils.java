@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_NAME;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.STORED_PASSWORD_REF_FORMAT;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -138,7 +139,7 @@ public class TestUtils {
 
         Map<String, Object> connectionProperties = new HashMap<>();
         connectionProperties.put(PROPERTY_USER, "gateway");
-        connectionProperties.put(PROPERTY_PASSWORD, String.format("${secpass.%s.plaintext}", "gateway"));
+        connectionProperties.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, "gateway"));
 
         jdbcElement.appendChild(createElementWithChildren(
                 document,

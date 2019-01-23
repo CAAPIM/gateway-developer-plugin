@@ -37,6 +37,7 @@ public class PropertyConstants {
 
     // Property names
     public static final String PROPERTY_USER = "user";
+    public static final String PROPERTY_USERNAME = "username";
     public static final String PROPERTY_PASSWORD = "password";
     public static final String PROPERTY_MIN_POOL_SIZE = "minimumPoolSize";
     public static final String PROPERTY_MAX_POOL_SIZE = "maximumPoolSize";
@@ -49,5 +50,53 @@ public class PropertyConstants {
     public static final String TAG_VALUE_POLICY = "policy";
     public static final String TAG_VALUE_WSDL = "wsdl";
 
+    // JMS Destination property constants
+    public static final String JNDI_INITIAL_CONTEXT_FACTORY_CLASSNAME = "jndi.initialContextFactoryClassname";
+    public static final String JNDI_PROVIDER_URL = "jndi.providerUrl";
+    public static final String JNDI_USERNAME = "java.naming.security.principal";
+    public static final String JNDI_PASSWORD = "java.naming.security.credentials";
+
+    public static final String DESTINATION_TYPE = "type";
+    public static final String CONNECTION_FACTORY_NAME = "queue.connectionFactoryName";
+    
+    public static final String REPLY_TYPE = "replyType";
+    public static final String REPLY_QUEUE_NAME = "replyToQueueName";
+    public static final String USE_REQUEST_CORRELATION_ID = "useRequestCorrelationId";
+
+    public static final String JMS_PROPS_PREFIX = "com.l7tech.server.jms.prop.";
+    public static final String TIBCO_JMS_PREFIX = "com.tibco.tibjms.";
+    
+    // JMS Destination - inbound specific
+    public static final String INBOUND_ACKNOWLEDGEMENT_TYPE = "inbound.acknowledgementType";
+    public static final String IS_HARDWIRED_SERVICE = JMS_PROPS_PREFIX + "hardwired.service.bool";
+    public static final String HARDWIRED_SERVICE_ID = JMS_PROPS_PREFIX + "hardwired.service.id";
+    public static final String SOAP_ACTION_MSG_PROP_NAME = "com.l7tech.server.jms.soapAction.msgPropName";
+    public static final String CONTENT_TYPE_SOURCE = JMS_PROPS_PREFIX + "contentType.source";
+    public static final String CONTENT_TYPE_VALUE = JMS_PROPS_PREFIX + "contentType.value";
+    public static final String INBOUND_FAILURE_QUEUE_NAME = "inbound.failureQueueName";
+    public static final String IS_DEDICATED_CONSUMER_CONNECTION = JMS_PROPS_PREFIX + "dedicated.consumer.bool";
+    public static final String DEDICATED_CONSUMER_CONNECTION_SIZE = JMS_PROPS_PREFIX + "dedicated.consumer.size";
+    public static final String INBOUND_MAX_SIZE = "inbound.maximumSize";
+
+    public static final String JNDI_CLIENT_AUT_KEYSTORE_ID = JMS_PROPS_PREFIX + "jndi.ssgKeystoreId";
+    public static final String JNDI_CLIENT_AUT_KEYSTORE_ALIAS = JMS_PROPS_PREFIX + "jndi.ssgKeyAlias";
+    public static final String JNDI_CLIENT_AUT_AUTH_IDENTITY = TIBCO_JMS_PREFIX + "naming.ssl_identity";
+    public static final String JNDI_CLIENT_AUT_AUTH_PASSWORD = TIBCO_JMS_PREFIX + "naming.ssl_password";
+
+    public static final String DESTINATION_CLIENT_AUTH_KEYSTORE_ID = JMS_PROPS_PREFIX + "queue.ssgKeystoreId";
+    public static final String DESTINATION_CLIENT_AUTH_KEYSTORE_ALIAS = JMS_PROPS_PREFIX + "queue.ssgKeyAlias";
+    public static final String DESTINATION_CLIENT_AUTH_IDENTITY = TIBCO_JMS_PREFIX + "ssl.identity";
+    public static final String DESTINATION_CLIENT_AUTH_PASSWORD = TIBCO_JMS_PREFIX + "ssl.password";
+    
+    // JMS Destination - outbound specific
+    public static final String OUTBOUND_MESSAGE_TYPE = "outbound.MessageType";
+    public static final String CONNECTION_POOL_ENABLED = JMS_PROPS_PREFIX + "connection.pool.enable";
+    public static final String CONNECTION_POOL_SIZE = JMS_PROPS_PREFIX + "connection.pool.size";
+    public static final String CONNECTION_POOL_MIN_IDLE = JMS_PROPS_PREFIX + "connection.min.idle";
+    public static final String CONNECTION_POOL_MAX_WAIT = JMS_PROPS_PREFIX + "connection.pool.max.wait";
+    public static final String SESSION_POOL_SIZE = JMS_PROPS_PREFIX + "session.pool.size";
+    public static final String SESSION_POOL_MAX_IDLE = JMS_PROPS_PREFIX + "max.session.idle";
+    public static final String SESSION_POOL_MAX_WAIT = JMS_PROPS_PREFIX + "session.pool.max.wait";
+    
     private PropertyConstants() { }
 }

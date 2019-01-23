@@ -115,6 +115,34 @@ class PolicyXMLSimplifierTest {
     }
 
     @Test
+    void simplifyJmsRoutingAssertion() throws DocumentParseException {
+        String id = new IdGenerator().generate();
+        String name = "jms-test";
+        JmsDestination jmsDestination = new JmsDestination.Builder()
+                .id(id)
+                .name(name)
+                .build();
+        Bundle bundle = new Bundle();
+        bundle.addEntity(jmsDestination);
+        Element jmsRoutingAssertionEle = createJmsRoutingAssertion(id, name);
+        policyXMLSimplifier.simplifyJmsRoutingAssertion(bundle, jmsRoutingAssertionEle);
+        
+        assertEquals(name, getSingleChildElementAttribute(jmsRoutingAssertionEle, JMS_ENDPOINT_NAME, STRING_VALUE));
+        assertNull(getSingleChildElement(jmsRoutingAssertionEle, JMS_ENDPOINT_OID, true));
+    }
+
+    @Test
+    void simplifyJmsRoutingAssertionMissingJmsDestination() throws DocumentParseException {
+        String id = new IdGenerator().generate();
+        String name = "jms-test";
+        Element jmsRoutingAssertionEle = createJmsRoutingAssertion(id, name);
+        
+        policyXMLSimplifier.simplifyJmsRoutingAssertion(new Bundle(), jmsRoutingAssertionEle);
+        assertEquals(name, getSingleChildElementAttribute(jmsRoutingAssertionEle, JMS_ENDPOINT_NAME, STRING_VALUE));
+        assertNull(getSingleChildElement(jmsRoutingAssertionEle, JMS_ENDPOINT_OID, true));
+    }
+    
+    @Test
     void simplifyIncludeAssertion() throws DocumentParseException {
         String id = new IdGenerator().generate();
         String testName = "test";
@@ -263,6 +291,17 @@ class PolicyXMLSimplifierTest {
                 AUTHENTICATION,
                 createElementWithAttribute(document, ID_PROV_OID, GOID_VALUE, id),
                 createElementWithAttribute(document, TARGET, "target", "RESPONSE")
+        );
+    }
+    
+    @NotNull
+    private Element createJmsRoutingAssertion(String id, String name) {
+        Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        return createElementWithChildren(
+                document,
+                JMS_ROUTING_ASSERTION,
+                createElementWithAttribute(document, JMS_ENDPOINT_OID, GOID_VALUE, id),
+                createElementWithAttribute(document, JMS_ENDPOINT_NAME, STRING_VALUE, name)
         );
     }
 

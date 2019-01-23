@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.STORED_PASSWORD_REF_FORMAT;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -102,7 +103,7 @@ class JdbcConnectionEntityBuilderTest {
         assertPropertiesContent(
                 ImmutableMap.of(
                         PROPERTY_USER, GATEWAY_USER,
-                        PROPERTY_PASSWORD, "${secpass." + PASSWORD_REF + ".plaintext}"
+                        PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, PASSWORD_REF)
                 ),
                 mapPropertiesElements(getSingleChildElement(extension, CONNECTION_PROPERTIES), CONNECTION_PROPERTIES)
         );

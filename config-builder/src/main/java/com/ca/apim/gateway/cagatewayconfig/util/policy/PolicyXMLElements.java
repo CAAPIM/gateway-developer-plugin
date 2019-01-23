@@ -30,6 +30,9 @@ public class PolicyXMLElements {
     public static final String ID_PROV_OID = "L7p:IdentityProviderOid";
     public static final String ID_PROV_NAME = "L7p:IdentityProviderName";
     public static final String TARGET = "L7p:Target";
+    public static final String JMS_ROUTING_ASSERTION = "L7p:JmsRoutingAssertion";
+    public static final String JMS_ENDPOINT_OID = "L7p:EndpointOid";
+    public static final String JMS_ENDPOINT_NAME = "L7p:EndpointName";
 
     private PolicyXMLElements() {
 
