@@ -95,7 +95,7 @@ public class ExportTask extends DefaultTask {
         try {
             copyInputStreamToFile(
                     gatewayClient.makeGatewayAPICall(
-                            create(METHOD_NAME).setUri(gatewayConnectionProperties.getFullRestmanURL() + exportQuery.get()),
+                            create(METHOD_NAME).setUri(gatewayConnectionProperties.getRestmanBundleEndpoint() + exportQuery.get()),
                             gatewayConnectionProperties.getUserName().get(),
                             gatewayConnectionProperties.getUserPass().get()
                     ),

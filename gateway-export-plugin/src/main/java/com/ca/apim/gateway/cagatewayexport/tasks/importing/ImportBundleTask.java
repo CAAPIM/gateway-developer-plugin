@@ -8,19 +8,15 @@ package com.ca.apim.gateway.cagatewayexport.tasks.importing;
 
 import com.ca.apim.gateway.cagatewayexport.config.GatewayConnectionProperties;
 import com.ca.apim.gateway.cagatewayexport.util.http.GatewayClient;
-import com.ca.apim.gateway.cagatewayexport.util.http.GatewayClientException;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.FileEntity;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
-import java.io.IOException;
 
 import static com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule.getInstance;
-import static java.nio.charset.Charset.defaultCharset;
-import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.client.methods.HttpPut.METHOD_NAME;
 import static org.apache.http.client.methods.RequestBuilder.create;
@@ -64,17 +60,13 @@ public class ImportBundleTask extends DefaultTask {
     @TaskAction
     public void perform() {
         File bundleFile = importFile.getAsFile().get();
-        try {
-            gatewayClient.makeGatewayAPICall(
-                    create(METHOD_NAME)
-                            .setUri(gatewayConnectionProperties.getFullRestmanURL())
-                            .setEntity(new StringEntity(readFileToString(bundleFile, defaultCharset())))
-                            .setHeader(CONTENT_TYPE, "application/xml"),
-                    gatewayConnectionProperties.getUserName().get(),
-                    gatewayConnectionProperties.getUserPass().get()
-            );
-        } catch (IOException e) {
-            throw new GatewayClientException("Could not read file " + bundleFile.getName(), e);
-        }
+        gatewayClient.makeGatewayAPICall(
+                create(METHOD_NAME)
+                        .setUri(gatewayConnectionProperties.getRestmanBundleEndpoint())
+                        .setEntity(new FileEntity(bundleFile))
+                        .setHeader(CONTENT_TYPE, "application/xml"),
+                gatewayConnectionProperties.getUserName().get(),
+                gatewayConnectionProperties.getUserPass().get()
+        );
     }
 }

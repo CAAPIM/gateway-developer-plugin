@@ -17,7 +17,6 @@ import org.w3c.dom.NodeList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,12 +35,6 @@ public class EntityBundleLoader {
     EntityBundleLoader(final DocumentTools documentTools, final BundleEntityLoaderRegistry entityLoaderRegistry) {
         this.documentTools = documentTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
-    }
-
-    public Bundle load(List<File> fileSet) {
-        final Bundle bundle = new Bundle();
-        fileSet.forEach(f -> loadBundleFile(f, bundle));
-        return bundle;
     }
 
     public Bundle load(File dependencyBundlePath) {

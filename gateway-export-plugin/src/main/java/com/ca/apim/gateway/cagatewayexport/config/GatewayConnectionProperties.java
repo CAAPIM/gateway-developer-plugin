@@ -51,7 +51,7 @@ public class GatewayConnectionProperties {
         return userPass;
     }
 
-    public String getFullRestmanURL() {
+    public String getRestmanBundleEndpoint() {
         String fullUrl = url.get();
         if (!fullUrl.endsWith("/")) {
             fullUrl += "/";

@@ -85,6 +85,6 @@ public class EnvironmentConfigurationUtils {
             }
         }
 
-        throw new MissingEnvironmentException("Unable to load environment from specified property: " + o.toString());
+        throw new MissingEnvironmentException("Unable to load environment from specified property '" + o.toString() + "' due to unsupported value, it has to be a text content or a file");
     }
 }
