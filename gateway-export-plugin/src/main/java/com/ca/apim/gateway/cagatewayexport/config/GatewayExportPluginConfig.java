@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport;
+package com.ca.apim.gateway.cagatewayexport.config;
 
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
@@ -29,19 +29,19 @@ public class GatewayExportPluginConfig {
         folderPath = project.getObjects().property(String.class);
     }
 
-    DirectoryProperty getSolutionDir() {
+    public DirectoryProperty getSolutionDir() {
         return solutionDir;
     }
 
-    RegularFileProperty getRawBundle() {
+    public RegularFileProperty getRawBundle() {
         return rawBundle;
     }
 
-    RegularFileProperty getSanitizedBundle() {
+    public RegularFileProperty getSanitizedBundle() {
         return sanitizedBundle;
     }
 
-    Property<Map> getExportEntities() {
+    public Property<Map> getExportEntities() {
         return exportEntities;
     }
 

@@ -6,17 +6,21 @@
 
 package com.ca.apim.gateway.cagatewayexport;
 
+import com.ca.apim.gateway.cagatewayexport.config.GatewayConnectionProperties;
+import com.ca.apim.gateway.cagatewayexport.config.GatewayExportPluginConfig;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundleTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.export.BuildExportQueryTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.export.ExportTask;
-import com.ca.apim.gateway.cagatewayexport.tasks.export.GatewayConnectionProperties;
+import com.ca.apim.gateway.cagatewayexport.tasks.importing.ImportBundleTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.sanitize.SanitizeBundleTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Delete;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.function.Supplier;
 
 public class CAGatewayExport implements Plugin<Project> {
     @Override
@@ -57,6 +61,7 @@ public class CAGatewayExport implements Plugin<Project> {
         });
         explodeBundleTask.dependsOn(sanitizeTask);
 
+        project.getTasks().create("import-bundle", ImportBundleTask.class, t -> t.setGatewayConnectionProperties(gatewayConnectionProperties));
         project.getTasks().create("clean-export", Delete.class, t -> t.delete(pluginConfig.getSolutionDir()));
     }
 
@@ -73,14 +78,14 @@ public class CAGatewayExport implements Plugin<Project> {
     }
 
     private static void setDefaults(final GatewayConnectionProperties gatewayConnectionProperties) {
-        if (!gatewayConnectionProperties.getUrl().isPresent()) {
-            gatewayConnectionProperties.getUrl().set("https://localhost:8443/restman");
-        }
-        if (!gatewayConnectionProperties.getUserName().isPresent()) {
-            gatewayConnectionProperties.getUserName().set("admin");
-        }
-        if (!gatewayConnectionProperties.getUserPass().isPresent()) {
-            gatewayConnectionProperties.getUserPass().set("password");
+        setDefault(gatewayConnectionProperties.getUrl(), () -> "https://localhost:8443/restman");
+        setDefault(gatewayConnectionProperties.getUserName(), () -> "admin");
+        setDefault(gatewayConnectionProperties.getUserPass(), () -> "password");
+    }
+
+    private static <T> void setDefault(Property<T> property, Supplier<T> supplier) {
+        if (!property.isPresent()) {
+            property.set(supplier.get());
         }
     }
 }

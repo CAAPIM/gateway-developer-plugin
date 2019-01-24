@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
@@ -55,11 +54,9 @@ public class PolicyEntityBuilder implements EntityBuilder {
     static final String ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 
     private final DocumentTools documentTools;
-    private final DocumentFileUtils documentFileUtils;
 
     @Inject
-    PolicyEntityBuilder(DocumentFileUtils documentFileUtils, DocumentTools documentTools) {
-        this.documentFileUtils = documentFileUtils;
+    PolicyEntityBuilder(DocumentTools documentTools) {
         this.documentTools = documentTools;
     }
 
@@ -316,7 +313,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Element resourcesElement = document.createElement(RESOURCES);
         Element resourceSetElement = createElementWithAttribute(document, RESOURCE_SET, PROPERTY_TAG, POLICY);
         Element resourceElement = createElementWithAttribute(document, RESOURCE, TYPE, POLICY);
-        resourceElement.setTextContent(documentFileUtils.elementToString(policy.getPolicyDocument()));
+        resourceElement.setTextContent(documentTools.elementToString(policy.getPolicyDocument()));
 
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);

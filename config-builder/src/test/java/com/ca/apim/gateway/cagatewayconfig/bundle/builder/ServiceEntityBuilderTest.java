@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -33,7 +32,7 @@ class ServiceEntityBuilderTest {
 
     @Test
     void buildNoServices() {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
 
@@ -44,7 +43,7 @@ class ServiceEntityBuilderTest {
 
     @Test
     void buildServicesWithoutPolicy() {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
 
@@ -64,7 +63,7 @@ class ServiceEntityBuilderTest {
 
     @Test
     void buildOneServices() throws DocumentParseException {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
 
@@ -95,7 +94,7 @@ class ServiceEntityBuilderTest {
 
     @Test
     void buildOneServicesEncodedPath() throws DocumentParseException {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
 
@@ -126,7 +125,7 @@ class ServiceEntityBuilderTest {
 
     @Test
     void buildTwoServicesSamePolicy() throws DocumentParseException {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
         Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
@@ -153,7 +152,7 @@ class ServiceEntityBuilderTest {
 
     @Test
     void buildOneSoapService() throws DocumentParseException {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
 
@@ -190,7 +189,7 @@ class ServiceEntityBuilderTest {
 
     @Test
     void buildTwoServicesOneSoapOneRest() throws DocumentParseException {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentFileUtils.INSTANCE, new IdGenerator());
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
         Folder service1ParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");

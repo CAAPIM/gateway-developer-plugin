@@ -6,13 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.config.loader.policy;
 
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 import org.w3c.dom.Element;
 
 import java.io.IOException;
@@ -22,16 +22,15 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class XMLPolicyConverterTest {
 
     private XMLPolicyConverter xmlPolicyConverter;
     @Mock
-    private DocumentFileUtils documentFileUtils;
+    private DocumentTools documentFileUtils;
 
     @BeforeEach
     void beforeEach() {

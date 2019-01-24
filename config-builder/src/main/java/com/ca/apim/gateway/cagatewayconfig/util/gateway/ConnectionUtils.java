@@ -27,29 +27,39 @@ public class ConnectionUtils {
     public static SSLSocketFactory createAcceptAllSocketFactory() {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-            sslContext.init(null,
-                    new TrustManager[]{new X509TrustManager() {
-                        @Override
-                        @SuppressWarnings("squid:S4424")
-                        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
-                            //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
-                        }
-
-                        @Override
-                        @SuppressWarnings("squid:S4424")
-                        public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
-                            //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
-                        }
-
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-            }}, null);
+            initSSLContext(sslContext);
             return sslContext.getSocketFactory();
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new EntityBuilderException("Error creating socket factory: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Initialize the SSLContext with parameters to accept all certificates and hostnames.
+     *
+     * @param sslContext The SSL Context to be initalized
+     * @throws KeyManagementException in case of key errors
+     */
+    public static void initSSLContext(SSLContext sslContext) throws KeyManagementException {
+        sslContext.init(null,
+                new TrustManager[]{new X509TrustManager() {
+                    @Override
+                    @SuppressWarnings("squid:S4424")
+                    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
+                        //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
+                    }
+
+                    @Override
+                    @SuppressWarnings("squid:S4424")
+                    public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
+                        //Intentionally blank as this object should only be used to obtain cert information upon SSL handshake
+                    }
+
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+        }}, null);
     }
 
     private ConnectionUtils(){}

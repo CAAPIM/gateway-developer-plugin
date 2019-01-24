@@ -14,14 +14,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Optional.ofNullable;
 
 public class FileUtils {
 
     private static final Logger LOGGER = Logger.getLogger(FileUtils.class.getName());
     public static final boolean POSIX_ENABLED = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
     public static final FileUtils INSTANCE = new FileUtils();
+    public static final String BUNDLE_EXTENSION = ".bundle";
 
     public InputStream getInputStream(final File file) {
         final InputStream stream;
@@ -70,5 +75,18 @@ public class FileUtils {
                 LOGGER.log(Level.WARNING, "Unexpected error when closing object", e);
             }
         }
+    }
+
+    /**
+     * Collect all files on a specific directory with specified extension
+     *
+     * @param folder folder to collect files
+     * @param extension extension to filter
+     * @return list of files
+     */
+    public static List<File> collectFiles(final String folder, final String extension) {
+        File templatizedFolder = new File(folder);
+        File[] templatizedBundles = ofNullable(templatizedFolder.listFiles((dir, name) -> name.endsWith(extension))).orElse(new File[0]);
+        return newArrayList(templatizedBundles);
     }
 }

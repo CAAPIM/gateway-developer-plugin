@@ -13,8 +13,11 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleBuilder;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
+import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
@@ -59,6 +62,9 @@ class ConfigBuilderModuleTest {
         assertNotNull(injector.getInstance(CertificateFactory.class), "CertificateFactory is not available");
         assertNotNull(injector.getInstance(KeystoreHelper.class), "KeystoreHelper is not available");
         assertNotNull(injector.getInstance(EnvironmentBundleCreator.class), "EnvironmentBundleCreator is not available");
+        assertNotNull(injector.getInstance(EnvironmentBundleBuilder.class), "EnvironmentBundleBuilder is not available");
+        assertNotNull(injector.getInstance(EnvironmentConfigurationUtils.class), "EnvironmentConfigurationUtils is not available");
+        assertNotNull(injector.getInstance(FullBundleCreator.class), "FullBundleCreator is not available");
     }
 
     @Test

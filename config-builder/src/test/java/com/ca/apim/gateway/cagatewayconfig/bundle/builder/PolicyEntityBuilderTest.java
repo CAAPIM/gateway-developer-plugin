@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
@@ -31,11 +30,11 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_BY;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_TO;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.junit.jupiter.api.Assertions.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 
 class PolicyEntityBuilderTest {
 
@@ -68,7 +67,7 @@ class PolicyEntityBuilderTest {
         policyElement.appendChild(encassElement);
         document.appendChild(policyElement);
 
-        policy.setPolicyXML(DocumentFileUtils.INSTANCE.elementToString(document.getDocumentElement()));
+        policy.setPolicyXML(DocumentTools.INSTANCE.elementToString(document.getDocumentElement()));
         policy.setParentFolder(Folder.ROOT_FOLDER);
         policy.setGuid("policyGuid");
         policy.setId("policyID");
@@ -93,7 +92,7 @@ class PolicyEntityBuilderTest {
                 "</wsp:Policy>");
         bundle.getPolicies().put("include", include);
 
-        PolicyEntityBuilder builder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+        PolicyEntityBuilder builder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
         final List<Entity> entities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
@@ -497,7 +496,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTest() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("/path");
@@ -515,7 +514,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestEncodedPath() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setName("policy-_¯-¯_");
@@ -534,7 +533,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestPBS() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/path.xml");
@@ -556,7 +555,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestGlobal() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/global.xml");
@@ -587,7 +586,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestInternal() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/internal.xml");

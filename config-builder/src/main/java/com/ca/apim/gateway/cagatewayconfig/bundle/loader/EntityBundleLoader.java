@@ -40,6 +40,12 @@ public class EntityBundleLoader {
     public Bundle load(File dependencyBundlePath) {
         final Bundle bundle = new Bundle();
 
+        loadBundleFile(dependencyBundlePath, bundle);
+
+        return bundle;
+    }
+
+    private void loadBundleFile(File dependencyBundlePath, Bundle bundle) {
         final Document bundleDocument;
         try {
             bundleDocument = documentTools.parse(dependencyBundlePath);
@@ -55,8 +61,6 @@ public class EntityBundleLoader {
                 handleItem(bundle, (Element) node);
             }
         }
-
-        return bundle;
     }
 
     private void handleItem(Bundle bundle, final Element element) {

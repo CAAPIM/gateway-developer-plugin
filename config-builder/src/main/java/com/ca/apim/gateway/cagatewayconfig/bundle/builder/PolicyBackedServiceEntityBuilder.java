@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderHelper.getEntityWithNameMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.POLICY_BACKED_SERVICE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
@@ -51,7 +52,7 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
                 buildOperations(policyBackedService, bundle, document)
         );
 
-        return new Entity(POLICY_BACKED_SERVICE_TYPE, name, id, policyBackedServiceElement);
+        return getEntityWithNameMapping(POLICY_BACKED_SERVICE_TYPE, name, id, policyBackedServiceElement);
     }
 
     private Element buildOperations(PolicyBackedService policyBackedService, Bundle bundle, Document document) {
