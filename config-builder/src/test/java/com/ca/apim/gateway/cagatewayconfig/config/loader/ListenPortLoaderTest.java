@@ -64,6 +64,7 @@ class ListenPortLoaderTest {
                 "    - \"Published service message input\"\n" +
                 "    tlsSettings:\n" +
                 "      clientAuthentication: \"REQUIRED\"\n" +
+                "      privateKey: \"Key\"\n" +
                 "      enabledVersions:\n" +
                 "      - \"TLSv1.2\"\n" +
                 "      enabledCipherSuites:\n" +
@@ -86,6 +87,7 @@ class ListenPortLoaderTest {
                 "      \"enabledFeatures\" : [ \"Published service message input\" ],\n" +
                 "      \"tlsSettings\" : {\n" +
                 "        \"clientAuthentication\" : \"REQUIRED\",\n" +
+                "        \"privateKey\" : \"Key\",\n" +
                 "        \"enabledVersions\" : [ \"TLSv1.2\" ],\n" +
                 "        \"enabledCipherSuites\" : [ \"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384\", \"TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384\", \"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384\" ],\n" +
                 "        \"properties\" : {\n" +
@@ -230,6 +232,7 @@ class ListenPortLoaderTest {
         assertTrue(listenPort.getTlsSettings().getEnabledVersions().contains(ListenPortTlsSettings.TLSV12), "TLS Version enabled is not 1.2");
         assertFalse(listenPort.getTlsSettings().getEnabledCipherSuites().isEmpty(), "Enabled Cipher Suites not loaded");
         assertEquals(listenPort.getTlsSettings().getEnabledCipherSuites().size(), 3, "More than 3 cipher suites enabled");
+        assertEquals("Key", listenPort.getTlsSettings().getPrivateKey(), "PrivateKey is not 'Key'");
         assertTrue(listenPort.getTlsSettings().getEnabledCipherSuites().containsAll(asList("TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384")), "Unexpected Cipher Suites enabled");
         assertPropertiesContent(ImmutableMap.of("usesTLS", true), listenPort.getTlsSettings().getProperties());
         assertPropertiesContent(ImmutableMap.of("threadPoolSize", "20"), listenPort.getProperties());

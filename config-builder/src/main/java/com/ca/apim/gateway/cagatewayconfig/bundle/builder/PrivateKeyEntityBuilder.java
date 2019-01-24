@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class PrivateKeyEntityBuilder implements EntityBuilder {
 
-    private static final Integer ORDER = 1200;
+    private static final Integer ORDER = 800;
     private static final String DUMMY_CERTIFICATE = "MIIBfTCCASegAwIBAgIJAPH69zKKw4ixMA0GCSqGSIb3DQEBBQUAMA8xDTALBgNVBAMTBHRlc3QwHhcNMTgxMDEzMDMyODI1WhcNMzgxMDA4MDMyODI1WjAPMQ0wCwYDVQQDEwR0ZXN0MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAIS+Vr8zPOBmSclkUtW/z0UXaMjhg7dix6IUZs+UoSiw/2GXfU2vc3renVAbn3AZaJEqnxgrcX4nldqt0WBIP4sCAwEAAaNmMGQwDgYDVR0PAQH/BAQDAgXgMBIGA1UdJQEB/wQIMAYGBFUdJQAwHQYDVR0OBBYEFN/aeDDEAB6MTxZhMhf/eJKnmaE5MB8GA1UdIwQYMBaAFN/aeDDEAB6MTxZhMhf/eJKnmaE5MA0GCSqGSIb3DQEBBQUAA0EAdolvh7bMX5ZMkM/yntJlBdzS8ukM/ULh8I11wKd6dDltyMuk9rOP0iEk1nsSFuFL0uQ4kIe12KyDwr8ns7VKvQ==";
 
     private final KeystoreHelper keystoreHelper;
@@ -54,6 +54,7 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
 
     private Entity buildPrivateKeyEntity(String alias, PrivateKey privateKey, Document document) {
         final String id = privateKey.getKeyStoreType().generateKeyId(alias);
+        privateKey.setId(id);
         final Element privateKeyElem = createElementWithAttributes(
                 document,
                 PRIVATE_KEY,
