@@ -11,6 +11,7 @@ import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 
 import java.util.Map;
 
@@ -51,6 +52,7 @@ public class GatewayExportPluginConfig {
      * @return the folder to export from the gateway
      */
     @Input
+    @Optional
     public Property<String> getFolderPath() {
         return folderPath;
     }

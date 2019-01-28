@@ -45,6 +45,7 @@ public class ExplodeBundleTask extends DefaultTask {
      * @return The path of the folder to explode.
      */
     @Input
+    @Optional
     public Property<String> getFolderPath() {
         return folderPath;
     }
@@ -74,7 +75,7 @@ public class ExplodeBundleTask extends DefaultTask {
     public void perform() throws DocumentParseException {
         ExplodeBundle explodeBundle = ExportPluginModule.getInjector().getInstance(ExplodeBundle.class);
         checkExportEntities();
-        explodeBundle.explodeBundle(folderPath.getOrElse("/"), toFilterConfiguration(exportEntities.getOrElse(Collections.emptyMap())), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
+        explodeBundle.explodeBundle(folderPath.getOrNull(), toFilterConfiguration(exportEntities.getOrElse(Collections.emptyMap())), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
     }
 
     /**
