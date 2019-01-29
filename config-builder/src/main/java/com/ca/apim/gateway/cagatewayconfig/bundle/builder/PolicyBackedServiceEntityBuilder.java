@@ -19,10 +19,12 @@ import javax.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderHelper.getEntityWithNameMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.POLICY_BACKED_SERVICE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static java.util.Collections.emptyList;
 
 @Singleton
 public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
@@ -36,6 +38,10 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        if (bundleType == ENVIRONMENT) {
+            return emptyList();
+        }
+
         return bundle.getPolicyBackedServices().entrySet().stream().map(pbsEntry ->
                 buildPBSEntity(bundle, pbsEntry.getKey(), pbsEntry.getValue(), document)
         ).collect(Collectors.toList());

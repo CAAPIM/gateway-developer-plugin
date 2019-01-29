@@ -20,6 +20,7 @@ import org.w3c.dom.Element;
 
 import java.util.List;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
@@ -48,49 +49,47 @@ class ScheduledTaskEntityBuilderTest {
     @Test
     void buildWithNoPolicy() {
         final Bundle bundle = new Bundle();
-        assertThrows(EntityBuilderException.class, () -> buildBundleWithScheduledTask(bundle, BundleType.DEPLOYMENT, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_SCHEDULED_TASK, false));
+        assertThrows(EntityBuilderException.class, () -> buildBundleWithScheduledTask(bundle, false));
     }
 
     @Test
     void buildDeploymentWithOneTimeScheduledTask() {
         final Bundle bundle = new Bundle();
-        putPolicy(bundle, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_POLICY_PATH);
-        buildBundleWithScheduledTask(bundle, BundleType.DEPLOYMENT, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_SCHEDULED_TASK, true);
+        putPolicy(bundle);
+        buildBundleWithScheduledTask(bundle, true);
     }
 
     @Test
-    void buildEnvironmentWithOneTimeScheduledTask() {
+    void buildEnvironment() {
         final Bundle bundle = new Bundle();
-        putPolicy(bundle, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_POLICY_PATH);
-        buildBundleWithScheduledTask(bundle, BundleType.ENVIRONMENT, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_SCHEDULED_TASK, true);
+        ScheduledTaskEntityBuilder builder = new ScheduledTaskEntityBuilder(ID_GENERATOR);
+        ScheduledTask scheduledTask = buildTestScheduledTask(false);
+        bundle.putAllScheduledTasks(ImmutableMap.of(TEST_SCHEDULED_TASK, scheduledTask));
+
+        final List<Entity> entities = builder.build(bundle, ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        assertTrue(entities.isEmpty());
     }
 
     @Test
     void buildDeploymentWithRecurringScheduledTask() {
         final Bundle bundle = new Bundle();
-        putPolicy(bundle, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_POLICY_PATH);
-        buildBundleWithScheduledTask(bundle, BundleType.DEPLOYMENT, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_SCHEDULED_TASK, false);
+        putPolicy(bundle);
+        buildBundleWithScheduledTask(bundle, false);
     }
 
-    @Test
-    void buildEnvironmentWithRecurringScheduledTask() {
-        final Bundle bundle = new Bundle();
-        putPolicy(bundle, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_POLICY_PATH);
-        buildBundleWithScheduledTask(bundle, BundleType.ENVIRONMENT, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_SCHEDULED_TASK, false);
-    }
-
-    private static void buildBundleWithScheduledTask(Bundle bundle, BundleType deployment, String policyPath, String policyId, String scheduledTaskName, boolean isOneTime) {
+    private static void buildBundleWithScheduledTask(Bundle bundle, boolean isOneTime) {
         ScheduledTaskEntityBuilder builder = new ScheduledTaskEntityBuilder(ID_GENERATOR);
-        ScheduledTask scheduledTask = buildTestScheduledTask(policyPath, isOneTime);
-        bundle.putAllScheduledTasks(ImmutableMap.of(scheduledTaskName, scheduledTask));
+        ScheduledTask scheduledTask = buildTestScheduledTask(isOneTime);
+        bundle.putAllScheduledTasks(ImmutableMap.of(TEST_SCHEDULED_TASK, scheduledTask));
 
-        final List<Entity> entities = builder.build(bundle, deployment, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
         assertEquals(1, entities.size());
 
         Entity entity = entities.get(0);
-        assertEquals(scheduledTaskName, entity.getName());
+        assertEquals(TEST_SCHEDULED_TASK, entity.getName());
         assertNotNull(entity.getId());
         assertNotNull(entity.getXml());
         assertEquals(EntityTypes.SCHEDULED_TASK_TYPE, entity.getType());
@@ -98,9 +97,9 @@ class ScheduledTaskEntityBuilderTest {
         Element xml = entity.getXml();
         assertEquals(SCHEDULED_TASK, xml.getTagName());
         assertNotNull(getSingleChildElement(xml, NAME));
-        assertEquals(scheduledTaskName, getSingleChildElementTextContent(xml, NAME));
+        assertEquals(TEST_SCHEDULED_TASK, getSingleChildElementTextContent(xml, NAME));
         assertNotNull(getSingleChildElement(xml, POLICY_REFERENCE));
-        assertEquals(policyId, getSingleChildElement(xml, POLICY_REFERENCE).getAttribute(ATTRIBUTE_ID));
+        assertEquals(TEST_POLICY_ID, getSingleChildElement(xml, POLICY_REFERENCE).getAttribute(ATTRIBUTE_ID));
         assertEquals("true", getSingleChildElementTextContent(xml, ONE_NODE));
         if (isOneTime) {
             assertEquals(ONE_TIME_JOB, getSingleChildElementTextContent(xml, JOB_TYPE));
@@ -116,9 +115,9 @@ class ScheduledTaskEntityBuilderTest {
         
     }
 
-    private static ScheduledTask buildTestScheduledTask(String policyPath, boolean isOneTime) {
+    private static ScheduledTask buildTestScheduledTask(boolean isOneTime) {
         ScheduledTask scheduledTask = new ScheduledTask();
-        scheduledTask.setPolicy(policyPath);
+        scheduledTask.setPolicy(TEST_POLICY_PATH);
         scheduledTask.setJobStatus(SCHEDULED_JOB_STATUS);
         scheduledTask.setOneNode(true);
         if (isOneTime) {
@@ -133,11 +132,11 @@ class ScheduledTaskEntityBuilderTest {
         return scheduledTask;
     }
 
-    private static void putPolicy(Bundle bundle, String name, String id, String path) {
+    private static void putPolicy(Bundle bundle) {
         Policy policy = new Policy();
-        policy.setName(name);
-        policy.setId(id);
-        bundle.getPolicies().put(path, policy);
+        policy.setName(TEST_POLICY_PATH);
+        policy.setId(TEST_POLICY_ID);
+        bundle.getPolicies().put(TEST_POLICY_PATH, policy);
     }
 
 }

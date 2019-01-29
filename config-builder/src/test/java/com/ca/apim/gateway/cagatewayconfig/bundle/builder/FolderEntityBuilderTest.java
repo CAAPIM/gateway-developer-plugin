@@ -20,6 +20,7 @@ import org.w3c.dom.Element;
 import java.util.List;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createRoot;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -41,7 +42,7 @@ class FolderEntityBuilderTest {
     @Test
     void buildFromEmptyBundle_noFolders() {
         FolderEntityBuilder builder = new FolderEntityBuilder(ID_GENERATOR);
-        final List<Entity> entities = builder.build(new Bundle(), BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(new Bundle(), DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertTrue(entities.isEmpty());
     }
@@ -52,27 +53,32 @@ class FolderEntityBuilderTest {
         Bundle bundle = new Bundle();
         bundle.putAllFolders(createTestFolders(null));
 
-        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test
     void buildEnvironment() {
-        build(BundleType.ENVIRONMENT);
-    }
-
-    @Test
-    void buildDeployment() {
-        build(BundleType.DEPLOYMENT);
-    }
-
-    private static void build(BundleType bundleType) {
         FolderEntityBuilder builder = new FolderEntityBuilder(ID_GENERATOR);
         Bundle bundle = new Bundle();
         Folder root = createRoot();
         bundle.getFolders().put(EMPTY, root);
         bundle.putAllFolders(createTestFolders(root));
 
-        final List<Entity> entities = builder.build(bundle, bundleType, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        assertNotNull(entities);
+        assertTrue(entities.isEmpty());
+    }
+
+    @Test
+    void buildDeployment() {
+        FolderEntityBuilder builder = new FolderEntityBuilder(ID_GENERATOR);
+        Bundle bundle = new Bundle();
+        Folder root = createRoot();
+        bundle.getFolders().put(EMPTY, root);
+        bundle.putAllFolders(createTestFolders(root));
+
+        final List<Entity> entities = builder.build(bundle, DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertNotNull(entities);
         assertFalse(entities.isEmpty());
