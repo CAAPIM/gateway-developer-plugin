@@ -7,13 +7,18 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Element;
 
+import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
@@ -24,7 +29,22 @@ public class EnvironmentBundleUtils {
 
     private static final Logger logger = Logger.getLogger(EnvironmentBundleUtils.class.getName());
 
+    private static String templatizedBundlesFolderPath;
+
     private EnvironmentBundleUtils() {}
+
+    static void setTemplatizedBundlesFolderPath(String folderPath) {
+        templatizedBundlesFolderPath = folderPath;
+    }
+
+    public static Bundle getDeploymentBundle() {
+        if (templatizedBundlesFolderPath == null) {
+            return null;
+        }
+        EntityBundleLoader loader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
+        List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath , BUNDLE_EXTENSION);
+        return loader.load(deploymentBundleFiles);
+    }
 
     static void processDeploymentBundles(Bundle environmentBundle,
                                           List<TemplatizedBundle> templatizedBundles,

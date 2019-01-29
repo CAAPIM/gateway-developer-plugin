@@ -19,9 +19,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.processDeploymentBundles;
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.setTemplatizedBundlesFolderPath;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static java.util.stream.Collectors.toList;
@@ -53,6 +55,7 @@ public class EnvironmentBundleCreator {
         Bundle environmentBundle = new Bundle();
         environmentBundleBuilder.build(environmentBundle, environmentProperties);
 
+        setTemplatizedBundlesFolderPath(templatizedBundleFolderPath);
         processDeploymentBundles(
                 environmentBundle,
                 collectFiles(templatizedBundleFolderPath, BUNDLE_EXTENSION).stream().map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName()))).collect(toList()),
