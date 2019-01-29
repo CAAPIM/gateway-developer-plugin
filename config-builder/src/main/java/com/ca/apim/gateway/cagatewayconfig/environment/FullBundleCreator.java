@@ -36,6 +36,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Singleton
 public class FullBundleCreator {
@@ -75,7 +76,7 @@ public class FullBundleCreator {
 
         // generate the environment one
         Bundle environmentBundle = new Bundle();
-        environmentBundleBuilder.build(environmentBundle, environmentProperties);
+        environmentBundleBuilder.build(environmentBundle, environmentProperties, EMPTY, PLUGIN);
 
         // validate and detemplatize
         processDeploymentBundles(environmentBundle, templatizedBundles, PLUGIN);

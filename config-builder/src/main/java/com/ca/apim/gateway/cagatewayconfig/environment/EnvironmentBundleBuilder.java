@@ -14,13 +14,15 @@ import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigura
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
+
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.APPLICATION;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 
 @Singleton
 public class EnvironmentBundleBuilder {
 
-    private static final String ENVIRONMENT_FILES_CONFIG_PATH = "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/env";
-    private static final String ENV_PREFIX = "ENV.";
     private static final String FILE_PREFIX = "FILE.";
 
     private final EntityLoaderRegistry entityLoaderRegistry;
@@ -32,12 +34,23 @@ public class EnvironmentBundleBuilder {
         this.environmentConfigurationUtils = environmentConfigurationUtils;
     }
 
-    void build(Bundle bundle, Map<String, String> environmentProperties) {
-        environmentProperties.entrySet().stream().filter(e -> e.getKey().startsWith("ENV.")).forEach(e -> addEnvToBundle(bundle, e.getKey(), e.getValue()));
+    void build(Bundle bundle, Map<String, String> environmentProperties, String environmentConfigurationFolderPath, EnvironmentBundleCreationMode mode) {
+        environmentProperties.entrySet().stream().filter(e -> e.getKey().startsWith(PREFIX_ENV)).forEach(e -> addEnvToBundle(bundle, e.getKey(), e.getValue()));
+        // only when running from environment creator application we try to load from directory.
+        if (mode != APPLICATION) {
+            return;
+        }
+
+        File envDir = new File(environmentConfigurationFolderPath);
+        if (envDir.exists()) {
+            // Load the entities to build bundle
+            final Collection<EntityLoader> entityLoaders = entityLoaderRegistry.getEntityLoaders();
+            entityLoaders.parallelStream().forEach(e -> e.load(bundle, envDir));
+        }
     }
 
     private void addEnvToBundle(Bundle bundle, String key, String value) {
-        if (!key.startsWith(ENV_PREFIX)) {
+        if (!key.startsWith(PREFIX_ENV)) {
             return;
         }
 
@@ -60,12 +73,14 @@ public class EnvironmentBundleBuilder {
         }
 
         String name = environmentKey.substring(type.length() + 1);
+        // if we have a file, replace the value contents with the content load from the file in JSON specification.
         if (isFile) {
-            // if we have a file, replace the value contents with the content load from the file in JSON specification.
-            value = environmentConfigurationUtils.loadConfigFromFile(new File(ENVIRONMENT_FILES_CONFIG_PATH, value), type, name);
+            // load the file
+            value = environmentConfigurationUtils.loadConfigFromFile(new File(value), type, name);
         }
 
         // then load it
         loader.load(bundle, name, value);
     }
+
 }

@@ -16,6 +16,7 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.KeystoreCreator.createKeyStoreIfNecessary;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.APPLICATION;
+import static java.lang.System.getenv;
 
 public class EnvironmentCreatorApplication {
 
@@ -27,6 +28,7 @@ public class EnvironmentCreatorApplication {
     private final String bootstrapBundleFolderPath;
     private final String keystoreFolderPath;
     private final String privateKeyFolderPath;
+    private final String environmentConfigurationFolderPath;
 
     /**
      * This application will build an environment bundle and detemplatize deployment bundles with environment configurations.
@@ -41,21 +43,31 @@ public class EnvironmentCreatorApplication {
         String templatizedBundleFolderPath = args.length > 0 ? args[0] : "/opt/docker/rc.d/bundle/templatized";
         String bootstrapBundleFolderPath = args.length > 1 ? args[1] : "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/bundle/";
         String keystoreFolderPath = args.length > 2 ? args[2] : "/opt/docker/rc.d/keystore";
-        String privateKeyFolderPath = args.length > 3 ? args[3] : "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/env/privateKeys";
+        String privateKeyFolderPath = args.length > 3 ? args[3] : "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/env/config/privateKeys";
+        String environmentConfigurationFolderPath = args.length > 4 ? args[4] : "/opt/SecureSpan/Gateway/node/default/etc/bootstrap/env";
 
-        new EnvironmentCreatorApplication(System.getenv(), templatizedBundleFolderPath, bootstrapBundleFolderPath, keystoreFolderPath, privateKeyFolderPath).run();
+        new EnvironmentCreatorApplication(
+                getenv(),
+                templatizedBundleFolderPath,
+                bootstrapBundleFolderPath,
+                keystoreFolderPath,
+                privateKeyFolderPath,
+                environmentConfigurationFolderPath
+        ).run();
     }
 
     EnvironmentCreatorApplication(Map<String, String> environmentProperties,
                                   String templatizedBundleFolderPath,
                                   String bootstrapBundleFolderPath,
                                   String keystoreFolderPath,
-                                  String privateKeyFolderPath) {
+                                  String privateKeyFolderPath,
+                                  String environmentConfigurationFolderPath) {
         this.environmentProperties = environmentProperties;
         this.templatizedBundleFolderPath = templatizedBundleFolderPath;
         this.bootstrapBundleFolderPath = bootstrapBundleFolderPath;
         this.keystoreFolderPath = keystoreFolderPath;
         this.privateKeyFolderPath = privateKeyFolderPath;
+        this.environmentConfigurationFolderPath = environmentConfigurationFolderPath;
     }
 
     @VisibleForTesting
@@ -66,6 +78,7 @@ public class EnvironmentCreatorApplication {
                 environmentProperties,
                 bootstrapBundleFolderPath,
                 templatizedBundleFolderPath,
+                environmentConfigurationFolderPath,
                 APPLICATION,
                 "_0_env.req.bundle"
         );

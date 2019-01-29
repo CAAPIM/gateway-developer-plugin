@@ -28,6 +28,8 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.inse
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_ID;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 
@@ -79,8 +81,8 @@ public class PolicyXMLSimplifier {
 
         Element variableToSetElement = getSingleElement(element, VARIABLE_TO_SET);
         String variableName = variableToSetElement.getAttribute(STRING_VALUE);
-        if (variableName.startsWith("ENV.")) {
-            if (variableName.startsWith("ENV.gateway.")) {
+        if (variableName.startsWith(PREFIX_ENV)) {
+            if (variableName.startsWith(PREFIX_ENV + PREFIX_GATEWAY)) {
                 throw new LinkerException("Cannot have local environment property start with the prefix `ENV.gateway.`. Property: " + variableName);
             }
             ContextVariableEnvironmentProperty contextVarEnvironmentProperty = new ContextVariableEnvironmentProperty(insertPrefixToEnvironmentVariable(variableName, policyName).substring(4), new String(decodedValue));

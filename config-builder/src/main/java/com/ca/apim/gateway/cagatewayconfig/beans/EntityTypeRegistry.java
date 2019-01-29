@@ -44,6 +44,13 @@ public class EntityTypeRegistry {
         return ofNullable(entityTypeMap.get(entityType)).orElse(NO_INFO).getEntityClass();
     }
 
+    public GatewayEntityInfo getEntityInfoFromEnvironmentType(String environmentType) {
+        return entityTypeMap.values().stream()
+                .filter(gatewayEntityInfo -> environmentType.equals(gatewayEntityInfo.getEnvironmentType()))
+                .findFirst()
+                .orElse(NO_INFO);
+    }
+
     public Map<String, GatewayEntityInfo> getEntityTypeMap() {
         return entityTypeMap;
     }
