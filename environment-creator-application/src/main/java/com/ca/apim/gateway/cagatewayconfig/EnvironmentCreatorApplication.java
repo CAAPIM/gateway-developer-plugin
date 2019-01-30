@@ -18,6 +18,7 @@ import static com.ca.apim.gateway.cagatewayconfig.KeystoreCreator.createKeyStore
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.APPLICATION;
 import static java.lang.System.getenv;
 
+@SuppressWarnings("squid:S2083") // This warn relates to path injection attacks - however, paths here are never changed by end users and all self contained into docker containers.
 public class EnvironmentCreatorApplication {
 
     @SuppressWarnings("squid:S1075") // this path is always fixed does not need to be customized.
@@ -86,6 +87,5 @@ public class EnvironmentCreatorApplication {
         // Create the KeyStore
         createKeyStoreIfNecessary(keystoreFolderPath, privateKeyFolderPath, environmentBundle.getPrivateKeys().values(), FileUtils.INSTANCE, SYSTEM_PROPERTIES_PATH);
     }
-
 
 }

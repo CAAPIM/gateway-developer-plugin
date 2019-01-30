@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigura
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleC
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 
 @Singleton
+@SuppressWarnings("squid:S2083") // This warn relates to path injection attacks - however, paths here are never changed by end users and all self contained into docker containers.
 public class EnvironmentBundleBuilder {
 
     private static final String FILE_PREFIX = "FILE.";
