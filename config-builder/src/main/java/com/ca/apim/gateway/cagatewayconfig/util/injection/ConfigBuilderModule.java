@@ -85,6 +85,7 @@ public class ConfigBuilderModule extends AbstractModule {
         reflections.getSubTypesOf(BundleEntityLoader.class).forEach(l -> depLoadersBinder.addBinding().to(l));
         bind(BundleEntityLoaderRegistry.class);
 
+        // bind entity bundle loaders to the module
         Multibinder<EntityBundleLoader> depLoadersBinderz = newSetBinder(binder(), EntityBundleLoader.class);
         reflections.getSubTypesOf(EntityBundleLoader.class).forEach(l -> depLoadersBinderz.addBinding().to(l));
 
