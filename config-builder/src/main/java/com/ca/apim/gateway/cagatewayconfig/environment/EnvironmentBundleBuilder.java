@@ -14,7 +14,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigura
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 
