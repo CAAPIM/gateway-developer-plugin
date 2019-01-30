@@ -11,16 +11,13 @@ import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ClientAuthentication
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.Feature;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSettings;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.File;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -98,7 +95,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
                 if (getDeploymentBundle() == null) {
                     throw new EntityBuilderException("Could not find service binded to listen port " + name + ". Service Path: " + targetServiceReference);
                 } else {
-                    service = getDeploymentBundle().getServices().get(targetServiceReference.substring(targetServiceReference.lastIndexOf("/") + 1));
+                    service = getDeploymentBundle().getServices().get(targetServiceReference.substring(targetServiceReference.lastIndexOf('/') + 1));
                 }
             }
             listenPortElement.appendChild(createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, ATTRIBUTE_ID, service.getId()));
