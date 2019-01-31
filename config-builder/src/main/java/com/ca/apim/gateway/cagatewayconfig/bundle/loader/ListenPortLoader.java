@@ -17,10 +17,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.PROTOCOL_FTP;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.PROTOCOL_FTPS;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.USE_EXTENDED_FTP_COMMAND_SET;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.lang.Integer.parseInt;
+import static org.apache.commons.lang3.StringUtils.equalsAny;
 
 @Singleton
 public class ListenPortLoader implements BundleEntityLoader {
@@ -35,7 +39,13 @@ public class ListenPortLoader implements BundleEntityLoader {
         final Set<String> enabledFeatures = getChildElementsTextContents(getSingleChildElement(listenPortElement, ENABLED_FEATURES), STRING_VALUE);
         final String targetServiceReference = getSingleChildElementTextContent(listenPortElement, TARGET_SERVICE_REFERENCE);
         final ListenPortTlsSettings tlsSettings = getTlsSettings(listenPortElement);
-        final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPortElement, PROPERTIES, true), PROPERTIES);
+        Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(listenPortElement, PROPERTIES, true), PROPERTIES);
+        if (!equalsAny(protocol, PROTOCOL_FTP, PROTOCOL_FTPS)) {
+            properties.remove(USE_EXTENDED_FTP_COMMAND_SET);
+            if (properties.isEmpty()) {
+                properties = null;
+            }
+        }
 
         ListenPort listenPort = new ListenPort();
         listenPort.setId(listenPortElement.getAttribute(ATTRIBUTE_ID));
@@ -69,6 +79,8 @@ public class ListenPortLoader implements BundleEntityLoader {
 
         Element properties = getSingleChildElement(tlsSettingsElement, PROPERTIES, true);
         tlsSettings.setProperties(mapPropertiesElements(properties, PROPERTIES));
+
+        tlsSettings.setPrivateKey(getSingleChildElementAttribute(tlsSettingsElement, PRIVATE_KEY_REFERENCE, ATTRIBUTE_ID));
 
         return tlsSettings;
     }

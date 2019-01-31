@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
+import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 
 import javax.inject.Singleton;
@@ -27,15 +28,30 @@ public class ListenPortLinker implements EntityLinker<ListenPort> {
 
     @Override
     public void link(ListenPort entity, Bundle bundle, Bundle targetBundle) {
+        linkService(bundle, entity);
+        linkPrivateKey(entity, bundle);
+    }
+
+    private void linkService(Bundle bundle, ListenPort entity) {
         if (entity.getTargetServiceReference() == null || entity.getTargetServiceReference().isEmpty()) {
             return;
         }
-
         Service service = bundle.getEntities(Service.class).values().stream().filter(s -> s.getId().equals(entity.getTargetServiceReference())).findFirst().orElse(null);
         if (service == null) {
             throw new LinkerException("Could not find Service for Listen Port: " + entity.getName() + ". Service Reference: " + entity.getTargetServiceReference());
         }
-
         entity.setTargetServiceReference(getServicePath(bundle, service));
     }
+
+    private void linkPrivateKey(ListenPort entity, Bundle bundle) {
+        if (entity.getTlsSettings() == null || entity.getTlsSettings().getPrivateKey() == null) {
+            return;
+        }
+        PrivateKey privateKey = bundle.getEntities(PrivateKey.class).values().stream().filter(p -> p.getId().equals(entity.getTlsSettings().getPrivateKey())).findFirst().orElse(null);
+        if (privateKey == null) {
+            throw new LinkerException("Could not find Private Key for Listen Port: " + entity.getName() + ". Private Key Reference: " + entity.getTlsSettings().getPrivateKey());
+        }
+        entity.getTlsSettings().setPrivateKey(privateKey.getAlias());
+    }
+
 }

@@ -33,6 +33,8 @@ public class ListenPort extends GatewayEntity {
 
     public static final String PROTOCOL_HTTP = "HTTP";
     public static final String PROTOCOL_HTTPS = "HTTPS";
+    public static final String PROTOCOL_FTP = "FTP";
+    public static final String PROTOCOL_FTPS = "FTPS";
     public static final Integer HTTP_DEFAULT_PORT = 8080;
     public static final Integer HTTPS_DEFAULT_PORT = 8443;
     public static final String DEFAULT_HTTP_8080 = "Default HTTP (8080)";
@@ -152,6 +154,7 @@ public class ListenPort extends GatewayEntity {
         public static final String TLSV12 = "TLSv1.2";
 
         private ClientAuthentication clientAuthentication;
+        private String privateKey;
         private Set<String> enabledVersions;
         private Set<String> enabledCipherSuites;
         private Map<String, Object> properties;
@@ -162,6 +165,14 @@ public class ListenPort extends GatewayEntity {
 
         public void setClientAuthentication(ClientAuthentication clientAuthentication) {
             this.clientAuthentication = clientAuthentication;
+        }
+
+        public String getPrivateKey() {
+            return privateKey;
+        }
+
+        public void setPrivateKey(String privateKey) {
+            this.privateKey = privateKey;
         }
 
         public Set<String> getEnabledVersions() {

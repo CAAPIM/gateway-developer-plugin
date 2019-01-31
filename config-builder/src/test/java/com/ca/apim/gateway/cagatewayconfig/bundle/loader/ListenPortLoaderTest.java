@@ -27,8 +27,7 @@ import java.util.stream.Stream;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithChildren;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,6 +53,7 @@ class ListenPortLoaderTest {
         Assertions.assertEquals(ClientAuthentication.REQUIRED, tlsSettings.getClientAuthentication());
         assertTrue(SetUtils.isEqualSet(tlsSettings.getEnabledCipherSuites(), ListenPort.DEFAULT_RECOMMENDED_CIPHERS));
         assertTrue(SetUtils.isEqualSet(tlsSettings.getEnabledVersions(), ListenPort.TLS_VERSIONS));
+        assertEquals("Key", tlsSettings.getPrivateKey());
         assertPropertiesContent(Collections.emptyMap(), tlsSettings.getProperties());
         assertPropertiesContent(ImmutableMap.of("prop", "value"), listenPort.getProperties());
     }
@@ -103,6 +103,7 @@ class ListenPortLoaderTest {
             ListenPort.DEFAULT_RECOMMENDED_CIPHERS.forEach(s -> enabledCipherSuites.appendChild(createElementWithTextContent(document, STRING_VALUE, s)));
             tlsSettingsElement.appendChild(enabledCipherSuites);
 
+            tlsSettingsElement.appendChild(createElementWithAttribute(document, PRIVATE_KEY_REFERENCE, ATTRIBUTE_ID, "Key"));
             listenPortElement.appendChild(tlsSettingsElement);
         }
 
