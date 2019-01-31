@@ -4,10 +4,10 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayexport.tasks.importing;
+package com.ca.apim.gateway.cagatewayimport.tasks;
 
-import com.ca.apim.gateway.cagatewayexport.config.GatewayConnectionProperties;
-import com.ca.apim.gateway.cagatewayexport.util.http.GatewayClient;
+import com.ca.apim.gateway.connection.GatewayClient;
+import com.ca.apim.gateway.connection.GatewayConnectionProperties;
 import org.apache.http.entity.FileEntity;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
@@ -16,7 +16,6 @@ import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
 
-import static com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule.getInstance;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.client.methods.HttpPut.METHOD_NAME;
 import static org.apache.http.client.methods.RequestBuilder.create;
@@ -33,7 +32,7 @@ public class ImportBundleTask extends DefaultTask {
     private RegularFileProperty importFile;
 
     public ImportBundleTask() {
-        this.gatewayClient = getInstance(GatewayClient.class);
+        this.gatewayClient = GatewayClient.INSTANCE;
         gatewayConnectionProperties = new GatewayConnectionProperties(getProject());
         importFile = newInputFile();
 

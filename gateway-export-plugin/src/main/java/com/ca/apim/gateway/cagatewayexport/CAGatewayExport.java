@@ -6,13 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayexport;
 
-import com.ca.apim.gateway.cagatewayexport.config.GatewayConnectionProperties;
 import com.ca.apim.gateway.cagatewayexport.config.GatewayExportPluginConfig;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundleTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.export.BuildExportQueryTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.export.ExportTask;
-import com.ca.apim.gateway.cagatewayexport.tasks.importing.ImportBundleTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.sanitize.SanitizeBundleTask;
+import com.ca.apim.gateway.connection.GatewayConnectionProperties;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
@@ -61,7 +60,6 @@ public class CAGatewayExport implements Plugin<Project> {
         });
         explodeBundleTask.dependsOn(sanitizeTask);
 
-        project.getTasks().create("import-bundle", ImportBundleTask.class, t -> t.setGatewayConnectionProperties(gatewayConnectionProperties));
         project.getTasks().create("clean-export", Delete.class, t -> t.delete(pluginConfig.getSolutionDir()));
     }
 

@@ -23,12 +23,8 @@ import org.w3c.dom.Document;
 import javax.inject.Inject;
 import java.io.File;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ExplodeBundle {
-
-    private static final Logger LOGGER = Logger.getLogger(ExplodeBundle.class.getName());
 
     private final DocumentTools documentTools;
     private final EntityWriterRegistry entityWriterRegistry;
@@ -52,11 +48,6 @@ public class ExplodeBundle {
     }
 
     void explodeBundle(String folderPath, FilterConfiguration filterConfiguration, File bundleFile, File explodeDirectory) throws DocumentParseException {
-        if (folderPath == null) {
-            LOGGER.log(Level.FINE, "Skipping exploding bundle due to unspecified folder");
-            return;
-        }
-
         final Document bundleDocument = documentTools.parse(bundleFile);
         documentTools.cleanup(bundleDocument);
 
