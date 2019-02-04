@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.export;
 
-import com.ca.apim.gateway.cagatewayexport.config.GatewayConnectionProperties;
-import com.ca.apim.gateway.cagatewayexport.util.http.GatewayClient;
-import com.ca.apim.gateway.cagatewayexport.util.http.GatewayClientException;
+import com.ca.apim.gateway.connection.GatewayClient;
+import com.ca.apim.gateway.connection.GatewayClientException;
+import com.ca.apim.gateway.connection.GatewayConnectionProperties;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;

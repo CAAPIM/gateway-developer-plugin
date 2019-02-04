@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+plugins {
+    id 'com.gradle.plugin-publish' version "0.10.0"
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+    id 'maven'
+}
+
+description = 'The gateway-import-plugin enables importing locally generated bundles to an existing running gateway instance.'
+
+project.ext.'gradle.publish.key' = System.env.GRADLE_PUBLISH_KEY
+project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
+
+dependencies {
+    compile gradleApi()
+    compile project(':gateway-connection-api')
+
+    testCompile gradleTestKit()
+}
+
+gradlePlugin {
+    plugins {
+        gatewayImportPlugin {
+            id = 'com.ca.apim.gateway.gateway-import-plugin'
+            implementationClass = 'com.ca.apim.gateway.cagatewayimport.CAGatewayImport'
+        }
+        gatewayImportPluginBase {
+            id = 'com.ca.apim.gateway.gateway-export-import-base'
+            implementationClass = 'com.ca.apim.gateway.cagatewayimport.CAGatewayImportBase'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
+    vcsUrl = 'https://github.com/ca-api-gateway/gateway-developer-plugin.git'
+
+    plugins {
+        gatewayImportPlugin {
+            displayName = 'CA API Gateway Import Gradle Plugin'
+            description = 'The Gateway import plugin can be used to import existing Gateway bundles into a CA API Gateway running instance'
+            tags = ['ca api gateway', 'deploying']
+        }
+        gatewayImportPluginBase {
+            displayName = 'CA API Gateway Import Base Gradle Plugin'
+            description = 'The Gateway import plugin can be used to import existing Gateway bundles into a CA API Gateway running instance'
+            tags = ['ca api gateway', 'deploying']
+        }
+    }
+}

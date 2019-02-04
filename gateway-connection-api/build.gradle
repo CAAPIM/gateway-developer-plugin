@@ -1,0 +1,16 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+description = 'Core library used to connect and invoke endpoints on the Gateway'
+
+dependencies {
+    compile gradleApi()
+    compile project(':config-builder')
+    compile 'org.jetbrains:annotations:16.0.2'
+    compile 'org.apache.httpcomponents:httpclient:4.5.5'
+    compile 'commons-io:commons-io:2.6'
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+}
