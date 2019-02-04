@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.connection;
+package com.ca.apim.gateway.cagatewayexport.config;
 
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
@@ -51,14 +51,4 @@ public class GatewayConnectionProperties {
         return userPass;
     }
 
-    public String getRestmanBundleEndpoint() {
-        String fullUrl = url.get();
-        if (!fullUrl.endsWith("/")) {
-            fullUrl += "/";
-        }
-        if (!fullUrl.contains("restman")) {
-            fullUrl += "restman/";
-        }
-        return  fullUrl + "1.0/bundle";
-    }
 }

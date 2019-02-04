@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayimport.tasks;
 
+import com.ca.apim.gateway.cagatewayimport.config.GatewayConnectionProperties;
 import com.ca.apim.gateway.connection.GatewayClient;
-import com.ca.apim.gateway.connection.GatewayConnectionProperties;
 import org.apache.http.entity.FileEntity;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
@@ -16,6 +16,7 @@ import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
 
+import static com.ca.apim.gateway.connection.GatewayClient.getRestmanBundleEndpoint;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.client.methods.HttpPut.METHOD_NAME;
 import static org.apache.http.client.methods.RequestBuilder.create;
@@ -61,7 +62,7 @@ public class ImportBundleTask extends DefaultTask {
         File bundleFile = importFile.getAsFile().get();
         gatewayClient.makeGatewayAPICall(
                 create(METHOD_NAME)
-                        .setUri(gatewayConnectionProperties.getRestmanBundleEndpoint())
+                        .setUri(getRestmanBundleEndpoint(gatewayConnectionProperties.getUrl().get()))
                         .setEntity(new FileEntity(bundleFile))
                         .setHeader(CONTENT_TYPE, "application/xml"),
                 gatewayConnectionProperties.getUserName().get(),

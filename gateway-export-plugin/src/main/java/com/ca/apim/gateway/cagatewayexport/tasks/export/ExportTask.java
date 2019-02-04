@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.export;
 
+import com.ca.apim.gateway.cagatewayexport.config.GatewayConnectionProperties;
 import com.ca.apim.gateway.connection.GatewayClient;
 import com.ca.apim.gateway.connection.GatewayClientException;
-import com.ca.apim.gateway.connection.GatewayConnectionProperties;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule.getInstance;
+import static com.ca.apim.gateway.connection.GatewayClient.getRestmanBundleEndpoint;
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 import static org.apache.http.client.methods.HttpGet.METHOD_NAME;
 import static org.apache.http.client.methods.RequestBuilder.create;
@@ -95,7 +96,7 @@ public class ExportTask extends DefaultTask {
         try {
             copyInputStreamToFile(
                     gatewayClient.makeGatewayAPICall(
-                            create(METHOD_NAME).setUri(gatewayConnectionProperties.getRestmanBundleEndpoint() + exportQuery.get()),
+                            create(METHOD_NAME).setUri(getRestmanBundleEndpoint(gatewayConnectionProperties.getUrl().get()) + exportQuery.get()),
                             gatewayConnectionProperties.getUserName().get(),
                             gatewayConnectionProperties.getUserPass().get()
                     ),

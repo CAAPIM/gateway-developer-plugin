@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayimport;
 
+import com.ca.apim.gateway.cagatewayimport.config.GatewayConnectionProperties;
 import com.ca.apim.gateway.cagatewayimport.tasks.ImportBundleTask;
-import com.ca.apim.gateway.connection.GatewayConnectionProperties;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
