@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport;
 
-import com.ca.apim.gateway.cagatewayexport.config.GatewayConnectionProperties;
+import com.ca.apim.gateway.cagatewayexport.config.GatewayExportConnectionProperties;
 import com.ca.apim.gateway.cagatewayexport.config.GatewayExportPluginConfig;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundleTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.export.BuildExportQueryTask;
@@ -33,7 +33,7 @@ public class CAGatewayExport implements Plugin<Project> {
         // Set Defaults
         project.afterEvaluate(p -> setDefaults(pluginConfig, project));
 
-        final GatewayConnectionProperties gatewayConnectionProperties = project.getExtensions().create("GatewayConnection", GatewayConnectionProperties.class, project);
+        final GatewayExportConnectionProperties gatewayConnectionProperties = project.getExtensions().create("GatewayConnection", GatewayExportConnectionProperties.class, project);
         // Set Defaults
         project.afterEvaluate(p -> setDefaults(gatewayConnectionProperties));
 
@@ -75,7 +75,7 @@ public class CAGatewayExport implements Plugin<Project> {
         }
     }
 
-    private static void setDefaults(final GatewayConnectionProperties gatewayConnectionProperties) {
+    private static void setDefaults(final GatewayExportConnectionProperties gatewayConnectionProperties) {
         setDefault(gatewayConnectionProperties.getUrl(), () -> "https://localhost:8443/restman");
         setDefault(gatewayConnectionProperties.getUserName(), () -> "admin");
         setDefault(gatewayConnectionProperties.getUserPass(), () -> "password");

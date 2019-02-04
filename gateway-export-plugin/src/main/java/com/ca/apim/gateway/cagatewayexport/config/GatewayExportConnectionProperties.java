@@ -4,20 +4,20 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayimport.config;
+package com.ca.apim.gateway.cagatewayexport.config;
 
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 
-public class GatewayConnectionProperties {
+public class GatewayExportConnectionProperties {
     private Property<String> url;
     private Property<String> userName;
     private Property<String> userPass;
 
-    public GatewayConnectionProperties(Project project) {
-        url = project.getObjects().property(String.class);
+    public GatewayExportConnectionProperties(Project project) {
         userName = project.getObjects().property(String.class);
+        url = project.getObjects().property(String.class);
         userPass = project.getObjects().property(String.class);
     }
 

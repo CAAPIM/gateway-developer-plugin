@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayimport.tasks;
 
-import com.ca.apim.gateway.cagatewayimport.config.GatewayConnectionProperties;
+import com.ca.apim.gateway.cagatewayimport.config.GatewayImportConnectionProperties;
 import com.ca.apim.gateway.connection.GatewayClient;
 import org.apache.http.entity.FileEntity;
 import org.gradle.api.DefaultTask;
@@ -29,12 +29,12 @@ public class ImportBundleTask extends DefaultTask {
     private GatewayClient gatewayClient;
 
     //Inputs
-    private GatewayConnectionProperties gatewayConnectionProperties;
+    private GatewayImportConnectionProperties gatewayConnectionProperties;
     private RegularFileProperty importFile;
 
     public ImportBundleTask() {
         this.gatewayClient = GatewayClient.INSTANCE;
-        gatewayConnectionProperties = new GatewayConnectionProperties(getProject());
+        gatewayConnectionProperties = new GatewayImportConnectionProperties(getProject());
         importFile = newInputFile();
 
         // makes it so that the export is always run
@@ -42,11 +42,11 @@ public class ImportBundleTask extends DefaultTask {
     }
 
     @Nested
-    public GatewayConnectionProperties getGatewayConnectionProperties() {
+    public GatewayImportConnectionProperties getGatewayConnectionProperties() {
         return gatewayConnectionProperties;
     }
 
-    public void setGatewayConnectionProperties(GatewayConnectionProperties gatewayConnectionProperties) {
+    public void setGatewayConnectionProperties(GatewayImportConnectionProperties gatewayConnectionProperties) {
         this.gatewayConnectionProperties = gatewayConnectionProperties;
     }
 

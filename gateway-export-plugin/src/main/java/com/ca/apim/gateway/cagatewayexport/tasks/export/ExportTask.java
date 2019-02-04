@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.export;
 
-import com.ca.apim.gateway.cagatewayexport.config.GatewayConnectionProperties;
+import com.ca.apim.gateway.cagatewayexport.config.GatewayExportConnectionProperties;
 import com.ca.apim.gateway.connection.GatewayClient;
 import com.ca.apim.gateway.connection.GatewayClientException;
 import org.gradle.api.DefaultTask;
@@ -37,7 +37,7 @@ public class ExportTask extends DefaultTask {
     private GatewayClient gatewayClient;
 
     //Inputs
-    private GatewayConnectionProperties gatewayConnectionProperties;
+    private GatewayExportConnectionProperties gatewayConnectionProperties;
     private Property<String> exportQuery;
 
     //Outputs
@@ -45,7 +45,7 @@ public class ExportTask extends DefaultTask {
 
     public ExportTask() {
         this.gatewayClient = getInstance(GatewayClient.class);
-        gatewayConnectionProperties = new GatewayConnectionProperties(getProject());
+        gatewayConnectionProperties = new GatewayExportConnectionProperties(getProject());
         exportQuery = getProject().getObjects().property(String.class);
         exportFile = newOutputFile();
 
@@ -54,11 +54,11 @@ public class ExportTask extends DefaultTask {
     }
 
     @Nested
-    public GatewayConnectionProperties getGatewayConnectionProperties() {
+    public GatewayExportConnectionProperties getGatewayConnectionProperties() {
         return gatewayConnectionProperties;
     }
 
-    public void setGatewayConnectionProperties(GatewayConnectionProperties gatewayConnectionProperties) {
+    public void setGatewayConnectionProperties(GatewayExportConnectionProperties gatewayConnectionProperties) {
         this.gatewayConnectionProperties = gatewayConnectionProperties;
     }
 
