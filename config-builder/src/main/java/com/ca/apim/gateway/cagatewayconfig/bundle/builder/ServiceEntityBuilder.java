@@ -48,6 +48,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        // no service has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }

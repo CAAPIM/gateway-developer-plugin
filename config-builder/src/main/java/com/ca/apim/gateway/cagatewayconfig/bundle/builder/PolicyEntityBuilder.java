@@ -63,6 +63,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        // no policy has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }

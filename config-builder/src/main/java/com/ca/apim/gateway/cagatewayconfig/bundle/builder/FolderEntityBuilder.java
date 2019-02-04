@@ -57,6 +57,7 @@ public class FolderEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        // no folder has to be added to environment bundle
         if (bundle.getFolders().isEmpty() || bundleType == ENVIRONMENT) {
             return Collections.emptyList();
         }

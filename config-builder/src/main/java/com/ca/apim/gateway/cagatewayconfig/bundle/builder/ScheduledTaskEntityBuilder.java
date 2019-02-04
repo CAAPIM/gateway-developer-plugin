@@ -41,6 +41,7 @@ public class ScheduledTaskEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        // no sched task has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
