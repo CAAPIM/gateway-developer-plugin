@@ -16,7 +16,7 @@ import java.util.List;
  * An implementation of entity builder is responsible for collecting the entity information stored in yaml/json/properties files or environment properties
  * and convert this data to a Gateway restman bundle format.
  *
- * ex: (input) some-entity-file.json --> SomeEntityBuilder --> Bundle XML element (output)
+ * ex: (input) some-entity-file.json -- SomeEntityBuilder -- Bundle XML element (output)
  */
 public interface EntityBuilder extends Comparable<EntityBuilder> {
 
