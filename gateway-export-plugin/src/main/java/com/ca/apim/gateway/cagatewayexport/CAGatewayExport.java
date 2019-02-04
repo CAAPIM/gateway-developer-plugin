@@ -6,12 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayexport;
 
+import com.ca.apim.gateway.cagatewayexport.config.GatewayExportConnectionProperties;
 import com.ca.apim.gateway.cagatewayexport.config.GatewayExportPluginConfig;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundleTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.export.BuildExportQueryTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.export.ExportTask;
 import com.ca.apim.gateway.cagatewayexport.tasks.sanitize.SanitizeBundleTask;
-import com.ca.apim.gateway.connection.GatewayConnectionProperties;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
@@ -33,7 +33,7 @@ public class CAGatewayExport implements Plugin<Project> {
         // Set Defaults
         project.afterEvaluate(p -> setDefaults(pluginConfig, project));
 
-        final GatewayConnectionProperties gatewayConnectionProperties = project.getExtensions().create("GatewayConnection", GatewayConnectionProperties.class, project);
+        final GatewayExportConnectionProperties gatewayConnectionProperties = project.getExtensions().create("GatewayConnection", GatewayExportConnectionProperties.class, project);
         // Set Defaults
         project.afterEvaluate(p -> setDefaults(gatewayConnectionProperties));
 
@@ -75,7 +75,7 @@ public class CAGatewayExport implements Plugin<Project> {
         }
     }
 
-    private static void setDefaults(final GatewayConnectionProperties gatewayConnectionProperties) {
+    private static void setDefaults(final GatewayExportConnectionProperties gatewayConnectionProperties) {
         setDefault(gatewayConnectionProperties.getUrl(), () -> "https://localhost:8443/restman");
         setDefault(gatewayConnectionProperties.getUserName(), () -> "admin");
         setDefault(gatewayConnectionProperties.getUserPass(), () -> "password");

@@ -113,4 +113,18 @@ public class GatewayClient {
                 .build();
     }
 
+    /**
+     * Format the url with the required parts for restman endpoint.
+     * @param url the url, full or partial
+     * @return the formatted url
+     */
+    public static String getRestmanBundleEndpoint(String url) {
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+        if (!url.contains("restman")) {
+            url += "restman/";
+        }
+        return  url + "1.0/bundle";
+    }
 }

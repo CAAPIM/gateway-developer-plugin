@@ -7,7 +7,6 @@
 description = 'Core library used to connect and invoke endpoints on the Gateway'
 
 dependencies {
-    compile gradleApi()
     compile project(':config-builder')
     compile 'org.jetbrains:annotations:16.0.2'
     compile 'org.apache.httpcomponents:httpclient:4.5.5'

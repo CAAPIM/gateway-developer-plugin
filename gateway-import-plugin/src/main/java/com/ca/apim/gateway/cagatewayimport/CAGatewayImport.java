@@ -6,8 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayimport;
 
+import com.ca.apim.gateway.cagatewayimport.config.GatewayImportConnectionProperties;
 import com.ca.apim.gateway.cagatewayimport.tasks.ImportBundleTask;
-import com.ca.apim.gateway.connection.GatewayConnectionProperties;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Property;
@@ -23,7 +23,7 @@ public class CAGatewayImport implements Plugin<Project> {
         // Add the base plugin to add standard lifecycle tasks: https://docs.gradle.org/current/userguide/standard_plugins.html#sec:base_plugins
         project.getPlugins().apply("base");
 
-        final GatewayConnectionProperties gatewayConnectionProperties = project.getExtensions().create("GatewayImportConnection", GatewayConnectionProperties.class, project);
+        final GatewayImportConnectionProperties gatewayConnectionProperties = project.getExtensions().create("GatewayImportConnection", GatewayImportConnectionProperties.class, project);
         // Set Defaults
         project.afterEvaluate(p -> setDefaults(gatewayConnectionProperties));
 
@@ -31,7 +31,7 @@ public class CAGatewayImport implements Plugin<Project> {
     }
 
 
-    private static void setDefaults(final GatewayConnectionProperties gatewayConnectionProperties) {
+    private static void setDefaults(final GatewayImportConnectionProperties gatewayConnectionProperties) {
         setDefault(gatewayConnectionProperties.getUrl(), () -> "https://localhost:8443/restman");
         setDefault(gatewayConnectionProperties.getUserName(), () -> "admin");
         setDefault(gatewayConnectionProperties.getUserPass(), () -> "password");

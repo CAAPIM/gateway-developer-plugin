@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.export;
 
+import com.ca.apim.gateway.cagatewayexport.config.GatewayExportConnectionProperties;
 import com.ca.apim.gateway.connection.GatewayClient;
 import com.ca.apim.gateway.connection.GatewayClientException;
-import com.ca.apim.gateway.connection.GatewayConnectionProperties;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule.getInstance;
+import static com.ca.apim.gateway.connection.GatewayClient.getRestmanBundleEndpoint;
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 import static org.apache.http.client.methods.HttpGet.METHOD_NAME;
 import static org.apache.http.client.methods.RequestBuilder.create;
@@ -36,7 +37,7 @@ public class ExportTask extends DefaultTask {
     private GatewayClient gatewayClient;
 
     //Inputs
-    private GatewayConnectionProperties gatewayConnectionProperties;
+    private GatewayExportConnectionProperties gatewayConnectionProperties;
     private Property<String> exportQuery;
 
     //Outputs
@@ -44,7 +45,7 @@ public class ExportTask extends DefaultTask {
 
     public ExportTask() {
         this.gatewayClient = getInstance(GatewayClient.class);
-        gatewayConnectionProperties = new GatewayConnectionProperties(getProject());
+        gatewayConnectionProperties = new GatewayExportConnectionProperties(getProject());
         exportQuery = getProject().getObjects().property(String.class);
         exportFile = newOutputFile();
 
@@ -53,11 +54,11 @@ public class ExportTask extends DefaultTask {
     }
 
     @Nested
-    public GatewayConnectionProperties getGatewayConnectionProperties() {
+    public GatewayExportConnectionProperties getGatewayConnectionProperties() {
         return gatewayConnectionProperties;
     }
 
-    public void setGatewayConnectionProperties(GatewayConnectionProperties gatewayConnectionProperties) {
+    public void setGatewayConnectionProperties(GatewayExportConnectionProperties gatewayConnectionProperties) {
         this.gatewayConnectionProperties = gatewayConnectionProperties;
     }
 
@@ -95,7 +96,7 @@ public class ExportTask extends DefaultTask {
         try {
             copyInputStreamToFile(
                     gatewayClient.makeGatewayAPICall(
-                            create(METHOD_NAME).setUri(gatewayConnectionProperties.getRestmanBundleEndpoint() + exportQuery.get()),
+                            create(METHOD_NAME).setUri(getRestmanBundleEndpoint(gatewayConnectionProperties.getUrl().get()) + exportQuery.get()),
                             gatewayConnectionProperties.getUserName().get(),
                             gatewayConnectionProperties.getUserPass().get()
                     ),
