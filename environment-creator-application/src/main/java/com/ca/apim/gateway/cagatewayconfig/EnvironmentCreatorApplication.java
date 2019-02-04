@@ -18,6 +18,13 @@ import static com.ca.apim.gateway.cagatewayconfig.KeystoreCreator.createKeyStore
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.APPLICATION;
 import static java.lang.System.getenv;
 
+/**
+ * This is the entrypoint for the environment creator application.
+ * This runs on docker container startup and is responsible to collect provided environment properties and generate a restman bundle with them.
+ * This bundle will be added to gateway bootstrap folder in order to be loaded with the gateway startup, and will be placed to be loaded first.
+ *
+ * This application also is responsible to read private keys folder if provided, and bootstrap a file based keystore from the keys presented.
+ */
 @SuppressWarnings("squid:S2083") // This warn relates to path injection attacks - however, paths here are never changed by end users and all self contained into docker containers.
 public class EnvironmentCreatorApplication {
 

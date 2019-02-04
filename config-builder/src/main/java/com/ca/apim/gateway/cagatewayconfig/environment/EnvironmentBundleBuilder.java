@@ -20,6 +20,10 @@ import java.util.Map;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.APPLICATION;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 
+/**
+ * Collect values from provided environment variables/files and generates a restman bundle with those values.
+ * Each value is an entity that when loaded outputs to a bundle xml element.
+ */
 @Singleton
 @SuppressWarnings("squid:S2083") // This warn relates to path injection attacks - however, paths here are never changed by end users and all self contained into docker containers.
 public class EnvironmentBundleBuilder {

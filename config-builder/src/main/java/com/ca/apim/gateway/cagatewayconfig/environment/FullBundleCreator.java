@@ -38,6 +38,10 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
+/**
+ * This combines the environment bundle generation with the deployment bundle generation and outputs one single full bundle
+ * with everything on it. This is used to output the whole solution in one bundle and allow to be installed into non ephemeral gateways.
+ */
 @Singleton
 public class FullBundleCreator {
 

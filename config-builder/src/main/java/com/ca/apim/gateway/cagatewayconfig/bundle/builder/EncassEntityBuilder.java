@@ -36,6 +36,9 @@ import static java.lang.Boolean.FALSE;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
+/**
+ * Builder for encass - refer to {@link EntityBuilder} javadoc for more information.
+ */
 @Singleton
 public class EncassEntityBuilder implements EntityBuilder {
 
