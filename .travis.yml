@@ -14,7 +14,7 @@ branches:
   - master
 deploy:
   provider: script
-  script: ./gradlew printVersion tag -Prelease && git push "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git" --tags && .travis/travis_wait "./gradlew gateway-developer-plugin:publishPlugins gateway-export-plugin:publishPlugins bintrayUpload -Prelease"
+  script: ./gradlew printVersion tag -Prelease && git push "https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git" --tags && .travis/travis_wait "./gradlew gateway-developer-plugin:publishPlugins gateway-export-plugin:publishPlugins gateway-import-plugin:publishPlugins bintrayUpload -Prelease"
   on:
     branch: master
 before_cache:
