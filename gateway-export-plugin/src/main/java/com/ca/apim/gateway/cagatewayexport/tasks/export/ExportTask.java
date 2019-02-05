@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.export;
 
+import com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClient;
+import com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClientException;
 import com.ca.apim.gateway.cagatewayexport.config.GatewayExportConnectionProperties;
-import com.ca.apim.gateway.connection.GatewayClient;
-import com.ca.apim.gateway.connection.GatewayClientException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClient.getRestmanBundleEndpoint;
 import static com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule.getInstance;
-import static com.ca.apim.gateway.connection.GatewayClient.getRestmanBundleEndpoint;
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 import static org.apache.http.client.methods.HttpGet.METHOD_NAME;
 import static org.apache.http.client.methods.RequestBuilder.create;
