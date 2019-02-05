@@ -29,7 +29,7 @@ gradlePlugin {
             implementationClass = 'com.ca.apim.gateway.cagatewayimport.CAGatewayImport'
         }
         gatewayImportPluginBase {
-            id = 'com.ca.apim.gateway.gateway-export-import-base'
+            id = 'com.ca.apim.gateway.gateway-import-base'
             implementationClass = 'com.ca.apim.gateway.cagatewayimport.CAGatewayImportBase'
         }
     }
