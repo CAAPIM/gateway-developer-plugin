@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.connection;
+package com.ca.apim.gateway.cagatewayconfig.util.connection;
 
 public class GatewayClientException extends RuntimeException {
     public GatewayClientException(String message) {
