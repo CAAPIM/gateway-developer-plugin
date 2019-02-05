@@ -18,7 +18,6 @@ project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
 dependencies {
     compile gradleApi()
     compile project(':config-builder')
-    compile project(':gateway-connection-api')
     compile 'org.reflections:reflections:0.9.11'
     compile 'com.google.inject:guice:4.2.1'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.6'

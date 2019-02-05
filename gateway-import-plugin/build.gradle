@@ -17,7 +17,7 @@ project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
 
 dependencies {
     compile gradleApi()
-    compile project(':gateway-connection-api')
+    compile project(':config-builder')
 
     testCompile gradleTestKit()
 }
