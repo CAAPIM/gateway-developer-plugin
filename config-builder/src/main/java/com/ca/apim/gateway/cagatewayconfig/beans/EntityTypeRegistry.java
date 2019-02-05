@@ -20,7 +20,10 @@ import static java.util.Collections.unmodifiableMap;
 import static java.util.Optional.ofNullable;
 
 /**
+ * Registry to store gateway entities metadata read from each entity class.
  *
+ * - key is the entity type from Named annotation
+ * - value is an object GatewayEntityInfo which holds entity type, class, file name for loading, file type (json/yaml or properties) and its environment key for provision as env property.
  */
 @Singleton
 public class EntityTypeRegistry {
@@ -40,6 +43,12 @@ public class EntityTypeRegistry {
         this.entityTypeMap = unmodifiableMap(entityTypes);
     }
 
+    /**
+     * Get the entity class which has the specified type, or the placeholder NO_INFO if not found.
+     *
+     * @param entityType the entity type
+     * @return the entity class
+     */
     public Class<? extends GatewayEntity> getEntityClass(String entityType) {
         return ofNullable(entityTypeMap.get(entityType)).orElse(NO_INFO).getEntityClass();
     }

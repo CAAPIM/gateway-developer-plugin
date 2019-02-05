@@ -20,6 +20,7 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule.getInstance;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * The BuildEnvironmentBundle task will grab provided environment properties and build a bundle.
@@ -57,6 +58,7 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
                 environmentValues,
                 into.getAsFile().get().getPath(),
                 into.getAsFile().get().getPath(),
+                EMPTY,
                 PLUGIN,
                 bundleFileName
         );

@@ -20,12 +20,14 @@ import javax.inject.Singleton;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SCHEDULED_TASK_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributesAndChildren;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+import static java.util.Collections.emptyList;
 
 @Singleton
 public class ScheduledTaskEntityBuilder implements EntityBuilder {
@@ -39,6 +41,11 @@ public class ScheduledTaskEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        // no sched task has to be added to environment bundle
+        if (bundleType == ENVIRONMENT) {
+            return emptyList();
+        }
+
         return bundle.getScheduledTasks().entrySet().stream().map(scheduledTaskEntry ->
                 buildScheduledTaskEntity(bundle, scheduledTaskEntry.getKey(), scheduledTaskEntry.getValue(), document)
         ).collect(Collectors.toList());
