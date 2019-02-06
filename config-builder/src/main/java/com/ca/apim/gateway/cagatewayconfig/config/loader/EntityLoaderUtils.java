@@ -19,10 +19,21 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Utility methods for entity loading.
+ */
 public class EntityLoaderUtils {
 
     private EntityLoaderUtils() {}
 
+    /**
+     * Create a generic instance of entity loader that will be responsible for loading entity specified by GatewayEntityInfo metadata object.
+     *
+     * @param jsonTools the JsonTools instance
+     * @param idGenerator the IdGenerator instance
+     * @param entityInfo the entity info for this loader
+     * @return one instance of entity loader.
+     */
     @NotNull
     public static EntityLoader createEntityLoader(JsonTools jsonTools, IdGenerator idGenerator, GatewayEntityInfo entityInfo) {
         return new EntityLoaderBase<GatewayEntity>(jsonTools, idGenerator) {
@@ -38,7 +49,7 @@ public class EntityLoaderUtils {
 
             @Override
             protected String getFileName() {
-                return entityInfo.getFileName();
+           with     return entityInfo.getFileName();
             }
 
             @Override
@@ -48,6 +59,14 @@ public class EntityLoaderUtils {
         };
     }
 
+    /**
+     * Create a generic instance of properties loader that will be responsible for loading entity specified by GatewayEntityInfo metadata object.
+     *
+     * @param fileUtils the {@link FileUtils} instance
+     * @param idGenerator the IdGenerator instance
+     * @param entityInfo the entity info for this loader
+     * @return one instance of properties entity loader.
+     */
     @NotNull
     static PropertiesLoaderBase createPropertiesLoader(FileUtils fileUtils, IdGenerator idGenerator, GatewayEntityInfo entityInfo) {
         return new PropertiesLoaderBase(fileUtils, idGenerator) {
@@ -69,7 +88,16 @@ public class EntityLoaderUtils {
         };
     }
 
-    public static <B> Map<String, B> loadEntitiesFromFile(JsonTools jsonTools, Class<? extends GatewayEntity> entityClass,  File entitiesFile) {
+    /**
+     * Load entities from a json/yaml file to a map of key-value entities by name.
+     *
+     * @param jsonTools {@link JsonTools} instance
+     * @param entityClass Entity class
+     * @param entitiesFile Entity file
+     * @param <B> Entity type
+     * @return map of name-entity
+     */
+    static <B> Map<String, B> loadEntitiesFromFile(JsonTools jsonTools, Class<? extends GatewayEntity> entityClass, File entitiesFile) {
         final String fileType = jsonTools.getTypeFromFile(entitiesFile);
         final MapType type = jsonTools.getObjectMapper(fileType).getTypeFactory().constructMapType(LinkedHashMap.class, String.class, entityClass);
 

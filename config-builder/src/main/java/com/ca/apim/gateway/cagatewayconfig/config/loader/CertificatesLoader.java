@@ -25,7 +25,7 @@ import static java.util.Arrays.stream;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 
 /**
- * Loads the certificates specified in the 'config/certificates' directory. Certificates in this directory must end with
+ * Loads the certificates specified in the 'certificates' directory. Certificates in this directory must end with
  * .der, .pem, .crt, or .cer.
  */
 @Singleton

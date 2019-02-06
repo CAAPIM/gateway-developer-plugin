@@ -19,6 +19,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Base loader for all entities stored into properties files.
+ *
+ * @param <P> type of entity.
+ */
 public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implements EntityLoader {
 
     private FileUtils fileUtils;

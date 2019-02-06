@@ -93,6 +93,13 @@ public class FileUtils {
         return newArrayList(templatizedBundles);
     }
 
+    /**
+     * Find config file or directory into the base dir specified.
+     *
+     * @param baseDir base dir
+     * @param fileOrDirName file to be found
+     * @return file found or null
+     */
     public static File findConfigFileOrDir(final File baseDir, final String fileOrDirName) {
         return Stream.of(new File(baseDir, fileOrDirName), new File(new File(baseDir, "config"), fileOrDirName)).filter(File::exists).findFirst().orElse(null);
     }
