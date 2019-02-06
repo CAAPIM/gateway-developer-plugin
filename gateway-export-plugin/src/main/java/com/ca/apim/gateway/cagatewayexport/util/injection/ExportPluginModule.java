@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.util.injection;
 
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
+import com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClient;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
@@ -20,7 +21,6 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
-import com.ca.apim.gateway.cagatewayexport.util.http.GatewayClient;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.AbstractModule;

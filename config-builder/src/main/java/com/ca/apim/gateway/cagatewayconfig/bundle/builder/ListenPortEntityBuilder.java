@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ClientAuthentication;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.Feature;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSettings;
+import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,10 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.getDeploymentBundle;
@@ -34,6 +38,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.collections4.MapUtils.unmodifiableMap;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Builder for Listen ports
@@ -43,7 +48,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
 
     private static final Map<String, ListenPort> DEFAULT_PORTS = unmodifiableMap(createDefaultListenPorts());
     private static final String USES_TLS = "usesTLS";
-    private static final Integer ORDER = 800;
+    private static final Integer ORDER = 1200;
 
     private final IdGenerator idGenerator;
 
@@ -106,6 +111,14 @@ public class ListenPortEntityBuilder implements EntityBuilder {
 
             Element tlsSettingsElement = document.createElement(TLS_SETTINGS);
             tlsSettingsElement.appendChild(createElementWithTextContent(document, CLIENT_AUTHENTICATION, tlsSettings.getClientAuthentication().getType()));
+
+            if (isNotEmpty(tlsSettings.getPrivateKey())) {
+                final PrivateKey privateKey = bundle.getPrivateKeys().get(tlsSettings.getPrivateKey());
+                if (privateKey == null) {
+                    throw new EntityBuilderException("Could not find Private Key " + tlsSettings.getPrivateKey() + " associated to Listen Port " + name);
+                }
+                tlsSettingsElement.appendChild(createElementWithAttribute(document, PRIVATE_KEY_REFERENCE, ATTRIBUTE_ID, privateKey.getId()));
+            }
 
             if (isNotEmpty(tlsSettings.getEnabledVersions())) {
                 Element enabledVersions = document.createElement(ENABLED_VERSIONS);

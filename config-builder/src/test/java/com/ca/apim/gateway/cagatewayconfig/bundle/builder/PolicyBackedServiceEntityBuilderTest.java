@@ -47,21 +47,26 @@ class PolicyBackedServiceEntityBuilderTest {
     @Test
     void buildWithNoPolicy() {
         final Bundle bundle = new Bundle();
-        assertThrows(EntityBuilderException.class, () -> buildBundleWithPBS(bundle, BundleType.DEPLOYMENT));
+        assertThrows(EntityBuilderException.class, () -> buildBundleWithPBS(bundle));
     }
 
     @Test
     void buildDeploymentWithPBS() {
         final Bundle bundle = new Bundle();
         putPolicy(bundle);
-        buildBundleWithPBS(bundle, BundleType.DEPLOYMENT);
+        buildBundleWithPBS(bundle);
     }
 
     @Test
     void buildEnvironmentWithPBS() {
         final Bundle bundle = new Bundle();
         putPolicy(bundle);
-        buildBundleWithPBS(bundle, BundleType.ENVIRONMENT);
+        PolicyBackedServiceEntityBuilder builder = new PolicyBackedServiceEntityBuilder(ID_GENERATOR);
+        bundle.putAllPolicyBackedServices(ImmutableMap.of(TEST_PBS, buildTestPBS()));
+
+        final List<Entity> entities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        assertTrue(entities.isEmpty());
     }
 
     private static void putPolicy(Bundle bundle) {
@@ -71,11 +76,11 @@ class PolicyBackedServiceEntityBuilderTest {
         bundle.getPolicies().put(TEST_POLICY, policy);
     }
 
-    private static void buildBundleWithPBS(Bundle bundle, BundleType deployment) {
+    private static void buildBundleWithPBS(Bundle bundle) {
         PolicyBackedServiceEntityBuilder builder = new PolicyBackedServiceEntityBuilder(ID_GENERATOR);
         bundle.putAllPolicyBackedServices(ImmutableMap.of(TEST_PBS, buildTestPBS()));
 
-        final List<Entity> entities = builder.build(bundle, deployment, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
         assertEquals(1, entities.size());

@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderHelper.getEntityWithNameMapping;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
@@ -32,8 +33,12 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PALETTE_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.lang.Boolean.FALSE;
+import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
+/**
+ * Builder for encass - refer to {@link EntityBuilder} javadoc for more information.
+ */
 @Singleton
 public class EncassEntityBuilder implements EntityBuilder {
 
@@ -47,6 +52,11 @@ public class EncassEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        // no encass has to be added to environment bundle
+        if (bundleType == ENVIRONMENT) {
+            return emptyList();
+        }
+
         return bundle.getEncasses().entrySet().stream().map(encassEntry ->
                 buildEncassEntity(bundle, encassEntry.getKey(), encassEntry.getValue(), document)
         ).collect(Collectors.toList());

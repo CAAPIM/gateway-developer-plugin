@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -54,37 +55,40 @@ public class EnvironmentConfigurationUtils {
             return (String) o;
         }
         if (o instanceof File) {
-            File configFile = (File) o;
-            if (!configFile.exists()) {
-                throw new MissingEnvironmentException("Specified environment config file " + configFile.toString() + " does not exist.");
-            }
-
             // get the entity type and name
             String entityType = key.substring(0, key.indexOf('.'));
             String entityName = key.substring(key.indexOf('.') + 1);
-
-            // read a single file to the map of entities (or strings, if is a properties or certificate)
-            EntityLoader loader = entityLoaderRegistry.getLoader(entityType);
-
-            // find the entity value
-            Object entity = loader.loadSingle(entityName, configFile);
-            if (entity == null) {
-                throw new MissingEnvironmentException("Specified environment config file " + configFile.toString() + " does not have the configuration for entity " + entityName + ", type " + entityType + ".");
-            }
-
-            // in case of properties or certificates will be the string value
-            if (entity instanceof String) {
-                return (String) entity;
-            }
-
-            // otherwise is a real entity so we jsonify it
-            try {
-                return jsonTools.getObjectWriter(JSON).writeValueAsString(entity);
-            } catch (JsonProcessingException e) {
-                throw new MissingEnvironmentException("Unable to read environment for specified configuration " + entityName, e);
-            }
+            return loadConfigFromFile((File) o, entityType, entityName);
         }
 
         throw new MissingEnvironmentException("Unable to load environment from specified property '" + o.toString() + "' due to unsupported value, it has to be a text content or a file");
+    }
+
+    @NotNull
+    public String loadConfigFromFile(File configFile, String entityType, String entityName) {
+        if (!configFile.exists()) {
+            throw new MissingEnvironmentException("Specified environment config file " + configFile.toString() + " does not exist.");
+        }
+
+        // read a single file to the map of entities (or strings, if is a properties or certificate)
+        EntityLoader loader = entityLoaderRegistry.getLoader(entityType);
+
+        // find the entity value
+        Object entity = loader.loadSingle(entityName, configFile);
+        if (entity == null) {
+            throw new MissingEnvironmentException("Specified environment config file " + configFile.toString() + " does not have the configuration for entity " + entityName + ", type " + entityType + ".");
+        }
+
+        // in case of properties or certificates will be the string value
+        if (entity instanceof String) {
+            return (String) entity;
+        }
+
+        // otherwise is a real entity so we jsonify it
+        try {
+            return jsonTools.getObjectWriter(JSON).writeValueAsString(entity);
+        } catch (JsonProcessingException e) {
+            throw new MissingEnvironmentException("Unable to read environment for specified configuration " + entityName, e);
+        }
     }
 }

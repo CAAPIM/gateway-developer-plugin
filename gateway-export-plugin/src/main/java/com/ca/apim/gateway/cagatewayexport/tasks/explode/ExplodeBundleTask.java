@@ -45,6 +45,7 @@ public class ExplodeBundleTask extends DefaultTask {
      * @return The path of the folder to explode.
      */
     @Input
+    @Optional
     public Property<String> getFolderPath() {
         return folderPath;
     }

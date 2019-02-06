@@ -106,6 +106,7 @@ public class BundleElementNames {
     public static final String CLIENT_AUTHENTICATION = "l7:ClientAuthentication";
     public static final String ENABLED_VERSIONS = "l7:EnabledVersions";
     public static final String ENABLED_CIPHER_SUITES = "l7:EnabledCipherSuites";
+    public static final String PRIVATE_KEY_REFERENCE = "l7:PrivateKeyReference";
 
     // Stored Passwords
     public static final String STORED_PASSWD = "l7:StoredPassword";

@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.Collection;
 
 public class ExplodeBundle {
+
     private final DocumentTools documentTools;
     private final EntityWriterRegistry entityWriterRegistry;
     private final EntityLinkerRegistry entityLinkerRegistry;

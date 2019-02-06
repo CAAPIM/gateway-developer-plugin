@@ -49,10 +49,11 @@ public class EnvironmentBundleCreator {
     public Bundle createEnvironmentBundle(Map<String, String> environmentProperties,
                                           String bundleFolderPath,
                                           String templatizedBundleFolderPath,
+                                          String environmentConfigurationFolderPath,
                                           EnvironmentBundleCreationMode mode,
                                           String bundleFileName) {
         Bundle environmentBundle = new Bundle();
-        environmentBundleBuilder.build(environmentBundle, environmentProperties);
+        environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, mode);
 
         setTemplatizedBundlesFolderPath(templatizedBundleFolderPath);
         processDeploymentBundles(

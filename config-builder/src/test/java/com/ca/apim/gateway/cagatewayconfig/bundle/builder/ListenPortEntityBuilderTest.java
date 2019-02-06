@@ -11,10 +11,12 @@ import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ClientAuthentication;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.Feature;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSettings;
+import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.lang.Boolean.TRUE;
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -41,6 +43,7 @@ class ListenPortEntityBuilderTest {
     private static final int TEST_HTTP_PORT = 12345;
     private static final String TEST_HTTP_PORT_NAME = "Test HTTP Port 12345";
     private static final String SERVICE_REFERENCE = "service-reference";
+    private static final String PRIVATE_KEY = "private-key";
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
 
     @Test
@@ -153,9 +156,10 @@ class ListenPortEntityBuilderTest {
         Service service = new Service();
         service.setId(ID_GENERATOR.generate());
         final Bundle bundle = new Bundle();
-        bundle.putAllServices(new HashMap<String, Service>() {{
-            put(SERVICE_REFERENCE, service);
-        }});
+        bundle.putAllServices(ImmutableMap.of(SERVICE_REFERENCE, service));
+        PrivateKey privateKey = new PrivateKey();
+        privateKey.setId(ID_GENERATOR.generate());
+        bundle.putAllPrivateKeys(ImmutableMap.of(PRIVATE_KEY, privateKey));
 
         final ListenPort listenPort = buildPortWithAllOptions();
         final ListenPortTlsSettings tlsSettings = listenPort.getTlsSettings();
@@ -175,6 +179,7 @@ class ListenPortEntityBuilderTest {
         assertFalse(getChildElements(getSingleChildElement(xml, ENABLED_FEATURES), STRING_VALUE).isEmpty());
         assertNotNull(getSingleChildElement(xml, TARGET_SERVICE_REFERENCE));
         assertNotNull(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), CLIENT_AUTHENTICATION));
+        assertNotNull(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), PRIVATE_KEY_REFERENCE));
         assertNotNull(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), ENABLED_VERSIONS));
         assertFalse(getChildElements(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), ENABLED_VERSIONS), STRING_VALUE).isEmpty());
         assertNotNull(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), ENABLED_CIPHER_SUITES));
@@ -191,6 +196,7 @@ class ListenPortEntityBuilderTest {
         assertTrue(getChildElementsTextContents(getSingleChildElement(xml, ENABLED_FEATURES), STRING_VALUE).containsAll(listenPort.getEnabledFeatures()));
         assertEquals(service.getId(), getSingleChildElement(xml, TARGET_SERVICE_REFERENCE).getAttribute(ATTRIBUTE_ID));
         assertEquals(tlsSettings.getClientAuthentication().getType(), getSingleChildElementTextContent(getSingleChildElement(xml, TLS_SETTINGS), CLIENT_AUTHENTICATION));
+        assertEquals(privateKey.getId(), getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), PRIVATE_KEY_REFERENCE).getAttribute(ATTRIBUTE_ID));
         assertTrue(tlsSettings.getEnabledVersions().containsAll(getChildElementsTextContents(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), ENABLED_VERSIONS), STRING_VALUE)));
         assertTrue(tlsSettings.getEnabledCipherSuites().containsAll(getChildElementsTextContents(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), ENABLED_CIPHER_SUITES), STRING_VALUE)));
         assertPropertiesContent(tlsSettings.getProperties(), mapPropertiesElements(getSingleChildElement(getSingleChildElement(xml, TLS_SETTINGS), PROPERTIES), PROPERTIES));
@@ -238,6 +244,7 @@ class ListenPortEntityBuilderTest {
         testPort.setEnabledFeatures(Stream.of(Feature.values()).map(Feature::getDescription).collect(toSet()));
         testPort.setTlsSettings(new ListenPortTlsSettings());
         testPort.getTlsSettings().setClientAuthentication(ClientAuthentication.OPTIONAL);
+        testPort.getTlsSettings().setPrivateKey(PRIVATE_KEY);
         testPort.getTlsSettings().setEnabledVersions(new HashSet<>(ListenPort.TLS_VERSIONS));
         testPort.getTlsSettings().setEnabledCipherSuites(new HashSet<>(ListenPort.DEFAULT_RECOMMENDED_CIPHERS));
         testPort.getTlsSettings().setProperties(new HashMap<>());

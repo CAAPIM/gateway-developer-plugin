@@ -16,6 +16,9 @@ public class PropertyConstants {
     public static final String PREFIX_ENV = "ENV.";
     public static final String PREFIX_PROPERTY = "property.";
 
+    // Listen Port
+    public static final String USE_EXTENDED_FTP_COMMAND_SET = "useExtendedFtpCommandSet";
+
     //Trusted Cert property constants
     public static final String VERIFY_HOSTNAME = "verifyHostname";
     public static final String TRUSTED_FOR_SSL = "trustedForSsl";

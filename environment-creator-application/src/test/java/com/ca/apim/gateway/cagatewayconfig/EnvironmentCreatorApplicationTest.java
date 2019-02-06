@@ -12,18 +12,19 @@ import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.google.common.collect.ImmutableMap;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.util.Objects;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.DEFAULT_HTTPS_8443;
 import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.DEFAULT_HTTP_8080;
+import static java.nio.charset.Charset.defaultCharset;
+import static org.apache.commons.io.FileUtils.copyDirectory;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EnvironmentCreatorApplicationTest {
@@ -34,15 +35,16 @@ class EnvironmentCreatorApplicationTest {
         File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "no-bundles");
         File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
         File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
-        File privateKeyFolder = new File(temporaryFolder.getRoot(), "privateKeys");
+        File envFolder = new File(temporaryFolder.getRoot(), "config");
+        File privateKeyFolder = new File(envFolder, "privateKeys");
 
         assertTrue(testDetemplatizedBundlesFolder.mkdirs());
 
-        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("no-bundles")).toURI()), testTemplatizedBundlesFolder);
+        copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("no-bundles")).toURI()), testTemplatizedBundlesFolder);
 
         ImmutableMap<String, String> environmentProperties = ImmutableMap.of();
 
-        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath()).run();
+        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath(), envFolder.getPath()).run();
 
         File environmentBundle = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
 
@@ -51,15 +53,39 @@ class EnvironmentCreatorApplicationTest {
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
+    void testEnvironmentPropertiesNotFoundInBundle(TemporaryFolder temporaryFolder) throws URISyntaxException, IOException {
+        File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "templatized-bundles");
+        File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
+        File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
+        File envFolder = new File(temporaryFolder.getRoot(), "config");
+        File privateKeyFolder = new File(envFolder, "privateKeys");
+
+        assertTrue(testDetemplatizedBundlesFolder.mkdirs());
+
+        copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templatized-bundles")).toURI()), testTemplatizedBundlesFolder);
+
+        ImmutableMap<String, String> environmentProperties = ImmutableMap.<String, String>builder()
+                .put("ENV.SERVICE_PROPERTY.my-gateway-api.myEnvironmentVariable", "my-service-property-value")
+                .put("ENV.CONTEXT_VARIABLE_PROPERTY.anotherEnvVar", "context-variable-value")
+                .put("ENV.SERVICE_PROPERTY.my-gateway-api.environmentVariableNotInBundle", "my-service-property-value")
+                .put("ENV.CONTEXT_VARIABLE_PROPERTY.environmentVariableNotInBundle", "context-variable-value")
+                .build();
+
+        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath(), envFolder.getPath()).run();
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
     void testEnvironmentProperties(TemporaryFolder temporaryFolder) throws URISyntaxException, IOException {
         File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "templatized-bundles");
         File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
         File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
-        File privateKeyFolder = new File(temporaryFolder.getRoot(), "privateKeys");
+        File envFolder = new File(temporaryFolder.getRoot(), "config");
+        File privateKeyFolder = new File(envFolder, "privateKeys");
 
         assertTrue(testDetemplatizedBundlesFolder.mkdirs());
 
-        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templatized-bundles")).toURI()), testTemplatizedBundlesFolder);
+        copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templatized-bundles")).toURI()), testTemplatizedBundlesFolder);
 
         ImmutableMap<String, String> environmentProperties = ImmutableMap.<String, String>builder()
                 .put(
@@ -132,12 +158,134 @@ class EnvironmentCreatorApplicationTest {
                 testTemplatizedBundlesFolder.getPath(),
                 testDetemplatizedBundlesFolder.getPath(),
                 keyStoreFolder.getPath(),
-                privateKeyFolder.getPath()
+                privateKeyFolder.getPath(),
+                envFolder.getPath()).run();
+
+        assertEnvironment(testDetemplatizedBundlesFolder);
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testEnvironmentFromConfigFolder(TemporaryFolder temporaryFolder) throws URISyntaxException, IOException {
+        File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "templatized-bundles");
+        File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
+        File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
+        File envFolder = new File(temporaryFolder.getRoot(), "config");
+        File privateKeyFolder = new File(envFolder, "privateKeys");
+
+        assertTrue(testDetemplatizedBundlesFolder.mkdirs());
+
+        copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templatized-bundles")).toURI()), testTemplatizedBundlesFolder);
+        writeStringToFile(
+                new File(envFolder, "identity-providers.json"),
+                "{\n" +
+                        "  \"simple ldap\": {\n" +
+                        "    \"type\" : \"BIND_ONLY_LDAP\",\n" +
+                        "    \"environmentVariables\": {\n" +
+                        "      \"key1\":\"value1\",\n" +
+                        "      \"key2\":\"value2\"\n" +
+                        "    },\n" +
+                        "    \"identityProviderDetail\" : {\n" +
+                        "      \"serverUrls\": [\n" +
+                        "        \"ldap://host:port\",\n" +
+                        "        \"ldap://host:port2\"\n" +
+                        "      ],\n" +
+                        "      \"useSslClientAuthentication\":false,\n" +
+                        "      \"bindPatternPrefix\": \"somePrefix\",\n" +
+                        "      \"bindPatternSuffix\": \"someSuffix\"\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}",
+                defaultCharset()
+        );
+        writeStringToFile(
+                new File(envFolder, "listen-ports.json"),
+                "{\n" +
+                        "  \"Custom HTTPS Port\": {\n" +
+                        "      \"protocol\" : \"HTTPS\",\n" +
+                        "      \"port\" : 12345,\n" +
+                        "      \"enabledFeatures\" : [ \"Published service message input\" ],\n" +
+                        "      \"tlsSettings\" : {\n" +
+                        "        \"clientAuthentication\" : \"REQUIRED\",\n" +
+                        "        \"enabledVersions\" : [ \"TLSv1.2\" ],\n" +
+                        "        \"enabledCipherSuites\" : [ \"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384\", \"TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384\", \"TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384\" ],\n" +
+                        "        \"environmentVariables\" : {\n" +
+                        "          \"usesTLS\" : true\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"environmentVariables\" : { \n" +
+                        "         \"threadPoolSize\" : \"20\"\n" +
+                        "      }\n" +
+                        "    } \n" +
+                        "}",
+                defaultCharset()
+        );
+        writeStringToFile(
+                new File(envFolder, "jdbc-connections.json"),
+                "{\n" +
+                        "  \"my-jdbc\": {\n" +
+                        "    \"driverClass\" : \"com.mysql.jdbc.Driver\",\n" +
+                        "    \"jdbcUrl\" : \"jdbc:mysql://localhost:3306/ssg\",\n" +
+                        "    \"user\" : \"gateway\",\n" +
+                        "    \"passwordRef\" : \"gateway\",\n" +
+                        "    \"minimumPoolSize\" : 3,\n" +
+                        "    \"maximumPoolSize\" : 15,\n" +
+                        "    \"properties\" : {\n" +
+                        "      \"EnableCancelTimeout\" : \"true\"\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}",
+                defaultCharset()
+        );
+        writeStringToFile(
+                new File(envFolder, "trusted-certs.json"),
+                "{\n" +
+                        "  \"my-cert\": {\n" +
+                        "      \"verifyHostname\" : false,\n" +
+                        "      \"trustedForSsl\" : true,\n" +
+                        "      \"trustedAsSamlAttestingEntity\" : false,\n" +
+                        "      \"trustAnchor\" : true,\n" +
+                        "      \"revocationCheckingEnabled\" : true,\n" +
+                        "      \"trustedForSigningClientCerts\" : true,\n" +
+                        "      \"trustedForSigningServerCerts\" : true,\n" +
+                        "      \"trustedAsSamlIssuer\" : false,\n" +
+                        "      \"certificateData\" : {\n" +
+                        "           \"issuerName\" : \"my-cert\",\n" +
+                        "           \"serialNumber\" : \"123\",\n" +
+                        "           \"subjectName\" : \"my-cert\",\n" +
+                        "           \"encodedData\" : \"my-cert-data\"\n" +
+                        "      }\n" +
+                        "  }\n" +
+                        "}",
+                defaultCharset()
+        );
+        writeStringToFile(
+                new File(envFolder, "stored-passwords.properties"),
+                "my_password=my_secret_password",
+                defaultCharset()
+        );
+        writeStringToFile(
+                new File(envFolder, "env.properties"),
+                "my-gateway-api.myEnvironmentVariable=my-service-property-value\n" +
+                        "anotherEnvVar=context-variable-value",
+                defaultCharset()
+        );
+
+        new EnvironmentCreatorApplication(
+                System.getenv(),
+                testTemplatizedBundlesFolder.getPath(),
+                testDetemplatizedBundlesFolder.getPath(),
+                keyStoreFolder.getPath(),
+                privateKeyFolder.getPath(),
+                temporaryFolder.getRoot().getPath()
         ).run();
 
+        assertEnvironment(testDetemplatizedBundlesFolder);
+    }
+
+    private static void assertEnvironment(File testDetemplatizedBundlesFolder) {
         File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
         assertTrue(environmentBundleFile.exists());
-        System.out.println(new String(Files.readAllBytes(environmentBundleFile.toPath())));
 
         EntityBundleLoader bundleLoader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
         Bundle environmentBundle = bundleLoader.load(environmentBundleFile);
@@ -161,28 +309,35 @@ class EnvironmentCreatorApplicationTest {
 
         File deploymentBundleFile = new File(testDetemplatizedBundlesFolder, "my-bundle.req.bundle");
         assertTrue(deploymentBundleFile.exists());
-        System.out.println(new String(Files.readAllBytes(deploymentBundleFile.toPath())));
     }
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
-    void testEnvironmentPropertiesNotFoundInBundle(TemporaryFolder temporaryFolder) throws URISyntaxException, IOException {
+    void testEnvironmentFromConfigFolderMissingValues(TemporaryFolder temporaryFolder) throws URISyntaxException, IOException {
         File testTemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "templatized-bundles");
         File testDetemplatizedBundlesFolder = new File(temporaryFolder.getRoot(), "detemplatized-bundles");
         File keyStoreFolder = new File(temporaryFolder.getRoot(), "keystore");
-        File privateKeyFolder = new File(temporaryFolder.getRoot(), "privateKeys");
+        File envFolder = new File(temporaryFolder.getRoot(), "config");
+        File privateKeyFolder = new File(envFolder, "privateKeys");
 
         assertTrue(testDetemplatizedBundlesFolder.mkdirs());
 
-        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templatized-bundles")).toURI()), testTemplatizedBundlesFolder);
+        copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templatized-bundles")).toURI()), testTemplatizedBundlesFolder);
 
-        ImmutableMap<String, String> environmentProperties = ImmutableMap.<String, String>builder()
-                .put("ENV.SERVICE_PROPERTY.my-gateway-api.myEnvironmentVariable", "my-service-property-value")
-                .put("ENV.CONTEXT_VARIABLE_PROPERTY.anotherEnvVar", "context-variable-value")
-                .put("ENV.SERVICE_PROPERTY.my-gateway-api.environmentVariableNotInBundle", "my-service-property-value")
-                .put("ENV.CONTEXT_VARIABLE_PROPERTY.environmentVariableNotInBundle", "context-variable-value")
-                .build();
+        writeStringToFile(
+                new File(envFolder, "env.properties"),
+                "my-gateway-api.myEnvironmentVariable=my-service-property-value\n" +
+                        "anotherEnvVar=context-variable-value",
+                defaultCharset()
+        );
 
-        new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath()).run();
+        new EnvironmentCreatorApplication(
+                System.getenv(),
+                testTemplatizedBundlesFolder.getPath(),
+                testDetemplatizedBundlesFolder.getPath(),
+                keyStoreFolder.getPath(),
+                privateKeyFolder.getPath(),
+                temporaryFolder.getRoot().getPath()
+        ).run();
     }
 }

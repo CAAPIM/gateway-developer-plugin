@@ -25,12 +25,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SERVICE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.insertPrefixToEnvironmentVariable;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static java.util.Collections.emptyList;
 
 @Singleton
 public class ServiceEntityBuilder implements EntityBuilder {
@@ -46,6 +48,11 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        // no service has to be added to environment bundle
+        if (bundleType == ENVIRONMENT) {
+            return emptyList();
+        }
+
         return bundle.getServices().entrySet().stream().map(serviceEntry ->
                 buildServiceEntity(bundle, serviceEntry.getKey(), serviceEntry.getValue(), document)
         ).collect(Collectors.toList());
