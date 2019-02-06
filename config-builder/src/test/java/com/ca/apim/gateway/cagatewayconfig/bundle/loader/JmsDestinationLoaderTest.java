@@ -316,7 +316,7 @@ class JmsDestinationLoaderTest {
         assertEquals(ON_COMPLETION, inboundDetail.getAcknowledgeType());
         assertEquals(SPECIFIED_QUEUE, inboundDetail.getReplyType());
         assertEquals("my-reply-Q", inboundDetail.getReplyToQueueName());
-        assertFalse(inboundDetail.useRequestCorrelationId());
+        assertFalse(inboundDetail.getUseRequestCorrelationId());
 
         ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
         assertNotNull(serviceResolutionSettings);
@@ -339,7 +339,7 @@ class JmsDestinationLoaderTest {
         assertFalse(outboundDetail.isTemplate());
         assertEquals(SPECIFIED_QUEUE, outboundDetail.getReplyType());
         assertEquals("my-reply-Q", outboundDetail.getReplyToQueueName());
-        assertFalse(outboundDetail.useRequestCorrelationId());
+        assertFalse(outboundDetail.getUseRequestCorrelationId());
         assertEquals(BYTES, outboundDetail.getMessageFormat());
 
         assertEquals(CONNECTION, outboundDetail.getPoolingType());

@@ -83,7 +83,7 @@ class JmsDestinationLoaderTest {
                 "    acknowledgeType: \"ON_COMPLETION\"\n" +
                 "    replyType: \"SPECIFIED_QUEUE\"\n" +
                 "    replyToQueueName: \"my-reply-Q\"\n" +
-                "    useRequestCorrelationId: false\n" +
+                "    getUseRequestCorrelationId: false\n" +
                 "    serviceResolutionSettings:\n" +
                 "      serviceRef: \"my-folder/my-service\"\n" +
                 "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
@@ -118,7 +118,7 @@ class JmsDestinationLoaderTest {
                 "      \"isTemplate\" : false,\n" +
                 "      \"replyType\" : \"SPECIFIED_QUEUE\",\n" +
                 "      \"replyToQueueName\" : \"my-reply-Q\",\n" +
-                "      \"useRequestCorrelationId\" : false,\n" +
+                "      \"getUseRequestCorrelationId\" : false,\n" +
                 "      \"messageFormat\" : \"BYTES\",\n" +
                 "      \"poolingType\" : \"CONNECTION\",\n" +
                 "      \"connectionPoolingSettings\" : {\n" +
@@ -153,7 +153,7 @@ class JmsDestinationLoaderTest {
                 "    acknowledgeType: \"ON_COMPLETION\"\n" +
                 "    replyType: \"SPECIFIED_QUEUE\"\n" +
                 "    replyToQueueName: \"my-reply-Q\"\n" +
-                "    useRequestCorrelationId: false\n" +
+                "    getUseRequestCorrelationId: false\n" +
                 "    serviceResolutionSettings:\n" +
                 "      serviceRef: \"my-folder/my-service\"\n" +
                 "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
@@ -221,7 +221,7 @@ class JmsDestinationLoaderTest {
                 "      \"isTemplate\" : false,\n" +
                 "      \"replyType\" : \"SPECIFIED_QUEUE\",\n" +
                 "      \"replyToQueueName\" : \"my-reply-Q\",\n" +
-                "      \"useRequestCorrelationId\" : false,\n" +
+                "      \"getUseRequestCorrelationId\" : false,\n" +
                 "      \"messageFormat\" : \"BYTES\",\n" +
                 "      \"poolingType\" : \"CONNECTION\",\n" +
                 "      \"connectionPoolingSettings\" : {\n" +
@@ -268,7 +268,7 @@ class JmsDestinationLoaderTest {
                 "    acknowledgeType: \"ON_COMPLETION\"\n" +
                 "    replyType: \"SPECIFIED_QUEUE\"\n" +
                 "    replyToQueueName: \"my-reply-Q\"\n" +
-                "    useRequestCorrelationId: false\n" +
+                "    getUseRequestCorrelationId: false\n" +
                 "    serviceResolutionSettings:\n" +
                 "      serviceRef: \"my-folder/my-service\"\n" +
                 "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
@@ -303,7 +303,7 @@ class JmsDestinationLoaderTest {
                 "      \"isTemplate\" : false,\n" +
                 "      \"replyType\" : \"SPECIFIED_QUEUE\",\n" +
                 "      \"replyToQueueName\" : \"my-reply-Q\",\n" +
-                "      \"useRequestCorrelationId\" : false,\n" +
+                "      \"getUseRequestCorrelationId\" : false,\n" +
                 "      \"messageFormat\" : \"BYTES\",\n" +
                 "      \"poolingType\" : \"CONNECTION\",\n" +
                 "      \"connectionPoolingSettings\" : {\n" +
@@ -339,7 +339,7 @@ class JmsDestinationLoaderTest {
                 "    acknowledgeType: \"ON_COMPLETION\"\n" +
                 "    replyType: \"SPECIFIED_QUEUE\"\n" +
                 "    replyToQueueName: \"my-reply-Q\"\n" +
-                "    useRequestCorrelationId: false\n" +
+                "    getUseRequestCorrelationId: false\n" +
                 "    serviceResolutionSettings:\n" +
                 "      serviceRef: \"my-folder/my-service\"\n" +
                 "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
@@ -375,7 +375,7 @@ class JmsDestinationLoaderTest {
                 "      \"isTemplate\" : false,\n" +
                 "      \"replyType\" : \"SPECIFIED_QUEUE\",\n" +
                 "      \"replyToQueueName\" : \"my-reply-Q\",\n" +
-                "      \"useRequestCorrelationId\" : false,\n" +
+                "      \"getUseRequestCorrelationId\" : false,\n" +
                 "      \"messageFormat\" : \"BYTES\",\n" +
                 "      \"poolingType\" : \"CONNECTION\",\n" +
                 "      \"connectionPoolingSettings\" : {\n" +
@@ -410,7 +410,7 @@ class JmsDestinationLoaderTest {
                 "    acknowledgeType: \"ON_COMPLETION\"\n" +
                 "    replyType: \"SPECIFIED_QUEUE\"\n" +
                 "    replyToQueueName: \"my-reply-Q\"\n" +
-                "    useRequestCorrelationId: false\n" +
+                "    getUseRequestCorrelationId: false\n" +
                 "    serviceResolutionSettings:\n" +
                 "      serviceRef: \"my-folder/my-service\"\n" +
                 "      soapActionMessagePropertyName: \"my-jms-soap-action-prop-name\"\n" +
@@ -423,7 +423,7 @@ class JmsDestinationLoaderTest {
                 "    isTemplate: false\n" +
                 "    replyType: \"SPECIFIED_QUEUE\"\n" +
                 "    replyToQueueName: \"my-reply-Q\"\n" +
-                "    useRequestCorrelationId: false\n" +
+                "    getUseRequestCorrelationId: false\n" +
                 "    messageFormat: \"BYTES\"\n" +
                 "    poolingType: \"CONNECTION\"\n" +
                 "    connectionPoolingSettings:\n" +
@@ -529,7 +529,7 @@ class JmsDestinationLoaderTest {
             assertEquals(ON_COMPLETION, inboundDetail.getAcknowledgeType());
             assertEquals(SPECIFIED_QUEUE, inboundDetail.getReplyType());
             assertEquals("my-reply-Q", inboundDetail.getReplyToQueueName());
-            assertFalse(inboundDetail.useRequestCorrelationId());
+            assertFalse(inboundDetail.getUseRequestCorrelationId());
             
             ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
             assertNotNull(serviceResolutionSettings);
@@ -549,7 +549,7 @@ class JmsDestinationLoaderTest {
             assertFalse(outboundDetail.isTemplate());
             assertEquals(SPECIFIED_QUEUE, outboundDetail.getReplyType());
             assertEquals("my-reply-Q", outboundDetail.getReplyToQueueName());
-            assertFalse(outboundDetail.useRequestCorrelationId());
+            assertFalse(outboundDetail.getUseRequestCorrelationId());
             assertEquals(BYTES, outboundDetail.getMessageFormat());
             assertEquals(CONNECTION, outboundDetail.getPoolingType());
             
