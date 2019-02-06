@@ -92,7 +92,7 @@ public class JsonTools {
         if (fileToUse == null) {
             LOGGER.log(Level.FINE, "Did not find a {0} configuration file. Not loading any.", fileName);
         } else {
-            LOGGER.log(Level.FINE, "Found file: '{0}'", fileToUse.toString());
+            LOGGER.log(Level.FINE, "Found file: {0}", fileToUse);
         }
         return fileToUse;
     }
