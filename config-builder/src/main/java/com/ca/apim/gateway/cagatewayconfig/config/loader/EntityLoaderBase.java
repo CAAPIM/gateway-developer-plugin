@@ -42,7 +42,7 @@ public abstract class EntityLoaderBase<B extends GatewayEntity> implements Entit
 
     @Override
     public void load(final Bundle bundle, final File rootDir) {
-        final File entitiesFile = jsonTools.getDocumentFileFromConfigDir(rootDir, getFileName());
+        final File entitiesFile = jsonTools.getDocumentFile(rootDir, getFileName());
         if (entitiesFile == null) {
             // no file
             return;

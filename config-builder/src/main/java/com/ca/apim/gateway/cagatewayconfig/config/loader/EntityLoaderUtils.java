@@ -58,8 +58,8 @@ public class EntityLoaderUtils {
             }
 
             @Override
-            protected String getFilePath() {
-                return "config" + File.separator + entityInfo.getFileName() + ".properties";
+            protected String getFileName() {
+                return entityInfo.getFileName() + ".properties";
             }
 
             @Override

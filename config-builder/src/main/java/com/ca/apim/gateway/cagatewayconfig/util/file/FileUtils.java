@@ -15,8 +15,11 @@ import java.io.OutputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Optional.ofNullable;
@@ -88,5 +91,9 @@ public class FileUtils {
         File templatizedFolder = new File(folder);
         File[] templatizedBundles = ofNullable(templatizedFolder.listFiles((dir, name) -> name.endsWith(extension))).orElse(new File[0]);
         return newArrayList(templatizedBundles);
+    }
+
+    public static File findConfigFileOrDir(final File baseDir, final String fileOrDirName) {
+        return Stream.of(new File(baseDir, fileOrDirName), new File(new File(baseDir, "config"), fileOrDirName)).filter(File::exists).findFirst().orElse(null);
     }
 }

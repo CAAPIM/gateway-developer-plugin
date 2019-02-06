@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,25 +69,32 @@ public class JsonTools {
         return objectMapper;
     }
 
-    public File getDocumentFileFromConfigDir(final File rootDir, final String fileName) {
-        final File directory = new File(rootDir, "config");
+    public File getDocumentFile(final File rootDir, final String fileName) {
+        return Optional.ofNullable(findFile(rootDir, fileName)).orElseGet(() -> findFile(new File(rootDir, "config"), fileName));
+    }
+
+    private File findFile(final File directory, final String fileName) {
         final File jsonFile = new File(directory, fileName + "." + JSON_EXTENSION);
         final File yamlFile = new File(directory, fileName + "." + YAML_EXTENSION);
         final File ymlFile = new File(directory, fileName + "." + YML_EXTENSION);
 
+        File fileToUse = null;
         if (jsonFile.exists() && yamlFile.exists() && ymlFile.exists()) {
             throw new JsonToolsException("Can have either a " + fileName + ".json or a " + fileName + ".yml not both.");
         } else if (jsonFile.isFile()) {
-            return jsonFile;
+            fileToUse = jsonFile;
         } else if (yamlFile.isFile()) {
-            return yamlFile;
+            fileToUse = yamlFile;
         } else if (ymlFile.isFile()) {
-            return ymlFile;
+            fileToUse = ymlFile;
         }
 
-        LOGGER.log(Level.FINE, "Did not find a {0} configuration file. Not loading any.", fileName);
-        // no services to bundle
-        return null;
+        if (fileToUse == null) {
+            LOGGER.log(Level.FINE, "Did not find a {0} configuration file. Not loading any.", fileName);
+        } else {
+            LOGGER.log(Level.FINE, "Found file: '{0}'", fileToUse.toString());
+        }
+        return fileToUse;
     }
 
     public <T> T readDocumentFile(final File file, final JavaType entityMapType) {

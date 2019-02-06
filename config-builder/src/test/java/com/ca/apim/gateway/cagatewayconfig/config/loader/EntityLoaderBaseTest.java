@@ -63,7 +63,7 @@ class EntityLoaderBaseTest {
         AtomicBoolean putToBundle = new AtomicBoolean(false);
         EntityLoader loader = new TestEntityLoader(jsonTools, putToBundle);
 
-        when(jsonTools.getDocumentFileFromConfigDir(any(File.class), any(String.class))).thenReturn(new File(""));
+        when(jsonTools.getDocumentFile(any(File.class), any(String.class))).thenReturn(new File(""));
         when(jsonTools.readDocumentFile(any(File.class), any(JavaType.class))).thenReturn(ImmutableMap.<String, TestEntity>builder().put("test", new TestEntity("custom")).build());
         when(jsonTools.getTypeFromFile(any(File.class))).thenReturn(JsonTools.JSON);
         when(jsonTools.getObjectMapper(any(String.class))).thenReturn(JsonTools.INSTANCE.getObjectMapper(JsonTools.JSON));
