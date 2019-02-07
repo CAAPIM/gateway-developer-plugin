@@ -218,7 +218,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, inboundDetail.getReplyToQueueName());
         }
 
-        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, inboundDetail.useRequestCorrelationId());
+        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, inboundDetail.isUseRequestCorrelationId());
 
         ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
         if (serviceResolutionSettings != null) {
@@ -311,7 +311,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             jmsDestinationDetailProps.put(REPLY_QUEUE_NAME, outboundDetail.getReplyToQueueName());
         }
 
-        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, outboundDetail.useRequestCorrelationId());
+        jmsDestinationDetailProps.put(USE_REQUEST_CORRELATION_ID, outboundDetail.isUseRequestCorrelationId());
         jmsDestinationDetailProps.put(OUTBOUND_MESSAGE_TYPE, outboundDetail.getMessageFormat().getType());
 
         PoolingType poolingType = outboundDetail.getPoolingType();

@@ -37,7 +37,7 @@ public class JmsDestinationDetail {
         this.replyToQueueName = replyToQueueName;
     }
 
-    public boolean useRequestCorrelationId() {
+    public boolean isUseRequestCorrelationId() {
         return useRequestCorrelationId;
     }
 
