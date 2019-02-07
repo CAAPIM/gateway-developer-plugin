@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.Po
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.SessionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -248,9 +249,8 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, this.getContentTypeSource(serviceResolutionSettings));
 
             String contentType = serviceResolutionSettings.getContentType();
-            if (contentType == null) {
-                contentType = "";
-            }
+            contentType = Strings.nullToEmpty(contentType);
+
             contextPropertiesTemplateProps.put(CONTENT_TYPE_VALUE, contentType);
         }
 
