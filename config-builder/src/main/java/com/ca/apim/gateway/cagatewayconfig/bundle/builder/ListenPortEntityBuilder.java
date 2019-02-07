@@ -109,13 +109,15 @@ public class ListenPortEntityBuilder implements EntityBuilder {
     private Element createServiceElement(Bundle bundle, String name, ListenPort listenPort, Document document) {
         String targetServiceReference = listenPort.getTargetServiceReference();
         Service service = bundle.getServices().get(targetServiceReference);
+
         if (service == null) {
-            if (getDeploymentBundle() == null) {
-                throw new EntityBuilderException("Could not find service binded to listen port " + name + ". Service Path: " + targetServiceReference);
-            } else {
-                service = getDeploymentBundle().getServices().get(targetServiceReference.substring(targetServiceReference.lastIndexOf('/') + 1));
-            }
+            service = getDeploymentBundle().getServices().get(targetServiceReference.substring(targetServiceReference.lastIndexOf('/') + 1));
         }
+
+        if (service == null) {
+            throw new EntityBuilderException("Could not find service binded to listen port " + name + ". Service Path: " + targetServiceReference);
+        }
+
         return createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, ATTRIBUTE_ID, service.getId());
     }
 

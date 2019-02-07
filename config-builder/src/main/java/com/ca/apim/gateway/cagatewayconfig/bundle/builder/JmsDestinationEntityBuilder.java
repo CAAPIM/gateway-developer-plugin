@@ -227,14 +227,14 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             Service service = bundle.getServices().get(serviceRef);
 
             if (service == null) {
-                if (getDeploymentBundle() == null) {
-                    throw new EntityBuilderException("Could not find associated Service for inbound JMS Destination: " + name + ". Service Path: " + serviceRef);
-                } else {
-                    service = getDeploymentBundle().getServices().get(serviceRef.substring(serviceRef.lastIndexOf('/') + 1));
-                }
+                service = getDeploymentBundle().getServices().get(serviceRef.substring(serviceRef.lastIndexOf('/') + 1));
             }
 
             if (service == null) {
+                throw new EntityBuilderException("Could not find associated Service for inbound JMS Destination: " + name + ". Service Path: " + serviceRef);
+            }
+
+            if (serviceRef == null) {
                 contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, Boolean.FALSE.toString());
             } else {
                 contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, Boolean.TRUE.toString());

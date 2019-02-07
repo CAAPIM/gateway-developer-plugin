@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
@@ -92,7 +93,7 @@ class JmsDestinationEntityBuilderTest {
         final Bundle bundle = new Bundle();
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildInbound(bundle, false).build()));
 
-        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+        assertThrows(BundleLoadException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
     
     @Test
@@ -325,6 +326,7 @@ class JmsDestinationEntityBuilderTest {
         
         assertEquals("AUTOMATIC", jmsDestinationDetailProps.remove(INBOUND_ACKNOWLEDGEMENT_TYPE));
         assertEquals("AUTOMATIC", jmsDestinationDetailProps.remove(REPLY_TYPE));
+        assertEquals("true", contextPropertiesTemplateProps.remove(IS_HARDWIRED_SERVICE));
         assertEquals("my-service-id", contextPropertiesTemplateProps.remove(HARDWIRED_SERVICE_ID));
         assertEquals("com.l7tech.server.jms.prop.contentType.header", contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE));
         assertEquals("my-content-type-jms-prop", contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE));

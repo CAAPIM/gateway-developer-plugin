@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSetting
 import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
@@ -105,7 +106,7 @@ class ListenPortEntityBuilderTest {
         final Bundle bundle = new Bundle();
         addPortToBundle(bundle, buildPortWithServiceRef());
 
-        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+        assertThrows(BundleLoadException.class, () -> builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
     }
 
     @Test

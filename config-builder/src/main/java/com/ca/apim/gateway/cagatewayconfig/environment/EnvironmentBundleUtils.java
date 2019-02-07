@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
 import com.google.common.annotations.VisibleForTesting;
@@ -39,7 +40,7 @@ public class EnvironmentBundleUtils {
 
     public static Bundle getDeploymentBundle() {
         if (templatizedBundlesFolderPath == null) {
-            return null;
+            throw new BundleLoadException("Invalid deployment bundle path : " + templatizedBundlesFolderPath);
         }
         EntityBundleLoader loader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
         List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath , BUNDLE_EXTENSION);
