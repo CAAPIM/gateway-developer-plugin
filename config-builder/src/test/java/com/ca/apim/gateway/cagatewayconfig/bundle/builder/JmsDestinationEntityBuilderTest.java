@@ -325,7 +325,6 @@ class JmsDestinationEntityBuilderTest {
         
         assertEquals("AUTOMATIC", jmsDestinationDetailProps.remove(INBOUND_ACKNOWLEDGEMENT_TYPE));
         assertEquals("AUTOMATIC", jmsDestinationDetailProps.remove(REPLY_TYPE));
-        assertEquals("true", contextPropertiesTemplateProps.remove(IS_HARDWIRED_SERVICE));
         assertEquals("my-service-id", contextPropertiesTemplateProps.remove(HARDWIRED_SERVICE_ID));
         assertEquals("com.l7tech.server.jms.prop.contentType.header", contextPropertiesTemplateProps.remove(CONTENT_TYPE_SOURCE));
         assertEquals("my-content-type-jms-prop", contextPropertiesTemplateProps.remove(CONTENT_TYPE_VALUE));
