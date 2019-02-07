@@ -43,7 +43,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributesAndChildren;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
-
 @Singleton
 @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public class JmsDestinationEntityBuilder implements EntityBuilder {
