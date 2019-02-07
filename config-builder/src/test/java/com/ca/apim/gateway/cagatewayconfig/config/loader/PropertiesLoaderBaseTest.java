@@ -29,7 +29,7 @@ class PropertiesLoaderBaseTest {
         }
 
         @Override
-        protected String getFilePath() {
+        protected String getFileName() {
             return "property";
         }
 

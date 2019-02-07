@@ -19,6 +19,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Base loader for all entities stored into properties files.
+ *
+ * @param <P> type of entity.
+ */
 public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implements EntityLoader {
 
     private FileUtils fileUtils;
@@ -31,7 +36,7 @@ public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implement
 
     private Map<String, Object> load(final File propertiesFile) {
         Map<String, Object> propertiesMap = new LinkedHashMap<>();
-        if (propertiesFile.exists()) {
+        if (propertiesFile != null && propertiesFile.exists()) {
             Properties properties = new Properties();
             try (InputStream inStream = fileUtils.getInputStream(propertiesFile)) {
                 properties.load(inStream);
@@ -50,7 +55,7 @@ public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implement
 
     @Override
     public void load(Bundle bundle, File rootDir) {
-        File propertiesFile = new File(rootDir, this.getFilePath());
+        File propertiesFile = FileUtils.findConfigFileOrDir(rootDir, getFileName());
         load(propertiesFile).forEach((k, v) -> putToBundle(bundle, rootDir, k, v.toString()));
     }
 
@@ -75,9 +80,9 @@ public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implement
     }
 
     /**
-     * @return the file path for this loader
+     * @return the file name for this loader
      */
-    protected abstract String getFilePath();
+    protected abstract String getFileName();
 
     /**
      * @return the entity class of this loader

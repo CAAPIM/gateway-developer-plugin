@@ -20,11 +20,12 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.findConfigFileOrDir;
 import static java.util.Arrays.stream;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 
 /**
- * Loads the certificates specified in the 'config/certificates' directory. Certificates in this directory must end with
+ * Loads the certificates specified in the 'certificates' directory. Certificates in this directory must end with
  * .der, .pem, .crt, or .cer.
  */
 @Singleton
@@ -39,8 +40,8 @@ public class CertificatesLoader implements EntityLoader {
 
     @Override
     public void load(Bundle bundle, File rootDir) {
-        final File certificatesDir = new File(rootDir, "config/certificates");
-        if (certificatesDir.exists()) {
+        final File certificatesDir = findConfigFileOrDir(rootDir, "certificates");
+        if (certificatesDir != null && certificatesDir.exists()) {
             final String[] certs = certificatesDir.list();
             if (certs != null && certs.length > 0) {
                 final Map<String, SupplierWithIO<InputStream>> map = new HashMap<>();
