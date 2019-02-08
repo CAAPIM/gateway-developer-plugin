@@ -43,7 +43,7 @@ public class EnvironmentBundleUtils {
             throw new BundleLoadException("Invalid deployment bundle path : " + templatizedBundlesFolderPath);
         }
         EntityBundleLoader loader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
-        List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath , BUNDLE_EXTENSION);
+        List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath, BUNDLE_EXTENSION);
         return loader.load(deploymentBundleFiles);
     }
 
