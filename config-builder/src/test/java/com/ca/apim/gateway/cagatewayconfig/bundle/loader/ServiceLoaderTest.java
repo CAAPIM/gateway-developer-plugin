@@ -31,7 +31,7 @@ class ServiceLoaderTest {
 
         assertFalse(bundle.getServices().isEmpty());
         assertEquals(1, bundle.getServices().size());
-        Service service = bundle.getServices().get("service");
+        Service service = bundle.getServices().get("/folder/service");
         assertNotNull(service);
         assertEquals("service", service.getName());
         assertEquals("/service", service.getUrl());
@@ -59,7 +59,7 @@ class ServiceLoaderTest {
 
         assertFalse(bundle.getServices().isEmpty());
         assertEquals(1, bundle.getServices().size());
-        Service service = bundle.getServices().get("service");
+        Service service = bundle.getServices().get("/folder/service");
         assertNotNull(service);
         assertEquals("service", service.getName());
         assertEquals("/soap-service", service.getUrl());

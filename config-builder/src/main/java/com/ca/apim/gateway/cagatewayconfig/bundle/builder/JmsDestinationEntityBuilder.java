@@ -227,7 +227,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             Service service = bundle.getServices().get(serviceRef);
 
             if (service == null) {
-                service = getDeploymentBundle().getServices().get(serviceRef.substring(serviceRef.lastIndexOf('/') + 1));
+                service = getDeploymentBundle().getServices().get(serviceRef);
             }
 
             if (service == null) {

@@ -111,7 +111,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         Service service = bundle.getServices().get(targetServiceReference);
 
         if (service == null) {
-            service = getDeploymentBundle().getServices().get(targetServiceReference.substring(targetServiceReference.lastIndexOf('/') + 1));
+            service = getDeploymentBundle().getServices().get(targetServiceReference);
         }
 
         if (service == null) {
