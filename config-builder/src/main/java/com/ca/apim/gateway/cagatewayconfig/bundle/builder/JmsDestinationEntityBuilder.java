@@ -224,21 +224,22 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
         if (serviceResolutionSettings != null) {
             String serviceRef = serviceResolutionSettings.getServiceRef();
-            Service service = bundle.getServices().get(serviceRef);
 
-            if (service == null) {
-                service = getDeploymentBundle().getServices().get(serviceRef);
-            }
+            if (serviceRef != null) {
+                Service service = bundle.getServices().get(serviceRef);
 
-            if (service == null) {
-                throw new EntityBuilderException("Could not find associated Service for inbound JMS Destination: " + name + ". Service Path: " + serviceRef);
-            }
+                if (service == null) {
+                    service = getDeploymentBundle().getServices().get(serviceRef);
+                }
 
-            if (serviceRef == null) {
-                contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, Boolean.FALSE.toString());
-            } else {
+                if (service == null) {
+                    throw new EntityBuilderException("Could not find associated Service for inbound JMS Destination: " + name + ". Service Path: " + serviceRef);
+                }
+
                 contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, Boolean.TRUE.toString());
                 contextPropertiesTemplateProps.put(HARDWIRED_SERVICE_ID, service.getId());
+            } else {
+                contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, Boolean.FALSE.toString());
             }
 
             putToMapIfValueIsNotNull(
