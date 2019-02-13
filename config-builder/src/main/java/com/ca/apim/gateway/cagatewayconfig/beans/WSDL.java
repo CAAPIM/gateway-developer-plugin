@@ -1,11 +1,15 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class WSDL {
 
     private String rootUrl;
     private String soapVersion;
     private boolean wssProcessingEnabled;
+    @JsonIgnore
     private String wsdlXml;
+    private String location;
 
     public String getRootUrl() {
         return rootUrl;
@@ -37,5 +41,13 @@ public class WSDL {
 
     public void setWssProcessingEnabled(boolean wssProcessingEnabled) {
         this.wssProcessingEnabled = wssProcessingEnabled;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }

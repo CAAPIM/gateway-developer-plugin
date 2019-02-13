@@ -95,6 +95,10 @@ public class Service extends Folderable {
     @Override
     public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
         setPolicy(getPath());
+
+        if(wsdl != null) {
+            wsdl.setLocation(getPath());
+        }
     }
 
     public WSDL getWsdl() {
