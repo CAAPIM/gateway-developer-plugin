@@ -50,7 +50,7 @@ public class EnvironmentBundleUtils {
         } else {
             EntityBundleLoader loader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
             List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath, BUNDLE_EXTENSION);
-            ConfigBuilderModule.getInjector().getInstance(EnvironmentBundleCache.class).putBundle(templatizedBundlesFolderPath, loader.load(deploymentBundleFiles));
+            cache.putBundle(templatizedBundlesFolderPath, loader.load(deploymentBundleFiles));
 
             return loader.load(deploymentBundleFiles);
         }
