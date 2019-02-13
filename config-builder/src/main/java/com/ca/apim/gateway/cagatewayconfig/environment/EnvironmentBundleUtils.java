@@ -42,9 +42,18 @@ public class EnvironmentBundleUtils {
         if (templatizedBundlesFolderPath == null) {
             throw new BundleLoadException("Invalid deployment bundle path : " + templatizedBundlesFolderPath);
         }
-        EntityBundleLoader loader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
-        List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath, BUNDLE_EXTENSION);
-        return loader.load(deploymentBundleFiles);
+
+        EnvironmentBundleCache cache = ConfigBuilderModule.getInjector().getInstance(EnvironmentBundleCache.class);
+
+        if (cache.contains(templatizedBundlesFolderPath)) {
+            return cache.getBundle(templatizedBundlesFolderPath);
+        } else {
+            EntityBundleLoader loader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
+            List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath, BUNDLE_EXTENSION);
+            ConfigBuilderModule.getInjector().getInstance(EnvironmentBundleCache.class).putBundle(templatizedBundlesFolderPath, loader.load(deploymentBundleFiles));
+
+            return loader.load(deploymentBundleFiles);
+        }
     }
 
     static void processDeploymentBundles(Bundle environmentBundle,
