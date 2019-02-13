@@ -8,11 +8,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
-public class EnvironmentBundleCache {
+public class BundleCache {
     private final Map<String, Bundle> cache = new ConcurrentHashMap<>();
 
     @Inject
-    public EnvironmentBundleCache() {
+    public BundleCache() {
+        // Wrapper class for a hashmap to be a persistent cache, no argument needed
     }
 
     public Bundle getBundle(String bundlePath) {

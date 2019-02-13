@@ -43,7 +43,7 @@ public class EnvironmentBundleUtils {
             throw new BundleLoadException("Invalid deployment bundle path : " + templatizedBundlesFolderPath);
         }
 
-        EnvironmentBundleCache cache = ConfigBuilderModule.getInjector().getInstance(EnvironmentBundleCache.class);
+        BundleCache cache = ConfigBuilderModule.getInjector().getInstance(BundleCache.class);
 
         if (cache.contains(templatizedBundlesFolderPath)) {
             return cache.getBundle(templatizedBundlesFolderPath);
