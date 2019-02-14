@@ -11,11 +11,13 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleBuilder;
+import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -82,6 +84,12 @@ public class ConfigBuilderModule extends AbstractModule {
         Multibinder<BundleEntityLoader> depLoadersBinder = newSetBinder(binder(), BundleEntityLoader.class);
         reflections.getSubTypesOf(BundleEntityLoader.class).forEach(l -> depLoadersBinder.addBinding().to(l));
         bind(BundleEntityLoaderRegistry.class);
+
+        // bind entity bundle loaders to the module
+        Multibinder<EntityBundleLoader> depLoadersBinderz = newSetBinder(binder(), EntityBundleLoader.class);
+        reflections.getSubTypesOf(EntityBundleLoader.class).forEach(l -> depLoadersBinderz.addBinding().to(l));
+
+        bind(BundleCache.class);
 
         // bind all entity loaders to the module
         Multibinder<EntityLoader> entityLoadersBinder = newSetBinder(binder(), EntityLoader.class);

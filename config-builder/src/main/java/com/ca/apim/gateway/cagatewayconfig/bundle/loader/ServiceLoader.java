@@ -31,6 +31,7 @@ public class ServiceLoader implements BundleEntityLoader {
     @Override
     public void load(Bundle bundle, Element element) {
         final Element service = getSingleChildElement(getSingleChildElement(element, RESOURCE), SERVICE);
+        final String servicePath = getSingleChildElement(element, NAME).getTextContent();
 
         final Element serviceDetails = getSingleChildElement(service, SERVICE_DETAIL);
         final String id = serviceDetails.getAttribute(ATTRIBUTE_ID);
@@ -76,7 +77,7 @@ public class ServiceLoader implements BundleEntityLoader {
         serviceEntity.setHttpMethods(httpMethods);
         serviceEntity.setProperties(properties);
 
-        bundle.getServices().put(name, serviceEntity);
+        bundle.getServices().put(servicePath, serviceEntity);
     }
 
     private void populateServiceEntity(Element service, Service serviceEntity, Map<String, Object> allProperties, Map<String, Object> properties) {

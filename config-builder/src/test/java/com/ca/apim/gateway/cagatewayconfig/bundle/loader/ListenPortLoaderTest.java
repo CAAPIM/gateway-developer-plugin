@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ClientAuthentication;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.Feature;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSettings;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.collections4.SetUtils;
@@ -27,7 +28,11 @@ import java.util.stream.Stream;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.assertPropertiesContent;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithChildren;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+
 import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,6 +85,9 @@ class ListenPortLoaderTest {
     private static Element buildListenPortElement(Document document, boolean tlsSettings) {
         Element listenPortElement = document.createElement(LISTEN_PORT);
 
+        Service service = new Service();
+        service.setId("Service");
+
         listenPortElement.setAttribute(ATTRIBUTE_ID, "id");
         listenPortElement.appendChild(createElementWithTextContent(document, NAME, "port"));
         listenPortElement.appendChild(createElementWithTextContent(document, ENABLED, TRUE.toString())); // people should not bootstrap a disabled listen port.
@@ -89,7 +97,7 @@ class ListenPortLoaderTest {
         Element enabledFeatures = document.createElement(ENABLED_FEATURES);
         Stream.of(Feature.values()).forEach(s -> enabledFeatures.appendChild(createElementWithTextContent(document, STRING_VALUE, s)));
         listenPortElement.appendChild(enabledFeatures);
-        listenPortElement.appendChild(createElementWithTextContent(document, TARGET_SERVICE_REFERENCE, "Service"));
+        listenPortElement.appendChild(createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, ATTRIBUTE_ID, service.getId()));
 
         if (tlsSettings) {
             Element tlsSettingsElement = document.createElement(TLS_SETTINGS);

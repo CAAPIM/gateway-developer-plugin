@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.getDeploymentBundle;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.LISTEN_PORT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -93,47 +94,62 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         listenPortElement.appendChild(enabledFeatures);
 
         if (listenPort.getTargetServiceReference() != null) {
-            final Service service = bundle.getServices().get(listenPort.getTargetServiceReference());
-            if (service == null) {
-                throw new EntityBuilderException("Could not find service binded to listen port " + name + ". Service Path: " + listenPort.getTargetServiceReference());
-            }
-            listenPortElement.appendChild(createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, ATTRIBUTE_ID, service.getId()));
+            listenPortElement.appendChild(createServiceElement(bundle, name, listenPort, document));
         }
 
         if (listenPort.getTlsSettings() != null) {
-            ListenPortTlsSettings tlsSettings = listenPort.getTlsSettings();
-
-            Element tlsSettingsElement = document.createElement(TLS_SETTINGS);
-            tlsSettingsElement.appendChild(createElementWithTextContent(document, CLIENT_AUTHENTICATION, tlsSettings.getClientAuthentication().getType()));
-
-            if (isNotEmpty(tlsSettings.getPrivateKey())) {
-                final PrivateKey privateKey = bundle.getPrivateKeys().get(tlsSettings.getPrivateKey());
-                if (privateKey == null) {
-                    throw new EntityBuilderException("Could not find Private Key " + tlsSettings.getPrivateKey() + " associated to Listen Port " + name);
-                }
-                tlsSettingsElement.appendChild(createElementWithAttribute(document, PRIVATE_KEY_REFERENCE, ATTRIBUTE_ID, privateKey.getId()));
-            }
-
-            if (isNotEmpty(tlsSettings.getEnabledVersions())) {
-                Element enabledVersions = document.createElement(ENABLED_VERSIONS);
-                tlsSettings.getEnabledVersions().forEach(s -> enabledVersions.appendChild(createElementWithTextContent(document, STRING_VALUE, s)));
-                tlsSettingsElement.appendChild(enabledVersions);
-            }
-
-            if (isNotEmpty(tlsSettings.getEnabledCipherSuites())) {
-                Element enabledCipherSuites = document.createElement(ENABLED_CIPHER_SUITES);
-                tlsSettings.getEnabledCipherSuites().forEach(s -> enabledCipherSuites.appendChild(createElementWithTextContent(document, STRING_VALUE, s)));
-                tlsSettingsElement.appendChild(enabledCipherSuites);
-            }
-
-            buildAndAppendPropertiesElement(tlsSettings.getProperties(), document, tlsSettingsElement);
-
-            listenPortElement.appendChild(tlsSettingsElement);
+            listenPortElement.appendChild(createTlsSettings(bundle, name, listenPort, document));
         }
 
         buildAndAppendPropertiesElement(listenPort.getProperties(), document, listenPortElement);
 
         return EntityBuilderHelper.getEntityWithNameMapping(LISTEN_PORT_TYPE, name, id, listenPortElement);
+    }
+
+    private Element createServiceElement(Bundle bundle, String name, ListenPort listenPort, Document document) {
+        String targetServiceReference = listenPort.getTargetServiceReference();
+        Service service = bundle.getServices().get(targetServiceReference);
+
+        if (service == null) {
+            service = getDeploymentBundle().getServices().get(targetServiceReference);
+        }
+
+        if (service == null) {
+            throw new EntityBuilderException("Could not find service binded to listen port " + name + ". Service Path: " + targetServiceReference);
+        }
+
+        return createElementWithAttribute(document, TARGET_SERVICE_REFERENCE, ATTRIBUTE_ID, service.getId());
+    }
+
+    private Element createTlsSettings(Bundle bundle, String name, ListenPort listenPort, Document document) {
+        ListenPortTlsSettings tlsSettings = listenPort.getTlsSettings();
+
+        Element tlsSettingsElement = document.createElement(TLS_SETTINGS);
+        tlsSettingsElement.appendChild(createElementWithTextContent(document, CLIENT_AUTHENTICATION, tlsSettings.getClientAuthentication().getType()));
+
+        if (isNotEmpty(tlsSettings.getPrivateKey())) {
+            final PrivateKey privateKey = bundle.getPrivateKeys().get(tlsSettings.getPrivateKey());
+            if (privateKey == null) {
+                throw new EntityBuilderException("Could not find Private Key " + tlsSettings.getPrivateKey() + " associated to Listen Port " + name);
+            }
+            tlsSettingsElement.appendChild(createElementWithAttribute(document, PRIVATE_KEY_REFERENCE, ATTRIBUTE_ID, privateKey.getId()));
+        }
+
+        if (isNotEmpty(tlsSettings.getEnabledVersions())) {
+            Element enabledVersions = document.createElement(ENABLED_VERSIONS);
+            tlsSettings.getEnabledVersions().forEach(s -> enabledVersions.appendChild(createElementWithTextContent(document, STRING_VALUE, s)));
+            tlsSettingsElement.appendChild(enabledVersions);
+        }
+
+        if (isNotEmpty(tlsSettings.getEnabledCipherSuites())) {
+            Element enabledCipherSuites = document.createElement(ENABLED_CIPHER_SUITES);
+            tlsSettings.getEnabledCipherSuites().forEach(s -> enabledCipherSuites.appendChild(createElementWithTextContent(document, STRING_VALUE, s)));
+            tlsSettingsElement.appendChild(enabledCipherSuites);
+        }
+
+        buildAndAppendPropertiesElement(tlsSettings.getProperties(), document, tlsSettingsElement);
+
+        return tlsSettingsElement;
     }
 
     // visibility for unit testing
