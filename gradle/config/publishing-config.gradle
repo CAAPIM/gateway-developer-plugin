@@ -1,0 +1,47 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    publications = ['gwPlugin']
+    publish = true
+    pkg {
+        repo = 'gateway-developer-plugin'
+        userOrg = 'ca-api-gateway'
+        name = project.name
+        desc = project.description
+        licenses = ['MIT']
+        websiteUrl = 'https://github.com/ca-api-gateway/gateway-export-plugin'
+        issueTrackerUrl = 'https://waffle.io/ca-api-gateway/gateway-developer-plugin'
+        vcsUrl = 'https://github.com/ca-api-gateway/gateway-developer-plugin.git'
+        githubRepo = 'ca-api-gateway/gateway-developer-plugin'
+        version {
+            name = project.version
+            released = new Date()
+            vcsTag = 'release/' + project.version
+            gpg {
+                sign = true
+            }
+            mavenCentralSync {
+                sync = true
+                user = project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : System.getenv('OSS_USER') //OSS user token: mandatory
+                password = project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : System.getenv('OSS_PASSWORD') //OSS user password: mandatory
+            }
+        }
+    }
+}
+
+model {
+    tasks.generatePomFileForGwPluginPublication {
+        destination = file( "${buildDir}/generated-pom.xml" )
+    }
+}
+
+task generatePomFile( dependsOn: 'generatePomFileForGwPluginPublication' )
