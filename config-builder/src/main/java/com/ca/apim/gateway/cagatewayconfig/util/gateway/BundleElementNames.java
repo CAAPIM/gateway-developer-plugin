@@ -170,6 +170,11 @@ public class BundleElementNames {
     public static final String JMS_CONNECTION = "l7:JMSConnection";
     public static final String JMS_PROVIDER_TYPE = "l7:ProviderType";
     public static final String CONTEXT_PROPERTIES_TEMPLATE = "l7:ContextPropertiesTemplate";
+
+    // Generic Entity
+    public static final String GENERIC_ENTITY = "l7:GenericEntity";
+    public static final String ENTITY_CLASS_NAME = "l7:EntityClassName";
+    public static final String VALUE_XML = "l7:ValueXml";
     
     private BundleElementNames() {
         //

@@ -7,14 +7,13 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableMap;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
-import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,7 @@ import java.util.*;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.asList;
-import static org.apache.commons.io.FileUtils.readLines;
+import static org.apache.commons.io.FileUtils.*;
 import static org.gradle.util.WrapUtil.toSet;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,7 +45,7 @@ class WriterHelperTest {
     private static final String JSON_FILE = "json";
     private static final String TEST_FILE = "test-file";
 
-    private DocumentFileUtils documentFileUtils = DocumentFileUtils.INSTANCE;
+    private FileUtils documentFileUtils = FileUtils.INSTANCE;
     private JsonTools jsonTools = JsonTools.INSTANCE;
     private File testProjectDir;
 
@@ -124,7 +123,7 @@ class WriterHelperTest {
         final File propertiesFile = checkFileBasics(WriterHelperTest.TEST_PROPERTIES, PROPERTIES);
 
         // load existing file
-        final FileInputStream stream = FileUtils.openInputStream(propertiesFile);
+        final FileInputStream stream = openInputStream(propertiesFile);
         final Properties writtenProperties = new Properties();
         writtenProperties.load(stream);
         stream.close();
@@ -292,7 +291,7 @@ class WriterHelperTest {
     private void setupCurrentFile(String name, String extension) throws IOException, URISyntaxException {
         final InputStream currentFile = newInputStream(Paths.get(this.getClass().getClassLoader().getResource("config/" + name + "." + extension).toURI()));
         final File destCurrentFile = new File(new File(testProjectDir, "config"), name + "." + extension);
-        FileUtils.copyInputStreamToFile(currentFile, destCurrentFile);
+        copyInputStreamToFile(currentFile, destCurrentFile);
         currentFile.close();
     }
 

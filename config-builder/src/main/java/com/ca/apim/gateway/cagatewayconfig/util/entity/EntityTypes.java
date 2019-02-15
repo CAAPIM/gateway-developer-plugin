@@ -27,6 +27,7 @@ public class EntityTypes {
     public static final String CASSANDRA_CONNECTION_TYPE = "CASSANDRA_CONFIGURATION";
     public static final String SCHEDULED_TASK_TYPE = "SCHEDULED_TASK";
     public static final String JMS_DESTINATION_TYPE = "JMS_ENDPOINT";
+    public static final String GENERIC_ENTITY_TYPE = "GENERIC";
 
     private EntityTypes() { }
 }

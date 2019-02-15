@@ -80,4 +80,41 @@ class FileUtilsTest {
         assertThrows(EntityBuilderException.class, () -> FileUtils.INSTANCE.getFileAsString(path.toFile()));
     }
 
+    @Test
+    void createFolder() {
+        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test");
+        FileUtils.INSTANCE.createFolder(path);
+        assertTrue(path.toFile().exists());
+        assertTrue(path.toFile().isDirectory());
+    }
+
+    @Test
+    void createFolderWithInvalidPath() {
+        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test", "test1");
+        assertThrows(DocumentFileUtilsException.class, () -> FileUtils.INSTANCE.createFolder(path));
+    }
+
+    @Test
+    void createFolderWithFileSameName() throws IOException {
+        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test.f");
+        org.testcontainers.shaded.com.google.common.io.Files.touch(path.toFile());
+        assertThrows(DocumentFileUtilsException.class, () -> FileUtils.INSTANCE.createFolder(path));
+    }
+
+    @Test
+    void createFolders() {
+        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test", "test1");
+        FileUtils.INSTANCE.createFolders(path);
+        assertTrue(path.toFile().exists());
+        assertTrue(path.toFile().isDirectory());
+        assertTrue(path.getParent().toFile().exists());
+        assertTrue(path.getParent().toFile().isDirectory());
+    }
+
+    @Test
+    void createFoldersExistingFile() throws IOException {
+        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test.f");
+        org.testcontainers.shaded.com.google.common.io.Files.touch(path.toFile());
+        assertThrows(DocumentFileUtilsException.class, () -> FileUtils.INSTANCE.createFolders(path));
+    }
 }

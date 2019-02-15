@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.AssertionJSPolic
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.XMLPolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableSet;
@@ -34,7 +35,7 @@ class PolicyWriterTest {
 
     @Test
     void testNoPolicies(final TemporaryFolder temporaryFolder) {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, FileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -50,7 +51,7 @@ class PolicyWriterTest {
 
     @Test
     void testWriteAssertionJS(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, FileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);

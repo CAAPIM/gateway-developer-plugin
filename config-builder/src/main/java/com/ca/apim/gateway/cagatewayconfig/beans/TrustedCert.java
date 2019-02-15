@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.ImmutableMap;
@@ -190,9 +190,9 @@ public class TrustedCert extends GatewayEntity {
     }
 
     @Override
-    public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
+    public void preWrite(File configFolder, FileUtils fileUtils) {
         final File certFolder = new File(configFolder, "certificates");
-        documentFileUtils.createFolder(certFolder.toPath());
+        fileUtils.createFolder(certFolder.toPath());
 
         writeCertificateData(certFolder, getName(), getCertificateData().getEncodedData());
 

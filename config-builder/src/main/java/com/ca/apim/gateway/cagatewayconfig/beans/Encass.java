@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.annotations.VisibleForTesting;
@@ -104,7 +104,7 @@ public class Encass extends GatewayEntity {
     }
 
     @Override
-    public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
+    public void preWrite(File configFolder, FileUtils fileUtils) {
         sortArgumentsAndResults();
     }
 

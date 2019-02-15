@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ public class Bundle {
 
     // some special things need their own maps
     private final Map<String, SupplierWithIO<InputStream>> certificateFiles = new HashMap<>();
+    private final Map<String, File> genericEntityConfigurations = new HashMap<>();
     private Set<Bundle> dependencies;
     private FolderTree folderTree;
     private Map<Dependency, List<Dependency>> dependencyMap;
@@ -206,7 +208,23 @@ public class Bundle {
     public void putAllJmsDestinations(@NotNull Map<String, JmsDestination> jmsDestinations) {
         this.getJmsDestinations().putAll(jmsDestinations);
     }
-    
+
+    public Map<String, GenericEntity> getGenericEntities() {
+        return getEntities(GenericEntity.class);
+    }
+
+    public void putAllGenericEntities(@NotNull Map<String, GenericEntity> genericEntities) {
+        this.getGenericEntities().putAll(genericEntities);
+    }
+
+    public Map<String, File> getGenericEntityConfigurations() {
+        return genericEntityConfigurations;
+    }
+
+    public void putAllGenericEntityConfigurations(@NotNull Map<String, File> genericEntityConfigurations) {
+        this.getGenericEntityConfigurations().putAll(genericEntityConfigurations);
+    }
+
     public FolderTree getFolderTree() {
         return folderTree;
     }

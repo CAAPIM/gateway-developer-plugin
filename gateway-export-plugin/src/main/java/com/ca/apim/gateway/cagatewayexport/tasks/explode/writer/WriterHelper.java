@@ -10,7 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.GatewayEntityInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.PropertiesEntity;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayexport.util.file.StripFirstLineStream;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +38,7 @@ class WriterHelper {
     private WriterHelper() {
     }
 
-    static void write(Bundle bundle, File rootFolder, GatewayEntityInfo info, DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    static void write(Bundle bundle, File rootFolder, GatewayEntityInfo info, FileUtils documentFileUtils, JsonTools jsonTools) {
         if (info.getFileType() == JSON_YAML) {
             writeFile(rootFolder, documentFileUtils, jsonTools, bundle.getEntities(info.getEntityClass()), info.getFileName(), info.getEntityClass());
         } else if (info.getFileType() == PROPERTIES) {
@@ -53,42 +53,42 @@ class WriterHelper {
      * Write beans map to config folder into rootFolder specified, using specified filename.
      *
      * @param rootFolder root folder
-     * @param documentFileUtils file utility
+     * @param fileUtils file utility
      * @param beans beans to be written as properties files
      * @param fileName name of the file
      */
-    private static <B extends GatewayEntity> void writePropertiesFile(File rootFolder, DocumentFileUtils documentFileUtils, Map<String, B> beans, String fileName) {
+    private static <B extends GatewayEntity> void writePropertiesFile(File rootFolder, FileUtils fileUtils, Map<String, B> beans, String fileName) {
         File configFolder = new File(rootFolder, CONFIG_DIRECTORY);
-        documentFileUtils.createFolder(configFolder.toPath());
+        fileUtils.createFolder(configFolder.toPath());
 
         Properties properties = new Properties();
         properties.putAll(beans
                 .values()
                 .stream()
                 .map(b -> {
-                    b.preWrite(configFolder, documentFileUtils);
+                    b.preWrite(configFolder, fileUtils);
                     return (PropertiesEntity) b;
                 })
                 .collect(toMap(PropertiesEntity::getKey, PropertiesEntity::getValue)));
 
-        writePropertiesFile(rootFolder, documentFileUtils, properties, fileName);
+        writePropertiesFile(rootFolder, fileUtils, properties, fileName);
     }
 
     /**
      * Write {@link Properties} map to config folder into rootFolder specified, using specified filename.
      *
      * @param rootFolder root folder
-     * @param documentFileUtils file utility
+     * @param fileUtils file utility
      * @param properties Properties to be written
      * @param fileName name of the file
      */
-    static synchronized void writePropertiesFile(File rootFolder, DocumentFileUtils documentFileUtils, Properties properties, String fileName) {
+    static synchronized void writePropertiesFile(File rootFolder, FileUtils fileUtils, Properties properties, String fileName) {
         if (properties.isEmpty()) {
             return;
         }
 
         File configFolder = new File(rootFolder, CONFIG_DIRECTORY);
-        documentFileUtils.createFolder(configFolder.toPath());
+        fileUtils.createFolder(configFolder.toPath());
 
         File propertiesFile = new File(configFolder, fileName + ".properties");
         Properties currentProperties = loadExistingProperties(propertiesFile);
@@ -113,25 +113,25 @@ class WriterHelper {
      * Write map of beans to config folder into rootFolder specified, using specified fileName, in format yaml.
      *
      * @param rootFolder root folder
-     * @param documentFileUtils file utility
+     * @param fileUtils file utility
      * @param jsonTools json utility
      * @param beans map of beans to be written
      * @param fileName name of the file
      * @param beanClass The class type of the bean
      * @param <B> type of bean
      */
-    static <B extends GatewayEntity> void writeFile(File rootFolder, DocumentFileUtils documentFileUtils, JsonTools jsonTools, Map<String, B> beans, String fileName, Class<B> beanClass) {
+    static <B extends GatewayEntity> void writeFile(File rootFolder, FileUtils fileUtils, JsonTools jsonTools, Map<String, B> beans, String fileName, Class<B> beanClass) {
         if (beans.isEmpty()) {
             return;
         }
 
         File configFolder = new File(rootFolder, CONFIG_DIRECTORY);
-        documentFileUtils.createFolder(configFolder.toPath());
+        fileUtils.createFolder(configFolder.toPath());
 
         // remap the beans by name and run pre-write methods
         LinkedHashMap<String, B> beansByName = new LinkedHashMap<>();
         beans.forEach((k, v) -> {
-            v.preWrite(configFolder, documentFileUtils);
+            v.preWrite(configFolder, fileUtils);
             beansByName.put(v.getMappingValue(), v);
         });
         beans = beansByName;

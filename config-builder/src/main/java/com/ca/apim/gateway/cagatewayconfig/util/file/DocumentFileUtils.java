@@ -40,33 +40,4 @@ public class DocumentFileUtils {
             closeQuietly(fos);
         }
     }
-
-    public synchronized void createFolder(Path folderPath) {
-        if (!folderPath.toFile().exists()) {
-            try {
-                Files.createDirectory(folderPath);
-            } catch (IOException e) {
-                throw new DocumentFileUtilsException("Exception creating folder: " + folderPath, e);
-            }
-        } else if (!folderPath.toFile().isDirectory()) {
-            throw new DocumentFileUtilsException("Wanted to create folder but found a file: " + folderPath);
-        }
-    }
-
-    /**
-     * Create all folder in this path. Does not fail if any of them already exist.
-     *
-     * @param folderPath Path representing all folders that should be created.
-     */
-    public synchronized void createFolders(Path folderPath) {
-        if (!folderPath.toFile().exists()) {
-            try {
-                Files.createDirectories(folderPath);
-            } catch (IOException e) {
-                throw new DocumentFileUtilsException("Exception creating folder(s): " + folderPath, e);
-            }
-        } else if (!folderPath.toFile().isDirectory()) {
-            throw new DocumentFileUtilsException("Wanted to create folder but found a file: " + folderPath);
-        }
-    }
 }

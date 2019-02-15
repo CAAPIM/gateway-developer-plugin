@@ -13,7 +13,6 @@ import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.testcontainers.shaded.com.google.common.io.Files;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -62,44 +61,6 @@ class DocumentFileUtilsTest {
         assertNotNull(content);
         assertTrue(content.contains("xmlns:l7"));
         assertTrue(content.contains("http://ns.l7tech.com/2010/04/gateway-management"));
-    }
-
-    @Test
-    void createFolder() {
-        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test");
-        DocumentFileUtils.INSTANCE.createFolder(path);
-        assertTrue(path.toFile().exists());
-        assertTrue(path.toFile().isDirectory());
-    }
-
-    @Test
-    void createFolderWithInvalidPath() {
-        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test", "test1");
-        assertThrows(DocumentFileUtilsException.class, () -> DocumentFileUtils.INSTANCE.createFolder(path));
-    }
-
-    @Test
-    void createFolderWithFileSameName() throws IOException {
-        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test.f");
-        Files.touch(path.toFile());
-        assertThrows(DocumentFileUtilsException.class, () -> DocumentFileUtils.INSTANCE.createFolder(path));
-    }
-
-    @Test
-    void createFolders() {
-        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test", "test1");
-        DocumentFileUtils.INSTANCE.createFolders(path);
-        assertTrue(path.toFile().exists());
-        assertTrue(path.toFile().isDirectory());
-        assertTrue(path.getParent().toFile().exists());
-        assertTrue(path.getParent().toFile().isDirectory());
-    }
-
-    @Test
-    void createFoldersExistingFile() throws IOException {
-        Path path = Paths.get(rootProjectDir.getRoot().toPath().toString(), "test.f");
-        Files.touch(path.toFile());
-        assertThrows(DocumentFileUtilsException.class, () -> DocumentFileUtils.INSTANCE.createFolders(path));
     }
 
     @Test
