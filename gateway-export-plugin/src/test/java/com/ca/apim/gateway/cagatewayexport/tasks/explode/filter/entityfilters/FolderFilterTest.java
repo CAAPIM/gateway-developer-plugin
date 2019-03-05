@@ -97,4 +97,22 @@ class FolderFilterTest {
         assertTrue(parentFolders.stream().anyMatch(f -> "folder".equals(f.getName())));
         assertTrue(parentFolders.stream().anyMatch(f -> "path".equals(f.getName())));
     }
+
+    @Test
+    void filterBundleWithMultipleFoldersStartingWithTheSameName() {
+        Bundle bundle = FilterTestUtils.getBundle();
+        Folder folder1 = createFolder("Folder Test", "1", Folder.ROOT_FOLDER);
+        Folder folder2 = createFolder("Folder Test 2", "2", Folder.ROOT_FOLDER);
+        bundle.addEntity(folder1);
+        bundle.addEntity(folder2);
+        bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
+
+        FolderFilter folderFilter = new FolderFilter();
+
+        Bundle filteredBundle = new Bundle();
+        List<Folder> childFolders = folderFilter.filter("/Folder Test", new FilterConfiguration(), bundle, filteredBundle);
+
+        assertEquals(1, childFolders.size());
+        assertEquals("Folder Test", childFolders.iterator().next().getName());
+    }
 }
