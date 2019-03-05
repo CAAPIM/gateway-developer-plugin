@@ -29,7 +29,8 @@ public class FolderFilter implements EntityFilter<Folder> {
                 .filter(f -> {
                     String path = bundle.getFolderTree().getFormattedPath(f);
                     // Children folders have a path that starts with the folder path
-                    return ("/" + path).startsWith(folderPath);
+                    // Adding end slashes to ensure path is complete
+                    return ("/" + path + "/").startsWith(folderPath + "/");
                 }).collect(Collectors.toList());
     }
 
