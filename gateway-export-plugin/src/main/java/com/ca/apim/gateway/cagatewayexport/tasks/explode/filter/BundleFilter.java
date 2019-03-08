@@ -32,7 +32,6 @@ public class BundleFilter {
             }
         });
 
-        // TODO Generic Entity Filter
         Bundle filteredBundle = new Bundle();
         //for each entity filter, filter and then add the results to the filtered bundle
         filterRegistry.getEntityFilters()

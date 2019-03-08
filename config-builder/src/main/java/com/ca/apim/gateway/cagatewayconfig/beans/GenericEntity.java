@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -22,7 +23,10 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @JsonInclude(NON_NULL)
 @Named("GENERIC")
 @ConfigurationFile(name = "generic-entities", type = JSON_YAML)
+@EnvironmentType("GENERIC_ENTITY")
 public class GenericEntity extends GatewayEntity {
+
+    public static final String VALUE = "value";
 
     private String entityClassName;
     @JsonIgnore

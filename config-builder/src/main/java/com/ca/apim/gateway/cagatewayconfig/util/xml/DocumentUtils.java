@@ -8,15 +8,10 @@ package com.ca.apim.gateway.cagatewayconfig.util.xml;
 
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.google.common.collect.ImmutableMap;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -265,7 +260,11 @@ public class DocumentUtils {
      * @param nodeList node list
      * @return iterable wrapper
      */
-    public static Iterable<Node> nodeList(@NotNull final NodeList nodeList) {
+    public static Iterable<Node> nodeList(final NodeList nodeList) {
+        if (nodeList == null) {
+            return emptyList();
+        }
+
         return () -> new Iterator<Node>() {
 
             private int index = 0;
@@ -277,9 +276,40 @@ public class DocumentUtils {
 
             @Override
             public Node next() {
-                if (!hasNext())
+                if (!hasNext()){
                     throw new NoSuchElementException();
+                }
                 return nodeList.item(index++);
+            }
+        };
+    }
+
+    /**
+     * Returns a Iterable wrapper for {@link NamedNodeMap} to be used in foreach loops.
+     *
+     * @param namedNodeMap node map
+     * @return iterable wrapper
+     */
+    public static Iterable<Node> namedNodeMap(final NamedNodeMap namedNodeMap) {
+        if (namedNodeMap == null) {
+            return emptyList();
+        }
+
+        return () -> new Iterator<Node>() {
+
+            private int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return index < namedNodeMap.getLength();
+            }
+
+            @Override
+            public Node next() {
+                if (!this.hasNext()){
+                    throw new NoSuchElementException();
+                }
+                return namedNodeMap.item(index++);
             }
         };
     }
