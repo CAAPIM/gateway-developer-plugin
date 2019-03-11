@@ -38,6 +38,14 @@ public class CertificateUtils {
 
     private CertificateUtils() {}
 
+    public static CertificateFactory createX509CertificateFactory() {
+        try {
+             return CertificateFactory.getInstance("X.509");
+        } catch (CertificateException e) {
+            throw new IllegalStateException("Unable to load X509 Certificate Factory", e);
+        }
+    }
+
     public static Element buildCertDataFromFile(SupplierWithIO<InputStream> certFileLocation, Document document, CertificateFactory certificateFactory) {
         X509Certificate cert = loadCertificateFromFile(certFileLocation, certificateFactory);
         return createCertDataElementFromCert(cert, document);

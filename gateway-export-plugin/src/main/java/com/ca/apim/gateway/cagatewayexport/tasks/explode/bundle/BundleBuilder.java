@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
-import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -31,8 +31,8 @@ public class BundleBuilder {
     private final EntityTypeRegistry entityTypeRegistry;
 
     public BundleBuilder() {
-        this.entityLoaderRegistry = ConfigBuilderModule.getInstance(BundleEntityLoaderRegistry.class);
-        this.entityTypeRegistry = ConfigBuilderModule.getInstance(EntityTypeRegistry.class);
+        this.entityLoaderRegistry = InjectionRegistry.getInstance(BundleEntityLoaderRegistry.class);
+        this.entityTypeRegistry = InjectionRegistry.getInstance(EntityTypeRegistry.class);
     }
 
     public Bundle buildBundle(final Element bundleElement) {

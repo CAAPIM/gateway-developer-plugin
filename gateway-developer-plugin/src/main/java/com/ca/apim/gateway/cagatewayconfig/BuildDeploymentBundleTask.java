@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
@@ -54,7 +54,7 @@ public class BuildDeploymentBundleTask extends DefaultTask {
 
     @TaskAction
     public void perform() {
-        BundleFileBuilder bundleFileBuilder = ConfigBuilderModule.getInjector().getInstance(BundleFileBuilder.class);
+        BundleFileBuilder bundleFileBuilder = InjectionRegistry.getInjector().getInstance(BundleFileBuilder.class);
         bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(), filterBundleFiles(dependencies.getFiles()), getProject().getName() + '-' + getProject().getVersion());
     }
 }

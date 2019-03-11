@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.util.injection;
 
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundle;
@@ -36,7 +37,7 @@ class ExportPluginModuleTest {
 
     @BeforeEach
     void before() {
-        injector = ExportPluginModule.create();
+        injector = InjectionRegistry.getInjector();
     }
 
     @Test

@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.environment;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
-import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Element;
 
@@ -43,12 +43,12 @@ public class EnvironmentBundleUtils {
             throw new BundleLoadException("Invalid deployment bundle path : " + templatizedBundlesFolderPath);
         }
 
-        BundleCache cache = ConfigBuilderModule.getInjector().getInstance(BundleCache.class);
+        BundleCache cache = InjectionRegistry.getInjector().getInstance(BundleCache.class);
 
         if (cache.contains(templatizedBundlesFolderPath)) {
             return cache.getBundle(templatizedBundlesFolderPath);
         } else {
-            EntityBundleLoader loader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
+            EntityBundleLoader loader = InjectionRegistry.getInjector().getInstance(EntityBundleLoader.class);
             List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath, BUNDLE_EXTENSION);
             cache.putBundle(templatizedBundlesFolderPath, loader.load(deploymentBundleFiles));
             return loader.load(deploymentBundleFiles);

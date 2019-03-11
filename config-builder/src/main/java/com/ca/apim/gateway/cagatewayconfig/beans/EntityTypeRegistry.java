@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.GatewayEntityInfo;
 import org.reflections.Reflections;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class EntityTypeRegistry {
     private final Map<String, GatewayEntityInfo> entityTypeMap;
 
     @Inject
-    public EntityTypeRegistry(final Reflections reflections) {
+    public EntityTypeRegistry(@Named("Reflections_ConfigBuilderInjectionProvider") final Reflections reflections) {
         Map<String, GatewayEntityInfo> entityTypes = new HashMap<>();
         reflections.getSubTypesOf(GatewayEntity.class).forEach(e -> {
             GatewayEntityInfo info = createEntityInfo(e);

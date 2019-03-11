@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
-import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.google.common.collect.ImmutableMap;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
@@ -287,7 +287,7 @@ class EnvironmentCreatorApplicationTest {
         File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
         assertTrue(environmentBundleFile.exists());
 
-        EntityBundleLoader bundleLoader = ConfigBuilderModule.getInjector().getInstance(EntityBundleLoader.class);
+        EntityBundleLoader bundleLoader = InjectionRegistry.getInjector().getInstance(EntityBundleLoader.class);
         Bundle environmentBundle = bundleLoader.load(environmentBundleFile);
 
         assertEquals(1, environmentBundle.getIdentityProviders().size());

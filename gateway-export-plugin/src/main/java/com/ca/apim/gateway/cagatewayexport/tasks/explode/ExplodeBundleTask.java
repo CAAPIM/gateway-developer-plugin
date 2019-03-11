@@ -6,10 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
-import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
@@ -73,7 +73,7 @@ public class ExplodeBundleTask extends DefaultTask {
 
     @TaskAction
     public void perform() throws DocumentParseException {
-        ExplodeBundle explodeBundle = ExportPluginModule.getInjector().getInstance(ExplodeBundle.class);
+        ExplodeBundle explodeBundle = InjectionRegistry.getInstance(ExplodeBundle.class);
         checkExportEntities();
         explodeBundle.explodeBundle(folderPath.getOrElse("/"), toFilterConfiguration(exportEntities.getOrElse(Collections.emptyMap())), inputBundleFile.getAsFile().get(), exportDir.getAsFile().get());
     }
