@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
 import javax.inject.Inject;
@@ -31,7 +31,7 @@ public class EntityWriterRegistry {
         Set<EntityWriter> allWriters = new HashSet<>(writers);
 
         // create generic writers for the entities configured to not have a specific implementation
-        EntityTypeRegistry entityTypeRegistry = ConfigBuilderModule.getInstance(EntityTypeRegistry.class);
+        EntityTypeRegistry entityTypeRegistry = InjectionRegistry.getInstance(EntityTypeRegistry.class);
         entityTypeRegistry.getEntityTypeMap().values().forEach(info -> {
             if (info.getFileName() != null && info.getFileType() != null) {
                 allWriters.add((bundle, rootFolder) -> write(bundle, rootFolder, info, documentFileUtils, jsonTools));

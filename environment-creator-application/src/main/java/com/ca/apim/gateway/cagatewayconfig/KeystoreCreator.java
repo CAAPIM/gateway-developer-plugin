@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeyStoreCreationException;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -29,7 +29,7 @@ class KeystoreCreator {
     static void createKeyStoreIfNecessary(String keyStoreDirPath, String privateKeyFolderPath, Collection<PrivateKey> privateKeys, FileUtils fileUtils, String systemPropertiesPath) {
         PrivateKey.loadFromDirectory(privateKeys, new File(privateKeyFolderPath), true);
 
-        KeystoreHelper keystoreHelper = ConfigBuilderModule.getInjector().getInstance(KeystoreHelper.class);
+        KeystoreHelper keystoreHelper = InjectionRegistry.getInjector().getInstance(KeystoreHelper.class);
         final byte[] keyStore = keystoreHelper.createKeyStore(privateKeys);
         // no keys
         if (keyStore.length == 0) {

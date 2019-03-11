@@ -19,7 +19,7 @@ import javax.inject.Inject;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
-import static com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule.getInstance;
+import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**

@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.injection.ConfigBuilderModule;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.util.Map;
@@ -81,7 +81,7 @@ public class EnvironmentCreatorApplication {
     @VisibleForTesting
     void run() {
         //create bundle from environment
-        EnvironmentBundleCreator bundleCreator = ConfigBuilderModule.getInjector().getInstance(EnvironmentBundleCreator.class);
+        EnvironmentBundleCreator bundleCreator = InjectionRegistry.getInjector().getInstance(EnvironmentBundleCreator.class);
         Bundle environmentBundle = bundleCreator.createEnvironmentBundle(
                 environmentProperties,
                 bootstrapBundleFolderPath,

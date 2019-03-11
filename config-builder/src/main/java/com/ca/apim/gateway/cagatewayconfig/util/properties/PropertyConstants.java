@@ -12,6 +12,8 @@ package com.ca.apim.gateway.cagatewayconfig.util.properties;
 @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public class PropertyConstants {
 
+    public static final String EXTENSION_CONFIG_FILE = "gateway-developer-plugin-extension.properties";
+
     public static final String PREFIX_GATEWAY = "gateway.";
     public static final String PREFIX_ENV = "ENV.";
     public static final String PREFIX_PROPERTY = "property.";

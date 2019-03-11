@@ -42,13 +42,13 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ConfigBuilderModuleTest {
+class InjectionRegistryTest {
 
     private Injector injector;
 
     @BeforeEach
     void before() {
-        injector = ConfigBuilderModule.create();
+        injector = InjectionRegistry.create();
     }
 
     @Test
