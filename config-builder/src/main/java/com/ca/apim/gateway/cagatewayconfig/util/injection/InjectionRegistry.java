@@ -56,12 +56,7 @@ public class InjectionRegistry extends AbstractModule {
 
             refl.getSubTypesOf(InjectionProvider.class).forEach(c -> {
                 // create the provider
-                InjectionProvider provider;
-                try {
-                    provider = c.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new InjectionConfigurationException("Unable to instantiate configuration provider " + c.getName(), e);
-                }
+                InjectionProvider provider = instantiateProvider(c);
 
                 // set up reflections instance of this provider
                 bind(Reflections.class).annotatedWith(Names.named("Reflections_" + provider.getClass().getSimpleName())).toInstance(refl);
