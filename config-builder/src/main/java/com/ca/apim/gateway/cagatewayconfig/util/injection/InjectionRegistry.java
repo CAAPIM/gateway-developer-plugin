@@ -14,6 +14,8 @@ import com.google.inject.name.Names;
 import org.reflections.Reflections;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -103,6 +105,20 @@ public class InjectionRegistry extends AbstractModule {
             throw new InjectionConfigurationException("Could not load plugin configuration files: " + e.getMessage(), e);
         }
         return packagesToScan;
+    }
+
+    private static InjectionProvider instantiateProvider(Class<? extends InjectionProvider> providerClass) {
+        Constructor constructor;
+        try {
+            constructor = providerClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new InjectionConfigurationException("No empty constructor available for class " + providerClass.getName(), e);
+        }
+        try {
+            return (InjectionProvider) constructor.newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new InjectionConfigurationException("Error instantiating provider for class " + providerClass.getName() + ": " + e.getMessage(), e);
+        }
     }
 
     public static Injector getInjector() {
