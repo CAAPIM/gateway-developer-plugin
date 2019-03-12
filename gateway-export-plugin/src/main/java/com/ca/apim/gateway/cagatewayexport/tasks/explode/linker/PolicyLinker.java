@@ -29,9 +29,9 @@ public class PolicyLinker implements EntityLinker<Policy> {
     private final PolicyXMLSimplifier policyXMLSimplifier;
 
     @Inject
-    PolicyLinker(DocumentTools documentTools) {
+    PolicyLinker(DocumentTools documentTools, PolicyXMLSimplifier policyXMLSimplifier) {
         this.documentTools = documentTools;
-        this.policyXMLSimplifier = PolicyXMLSimplifier.INSTANCE;
+        this.policyXMLSimplifier = policyXMLSimplifier;
     }
 
     @Override

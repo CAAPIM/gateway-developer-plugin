@@ -15,6 +15,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
+import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyAssertionSimplifier;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import com.google.inject.Binding;
 import com.google.inject.Injector;
@@ -45,12 +46,6 @@ class ExportPluginModuleTest {
         assertEquals(DocumentTools.INSTANCE, injector.getInstance(DocumentTools.class), "DocumentTools is not the default");
         assertEquals(JsonTools.INSTANCE, injector.getInstance(JsonTools.class), "JsonTools is not the default");
         assertEquals(DocumentFileUtils.INSTANCE, injector.getInstance(DocumentFileUtils.class), "DocumentFileUtils is not the default");
-        assertEquals(PolicyXMLSimplifier.INSTANCE, injector.getInstance(PolicyXMLSimplifier.class), "PolicyXMLSimplifier is not the default");
-    }
-
-    @Test
-    void checkReflectionsIsSet() {
-        assertNotNull(injector.getInstance(Reflections.class));
     }
 
     @Test
@@ -92,4 +87,22 @@ class ExportPluginModuleTest {
     void checkExplodeBundleImpl() {
         assertNotNull(injector.getInstance(ExplodeBundle.class));
     }
+
+    @Test
+    void checkPolicyXMLSimplifiers() {
+        final List<Binding<PolicyAssertionSimplifier>> writersBindings = injector.findBindingsByType(TypeLiteral.get(PolicyAssertionSimplifier.class));
+        assertNotNull(writersBindings);
+        assertFalse(writersBindings.isEmpty());
+
+        final List<PolicyAssertionSimplifier> writers = writersBindings.stream().map(b -> injector.getInstance(b.getKey())).collect(toList());
+        assertFalse(writers.isEmpty());
+        assertEquals(writersBindings.size(), writers.size());
+
+        final PolicyXMLSimplifier registry = injector.getInstance(PolicyXMLSimplifier.class);
+        assertNotNull(registry);
+        assertNotNull(registry.getSimplifiersByTag());
+        assertFalse(registry.getSimplifiersByTag().isEmpty());
+        assertTrue(registry.getSimplifiersByTag().values().containsAll(writers));
+    }
+
 }

@@ -2,6 +2,7 @@ package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
@@ -23,7 +24,6 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PolicyXMLSimplifierTest {
-    private PolicyXMLSimplifier policyXMLSimplifier = PolicyXMLSimplifier.INSTANCE;
 
     @Test
     void simplifySetVariable() throws DocumentParseException {
@@ -31,7 +31,14 @@ class PolicyXMLSimplifierTest {
         String policyName = "policyName";
 
         Bundle resultantBundle = new Bundle();
-        policyXMLSimplifier.simplifySetVariable(policyName, setVariableAssertion, resultantBundle);
+        new SetVariableAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                policyName,
+                                null,
+                                resultantBundle)
+                                .withAssertionElement(setVariableAssertion)
+                );
 
         Element expressionElement = getSingleElement(setVariableAssertion, EXPRESSION);
         assertEquals("testing simplify set variable assertion", expressionElement.getFirstChild().getTextContent());
@@ -46,7 +53,14 @@ class PolicyXMLSimplifierTest {
         String policyName = "policyName";
 
         Bundle resultantBundle = new Bundle();
-        assertThrows(LinkerException.class, () -> policyXMLSimplifier.simplifySetVariable(policyName, setVariableAssertion, resultantBundle));
+        assertThrows(LinkerException.class, () -> new SetVariableAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                policyName,
+                                null,
+                                resultantBundle)
+                                .withAssertionElement(setVariableAssertion)
+                ));
     }
 
     @Test
@@ -58,7 +72,14 @@ class PolicyXMLSimplifierTest {
         ContextVariableEnvironmentProperty property = new ContextVariableEnvironmentProperty(policyName + ".test", "test");
         resultantBundle.getContextVariableEnvironmentProperties().put(property.getName(), property);
 
-        assertThrows(LinkerException.class, () -> policyXMLSimplifier.simplifySetVariable(policyName, setVariableAssertion, resultantBundle));
+        assertThrows(LinkerException.class, () -> new SetVariableAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                policyName,
+                                null,
+                                resultantBundle)
+                                .withAssertionElement(setVariableAssertion)
+                ));
     }
 
     @Test
@@ -68,7 +89,14 @@ class PolicyXMLSimplifierTest {
         String policyName = "policyName";
 
         Bundle resultantBundle = new Bundle();
-        policyXMLSimplifier.simplifySetVariable(policyName, setVariableAssertion, resultantBundle);
+        new SetVariableAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                policyName,
+                                null,
+                                resultantBundle)
+                                .withAssertionElement(setVariableAssertion)
+                );
 
         Element expressionElement = getSingleElement(setVariableAssertion, EXPRESSION);
         assertEquals("{\r\n" +
@@ -91,7 +119,14 @@ class PolicyXMLSimplifierTest {
         Bundle bundle = new Bundle();
         bundle.addEntity(identityProvider);
         Element authenticationAssertion = createAuthenticationAssertionElement(id);
-        policyXMLSimplifier.simplifyAuthenticationAssertion(bundle, authenticationAssertion);
+        new AuthenticationAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                 "policy",
+                                bundle,
+                                null)
+                                .withAssertionElement(authenticationAssertion)
+                );
 
         assertEquals(testName, getSingleChildElementAttribute(authenticationAssertion, ID_PROV_NAME, STRING_VALUE));
         assertNull(getSingleChildElement(authenticationAssertion, ID_PROV_OID, true));
@@ -100,7 +135,14 @@ class PolicyXMLSimplifierTest {
     @Test
     void simplifyAuthenticationAssertionToInternalIDP() throws DocumentParseException {
         Element authenticationAssertion = createAuthenticationAssertionElement(INTERNAL_IDP_ID);
-        policyXMLSimplifier.simplifyAuthenticationAssertion(new Bundle(), authenticationAssertion);
+        new AuthenticationAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                new Bundle(),
+                                null)
+                                .withAssertionElement(authenticationAssertion)
+                );
         assertEquals(INTERNAL_IDP_NAME, getSingleChildElementAttribute(authenticationAssertion, ID_PROV_NAME, STRING_VALUE));
         assertNull(getSingleChildElement(authenticationAssertion, ID_PROV_OID, true));
     }
@@ -109,7 +151,14 @@ class PolicyXMLSimplifierTest {
     void simplifyAuthenticationAssertionToMissingIDP() throws DocumentParseException {
         String id = new IdGenerator().generate();
         Element authenticationAssertion = createAuthenticationAssertionElement(id);
-        policyXMLSimplifier.simplifyAuthenticationAssertion(new Bundle(), authenticationAssertion);
+        new AuthenticationAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                new Bundle(),
+                                null)
+                                .withAssertionElement(authenticationAssertion)
+                );
         assertEquals(id, getSingleChildElementAttribute(authenticationAssertion, ID_PROV_OID, GOID_VALUE));
         assertNull(getSingleChildElement(authenticationAssertion, ID_PROV_NAME, true));
     }
@@ -125,7 +174,14 @@ class PolicyXMLSimplifierTest {
         Bundle bundle = new Bundle();
         bundle.addEntity(jmsDestination);
         Element jmsRoutingAssertionEle = createJmsRoutingAssertion(id, name);
-        policyXMLSimplifier.simplifyJmsRoutingAssertion(bundle, jmsRoutingAssertionEle);
+        new JmsRoutingAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                bundle,
+                                null)
+                                .withAssertionElement(jmsRoutingAssertionEle)
+                );
         
         assertEquals(name, getSingleChildElementAttribute(jmsRoutingAssertionEle, JMS_ENDPOINT_NAME, STRING_VALUE));
         assertNull(getSingleChildElement(jmsRoutingAssertionEle, JMS_ENDPOINT_OID, true));
@@ -136,8 +192,15 @@ class PolicyXMLSimplifierTest {
         String id = new IdGenerator().generate();
         String name = "jms-test";
         Element jmsRoutingAssertionEle = createJmsRoutingAssertion(id, name);
-        
-        policyXMLSimplifier.simplifyJmsRoutingAssertion(new Bundle(), jmsRoutingAssertionEle);
+
+        new JmsRoutingAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                new Bundle(),
+                                null)
+                                .withAssertionElement(jmsRoutingAssertionEle)
+                );
         assertEquals(name, getSingleChildElementAttribute(jmsRoutingAssertionEle, JMS_ENDPOINT_NAME, STRING_VALUE));
         assertNull(getSingleChildElement(jmsRoutingAssertionEle, JMS_ENDPOINT_OID, true));
     }
@@ -158,7 +221,14 @@ class PolicyXMLSimplifierTest {
         bundle.setFolderTree(folderTree);
 
         Element includeAssertion = createIncludeAssertionElement(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), id);
-        policyXMLSimplifier.simplifyIncludeAssertion(bundle, includeAssertion);
+        new IncludeAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                testName,
+                                bundle,
+                                null)
+                                .withAssertionElement(includeAssertion)
+                );
 
         assertEquals(testName, getSingleChildElementAttribute(includeAssertion, POLICY_GUID, "policyPath"));
         assertNull(getSingleChildElementAttribute(includeAssertion, POLICY_GUID, STRING_VALUE));
@@ -173,7 +243,14 @@ class PolicyXMLSimplifierTest {
         bundle.setFolderTree(folderTree);
 
         Element includeAssertion = createIncludeAssertionElement(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), id);
-        policyXMLSimplifier.simplifyIncludeAssertion(bundle, includeAssertion);
+        new IncludeAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                bundle,
+                                null)
+                                .withAssertionElement(includeAssertion)
+                );
 
         assertNull(getSingleChildElementAttribute(includeAssertion, POLICY_GUID, "policyPath"));
         assertEquals(id, getSingleChildElementAttribute(includeAssertion, POLICY_GUID, STRING_VALUE));
@@ -200,20 +277,35 @@ class PolicyXMLSimplifierTest {
                 "wsp:Policy",
                 createIncludeAssertionElement(document, policyID)
         );
-        policyXMLSimplifier.simplifyPolicyXML(policyXML, policy.getName(), bundle, bundle);
+
+        InjectionRegistry.getInstance(PolicyXMLSimplifier.class).simplifyPolicyXML(policyXML, policy.getName(), bundle, bundle);
     }
 
     @Test
     void simplifyHardcodedResponse() {
         Element hardcodedResponse = createHardcodedResponse(true);
-        policyXMLSimplifier.simplifyHardcodedResponse(hardcodedResponse);
+        new HardcodedResponseAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                null,
+                                null)
+                                .withAssertionElement(hardcodedResponse)
+                );
         assertEquals("Test", getSingleChildElementTextContent(hardcodedResponse, RESPONSE_BODY));
     }
 
     @Test
     void simplifyHardcodedResponseNoBody() {
         Element hardcodedResponse = createHardcodedResponse(false);
-        policyXMLSimplifier.simplifyHardcodedResponse(hardcodedResponse);
+        new HardcodedResponseAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                null,
+                                null)
+                                .withAssertionElement(hardcodedResponse)
+                );
         assertNull(getSingleChildElementTextContent(hardcodedResponse, RESPONSE_BODY));
     }
 
@@ -230,7 +322,14 @@ class PolicyXMLSimplifierTest {
         bundle.getEncasses().put(encass.getGuid(), encass);
         bundle.getPolicies().put(policy.getId(), policy);
 
-        policyXMLSimplifier.simplifyEncapsulatedAssertion(bundle, encapsulatedAssertion);
+        new EncapsulatedAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "Policy",
+                                bundle,
+                                null)
+                                .withAssertionElement(encapsulatedAssertion)
+                );
 
         assertEquals("Test Name", encapsulatedAssertion.getAttribute("encassName"));
         assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME, true));
@@ -247,7 +346,14 @@ class PolicyXMLSimplifierTest {
         encass.setPolicyId("Policy");
         bundle.getEncasses().put(encass.getGuid(), encass);
 
-        policyXMLSimplifier.simplifyEncapsulatedAssertion(bundle, encapsulatedAssertion);
+        new EncapsulatedAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "Policy",
+                                bundle,
+                                null)
+                                .withAssertionElement(encapsulatedAssertion)
+                );
 
         assertNull(StringUtils.trimToNull(encapsulatedAssertion.getAttribute("encassName")));
         assertNotNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME));
@@ -258,7 +364,14 @@ class PolicyXMLSimplifierTest {
     void simplifyEncapsulatedAssertionMissingEncass() throws DocumentParseException {
         Element encapsulatedAssertion = createEncapsulatedAssertion();
         Bundle bundle = new Bundle();
-        policyXMLSimplifier.simplifyEncapsulatedAssertion(bundle, encapsulatedAssertion);
+        new EncapsulatedAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "Policy",
+                                bundle,
+                                null)
+                                .withAssertionElement(encapsulatedAssertion)
+                );
 
         assertNull(StringUtils.trimToNull(encapsulatedAssertion.getAttribute("encassName")));
         assertNotNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME));

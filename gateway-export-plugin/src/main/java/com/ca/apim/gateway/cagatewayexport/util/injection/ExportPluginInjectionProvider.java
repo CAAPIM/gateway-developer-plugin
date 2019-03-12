@@ -18,6 +18,7 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
+import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyAssertionSimplifier;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.Nullable;
@@ -36,10 +37,7 @@ public class ExportPluginInjectionProvider implements InjectionProvider {
 
     @Override
     public @Nullable Map<Class, Object> getSingleInstances(InjectionProviderContext context) {
-        return ImmutableMap.<Class, Object>builder()
-                .put(PolicyXMLSimplifier.class, PolicyXMLSimplifier.INSTANCE)
-                .put(GatewayClient.class, GatewayClient.INSTANCE)
-                .build();
+        return ImmutableMap.of(GatewayClient.class, GatewayClient.INSTANCE);
     }
 
     @Override
@@ -49,7 +47,8 @@ public class ExportPluginInjectionProvider implements InjectionProvider {
                 EntityWriterRegistry.class,
                 EntityFilterRegistry.class,
                 PolicyConverterRegistry.class,
-                ExplodeBundle.class
+                ExplodeBundle.class,
+                PolicyXMLSimplifier.class
         );
     }
 
@@ -59,7 +58,7 @@ public class ExportPluginInjectionProvider implements InjectionProvider {
                 .put(EntitiesLinker.class, copyOf(context.getDefaultReflections().getSubTypesOf(EntitiesLinker.class)))
                 .put(EntityFilter.class, copyOf(context.getDefaultReflections().getSubTypesOf(EntityFilter.class)))
                 .put(EntityWriter.class, copyOf(context.getDefaultReflections().getSubTypesOf(EntityWriter.class)))
-                .put(PolicyConverter.class, copyOf(context.getDefaultReflections().getSubTypesOf(PolicyConverter.class)))
+                .put(PolicyAssertionSimplifier.class, copyOf(context.getDefaultReflections().getSubTypesOf(PolicyAssertionSimplifier.class)))
                 .build();
     }
 }
