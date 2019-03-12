@@ -28,4 +28,6 @@ public class PolicySimplifierUtils {
             throw new IllegalArgumentException("Unable to decode: " + base64Expression, e);
         }
     }
+
+    private PolicySimplifierUtils() {}
 }

@@ -7,18 +7,15 @@
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
-import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.PolicyWriter;
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
-
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.RESPONSE_BODY;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 
 /**

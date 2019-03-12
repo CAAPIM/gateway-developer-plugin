@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayexport.util.injection;
 
-import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClient;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionProvider;
