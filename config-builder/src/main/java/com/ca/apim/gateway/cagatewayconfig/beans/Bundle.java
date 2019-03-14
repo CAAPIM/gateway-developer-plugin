@@ -62,6 +62,13 @@ public class Bundle {
         policies.forEach((path, p) -> policyMap.merge(path, p, Policy::merge));
     }
 
+    public Map<String, WSDL> getWSDLs() {
+        return getEntities(WSDL.class);
+    }
+
+    public void putAllWSDLs(@NotNull Map<String, WSDL> wsdls) {
+        this.getWSDLs().putAll(wsdls);
+    }
     public void putAllFolders(@NotNull Map<String, Folder> folders) {
         this.getFolders().putAll(folders);
     }

@@ -69,6 +69,12 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());
         final WSDL wsdlBean = service.getWsdl();
+
+        if ( (wsdlBean != null) && (wsdlBean.getWsdlXml() == null) ) {
+            String wsdlXml = bundle.getWSDLs().get(wsdlBean.getLocation()).getWsdlXml();
+            wsdlBean.setWsdlXml(wsdlXml);
+        }
+
         boolean isSoapService = (wsdlBean != null);
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());

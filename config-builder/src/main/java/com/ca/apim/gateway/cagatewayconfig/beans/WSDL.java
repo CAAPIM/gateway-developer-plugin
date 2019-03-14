@@ -2,7 +2,7 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class WSDL {
+public class WSDL extends Folderable {
 
     private String rootUrl;
     private String soapVersion;
