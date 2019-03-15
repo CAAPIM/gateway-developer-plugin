@@ -7,16 +7,15 @@
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
-import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
-import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
+import static com.ca.apim.gateway.cagatewayexport.util.policy.PolicySimplifierUtils.base64Decode;
 
 /**
  * Simplifies the Hardcoded Assertion XML tags, removing the base64 encoded and setting up as plain text.
@@ -43,14 +42,6 @@ public class HardcodedResponseAssertionSimplifier implements PolicyAssertionSimp
         expressionElement.appendChild(element.getOwnerDocument().createCDATASection(new String(decoded)));
         element.insertBefore(expressionElement, base64ResponseBodyElement);
         element.removeChild(base64ResponseBodyElement);
-    }
-
-    private static byte[] base64Decode(String base64Expression) {
-        try {
-            return Base64.decodeBase64(base64Expression.getBytes(StandardCharsets.UTF_8));
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Unable to decode: " + base64Expression, e);
-        }
     }
 
     @Override
