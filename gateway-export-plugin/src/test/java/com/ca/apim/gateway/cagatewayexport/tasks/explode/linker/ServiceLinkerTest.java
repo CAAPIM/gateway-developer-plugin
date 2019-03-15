@@ -7,18 +7,32 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
+import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
+import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.Extensions;
+import org.mockito.*;
+import org.mockito.junit.jupiter.*;
 import org.w3c.dom.Element;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.SERVICE_DETAIL;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Extensions({ @ExtendWith(MockitoExtension.class) })
 class ServiceLinkerTest {
 
-    private ServiceLinker linker = new ServiceLinker(DocumentTools.INSTANCE);
+    @Mock
+    private PolicyXMLSimplifier policyXMLSimplifier;
+    private ServiceLinker linker;
+
+    @BeforeEach
+    void before() {
+        linker = new ServiceLinker(DocumentTools.INSTANCE, policyXMLSimplifier);
+    }
 
     @Test
     void linkInvalidPolicy() {

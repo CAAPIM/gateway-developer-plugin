@@ -17,10 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.EXTENSION_CONFIG_FILE;
 import static com.google.inject.Guice.createInjector;
@@ -47,6 +44,9 @@ public class InjectionRegistry extends AbstractModule {
     @SuppressWarnings("unchecked")
     @Override
     protected void configure() {
+        Map<Class, Object> singleInstances = new HashMap<>();
+        Map<Class, Set<Class>> multibindings = new HashMap<>();
+
         // find the configuration files and load the packages to be scanned from them
         findPackagesToScan().forEach(p -> {
             // for each package, create a reflections object to find the providers
@@ -61,27 +61,39 @@ public class InjectionRegistry extends AbstractModule {
                 // set up reflections instance of this provider
                 bind(Reflections.class).annotatedWith(Names.named("Reflections_" + provider.getClass().getSimpleName())).toInstance(refl);
 
-                // bind all provided singleton instances
-                ofNullable(provider.getSingleInstances(context))
-                        .orElse(emptyMap())
-                        .forEach((clazz, object) -> bind(clazz).toInstance(object));
-
                 // bind all single bindings
                 ofNullable(provider.getSingleBindings(context))
                         .orElse(emptyList())
                         .forEach(this::bind);
 
-                // add all the multibindings
+                // record all provided singleton instances
+                ofNullable(provider.getSingleInstances(context))
+                        .orElse(emptyMap())
+                        .forEach((clazz, object) -> {
+                            Object oldValue = singleInstances.put(clazz, object);
+                            if (oldValue != null) {
+                                throw new InjectionConfigurationException("Found more than one instance of " + clazz);
+                            }
+                        });
+
+                // record and merge all the multibindings
                 ofNullable(provider.getMultiBindings(context))
                         .orElse(emptyMap())
                         .forEach((baseClass, subClasses) -> {
-                            Multibinder<?> multibinder = newSetBinder(binder(), baseClass);
+                            Set<Class> bindings = multibindings.computeIfAbsent(baseClass, clazz -> new HashSet<>());
                             subClasses.stream()
                                     // filter out unwanted subclasses: abstracts, interfaces and inner classes
                                     .filter(l -> !isAbstract(l.getModifiers()) && !isInterface(l.getModifiers()) && l.getEnclosingClass() == null)
-                                    .forEach(l -> multibinder.addBinding().to(l));
+                                    .forEach(bindings::add);
                         });
             });
+        });
+
+        // iterate the instances and the multibindings and bind them
+        singleInstances.forEach((clazz, object) -> bind(clazz).toInstance(object));
+        multibindings.forEach((baseClass, subClasses) -> {
+            Multibinder multibinder = newSetBinder(binder(), baseClass);
+            subClasses.forEach(c -> multibinder.addBinding().to(c));
         });
     }
 

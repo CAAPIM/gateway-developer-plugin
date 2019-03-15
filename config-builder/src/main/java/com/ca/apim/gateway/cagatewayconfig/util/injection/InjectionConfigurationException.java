@@ -11,6 +11,10 @@ package com.ca.apim.gateway.cagatewayconfig.util.injection;
  */
 public class InjectionConfigurationException extends RuntimeException {
 
+    public InjectionConfigurationException(String message) {
+        super(message);
+    }
+
     public InjectionConfigurationException(String message, Throwable cause) {
         super(message, cause);
     }

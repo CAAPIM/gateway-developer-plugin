@@ -32,9 +32,9 @@ public class ServiceLinker implements EntityLinker<Service> {
     private final PolicyXMLSimplifier policyXMLSimplifier;
 
     @Inject
-    ServiceLinker(DocumentTools documentTools) {
+    ServiceLinker(DocumentTools documentTools, PolicyXMLSimplifier policyXMLSimplifier) {
         this.documentTools = documentTools;
-        this.policyXMLSimplifier = PolicyXMLSimplifier.INSTANCE;
+        this.policyXMLSimplifier = policyXMLSimplifier;
     }
 
     @Override
