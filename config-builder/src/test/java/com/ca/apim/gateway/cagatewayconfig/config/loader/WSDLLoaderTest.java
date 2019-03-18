@@ -2,16 +2,8 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.WSDL;
-import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.AssertionJSPolicyConverter;
-import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterException;
-import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
-import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.XMLPolicyConverter;
-import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.google.common.collect.ImmutableSet;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.Assert;
