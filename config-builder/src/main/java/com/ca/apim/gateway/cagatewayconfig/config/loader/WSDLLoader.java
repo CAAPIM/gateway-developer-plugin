@@ -33,7 +33,7 @@ public class WSDLLoader implements EntityLoader {
         if (wsdlRootDir == null) return;
 
         final Map<String, WSDL> wsdls = new HashMap<>();
-        loadWSDLs(wsdlRootDir, rootDir, null, wsdls, bundle);
+        loadWSDLs(wsdlRootDir, wsdlRootDir, null, wsdls, bundle);
         bundle.putAllWSDLs(wsdls);
     }
 
@@ -55,7 +55,7 @@ public class WSDLLoader implements EntityLoader {
                 if (child.isDirectory()) {
                     loadWSDLs(child, rootDir, folder, wsdls, bundle);
                 } else if (child.getName().endsWith(EXTENSION)) {
-                    WSDL wsdl = loadWSDL(child, rootDir, folder, bundle);
+                    WSDL wsdl = loadWSDL(child, rootDir, folder);
                     WSDL existingWSDL = wsdls.put(wsdl.getPath(), wsdl);
                     if (existingWSDL != null) {
                         throw new ConfigLoadException("Found multiple wsdls with same path but different types. WSDL Path: " + wsdl.getPath());
@@ -65,7 +65,7 @@ public class WSDLLoader implements EntityLoader {
         }
     }
 
-    private WSDL loadWSDL(final File wsdlFile, final File rootDir, Folder parentFolder, Bundle bundle) {
+    private WSDL loadWSDL(final File wsdlFile, final File rootDir, Folder parentFolder) {
         WSDL wsdl = new WSDL();
         String wsdlPath = getPath(wsdlFile, rootDir);
         String wsdlName = wsdlFile.getName();
