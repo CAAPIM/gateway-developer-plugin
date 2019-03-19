@@ -71,7 +71,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         final WSDL wsdlBean = service.getWsdl();
 
         if ( (wsdlBean != null) && (wsdlBean.getWsdlXml() == null) ) {
-            String wsdlXml = bundle.getWSDLs().get(wsdlBean.getLocation()).getWsdlXml();
+            String wsdlXml = bundle.getWSDLs().get(wsdlBean.getPath()).getWsdlXml();
             wsdlBean.setWsdlXml(wsdlXml);
         }
 
