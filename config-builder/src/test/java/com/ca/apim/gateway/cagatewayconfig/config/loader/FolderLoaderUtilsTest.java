@@ -87,7 +87,7 @@ class FolderLoaderUtilsTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void getWSDLRootDirTest(TemporaryFolder temporaryFolder) {
-        temporaryFolder.createDirectory("WSDL");
+        temporaryFolder.createDirectory("wsdl");
         assertNotNull(getWSDLRootDir(temporaryFolder.getRoot()));
     }
 
