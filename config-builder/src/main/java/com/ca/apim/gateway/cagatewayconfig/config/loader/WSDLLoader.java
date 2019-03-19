@@ -56,10 +56,7 @@ public class WSDLLoader implements EntityLoader {
                     loadWSDLs(child, rootDir, folder, wsdls, bundle);
                 } else if (child.getName().endsWith(EXTENSION)) {
                     WSDL wsdl = loadWSDL(child, rootDir, folder);
-                    WSDL existingWSDL = wsdls.put(wsdl.getPath(), wsdl);
-                    if (existingWSDL != null) {
-                        throw new ConfigLoadException("Found multiple wsdls with same path but different types. WSDL Path: " + wsdl.getPath());
-                    }
+                    wsdls.put(wsdl.getPath(), wsdl);
                 }
             }
         }

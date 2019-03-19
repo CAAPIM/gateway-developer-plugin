@@ -59,6 +59,9 @@ public class WSDLLoaderTest {
     void testLoadSingle(TemporaryFolder temporaryFolder) {
         WSDLLoader wsdlLoader = new WSDLLoader(fileUtils);
         assertThrows(ConfigLoadException.class, () -> wsdlLoader.loadSingle("wsdl", temporaryFolder.getRoot()));
+
+        Bundle bundle = new Bundle();
+        assertThrows(ConfigLoadException.class, () -> wsdlLoader.load(bundle, "wsdl", "wsdl"));
     }
 
     @Test
@@ -70,5 +73,24 @@ public class WSDLLoaderTest {
         wsdlLoader.load(bundle, temporaryFolder.getRoot());
 
         Assert.assertTrue(bundle.getFolders().isEmpty());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testLoad2(TemporaryFolder temporaryFolder) throws IOException {
+        WSDLLoader wsdlLoader = new WSDLLoader(fileUtils);
+
+        File wsdlFolder = temporaryFolder.createDirectory("wsdl");
+        File a = new File(wsdlFolder, "a");
+        Assert.assertTrue(a.mkdir());
+        File wsdl = new File(a, "wsdl.wsdl");
+        File wsdl2 = new File(a, "wsdl.wsdl");
+        Files.touch(wsdl);
+        Files.touch(wsdl2);
+
+        Bundle bundle = new Bundle();
+        wsdlLoader.load(bundle, temporaryFolder.getRoot());
+
+        WSDL loadedWSDL = bundle.getWSDLs().get("a/wsdl");
     }
 }
