@@ -279,35 +279,6 @@ class ServiceEntityBuilderTest {
         return service1;
     }
 
-    /*@NotNull
-    private Folder setUpFolderAndWsdl(Bundle bundle, String policyPath, String policyName) throws DocumentParseException {
-        Folder parentFolder = new Folder();
-        parentFolder.setId("asd");
-        parentFolder.setName("my");
-        parentFolder.setPath("my");
-
-        Folder serviceParentFolder = new Folder();
-        serviceParentFolder.setId("test");
-        serviceParentFolder.setName("v1");
-        serviceParentFolder.setPath("my/v1");
-
-        bundle.putAllFolders(new HashMap<String, Folder>() {{
-            put(parentFolder.getPath(), parentFolder);
-            put(serviceParentFolder.getPath(), serviceParentFolder);
-        }});
-
-        Wsdl wsdl = new Wsdl();
-        wsdl.setWssProcessingEnabled(true);
-        wsdl.setRootUrl("/test/rooturl/for/soap.wsdl");
-        wsdl.setSoapVersion("1.1");
-        wsdl.setLocation("/soap/wsdl.wsdl");
-        wsdl.setWsdlXml("wsdl xml content");
-        bundle.putAllWsdls(new HashMap<String, Wsdl>() {{
-            put(wsdl.getPath(), wsdl);
-        }});
-        return serviceParentFolder;
-    }*/
-
     @NotNull
     private Folder setUpFolderAndPolicy(Bundle bundle, String policyPath, String policyName) throws DocumentParseException {
         Folder parentFolder = new Folder();
