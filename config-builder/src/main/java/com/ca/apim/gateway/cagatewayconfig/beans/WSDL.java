@@ -2,14 +2,19 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class WSDL extends Folderable {
+import javax.inject.Named;
+
+/**
+ * An object to contain all related Wsdl configurables
+ */
+@Named("WSDL")
+public class Wsdl extends Folderable {
 
     private String rootUrl;
     private String soapVersion;
     private boolean wssProcessingEnabled;
     @JsonIgnore
     private String wsdlXml;
-    private String location;
 
     public String getRootUrl() {
         return rootUrl;

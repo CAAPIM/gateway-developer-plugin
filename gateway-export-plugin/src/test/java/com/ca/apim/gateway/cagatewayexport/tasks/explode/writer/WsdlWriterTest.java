@@ -377,8 +377,8 @@ class WsdlWriterTest {
     }
 
     @NotNull
-    private WSDL getWsdl(boolean emptyWsdlXml) {
-        WSDL wsdl = new WSDL();
+    private Wsdl getWsdl(boolean emptyWsdlXml) {
+        Wsdl wsdl = new Wsdl();
         wsdl.setRootUrl("file:/EchoAttachmentsServiceAxisAll.wsdl");
         wsdl.setSoapVersion("1.1");
         wsdl.setWssProcessingEnabled(true);

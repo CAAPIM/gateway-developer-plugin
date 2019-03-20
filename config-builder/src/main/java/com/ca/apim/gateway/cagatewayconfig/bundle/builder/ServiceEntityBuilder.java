@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.beans.WSDL;
+import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -68,10 +68,10 @@ public class ServiceEntityBuilder implements EntityBuilder {
         service.setName(processedName);
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());
-        final WSDL wsdlBean = service.getWsdl();
+        final Wsdl wsdlBean = service.getWsdl();
 
         if ( (wsdlBean != null) && (wsdlBean.getWsdlXml() == null) ) {
-            String wsdlXml = bundle.getWSDLs().get(wsdlBean.getPath()).getWsdlXml();
+            String wsdlXml = bundle.getWsdls().get(wsdlBean.getPath()).getWsdlXml();
             wsdlBean.setWsdlXml(wsdlXml);
         }
 

@@ -2,7 +2,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.WSDL;
+import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @ExtendWith(MockitoExtension.class)
-public class WSDLLoaderTest {
+public class WsdlLoaderTest {
 
     @Mock
     private FileUtils fileUtils;
@@ -28,7 +28,7 @@ public class WSDLLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoad(TemporaryFolder temporaryFolder) throws IOException {
-        WSDLLoader wsdlLoader = new WSDLLoader(fileUtils);
+        WsdlLoader wsdlLoader = new WsdlLoader(fileUtils);
 
         File wsdlFolder = temporaryFolder.createDirectory("wsdl");
         File a = new File(wsdlFolder, "a");
@@ -49,15 +49,15 @@ public class WSDLLoaderTest {
         Folder parentFolder = bundle.getFolders().get("a/b/c/");
         Assert.assertNotNull(parentFolder);
 
-        WSDL loadedWSDL = bundle.getWSDLs().get("a/b/c/wsdl");
-        Assert.assertNotNull(loadedWSDL);
-        Assert.assertEquals(parentFolder, loadedWSDL.getParentFolder());
+        Wsdl loadedWsdl = bundle.getWsdls().get("a/b/c/wsdl");
+        Assert.assertNotNull(loadedWsdl);
+        Assert.assertEquals(parentFolder, loadedWsdl.getParentFolder());
     }
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoadSingle(TemporaryFolder temporaryFolder) {
-        WSDLLoader wsdlLoader = new WSDLLoader(fileUtils);
+        WsdlLoader wsdlLoader = new WsdlLoader(fileUtils);
         assertThrows(ConfigLoadException.class, () -> wsdlLoader.loadSingle("wsdl", temporaryFolder.getRoot()));
 
         Bundle bundle = new Bundle();
@@ -66,8 +66,8 @@ public class WSDLLoaderTest {
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
-    void testLoadNoWSDLFolder(TemporaryFolder temporaryFolder) {
-        WSDLLoader wsdlLoader = new WSDLLoader(fileUtils);
+    void testLoadNoWsdlFolder(TemporaryFolder temporaryFolder) {
+        WsdlLoader wsdlLoader = new WsdlLoader(fileUtils);
 
         Bundle bundle = new Bundle();
         wsdlLoader.load(bundle, temporaryFolder.getRoot());
@@ -78,7 +78,7 @@ public class WSDLLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoad2(TemporaryFolder temporaryFolder) throws IOException {
-        WSDLLoader wsdlLoader = new WSDLLoader(fileUtils);
+        WsdlLoader wsdlLoader = new WsdlLoader(fileUtils);
 
         File wsdlFolder = temporaryFolder.createDirectory("wsdl");
         File a = new File(wsdlFolder, "a");
@@ -91,6 +91,6 @@ public class WSDLLoaderTest {
         Bundle bundle = new Bundle();
         wsdlLoader.load(bundle, temporaryFolder.getRoot());
 
-        WSDL loadedWSDL = bundle.getWSDLs().get("a/wsdl");
+        Wsdl loadedWsdl = bundle.getWsdls().get("a/wsdl");
     }
 }

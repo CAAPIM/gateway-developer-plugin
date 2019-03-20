@@ -70,7 +70,7 @@ public class FolderLoaderUtils {
     }
 
     @Nullable
-    static File getWSDLRootDir(File rootDir) {
+    static File getWsdlRootDir(File rootDir) {
         final File wsdlRootDir = new File(rootDir, "wsdl");
 
         if (!wsdlRootDir.exists()) {

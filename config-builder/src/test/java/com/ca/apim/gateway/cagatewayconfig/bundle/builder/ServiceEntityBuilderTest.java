@@ -151,6 +151,37 @@ class ServiceEntityBuilderTest {
     }
 
     @Test
+    void buildServiceWithWsdlFile() throws DocumentParseException {
+        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+
+        Bundle bundle = new Bundle();
+
+        Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/soap/policy.xml", "policy");
+
+        Folder wsdlParentFolder = setUpFolderAndPolicy(bundle, "/soap/wsdl.wsdl", "wsdl");
+
+
+        Service service = new Service();
+        service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
+        service.setUrl("/soap/service/url");
+        service.setPolicy("/soap/policy.xml");
+        service.setParentFolder(serviceParentFolder);
+        service.setProperties(new HashMap<String, Object>() {{
+            put("key1", "value1");
+            put("ENV.key.environment", "something");
+        }});
+        Wsdl wsdlBean = new Wsdl();
+        wsdlBean.setWssProcessingEnabled(true);
+        wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
+        wsdlBean.setSoapVersion("1.1");
+        service.setWsdl(wsdlBean);
+
+        bundle.putAllServices(new HashMap<String, Service>() {{
+            put("/v1/soap-service1", service);
+        }});
+    }
+
+    @Test
     void buildOneSoapService() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
@@ -167,7 +198,7 @@ class ServiceEntityBuilderTest {
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
-        WSDL wsdlBean = new WSDL();
+        Wsdl wsdlBean = new Wsdl();
         wsdlBean.setWssProcessingEnabled(true);
         wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
         wsdlBean.setSoapVersion("1.1");
@@ -206,7 +237,7 @@ class ServiceEntityBuilderTest {
             put("key2", "value2");
             put("ENV.key.environment", "something");
         }});
-        WSDL wsdlBean = new WSDL();
+        Wsdl wsdlBean = new Wsdl();
         wsdlBean.setWssProcessingEnabled(true);
         wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
         wsdlBean.setSoapVersion("1.1");
@@ -247,6 +278,35 @@ class ServiceEntityBuilderTest {
         }});
         return service1;
     }
+
+    /*@NotNull
+    private Folder setUpFolderAndWsdl(Bundle bundle, String policyPath, String policyName) throws DocumentParseException {
+        Folder parentFolder = new Folder();
+        parentFolder.setId("asd");
+        parentFolder.setName("my");
+        parentFolder.setPath("my");
+
+        Folder serviceParentFolder = new Folder();
+        serviceParentFolder.setId("test");
+        serviceParentFolder.setName("v1");
+        serviceParentFolder.setPath("my/v1");
+
+        bundle.putAllFolders(new HashMap<String, Folder>() {{
+            put(parentFolder.getPath(), parentFolder);
+            put(serviceParentFolder.getPath(), serviceParentFolder);
+        }});
+
+        Wsdl wsdl = new Wsdl();
+        wsdl.setWssProcessingEnabled(true);
+        wsdl.setRootUrl("/test/rooturl/for/soap.wsdl");
+        wsdl.setSoapVersion("1.1");
+        wsdl.setLocation("/soap/wsdl.wsdl");
+        wsdl.setWsdlXml("wsdl xml content");
+        bundle.putAllWsdls(new HashMap<String, Wsdl>() {{
+            put(wsdl.getPath(), wsdl);
+        }});
+        return serviceParentFolder;
+    }*/
 
     @NotNull
     private Folder setUpFolderAndPolicy(Bundle bundle, String policyPath, String policyName) throws DocumentParseException {
