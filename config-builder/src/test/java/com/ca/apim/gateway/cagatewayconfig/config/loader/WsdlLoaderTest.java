@@ -74,23 +74,4 @@ public class WsdlLoaderTest {
 
         Assert.assertTrue(bundle.getFolders().isEmpty());
     }
-
-    @Test
-    @ExtendWith(TemporaryFolderExtension.class)
-    void testLoad2(TemporaryFolder temporaryFolder) throws IOException {
-        WsdlLoader wsdlLoader = new WsdlLoader(fileUtils);
-
-        File wsdlFolder = temporaryFolder.createDirectory("wsdl");
-        File a = new File(wsdlFolder, "a");
-        Assert.assertTrue(a.mkdir());
-        File wsdl = new File(a, "wsdl.wsdl");
-        File wsdl2 = new File(a, "wsdl.wsdl");
-        Files.touch(wsdl);
-        Files.touch(wsdl2);
-
-        Bundle bundle = new Bundle();
-        wsdlLoader.load(bundle, temporaryFolder.getRoot());
-
-        Wsdl loadedWsdl = bundle.getWsdls().get("a/wsdl");
-    }
 }
