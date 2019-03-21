@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.Po
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.SessionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,7 @@ import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType.SPECIFIED_QUEUE;
 import static com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType.CONNECTION;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.STORED_PASSWORD_REF_FORMAT;
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.getDeploymentBundle;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.JMS_DESTINATION_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildPropertiesElement;
@@ -222,11 +224,18 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         ServiceResolutionSettings serviceResolutionSettings = inboundDetail.getServiceResolutionSettings();
         if (serviceResolutionSettings != null) {
             String serviceRef = serviceResolutionSettings.getServiceRef();
+
             if (serviceRef != null) {
                 Service service = bundle.getServices().get(serviceRef);
+
+                if (service == null) {
+                    service = getDeploymentBundle().getServices().get(serviceRef);
+                }
+
                 if (service == null) {
                     throw new EntityBuilderException("Could not find associated Service for inbound JMS Destination: " + name + ". Service Path: " + serviceRef);
                 }
+
                 contextPropertiesTemplateProps.put(IS_HARDWIRED_SERVICE, Boolean.TRUE.toString());
                 contextPropertiesTemplateProps.put(HARDWIRED_SERVICE_ID, service.getId());
             } else {
@@ -241,9 +250,8 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, this.getContentTypeSource(serviceResolutionSettings));
 
             String contentType = serviceResolutionSettings.getContentType();
-            if (contentType == null) {
-                contentType = "";
-            }
+            contentType = Strings.nullToEmpty(contentType);
+
             contextPropertiesTemplateProps.put(CONTENT_TYPE_VALUE, contentType);
         }
 

@@ -1,0 +1,85 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+apply plugin: 'base'
+apply plugin: 'java'
+apply plugin: 'jacoco'
+apply plugin: 'com.srcclr.gradle'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+apply from: rootProject.file( 'gradle/config/publishing-pom.gradle' )
+apply from: rootProject.file( 'gradle/config/publishing-config.gradle' )
+
+group 'com.ca.apim.gateway'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
+    testCompile("io.github.glytching:junit-extensions:2.3.0")
+    testCompile 'org.mockito:mockito-junit-jupiter:2.19.0'
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
+    testCompile 'org.testcontainers:testcontainers:1.4.3'
+}
+
+//runs tests in parallel
+tasks.withType(Test) {
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+artifacts {
+    archives javadocJar, sourceJar
+}
+
+jar {
+    manifest {
+        attributes(
+                "Implementation-Title": name,
+                "Implementation-Version": version)
+    }
+}
+
+publishing {
+    publications {
+        gwPlugin( MavenPublication ) {
+            from components.java
+
+            artifact( sourceJar ) {
+                classifier = 'sources'
+            }
+
+            artifact( javadocJar ) {
+                classifier = "javadoc"
+            }
+        }
+    }
+}

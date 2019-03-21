@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.export;
 
 import com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClient;
 import com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClientException;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.ca.apim.gateway.cagatewayexport.config.GatewayExportConnectionProperties;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
@@ -23,7 +24,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClient.getRestmanBundleEndpoint;
-import static com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule.getInstance;
 import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 import static org.apache.http.client.methods.HttpGet.METHOD_NAME;
 import static org.apache.http.client.methods.RequestBuilder.create;
@@ -44,7 +44,7 @@ public class ExportTask extends DefaultTask {
     private RegularFileProperty exportFile;
 
     public ExportTask() {
-        this.gatewayClient = getInstance(GatewayClient.class);
+        this.gatewayClient = InjectionRegistry.getInstance(GatewayClient.class);
         gatewayConnectionProperties = new GatewayExportConnectionProperties(getProject());
         exportQuery = getProject().getObjects().property(String.class);
         exportFile = newOutputFile();

@@ -2,7 +2,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -48,7 +48,7 @@ public interface EntityFilter<E extends GatewayEntity> extends Comparable<Entity
      * @return an instance of the entity filter
      */
     static EntityFilter getEntityFilterFromClass(Class<? extends EntityFilter> filterClass) {
-        return ExportPluginModule.getInjector().getInstance(filterClass);
+        return InjectionRegistry.getInstance(filterClass);
     }
 
     /**

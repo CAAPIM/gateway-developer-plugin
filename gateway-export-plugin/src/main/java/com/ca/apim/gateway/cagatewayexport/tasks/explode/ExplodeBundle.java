@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle.BundleBuilder;
@@ -17,7 +18,6 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.EntityWriterRegistry;
-import com.ca.apim.gateway.cagatewayexport.util.injection.ExportPluginModule;
 import org.w3c.dom.Document;
 
 import javax.inject.Inject;
@@ -52,7 +52,7 @@ public class ExplodeBundle {
         documentTools.cleanup(bundleDocument);
 
         //loads the bundle
-        final BundleBuilder bundleBuilder = ExportPluginModule.getInjector().getInstance(BundleBuilder.class);
+        final BundleBuilder bundleBuilder = InjectionRegistry.getInstance(BundleBuilder.class);
         Bundle bundle = bundleBuilder.buildBundle(bundleDocument.getDocumentElement());
 
         //checks if bundle has specified folderpath
@@ -61,7 +61,7 @@ public class ExplodeBundle {
         }
 
         //filter out unwanted entities
-        BundleFilter bundleFilter = ExportPluginModule.getInjector().getInstance(BundleFilter.class);
+        BundleFilter bundleFilter = InjectionRegistry.getInstance(BundleFilter.class);
         Bundle filteredBundle = bundleFilter.filter(folderPath, filterConfiguration, bundle);
         //Link, simplify and process entities
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();

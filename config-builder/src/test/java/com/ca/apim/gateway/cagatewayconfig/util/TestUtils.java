@@ -276,6 +276,7 @@ public class TestUtils {
         return createElementWithChildren(
                 document,
                 ITEM,
+                createElementWithTextContent(document, NAME, "/folder/service"),
                 createElementWithTextContent(document, ID, (isSoap ? "soapId" : "id")),
                 createElementWithTextContent(document, TYPE, EntityTypes.SERVICE_TYPE),
                 createElementWithChildren(
