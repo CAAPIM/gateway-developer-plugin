@@ -69,6 +69,19 @@ public class FolderLoaderUtils {
         return policyRootDir;
     }
 
+    @Nullable
+    static File getWsdlRootDir(File rootDir) {
+        final File wsdlRootDir = new File(rootDir, "wsdl");
+
+        if (!wsdlRootDir.exists()) {
+            return null;
+        } else if (!wsdlRootDir.isDirectory()) {
+            throw new ConfigLoadException("Expected directory but was file: " + wsdlRootDir);
+        }
+
+        return wsdlRootDir;
+    }
+
     /**
      * Creates all folders along a path if they do not already exist, and adds them to the folderMap.
      *

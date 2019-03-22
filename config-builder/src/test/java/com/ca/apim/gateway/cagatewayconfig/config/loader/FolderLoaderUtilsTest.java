@@ -72,6 +72,26 @@ class FolderLoaderUtilsTest {
     }
 
     @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void getWsdlRootNoWsdlDirTest(TemporaryFolder temporaryFolder) {
+        assertNull(getWsdlRootDir(temporaryFolder.getRoot()));
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void getWsdlRootDirWsdlFileErrorTest(TemporaryFolder temporaryFolder) throws IOException {
+        temporaryFolder.createFile("wsdl");
+        assertThrows(ConfigLoadException.class, () -> getWsdlRootDir(temporaryFolder.getRoot()));
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void getWsdlRootDirTest(TemporaryFolder temporaryFolder) {
+        temporaryFolder.createDirectory("wsdl");
+        assertNotNull(getWsdlRootDir(temporaryFolder.getRoot()));
+    }
+
+    @Test
     void createFoldersTest() {
         //Set up
         String path = "a/b/c/";

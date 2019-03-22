@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.beans.WSDL;
+import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
@@ -135,7 +135,7 @@ public class ServiceLoader implements BundleEntityLoader {
                 if(StringUtils.isEmpty(wsdl) || StringUtils.isEmpty(rootUrlForWsdl)) {
                     throw new BundleLoadException("No wsdl or rootUrl found under " + RESOURCE_SET);
                 } else {
-                    WSDL wsdlBean = new WSDL();
+                    Wsdl wsdlBean = new Wsdl();
                     wsdlBean.setRootUrl(rootUrlForWsdl);
                     wsdlBean.setWsdlXml(wsdl);
                     wsdlBean.setSoapVersion(soapVersion);

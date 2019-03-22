@@ -35,7 +35,7 @@ public class Service extends Folderable {
     private Element serviceDetailsElement;
     @JsonIgnore
     private Element policyXML;
-    private WSDL wsdl;
+    private Wsdl wsdl;
 
     public String getUrl() {
         return url;
@@ -97,11 +97,11 @@ public class Service extends Folderable {
         setPolicy(getPath());
     }
 
-    public WSDL getWsdl() {
+    public Wsdl getWsdl() {
         return wsdl;
     }
 
-    public void setWsdl(WSDL wsdl) {
+    public void setWsdl(Wsdl wsdl) {
         this.wsdl = wsdl;
     }
 }
