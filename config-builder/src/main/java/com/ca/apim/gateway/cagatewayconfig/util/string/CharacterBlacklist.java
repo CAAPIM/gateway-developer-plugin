@@ -6,27 +6,47 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.string;
 
-public class EncodeDecodeUtils {
+import java.util.Set;
 
-    private EncodeDecodeUtils() {
+import static com.ca.apim.gateway.cagatewayconfig.util.environment.CharacterBlacklist.getCharBlacklist;
+
+public class CharacterBlacklistFilter {
+
+    private CharacterBlacklistFilter() {
     }
 
     public static String encodePath(String pathToEncode) {
         if (pathToEncode.contains("_¯") || pathToEncode.contains("¯_")) {
             throw new IllegalArgumentException("Illegal characters in path. Cannot contain '_¯' or '¯_': " + pathToEncode);
         }
-        pathToEncode = pathToEncode.replaceAll("/", "_¯");
-        pathToEncode = pathToEncode.replaceAll("\\\\", "¯_");
+
+        Set<Character> charBlacklist = getCharBlacklist();
+
+        for (char c : pathToEncode.toCharArray()) {
+            if (charBlacklist.contains(c)) {
+                pathToEncode = pathToEncode.replace(Character.toString(c),"-");
+            }
+        }
+
         return pathToEncode;
     }
 
     public static String decodePath(String pathToDecode) {
         pathToDecode = pathToDecode.replaceAll("_¯", "/");
         pathToDecode = pathToDecode.replaceAll("¯_", "\\\\");
+        getCharBlacklist();
         return pathToDecode;
     }
 
     public static boolean containsInvalidCharacter(String name) {
-        return name.contains("_¯") || name.contains("¯_") || name.contains("\\") || name.contains("/");
+        Set<Character> charBlacklist = getCharBlacklist();
+
+        for (char c : name.toCharArray()) {
+            if (charBlacklist.contains(c)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
