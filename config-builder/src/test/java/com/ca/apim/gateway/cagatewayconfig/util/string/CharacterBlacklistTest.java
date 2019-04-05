@@ -10,15 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class EncodeDecodeUtilsTest {
+class CharacterBlacklistTest {
 
     @Test
-    void decodePath() {
-        assertEquals("example/folder-/-\\-slashed/example-/-\\-slashed.xml", EncodeDecodeUtils.decodePath("example/folder-_¯-¯_-slashed/example-_¯-¯_-slashed.xml"));
-    }
-
-    //@Test
-    void encodePath() {
-        assertEquals("example-_¯-¯_-slashed.xml", EncodeDecodeUtils.encodePath("example-/-\\-slashed.xml"));
+    void filterAndReplace() {
+        assertEquals("example-----slashed.xml", CharacterBlacklistUtil.filterAndReplace("example-/-\\-slashed.xml"));
     }
 }

@@ -10,32 +10,21 @@ import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.environment.CharacterBlacklist.getCharBlacklist;
 
-public class CharacterBlacklistFilter {
+public class CharacterBlacklistUtil {
 
-    private CharacterBlacklistFilter() {
+    private CharacterBlacklistUtil() {
     }
 
-    public static String encodePath(String pathToEncode) {
-        if (pathToEncode.contains("_¯") || pathToEncode.contains("¯_")) {
-            throw new IllegalArgumentException("Illegal characters in path. Cannot contain '_¯' or '¯_': " + pathToEncode);
-        }
-
+    public static String filterAndReplace(String string) {
         Set<Character> charBlacklist = getCharBlacklist();
 
-        for (char c : pathToEncode.toCharArray()) {
+        for (char c : string.toCharArray()) {
             if (charBlacklist.contains(c)) {
-                pathToEncode = pathToEncode.replace(Character.toString(c),"-");
+                string = string.replace(Character.toString(c),"-");
             }
         }
 
-        return pathToEncode;
-    }
-
-    public static String decodePath(String pathToDecode) {
-        pathToDecode = pathToDecode.replaceAll("_¯", "/");
-        pathToDecode = pathToDecode.replaceAll("¯_", "\\\\");
-        getCharBlacklist();
-        return pathToDecode;
+        return string;
     }
 
     public static boolean containsInvalidCharacter(String name) {

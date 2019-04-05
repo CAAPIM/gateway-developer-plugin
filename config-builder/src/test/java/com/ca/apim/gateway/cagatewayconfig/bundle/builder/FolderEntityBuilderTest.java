@@ -11,7 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class FolderEntityBuilderTest {
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
     private static final String FOLDER_1 = "Folder1";
     private static final String FOLDER_2 = "Folder2";
-    private static final String FOLDER_3 = "Fo-_¯-¯_-lder3";
+    private static final String FOLDER_3 = "Folder3";
 
     @Test
     void buildFromEmptyBundle_noFolders() {
@@ -88,9 +88,9 @@ class FolderEntityBuilderTest {
         entitiesMap.forEach((k, entity) -> {
             k = Folder.ROOT_FOLDER_NAME.equals(k) ? EMPTY : k;
 
-            Folder folder = bundle.getFolders().get(EncodeDecodeUtils.encodePath(k));
+            Folder folder = bundle.getFolders().get(k);
             assertNotNull(folder);
-            assertEquals(EncodeDecodeUtils.decodePath(folder.getName()), entity.getName());
+            assertEquals(folder.getName(), CharacterBlacklistUtil.filterAndReplace(entity.getName()));
             assertNotNull(entity.getId());
             assertNotNull(entity.getXml());
             assertEquals(EntityTypes.FOLDER_TYPE, entity.getType());

@@ -11,10 +11,8 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -64,8 +62,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
-        String processedName = EncodeDecodeUtils.decodePath(FilenameUtils.getBaseName(servicePath));
-        service.setName(processedName);
+        String baseName = servicePath.substring(servicePath.lastIndexOf("/") + 1);
+        service.setName(baseName);
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());
         final Wsdl wsdlBean = service.getWsdl();
@@ -83,7 +81,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         service.setId(id);
 
         Element serviceDetailElement = createElementWithAttributes(document, SERVICE_DETAIL, ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_FOLDER_ID, service.getParentFolder().getId()));
-        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, processedName));
+        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, baseName));
         serviceDetailElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));
         serviceDetailElement.appendChild(buildServiceMappings(service, document));
 

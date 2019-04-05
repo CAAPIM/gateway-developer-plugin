@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -21,17 +22,24 @@ import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createServiceXm
 import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceLoaderTest {
+    private static final String TEST_FOLDER = "folder";
 
     @Test
     void load() {
         ServiceLoader loader = new ServiceLoader();
         Bundle bundle = new Bundle();
+        Folder folder = new Folder();
+        folder.setId(TEST_FOLDER);
+        folder.setName(TEST_FOLDER);
+        folder.setPath(TEST_FOLDER);
+        bundle.getFolders().put(TEST_FOLDER, folder);
+
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 true, false, false, false));
 
         assertFalse(bundle.getServices().isEmpty());
         assertEquals(1, bundle.getServices().size());
-        Service service = bundle.getServices().get("/folder/service");
+        Service service = bundle.getServices().get(TEST_FOLDER + "/service");
         assertNotNull(service);
         assertEquals("service", service.getName());
         assertEquals("/service", service.getUrl());
@@ -53,13 +61,19 @@ class ServiceLoaderTest {
     void soapServiceLoad() {
         ServiceLoader loader = new ServiceLoader();
         Bundle bundle = new Bundle();
+        Folder folder = new Folder();
+        folder.setId(TEST_FOLDER);
+        folder.setName(TEST_FOLDER);
+        folder.setPath(TEST_FOLDER);
+        bundle.getFolders().put(TEST_FOLDER, folder);
+
         loader.load(bundle, createServiceXml(
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, false, false
         ));
 
         assertFalse(bundle.getServices().isEmpty());
         assertEquals(1, bundle.getServices().size());
-        Service service = bundle.getServices().get("/folder/service");
+        Service service = bundle.getServices().get(TEST_FOLDER + "/service");
         assertNotNull(service);
         assertEquals("service", service.getName());
         assertEquals("/soap-service", service.getUrl());
