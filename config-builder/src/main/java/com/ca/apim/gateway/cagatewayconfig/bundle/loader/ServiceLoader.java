@@ -83,7 +83,7 @@ public class ServiceLoader implements BundleEntityLoader {
 
         if (bundleService.containsKey(serviceEntity.getPath())) {
             String duplicatePathName = handleDuplicate(bundleService, serviceEntity);
-            serviceEntity.setName(duplicatePathName.substring(duplicatePathName.lastIndexOf("/") + 1));
+            serviceEntity.setName(duplicatePathName.substring(duplicatePathName.lastIndexOf('/') + 1));
             serviceEntity.setPath(duplicatePathName);
         }
 
@@ -96,7 +96,7 @@ public class ServiceLoader implements BundleEntityLoader {
         String clonePath = basePath;
         while (bundleService.containsKey(clonePath)) {
             Service service = bundleService.get(clonePath);
-            if ( (service.getId() != serviceEntity.getId())
+            if (!service.getId().equals(serviceEntity.getId())
                     && (service.getParentFolderId().equals(serviceEntity.getParentFolderId())) ) {
                 clonePath = basePath + "(" + duplicateCounter + ")";
                 duplicateCounter++;

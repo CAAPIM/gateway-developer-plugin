@@ -62,7 +62,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
-        String baseName = servicePath.substring(servicePath.lastIndexOf("/") + 1);
+        String baseName = servicePath.substring(servicePath.lastIndexOf('/') + 1);
         service.setName(baseName);
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());

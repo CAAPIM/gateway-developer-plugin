@@ -2,6 +2,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.environment;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class CharacterBlacklist {
@@ -17,17 +18,17 @@ public class CharacterBlacklist {
     public static final char ASTERISK = '*';
     public static final char NULL_CHAR = '\0';
 
-    public static HashSet<Character> getCharBlacklist() {
+    public static Set getCharBlacklist() {
         Field[] fields = CharacterBlacklist.class.getFields();
         CharacterBlacklist cblInstance = new CharacterBlacklist();
-        HashSet<Character> charBlackList = new HashSet<>();
+        Set<Character> charBlackList = new HashSet<>();
 
         Stream.of(fields).forEach(field -> {
             try {
                 char fieldValue = (Character) field.get(cblInstance);
                 charBlackList.add(fieldValue);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                throw new IllegalArgumentException("Error accessing blacklist character field " + field.getName(), e);
             }
         });
 

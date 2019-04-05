@@ -23,4 +23,6 @@ public class ServiceAndPolicyLoaderUtil {
         }
         return folderList.get(0);
     }
+
+    private ServiceAndPolicyLoaderUtil(){}
 }
