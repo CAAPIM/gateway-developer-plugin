@@ -23,14 +23,40 @@ public class CharacterBlacklistUtil {
      */
     public static String filterAndReplace(String string) {
         Set<Character> charBlacklist = getCharBlacklist();
+        final char replacementChar = '-';
+        StringBuilder processedString = new StringBuilder();
 
         for (char c : string.toCharArray()) {
             if (charBlacklist.contains(c)) {
-                string = string.replace(Character.toString(c),"-");
+                processedString.append(replacementChar);
+            } else {
+                processedString.append(c);
             }
         }
 
-        return string;
+        return compressString(processedString.toString(), replacementChar);
+    }
+
+    /**
+     * Compress repeating characters in String
+     *
+     * @param string with repeating characters
+     * @param replacementChar to replace in string
+     * @return string with selected repeating character removed
+     */
+    private static String compressString(String string, char replacementChar) {
+        StringBuilder processedString = new StringBuilder(string);
+        int iterator = 0;
+
+        while (iterator < processedString.length() - 1) {
+            if (processedString.charAt(iterator) == replacementChar && processedString.charAt(iterator + 1) == replacementChar) {
+                processedString.deleteCharAt(iterator);
+            } else {
+                iterator++;
+            }
+        }
+
+        return processedString.toString();
     }
 
     /**

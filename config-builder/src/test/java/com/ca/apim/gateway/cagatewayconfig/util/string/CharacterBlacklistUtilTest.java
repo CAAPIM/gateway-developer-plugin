@@ -15,7 +15,12 @@ class CharacterBlacklistUtilTest {
 
     @Test
     void filterAndReplace() {
-        assertEquals("example-----slashed.xml", CharacterBlacklistUtil.filterAndReplace("example-/-\\-slashed.xml"));
+        assertEquals("example-slashed.xml", CharacterBlacklistUtil.filterAndReplace("example-/-\\-slashed.xml"));
+    }
+
+    @Test
+    void testStringCompressionOnRepeatingHyphens() {
+        assertEquals("example-", CharacterBlacklistUtil.filterAndReplace("example-------"));
     }
 
     @Test

@@ -13,7 +13,7 @@ public class ServiceAndPolicyLoaderUtil {
     /**
      * Get path with file name
      *
-     * @param parentFolder
+     * @param parentFolder parent folder for file name to appended on to for path
      * @param fileName name used to create a path with parent folder
      * @return a path ending with name
      */
