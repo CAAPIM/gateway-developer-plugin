@@ -12,9 +12,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.environment.CharacterBlac
 
 public class CharacterBlacklistUtil {
 
-    private CharacterBlacklistUtil() {
-    }
-
     public static String filterAndReplace(String string) {
         Set<Character> charBlacklist = getCharBlacklist();
 
@@ -38,4 +35,6 @@ public class CharacterBlacklistUtil {
 
         return false;
     }
+
+    private CharacterBlacklistUtil() {}
 }

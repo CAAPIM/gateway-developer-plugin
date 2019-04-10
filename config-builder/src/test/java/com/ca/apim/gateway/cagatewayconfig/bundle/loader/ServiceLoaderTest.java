@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Element;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -55,6 +56,43 @@ class ServiceLoaderTest {
         expected.put("prop", "value");
         expected.put("ENV.prop", null);
         assertPropertiesContent(expected, service.getProperties());
+    }
+
+    @Test
+    void loadDuplicateNameService() {
+        ServiceLoader loader = new ServiceLoader();
+        Bundle bundle = new Bundle();
+        Folder folder = new Folder();
+        folder.setId(TEST_FOLDER);
+        folder.setName(TEST_FOLDER);
+        folder.setPath(TEST_FOLDER);
+        bundle.getFolders().put(TEST_FOLDER, folder);
+
+        loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                true, false, false, false));
+
+        //Load duplicate with different id
+        loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                true, true, false, false));
+
+        assertFalse(bundle.getServices().isEmpty());
+        assertEquals(2, bundle.getServices().size());
+
+        Service service = bundle.getServices().get(TEST_FOLDER + "/service");
+        assertNotNull(service);
+
+        Service duplicateService = bundle.getServices().get(TEST_FOLDER + "/service (2)");
+        assertNotNull(duplicateService);
+
+        assertEquals("service", service.getName());
+        assertEquals("id", service.getId());
+
+        assertEquals("service (2)", duplicateService.getName());
+        assertEquals("soapId", duplicateService.getId());
+
+
+        assertTrue(service.getHttpMethods().containsAll(Arrays.asList("GET", "POST", "PUT", "DELETE")));
+        assertEquals(service.getParentFolder(), duplicateService.getParentFolder());
     }
 
     @Test
