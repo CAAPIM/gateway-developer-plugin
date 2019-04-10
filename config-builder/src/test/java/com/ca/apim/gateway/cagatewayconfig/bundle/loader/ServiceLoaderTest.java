@@ -96,6 +96,26 @@ class ServiceLoaderTest {
     }
 
     @Test
+    void loadDuplicateService() {
+        ServiceLoader loader = new ServiceLoader();
+        Bundle bundle = new Bundle();
+        Folder folder = new Folder();
+        folder.setId(TEST_FOLDER);
+        folder.setName(TEST_FOLDER);
+        folder.setPath(TEST_FOLDER);
+        bundle.getFolders().put(TEST_FOLDER, folder);
+
+        loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                true, false, false, false));
+
+        loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                true, false, false, false));
+
+        assertFalse(bundle.getServices().isEmpty());
+        assertEquals(1, bundle.getServices().size());
+    }
+
+    @Test
     void soapServiceLoad() {
         ServiceLoader loader = new ServiceLoader();
         Bundle bundle = new Bundle();

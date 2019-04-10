@@ -90,6 +90,14 @@ public class ServiceLoader implements BundleEntityLoader {
         bundleService.put(serviceEntity.getPath(), serviceEntity);
     }
 
+    /**
+     * Append a value to end of name of Service in a path if service name is found in bundle.
+     * Service Id must be different and must exist in the same folder.
+     *
+     * @param bundleService bundle containing original service
+     * @param serviceEntity duplicate service with same path and service name
+     * @return a path with a numerical value appended to the end to differentiate from original service
+     */
     private String handleDuplicatePathName(Map<String, Service> bundleService, Service serviceEntity) {
         int duplicateCounter = 2;
         String basePath = serviceEntity.getPath();

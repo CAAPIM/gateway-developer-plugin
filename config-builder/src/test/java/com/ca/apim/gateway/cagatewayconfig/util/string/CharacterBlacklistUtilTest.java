@@ -8,12 +8,18 @@ package com.ca.apim.gateway.cagatewayconfig.util.string;
 
 import org.junit.jupiter.api.Test;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CharacterBlacklistTest {
+class CharacterBlacklistUtilTest {
 
     @Test
     void filterAndReplace() {
         assertEquals("example-----slashed.xml", CharacterBlacklistUtil.filterAndReplace("example-/-\\-slashed.xml"));
+    }
+
+    @Test
+    void containsInvalidCharacter() {
+        assertTrue(CharacterBlacklistUtil.containsInvalidCharacter("example-/-\\-slashed.xml"));
     }
 }

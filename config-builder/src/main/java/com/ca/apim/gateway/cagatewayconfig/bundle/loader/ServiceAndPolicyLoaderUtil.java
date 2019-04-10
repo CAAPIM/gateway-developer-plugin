@@ -10,10 +10,24 @@ import java.util.stream.Collectors;
 
 public class ServiceAndPolicyLoaderUtil {
 
-    public static String getPath(Folder parentFolder, String name) {
-        return PathUtils.unixPath(Paths.get(parentFolder.getPath()).resolve(name));
+    /**
+     * Get path with file name
+     *
+     * @param parentFolder
+     * @param fileName name used to create a path with parent folder
+     * @return a path ending with name
+     */
+    public static String getPath(Folder parentFolder, String fileName) {
+        return PathUtils.unixPath(Paths.get(parentFolder.getPath()).resolve(fileName));
     }
 
+    /**
+     * Extract folder object from bundle
+     *
+     * @param bundle bundle contaning the folder
+     * @param folderId id of folder to be extracted from bundle
+     * @return folder object from bundle
+     */
     public static Folder getFolder(Bundle bundle, String folderId) {
         List<Folder> folderList = bundle.getFolders().values().stream().filter(f -> folderId.equals(f.getId())).collect(Collectors.toList());
         if (folderList.isEmpty()) {
