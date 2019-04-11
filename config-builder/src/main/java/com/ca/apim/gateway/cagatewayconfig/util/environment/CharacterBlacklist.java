@@ -25,13 +25,14 @@ public class CharacterBlacklist {
     // Unix
     public static final char NULL_CHAR = '\0';
 
+    private static final Field[] fields = CharacterBlacklist.class.getFields();
+
     /**
      * Retrieve set of blacklist characters
      *
-     * @return set with all constants in the class. Constants are blacklisted characters.
+     * @return Character Set with all constants in the class. Constants are blacklisted characters.
      */
-    public static Set getCharBlacklist() {
-        Field[] fields = CharacterBlacklist.class.getFields();
+    public static Set<Character> getCharBlacklist() {
         CharacterBlacklist cblInstance = new CharacterBlacklist();
         Set<Character> charBlackList = new HashSet<>();
 

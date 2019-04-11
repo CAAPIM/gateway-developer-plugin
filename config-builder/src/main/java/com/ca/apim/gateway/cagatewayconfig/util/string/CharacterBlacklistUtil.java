@@ -14,6 +14,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.environment.CharacterBlac
  * Utility class for Character Blacklist. Purpose is to apply functions to the constants found in CharacterBlacklist
  */
 public class CharacterBlacklistUtil {
+    private static final char REPLACEMENT_CHAR = '-';
 
     /**
      * Find blacklist characters and replace with value '-'
@@ -23,18 +24,14 @@ public class CharacterBlacklistUtil {
      */
     public static String filterAndReplace(String string) {
         Set<Character> charBlacklist = getCharBlacklist();
-        final char replacementChar = '-';
-        StringBuilder processedString = new StringBuilder();
 
         for (char c : string.toCharArray()) {
             if (charBlacklist.contains(c)) {
-                processedString.append(replacementChar);
-            } else {
-                processedString.append(c);
+                string = string.replace(c, REPLACEMENT_CHAR);
             }
         }
 
-        return compressString(processedString.toString(), replacementChar);
+        return compressString(string, REPLACEMENT_CHAR);
     }
 
     /**
