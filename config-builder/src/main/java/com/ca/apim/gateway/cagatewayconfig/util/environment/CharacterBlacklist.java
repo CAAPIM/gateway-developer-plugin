@@ -15,7 +15,7 @@ public class CharacterBlacklist {
     public static final char LESS_THAN = '<';
     public static final char GREATER_THAN = '>';
     public static final char COLON = ':';
-    public static final char DOUBLE_QUOTE = '\'';
+    public static final char DOUBLE_QUOTE = '\"';
     public static final char FORWARD_SLASH = '/';
     public static final char BACK_SLASH = '\\';
     public static final char PIPE = '|';

@@ -31,7 +31,6 @@ interface TemplatizedBundle {
 
         private final File newFile;
         private final File originalFile;
-        private final Charset defaultCharSet = StandardCharsets.UTF_8;
 
         FileTemplatizedBundle(File originalFile, File newFile) {
             this.newFile = newFile;
@@ -41,7 +40,7 @@ interface TemplatizedBundle {
         @Override
         public String getContents() {
             try {
-                return new String(Files.readAllBytes(this.originalFile.toPath()), defaultCharSet);
+                return new String(Files.readAllBytes(this.originalFile.toPath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new BundleDetemplatizeException("Could not read bundle file: " + originalFile.getName(), e);
             }
@@ -50,7 +49,7 @@ interface TemplatizedBundle {
         @Override
         public void writeContents(String content) {
             try {
-                Files.write(newFile.toPath(), Collections.singleton(content), defaultCharSet);
+                Files.write(newFile.toPath(), Collections.singleton(content), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new BundleDetemplatizeException("Could not write detemplatized bundle to: " + newFile.getName(), e);
             }
