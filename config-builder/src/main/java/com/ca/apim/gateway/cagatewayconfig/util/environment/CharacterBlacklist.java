@@ -25,20 +25,25 @@ public class CharacterBlacklist {
     // Unix
     public static final char NULL_CHAR = '\0';
 
-    private static final Field[] fields = CharacterBlacklist.class.getFields();
+    private static final Set<Character> charBlackList = initializeCharBlacklist();
 
     /**
      * Retrieve set of blacklist characters
      *
      * @return Character Set with all constants in the class. Constants are blacklisted characters.
      */
+
     public static Set<Character> getCharBlacklist() {
-        CharacterBlacklist cblInstance = new CharacterBlacklist();
+        return charBlackList;
+    }
+
+    private static Set<Character> initializeCharBlacklist() {
+        Field[] fields = CharacterBlacklist.class.getFields();
         Set<Character> charBlackList = new HashSet<>();
 
         Stream.of(fields).forEach(field -> {
             try {
-                char fieldValue = (Character) field.get(cblInstance);
+                char fieldValue = (Character) field.get(CharacterBlacklist.class);
                 charBlackList.add(fieldValue);
             } catch (IllegalAccessException e) {
                 throw new IllegalArgumentException("Error accessing blacklist character field " + field.getName(), e);
