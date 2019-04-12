@@ -14,6 +14,7 @@ import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 
+import static com.ca.apim.gateway.cagatewayconfig.CAGatewayDeveloper.BUNDLE_FILE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
 
 /**
@@ -25,6 +26,7 @@ public class BuildDeploymentBundleTask extends DefaultTask {
     private DirectoryProperty from;
     private DirectoryProperty into;
     private ConfigurableFileCollection dependencies;
+    private String bundleFileName;
 
     /**
      * Creates a new BuildBundle task to build a bundle from local source files
@@ -34,6 +36,7 @@ public class BuildDeploymentBundleTask extends DefaultTask {
         into = newOutputDirectory();
         from = newInputDirectory();
         dependencies = getProject().files();
+        bundleFileName = getProject().getName() + '-' + getProject().getVersion() + "." + BUNDLE_FILE_EXTENSION;
     }
 
     @InputDirectory
@@ -55,6 +58,10 @@ public class BuildDeploymentBundleTask extends DefaultTask {
     @TaskAction
     public void perform() {
         BundleFileBuilder bundleFileBuilder = InjectionRegistry.getInjector().getInstance(BundleFileBuilder.class);
-        bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(), filterBundleFiles(dependencies.getFiles()), getProject().getName() + '-' + getProject().getVersion());
+        bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(), filterBundleFiles(dependencies.getFiles()), bundleFileName);
+    }
+
+    public String getBundleFileName() {
+        return bundleFileName;
     }
 }

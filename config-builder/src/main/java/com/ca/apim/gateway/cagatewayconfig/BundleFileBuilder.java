@@ -72,7 +72,7 @@ class BundleFileBuilder {
 
         //Zip
         Element bundleElement = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document);
-        documentFileUtils.createFile(bundleElement, new File(outputDir, name + ".bundle").toPath());
+        documentFileUtils.createFile(bundleElement, new File(outputDir, name).toPath());
     }
 
 
