@@ -21,8 +21,7 @@ import org.w3c.dom.NodeList;
 import javax.inject.Singleton;
 import java.util.*;
 
-import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.getFolder;
-import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.getPath;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
@@ -88,31 +87,6 @@ public class ServiceLoader implements BundleEntityLoader {
         }
 
         bundleService.put(serviceEntity.getPath(), serviceEntity);
-    }
-
-    /**
-     * Append a value to end of name of Service in a path if service name is found in bundle.
-     * Service Id must be different and must exist in the same folder.
-     *
-     * @param bundleService bundle containing original service
-     * @param serviceEntity duplicate service with same path and service name
-     * @return a path with a numerical value appended to the end to differentiate from original service
-     */
-    private String handleDuplicatePathName(Map<String, Service> bundleService, Service serviceEntity) {
-        int duplicateCounter = 2;
-        String basePath = serviceEntity.getPath();
-        String clonePath = basePath;
-        while (bundleService.containsKey(clonePath)) {
-            Service service = bundleService.get(clonePath);
-            if (!service.getId().equals(serviceEntity.getId())
-                    && (service.getParentFolderId().equals(serviceEntity.getParentFolderId())) ) {
-                clonePath = basePath + " (" + duplicateCounter + ")";
-                duplicateCounter++;
-            } else {
-                break;
-            }
-        }
-        return clonePath;
     }
 
     private void populateServiceEntity(Element service, Service serviceEntity, Map<String, Object> allProperties, Map<String, Object> properties) {

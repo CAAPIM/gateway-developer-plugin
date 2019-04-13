@@ -18,8 +18,7 @@ import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.GLOBAL;
 import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.INTERNAL;
-import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.getFolder;
-import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.getPath;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_TAG;
@@ -75,6 +74,14 @@ public class PolicyLoader implements BundleEntityLoader {
         policy.setPolicyType(type);
         policy.setPolicyDocument(policyElement);
         policy.setPolicyXML(policyString);
+
+        Map<String, Policy> bundlePolicies = bundle.getPolicies();
+
+        if (bundlePolicies.containsKey(policy.getPath())) {
+            String duplicatePathName = handleDuplicatePathName(bundlePolicies, policy);
+            policy.setName(duplicatePathName.substring(duplicatePathName.lastIndexOf('/') + 1));
+            policy.setPath(duplicatePathName);
+        }
 
         bundle.getPolicies().put(policy.getPath(), policy);
         if (type == GLOBAL) {

@@ -12,7 +12,6 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.Element;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -104,6 +103,7 @@ class ServiceLoaderTest {
         folder.setName(TEST_FOLDER);
         folder.setPath(TEST_FOLDER);
         bundle.getFolders().put(TEST_FOLDER, folder);
+        System.setProperty("exportDuplicate", "true");
 
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 true, false, false, false));
@@ -124,6 +124,7 @@ class ServiceLoaderTest {
         folder.setName(TEST_FOLDER);
         folder.setPath(TEST_FOLDER);
         bundle.getFolders().put(TEST_FOLDER, folder);
+        System.setProperty("exportDuplicate", "true");
 
         loader.load(bundle, createServiceXml(
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, false, false
