@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 public class ServiceAndPolicyLoaderUtil {
 
+    public static final String HANDLE_DUPLICATE_NAMES = "com.ca.apim.export.handleDuplicateNames";
+
     /**
      * Get path with file name
      *
@@ -53,8 +55,9 @@ public class ServiceAndPolicyLoaderUtil {
         int duplicateCounter = 2;
         String basePath = entity.getPath();
         String clonePath = basePath;
+        String sysProp = System.getProperty(HANDLE_DUPLICATE_NAMES);
 
-        if (System.getProperty("exportDuplicate").equals("true")) {
+        if (sysProp != null && sysProp.equals("true")) {
             while (bundleEntity.containsKey(clonePath)) {
                 Folderable service = bundleEntity.get(clonePath);
                 if (!service.getId().equals(entity.getId())

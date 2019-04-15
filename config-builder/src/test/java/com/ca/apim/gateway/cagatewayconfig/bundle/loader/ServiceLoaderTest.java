@@ -66,6 +66,7 @@ class ServiceLoaderTest {
         folder.setName(TEST_FOLDER);
         folder.setPath(TEST_FOLDER);
         bundle.getFolders().put(TEST_FOLDER, folder);
+        System.setProperty(ServiceAndPolicyLoaderUtil.HANDLE_DUPLICATE_NAMES, "true");
 
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 true, false, false, false));
@@ -73,6 +74,8 @@ class ServiceLoaderTest {
         //Load duplicate with different id
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 true, true, false, false));
+
+        System.clearProperty(ServiceAndPolicyLoaderUtil.HANDLE_DUPLICATE_NAMES);
 
         assertFalse(bundle.getServices().isEmpty());
         assertEquals(2, bundle.getServices().size());
@@ -95,7 +98,7 @@ class ServiceLoaderTest {
     }
 
     @Test
-    void loadDuplicateService() {
+    void loadDuplicateServiceWithPropDisabled() {
         ServiceLoader loader = new ServiceLoader();
         Bundle bundle = new Bundle();
         Folder folder = new Folder();
@@ -103,16 +106,14 @@ class ServiceLoaderTest {
         folder.setName(TEST_FOLDER);
         folder.setPath(TEST_FOLDER);
         bundle.getFolders().put(TEST_FOLDER, folder);
-        System.setProperty("exportDuplicate", "true");
 
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 true, false, false, false));
 
-        loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
-                true, false, false, false));
-
-        assertFalse(bundle.getServices().isEmpty());
-        assertEquals(1, bundle.getServices().size());
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle,
+            createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
+                true, false, false, false))
+        );
     }
 
     @Test
@@ -124,7 +125,6 @@ class ServiceLoaderTest {
         folder.setName(TEST_FOLDER);
         folder.setPath(TEST_FOLDER);
         bundle.getFolders().put(TEST_FOLDER, folder);
-        System.setProperty("exportDuplicate", "true");
 
         loader.load(bundle, createServiceXml(
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, false, false
