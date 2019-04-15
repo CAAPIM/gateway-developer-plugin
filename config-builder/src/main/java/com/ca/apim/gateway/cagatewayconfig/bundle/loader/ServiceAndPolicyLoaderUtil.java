@@ -55,9 +55,8 @@ public class ServiceAndPolicyLoaderUtil {
         int duplicateCounter = 2;
         String basePath = entity.getPath();
         String clonePath = basePath;
-        String sysProp = System.getProperty(HANDLE_DUPLICATE_NAMES);
 
-        if (sysProp != null && sysProp.equals("true")) {
+        if (Boolean.getBoolean(HANDLE_DUPLICATE_NAMES)) {
             while (bundleEntity.containsKey(clonePath)) {
                 Folderable service = bundleEntity.get(clonePath);
                 if (!service.getId().equals(entity.getId())
