@@ -99,10 +99,12 @@ class PolicyXMLSimplifierTest {
                 );
 
         Element expressionElement = getSingleElement(setVariableAssertion, EXPRESSION);
-        assertEquals("{\r\n" +
-                "                \"error\":\"invalid_method\",\r\n" +
-                "                \"error_description\":\"${request.http.method} not permitted\"\r\n" +
-                "                }", expressionElement.getFirstChild().getTextContent());
+    assertEquals(
+        "{\n"
+            + "&quot;error&quot;:&quot;invalid_method&quot;,\n"
+            + "&quot;error_description&quot;:&quot;${request.http.method} not permitted&quot;\n"
+            + "}",
+        expressionElement.getFirstChild().getTextContent());
 
         NodeList base64ElementNodes = setVariableAssertion.getElementsByTagName(BASE_64_EXPRESSION);
         assertEquals(0, base64ElementNodes.getLength());
