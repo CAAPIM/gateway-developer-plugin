@@ -16,6 +16,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.*;
 
@@ -156,18 +157,18 @@ public class PolicyEntityBuilder implements EntityBuilder {
     private static String getCDataOrText(Element element) {
         StringBuilder content = new StringBuilder();
         NodeList children = element.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
+        for (Node child : nodeList(children)) {
             short nodeType = child.getNodeType();
             if (nodeType == Node.TEXT_NODE) {
                 content.append(child.getTextContent());
             } else if (nodeType == Node.CDATA_SECTION_NODE) {
-                return ((CDATASection) child).getData();
+                content.append(((CDATASection) child).getData());
+                break;
             } else {
                 throw new EntityBuilderException("Unexpected set variable assertion expression node type: " + child.getNodeName());
             }
         }
-        return content.toString();
+        return StringEscapeUtils.unescapeXml(content.toString());
     }
 
     @VisibleForTesting
