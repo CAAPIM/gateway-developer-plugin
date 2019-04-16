@@ -33,6 +33,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PolicyEntityBuilderTest {
@@ -122,6 +123,37 @@ class PolicyEntityBuilderTest {
         Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
         String b64 = expressionElement.getAttribute(PolicyEntityBuilder.STRING_VALUE);
         assertEquals(Base64.getEncoder().encodeToString("base64Text".getBytes(StandardCharsets.UTF_8)), b64);
+    }
+
+    @Test
+    void testPrepareSetVariableAssertionUnescaping() throws DocumentParseException {
+        Element setVariableAssertionElement = createSetVariableAssertion(document, "userSession", "&lt;usersession&gt;\n"
+                + " &lt;user&gt;&lt;![CDATA[${current.username}]]&gt;&lt;/user&gt;\n"
+                + " &lt;role&gt;&lt;![CDATA[${current.user.role}]]&gt;&lt;/role&gt;\n"
+                + " &lt;lookupUser&gt;&lt;![CDATA[${lookupUser}]]&gt;&lt;/lookupUser&gt;\n"
+                + " &lt;synchToken&gt;&lt;![CDATA[${xpathSynchToken.result}]]&gt;&lt;/synchToken&gt;\n"
+                + "&lt;/usersession&gt;");
+        document.appendChild(setVariableAssertionElement);
+        String prefix = "prefix";
+
+        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertionElement);
+
+        Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
+        assertEquals("userSession", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
+
+        Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
+        String expectedB64 = "PHVzZXJzZXNzaW9uPgogPHVzZXI+PCFbQ0RBVEFbJHtjdXJyZW50LnVzZXJuYW1lfV1dPjwvdXNlcj4KIDxyb2xlPjwhW0NEQVRBWyR7Y3VycmVudC51c2VyLnJvbGV9XV0+PC9yb2xlPgogPGxvb2t1cFVzZXI+PCFbQ0RBVEFbJHtsb29rdXBVc2VyfV1dPjwvbG9va3VwVXNlcj4KIDxzeW5jaFRva2VuPjwhW0NEQVRBWyR7eHBhdGhTeW5jaFRva2VuLnJlc3VsdH1dXT48L3N5bmNoVG9rZW4+CjwvdXNlcnNlc3Npb24+";
+        String b64 = expressionElement.getAttribute(PolicyEntityBuilder.STRING_VALUE);
+        assertEquals(expectedB64, b64);
+
+        String value = new String(decodeBase64(b64));
+    assertEquals(
+        "<usersession>\n"
+            + " <user><![CDATA[${current.username}]]></user>\n"
+            + " <role><![CDATA[${current.user.role}]]></role>\n"
+            + " <lookupUser><![CDATA[${lookupUser}]]></lookupUser>\n"
+            + " <synchToken><![CDATA[${xpathSynchToken.result}]]></synchToken>\n"
+            + "</usersession>", value);
     }
 
     @Test
