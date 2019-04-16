@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleTy
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
@@ -510,25 +509,6 @@ class PolicyEntityBuilderTest {
         Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
 
         assertEquals(policyToBuild.getId(), policyEntity.getId());
-    }
-
-    @Test
-    void buildPolicyEntityTestEncodedPath() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
-
-        Policy policyToBuild = new Policy();
-        policyToBuild.setName("policy-_¯-¯_");
-        policyToBuild.setPath("policy-_¯-¯_");
-        policyToBuild.setId("policy-id");
-        policyToBuild.setGuid("policy-guid-123");
-        Folder parentFolder = new Folder();
-        parentFolder.setId("folder-id");
-        policyToBuild.setParentFolder(parentFolder);
-
-        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
-
-        assertEquals(policyToBuild.getId(), policyEntity.getId());
-        assertEquals(EncodeDecodeUtils.decodePath(policyToBuild.getName()), policyEntity.getName());
     }
 
     @Test

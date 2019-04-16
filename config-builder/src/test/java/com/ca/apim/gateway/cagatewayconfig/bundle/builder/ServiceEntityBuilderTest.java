@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.jetbrains.annotations.NotNull;
@@ -90,37 +89,6 @@ class ServiceEntityBuilderTest {
         Entity serviceEntity = services.get(0);
 
         verifyService(service, serviceEntity, 1, "service" + 1);
-    }
-
-    @Test
-    void buildOneServicesEncodedPath() throws DocumentParseException {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-
-        Bundle bundle = new Bundle();
-
-        Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "my/policy-_¯-¯_/_¯-¯_-path.xml", "_¯-¯_-path");
-
-        Service service = new Service();
-        service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
-        service.setUrl("/my/service/url");
-        service.setPolicy("my/policy-_¯-¯_/_¯-¯_-path.xml");
-        service.setParentFolder(serviceParentFolder);
-        service.setProperties(new HashMap<String, Object>() {{
-            put("key1", "value1");
-            put("ENV.key.environment", "something");
-        }});
-
-        bundle.putAllServices(new HashMap<String, Service>() {{
-            put("my/service-_¯-¯_/_¯-¯_-path", service);
-        }});
-
-        List<Entity> services = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
-
-        assertEquals(1, services.size());
-
-        Entity serviceEntity = services.get(0);
-
-        verifyService(service, serviceEntity, 1, EncodeDecodeUtils.decodePath("_¯-¯_-path"));
     }
 
     @Test

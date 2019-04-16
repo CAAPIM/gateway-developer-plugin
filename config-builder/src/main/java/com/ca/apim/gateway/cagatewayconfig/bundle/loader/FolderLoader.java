@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -46,7 +46,7 @@ public class FolderLoader implements BundleEntityLoader {
             parentFolder = parentFolderList.get(0);
         }
 
-        if (EncodeDecodeUtils.containsInvalidCharacter(name)) {
+        if (CharacterBlacklistUtil.containsInvalidCharacter(name)) {
             throw new BundleLoadException("Folder name contains invalid characters: " + name);
         }
 

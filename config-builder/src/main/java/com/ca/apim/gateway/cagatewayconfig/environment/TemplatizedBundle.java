@@ -8,7 +8,10 @@ package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 
 /**
  * Represents a Templatized Deployment Bundle and provide read/write to its contents.
@@ -37,7 +40,7 @@ interface TemplatizedBundle {
         @Override
         public String getContents() {
             try {
-                return new String(Files.readAllBytes(this.originalFile.toPath()));
+                return new String(Files.readAllBytes(this.originalFile.toPath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new BundleDetemplatizeException("Could not read bundle file: " + originalFile.getName(), e);
             }
@@ -46,7 +49,7 @@ interface TemplatizedBundle {
         @Override
         public void writeContents(String content) {
             try {
-                Files.write(newFile.toPath(), content.getBytes());
+                Files.write(newFile.toPath(), Collections.singleton(content), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new BundleDetemplatizeException("Could not write detemplatized bundle to: " + newFile.getName(), e);
             }

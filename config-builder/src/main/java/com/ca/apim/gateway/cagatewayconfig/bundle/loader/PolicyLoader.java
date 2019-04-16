@@ -8,19 +8,17 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.GLOBAL;
 import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.INTERNAL;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_TAG;
@@ -56,7 +54,7 @@ public class PolicyLoader implements BundleEntityLoader {
         final String id = policyDetails.getAttribute(ATTRIBUTE_ID);
         final String folderId = policyDetails.getAttribute(ATTRIBUTE_FOLDER_ID);
         Element nameElement = getSingleChildElement(policyDetails, NAME);
-        final String name = nameElement.getTextContent();
+        final String name = CharacterBlacklistUtil.filterAndReplace(nameElement.getTextContent());
 
         final Element resources = getSingleChildElement(policyElement, RESOURCES);
         final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
@@ -77,26 +75,20 @@ public class PolicyLoader implements BundleEntityLoader {
         policy.setPolicyDocument(policyElement);
         policy.setPolicyXML(policyString);
 
+        Map<String, Policy> bundlePolicies = bundle.getPolicies();
+
+        if (bundlePolicies.containsKey(policy.getPath())) {
+            String duplicatePathName = handleDuplicatePathName(bundlePolicies, policy);
+            policy.setName(duplicatePathName.substring(duplicatePathName.lastIndexOf('/') + 1));
+            policy.setPath(duplicatePathName);
+        }
+
         bundle.getPolicies().put(policy.getPath(), policy);
         if (type == GLOBAL) {
             bundle.getEntities(GlobalPolicy.class).put(policy.getPath(), (GlobalPolicy) policy);
         } else if (type == INTERNAL && firstNonNull(policyTag, EMPTY).startsWith("audit")) {
             bundle.getEntities(AuditPolicy.class).put(policy.getPath(), (AuditPolicy) policy);
         }
-    }
-
-    private String getPath(Folder parentFolder, String name) {
-        return PathUtils.unixPath(Paths.get(parentFolder.getPath()).resolve(name));
-    }
-
-    private Folder getFolder(Bundle bundle, String folderId) {
-        List<Folder> folderList = bundle.getFolders().values().stream().filter(f -> folderId.equals(f.getId())).collect(Collectors.toList());
-        if (folderList.isEmpty()) {
-            throw new BundleLoadException("Invalid dependency bundle. Could not find folder with id: " + folderId);
-        } else if (folderList.size() > 1) {
-            throw new BundleLoadException("Invalid dependency bundle. Found multiple folders with id: " + folderId);
-        }
-        return folderList.get(0);
     }
 
     @Override

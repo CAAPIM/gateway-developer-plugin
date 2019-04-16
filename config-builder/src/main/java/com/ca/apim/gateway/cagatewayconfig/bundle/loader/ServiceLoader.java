@@ -12,7 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.string.EncodeDecodeUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -21,6 +21,7 @@ import org.w3c.dom.NodeList;
 import javax.inject.Singleton;
 import java.util.*;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
@@ -31,13 +32,12 @@ public class ServiceLoader implements BundleEntityLoader {
     @Override
     public void load(Bundle bundle, Element element) {
         final Element service = getSingleChildElement(getSingleChildElement(element, RESOURCE), SERVICE);
-        final String servicePath = getSingleChildElement(element, NAME).getTextContent();
 
         final Element serviceDetails = getSingleChildElement(service, SERVICE_DETAIL);
         final String id = serviceDetails.getAttribute(ATTRIBUTE_ID);
         final String folderId = serviceDetails.getAttribute(ATTRIBUTE_FOLDER_ID);
         Element nameElement = getSingleChildElement(serviceDetails, NAME);
-        final String name = EncodeDecodeUtils.encodePath(nameElement.getTextContent());
+        final String name = CharacterBlacklistUtil.filterAndReplace(nameElement.getTextContent());
 
         Element servicePropertiesElement = getSingleChildElement(serviceDetails, PROPERTIES);
         Map<String, Object> allProperties = BuilderUtils.mapPropertiesElements(servicePropertiesElement, PROPERTIES);
@@ -46,11 +46,12 @@ public class ServiceLoader implements BundleEntityLoader {
         populateServiceEntity(service, serviceEntity, allProperties, properties);
         boolean isSoapService = serviceEntity.getWsdl() != null;
 
+        Folder parentFolder = getFolder(bundle, folderId);
+
         serviceEntity.setName(name);
         serviceEntity.setId(id);
-        Folder folder = new Folder();
-        folder.setId(folderId);
-        serviceEntity.setParentFolder(folder);
+        serviceEntity.setPath(getPath(parentFolder, name));
+        serviceEntity.setParentFolder(parentFolder);
         serviceEntity.setServiceDetailsElement(serviceDetails);
 
         Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);
@@ -77,7 +78,15 @@ public class ServiceLoader implements BundleEntityLoader {
         serviceEntity.setHttpMethods(httpMethods);
         serviceEntity.setProperties(properties);
 
-        bundle.getServices().put(servicePath, serviceEntity);
+        Map<String, Service> bundleService = bundle.getServices();
+
+        if (bundleService.containsKey(serviceEntity.getPath())) {
+            String duplicatePathName = handleDuplicatePathName(bundleService, serviceEntity);
+            serviceEntity.setName(duplicatePathName.substring(duplicatePathName.lastIndexOf('/') + 1));
+            serviceEntity.setPath(duplicatePathName);
+        }
+
+        bundleService.put(serviceEntity.getPath(), serviceEntity);
     }
 
     private void populateServiceEntity(Element service, Service serviceEntity, Map<String, Object> allProperties, Map<String, Object> properties) {
