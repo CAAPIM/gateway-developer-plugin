@@ -26,8 +26,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public class CAGatewayDeveloper implements Plugin<Project> {
 
-    static final String BUNDLE_FILE_EXTENSION = "bundle";
-
+    private static final String BUNDLE_FILE_EXTENSION = "bundle";
     private static final String BUNDLE_CONFIGURATION = "bundle";
     private static final String MODULAR_ASSERTION_CONFIGURATION = "assertion";
     private static final String CUSTOM_ASSERTION_CONFIGURATION = "customassertion";
@@ -142,18 +141,19 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // add the deployment bundle to the default artifacts
         project.artifacts(artifactHandler -> addBundleArtifact(artifactHandler, packageGW7Task.getBundle(), buildDeploymentBundleTask, project::getName, "deployment"));
         // set the deployment bundle path as a project property to be consumed by publishing projects
-//        project.afterEvaluate(p -> project.getExtensions().add("deployment-bundle-file", new File(buildDeploymentBundleTask.getInto().getAsFile().get(), buildDeploymentBundleTask.getBundleFileName()).toString()));
+        project.afterEvaluate(p -> project.getExtensions().add("deployment-bundle-file", new File(buildDeploymentBundleTask.getInto().getAsFile().get(), getBuiltArtifactName(project, EMPTY, BUNDLE_FILE_EXTENSION)).toString()));
 
         // add the environment bundle to the artifacts only if the environment bundle task was triggered
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_ENVIRONMENT_BUNDLE)) {
+            String artifactName = getBuiltArtifactName(project, "-environment", BUNDLE_FILE_EXTENSION);
             project.artifacts(artifactHandler -> addBundleArtifact(
                 artifactHandler,
-                pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, "-environment", BUNDLE_FILE_EXTENSION))),
+                pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> artifactName)),
                 buildEnvironmentBundleTask,
                 project::getName,
                 "environment"));
             // set the env bundle as property as well
-//            project.afterEvaluate(p -> project.getExtensions().add("environment-bundle-file", new File(buildEnvironmentBundleTask.getInto().getAsFile().get(), buildEnvironmentBundleTask.getBundleFileName()).toString()));
+            project.afterEvaluate(p -> project.getExtensions().add("environment-bundle-file", new File(buildEnvironmentBundleTask.getInto().getAsFile().get(), artifactName).toString()));
         }
         // add the full bundle to the artifacts only if the full bundle task was triggered
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_FULL_BUNDLE)) {
@@ -164,7 +164,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                     project::getName,
                     "full"));
             // and the full bundle as property too
-//            project.afterEvaluate(p -> project.getExtensions().add("full-bundle-file", buildFullBundleTask.getOutputBundle().getAsFile().get().toString()));
+            project.afterEvaluate(p -> project.getExtensions().add("full-bundle-file", buildFullBundleTask.getOutputBundle().getAsFile().get().toString()));
         }
     }
 

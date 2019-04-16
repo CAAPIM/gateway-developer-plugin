@@ -18,7 +18,6 @@ import org.gradle.api.tasks.TaskAction;
 import javax.inject.Inject;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.CAGatewayDeveloper.BUNDLE_FILE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -31,14 +30,12 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     private final DirectoryProperty into;
     private final Property<Map> environmentConfig;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
-    private final String bundleFileName;
 
     @Inject
     public BuildEnvironmentBundleTask() {
         into = newOutputDirectory();
         environmentConfig = getProject().getObjects().property(Map.class);
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
-        bundleFileName = getProject().getName() + '-' + getProject().getVersion() + "-environment." + BUNDLE_FILE_EXTENSION;
     }
 
     @OutputDirectory
@@ -65,9 +62,5 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
                 PLUGIN,
                 bundleFileName
         );
-    }
-
-    public String getBundleFileName() {
-        return bundleFileName;
     }
 }
