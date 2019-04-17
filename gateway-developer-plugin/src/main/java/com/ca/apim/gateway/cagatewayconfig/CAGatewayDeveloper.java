@@ -26,10 +26,10 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public class CAGatewayDeveloper implements Plugin<Project> {
 
-    private static final String BUNDLE_FILE_EXTENSION = "bundle";
     private static final String BUNDLE_CONFIGURATION = "bundle";
     private static final String MODULAR_ASSERTION_CONFIGURATION = "assertion";
     private static final String CUSTOM_ASSERTION_CONFIGURATION = "customassertion";
+    private static final String BUNDLE_FILE_EXTENSION = "bundle";
     private static final String BUILT_BUNDLE_DIRECTORY = "bundle";
     private static final String GATEWAY_BUILD_DIRECTORY = "gateway";
     private static final String ENV_APPLICATION_CONFIGURATION = "environment-creator-application";
