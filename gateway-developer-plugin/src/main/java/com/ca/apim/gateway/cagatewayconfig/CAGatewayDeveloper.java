@@ -24,6 +24,9 @@ import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
+/**
+ * This is the definition for the developer plugin tasks and operations and properties.
+ */
 public class CAGatewayDeveloper implements Plugin<Project> {
 
     private static final String BUNDLE_CONFIGURATION = "bundle";
