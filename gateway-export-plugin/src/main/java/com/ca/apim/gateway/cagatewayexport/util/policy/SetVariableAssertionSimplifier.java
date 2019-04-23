@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.ContextVariableEnvironmentProperty;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
+import org.apache.commons.text.StringEscapeUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -50,7 +51,8 @@ public class SetVariableAssertionSimplifier implements PolicyAssertionSimplifier
             resultantBundle.getEntities(ContextVariableEnvironmentProperty.class).put(contextVarEnvironmentProperty.getName(), contextVarEnvironmentProperty);
         } else {
             Element expressionElement = element.getOwnerDocument().createElement(EXPRESSION);
-            expressionElement.appendChild(element.getOwnerDocument().createCDATASection(new String(decodedValue)));
+            String value = new String(decodedValue);
+            expressionElement.appendChild(element.getOwnerDocument().createCDATASection(StringEscapeUtils.escapeXml11(value)));
             element.insertBefore(expressionElement, base64ExpressionElement);
         }
         element.removeChild(base64ExpressionElement);

@@ -99,10 +99,42 @@ class PolicyXMLSimplifierTest {
                 );
 
         Element expressionElement = getSingleElement(setVariableAssertion, EXPRESSION);
-        assertEquals("{\r\n" +
-                "                \"error\":\"invalid_method\",\r\n" +
-                "                \"error_description\":\"${request.http.method} not permitted\"\r\n" +
-                "                }", expressionElement.getFirstChild().getTextContent());
+    assertEquals(
+        "{\r\n"
+            + "                &quot;error&quot;:&quot;invalid_method&quot;,\r\n"
+            + "                &quot;error_description&quot;:&quot;${request.http.method} not permitted&quot;\r\n"
+            + "                }",
+        expressionElement.getFirstChild().getTextContent());
+
+        NodeList base64ElementNodes = setVariableAssertion.getElementsByTagName(BASE_64_EXPRESSION);
+        assertEquals(0, base64ElementNodes.getLength());
+    }
+
+    @Test
+    void simplifySetVariableWithXMLContent() throws DocumentParseException {
+        //The default Base64 decoder in java cannot decode this, but the commons-codec decoder can.
+        Element setVariableAssertion = createSetVariableAssertionElement("userSession", "PHVzZXJzZXNzaW9uPgogPHVzZXI+PCFbQ0RBVEFbJHtjdXJyZW50LnVzZXJuYW1lfV1dPjwvdXNlcj4KIDxyb2xlPjwhW0NEQVRBWyR7Y3VycmVudC51c2VyLnJvbGV9XV0+PC9yb2xlPgogPGxvb2t1cFVzZXI+PCFbQ0RBVEFbJHtsb29rdXBVc2VyfV1dPjwvbG9va3VwVXNlcj4KIDxzeW5jaFRva2VuPjwhW0NEQVRBWyR7eHBhdGhTeW5jaFRva2VuLnJlc3VsdH1dXT48L3N5bmNoVG9rZW4+CjwvdXNlcnNlc3Npb24+");
+        String policyName = "policyName";
+
+        Bundle resultantBundle = new Bundle();
+        new SetVariableAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                policyName,
+                                null,
+                                resultantBundle)
+                                .withAssertionElement(setVariableAssertion)
+                );
+
+        Element expressionElement = getSingleElement(setVariableAssertion, EXPRESSION);
+    assertEquals(
+        "&lt;usersession&gt;\n"
+            + " &lt;user&gt;&lt;![CDATA[${current.username}]]&gt;&lt;/user&gt;\n"
+            + " &lt;role&gt;&lt;![CDATA[${current.user.role}]]&gt;&lt;/role&gt;\n"
+            + " &lt;lookupUser&gt;&lt;![CDATA[${lookupUser}]]&gt;&lt;/lookupUser&gt;\n"
+            + " &lt;synchToken&gt;&lt;![CDATA[${xpathSynchToken.result}]]&gt;&lt;/synchToken&gt;\n"
+            + "&lt;/usersession&gt;",
+        expressionElement.getFirstChild().getTextContent());
 
         NodeList base64ElementNodes = setVariableAssertion.getElementsByTagName(BASE_64_EXPRESSION);
         assertEquals(0, base64ElementNodes.getLength());

@@ -20,4 +20,5 @@ dependencies {
     compile 'org.reflections:reflections:0.9.11'
     compile 'org.apache.httpcomponents:httpclient:4.5.5'
     runtime 'org.slf4j:slf4j-simple:1.7.25'
+    compile 'org.apache.commons:commons-text:1.6'
 }
