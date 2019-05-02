@@ -91,7 +91,7 @@ class FolderEntityBuilderTest {
             Folder folder = bundle.getFolders().get(k);
             assertNotNull(folder);
             if (k.equals(EMPTY)) {
-                assertEquals(folder.getName(), Folder.ROOT_FOLDER_NAME);
+                assertEquals(Folder.ROOT_FOLDER_NAME, folder.getName());
             } else {
                 assertEquals(folder.getName(), CharacterBlacklistUtil.filterAndReplace(k.substring(k.lastIndexOf('/') + 1)));
             }
