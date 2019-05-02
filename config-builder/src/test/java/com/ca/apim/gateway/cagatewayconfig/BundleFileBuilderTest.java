@@ -10,9 +10,9 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,11 +39,11 @@ class BundleFileBuilderTest {
     @Mock
     BundleEntityBuilder bundleEntityBuilder;
     @Mock
-    EntityBundleLoader entityBundleLoader;
-    @Mock
     DocumentTools documentTools;
     @Mock
     DocumentBuilder documentBuilder;
+    @Mock
+    BundleCache bundleCache;
 
     @BeforeEach
     void beforeEach() {
@@ -52,7 +52,7 @@ class BundleFileBuilderTest {
 
     @Test
     void buildBundleNoSource() {
-        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
+        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
         bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptyList(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
@@ -64,7 +64,7 @@ class BundleFileBuilderTest {
         policy.setName("from-file");
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
-        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
+        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
         bundleFileBuilder.buildBundle(new File("input"), new File("output"), Collections.emptyList(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
