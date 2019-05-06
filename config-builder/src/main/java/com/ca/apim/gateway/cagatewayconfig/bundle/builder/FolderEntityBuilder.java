@@ -37,20 +37,22 @@ public class FolderEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    private Entity buildFolderEntity(String name, String id, String parentFolderId, Document document) {
-        Element folder = createElementWithAttribute(document, FOLDER, ATTRIBUTE_ID, id);
+    private Entity buildFolderEntity(Folder folder, String id, String parentFolderId, Document document) {
+        Element folderElement = createElementWithAttribute(document, FOLDER, ATTRIBUTE_ID, id);
 
         if (parentFolderId != null) {
-            folder.setAttribute(ATTRIBUTE_FOLDER_ID, parentFolderId);
+            folderElement.setAttribute(ATTRIBUTE_FOLDER_ID, parentFolderId);
         }
-        String filteredName = CharacterBlacklistUtil.filterAndReplace(name);
-        folder.appendChild(createElementWithTextContent(document, NAME, filteredName));
+        String filteredName = CharacterBlacklistUtil.filterAndReplace(folder.getName());
+        folderElement.appendChild(createElementWithTextContent(document, NAME, filteredName));
         final Entity entity;
         if (parentFolderId == null) {
             //No need to map root folder by name
-            entity = new Entity(FOLDER_TYPE, filteredName, id, folder);
+            entity = new Entity(FOLDER_TYPE, filteredName, id, folderElement);
         } else {
-            entity = EntityBuilderHelper.getEntityWithNameMapping(FOLDER_TYPE, filteredName, id, folder);
+            String filteredPathName = folder.getPath().replaceAll(folder.getName(), filteredName);
+            entity = EntityBuilderHelper.getEntityWithPathMapping(FOLDER_TYPE, filteredPathName, id, folderElement);
+
         }
         entity.setMappingAction(NEW_OR_EXISTING);
         return entity;
@@ -78,7 +80,7 @@ public class FolderEntityBuilder implements EntityBuilder {
                 f.setId(idGenerator.generate());
             }
             String parentFolderId = f.getParentFolder() != null ? f.getParentFolder().getId() : null;
-            return buildFolderEntity(f.getName(), f.getId(), parentFolderId, document);
+            return buildFolderEntity(f, f.getId(), parentFolderId, document);
         })
                 .collect(Collectors.toList());
     }

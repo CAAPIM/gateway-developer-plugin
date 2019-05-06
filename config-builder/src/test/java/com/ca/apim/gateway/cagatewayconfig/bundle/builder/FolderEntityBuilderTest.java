@@ -90,7 +90,11 @@ class FolderEntityBuilderTest {
 
             Folder folder = bundle.getFolders().get(k);
             assertNotNull(folder);
-            assertEquals(folder.getName(), CharacterBlacklistUtil.filterAndReplace(entity.getName()));
+            if (k.equals(EMPTY)) {
+                assertEquals(Folder.ROOT_FOLDER_NAME, folder.getName());
+            } else {
+                assertEquals(folder.getName(), CharacterBlacklistUtil.filterAndReplace(k.substring(k.lastIndexOf('/') + 1)));
+            }
             assertNotNull(entity.getId());
             assertNotNull(entity.getXml());
             assertEquals(EntityTypes.FOLDER_TYPE, entity.getType());
@@ -109,7 +113,7 @@ class FolderEntityBuilderTest {
         Folder folder2 = createFolder(FOLDER_2, FOLDER_2, root);
         Folder folder3 = createFolder(FOLDER_3, FOLDER_3, folder2);
 
-        return ImmutableMap.of(FOLDER_1, folder1, FOLDER_2, folder2, FOLDER_3, folder3);
+        return ImmutableMap.of(folder1.getPath(), folder1, folder2.getPath(), folder2, folder3.getPath(), folder3);
     }
 
 }

@@ -10,20 +10,23 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -39,11 +42,11 @@ class BundleFileBuilderTest {
     @Mock
     BundleEntityBuilder bundleEntityBuilder;
     @Mock
-    EntityBundleLoader entityBundleLoader;
-    @Mock
     DocumentTools documentTools;
     @Mock
     DocumentBuilder documentBuilder;
+    @Mock
+    BundleCache bundleCache;
 
     @BeforeEach
     void beforeEach() {
@@ -52,7 +55,7 @@ class BundleFileBuilderTest {
 
     @Test
     void buildBundleNoSource() {
-        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
+        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
         bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptyList(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
@@ -64,10 +67,26 @@ class BundleFileBuilderTest {
         policy.setName("from-file");
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
-        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, entityBundleLoader);
+        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
         bundleFileBuilder.buildBundle(new File("input"), new File("output"), Collections.emptyList(), "my-bundle");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
+    }
+
+    @Test
+    void buildBundleWithDependency() {
+        Policy policy = new Policy();
+        policy.setName("from-file");
+        when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
+
+        List<File> dummyList = new ArrayList<>();
+        dummyList.add(new File("test"));
+        when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
+
+        BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache));
+        bundleFileBuilder.buildBundle(new File("input"), new File("output"), dummyList, "my-bundle");
+
+        verify(bundleFileBuilder, Mockito.times(2)).logOverriddenEntities(any(Bundle.class), any(), any());
     }
 
     static class TestPolicyLoader implements EntityLoader {

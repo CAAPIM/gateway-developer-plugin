@@ -293,6 +293,11 @@ public class TestUtils {
         folder.setName(folderName);
         folder.setId(folderId);
         folder.setParentFolder(parent);
+        if (parent == null) {
+            folder.setPath(folderName);
+        } else {
+            folder.setPath(parent.getPath() + "/" + folder.getName());
+        }
         return folder;
     }
 }

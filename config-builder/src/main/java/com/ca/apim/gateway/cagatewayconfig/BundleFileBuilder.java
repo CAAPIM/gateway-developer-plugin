@@ -7,12 +7,15 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
+import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
@@ -25,6 +28,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -33,20 +38,22 @@ class BundleFileBuilder {
     private final DocumentFileUtils documentFileUtils;
     private final EntityLoaderRegistry entityLoaderRegistry;
     private final BundleEntityBuilder bundleEntityBuilder;
-    private final EntityBundleLoader entityBundleLoader;
+    private final BundleCache cache;
     private final DocumentTools documentTools;
+
+    private static final Logger LOGGER = Logger.getLogger(BundleFileBuilder.class.getName());
 
     @Inject
     BundleFileBuilder(final DocumentTools documentTools,
                       final DocumentFileUtils documentFileUtils,
                       final EntityLoaderRegistry entityLoaderRegistry,
                       final BundleEntityBuilder bundleEntityBuilder,
-                      final EntityBundleLoader entityBundleLoader) {
+                      final BundleCache cache) {
         this.documentFileUtils = documentFileUtils;
         this.documentTools = documentTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
         this.bundleEntityBuilder = bundleEntityBuilder;
-        this.entityBundleLoader = entityBundleLoader;
+        this.cache = cache;
     }
 
     void buildBundle(File rootDir, File outputDir, List<File> dependencies, String name) {
@@ -64,15 +71,30 @@ class BundleFileBuilder {
             FolderLoaderUtils.createFolders(bundle, rootDir, bundle.getServices());
 
             //Load Dependencies
-            // Improvements can be made here by doing this loading in a separate task and caching the intermediate results.
-            // That way the dependent bundles are not re-processed on every new build
-            final Set<Bundle> dependencyBundles = dependencies.stream().map(entityBundleLoader::load).collect(Collectors.toSet());
+            final Set<Bundle> dependencyBundles = dependencies.stream().map(cache::getBundleFromFile).collect(Collectors.toSet());
+
+            // Log overridden entities
+            if (!dependencyBundles.isEmpty()) {
+                logOverriddenEntities(bundle, dependencyBundles, Service.class);
+                logOverriddenEntities(bundle, dependencyBundles, Policy.class);
+            }
+
             bundle.setDependencies(dependencyBundles);
         }
 
         //Zip
         Element bundleElement = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document);
         documentFileUtils.createFile(bundleElement, new File(outputDir, name + ".bundle").toPath());
+    }
+
+    protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entityClass) {
+        bundle.getEntities(entityClass).keySet().forEach(entityName ->
+            dependencyBundles.forEach(dependencyBundle -> {
+                if (dependencyBundle.getEntities(entityClass).containsKey(entityName)) {
+                    LOGGER.log(Level.INFO,"{0} policy will be overwritten by local version", entityName);
+                }
+            })
+        );
     }
 
 
