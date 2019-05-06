@@ -87,10 +87,10 @@ class BundleFileBuilder {
         documentFileUtils.createFile(bundleElement, new File(outputDir, name + ".bundle").toPath());
     }
 
-    protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entity) {
-        bundle.getEntities(entity).keySet().forEach(entityName ->
+    protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entityClass) {
+        bundle.getEntities(entityClass).keySet().forEach(entityName ->
             dependencyBundles.forEach(dependencyBundle -> {
-                if (dependencyBundle.getEntities(entity).containsKey(entityName)) {
+                if (dependencyBundle.getEntities(entityClass).containsKey(entityName)) {
                     LOGGER.log(Level.INFO,"{0} policy will be overwritten by local version", entityName);
                 }
             })
