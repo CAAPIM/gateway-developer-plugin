@@ -6,21 +6,16 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xmlunit.builder.Input;
-import org.xmlunit.input.WhitespaceStrippedSource;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.stream.Stream;
@@ -35,7 +30,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.nodeLis
 import static java.util.stream.Collectors.toCollection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.xmlunit.matchers.CompareMatcher.isIdenticalTo;
 
 @ExtendWith(TemporaryFolderExtension.class)
 class DependencyBundlesProcessorTest {
