@@ -1,0 +1,51 @@
+<l7:Bundle xmlns:l7="http://ns.l7tech.com/2010/04/gateway-management">
+    <l7:References>
+        <l7:Item>
+            <l7:Name>Root Node</l7:Name>
+            <l7:Id>0000000000000000ffffffffffffec76</l7:Id>
+            <l7:Type>FOLDER</l7:Type>
+            <l7:Resource>
+                <l7:Folder id="0000000000000000ffffffffffffec76">
+                    <l7:Name>Root Node</l7:Name>
+                </l7:Folder>
+            </l7:Resource>
+        </l7:Item>
+        <l7:Item>
+            <l7:Name>Test Policy Using Test Encass 1</l7:Name>
+            <l7:Id>d642a9f6d8d5a46cdc96cb1cc0261377</l7:Id>
+            <l7:Type>POLICY</l7:Type>
+            <l7:Resource>
+                <l7:Policy guid="d90986f3-a396-4597-816b-c18279ca11fb" id="d642a9f6d8d5a46cdc96cb1cc0261377">
+                    <l7:PolicyDetail folderId="0000000000000000ffffffffffffec76" guid="d90986f3-a396-4597-816b-c18279ca11fb" id="d642a9f6d8d5a46cdc96cb1cc0261377">
+                        <l7:Name>Test Policy Using Test Encass 1</l7:Name>
+                        <l7:PolicyType>Include</l7:PolicyType>
+                    </l7:PolicyDetail>
+                    <l7:Resources>
+                        <l7:ResourceSet tag="policy">
+                            <l7:Resource type="policy">
+                                &lt;wsp:Policy xmlns:wsp="http://schemas.xmlsoap.org/ws/2002/12/policy" xmlns:L7p="http://www.layer7tech.com/ws/policy"&gt;
+                                &lt;wsp:All wsp:Usage="Required"&gt;
+                                &lt;L7p:Encapsulated&gt;
+                                &lt;L7p:EncapsulatedAssertionConfigGuid stringValue="00000000-0000-0000-0000-000000000000"/&gt;
+                                &lt;L7p:EncapsulatedAssertionConfigName stringValue="Test Encass 1"/&gt;
+                                &lt;L7p:Parameters mapValue="included"&gt;
+                                &lt;L7p:entry&gt;
+                                &lt;L7p:key stringValue="input"/&gt;
+                                &lt;L7p:value stringValue=""/&gt;
+                                &lt;/L7p:entry&gt;
+                                &lt;/L7p:Parameters&gt;
+                                &lt;/L7p:Encapsulated&gt;
+                                &lt;/wsp:All&gt;
+                                &lt;/wsp:Policy&gt;
+                            </l7:Resource>
+                        </l7:ResourceSet>
+                    </l7:Resources>
+                </l7:Policy>
+            </l7:Resource>
+        </l7:Item>
+    </l7:References>
+    <l7:Mappings>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000ffffffffffffec76" type="FOLDER"/>
+        <l7:Mapping action="NewOrExisting" srcId="b5f856df483ce1c5362a9ab401fb9161" type="ENCAPSULATED_ASSERTION"/>
+    </l7:Mappings>
+</l7:Bundle>

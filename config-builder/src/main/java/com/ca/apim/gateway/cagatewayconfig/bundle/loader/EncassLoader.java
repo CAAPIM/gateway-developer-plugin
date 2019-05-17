@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingMode.PERMISSIVE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.POLICY_GUID_PROP;
@@ -54,9 +55,13 @@ public class EncassLoader implements BundleEntityLoader {
 
     private String getPath(Bundle bundle, String policyId) {
         List<Policy> policyList = bundle.getPolicies().values().stream().filter(p -> policyId.equals(p.getId())).collect(Collectors.toList());
+        if ((policyList.isEmpty() || policyList.size() > 1) && bundle.getLoadingMode() == PERMISSIVE) {
+            return null;
+        }
         if (policyList.isEmpty()) {
             throw new BundleLoadException("Invalid dependency bundle. Could not find policy with id: " + policyId);
-        } else if (policyList.size() > 1) {
+        }
+        if (policyList.size() > 1) {
             throw new BundleLoadException("Invalid dependency bundle. Found multiple policies with id: " + policyId);
         }
         return policyList.get(0).getPath();

@@ -1,0 +1,33 @@
+<l7:Bundle xmlns:l7="http://ns.l7tech.com/2010/04/gateway-management">
+    <l7:References>
+        <l7:Item>
+            <l7:Name>Test Encass 1</l7:Name>
+            <l7:Id>b5f856df483ce1c5362a9ab401fb9161</l7:Id>
+            <l7:Type>ENCAPSULATED_ASSERTION</l7:Type>
+            <l7:Resource>
+                <l7:EncapsulatedAssertion id="b5f856df483ce1c5362a9ab401fb9161">
+                    <l7:Name>Test Encass 1</l7:Name>
+                    <l7:Guid>283e93c6-9cf6-46f1-a34a-cf333bf4f1c3</l7:Guid>
+                    <l7:PolicyReference id="b5f856df483ce1c5362a9ab401fb9133"/>
+                    <l7:EncapsulatedArguments>
+                        <l7:EncapsulatedAssertionArgument>
+                            <l7:Ordinal>1</l7:Ordinal>
+                            <l7:ArgumentName>input</l7:ArgumentName>
+                            <l7:ArgumentType>string</l7:ArgumentType>
+                            <l7:GuiPrompt>false</l7:GuiPrompt>
+                        </l7:EncapsulatedAssertionArgument>
+                    </l7:EncapsulatedArguments>
+                    <l7:EncapsulatedResults>
+                        <l7:EncapsulatedAssertionResult>
+                            <l7:ResultName>result</l7:ResultName>
+                            <l7:ResultType>string</l7:ResultType>
+                        </l7:EncapsulatedAssertionResult>
+                    </l7:EncapsulatedResults>
+                </l7:EncapsulatedAssertion>
+            </l7:Resource>
+        </l7:Item>
+    </l7:References>
+    <l7:Mappings>
+        <l7:Mapping action="NewOrExisting" srcId="b5f856df483ce1c5362a9ab401fb9161" type="ENCAPSULATED_ASSERTION"/>
+    </l7:Mappings>
+</l7:Bundle>

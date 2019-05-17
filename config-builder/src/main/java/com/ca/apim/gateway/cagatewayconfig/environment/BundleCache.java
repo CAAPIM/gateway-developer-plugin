@@ -1,6 +1,7 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingMode;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 
 import javax.inject.Inject;
@@ -34,7 +35,7 @@ public class BundleCache {
 
     public Bundle getBundleFromFile(File file) {
         if (!cache.containsValue(file.getPath())) {
-            cache.put(file.getPath(), entityBundleLoader.load(file));
+            cache.put(file.getPath(), entityBundleLoader.load(file, BundleLoadingMode.STRICT));
         }
         return cache.get(file.getPath());
     }

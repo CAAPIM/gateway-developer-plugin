@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.ITEM;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static org.apache.commons.lang3.ArrayUtils.contains;
+import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
 @Singleton
 public class EntityBundleLoader {
@@ -38,21 +40,23 @@ public class EntityBundleLoader {
         this.entityLoaderRegistry = entityLoaderRegistry;
     }
 
-    public Bundle load(List<File> fileSet) {
+    public Bundle load(List<File> fileSet, BundleLoadingMode loadingMode, String... entityTypes) {
         final Bundle bundle = new Bundle();
-        fileSet.forEach(f -> loadBundleFile(f, bundle));
+        fileSet.forEach(f -> loadBundleFile(f, bundle, loadingMode, entityTypes));
         return bundle;
     }
 
-    public Bundle load(File dependencyBundlePath) {
+    public Bundle load(File dependencyBundlePath, BundleLoadingMode loadingMode, String... entityTypes) {
         final Bundle bundle = new Bundle();
 
-        loadBundleFile(dependencyBundlePath, bundle);
+        loadBundleFile(dependencyBundlePath, bundle, loadingMode, entityTypes);
 
         return bundle;
     }
 
-    private void loadBundleFile(File dependencyBundlePath, Bundle bundle) {
+    private void loadBundleFile(File dependencyBundlePath, Bundle bundle, BundleLoadingMode loadingMode, String... entityTypes) {
+        bundle.setLoadingMode(loadingMode);
+
         final Document bundleDocument;
         try {
             bundleDocument = documentTools.parse(dependencyBundlePath);
@@ -65,13 +69,17 @@ public class EntityBundleLoader {
             final Node node = nodeList.item(i);
 
             if (node.getNodeType() == Node.ELEMENT_NODE) {
-                handleItem(bundle, (Element) node);
+                handleItem(bundle, (Element) node, entityTypes);
             }
         }
     }
 
-    private void handleItem(Bundle bundle, final Element element) {
+    private void handleItem(Bundle bundle, final Element element, String[] entityTypes) {
         final String type = getSingleChildElement(element, TYPE).getTextContent();
+        if (isNotEmpty(entityTypes) && !contains(entityTypes, type)) {
+            return;
+        }
+
         final BundleEntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
         if (entityLoader != null) {
             entityLoader.load(bundle, element);

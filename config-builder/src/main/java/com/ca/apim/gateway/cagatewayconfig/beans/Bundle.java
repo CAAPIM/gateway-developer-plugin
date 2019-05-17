@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingMode;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,6 +28,7 @@ public class Bundle {
     private Set<Bundle> dependencies;
     private FolderTree folderTree;
     private Map<Dependency, List<Dependency>> dependencyMap;
+    private BundleLoadingMode loadingMode;
 
     @SuppressWarnings("unchecked")
     public <E extends GatewayEntity> Map<String, E> getEntities(Class<E> entityType) {
@@ -228,5 +230,13 @@ public class Bundle {
 
     public void setDependencyMap(Map<Dependency, List<Dependency>> dependencyMap) {
         this.dependencyMap = dependencyMap;
+    }
+
+    public BundleLoadingMode getLoadingMode() {
+        return loadingMode;
+    }
+
+    public void setLoadingMode(BundleLoadingMode loadingMode) {
+        this.loadingMode = loadingMode;
     }
 }
