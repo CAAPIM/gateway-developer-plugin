@@ -77,7 +77,6 @@ class DependencyBundlesProcessorTest {
 
         File bundle1 = processed.get(0);
         assertEquals(destinationFolder.toString() + File.separator + TEST_1_BUNDLE, bundle1.toString());
-        assertXMLsEqual(new String(bundle1Contents), FileUtils.readFileToString(bundle1, Charset.defaultCharset())); // bundle 1 should have no change
 
         File bundle2 = processed.get(1);
         assertEquals(destinationFolder.toString() + File.separator + TEST_2_BUNDLE, bundle2.toString());
@@ -124,7 +123,6 @@ class DependencyBundlesProcessorTest {
 
         File bundle3 = processed.get(1);
         assertEquals(destinationFolder.toString() + File.separator + TEST_3_BUNDLE, bundle3.toString());
-        assertXMLsEqual(new String(bundle3Contents), FileUtils.readFileToString(bundle3, Charset.defaultCharset())); // bundle 3 should have no change
 
         File bundle2 = processed.get(0);
         assertEquals(destinationFolder.toString() + File.separator + TEST_2_BUNDLE, bundle2.toString());
@@ -145,9 +143,4 @@ class DependencyBundlesProcessorTest {
 
         assertEquals(ZERO_GUID, guid);
     }
-
-    private static void assertXMLsEqual(String xml1, String xml2) {
-        Assert.assertThat(xml1, isIdenticalTo(Input.from(xml2).build()));
-    }
-
 }
