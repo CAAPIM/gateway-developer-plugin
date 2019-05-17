@@ -8,12 +8,15 @@ import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xmlunit.builder.Input;
+import org.xmlunit.input.WhitespaceStrippedSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +35,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.nodeLis
 import static java.util.stream.Collectors.toCollection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.xmlunit.matchers.CompareMatcher.isIdenticalTo;
 
 @ExtendWith(TemporaryFolderExtension.class)
 class DependencyBundlesProcessorTest {
@@ -73,7 +77,7 @@ class DependencyBundlesProcessorTest {
 
         File bundle1 = processed.get(0);
         assertEquals(destinationFolder.toString() + File.separator + TEST_1_BUNDLE, bundle1.toString());
-        assertEquals(new String(bundle1Contents).trim(), FileUtils.readFileToString(bundle1, Charset.defaultCharset()).trim()); // bundle 1 should have no change
+        assertXMLsEqual(new String(bundle1Contents), FileUtils.readFileToString(bundle1, Charset.defaultCharset())); // bundle 1 should have no change
 
         File bundle2 = processed.get(1);
         assertEquals(destinationFolder.toString() + File.separator + TEST_2_BUNDLE, bundle2.toString());
@@ -120,7 +124,7 @@ class DependencyBundlesProcessorTest {
 
         File bundle3 = processed.get(1);
         assertEquals(destinationFolder.toString() + File.separator + TEST_3_BUNDLE, bundle3.toString());
-        assertEquals(new String(bundle3Contents).trim(), FileUtils.readFileToString(bundle3, Charset.defaultCharset()).trim()); // bundle 3 should have no change
+        assertXMLsEqual(new String(bundle3Contents), FileUtils.readFileToString(bundle3, Charset.defaultCharset())); // bundle 3 should have no change
 
         File bundle2 = processed.get(0);
         assertEquals(destinationFolder.toString() + File.separator + TEST_2_BUNDLE, bundle2.toString());
@@ -140,6 +144,10 @@ class DependencyBundlesProcessorTest {
         String guid = guids.item(0).getAttributes().getNamedItem(STRING_VALUE).getTextContent();
 
         assertEquals(ZERO_GUID, guid);
+    }
+
+    private static void assertXMLsEqual(String xml1, String xml2) {
+        Assert.assertThat(xml1, isIdenticalTo(Input.from(xml2).build()));
     }
 
 }
