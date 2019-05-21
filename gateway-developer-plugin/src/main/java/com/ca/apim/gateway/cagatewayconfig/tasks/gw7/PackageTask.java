@@ -6,7 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.tasks.gw7;
 
+import com.ca.apim.gateway.cagatewayconfig.util.bundle.DependencyBundlesProcessor;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionProvider;
+import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
@@ -36,6 +39,7 @@ public class PackageTask extends DefaultTask {
 
     private final FileUtils fileUtils;
     private final GW7Builder gw7Builder;
+    private final DependencyBundlesProcessor dependencyBundlesProcessor;
 
     /**
      * Creates a new BuildBundle task to build a bundle from local source files
@@ -55,6 +59,7 @@ public class PackageTask extends DefaultTask {
 
         this.fileUtils = fileUtils;
         this.gw7Builder = gw7Builder;
+        this.dependencyBundlesProcessor = InjectionRegistry.getInstance(DependencyBundlesProcessor.class);
     }
 
     @InputFile
@@ -89,7 +94,7 @@ public class PackageTask extends DefaultTask {
 
     @TaskAction
     public void perform() {
-        Packager packager = new Packager(fileUtils, gw7Builder);
+        Packager packager = new Packager(fileUtils, gw7Builder, dependencyBundlesProcessor);
         final Set<File> bundleDependencies = dependencyBundles.getAsFileTree().getFiles();
 
         packager.buildPackage(

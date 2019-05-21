@@ -2,6 +2,7 @@ package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingMode;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ class BundleCacheTest {
         Bundle bundle = new Bundle();
         bundle.getPolicies().put(policy.getPath(), policy);
 
-        when(entityBundleLoader.load(file)).thenReturn(bundle);
+        when(entityBundleLoader.load(file, BundleLoadingMode.STRICT)).thenReturn(bundle);
 
         BundleCache cache = new BundleCache(entityBundleLoader);
         cache.getBundleFromFile(file);

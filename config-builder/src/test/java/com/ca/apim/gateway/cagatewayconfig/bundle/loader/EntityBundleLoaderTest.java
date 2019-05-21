@@ -7,10 +7,6 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.CassandraConnectionsLoader;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.JdbcConnectionLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -81,7 +77,7 @@ class EntityBundleLoaderTest {
         when(documentTools.parse(any(File.class))).thenReturn(mockDocument);
 
         EntityBundleLoader loader = new EntityBundleLoader(documentTools, registry);
-        final Bundle bundle = loader.load(mock(File.class));
+        final Bundle bundle = loader.load(mock(File.class), BundleLoadingMode.STRICT);
 
         assertNotNull(bundle);
         assertFalse(bundle.getCassandraConnections().isEmpty());
@@ -93,7 +89,7 @@ class EntityBundleLoaderTest {
     @Test
     void tryLoadParseException() throws DocumentParseException {
         when(documentTools.parse(any(File.class))).thenThrow(DocumentParseException.class);
-        assertThrows(BundleLoadException.class, () -> new EntityBundleLoader(documentTools, registry).load(mock(File.class)));
+        assertThrows(BundleLoadException.class, () -> new EntityBundleLoader(documentTools, registry).load(mock(File.class), BundleLoadingMode.STRICT));
     }
 
 }

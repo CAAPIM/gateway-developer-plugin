@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingMode;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -50,8 +51,8 @@ public class EnvironmentBundleUtils {
         } else {
             EntityBundleLoader loader = InjectionRegistry.getInjector().getInstance(EntityBundleLoader.class);
             List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath, BUNDLE_EXTENSION);
-            cache.putBundle(templatizedBundlesFolderPath, loader.load(deploymentBundleFiles));
-            return loader.load(deploymentBundleFiles);
+            cache.putBundle(templatizedBundlesFolderPath, loader.load(deploymentBundleFiles, BundleLoadingMode.STRICT));
+            return loader.load(deploymentBundleFiles, BundleLoadingMode.STRICT);
         }
     }
 

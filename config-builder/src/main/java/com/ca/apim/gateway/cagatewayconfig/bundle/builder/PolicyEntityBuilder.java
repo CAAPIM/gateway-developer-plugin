@@ -39,6 +39,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.IterableUtils.first;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Singleton
@@ -51,9 +52,9 @@ public class PolicyEntityBuilder implements EntityBuilder {
     static final String ENCASS_NAME = "encassName";
     static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
     private static final String TYPE = "type";
-    private static final String POLICY = "policy";
     private static final Integer ORDER = 200;
-    static final String ZERO_GUID = "00000000-0000-0000-0000-000000000000";
+    public static final String POLICY = "policy";
+    public static final String ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 
     private final DocumentTools documentTools;
 
@@ -98,12 +99,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private void preparePolicy(Policy policy, Bundle bundle) {
-        Document policyDocument;
-        try {
-            policyDocument = stringToXMLDocument(documentTools, policy.getPolicyXML());
-        } catch (DocumentParseException e) {
-            throw new EntityBuilderException("Could not load policy: " + e.getMessage(), e);
-        }
+        Document policyDocument = loadPolicyDocument(policy);
         Element policyElement = policyDocument.getDocumentElement();
 
         prepareAssertion(policyElement, PolicyXMLElements.INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
@@ -112,6 +108,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
         policy.setPolicyDocument(policyElement);
+    }
+
+    private Document loadPolicyDocument(Policy policy) {
+        Document policyDocument;
+        try {
+            policyDocument = stringToXMLDocument(documentTools, policy.getPolicyXML());
+        } catch (DocumentParseException e) {
+            throw new EntityBuilderException("Could not load policy: " + e.getMessage(), e);
+        }
+        return policyDocument;
     }
 
     @VisibleForTesting
@@ -169,6 +175,34 @@ public class PolicyEntityBuilder implements EntityBuilder {
             }
         }
         return StringEscapeUtils.unescapeXml(content.toString());
+    }
+
+    public static void resolvePossibleMissingEncapsulatedAssertionDependencies(Bundle bundle, Element encapsulatedAssertionElement) {
+        Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
+        if (guidElement == null) {
+            return;
+        }
+
+        Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
+        if (nameElement == null) {
+            return;
+        }
+
+        String guid = guidElement.getAttribute(STRING_VALUE);
+        if (!ZERO_GUID.equals(guid)) {
+            return;
+        }
+
+        String name = nameElement.getAttribute(STRING_VALUE);
+        List<Encass> encasses = bundle.getEncasses().values().stream().filter(e -> name.equals(e.getName())).collect(toList());
+        if (encasses.isEmpty()) {
+            return;
+        }
+        if (encasses.size() > 1) {
+            throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
+        }
+        Encass encass = first(encasses);
+        guidElement.setAttribute(STRING_VALUE, encass.getGuid());
     }
 
     @VisibleForTesting

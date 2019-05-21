@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.tasks.gw7;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.gw7.GW7Builder.PackageFile;
+import com.ca.apim.gateway.cagatewayconfig.util.bundle.DependencyBundlesProcessor;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
@@ -39,10 +40,12 @@ class Packager {
 
     private final GW7Builder gw7Builder;
     private final FileUtils fileUtils;
+    private final DependencyBundlesProcessor dependencyBundlesProcessor;
 
-    Packager(FileUtils fileUtils, GW7Builder gw7Builder) {
+    Packager(FileUtils fileUtils, GW7Builder gw7Builder, DependencyBundlesProcessor dependencyBundlesProcessor) {
         this.fileUtils = fileUtils;
         this.gw7Builder = gw7Builder;
+        this.dependencyBundlesProcessor = dependencyBundlesProcessor;
     }
 
     /**
@@ -64,7 +67,7 @@ class Packager {
 
         int numBundles = dependencyBundles.size() + 2;
         Set<PackageFile> packageFiles = Stream.of(
-                dependencyBundles(dependencyBundles, numBundles), // adds dependency bundles
+                dependencyBundles(dependencyBundles, bundle.getParentFile().getPath(), numBundles), // adds dependency bundles
                 deploymentBundle(bundle, dependencyBundles.size(), numBundles), // adds the deployment bundle
                 applyEnvironmentScript(), // apply-environment.sh script
                 fileDependencies(containerApplicationDependencies, DIRECTORY_OPT_DOCKER_RC_D + "apply-environment/"), // adds the apply environment jars
@@ -85,8 +88,11 @@ class Packager {
         return paddingLevel > 0 ? String.format(format, currentBundleNumber) : String.valueOf(currentBundleNumber);
     }
 
-    private Stream<PackageFile> dependencyBundles(LinkedList<File> dependencyBundles, int numBundles) {
+    private Stream<PackageFile> dependencyBundles(LinkedList<File> dependencyBundles, String bundleFolderPath, int numBundles) {
         AtomicInteger dependencyBundleCounter = new AtomicInteger(1);
+
+        // process the bundles prior to packaging
+        dependencyBundles = dependencyBundlesProcessor.process(dependencyBundles, bundleFolderPath);
 
         return stream(
                 spliteratorUnknownSize(
