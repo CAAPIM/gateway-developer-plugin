@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -43,8 +44,6 @@ public class ServiceLoader implements BundleEntityLoader {
         Map<String, Object> allProperties = BuilderUtils.mapPropertiesElements(servicePropertiesElement, PROPERTIES);
         Map<String, Object> properties = new HashMap<>();
         Service serviceEntity = new Service();
-        populateServiceEntity(service, serviceEntity, allProperties, properties);
-        boolean isSoapService = serviceEntity.getWsdl() != null;
 
         Folder parentFolder = getFolder(bundle, folderId);
 
@@ -53,6 +52,9 @@ public class ServiceLoader implements BundleEntityLoader {
         serviceEntity.setPath(getPath(parentFolder, name));
         serviceEntity.setParentFolder(parentFolder);
         serviceEntity.setServiceDetailsElement(serviceDetails);
+
+        populateServiceEntity(service, serviceEntity, allProperties, properties);
+        boolean isSoapService = serviceEntity.getWsdl() != null;
 
         Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);
         Element httpMappingElement = getSingleChildElement(serviceMappingsElement, HTTP_MAPPING);
@@ -132,7 +134,14 @@ public class ServiceLoader implements BundleEntityLoader {
         List<Element> resourceSets = getChildElements(resources, RESOURCE_SET);
         for(Element resourceSet : resourceSets) {
             String tagValue = resourceSet.getAttribute(ATTRIBUTE_TAG);
-            final Element resource = getSingleChildElement(resourceSet, RESOURCE);
+            final List<Element> resourceElements = getChildElements(resourceSet, RESOURCE);
+            if (resourceElements.size() > 1) {
+                throw new BundleLoadException("Multiple l7:resource elements found for service " + serviceEntity.getName());
+            }
+            if (resourceElements.size() == 0) {
+                throw new BundleLoadException("No l7:resource elements for service " + serviceEntity.getName());
+            }
+            final Element resource = resourceElements.get(0);
             if(StringUtils.isEmpty(tagValue)) {
                 throw new BundleLoadException("No tag attribute found under " + RESOURCE_SET);
             } else if(TAG_VALUE_POLICY.equals(tagValue)) {
