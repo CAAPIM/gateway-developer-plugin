@@ -9,8 +9,10 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -143,9 +145,11 @@ class ServiceLoaderTest {
         assertTrue(service.getHttpMethods().containsAll(Arrays.asList("GET", "POST", "PUT", "DELETE")));
         assertNotNull(service.getParentFolder());
         assertEquals("folder", service.getParentFolder().getId());
-        assertEquals("wsdl file", service.getWsdl().getWsdlXml());
-        assertEquals("1.1", service.getWsdl().getSoapVersion());
-        assertTrue(service.getWsdl().isWssProcessingEnabled());
+        assertTrue(CollectionUtils.isNotEmpty(service.getWsdls()));
+        Wsdl wsdl = service.getWsdls().iterator().next();
+        assertEquals("wsdl file", wsdl.getWsdlXml());
+        assertEquals("1.1", service.getSoapVersion());
+        assertTrue(service.isWssProcessingEnabled());
         Map<String, Object> expected = new HashMap<>();
         expected.put("prop", "value");
         expected.put("ENV.prop", null);

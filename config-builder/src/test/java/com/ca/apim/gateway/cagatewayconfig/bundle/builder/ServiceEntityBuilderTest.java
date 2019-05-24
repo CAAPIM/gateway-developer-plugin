@@ -10,8 +10,10 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -138,11 +140,11 @@ class ServiceEntityBuilderTest {
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
+        service.setWssProcessingEnabled(true);
+        service.setSoapVersion("1.1");
         Wsdl wsdlBean = new Wsdl();
-        wsdlBean.setWssProcessingEnabled(true);
         wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
-        wsdlBean.setSoapVersion("1.1");
-        service.setWsdl(wsdlBean);
+        service.addWsdl(wsdlBean);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("/v1/soap-service1", service);
@@ -166,16 +168,19 @@ class ServiceEntityBuilderTest {
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
+        service.setWssProcessingEnabled(true);
+        service.setSoapVersion("1.1");
         Wsdl wsdlBean = new Wsdl();
-        wsdlBean.setWssProcessingEnabled(true);
         wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
-        wsdlBean.setSoapVersion("1.1");
+        wsdlBean.setPath(wsdlBean.getRootUrl());
         wsdlBean.setWsdlXml("wsdl xml content");
-        service.setWsdl(wsdlBean);
+        service.setWsdlRootUrl(wsdlBean.getRootUrl());
+        service.addWsdl(wsdlBean);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("/v1/soap-service1", service);
         }});
+        bundle.putAllWsdls(ImmutableMap.of(wsdlBean.getPath(), wsdlBean));
 
         List<Entity> services = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
@@ -205,17 +210,20 @@ class ServiceEntityBuilderTest {
             put("key2", "value2");
             put("ENV.key.environment", "something");
         }});
+        service2.setWssProcessingEnabled(true);
+        service2.setSoapVersion("1.1");
         Wsdl wsdlBean = new Wsdl();
-        wsdlBean.setWssProcessingEnabled(true);
         wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
-        wsdlBean.setSoapVersion("1.1");
         wsdlBean.setWsdlXml("wsdl xml content");
-        service2.setWsdl(wsdlBean);
+        wsdlBean.setPath(wsdlBean.getRootUrl());
+        service2.setWsdlRootUrl(wsdlBean.getRootUrl());
+        service2.addWsdl(wsdlBean);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("my/v1/service1", service1);
             put("my/service2", service2);
         }});
+        bundle.putAllWsdls(ImmutableMap.of(wsdlBean.getPath(), wsdlBean));
 
         verifyMultipleServices(builder, bundle, service1, service2);
     }
@@ -298,7 +306,7 @@ class ServiceEntityBuilderTest {
 
         Element serviceProperties = getSingleElement(serviceDetails, PROPERTIES);
         NodeList propertyList = serviceProperties.getElementsByTagName(PROPERTY);
-        boolean isSoapService = service.getWsdl() != null;
+        boolean isSoapService = CollectionUtils.isNotEmpty(service.getWsdls());
         if (isSoapService) {
             assertEquals(5, propertyList.getLength());
         } else {

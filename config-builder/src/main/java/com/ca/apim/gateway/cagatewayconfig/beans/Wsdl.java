@@ -11,8 +11,6 @@ import javax.inject.Named;
 public class Wsdl extends Folderable {
 
     private String rootUrl;
-    private String soapVersion;
-    private boolean wssProcessingEnabled;
     @JsonIgnore
     private String wsdlXml;
 
@@ -30,22 +28,6 @@ public class Wsdl extends Folderable {
 
     public void setWsdlXml(String wsdlXml) {
         this.wsdlXml = wsdlXml;
-    }
-
-    public String getSoapVersion() {
-        return soapVersion;
-    }
-
-    public void setSoapVersion(String soapVersion) {
-        this.soapVersion = soapVersion;
-    }
-
-    public boolean isWssProcessingEnabled() {
-        return wssProcessingEnabled;
-    }
-
-    public void setWssProcessingEnabled(boolean wssProcessingEnabled) {
-        this.wssProcessingEnabled = wssProcessingEnabled;
     }
 
 }
