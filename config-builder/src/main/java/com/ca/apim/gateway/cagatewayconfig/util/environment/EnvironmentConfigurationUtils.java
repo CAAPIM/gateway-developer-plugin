@@ -22,9 +22,11 @@ import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.JSON;
+import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YAML;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Utility class to handle tasks related to environment properties
@@ -89,6 +91,21 @@ public class EnvironmentConfigurationUtils {
             return jsonTools.getObjectWriter(JSON).writeValueAsString(entity);
         } catch (JsonProcessingException e) {
             throw new MissingEnvironmentException("Unable to read environment for specified configuration " + entityName, e);
+        }
+    }
+
+    public static String tryInferContentTypeFromValue(final String value) {
+        if (isBlank(value)) {
+            return null;
+        }
+
+        // remove extra spaces and pick first char
+        char initial = value.trim().charAt(0);
+        switch (initial) {
+            case '[':
+            case '{': return JSON;
+            case '<': throw new MissingEnvironmentException("XML Environment Values are not yet supported.");
+            default: return YAML;
         }
     }
 }
