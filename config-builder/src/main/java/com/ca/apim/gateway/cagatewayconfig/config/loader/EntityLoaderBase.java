@@ -60,23 +60,18 @@ public abstract class EntityLoaderBase<B extends GatewayEntity> implements Entit
 
     @Override
     public void load(Bundle bundle, String fullName, String value) {
-        String name = getBaseName(fullName);
+        String name = fullName;
         String extension = getExtension(fullName);
-
-        String valueType = getValueType(value, extension);
-
-        final JavaType type = jsonTools.getObjectMapper(valueType).getTypeFactory().constructType(this.getBeanClass());
-
-        B entity = jsonTools.readStream(IOUtils.toInputStream(value, Charset.defaultCharset()), valueType, type);
-        entity.postLoad(name, bundle, null, idGenerator);
-        putToBundle(bundle, ImmutableMap.<String, B>builder().put(name, entity).build());
-    }
-
-    private String getValueType(String value, String extension) {
         String valueType = null;
+
         // if there is an extension, get from there
         if (isNotBlank(extension)) {
             valueType = jsonTools.getTypeFromExtension(extension);
+
+            // if its found by extension means that is a valid extension and not part of the name
+            if (valueType != null) {
+                name = getBaseName(fullName);
+            }
         }
         // try infering from the content
         if (valueType == null) {
@@ -86,7 +81,12 @@ public abstract class EntityLoaderBase<B extends GatewayEntity> implements Entit
         if (valueType == null) {
             valueType = getDefaultValueType();
         }
-        return valueType;
+
+        final JavaType type = jsonTools.getObjectMapper(valueType).getTypeFactory().constructType(this.getBeanClass());
+
+        B entity = jsonTools.readStream(IOUtils.toInputStream(value, Charset.defaultCharset()), valueType, type);
+        entity.postLoad(name, bundle, null, idGenerator);
+        putToBundle(bundle, ImmutableMap.<String, B>builder().put(name, entity).build());
     }
 
     /**
