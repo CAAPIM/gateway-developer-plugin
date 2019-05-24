@@ -304,6 +304,7 @@ class WsdlWriterTest {
             "\n" +
             "   </wsdl:service>\n" +
             "</wsdl:definitions>\n";
+    public static final String WSDL_FILE_NAME = "EchoAttachmentsServiceAxisAll.wsdl";
 
     @Test
     void testWriteWsdl(final TemporaryFolder temporaryFolder) {
@@ -315,8 +316,10 @@ class WsdlWriterTest {
         Service service = new Service();
         service.setName(NAME_SERVICE);
         service.setParentFolder(ROOT_FOLDER);
-        service.setWsdl(getWsdl(false));
+        service.addWsdl(getWsdl(false));
         service.setPolicy(POLICY_XML);
+        service.setSoapVersion("1.1");
+        service.setWssProcessingEnabled(true);
         bundle.getServices().put("service", service);
 
         writer.write(bundle, temporaryFolder.getRoot());
@@ -324,7 +327,10 @@ class WsdlWriterTest {
         File wsdlFolder = new File(temporaryFolder.getRoot(), FOLDER_NAME);
         assertTrue(wsdlFolder.exists());
 
-        File wsdlFile = new File(wsdlFolder, NAME_SERVICE + EXTENSION);
+        File serviceWsdlsFolder = new File(wsdlFolder, NAME_SERVICE);
+        assertTrue(serviceWsdlsFolder.exists());
+
+        File wsdlFile = new File(serviceWsdlsFolder, WSDL_FILE_NAME);
         assertTrue(wsdlFile.exists());
 
     }
@@ -339,8 +345,10 @@ class WsdlWriterTest {
         Service service = new Service();
         service.setName(NAME_SERVICE);
         service.setParentFolder(ROOT_FOLDER);
-        service.setWsdl(getWsdl(true));
+        service.addWsdl(getWsdl(true));
         service.setPolicy(POLICY_XML);
+        service.setSoapVersion("1.1");
+        service.setWssProcessingEnabled(true);
         bundle.getServices().put("service", service);
 
         writer.write(bundle, temporaryFolder.getRoot());
@@ -348,7 +356,10 @@ class WsdlWriterTest {
         File wsdlFolder = new File(temporaryFolder.getRoot(), FOLDER_NAME);
         assertTrue(wsdlFolder.exists());
 
-        File wsdlFile = new File(wsdlFolder, NAME_SERVICE + EXTENSION);
+        File serviceWsdlsFolder = new File(wsdlFolder, NAME_SERVICE);
+        assertTrue(serviceWsdlsFolder.exists());
+
+        File wsdlFile = new File(serviceWsdlsFolder, WSDL_FILE_NAME);
         assertTrue(wsdlFile.exists());
 
     }
@@ -371,7 +382,10 @@ class WsdlWriterTest {
         File wsdlFolder = new File(temporaryFolder.getRoot(), FOLDER_NAME);
         assertFalse(wsdlFolder.exists());
 
-        File wsdlFile = new File(wsdlFolder, NAME_SERVICE + EXTENSION);
+        File serviceWsdlsFolder = new File(wsdlFolder, NAME_SERVICE);
+        assertFalse(serviceWsdlsFolder.exists());
+
+        File wsdlFile = new File(serviceWsdlsFolder, WSDL_FILE_NAME);
         assertFalse(wsdlFile.exists());
 
     }
@@ -379,9 +393,7 @@ class WsdlWriterTest {
     @NotNull
     private Wsdl getWsdl(boolean emptyWsdlXml) {
         Wsdl wsdl = new Wsdl();
-        wsdl.setRootUrl("file:/EchoAttachmentsServiceAxisAll.wsdl");
-        wsdl.setSoapVersion("1.1");
-        wsdl.setWssProcessingEnabled(true);
+        wsdl.setRootUrl("file:/" + WSDL_FILE_NAME);
         if(emptyWsdlXml) {
             wsdl.setWsdlXml("");
         } else {

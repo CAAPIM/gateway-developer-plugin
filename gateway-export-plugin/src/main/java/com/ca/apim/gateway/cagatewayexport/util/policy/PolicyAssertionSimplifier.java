@@ -17,6 +17,7 @@ public interface PolicyAssertionSimplifier {
      * Simplify the policy XML assertion element.
      *
      * @param context context containing required data for simplification process
+     * @throws DocumentParseException if there is any issue to read policy contents
      */
     void simplifyAssertionElement(PolicySimplifierContext context) throws DocumentParseException;
 

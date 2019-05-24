@@ -6,6 +6,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -41,11 +42,9 @@ public class WsdlWriter implements EntityWriter {
     public void write(Bundle bundle, File rootFolder) {
         //write wsdl to file
         Map<String, Service> services = bundle.getEntities(Service.class);
-        services.values().stream().filter(s -> isNotEmpty(s.getWsdls())).forEach(serviceEntity -> {
-            serviceEntity.getWsdls().forEach(wsdl ->
-                    writeWsdl(bundle, rootFolder, serviceEntity.getParentFolder().getId(), serviceEntity.getName(), wsdl)
-            );
-        });
+        services.values().stream().filter(s -> isNotEmpty(s.getWsdls())).forEach(serviceEntity -> serviceEntity.getWsdls().forEach(wsdl ->
+                writeWsdl(bundle, rootFolder, serviceEntity.getParentFolder().getId(), serviceEntity.getName(), wsdl)
+        ));
     }
 
     private void writeWsdl(Bundle bundle, File rootFolder, String folderId, String name, Wsdl wsdl) {
@@ -56,7 +55,7 @@ public class WsdlWriter implements EntityWriter {
         folderPath = new File(folderPath.toFile(), name).toPath();
         documentFileUtils.createFolders(folderPath);
 
-        String wsdlName = URI.create(wsdl.getRootUrl()).getPath();
+        String wsdlName = FilenameUtils.getBaseName(wsdl.getRootUrl());
         Path policyPath = folderPath.resolve(wsdlName + EXTENSION);
         try (InputStream policyStream = toInputStream(wsdl.getWsdlXml(), UTF_8)) {
             FileUtils.copyInputStreamToFile(policyStream, policyPath.toFile());
