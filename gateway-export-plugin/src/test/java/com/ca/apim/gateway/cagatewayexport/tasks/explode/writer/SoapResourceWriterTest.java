@@ -11,13 +11,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.io.File;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WsdlWriter.EXTENSION;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WsdlWriter.FOLDER_NAME;
+import static com.ca.apim.gateway.cagatewayconfig.beans.SoapResource.TYPE_WSDL;
+import static com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils.SOAP_RESOURCES_FOLDER;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(TemporaryFolderExtension.class)
-class WsdlWriterTest {
+class SoapResourceWriterTest {
 
     private static final String NAME_SERVICE = "service";
     private static final String POLICY_XML = "<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\" xmlns:L7p=\"http://www.layer7tech.com/ws/policy\">\n" +
@@ -307,8 +307,8 @@ class WsdlWriterTest {
     public static final String WSDL_FILE_NAME = "EchoAttachmentsServiceAxisAll.wsdl";
 
     @Test
-    void testWriteWsdl(final TemporaryFolder temporaryFolder) {
-        WsdlWriter writer = new WsdlWriter(DocumentFileUtils.INSTANCE);
+    void testWriteSoapResource(final TemporaryFolder temporaryFolder) {
+        SoapResourceWriter writer = new SoapResourceWriter(DocumentFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -316,7 +316,7 @@ class WsdlWriterTest {
         Service service = new Service();
         service.setName(NAME_SERVICE);
         service.setParentFolder(ROOT_FOLDER);
-        service.addWsdl(getWsdl(false));
+        service.addResource(getSoapResource(false));
         service.setPolicy(POLICY_XML);
         service.setSoapVersion("1.1");
         service.setWssProcessingEnabled(true);
@@ -324,20 +324,20 @@ class WsdlWriterTest {
 
         writer.write(bundle, temporaryFolder.getRoot());
 
-        File wsdlFolder = new File(temporaryFolder.getRoot(), FOLDER_NAME);
+        File wsdlFolder = new File(temporaryFolder.getRoot(), SOAP_RESOURCES_FOLDER);
         assertTrue(wsdlFolder.exists());
 
-        File serviceWsdlsFolder = new File(wsdlFolder, NAME_SERVICE);
-        assertTrue(serviceWsdlsFolder.exists());
+        File serviceSoapResourcesFolder = new File(wsdlFolder, NAME_SERVICE);
+        assertTrue(serviceSoapResourcesFolder.exists());
 
-        File wsdlFile = new File(serviceWsdlsFolder, WSDL_FILE_NAME);
+        File wsdlFile = new File(serviceSoapResourcesFolder, WSDL_FILE_NAME);
         assertTrue(wsdlFile.exists());
 
     }
 
     @Test
-    void testWriteEmptyWsdl(final TemporaryFolder temporaryFolder) {
-        WsdlWriter writer = new WsdlWriter(DocumentFileUtils.INSTANCE);
+    void testWriteEmptySoapResource(final TemporaryFolder temporaryFolder) {
+        SoapResourceWriter writer = new SoapResourceWriter(DocumentFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -345,7 +345,7 @@ class WsdlWriterTest {
         Service service = new Service();
         service.setName(NAME_SERVICE);
         service.setParentFolder(ROOT_FOLDER);
-        service.addWsdl(getWsdl(true));
+        service.addResource(getSoapResource(true));
         service.setPolicy(POLICY_XML);
         service.setSoapVersion("1.1");
         service.setWssProcessingEnabled(true);
@@ -353,20 +353,20 @@ class WsdlWriterTest {
 
         writer.write(bundle, temporaryFolder.getRoot());
 
-        File wsdlFolder = new File(temporaryFolder.getRoot(), FOLDER_NAME);
+        File wsdlFolder = new File(temporaryFolder.getRoot(), SOAP_RESOURCES_FOLDER);
         assertTrue(wsdlFolder.exists());
 
-        File serviceWsdlsFolder = new File(wsdlFolder, NAME_SERVICE);
-        assertTrue(serviceWsdlsFolder.exists());
+        File serviceSoapResourcesFolder = new File(wsdlFolder, NAME_SERVICE);
+        assertTrue(serviceSoapResourcesFolder.exists());
 
-        File wsdlFile = new File(serviceWsdlsFolder, WSDL_FILE_NAME);
+        File wsdlFile = new File(serviceSoapResourcesFolder, WSDL_FILE_NAME);
         assertTrue(wsdlFile.exists());
 
     }
 
     @Test
     void testWriteNonSoapService_NofolderCreated(final TemporaryFolder temporaryFolder) {
-        WsdlWriter writer = new WsdlWriter(DocumentFileUtils.INSTANCE);
+        SoapResourceWriter writer = new SoapResourceWriter(DocumentFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -379,26 +379,27 @@ class WsdlWriterTest {
 
         writer.write(bundle, temporaryFolder.getRoot());
 
-        File wsdlFolder = new File(temporaryFolder.getRoot(), FOLDER_NAME);
+        File wsdlFolder = new File(temporaryFolder.getRoot(), SOAP_RESOURCES_FOLDER);
         assertFalse(wsdlFolder.exists());
 
-        File serviceWsdlsFolder = new File(wsdlFolder, NAME_SERVICE);
-        assertFalse(serviceWsdlsFolder.exists());
+        File serviceSoapResourcesFolder = new File(wsdlFolder, NAME_SERVICE);
+        assertFalse(serviceSoapResourcesFolder.exists());
 
-        File wsdlFile = new File(serviceWsdlsFolder, WSDL_FILE_NAME);
+        File wsdlFile = new File(serviceSoapResourcesFolder, WSDL_FILE_NAME);
         assertFalse(wsdlFile.exists());
 
     }
 
     @NotNull
-    private Wsdl getWsdl(boolean emptyWsdlXml) {
-        Wsdl wsdl = new Wsdl();
+    private SoapResource getSoapResource(boolean emptySoapResourceXml) {
+        SoapResource wsdl = new SoapResource();
         wsdl.setRootUrl("file:/" + WSDL_FILE_NAME);
-        if(emptyWsdlXml) {
-            wsdl.setWsdlXml("");
+        if(emptySoapResourceXml) {
+            wsdl.setContent("");
         } else {
-            wsdl.setWsdlXml(WSDL_XML);
+            wsdl.setContent(WSDL_XML);
         }
+        wsdl.setType(TYPE_WSDL);
         return wsdl;
     }
 }

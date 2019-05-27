@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
+import com.ca.apim.gateway.cagatewayconfig.beans.SoapResource;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
@@ -24,8 +24,8 @@ import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicy
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Singleton
 public class ServiceLoader implements BundleEntityLoader {
@@ -54,7 +54,7 @@ public class ServiceLoader implements BundleEntityLoader {
         serviceEntity.setServiceDetailsElement(serviceDetails);
 
         populateServiceEntity(service, serviceEntity, allProperties, properties);
-        boolean isSoapService = isNotEmpty(serviceEntity.getWsdls());
+        boolean isSoapService = isNotBlank(serviceEntity.getSoapVersion());
 
         Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);
         Element httpMappingElement = getSingleChildElement(serviceMappingsElement, HTTP_MAPPING);
@@ -148,7 +148,7 @@ public class ServiceLoader implements BundleEntityLoader {
             if (TAG_VALUE_WSDL.equals(tagValue)) {
                 serviceEntity.setWsdlRootUrl(resourceSet.getAttribute(ATTRIBUTE_ROOT_URL));
 
-                resourceElements.forEach(e -> addServiceWsdl(e, serviceEntity));
+                resourceElements.forEach(e -> addServiceResource(e, serviceEntity));
                 return;
             }
 
@@ -163,17 +163,19 @@ public class ServiceLoader implements BundleEntityLoader {
         });
     }
 
-    private void addServiceWsdl(final Element resource, final Service service) {
-        final String rootUrlForWsdl = resource.getAttribute(ATTRIBUTE_SOURCE_URL);
-        final String wsdl = resource.getTextContent();
+    private void addServiceResource(final Element resource, final Service service) {
+        final String rootUrl = resource.getAttribute(ATTRIBUTE_SOURCE_URL);
+        final String content = resource.getTextContent();
+        final String type = resource.getAttribute(ATTRIBUTE_TYPE);
 
-        if (isEmpty(wsdl) || isEmpty(rootUrlForWsdl)) {
-            throw new BundleLoadException("No wsdl content or sourceUrl found under " + RESOURCE + " for service " + service.getName());
+        if (isEmpty(content) || isEmpty(rootUrl)) {
+            throw new BundleLoadException("No content or sourceUrl found under " + RESOURCE + " for service " + service.getName());
         } else {
-            Wsdl wsdlBean = new Wsdl();
-            wsdlBean.setRootUrl(rootUrlForWsdl);
-            wsdlBean.setWsdlXml(wsdl);
-            service.addWsdl(wsdlBean);
+            SoapResource soapResource = new SoapResource();
+            soapResource.setRootUrl(rootUrl);
+            soapResource.setContent(content);
+            soapResource.setType(type);
+            service.addResource(soapResource);
         }
     }
 

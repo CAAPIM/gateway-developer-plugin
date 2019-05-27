@@ -48,8 +48,8 @@ public class BundleBuilder {
                 handleItem((Element) node, bundle);
             }
         }
-        FolderTree folderTree = new FolderTree(bundle.getFolders().values());
-        bundle.setFolderTree(folderTree);
+
+        bundle.buildFolderTree();
         bundle.setDependencyMap(buildDependencies(getSingleChildElement(getSingleChildElement(bundleElement, DEPENDENCY_GRAPH), DEPENDENCIES)));
 
         return bundle;

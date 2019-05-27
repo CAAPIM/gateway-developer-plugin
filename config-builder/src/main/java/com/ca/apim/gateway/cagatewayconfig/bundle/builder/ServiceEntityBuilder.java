@@ -9,8 +9,9 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
+import com.ca.apim.gateway.cagatewayconfig.beans.SoapResource;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
@@ -70,16 +71,17 @@ public class ServiceEntityBuilder implements EntityBuilder {
         service.setName(baseName);
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());
-        final Set<Wsdl> wsdlBeans = service.getWsdls();
+        final Set<SoapResource> soapResourceBeans = service.getResources();
 
-        if (isNotEmpty(wsdlBeans)) {
-            wsdlBeans.forEach(wsdlBean -> {
-                String wsdlXml = bundle.getWsdls().get(wsdlBean.getPath()).getWsdlXml();
-                wsdlBean.setWsdlXml(wsdlXml);
+        if (isNotEmpty(soapResourceBeans)) {
+            soapResourceBeans.forEach(soapResourceBean -> {
+                String path = PathUtils.unixPath(service.getParentFolder().getPath(), service.getName(), soapResourceBean.getFileName());
+                String content = bundle.getSoapResources().get(path).getContent();
+                soapResourceBean.setContent(content);
             });
         }
 
-        boolean isSoapService = isNotEmpty(wsdlBeans);
+        boolean isSoapService = isNotEmpty(soapResourceBeans);
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());
         }
@@ -127,10 +129,10 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
         if (isSoapService) {
             Element wsdlResourceSetElement = createElementWithAttributes(document, RESOURCE_SET, ImmutableMap.of(ATTRIBUTE_TAG, TAG_VALUE_WSDL, ATTRIBUTE_ROOT_URL, service.getWsdlRootUrl()));
-            wsdlBeans.forEach(wsdlBean -> {
-                Element wsdlResourceElement = createElementWithAttributes(document, RESOURCE, ImmutableMap.of(ATTRIBUTE_TYPE, TAG_VALUE_WSDL, ATTRIBUTE_SOURCE_URL, wsdlBean.getRootUrl()));
-                wsdlResourceElement.setTextContent(wsdlBean.getWsdlXml());
-                wsdlResourceSetElement.appendChild(wsdlResourceElement);
+            soapResourceBeans.forEach(soapResourceBean -> {
+                Element resourceElement = createElementWithAttributes(document, RESOURCE, ImmutableMap.of(ATTRIBUTE_TYPE, soapResourceBean.getType(), ATTRIBUTE_SOURCE_URL, soapResourceBean.getRootUrl()));
+                resourceElement.setTextContent(soapResourceBean.getContent());
+                wsdlResourceSetElement.appendChild(resourceElement);
             });
             resourcesElement.appendChild(wsdlResourceSetElement);
         }

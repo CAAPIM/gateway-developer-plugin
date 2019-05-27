@@ -36,7 +36,7 @@ public class Service extends Folderable {
     private Element serviceDetailsElement;
     @JsonIgnore
     private Element policyXML;
-    private Set<Wsdl> wsdls;
+    private Set<SoapResource> resources;
     private String soapVersion;
     private boolean wssProcessingEnabled;
     private String wsdlRootUrl;
@@ -101,19 +101,19 @@ public class Service extends Folderable {
         setPolicy(getPath());
     }
 
-    public Set<Wsdl> getWsdls() {
-        return wsdls;
+    public Set<SoapResource> getResources() {
+        return resources;
     }
 
-    public void setWsdls(Set<Wsdl> wsdls) {
-        this.wsdls = wsdls;
+    public void setResources(Set<SoapResource> resources) {
+        this.resources = resources;
     }
 
-    public void addWsdl(Wsdl wsdl) {
-        if (this.wsdls == null) {
-            this.wsdls = new LinkedHashSet<>();
+    public void addResource(SoapResource wsdl) {
+        if (this.resources == null) {
+            this.resources = new LinkedHashSet<>();
         }
-        this.wsdls.add(wsdl);
+        this.resources.add(wsdl);
     }
 
     public String getSoapVersion() {
