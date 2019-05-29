@@ -37,6 +37,7 @@ class DependencyBundlesProcessorTest {
     private static final String TEST_1_BUNDLE = "DependencyBundleProcessorTest_1.bundle";
     private static final String TEST_2_BUNDLE = "DependencyBundleProcessorTest_2.bundle";
     private static final String TEST_3_BUNDLE = "DependencyBundleProcessorTest_3.bundle";
+    private static final String TEST_4_BUNDLE = "DependencyBundleProcessorTest_4.bundle";
     private TemporaryFolder rootProjectDir;
     private DependencyBundlesProcessor processor;
 
@@ -76,6 +77,52 @@ class DependencyBundlesProcessorTest {
         assertEquals(destinationFolder.toString() + File.separator + TEST_2_BUNDLE, bundle2.toString());
         Document bundle2Doc = DocumentTools.INSTANCE.parse(bundle2);
         NodeList resources = bundle2Doc.getDocumentElement().getElementsByTagName(RESOURCE);
+        assertNotNull(resources);
+        assertEquals(3, resources.getLength());
+        Element resourceElement = StreamSupport.stream(nodeList(resources).spliterator(), false).map(n -> (Element) n).filter(e -> PolicyEntityBuilder.POLICY.equals(e.getAttribute(ATTRIBUTE_TYPE))).findFirst().orElse(null);
+        assertNotNull(resourceElement);
+        String policyXML = resourceElement.getTextContent();
+        assertNotNull(policyXML);
+        Element policyElement = DocumentTools.INSTANCE.parse(policyXML).getDocumentElement();
+        assertNotNull(policyElement);
+        NodeList guids = policyElement.getElementsByTagName(ENCAPSULATED_ASSERTION_CONFIG_GUID);
+        assertNotNull(guids);
+        assertEquals(1, guids.getLength());
+        String guid = guids.item(0).getAttributes().getNamedItem(STRING_VALUE).getTextContent();
+
+        assertEquals("283e93c6-9cf6-46f1-a34a-cf333bf4f1c3", guid);
+    }
+
+    @Test
+    void testAttachingEncassesInServicePolicy() throws IOException, DocumentParseException {
+        File originFolder = new File(rootProjectDir.getRoot(), "original");
+        originFolder.mkdirs();
+        File destinationFolder = new File(rootProjectDir.getRoot(), "processed");
+        destinationFolder.mkdirs();
+
+        // copy the bundles
+        byte[] bundle1Contents = IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResource(TEST_1_BUNDLE));
+        byte[] bundle4Contents = IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResource(TEST_4_BUNDLE));
+        File file1 = new File(originFolder, TEST_1_BUNDLE);
+        file1.createNewFile();
+        File file4 = new File(originFolder, TEST_4_BUNDLE);
+        file4.createNewFile();
+        Files.write(file1.toPath(), bundle1Contents);
+        Files.write(file4.toPath(), bundle4Contents);
+
+        // and process them
+        LinkedList<File> processed = processor.process(Stream.of(new File(originFolder, TEST_1_BUNDLE), new File(originFolder, TEST_4_BUNDLE)).collect(toCollection(LinkedList::new)), destinationFolder.toString());
+
+        assertNotNull(processed);
+        assertEquals(2, processed.size());
+
+        File bundle1 = processed.get(0);
+        assertEquals(destinationFolder.toString() + File.separator + TEST_1_BUNDLE, bundle1.toString());
+
+        File bundle4 = processed.get(1);
+        assertEquals(destinationFolder.toString() + File.separator + TEST_4_BUNDLE, bundle4.toString());
+        Document bundle4Doc = DocumentTools.INSTANCE.parse(bundle4);
+        NodeList resources = bundle4Doc.getDocumentElement().getElementsByTagName(RESOURCE);
         assertNotNull(resources);
         assertEquals(3, resources.getLength());
         Element resourceElement = StreamSupport.stream(nodeList(resources).spliterator(), false).map(n -> (Element) n).filter(e -> PolicyEntityBuilder.POLICY.equals(e.getAttribute(ATTRIBUTE_TYPE))).findFirst().orElse(null);
