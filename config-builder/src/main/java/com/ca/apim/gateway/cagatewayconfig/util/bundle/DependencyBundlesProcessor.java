@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,6 +34,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.ENCAPSULATED;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.stream.StreamSupport.stream;
+import static org.apache.commons.lang3.StringUtils.equalsAny;
 
 /**
  * Processor for dependency bundles that apply necessary changes prior to packaging.
@@ -89,7 +91,7 @@ public class DependencyBundlesProcessor {
     private void processEncasses(Bundle bundleObject, NodeList items) {
         stream(nodeList(items).spliterator(), false)
                 .map(node -> (Element) node)
-                .filter(element -> EntityTypes.POLICY_TYPE.equals(getSingleChildElementTextContent(element, TYPE)))
+                .filter(element -> equalsAny(getSingleChildElementTextContent(element, TYPE), EntityTypes.POLICY_TYPE, EntityTypes.SERVICE_TYPE))
                 .forEach(policyItem -> processPolicyItem(bundleObject, policyItem));
     }
 
