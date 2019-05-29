@@ -142,7 +142,7 @@ public class ServiceLoader implements BundleEntityLoader {
 
             final List<Element> resourceElements = getChildElements(resourceSet, RESOURCE);
 
-            if (resourceElements.size() == 0) {
+            if (resourceElements.isEmpty()) {
                 throw new BundleLoadException("No l7:resource elements for service " + serviceEntity.getName());
             }
             if (TAG_VALUE_WSDL.equals(tagValue)) {
