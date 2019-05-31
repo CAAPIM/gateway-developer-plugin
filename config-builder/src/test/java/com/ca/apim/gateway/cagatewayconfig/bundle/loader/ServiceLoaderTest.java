@@ -37,7 +37,7 @@ class ServiceLoaderTest {
         bundle.getFolders().put(TEST_FOLDER, folder);
 
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
-                true, false, false, false));
+                true, false, false, false, false));
 
         assertFalse(bundle.getServices().isEmpty());
         assertEquals(1, bundle.getServices().size());
@@ -71,11 +71,11 @@ class ServiceLoaderTest {
         System.setProperty(ServiceAndPolicyLoaderUtil.HANDLE_DUPLICATE_NAMES, "true");
 
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
-                true, false, false, false));
+                true, false, false, false, false));
 
         //Load duplicate with different id
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
-                true, true, false, false));
+                true, true, false, false, false));
 
         System.clearProperty(ServiceAndPolicyLoaderUtil.HANDLE_DUPLICATE_NAMES);
 
@@ -110,11 +110,11 @@ class ServiceLoaderTest {
         bundle.getFolders().put(TEST_FOLDER, folder);
 
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
-                true, false, false, false));
+                true, false, false, false, false));
 
         assertThrows(BundleLoadException.class, () -> loader.load(bundle,
             createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
-                true, false, false, false))
+                true, false, false, false, false))
         );
     }
 
@@ -129,8 +129,8 @@ class ServiceLoaderTest {
         bundle.getFolders().put(TEST_FOLDER, folder);
 
         loader.load(bundle, createServiceXml(
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, false, false
-        ));
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, false, false,
+                false));
 
         assertFalse(bundle.getServices().isEmpty());
         assertEquals(1, bundle.getServices().size());
@@ -168,15 +168,22 @@ class ServiceLoaderTest {
             ServiceLoader loader = new ServiceLoader();
             Bundle bundle = new Bundle();
             loader.load(bundle, createServiceXml(
-                    DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, false, true
-            ));
+                    DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, false, true,
+                    false));
         });
         assertThrows(BundleLoadException.class, () -> {
             ServiceLoader loader = new ServiceLoader();
             Bundle bundle = new Bundle();
             loader.load(bundle, createServiceXml(
-                    DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, true, false
-            ));
+                    DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, true, false,
+                    false));
+        });
+        assertThrows(BundleLoadException.class, () -> {
+            ServiceLoader loader = new ServiceLoader();
+            Bundle bundle = new Bundle();
+            loader.load(bundle, createServiceXml(
+                    DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), true, true, false, false,
+                    true));
         });
     }
 }

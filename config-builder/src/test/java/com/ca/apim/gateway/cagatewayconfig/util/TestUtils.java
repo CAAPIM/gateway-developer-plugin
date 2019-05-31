@@ -187,7 +187,7 @@ public class TestUtils {
         return createFolder(ROOT_FOLDER_NAME, ROOT_FOLDER_ID, null);
     }
 
-    public static Element createServiceXml(Document document, boolean withProperties, boolean isSoap, boolean isTagEmpty, boolean isWsdlEmpty) {
+    public static Element createServiceXml(Document document, boolean withProperties, boolean isSoap, boolean isTagEmpty, boolean isWsdlEmpty, boolean withoutResources) {
         Element resourcesElement;
         Element policyResourceSetElement = createElementWithAttributesAndChildren(
                 document,
@@ -212,14 +212,18 @@ public class TestUtils {
             wsdlResourceSetElement = createElementWithAttributesAndChildren(
                     document,
                     RESOURCE_SET,
-                    ImmutableMap.of(ATTRIBUTE_ROOT_URL, "test.wsdl", ATTRIBUTE_TAG, (isTagEmpty ? "" : TAG_VALUE_WSDL)),
-                    createElementWithAttributesAndTextContent(
-                            document,
-                            RESOURCE,
-                            ImmutableMap.of(ATTRIBUTE_SOURCE_URL, "test.wsdl", ATTRIBUTE_TYPE, TAG_VALUE_WSDL),
-                            (isWsdlEmpty ? "" : "wsdl file")
-                    )
+                    ImmutableMap.of(ATTRIBUTE_ROOT_URL, "test.wsdl", ATTRIBUTE_TAG, (isTagEmpty ? "" : TAG_VALUE_WSDL))
             );
+            if (!withoutResources) {
+                wsdlResourceSetElement.appendChild(
+                        createElementWithAttributesAndTextContent(
+                                document,
+                                RESOURCE,
+                                ImmutableMap.of(ATTRIBUTE_SOURCE_URL, "test.wsdl", ATTRIBUTE_TYPE, TAG_VALUE_WSDL),
+                                (isWsdlEmpty ? "" : "wsdl file")
+                        )
+                );
+            }
             resourcesElement = createElementWithChildren(
                     document,
                     RESOURCES,

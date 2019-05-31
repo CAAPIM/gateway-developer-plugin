@@ -67,4 +67,16 @@ class SoapResourceLoaderTest {
 
         Assert.assertTrue(bundle.getFolders().isEmpty());
     }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testLoadEmptyResourceFolder(TemporaryFolder temporaryFolder) {
+        SoapResourceLoader soapResourceLoader = new SoapResourceLoader(fileUtils);
+        temporaryFolder.createDirectory(SOAP_RESOURCES_FOLDER);
+
+        Bundle bundle = new Bundle();
+        soapResourceLoader.load(bundle, temporaryFolder.getRoot());
+
+        Assert.assertTrue(bundle.getFolders().isEmpty());
+    }
 }
