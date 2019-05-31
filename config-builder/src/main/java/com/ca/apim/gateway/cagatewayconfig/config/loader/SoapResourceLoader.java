@@ -118,5 +118,5 @@ public class SoapResourceLoader implements EntityLoader {
      * @return a soapResource entity type
      */
     @Override
-    public String getEntityType() { return EntityTypes.WSDL_TYPE; }
+    public String getEntityType() { return EntityTypes.SOAP_RESOURCE_TYPE; }
 }

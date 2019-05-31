@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,7 @@ import java.io.File;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils.SOAP_RESOURCES_FOLDER;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -304,9 +306,47 @@ class SoapResourceWriterTest {
             "   </wsdl:service>\n" +
             "</wsdl:definitions>\n";
     public static final String WSDL_FILE_NAME = "EchoAttachmentsServiceAxisAll.wsdl";
+    private static final String XML_SCHEMA = "<xs:schema\n" +
+            "    targetNamespace=\"http://schemas.xmlsoap.org/ws/2004/09/transfer\"\n" +
+            "    xmlns:tns=\"http://schemas.xmlsoap.org/ws/2004/09/transfer\"\n" +
+            "    xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\"\n" +
+            "    xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n" +
+            "    elementFormDefault=\"qualified\"\n" +
+            "    blockDefault=\"#all\" >\n" +
+            "\n" +
+            "  <xs:import\n" +
+            "    namespace=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\"\n" +
+            "    schemaLocation=\"http://schemas.xmlsoap.org/ws/2004/08/addressing/addressing.xsd\"\n" +
+            "    />\n" +
+            "\n" +
+            "  <xs:complexType name=\"AnyXmlType\">\n" +
+            "    <xs:sequence>\n" +
+            "      <xs:any namespace=\"##other\" processContents=\"lax\" />\n" +
+            "    </xs:sequence>\n" +
+            "  </xs:complexType>\n" +
+            "\n" +
+            "  <xs:complexType name=\"AnyXmlOptionalType\">\n" +
+            "    <xs:sequence>\n" +
+            "      <xs:any namespace=\"##other\" processContents=\"lax\"\n" +
+            "              minOccurs=\"0\"/>\n" +
+            "    </xs:sequence>\n" +
+            "  </xs:complexType>\n" +
+            "\n" +
+            "  <xs:complexType name=\"CreateResponseType\">\n" +
+            "    <xs:sequence>\n" +
+            "      <xs:element ref=\"tns:ResourceCreated\" />\n" +
+            "      <xs:any namespace=\"##other\" processContents=\"lax\"\n" +
+            "              minOccurs=\"0\"/>\n" +
+            "    </xs:sequence>\n" +
+            "  </xs:complexType>\n" +
+            "\n" +
+            "  <xs:element name=\"ResourceCreated\" type=\"wsa:EndpointReferenceType\" />\n" +
+            "\n" +
+            "</xs:schema>";
+    private static final String XML_SCHEMA_FILE_NAME = "schema.xsd";
 
     @Test
-    void testWriteSoapResource(final TemporaryFolder temporaryFolder) {
+    void testWriteSoapResources(final TemporaryFolder temporaryFolder) {
         SoapResourceWriter writer = new SoapResourceWriter(DocumentFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
@@ -315,7 +355,8 @@ class SoapResourceWriterTest {
         Service service = new Service();
         service.setName(NAME_SERVICE);
         service.setParentFolder(ROOT_FOLDER);
-        service.addSoapResource(getSoapResource(false));
+        service.addSoapResource(getSoapResource(WSDL_FILE_NAME, WSDL_XML, SoapResourceType.WSDL));
+        service.addSoapResource(getSoapResource(XML_SCHEMA_FILE_NAME, XML_SCHEMA, SoapResourceType.XMLSCHEMA));
         service.setPolicy(POLICY_XML);
         service.setSoapVersion("1.1");
         service.setWssProcessingEnabled(true);
@@ -332,6 +373,8 @@ class SoapResourceWriterTest {
         File wsdlFile = new File(serviceSoapResourcesFolder, WSDL_FILE_NAME);
         assertTrue(wsdlFile.exists());
 
+        File xsdFile = new File(serviceSoapResourcesFolder, XML_SCHEMA_FILE_NAME);
+        assertTrue(xsdFile.exists());
     }
 
     @Test
@@ -344,7 +387,7 @@ class SoapResourceWriterTest {
         Service service = new Service();
         service.setName(NAME_SERVICE);
         service.setParentFolder(ROOT_FOLDER);
-        service.addSoapResource(getSoapResource(true));
+        service.addSoapResource(getSoapResource(WSDL_FILE_NAME, EMPTY, SoapResourceType.WSDL));
         service.setPolicy(POLICY_XML);
         service.setSoapVersion("1.1");
         service.setWssProcessingEnabled(true);
@@ -390,15 +433,11 @@ class SoapResourceWriterTest {
     }
 
     @NotNull
-    private SoapResource getSoapResource(boolean emptySoapResourceXml) {
+    private SoapResource getSoapResource(String fileName, String content, SoapResourceType type) {
         SoapResource wsdl = new SoapResource();
-        wsdl.setRootUrl("file:/" + WSDL_FILE_NAME);
-        if(emptySoapResourceXml) {
-            wsdl.setContent("");
-        } else {
-            wsdl.setContent(WSDL_XML);
-        }
-        wsdl.setType(SoapResourceType.WSDL.getType());
+        wsdl.setRootUrl("file:/" + fileName);
+        wsdl.setContent(content);
+        wsdl.setType(type.getType());
         return wsdl;
     }
 }

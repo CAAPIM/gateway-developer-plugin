@@ -39,12 +39,22 @@ class SoapResourceLoaderTest {
         Assert.assertTrue(c.mkdir());
         File soapResource = new File(c, "wsdl.wsdl");
         Files.touch(soapResource);
+        soapResource = new File(c, "schema.xsd");
+        Files.touch(soapResource);
+        soapResource = new File(c, "invalid.txt");
+        Files.touch(soapResource);
 
         Bundle bundle = new Bundle();
         soapResourceLoader.load(bundle, temporaryFolder.getRoot());
 
         SoapResource loadedSoapResource = bundle.getSoapResources().get("a/b/c/wsdl.wsdl");
         Assert.assertNotNull(loadedSoapResource);
+
+        loadedSoapResource = bundle.getSoapResources().get("a/b/c/schema.xsd");
+        Assert.assertNotNull(loadedSoapResource);
+
+        loadedSoapResource = bundle.getSoapResources().get("a/b/c/invalid.txt");
+        Assert.assertNull(loadedSoapResource);
     }
 
     @Test

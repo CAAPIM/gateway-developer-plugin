@@ -122,7 +122,7 @@ class ServiceEntityBuilderTest {
     }
 
     @Test
-    void buildOneSoapService() throws DocumentParseException {
+    void buildOneSoapServiceWithWSDLAndNoXSD() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
@@ -165,7 +165,7 @@ class ServiceEntityBuilderTest {
     }
 
     @Test
-    void buildTwoServicesOneSoapOneRest() throws DocumentParseException {
+    void buildTwoServicesOneSoapWithWSDLAndXSDAndOneRest() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
@@ -192,14 +192,22 @@ class ServiceEntityBuilderTest {
         wsdlBean.setContent("wsdl xml content");
         wsdlBean.setPath(PathUtils.unixPath(service2ParentFolder.getPath(), service2.getName(), "soap.wsdl"));
         wsdlBean.setType(SoapResourceType.WSDL.getType());
+
+        SoapResource xsdBean = new SoapResource();
+        xsdBean.setRootUrl("/test/rooturl/for/soap.xsd");
+        xsdBean.setContent("xsd xml content");
+        xsdBean.setPath(PathUtils.unixPath(service2ParentFolder.getPath(), service2.getName(), "soap.xsd"));
+        xsdBean.setType(SoapResourceType.XMLSCHEMA.getType());
+
         service2.setWsdlRootUrl(wsdlBean.getRootUrl());
         service2.addSoapResource(wsdlBean);
+        service2.addSoapResource(xsdBean);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put(service1.getName(), service1);
             put(service2.getName(), service2);
         }});
-        bundle.putAllSoapResources(ImmutableMap.of(wsdlBean.getPath(), wsdlBean));
+        bundle.putAllSoapResources(ImmutableMap.of(wsdlBean.getPath(), wsdlBean, xsdBean.getPath(), xsdBean));
         bundle.buildFolderTree();
 
         verifyMultipleServices(builder, bundle, service1, service2);
@@ -337,7 +345,10 @@ class ServiceEntityBuilderTest {
         Element serviceResources = getSingleElement(serviceEntityXml, RESOURCES);
         if(isSoapService) {
             List<Element> serviceResourceSets = getChildElements(serviceResources, RESOURCE_SET);
-            Element serviceResource = null, wsdlResource = null;
+            Element serviceResource = null;
+            Element wsdlResource = null;
+            Element xsdResource = null;
+
             for(Element serviceResourceSet : serviceResourceSets) {
                 String tagValue = serviceResourceSet.getAttribute(ATTRIBUTE_TAG);
                 switch (tagValue) {
@@ -345,15 +356,21 @@ class ServiceEntityBuilderTest {
                         serviceResource = getSingleChildElement(serviceResourceSet, RESOURCE);
                         break;
                     case TAG_VALUE_WSDL:
-                        wsdlResource = getSingleChildElement(serviceResourceSet, RESOURCE);
+                        List<Element> resources = getChildElements(serviceResourceSet, RESOURCE);
+                        wsdlResource = resources.stream().filter(e -> SoapResourceType.WSDL.getType().equals(e.getAttribute(ATTRIBUTE_TYPE))).findFirst().orElse(null);
+                        xsdResource = resources.stream().filter(e -> SoapResourceType.XMLSCHEMA.getType().equals(e.getAttribute(ATTRIBUTE_TYPE))).findFirst().orElse(null);
                         break;
                 }
             }
 
             assertEquals(TAG_VALUE_POLICY, serviceResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
             assertNotNull(serviceResource.getTextContent());
-            assertEquals(TAG_VALUE_WSDL, wsdlResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
+            assertEquals(SoapResourceType.WSDL.getType(), wsdlResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
             assertNotNull(wsdlResource.getTextContent());
+            if (xsdResource != null) {
+                assertEquals(SoapResourceType.XMLSCHEMA.getType(), xsdResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
+                assertNotNull(xsdResource.getTextContent());
+            }
         } else {
             Element serviceResourceSet = getSingleElement(serviceResources, RESOURCE_SET);
             Element serviceResource = getSingleElement(serviceResourceSet, RESOURCE);
