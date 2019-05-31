@@ -14,7 +14,7 @@ import javax.inject.Named;
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
 
 @Named("ENVIRONMENT_PROPERTY")
-@ConfigurationFile(name = "env", type = PROPERTIES)
+@ConfigurationFile(name = "global-env", type = PROPERTIES)
 @EnvironmentType("PROPERTY")
 public class GlobalEnvironmentProperty extends EnvironmentProperty {
 

@@ -266,11 +266,11 @@ class EnvironmentCreatorApplicationTest {
                 defaultCharset()
         );
         writeStringToFile(
-                new File(envFolder, "env.properties"),
-                "my-gateway-api.myEnvironmentVariable=my-service-property-value\n" +
-                        "anotherEnvVar=context-variable-value",
+                new File(envFolder, "service-env.properties"),
+                "my-gateway-api.myEnvironmentVariable=my-service-property-value",
                 defaultCharset()
         );
+        writeStringToFile(new File( envFolder, "context-env.properties"), "anotherEnvVar=context-variable-value", defaultCharset());
 
         new EnvironmentCreatorApplication(
                 System.getenv(),
@@ -326,11 +326,11 @@ class EnvironmentCreatorApplicationTest {
         copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("templatized-bundles")).toURI()), testTemplatizedBundlesFolder);
 
         writeStringToFile(
-                new File(envFolder, "env.properties"),
-                "my-gateway-api.myEnvironmentVariable=my-service-property-value\n" +
-                        "anotherEnvVar=context-variable-value",
+                new File(envFolder, "service-env.properties"),
+                "my-gateway-api.myEnvironmentVariable=my-service-property-value",
                 defaultCharset()
         );
+        writeStringToFile(new File( envFolder, "context-env.properties"), "anotherEnvVar=context-variable-value", defaultCharset());
 
         new EnvironmentCreatorApplication(
                 System.getenv(),
