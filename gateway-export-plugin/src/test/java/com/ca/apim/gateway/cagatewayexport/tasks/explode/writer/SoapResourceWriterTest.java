@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.io.File;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
-import static com.ca.apim.gateway.cagatewayconfig.beans.SoapResource.TYPE_WSDL;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils.SOAP_RESOURCES_FOLDER;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -316,7 +315,7 @@ class SoapResourceWriterTest {
         Service service = new Service();
         service.setName(NAME_SERVICE);
         service.setParentFolder(ROOT_FOLDER);
-        service.addResource(getSoapResource(false));
+        service.addSoapResource(getSoapResource(false));
         service.setPolicy(POLICY_XML);
         service.setSoapVersion("1.1");
         service.setWssProcessingEnabled(true);
@@ -345,7 +344,7 @@ class SoapResourceWriterTest {
         Service service = new Service();
         service.setName(NAME_SERVICE);
         service.setParentFolder(ROOT_FOLDER);
-        service.addResource(getSoapResource(true));
+        service.addSoapResource(getSoapResource(true));
         service.setPolicy(POLICY_XML);
         service.setSoapVersion("1.1");
         service.setWssProcessingEnabled(true);
@@ -399,7 +398,7 @@ class SoapResourceWriterTest {
         } else {
             wsdl.setContent(WSDL_XML);
         }
-        wsdl.setType(TYPE_WSDL);
+        wsdl.setType(SoapResourceType.WSDL.getType());
         return wsdl;
     }
 }

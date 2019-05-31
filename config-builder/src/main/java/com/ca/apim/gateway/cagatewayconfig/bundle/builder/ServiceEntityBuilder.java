@@ -71,7 +71,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         service.setName(baseName);
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());
-        final Set<SoapResource> soapResourceBeans = service.getResources();
+        final Set<SoapResource> soapResourceBeans = service.getSoapResources();
 
         if (isNotEmpty(soapResourceBeans)) {
             soapResourceBeans.forEach(soapResourceBean -> {

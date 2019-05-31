@@ -145,8 +145,8 @@ class ServiceLoaderTest {
         assertTrue(service.getHttpMethods().containsAll(Arrays.asList("GET", "POST", "PUT", "DELETE")));
         assertNotNull(service.getParentFolder());
         assertEquals("folder", service.getParentFolder().getId());
-        assertTrue(CollectionUtils.isNotEmpty(service.getResources()));
-        SoapResource soapResource = service.getResources().iterator().next();
+        assertTrue(CollectionUtils.isNotEmpty(service.getSoapResources()));
+        SoapResource soapResource = service.getSoapResources().iterator().next();
         assertEquals("wsdl file", soapResource.getContent());
         assertEquals("1.1", service.getSoapVersion());
         assertTrue(service.isWssProcessingEnabled());

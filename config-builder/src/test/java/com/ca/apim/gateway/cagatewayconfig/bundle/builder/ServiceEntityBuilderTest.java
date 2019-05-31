@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.ca.apim.gateway.cagatewayconfig.beans.SoapResource.TYPE_WSDL;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SERVICE_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
@@ -146,9 +145,9 @@ class ServiceEntityBuilderTest {
         wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
         wsdlBean.setPath(PathUtils.unixPath(serviceParentFolder.getPath(), service.getName(), "soap.wsdl"));
         wsdlBean.setContent("wsdl xml content");
-        wsdlBean.setType(TYPE_WSDL);
+        wsdlBean.setType(SoapResourceType.WSDL.getType());
         service.setWsdlRootUrl(wsdlBean.getRootUrl());
-        service.addResource(wsdlBean);
+        service.addSoapResource(wsdlBean);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put(service.getName(), service);
@@ -192,9 +191,9 @@ class ServiceEntityBuilderTest {
         wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
         wsdlBean.setContent("wsdl xml content");
         wsdlBean.setPath(PathUtils.unixPath(service2ParentFolder.getPath(), service2.getName(), "soap.wsdl"));
-        wsdlBean.setType(TYPE_WSDL);
+        wsdlBean.setType(SoapResourceType.WSDL.getType());
         service2.setWsdlRootUrl(wsdlBean.getRootUrl());
-        service2.addResource(wsdlBean);
+        service2.addSoapResource(wsdlBean);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put(service1.getName(), service1);
@@ -287,7 +286,7 @@ class ServiceEntityBuilderTest {
 
         Element serviceProperties = getSingleElement(serviceDetails, PROPERTIES);
         NodeList propertyList = serviceProperties.getElementsByTagName(PROPERTY);
-        boolean isSoapService = CollectionUtils.isNotEmpty(service.getResources());
+        boolean isSoapService = CollectionUtils.isNotEmpty(service.getSoapResources());
         if (isSoapService) {
             assertEquals(5, propertyList.getLength());
         } else {

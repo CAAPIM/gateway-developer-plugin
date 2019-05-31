@@ -175,7 +175,7 @@ public class ServiceLoader implements BundleEntityLoader {
             soapResource.setRootUrl(rootUrl);
             soapResource.setContent(content);
             soapResource.setType(type);
-            service.addResource(soapResource);
+            service.addSoapResource(soapResource);
         }
     }
 

@@ -12,8 +12,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.ca.apim.gateway.cagatewayconfig.beans.SoapResource.WSDL_EXTENSION;
-import static com.ca.apim.gateway.cagatewayconfig.beans.SoapResource.XSD_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.beans.SoapResourceType.WSDL;
+import static com.ca.apim.gateway.cagatewayconfig.beans.SoapResourceType.XMLSCHEMA;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils.getPath;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.apache.commons.lang3.StringUtils.equalsAnyIgnoreCase;
@@ -85,7 +85,7 @@ public class SoapResourceLoader implements EntityLoader {
             for (final File child : children) {
                 if (child.isDirectory()) {
                     loadSoapResources(child, rootDir, soapResources);
-                } else if (equalsAnyIgnoreCase("." + getExtension(child.getName()), WSDL_EXTENSION, XSD_EXTENSION)) {
+                } else if (equalsAnyIgnoreCase("." + getExtension(child.getName()), WSDL.getExtension(), XMLSCHEMA.getExtension())) {
                     SoapResource soapResource = loadSoapResource(child, rootDir);
                     soapResources.put(soapResource.getPath(), soapResource);
                 }
