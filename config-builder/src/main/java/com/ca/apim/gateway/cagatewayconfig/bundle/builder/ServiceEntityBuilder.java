@@ -9,10 +9,12 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
+import com.ca.apim.gateway.cagatewayconfig.beans.SoapResource;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -21,6 +23,7 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
@@ -31,6 +34,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.Collections.emptyList;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Singleton
 public class ServiceEntityBuilder implements EntityBuilder {
@@ -56,6 +60,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         ).collect(Collectors.toList());
     }
 
+    @NotNull
     @Override
     public Integer getOrder() {
         return ORDER;
@@ -66,14 +71,17 @@ public class ServiceEntityBuilder implements EntityBuilder {
         service.setName(baseName);
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());
-        final Wsdl wsdlBean = service.getWsdl();
+        final Set<SoapResource> soapResourceBeans = service.getSoapResources();
 
-        if ( (wsdlBean != null) && (wsdlBean.getWsdlXml() == null) ) {
-            String wsdlXml = bundle.getWsdls().get(wsdlBean.getPath()).getWsdlXml();
-            wsdlBean.setWsdlXml(wsdlXml);
+        if (isNotEmpty(soapResourceBeans)) {
+            soapResourceBeans.forEach(soapResourceBean -> {
+                String path = PathUtils.unixPath(service.getParentFolder().getPath(), service.getName(), soapResourceBean.getFileName());
+                String content = bundle.getSoapResources().get(path).getContent();
+                soapResourceBean.setContent(content);
+            });
         }
 
-        boolean isSoapService = (wsdlBean != null);
+        boolean isSoapService = isNotEmpty(soapResourceBeans);
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());
         }
@@ -103,8 +111,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
         properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, false);
         if(isSoapService) {
             properties.put(KEY_VALUE_SOAP, true);
-            properties.put(KEY_VALUE_SOAP_VERSION, wsdlBean.getSoapVersion());
-            properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, wsdlBean.isWssProcessingEnabled());
+            properties.put(KEY_VALUE_SOAP_VERSION, service.getSoapVersion());
+            properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, service.isWssProcessingEnabled());
         }
 
         buildAndAppendPropertiesElement(properties, document, serviceDetailElement);
@@ -119,11 +127,13 @@ public class ServiceEntityBuilder implements EntityBuilder {
         policyResourceSetElement.appendChild(policyResourceElement);
         resourcesElement.appendChild(policyResourceSetElement);
 
-        if(isSoapService) {
-            Element wsdlResourceSetElement = createElementWithAttributes(document, RESOURCE_SET, ImmutableMap.of(ATTRIBUTE_TAG, TAG_VALUE_WSDL, ATTRIBUTE_ROOT_URL, wsdlBean.getRootUrl()));
-            Element wsdlResourceElement = createElementWithAttributes(document, RESOURCE, ImmutableMap.of(ATTRIBUTE_TYPE, TAG_VALUE_WSDL, ATTRIBUTE_SOURCE_URL, wsdlBean.getRootUrl()));
-            wsdlResourceElement.setTextContent(wsdlBean.getWsdlXml());
-            wsdlResourceSetElement.appendChild(wsdlResourceElement);
+        if (isSoapService) {
+            Element wsdlResourceSetElement = createElementWithAttributes(document, RESOURCE_SET, ImmutableMap.of(ATTRIBUTE_TAG, TAG_VALUE_WSDL, ATTRIBUTE_ROOT_URL, service.getWsdlRootUrl()));
+            soapResourceBeans.forEach(soapResourceBean -> {
+                Element resourceElement = createElementWithAttributes(document, RESOURCE, ImmutableMap.of(ATTRIBUTE_TYPE, soapResourceBean.getType(), ATTRIBUTE_SOURCE_URL, soapResourceBean.getRootUrl()));
+                resourceElement.setTextContent(soapResourceBean.getContent());
+                wsdlResourceSetElement.appendChild(resourceElement);
+            });
             resourcesElement.appendChild(wsdlResourceSetElement);
         }
 

@@ -64,13 +64,14 @@ public class Bundle {
         policies.forEach((path, p) -> policyMap.merge(path, p, Policy::merge));
     }
 
-    public Map<String, Wsdl> getWsdls() {
-        return getEntities(Wsdl.class);
+    public Map<String, SoapResource> getSoapResources() {
+        return getEntities(SoapResource.class);
     }
 
-    public void putAllWsdls(@NotNull Map<String, Wsdl> wsdls) {
-        this.getWsdls().putAll(wsdls);
+    public void putAllSoapResources(@NotNull Map<String, SoapResource> wsdls) {
+        this.getSoapResources().putAll(wsdls);
     }
+
     public void putAllFolders(@NotNull Map<String, Folder> folders) {
         this.getFolders().putAll(folders);
     }
@@ -222,6 +223,10 @@ public class Bundle {
 
     public void setFolderTree(FolderTree folderTree) {
         this.folderTree = folderTree;
+    }
+
+    public void buildFolderTree() {
+        this.folderTree = new FolderTree(this.getFolders().values());
     }
 
     public Map<Dependency, List<Dependency>> getDependencyMap() {

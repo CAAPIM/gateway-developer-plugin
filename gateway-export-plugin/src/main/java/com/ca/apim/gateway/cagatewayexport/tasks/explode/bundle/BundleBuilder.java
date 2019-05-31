@@ -6,7 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.bundle;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
@@ -46,8 +49,8 @@ public class BundleBuilder {
                 handleItem((Element) node, bundle);
             }
         }
-        FolderTree folderTree = new FolderTree(bundle.getFolders().values());
-        bundle.setFolderTree(folderTree);
+
+        bundle.buildFolderTree();
         bundle.setDependencyMap(buildDependencies(getSingleChildElement(getSingleChildElement(bundleElement, DEPENDENCY_GRAPH), DEPENDENCIES)));
 
         return bundle;
@@ -103,6 +106,9 @@ public class BundleBuilder {
     }
 
     private void handleItem(final Element element, final Bundle bundle) {
+        if (getSingleChildElement(element, TYPE, true) == null) {
+            return;
+        }
         final String type = getSingleChildElement(element, TYPE).getTextContent();
         final BundleEntityLoader entityLoader = entityLoaderRegistry.getLoader(type);
         if (entityLoader != null) {

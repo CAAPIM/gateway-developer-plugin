@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Named;
 import java.io.File;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +36,10 @@ public class Service extends Folderable {
     private Element serviceDetailsElement;
     @JsonIgnore
     private Element policyXML;
-    private Wsdl wsdl;
+    private Set<SoapResource> soapResources;
+    private String soapVersion;
+    private boolean wssProcessingEnabled;
+    private String wsdlRootUrl;
 
     public String getUrl() {
         return url;
@@ -97,11 +101,42 @@ public class Service extends Folderable {
         setPolicy(getPath());
     }
 
-    public Wsdl getWsdl() {
-        return wsdl;
+    public Set<SoapResource> getSoapResources() {
+        return soapResources;
     }
 
-    public void setWsdl(Wsdl wsdl) {
-        this.wsdl = wsdl;
+    public void setSoapResources(Set<SoapResource> soapResources) {
+        this.soapResources = soapResources;
+    }
+
+    public void addSoapResource(SoapResource wsdl) {
+        if (this.soapResources == null) {
+            this.soapResources = new LinkedHashSet<>();
+        }
+        this.soapResources.add(wsdl);
+    }
+
+    public String getSoapVersion() {
+        return soapVersion;
+    }
+
+    public void setSoapVersion(String soapVersion) {
+        this.soapVersion = soapVersion;
+    }
+
+    public boolean isWssProcessingEnabled() {
+        return wssProcessingEnabled;
+    }
+
+    public void setWssProcessingEnabled(boolean wssProcessingEnabled) {
+        this.wssProcessingEnabled = wssProcessingEnabled;
+    }
+
+    public String getWsdlRootUrl() {
+        return wsdlRootUrl;
+    }
+
+    public void setWsdlRootUrl(String wsdlRootUrl) {
+        this.wsdlRootUrl = wsdlRootUrl;
     }
 }

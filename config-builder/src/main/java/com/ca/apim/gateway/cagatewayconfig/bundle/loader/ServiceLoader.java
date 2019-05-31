@@ -9,11 +9,10 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.beans.Wsdl;
+import com.ca.apim.gateway.cagatewayconfig.beans.SoapResource;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -25,6 +24,8 @@ import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicy
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Singleton
 public class ServiceLoader implements BundleEntityLoader {
@@ -43,8 +44,6 @@ public class ServiceLoader implements BundleEntityLoader {
         Map<String, Object> allProperties = BuilderUtils.mapPropertiesElements(servicePropertiesElement, PROPERTIES);
         Map<String, Object> properties = new HashMap<>();
         Service serviceEntity = new Service();
-        populateServiceEntity(service, serviceEntity, allProperties, properties);
-        boolean isSoapService = serviceEntity.getWsdl() != null;
 
         Folder parentFolder = getFolder(bundle, folderId);
 
@@ -53,6 +52,9 @@ public class ServiceLoader implements BundleEntityLoader {
         serviceEntity.setPath(getPath(parentFolder, name));
         serviceEntity.setParentFolder(parentFolder);
         serviceEntity.setServiceDetailsElement(serviceDetails);
+
+        populateServiceEntity(service, serviceEntity, allProperties, properties);
+        boolean isSoapService = isNotBlank(serviceEntity.getSoapVersion());
 
         Element serviceMappingsElement = getSingleChildElement(serviceEntity.getServiceDetailsElement(), SERVICE_MAPPINGS);
         Element httpMappingElement = getSingleChildElement(serviceMappingsElement, HTTP_MAPPING);
@@ -118,9 +120,11 @@ public class ServiceLoader implements BundleEntityLoader {
         }
         final Element resources = getSingleChildElement(service, RESOURCES);
 
-        if(isSoapService) {
-            extractResourceSetsForSoap(soapVersion, resources, serviceEntity);
-            serviceEntity.getWsdl().setWssProcessingEnabled(wssProcessingEnabled);
+        if (isSoapService) {
+            extractResourceSetsForSoap(resources, serviceEntity);
+
+            serviceEntity.setWssProcessingEnabled(wssProcessingEnabled);
+            serviceEntity.setSoapVersion(soapVersion);
         } else {
             final Element resourceSet = getSingleChildElement(resources, RESOURCE_SET);
             final Element resource = getSingleChildElement(resourceSet, RESOURCE);
@@ -128,29 +132,50 @@ public class ServiceLoader implements BundleEntityLoader {
         }
     }
 
-    private void extractResourceSetsForSoap(String soapVersion, Element resources, Service serviceEntity) {
+    private void extractResourceSetsForSoap(Element resources, Service serviceEntity) {
         List<Element> resourceSets = getChildElements(resources, RESOURCE_SET);
-        for(Element resourceSet : resourceSets) {
+        resourceSets.forEach(resourceSet -> {
             String tagValue = resourceSet.getAttribute(ATTRIBUTE_TAG);
-            final Element resource = getSingleChildElement(resourceSet, RESOURCE);
-            if(StringUtils.isEmpty(tagValue)) {
-                throw new BundleLoadException("No tag attribute found under " + RESOURCE_SET);
-            } else if(TAG_VALUE_POLICY.equals(tagValue)) {
-                serviceEntity.setPolicy(resource.getTextContent());
-            } else if(TAG_VALUE_WSDL.equals(tagValue)) {
-                final String rootUrlForWsdl = resourceSet.getAttribute(ATTRIBUTE_ROOT_URL);
-                final String wsdl = resource.getTextContent();
-
-                if(StringUtils.isEmpty(wsdl) || StringUtils.isEmpty(rootUrlForWsdl)) {
-                    throw new BundleLoadException("No wsdl or rootUrl found under " + RESOURCE_SET);
-                } else {
-                    Wsdl wsdlBean = new Wsdl();
-                    wsdlBean.setRootUrl(rootUrlForWsdl);
-                    wsdlBean.setWsdlXml(wsdl);
-                    wsdlBean.setSoapVersion(soapVersion);
-                    serviceEntity.setWsdl(wsdlBean);
-                }
+            if (isEmpty(tagValue)) {
+                throw new BundleLoadException("No tag attribute found under " + RESOURCE_SET + " for service " + serviceEntity.getName());
             }
+
+            final List<Element> resourceElements = getChildElements(resourceSet, RESOURCE);
+
+            if (resourceElements.isEmpty()) {
+                throw new BundleLoadException("No l7:resource elements for service " + serviceEntity.getName());
+            }
+            if (TAG_VALUE_WSDL.equals(tagValue)) {
+                serviceEntity.setWsdlRootUrl(resourceSet.getAttribute(ATTRIBUTE_ROOT_URL));
+
+                resourceElements.forEach(e -> addServiceResource(e, serviceEntity));
+                return;
+            }
+
+            if (resourceElements.size() > 1) {
+                throw new BundleLoadException("Multiple l7:resource elements found for service " + serviceEntity.getName());
+            }
+
+            if (TAG_VALUE_POLICY.equals(tagValue)) {
+                final Element resource = resourceElements.get(0);
+                serviceEntity.setPolicy(resource.getTextContent());
+            }
+        });
+    }
+
+    private void addServiceResource(final Element resource, final Service service) {
+        final String rootUrl = resource.getAttribute(ATTRIBUTE_SOURCE_URL);
+        final String content = resource.getTextContent();
+        final String type = resource.getAttribute(ATTRIBUTE_TYPE);
+
+        if (isEmpty(content) || isEmpty(rootUrl)) {
+            throw new BundleLoadException("No content or sourceUrl found under " + RESOURCE + " for service " + service.getName());
+        } else {
+            SoapResource soapResource = new SoapResource();
+            soapResource.setRootUrl(rootUrl);
+            soapResource.setContent(content);
+            soapResource.setType(type);
+            service.addSoapResource(soapResource);
         }
     }
 

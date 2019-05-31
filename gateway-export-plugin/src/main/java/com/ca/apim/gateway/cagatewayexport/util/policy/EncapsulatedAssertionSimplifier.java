@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 
 /**
@@ -40,8 +41,10 @@ public class EncapsulatedAssertionSimplifier implements PolicyAssertionSimplifie
             Policy policyEntity = bundle.getPolicies().values().stream().filter(p -> encassEntity.get().getPolicyId().equals(p.getId())).findFirst().orElse(null);
             if (policyEntity != null) {
                 encapsulatedAssertionElement.setAttribute("encassName", encassEntity.get().getName());
-                Element encapsulatedAssertionConfigNameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-                encapsulatedAssertionElement.removeChild(encapsulatedAssertionConfigNameElement);
+                Element encapsulatedAssertionConfigNameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
+                if (encapsulatedAssertionConfigNameElement != null) {
+                    encapsulatedAssertionElement.removeChild(encapsulatedAssertionConfigNameElement);
+                }
                 encapsulatedAssertionElement.removeChild(encassGuidElement);
             } else {
                 LOGGER.log(Level.WARNING, "Could not find referenced encass policy with id: {0}", encassEntity.get().getPolicyId());

@@ -74,21 +74,21 @@ class FolderLoaderUtilsTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void getWsdlRootNoWsdlDirTest(TemporaryFolder temporaryFolder) {
-        assertNull(getWsdlRootDir(temporaryFolder.getRoot()));
+        assertNull(getSoapResourcesRootDir(temporaryFolder.getRoot()));
     }
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void getWsdlRootDirWsdlFileErrorTest(TemporaryFolder temporaryFolder) throws IOException {
-        temporaryFolder.createFile("wsdl");
-        assertThrows(ConfigLoadException.class, () -> getWsdlRootDir(temporaryFolder.getRoot()));
+        temporaryFolder.createFile(SOAP_RESOURCES_FOLDER);
+        assertThrows(ConfigLoadException.class, () -> getSoapResourcesRootDir(temporaryFolder.getRoot()));
     }
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void getWsdlRootDirTest(TemporaryFolder temporaryFolder) {
-        temporaryFolder.createDirectory("wsdl");
-        assertNotNull(getWsdlRootDir(temporaryFolder.getRoot()));
+        temporaryFolder.createDirectory(SOAP_RESOURCES_FOLDER);
+        assertNotNull(getSoapResourcesRootDir(temporaryFolder.getRoot()));
     }
 
     @Test

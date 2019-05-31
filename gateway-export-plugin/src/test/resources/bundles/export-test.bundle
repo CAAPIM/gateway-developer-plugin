@@ -2472,11 +2472,11 @@ http://www.w3.org/2007/08/xml.xsd will not change.
             </l7:Properties>
         </l7:Mapping>
         <l7:Mapping action="NewOrExisting" srcId="280843ac05d8a20bf42893beafb13f0d" srcUri="https://gateway-dev:8443/restman/1.0/firewallRules/280843ac05d8a20bf42893beafb13f0d" type="FIREWALL_RULE"/>
-        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffd" srcUri="https://gateway-dev:8443/restman/1.0/resources/0000000000000000fffffffffffffffd" type="RESOURCE_ENTRY"/>
-        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffff9" srcUri="https://gateway-dev:8443/restman/1.0/resources/0000000000000000fffffffffffffff9" type="RESOURCE_ENTRY"/>
-        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffa" srcUri="https://gateway-dev:8443/restman/1.0/resources/0000000000000000fffffffffffffffa" type="RESOURCE_ENTRY"/>
-        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffc" srcUri="https://gateway-dev:8443/restman/1.0/resources/0000000000000000fffffffffffffffc" type="RESOURCE_ENTRY"/>
-        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffb" srcUri="https://gateway-dev:8443/restman/1.0/resources/0000000000000000fffffffffffffffb" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffd" srcUri="https://gateway-dev:8443/restman/1.0/soapResources/0000000000000000fffffffffffffffd" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffff9" srcUri="https://gateway-dev:8443/restman/1.0/soapResources/0000000000000000fffffffffffffff9" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffa" srcUri="https://gateway-dev:8443/restman/1.0/soapResources/0000000000000000fffffffffffffffa" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffc" srcUri="https://gateway-dev:8443/restman/1.0/soapResources/0000000000000000fffffffffffffffc" type="RESOURCE_ENTRY"/>
+        <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffffb" srcUri="https://gateway-dev:8443/restman/1.0/soapResources/0000000000000000fffffffffffffffb" type="RESOURCE_ENTRY"/>
         <l7:Mapping action="NewOrExisting" srcId="0000000000000000fffffffffffffcd5" srcUri="https://gateway-dev:8443/restman/1.0/logSinks/0000000000000000fffffffffffffcd5" type="LOG_SINK"/>
         <l7:Mapping action="NewOrExisting" srcId="00000000000000040000000000000001" srcUri="https://gateway-dev:8443/restman/1.0/auditConfiguration/default" type="AUDIT_CONFIG">
             <l7:Properties>

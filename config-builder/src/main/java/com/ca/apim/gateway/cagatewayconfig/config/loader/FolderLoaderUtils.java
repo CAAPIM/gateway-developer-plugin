@@ -26,6 +26,8 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class FolderLoaderUtils {
 
+    public static final String SOAP_RESOURCES_FOLDER = "soapResources";
+
     /**
      * Creates all the folders along the path for each folderable bean
      * @param bundle The bundle
@@ -70,16 +72,16 @@ public class FolderLoaderUtils {
     }
 
     @Nullable
-    static File getWsdlRootDir(File rootDir) {
-        final File wsdlRootDir = new File(rootDir, "wsdl");
+    static File getSoapResourcesRootDir(File rootDir) {
+        final File soapResourceRootDir = new File(rootDir, SOAP_RESOURCES_FOLDER);
 
-        if (!wsdlRootDir.exists()) {
+        if (!soapResourceRootDir.exists()) {
             return null;
-        } else if (!wsdlRootDir.isDirectory()) {
-            throw new ConfigLoadException("Expected directory but was file: " + wsdlRootDir);
+        } else if (!soapResourceRootDir.isDirectory()) {
+            throw new ConfigLoadException("Expected directory but was file: " + soapResourceRootDir);
         }
 
-        return wsdlRootDir;
+        return soapResourceRootDir;
     }
 
     /**

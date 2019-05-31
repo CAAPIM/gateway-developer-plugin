@@ -8,6 +8,8 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import javax.inject.Named;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 @Named("FOLDER")
 public class Folder extends Folderable {
 
@@ -20,6 +22,7 @@ public class Folder extends Folderable {
     public Folder(String id, String name) {
         super.setId(id);
         super.setName(name);
+        super.setPath(EMPTY);
     }
 
 }

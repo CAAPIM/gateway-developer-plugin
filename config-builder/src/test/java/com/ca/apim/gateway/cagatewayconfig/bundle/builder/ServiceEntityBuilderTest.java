@@ -8,10 +8,13 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -119,38 +122,7 @@ class ServiceEntityBuilderTest {
     }
 
     @Test
-    void buildServiceWithWsdlFile() throws DocumentParseException {
-        ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-
-        Bundle bundle = new Bundle();
-
-        Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/soap/policy.xml", "policy");
-
-        Folder wsdlParentFolder = setUpFolderAndPolicy(bundle, "/soap/wsdl.wsdl", "wsdl");
-
-
-        Service service = new Service();
-        service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
-        service.setUrl("/soap/service/url");
-        service.setPolicy("/soap/policy.xml");
-        service.setParentFolder(serviceParentFolder);
-        service.setProperties(new HashMap<String, Object>() {{
-            put("key1", "value1");
-            put("ENV.key.environment", "something");
-        }});
-        Wsdl wsdlBean = new Wsdl();
-        wsdlBean.setWssProcessingEnabled(true);
-        wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
-        wsdlBean.setSoapVersion("1.1");
-        service.setWsdl(wsdlBean);
-
-        bundle.putAllServices(new HashMap<String, Service>() {{
-            put("/v1/soap-service1", service);
-        }});
-    }
-
-    @Test
-    void buildOneSoapService() throws DocumentParseException {
+    void buildOneSoapServiceWithWSDLAndNoXSD() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
@@ -162,20 +134,26 @@ class ServiceEntityBuilderTest {
         service.setUrl("/soap/service/url");
         service.setPolicy("/soap/policy.xml");
         service.setParentFolder(serviceParentFolder);
+        service.setName("soap-service1");
         service.setProperties(new HashMap<String, Object>() {{
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
-        Wsdl wsdlBean = new Wsdl();
-        wsdlBean.setWssProcessingEnabled(true);
+        service.setWssProcessingEnabled(true);
+        service.setSoapVersion("1.1");
+        SoapResource wsdlBean = new SoapResource();
         wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
-        wsdlBean.setSoapVersion("1.1");
-        wsdlBean.setWsdlXml("wsdl xml content");
-        service.setWsdl(wsdlBean);
+        wsdlBean.setPath(PathUtils.unixPath(serviceParentFolder.getPath(), service.getName(), "soap.wsdl"));
+        wsdlBean.setContent("wsdl xml content");
+        wsdlBean.setType(SoapResourceType.WSDL.getType());
+        service.setWsdlRootUrl(wsdlBean.getRootUrl());
+        service.addSoapResource(wsdlBean);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
-            put("/v1/soap-service1", service);
+            put(service.getName(), service);
         }});
+        bundle.putAllSoapResources(ImmutableMap.of(wsdlBean.getPath(), wsdlBean));
+        bundle.buildFolderTree();
 
         List<Entity> services = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
@@ -187,7 +165,7 @@ class ServiceEntityBuilderTest {
     }
 
     @Test
-    void buildTwoServicesOneSoapOneRest() throws DocumentParseException {
+    void buildTwoServicesOneSoapWithWSDLAndXSDAndOneRest() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle();
@@ -195,8 +173,10 @@ class ServiceEntityBuilderTest {
         Folder service2ParentFolder = setUpFolderAndPolicy(bundle, "/soap/policy.xml", "policy");
 
         Service service1 = getService1(service1ParentFolder);
+        service1.setName("service1");
 
         Service service2 = new Service();
+        service2.setName("service2");
         service2.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
         service2.setUrl("/soap/service/url");
         service2.setPolicy("/soap/policy.xml");
@@ -205,17 +185,30 @@ class ServiceEntityBuilderTest {
             put("key2", "value2");
             put("ENV.key.environment", "something");
         }});
-        Wsdl wsdlBean = new Wsdl();
-        wsdlBean.setWssProcessingEnabled(true);
+        service2.setWssProcessingEnabled(true);
+        service2.setSoapVersion("1.1");
+        SoapResource wsdlBean = new SoapResource();
         wsdlBean.setRootUrl("/test/rooturl/for/soap.wsdl");
-        wsdlBean.setSoapVersion("1.1");
-        wsdlBean.setWsdlXml("wsdl xml content");
-        service2.setWsdl(wsdlBean);
+        wsdlBean.setContent("wsdl xml content");
+        wsdlBean.setPath(PathUtils.unixPath(service2ParentFolder.getPath(), service2.getName(), "soap.wsdl"));
+        wsdlBean.setType(SoapResourceType.WSDL.getType());
+
+        SoapResource xsdBean = new SoapResource();
+        xsdBean.setRootUrl("/test/rooturl/for/soap.xsd");
+        xsdBean.setContent("xsd xml content");
+        xsdBean.setPath(PathUtils.unixPath(service2ParentFolder.getPath(), service2.getName(), "soap.xsd"));
+        xsdBean.setType(SoapResourceType.XMLSCHEMA.getType());
+
+        service2.setWsdlRootUrl(wsdlBean.getRootUrl());
+        service2.addSoapResource(wsdlBean);
+        service2.addSoapResource(xsdBean);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
-            put("my/v1/service1", service1);
-            put("my/service2", service2);
+            put(service1.getName(), service1);
+            put(service2.getName(), service2);
         }});
+        bundle.putAllSoapResources(ImmutableMap.of(wsdlBean.getPath(), wsdlBean, xsdBean.getPath(), xsdBean));
+        bundle.buildFolderTree();
 
         verifyMultipleServices(builder, bundle, service1, service2);
     }
@@ -253,15 +246,18 @@ class ServiceEntityBuilderTest {
         parentFolder.setId("asd");
         parentFolder.setName("my");
         parentFolder.setPath("my");
+        parentFolder.setParentFolder(Folder.ROOT_FOLDER);
 
         Folder serviceParentFolder = new Folder();
         serviceParentFolder.setId("test");
         serviceParentFolder.setName("v1");
         serviceParentFolder.setPath("my/v1");
+        serviceParentFolder.setParentFolder(parentFolder);
 
         bundle.putAllFolders(new HashMap<String, Folder>() {{
             put(parentFolder.getPath(), parentFolder);
             put(serviceParentFolder.getPath(), serviceParentFolder);
+            put(Folder.ROOT_FOLDER.getPath(), Folder.ROOT_FOLDER);
         }});
 
         Policy policy = new Policy();
@@ -298,7 +294,7 @@ class ServiceEntityBuilderTest {
 
         Element serviceProperties = getSingleElement(serviceDetails, PROPERTIES);
         NodeList propertyList = serviceProperties.getElementsByTagName(PROPERTY);
-        boolean isSoapService = service.getWsdl() != null;
+        boolean isSoapService = CollectionUtils.isNotEmpty(service.getSoapResources());
         if (isSoapService) {
             assertEquals(5, propertyList.getLength());
         } else {
@@ -349,7 +345,10 @@ class ServiceEntityBuilderTest {
         Element serviceResources = getSingleElement(serviceEntityXml, RESOURCES);
         if(isSoapService) {
             List<Element> serviceResourceSets = getChildElements(serviceResources, RESOURCE_SET);
-            Element serviceResource = null, wsdlResource = null;
+            Element serviceResource = null;
+            Element wsdlResource = null;
+            Element xsdResource = null;
+
             for(Element serviceResourceSet : serviceResourceSets) {
                 String tagValue = serviceResourceSet.getAttribute(ATTRIBUTE_TAG);
                 switch (tagValue) {
@@ -357,15 +356,21 @@ class ServiceEntityBuilderTest {
                         serviceResource = getSingleChildElement(serviceResourceSet, RESOURCE);
                         break;
                     case TAG_VALUE_WSDL:
-                        wsdlResource = getSingleChildElement(serviceResourceSet, RESOURCE);
+                        List<Element> resources = getChildElements(serviceResourceSet, RESOURCE);
+                        wsdlResource = resources.stream().filter(e -> SoapResourceType.WSDL.getType().equals(e.getAttribute(ATTRIBUTE_TYPE))).findFirst().orElse(null);
+                        xsdResource = resources.stream().filter(e -> SoapResourceType.XMLSCHEMA.getType().equals(e.getAttribute(ATTRIBUTE_TYPE))).findFirst().orElse(null);
                         break;
                 }
             }
 
             assertEquals(TAG_VALUE_POLICY, serviceResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
             assertNotNull(serviceResource.getTextContent());
-            assertEquals(TAG_VALUE_WSDL, wsdlResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
+            assertEquals(SoapResourceType.WSDL.getType(), wsdlResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
             assertNotNull(wsdlResource.getTextContent());
+            if (xsdResource != null) {
+                assertEquals(SoapResourceType.XMLSCHEMA.getType(), xsdResource.getAttributes().getNamedItem(ATTRIBUTE_TYPE).getTextContent());
+                assertNotNull(xsdResource.getTextContent());
+            }
         } else {
             Element serviceResourceSet = getSingleElement(serviceResources, RESOURCE_SET);
             Element serviceResource = getSingleElement(serviceResourceSet, RESOURCE);
