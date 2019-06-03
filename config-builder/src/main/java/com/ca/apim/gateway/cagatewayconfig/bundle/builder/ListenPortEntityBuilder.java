@@ -110,7 +110,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
         String targetServiceReference = listenPort.getTargetServiceReference();
         Service service = bundle.getServices().get(targetServiceReference);
 
-        if (service == null) {
+        if (service == null || service.getId() == null) {
             service = getDeploymentBundle().getServices().get(targetServiceReference);
         }
 

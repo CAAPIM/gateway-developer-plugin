@@ -26,6 +26,6 @@ public class ServiceEnvironmentProperty extends EnvironmentProperty {
 
     @Override
     public String getKey() {
-        return "service.property." + getName();
+        return getName();
     }
 }

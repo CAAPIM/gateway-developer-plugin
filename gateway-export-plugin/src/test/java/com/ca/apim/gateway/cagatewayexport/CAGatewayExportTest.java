@@ -90,9 +90,9 @@ class CAGatewayExportTest {
         try (FileReader reader = new FileReader(new File(configDir, "context-env.properties"))) {
             environmentProperties.load(reader);
         }
-        assertTrue(environmentProperties.containsKey("contextVariable.property.environment-variable.empty-value"));
-        assertTrue(environmentProperties.containsKey("contextVariable.property.environment-variable.message-variable"));
-        assertTrue(environmentProperties.containsKey("contextVariable.property.environment-variable.local.env.var"));
+        assertTrue(environmentProperties.containsKey("environment-variable.empty-value"));
+        assertTrue(environmentProperties.containsKey("environment-variable.message-variable"));
+        assertTrue(environmentProperties.containsKey("environment-variable.local.env.var"));
 
         assertFalse(new File(configDir, "static.properties").exists());
 

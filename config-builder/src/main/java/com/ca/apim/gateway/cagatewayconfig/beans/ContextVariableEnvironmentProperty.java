@@ -26,6 +26,6 @@ public class ContextVariableEnvironmentProperty extends EnvironmentProperty {
 
     @Override
     public String getKey() {
-        return "contextVariable.property." + getName();
+        return getName();
     }
 }
