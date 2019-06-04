@@ -1,4 +1,3 @@
-[![Waffle.io - Columns and their card count](https://badge.waffle.io/ca-api-Gateway/Gateway-developer-plugin.svg?columns=all)](https://waffle.io/ca-api-Gateway/Gateway-developer-plugin)
 [![Build Status](https://travis-ci.org/ca-api-gateway/gateway-developer-plugin.svg?branch=master)](https://travis-ci.org/ca-api-gateway/gateway-developer-plugin)
 [![Sonar Cloud Status](https://sonarcloud.io/api/project_badges/measure?project=com.ca.apim.gateway%3Agateway-developer-plugin&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.ca.apim.gateway%3Agateway-developer-plugin)
 [![Maven Central](https://img.shields.io/maven-central/v/com.ca.apim.gateway/gateway-developer-plugin.svg)](https://search.maven.org/artifact/com.ca.apim.gateway/gateway-developer-plugin)
@@ -12,8 +11,8 @@ In order to use this plugins add the following you your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.gateway.gateway-developer-plugin" version "0.6.+"
-    id "com.ca.apim.gateway.gateway-export-plugin" version "0.6.+"
+    id "com.ca.apim.gateway.gateway-developer-plugin" version "0.8.+"
+    id "com.ca.apim.gateway.gateway-export-plugin" version "0.8.+"
 }
 
 repositories {
@@ -60,7 +59,7 @@ Contributions are welcome and much appreciated. To learn more, see the [Contribu
 
 ## License
 
-Copyright (c) 2018 CA. All rights reserved.
+Copyright (c) 2018 CA/Broadcom. All rights reserved.
 
 This software may be modified and distributed under the terms
 of the MIT license. See the [LICENSE][license-link] file for details.
