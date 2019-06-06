@@ -65,8 +65,8 @@ public class FullBundleCreator {
                                  List<File> deploymentBundles,
                                  String bundleFolderPath,
                                  String bundleFileName,
-                                 boolean validateEnvironment) {
-        final String bundle = createFullBundleAsString(environmentProperties, deploymentBundles, validateEnvironment);
+                                 boolean detemplatizeDeploymentBundles) {
+        final String bundle = createFullBundleAsString(environmentProperties, deploymentBundles, detemplatizeDeploymentBundles);
         try {
             writeStringToFile(new File(bundleFolderPath, bundleFileName), bundle, defaultCharset());
         } catch (IOException e) {
