@@ -64,8 +64,9 @@ public class FullBundleCreator {
     public void createFullBundle(Map<String, String> environmentProperties,
                                  List<File> deploymentBundles,
                                  String bundleFolderPath,
-                                 String bundleFileName) {
-        final String bundle = createFullBundleAsString(environmentProperties, deploymentBundles);
+                                 String bundleFileName,
+                                 boolean validateEnvironment) {
+        final String bundle = createFullBundleAsString(environmentProperties, deploymentBundles, validateEnvironment);
         try {
             writeStringToFile(new File(bundleFolderPath, bundleFileName), bundle, defaultCharset());
         } catch (IOException e) {
@@ -74,7 +75,8 @@ public class FullBundleCreator {
     }
 
     private String createFullBundleAsString(Map<String, String> environmentProperties,
-                                            List<File> deploymentBundles) {
+                                            List<File> deploymentBundles,
+                                            boolean detemplatizeDeploymentBundles) {
         // load all deployment bundles to strings
         List<TemplatizedBundle> templatizedBundles = deploymentBundles.stream().map(f -> new StringTemplatizedBundle(f.getName(), fileUtils.getFileAsString(f))).collect(toList());
 
@@ -83,7 +85,7 @@ public class FullBundleCreator {
         environmentBundleBuilder.build(environmentBundle, environmentProperties, EMPTY, PLUGIN);
 
         // validate and detemplatize
-        processDeploymentBundles(environmentBundle, templatizedBundles, PLUGIN);
+        processDeploymentBundles(environmentBundle, templatizedBundles, PLUGIN, detemplatizeDeploymentBundles);
 
         // generate the environment bundle
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
