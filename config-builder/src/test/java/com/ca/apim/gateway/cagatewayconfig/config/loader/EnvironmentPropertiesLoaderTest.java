@@ -63,7 +63,7 @@ class EnvironmentPropertiesLoaderTest {
     void loadSinglePropertyFromFile() throws IOException {
         PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(GlobalEnvironmentProperty.class));
         final File configFolder = rootProjectDir.createDirectory("config");
-        final File identityProvidersFile = new File(configFolder, "env.properties");
+        final File identityProvidersFile = new File(configFolder, "global-env.properties");
         Files.touch(identityProvidersFile);
 
         when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream("Prop1=value1\nProp2=value2\nProp3=Gateway".getBytes()));
@@ -128,7 +128,7 @@ class EnvironmentPropertiesLoaderTest {
         PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(GlobalEnvironmentProperty.class));
 
         final File configFolder = rootProjectDir.createDirectory("config");
-        final File identityProvidersFile = new File(configFolder, "env.properties");
+        final File identityProvidersFile = new File(configFolder, "global-env.properties");
         Files.touch(identityProvidersFile);
 
         InputStream stream = mock(InputStream.class);
@@ -143,7 +143,7 @@ class EnvironmentPropertiesLoaderTest {
         PropertiesLoaderBase loader = createPropertiesLoader(fileUtils, new IdGenerator(), createEntityInfo(GlobalEnvironmentProperty.class));
 
         final File configFolder = rootProjectDir.createDirectory("config");
-        final File identityProvidersFile = new File(configFolder, "env.properties");
+        final File identityProvidersFile = new File(configFolder, "global-env.properties");
         Files.touch(identityProvidersFile);
 
         when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(content.getBytes()));

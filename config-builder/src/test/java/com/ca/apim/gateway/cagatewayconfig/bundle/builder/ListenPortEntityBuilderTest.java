@@ -110,6 +110,21 @@ class ListenPortEntityBuilderTest {
     }
 
     @Test
+    void buildWithCustomPortReferencingService() {
+        ListenPortEntityBuilder builder = new ListenPortEntityBuilder(ID_GENERATOR);
+        final Bundle bundle = new Bundle();
+        addPortToBundle(bundle, buildPortWithServiceRef());
+        Service service = new Service();
+        service.setId("service-id");
+        service.setName(SERVICE_REFERENCE);
+        bundle.getEntities(Service.class).put(SERVICE_REFERENCE, service);
+
+        final List<Entity> listenPortEntities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        // check
+        checkExpectedPorts(listenPortEntities, TEST_HTTP_PORT);
+    }
+
+    @Test
     void checkDefaultPortsAreCreated() {
         final Map<String, ListenPort> defaultListenPorts = ListenPortEntityBuilder.createDefaultListenPorts();
 

@@ -14,7 +14,7 @@ import javax.inject.Named;
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
 
 @Named("SERVICE_ENVIRONMENT_PROPERTY")
-@ConfigurationFile(name = "env", type = PROPERTIES)
+@ConfigurationFile(name = "service-env", type = PROPERTIES)
 @EnvironmentType("SERVICE_PROPERTY")
 public class ServiceEnvironmentProperty extends EnvironmentProperty {
 
@@ -26,6 +26,6 @@ public class ServiceEnvironmentProperty extends EnvironmentProperty {
 
     @Override
     public String getKey() {
-        return "service.property." + getName();
+        return getName();
     }
 }

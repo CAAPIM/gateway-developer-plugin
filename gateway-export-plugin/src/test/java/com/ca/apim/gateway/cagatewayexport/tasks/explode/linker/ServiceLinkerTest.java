@@ -57,7 +57,7 @@ class ServiceLinkerTest {
         ServiceEnvironmentProperty property = bundle.getServiceEnvironmentProperties().get("service.prop");
         assertNotNull(property);
         assertEquals("value2", property.getValue());
-        assertEquals("service.property.service.prop", property.getKey());
+        assertEquals("service.prop", property.getKey());
     }
 
     private void link(Bundle bundle, boolean serviceProperties) {

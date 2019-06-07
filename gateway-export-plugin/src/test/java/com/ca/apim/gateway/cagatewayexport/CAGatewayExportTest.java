@@ -79,15 +79,20 @@ class CAGatewayExportTest {
         File configDir = new File(exportDir, "config");
 
         Properties environmentProperties = new Properties();
-        try (FileReader reader = new FileReader(new File(configDir, "env.properties"))) {
+        try (FileReader reader = new FileReader(new File(configDir, "global-env.properties"))) {
             environmentProperties.load(reader);
         }
 
-        assertTrue(environmentProperties.containsKey("contextVariable.property.environment-variable.empty-value"));
-        assertTrue(environmentProperties.containsKey("contextVariable.property.environment-variable.message-variable"));
-        assertTrue(environmentProperties.containsKey("contextVariable.property.environment-variable.local.env.var"));
         assertTrue(environmentProperties.containsKey("gateway.ENV.my-global-property"));
         assertTrue(environmentProperties.containsKey("gateway.ENV.another.global"));
+
+        environmentProperties = new Properties();
+        try (FileReader reader = new FileReader(new File(configDir, "context-env.properties"))) {
+            environmentProperties.load(reader);
+        }
+        assertTrue(environmentProperties.containsKey("environment-variable.empty-value"));
+        assertTrue(environmentProperties.containsKey("environment-variable.message-variable"));
+        assertTrue(environmentProperties.containsKey("environment-variable.local.env.var"));
 
         assertFalse(new File(configDir, "static.properties").exists());
 

@@ -14,7 +14,7 @@ import javax.inject.Named;
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
 
 @Named("CONTEXT_VARIABLE_ENVIRONMENT_PROPERTY")
-@ConfigurationFile(name = "env", type = PROPERTIES)
+@ConfigurationFile(name = "context-env", type = PROPERTIES)
 @EnvironmentType("CONTEXT_VARIABLE_PROPERTY")
 public class ContextVariableEnvironmentProperty extends EnvironmentProperty {
 
@@ -26,6 +26,6 @@ public class ContextVariableEnvironmentProperty extends EnvironmentProperty {
 
     @Override
     public String getKey() {
-        return "contextVariable.property." + getName();
+        return getName();
     }
 }
