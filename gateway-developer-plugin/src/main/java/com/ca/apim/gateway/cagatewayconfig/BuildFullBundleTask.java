@@ -37,6 +37,7 @@ public class BuildFullBundleTask extends DefaultTask {
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
     private final ConfigurableFileCollection dependencyBundles;
     private final RegularFileProperty outputBundle;
+    private final Property<Boolean> detemplatizeDeploymentBundles;
 
     @Inject
     public BuildFullBundleTask() {
@@ -44,6 +45,7 @@ public class BuildFullBundleTask extends DefaultTask {
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
         dependencyBundles = getProject().files();
         outputBundle = newOutputFile();
+        detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
     }
 
     @Input
@@ -61,6 +63,11 @@ public class BuildFullBundleTask extends DefaultTask {
         return outputBundle;
     }
 
+    @Input
+    Property<Boolean> getDetemplatizeDeploymentBundles() {
+        return detemplatizeDeploymentBundles;
+    }
+
     @TaskAction
     public void perform() {
         final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrNull());
@@ -75,7 +82,8 @@ public class BuildFullBundleTask extends DefaultTask {
                 environmentValues,
                 bundleFiles,
                 bundleDirectory,
-                outputBundle.getAsFile().get().getName()
+                outputBundle.getAsFile().get().getName(),
+                detemplatizeDeploymentBundles.get()
         );
     }
 }

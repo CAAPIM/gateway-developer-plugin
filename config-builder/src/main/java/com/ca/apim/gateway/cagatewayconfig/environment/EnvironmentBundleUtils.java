@@ -57,8 +57,13 @@ public class EnvironmentBundleUtils {
     }
 
     static void processDeploymentBundles(Bundle environmentBundle,
-                                          List<TemplatizedBundle> templatizedBundles,
-                                          EnvironmentBundleCreationMode mode) {
+                                         List<TemplatizedBundle> templatizedBundles,
+                                         EnvironmentBundleCreationMode mode,
+                                         boolean detemplatize) {
+        if (!detemplatize) {
+            return;
+        }
+
         BundleEnvironmentValidator bundleEnvironmentValidator = new BundleEnvironmentValidator(environmentBundle);
         BundleDetemplatizer bundleDetemplatizer = new BundleDetemplatizer(environmentBundle);
         templatizedBundles.forEach(tb -> processTemplatizedBundle(tb, bundleEnvironmentValidator, bundleDetemplatizer, mode));

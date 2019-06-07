@@ -59,8 +59,8 @@ public class EnvironmentBundleCreator {
         processDeploymentBundles(
                 environmentBundle,
                 collectFiles(templatizedBundleFolderPath, BUNDLE_EXTENSION).stream().map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName()))).collect(toList()),
-                mode
-        );
+                mode,
+                true);
 
         // write the Environment bundle
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();

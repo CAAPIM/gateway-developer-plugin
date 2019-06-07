@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Spliterator;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.PolicyEntityBuilder.POLICY;
@@ -52,7 +53,7 @@ public class DependencyBundlesProcessor {
         this.documentFileUtils = documentFileUtils;
     }
 
-    public LinkedList<File> process(final LinkedList<File> bundles, String bundleFolderPath) {
+    public LinkedList<File> process(final List<File> bundles, String bundleFolderPath) {
         Bundle bundleObject = entityBundleLoader.load(bundles, BundleLoadingMode.PERMISSIVE, ENCAPSULATED_ASSERTION_TYPE);
         LinkedList<File> processedBundles = new LinkedList<>();
 

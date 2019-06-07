@@ -20,6 +20,7 @@ import org.gradle.api.provider.Provider;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -109,8 +110,9 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     private static BuildFullBundleTask createBuildFullBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
         // Create build-full-bundle task
         final BuildFullBundleTask buildFullBundleTask = project.getTasks().create(BUILD_FULL_BUNDLE, BuildFullBundleTask.class, t -> {
-            t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
+            t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig().getOrElse(Collections.emptyMap()));
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
+            t.getDetemplatizeDeploymentBundles().set(pluginConfig.getDetemplatizeDeploymentBundles().getOrElse(true));
         });
         project.afterEvaluate(p ->
                 buildFullBundleTask.getOutputBundle().set(new File(pluginConfig.getBuiltEnvironmentBundleDir().getAsFile().get(), getBuiltArtifactName(project, "-full", BUNDLE_FILE_EXTENSION))));
