@@ -11,10 +11,14 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
+import com.ca.apim.gateway.cagatewayconfig.util.bundle.DependencyBundlesProcessor;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.SystemUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -23,10 +27,9 @@ import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.*;
@@ -34,9 +37,11 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.copyNodes;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static java.nio.charset.Charset.defaultCharset;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.SystemUtils.JAVA_IO_TMPDIR;
 
 /**
  * This combines the environment bundle generation with the deployment bundle generation and outputs one single full bundle
@@ -45,20 +50,24 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 @Singleton
 public class FullBundleCreator {
 
+    private static final Logger LOGGER = Logger.getLogger(FullBundleCreator.class.getName());
+
     private final DocumentTools documentTools;
     private final EnvironmentBundleBuilder environmentBundleBuilder;
     private final BundleEntityBuilder bundleEntityBuilder;
     private final FileUtils fileUtils;
+    private final DependencyBundlesProcessor dependencyBundlesProcessor;
 
     @Inject
     FullBundleCreator(DocumentTools documentTools,
-                             EnvironmentBundleBuilder environmentBundleBuilder,
-                             BundleEntityBuilder bundleEntityBuilder,
-                             FileUtils fileUtils) {
+                      EnvironmentBundleBuilder environmentBundleBuilder,
+                      BundleEntityBuilder bundleEntityBuilder,
+                      FileUtils fileUtils, DependencyBundlesProcessor dependencyBundlesProcessor) {
         this.documentTools = documentTools;
         this.environmentBundleBuilder = environmentBundleBuilder;
         this.bundleEntityBuilder = bundleEntityBuilder;
         this.fileUtils = fileUtils;
+        this.dependencyBundlesProcessor = dependencyBundlesProcessor;
     }
 
     public void createFullBundle(Map<String, String> environmentProperties,
@@ -67,10 +76,20 @@ public class FullBundleCreator {
                                  String bundleFileName,
                                  boolean detemplatizeDeploymentBundles) {
         final String bundle = createFullBundleAsString(environmentProperties, deploymentBundles, detemplatizeDeploymentBundles);
+        // write the full bundle to a temporary file first
+        final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), bundleFileName);
         try {
-            writeStringToFile(new File(bundleFolderPath, bundleFileName), bundle, defaultCharset());
+            writeStringToFile(fullBundleFile, bundle, defaultCharset());
         } catch (IOException e) {
             throw new DocumentFileUtilsException("Error writing to file '" + bundleFileName + "': " + e.getMessage(), e);
+        }
+
+        // process for reattaching loose encasses and write to the final path
+        dependencyBundlesProcessor.process(singletonList(fullBundleFile), bundleFolderPath);
+        // delete the temp file
+        boolean deleted = fullBundleFile.delete();
+        if (!deleted) {
+            LOGGER.log(Level.WARNING, "Temporary bundle file was not deleted: " + fullBundleFile.toString());
         }
     }
 
