@@ -1,6 +1,7 @@
 package com.ca.apim.gateway.cagatewayconfig.util.bundle;
 
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.PolicyEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -28,8 +29,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.STRING_VALUE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.nodeList;
 import static java.util.stream.Collectors.toCollection;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(TemporaryFolderExtension.class)
 class DependencyBundlesProcessorTest {
@@ -38,6 +38,7 @@ class DependencyBundlesProcessorTest {
     private static final String TEST_2_BUNDLE = "DependencyBundleProcessorTest_2.bundle";
     private static final String TEST_3_BUNDLE = "DependencyBundleProcessorTest_3.bundle";
     private static final String TEST_4_BUNDLE = "DependencyBundleProcessorTest_4.bundle";
+    private static final String TEST_5_BUNDLE = "DependencyBundleProcessorTest_5.bundle";
     private TemporaryFolder rootProjectDir;
     private DependencyBundlesProcessor processor;
 
@@ -183,5 +184,26 @@ class DependencyBundlesProcessorTest {
         String guid = guids.item(0).getAttributes().getNamedItem(STRING_VALUE).getTextContent();
 
         assertEquals(ZERO_GUID, guid);
+    }
+
+    @Test
+    void testErrorOnDuplicatePolicies() throws IOException {
+        File originFolder = new File(rootProjectDir.getRoot(), "original");
+        originFolder.mkdirs();
+        File destinationFolder = new File(rootProjectDir.getRoot(), "processed");
+        destinationFolder.mkdirs();
+
+        // copy the bundles
+        byte[] bundle2Contents = IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResource(TEST_2_BUNDLE));
+        byte[] bundle3Contents = IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResource(TEST_5_BUNDLE));
+        File file2 = new File(originFolder, TEST_2_BUNDLE);
+        file2.createNewFile();
+        File file3 = new File(originFolder, TEST_5_BUNDLE);
+        file3.createNewFile();
+        Files.write(file2.toPath(), bundle2Contents);
+        Files.write(file3.toPath(), bundle3Contents);
+
+        // and try process them with error
+        assertThrows(BundleLoadException.class, () -> processor.process(Stream.of(new File(originFolder, TEST_2_BUNDLE), new File(originFolder, TEST_3_BUNDLE)).collect(toCollection(LinkedList::new)), destinationFolder.toString()));
     }
 }

@@ -9,15 +9,19 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
+import com.google.common.base.Joiner;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.GLOBAL;
 import static com.ca.apim.gateway.cagatewayconfig.beans.PolicyType.INTERNAL;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation.VALIDATE;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -76,6 +80,13 @@ public class PolicyLoader implements BundleEntityLoader {
         policy.setPolicyXML(policyString);
 
         Map<String, Policy> bundlePolicies = bundle.getPolicies();
+
+        if (bundle.getLoadingMode() == VALIDATE) {
+            Policy policyWithSameName = bundle.getPolicies().values().stream().filter(p -> Objects.equals(policy.getName(), p.getName())).findAny().orElse(null);
+            if (policyWithSameName != null) {
+                throw new BundleLoadException("Duplicate policies found with name '" + policyWithSameName.getName() + "': " + Joiner.on(", ").join(Arrays.asList(policyWithSameName.getPath(), policy.getPath())));
+            }
+        }
 
         if (bundlePolicies.containsKey(policy.getPath())) {
             String duplicatePathName = handleDuplicatePathName(bundlePolicies, policy);

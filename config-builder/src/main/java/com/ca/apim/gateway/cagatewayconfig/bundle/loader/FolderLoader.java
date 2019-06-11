@@ -37,13 +37,7 @@ public class FolderLoader implements BundleEntityLoader {
         if (ROOT_FOLDER_ID.equals(id)) {
             parentFolder = null;
         } else {
-            List<Folder> parentFolderList = bundle.getFolders().values().stream().filter(f -> parentFolderID.equals(f.getId())).collect(Collectors.toList());
-            if (parentFolderList.isEmpty()) {
-                throw new BundleLoadException("Invalid dependency bundle. Could not find folder with id: " + parentFolderID);
-            } else if (parentFolderList.size() > 1) {
-                throw new BundleLoadException("Invalid dependency bundle. Found multiple folders with id: " + parentFolderID);
-            }
-            parentFolder = parentFolderList.get(0);
+            parentFolder = ServiceAndPolicyLoaderUtil.getFolder(bundle, parentFolderID);
         }
 
         if (CharacterBlacklistUtil.containsInvalidCharacter(name)) {
