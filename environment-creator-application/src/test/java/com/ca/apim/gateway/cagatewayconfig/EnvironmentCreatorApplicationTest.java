@@ -7,7 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingMode;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
 import com.google.common.collect.ImmutableMap;
@@ -289,7 +289,7 @@ class EnvironmentCreatorApplicationTest {
         assertTrue(environmentBundleFile.exists());
 
         EntityBundleLoader bundleLoader = InjectionRegistry.getInjector().getInstance(EntityBundleLoader.class);
-        Bundle environmentBundle = bundleLoader.load(environmentBundleFile, BundleLoadingMode.STRICT);
+        Bundle environmentBundle = bundleLoader.load(environmentBundleFile, BundleLoadingOperation.EXPORT);
 
         assertEquals(1, environmentBundle.getIdentityProviders().size());
         assertNotNull(environmentBundle.getIdentityProviders().get("simple ldap"));

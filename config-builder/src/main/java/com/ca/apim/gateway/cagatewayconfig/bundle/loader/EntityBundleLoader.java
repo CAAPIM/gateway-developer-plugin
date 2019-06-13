@@ -40,13 +40,13 @@ public class EntityBundleLoader {
         this.entityLoaderRegistry = entityLoaderRegistry;
     }
 
-    public Bundle load(List<File> fileSet, BundleLoadingMode loadingMode, String... entityTypes) {
+    public Bundle load(List<File> fileSet, BundleLoadingOperation loadingMode, String... entityTypes) {
         final Bundle bundle = new Bundle();
         fileSet.forEach(f -> loadBundleFile(f, bundle, loadingMode, entityTypes));
         return bundle;
     }
 
-    public Bundle load(File dependencyBundlePath, BundleLoadingMode loadingMode, String... entityTypes) {
+    public Bundle load(File dependencyBundlePath, BundleLoadingOperation loadingMode, String... entityTypes) {
         final Bundle bundle = new Bundle();
 
         loadBundleFile(dependencyBundlePath, bundle, loadingMode, entityTypes);
@@ -54,7 +54,7 @@ public class EntityBundleLoader {
         return bundle;
     }
 
-    private void loadBundleFile(File dependencyBundlePath, Bundle bundle, BundleLoadingMode loadingMode, String... entityTypes) {
+    private void loadBundleFile(File dependencyBundlePath, Bundle bundle, BundleLoadingOperation loadingMode, String... entityTypes) {
         bundle.setLoadingMode(loadingMode);
 
         final Document bundleDocument;

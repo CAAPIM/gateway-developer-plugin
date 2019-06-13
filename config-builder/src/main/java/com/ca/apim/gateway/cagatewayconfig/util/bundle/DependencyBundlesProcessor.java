@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.bundle;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
-import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingMode;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
@@ -30,6 +30,7 @@ import java.util.Spliterator;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.PolicyEntityBuilder.POLICY;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.PolicyEntityBuilder.resolvePossibleMissingEncapsulatedAssertionDependencies;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.ENCAPSULATED;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
@@ -54,7 +55,7 @@ public class DependencyBundlesProcessor {
     }
 
     public LinkedList<File> process(final List<File> bundles, String bundleFolderPath) {
-        Bundle bundleObject = entityBundleLoader.load(bundles, BundleLoadingMode.PERMISSIVE, ENCAPSULATED_ASSERTION_TYPE);
+        Bundle bundleObject = entityBundleLoader.load(bundles, BundleLoadingOperation.VALIDATE, ENCAPSULATED_ASSERTION_TYPE, EntityTypes.POLICY_TYPE, FOLDER_TYPE);
         LinkedList<File> processedBundles = new LinkedList<>();
 
         for (File bundle : bundles) {

@@ -77,7 +77,7 @@ class EntityBundleLoaderTest {
         when(documentTools.parse(any(File.class))).thenReturn(mockDocument);
 
         EntityBundleLoader loader = new EntityBundleLoader(documentTools, registry);
-        final Bundle bundle = loader.load(mock(File.class), BundleLoadingMode.STRICT);
+        final Bundle bundle = loader.load(mock(File.class), BundleLoadingOperation.EXPORT);
 
         assertNotNull(bundle);
         assertFalse(bundle.getCassandraConnections().isEmpty());
@@ -89,7 +89,7 @@ class EntityBundleLoaderTest {
     @Test
     void tryLoadParseException() throws DocumentParseException {
         when(documentTools.parse(any(File.class))).thenThrow(DocumentParseException.class);
-        assertThrows(BundleLoadException.class, () -> new EntityBundleLoader(documentTools, registry).load(mock(File.class), BundleLoadingMode.STRICT));
+        assertThrows(BundleLoadException.class, () -> new EntityBundleLoader(documentTools, registry).load(mock(File.class), BundleLoadingOperation.EXPORT));
     }
 
 }
