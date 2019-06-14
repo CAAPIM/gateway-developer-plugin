@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/CAAPIM/gateway-developer-plugin.svg?branch=master)](https://travis-ci.org/ca-api-gateway/gateway-developer-plugin)
+[![Build Status](https://travis-ci.org/CAAPIM/gateway-developer-plugin.svg?branch=master)](https://travis-ci.org/CAAPIM/gateway-developer-plugin)
 [![Sonar Cloud Status](https://sonarcloud.io/api/project_badges/measure?project=com.ca.apim.gateway%3Agateway-developer-plugin&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.ca.apim.gateway%3Agateway-developer-plugin)
 [![Maven Central](https://img.shields.io/maven-central/v/com.ca.apim.gateway/gateway-developer-plugin.svg)](https://search.maven.org/artifact/com.ca.apim.gateway/gateway-developer-plugin)
 [![Gradle Plugin](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/ca/apim/gateway/gateway-developer-plugin/com.ca.apim.gateway.gateway-developer-plugin.gradle.plugin/maven-metadata.xml.svg?label=gradle-plugin)](https://plugins.gradle.org/plugin/com.ca.apim.gateway.gateway-developer-plugin)
