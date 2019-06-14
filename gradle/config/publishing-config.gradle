@@ -18,7 +18,7 @@ bintray {
         name = project.name
         desc = project.description
         licenses = ['MIT']
-        websiteUrl = 'https://github.com/CAAPIM/gateway-export-plugin'
+        websiteUrl = 'https://github.com/CAAPIM/gateway-developer-plugin'
         issueTrackerUrl = 'https://github.com/CAAPIM/gateway-developer-plugin/issues'
         vcsUrl = 'https://github.com/CAAPIM/gateway-developer-plugin.git'
         githubRepo = 'CAAPIM/gateway-developer-plugin'
