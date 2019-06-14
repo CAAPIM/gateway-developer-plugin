@@ -14,28 +14,28 @@ publishing {
             pom {
                 name = project.name
                 description = project.description
-                url = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
+                url = 'https://github.com/CAAPIM/gateway-developer-plugin'
 
                 organization {
                     name = 'CA API Gateway'
-                    url = 'https://github.com/ca-api-gateway'
+                    url = 'https://github.com/CAAPIM'
                 }
 
                 licenses {
                     license {
                         name = 'MIT'
-                        url = 'https://github.com/ca-api-gateway/gateway-developer-plugin/blob/master/LICENSE'
+                        url = 'https://github.com/CAAPIM/gateway-developer-plugin/blob/master/LICENSE'
                     }
                 }
                 scm {
-                    url = 'https://github.com/ca-api-gateway/gateway-developer-plugin'
-                    connection = 'scm:git:https://github.com/ca-api-gateway/gateway-developer-plugin.git'
-                    developerConnection = 'scm:git:git@github.com:ca-api-gateway/gateway-developer-plugin.git'
+                    url = 'https://github.com/CAAPIM/gateway-developer-plugin'
+                    connection = 'scm:git:https://github.com/CAAPIM/gateway-developer-plugin.git'
+                    developerConnection = 'scm:git:git@github.com:CAAPIM/gateway-developer-plugin.git'
                 }
                 
                 issueManagement {
                     system = 'github'
-                    url = 'https://github.com/ca-api-gateway/gateway-developer-plugin/issues'
+                    url = 'https://github.com/CAAPIM/gateway-developer-plugin/issues'
                 }
                 
                 developers {
@@ -44,7 +44,7 @@ publishing {
                         name = 'CA API Gateway Bot'
                         email = 'API-Gateway-OpenSource@ca.com'
                         organization = 'CA API Gateway'
-                        organizationUrl = 'https://github.com/ca-api-gateway'
+                        organizationUrl = 'https://github.com/CAAPIM'
                     }
                 }
             }

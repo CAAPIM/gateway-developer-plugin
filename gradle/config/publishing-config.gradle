@@ -18,10 +18,10 @@ bintray {
         name = project.name
         desc = project.description
         licenses = ['MIT']
-        websiteUrl = 'https://github.com/ca-api-gateway/gateway-export-plugin'
-        issueTrackerUrl = 'https://waffle.io/ca-api-gateway/gateway-developer-plugin'
-        vcsUrl = 'https://github.com/ca-api-gateway/gateway-developer-plugin.git'
-        githubRepo = 'ca-api-gateway/gateway-developer-plugin'
+        websiteUrl = 'https://github.com/CAAPIM/gateway-export-plugin'
+        issueTrackerUrl = 'https://github.com/CAAPIM/gateway-developer-plugin/issues'
+        vcsUrl = 'https://github.com/CAAPIM/gateway-developer-plugin.git'
+        githubRepo = 'CAAPIM/gateway-developer-plugin'
         version {
             name = project.version
             released = new Date()
