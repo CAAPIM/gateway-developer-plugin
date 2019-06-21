@@ -7,7 +7,7 @@
 The Gateway developer plugin can be used to develop Gateway configuration.
 
 # Usage
-In order to use this plugins add the following you your gradle file:
+To use this plugin, add the following you your gradle file:
 
 ```groovy
 plugins {
@@ -32,8 +32,8 @@ GatewayConnection {
 }
 ```
 
-After this is added run `./gradlew build` in order to build a bundle and deployment package from a gateway solution located in `src/main/Gateway`. 
-The build will result in a deployment bundle and a deployment package in `build/gateway`.
+After this is added run `./gradlew build` in order to build a bundle and deployment package from a Gateway solution located in `src/main/Gateway`. 
+The build will create a deployment bundle and a deployment package in `build/gateway`.
 Run `gradle export` in order to export a gateway solution into `src/main/Gateway`.
 
 **[See more details on the usage of the plugin in the Wiki](https://github.com/ca-api-gateway/gateway-developer-plugin/wiki)**
