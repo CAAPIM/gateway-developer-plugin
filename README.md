@@ -4,7 +4,7 @@
 [![Gradle Plugin](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/ca/apim/gateway/gateway-developer-plugin/com.ca.apim.gateway.gateway-developer-plugin.gradle.plugin/maven-metadata.xml.svg?label=gradle-plugin)](https://plugins.gradle.org/plugin/com.ca.apim.gateway.gateway-developer-plugin)
 
 # About
-The Gateway developer plugin can be used to develop Gateway configuration.
+The Gateway Developer plugin is used to develop Gateway configuration: it reads configuration files, converts them to the Gateway Restman bundle format and builds the GW7 package.
 
 # Usage
 To use this plugin, add the following you your gradle file:
