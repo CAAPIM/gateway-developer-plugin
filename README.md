@@ -43,7 +43,7 @@ The build is done using gradle. To build the plugin run ```./gradlew build```.
 
 ## Versioning
 Versioning is done using the [gradle-semantic-build-versioning](https://github.com/vivin/gradle-semantic-build-versioning) plugin. 
-Every time a pull request is merged into `master` the patch version will be updated. For example, if the current version is `1.3.2` the next pull request merged into master will cause the version to be updated to `1.3.3`.
+Every time a pull request is merged into `master`, the patch version is updated. For example, if the current version is `1.3.2`, the next pull request merged into master will cause the version to be updated to `1.3.3`.
 In order to update the major or minor version put either `[major]` or `[minor]` into the commit message.
 
 ## Publish to Local
