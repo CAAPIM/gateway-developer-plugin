@@ -38,7 +38,7 @@ Run `gradle export` in order to export a gateway solution into `src/main/Gateway
 
 **[See more details on the usage of the plugin in the Wiki](https://github.com/ca-api-gateway/gateway-developer-plugin/wiki)**
 
-# Building the Plugin
+# Building Your Gateway Project with the Plugin
 The build is done using gradle. To build the plugin run ```./gradlew build```.
 
 ## Versioning
