@@ -6,7 +6,7 @@
 # About
 The Gateway Developer plugin is used to develop Gateway configuration: it reads configuration files, converts them to the Gateway Restman bundle format and builds the GW7 package.
 
-Note: The [import plugin](https://github.com/CAAPIM/gateway-developer-plugin/tree/master/gateway-import-plugin) is not available for beta-release users. Availability to be announced. 
+Note: The [import plugin](https://github.com/CAAPIM/gateway-developer-plugin/tree/master/gateway-import-plugin) is not available for [beta-release users](https://github.com/CAAPIM/APIM-Gateway-Developer-Tools#about-the-beta-release). Availability to be announced. 
 
 # Usage
 To use this plugin, add the following to your gradle file:
