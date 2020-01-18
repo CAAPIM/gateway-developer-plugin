@@ -3,6 +3,9 @@
 # of the MIT license.  See the LICENSE file for details.
 
 # Root files to ignore
+.classpath
+.settings
+.project
 /.idea/
 /.gradle/
 build/

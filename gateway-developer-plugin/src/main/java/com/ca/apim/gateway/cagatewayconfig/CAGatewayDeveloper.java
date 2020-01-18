@@ -40,6 +40,8 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     private static final String BUILD_ENVIRONMENT_BUNDLE = "build-environment-bundle";
     private static final String BUILD_FULL_BUNDLE = "build-full-bundle";
 
+    private static final String BUILD_PROPFILE_AS_BUNDLE_TASKNAME = "build-propfile-bundle";
+
     @Override
     public void apply(@NotNull final Project project) {
         // This plugin builds on the CAGatewayDeveloperBase plugin to define conventions
@@ -60,12 +62,24 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         final BuildDeploymentBundleTask buildDeploymentBundleTask = createBuildDeploymentBundleTask(project, pluginConfig);
         final BuildEnvironmentBundleTask buildEnvironmentBundleTask = createBuildEnvironmentBundleTask(project, pluginConfig, buildDeploymentBundleTask);
         final BuildFullBundleTask buildFullBundleTask = createBuildFullBundleTask(project, pluginConfig, buildDeploymentBundleTask);
+        final BuildPropfileBundleTask buildPropfileBundleTask = createBuildPropfileBundleTask(project, pluginConfig);
         final PackageTask packageGW7Task = createPackageTask(project, pluginConfig, buildDeploymentBundleTask);
 
         configureGeneratedArtifacts(project, pluginConfig, buildDeploymentBundleTask, buildEnvironmentBundleTask, buildFullBundleTask, packageGW7Task);
     }
 
     @NotNull
+    private static BuildPropfileBundleTask createBuildPropfileBundleTask(@NotNull Project project,
+			GatewayDeveloperPluginConfig pluginConfig) {
+		return project.getTasks().create(
+				BUILD_PROPFILE_AS_BUNDLE_TASKNAME,
+				BuildPropfileBundleTask.class,
+				t -> {
+					// TODO Implement
+				});
+	}
+
+	@NotNull
     private static GatewayDeveloperPluginConfig createPluginConfig(@NotNull Project project) {
         final GatewayDeveloperPluginConfig pluginConfig = project.getExtensions().create("GatewaySourceConfig", GatewayDeveloperPluginConfig.class, project);
         // Set Defaults
