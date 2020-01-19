@@ -41,6 +41,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     private static final String BUILD_FULL_BUNDLE = "build-full-bundle";
 
     private static final String BUILD_PROPFILE_AS_BUNDLE_TASKNAME = "build-propfile-bundle";
+    private static final String PROPFILE_BUNDLE_CONFIG_NAME = "PropfileBundleConfig";
 
     @Override
     public void apply(@NotNull final Project project) {
@@ -75,7 +76,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 				BUILD_PROPFILE_AS_BUNDLE_TASKNAME,
 				BuildPropfileBundleTask.class,
 				t -> {
-					// TODO Implement
+					project.getExtensions().create(PROPFILE_BUNDLE_CONFIG_NAME, PropfileBundleConfig.class);
 				});
 	}
 
