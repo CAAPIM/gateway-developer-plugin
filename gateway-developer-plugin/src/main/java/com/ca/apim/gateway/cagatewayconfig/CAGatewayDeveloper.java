@@ -13,6 +13,8 @@ import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.dsl.ArtifactHandler;
 import org.gradle.api.file.Directory;
+import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.internal.artifacts.dsl.LazyPublishArtifact;
 import org.gradle.api.internal.provider.DefaultProvider;
@@ -21,7 +23,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -62,8 +66,9 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         final BuildEnvironmentBundleTask buildEnvironmentBundleTask = createBuildEnvironmentBundleTask(project, pluginConfig, buildDeploymentBundleTask);
         final BuildFullBundleTask buildFullBundleTask = createBuildFullBundleTask(project, pluginConfig, buildDeploymentBundleTask);
         final PackageTask packageGW7Task = createPackageTask(project, pluginConfig, buildDeploymentBundleTask);
-
+        LOGGER.log(Level.WARNING, "configure artifacts");
         configureGeneratedArtifacts(project, pluginConfig, buildDeploymentBundleTask, buildEnvironmentBundleTask, buildFullBundleTask, packageGW7Task);
+        LOGGER.log(Level.WARNING, "completed artifacts");
     }
 
     @NotNull
@@ -127,12 +132,14 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         return project.getTasks().create("package-gw7", PackageTask.class, t -> {
             t.dependsOn(buildDeploymentBundleTask);
             t.getInto().set(new DefaultProvider<RegularFile>(() -> () -> new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), getBuiltArtifactName(project, EMPTY,"gw7"))));
-            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> "Demo.bundle")));
+           // t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> "Demo.bundle")));
+            LOGGER.log(Level.WARNING, "setting bundle directory");
             t.getBundleDirectory().set(pluginConfig.getBuiltBundleDir());
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getContainerApplicationDependencies().setFrom(project.getConfigurations().getByName(ENV_APPLICATION_CONFIGURATION));
             t.getDependencyModularAssertions().setFrom(project.getConfigurations().getByName(MODULAR_ASSERTION_CONFIGURATION));
             t.getDependencyCustomAssertions().setFrom(project.getConfigurations().getByName(CUSTOM_ASSERTION_CONFIGURATION));
+            LOGGER.log(Level.WARNING, "completed bundle dependencies");
         });
     }
 
@@ -146,17 +153,17 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         project.afterEvaluate(p -> project.getTasks().getByPath("build").dependsOn(buildDeploymentBundleTask, packageGW7Task));
 
         // add the deployment bundle to the default artifacts
-        project.artifacts(artifactHandler -> addBundleArtifact(artifactHandler, packageGW7Task.getBundle(), buildDeploymentBundleTask, project::getName, "deployment"));
+        //project.artifacts(artifactHandler -> addBundleArtifacts(artifactHandler, packageGW7Task.getBundleDirectory(), buildDeploymentBundleTask, project::getName, "deployment"));
 
         // add the environment bundle to the artifacts only if the environment bundle task was triggered
         String artifactName = getBuiltArtifactName(project, "-environment", BUNDLE_FILE_EXTENSION);
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_ENVIRONMENT_BUNDLE)) {
             project.artifacts(artifactHandler -> addBundleArtifact(
-                artifactHandler,
-                pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> artifactName)),
-                buildEnvironmentBundleTask,
-                project::getName,
-                "environment"));
+                    artifactHandler,
+                    pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> artifactName)),
+                    buildEnvironmentBundleTask,
+                    project::getName,
+                    "environment"));
         }
         // add the full bundle to the artifacts only if the full bundle task was triggered
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_FULL_BUNDLE)) {
@@ -167,13 +174,26 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                     project::getName,
                     "full"));
         }
-
+        LOGGER.log(Level.WARNING, "publish artifacts");
         // set the deployment bundle path as a project property to be consumed by publishing projects
         project.afterEvaluate(p -> project.getExtensions().add("deployment-bundle-file", new File(buildDeploymentBundleTask.getInto().getAsFile().get(), getBuiltArtifactName(project, EMPTY, BUNDLE_FILE_EXTENSION)).toString()));
         // set the env bundle as property as well
         project.afterEvaluate(p -> project.getExtensions().add("environment-bundle-file", new File(buildEnvironmentBundleTask.getInto().getAsFile().get(), artifactName).toString()));
         // and the full bundle as property too
         project.afterEvaluate(p -> project.getExtensions().add("full-bundle-file", buildFullBundleTask.getOutputBundle().getAsFile().get().toString()));
+    }
+
+    private static void addBundleArtifacts(
+            ArtifactHandler artifactHandler,
+            Provider<Directory> bundleDirectory,
+            Task generatedTask,
+            Supplier<String> nameSupplier,
+            String classifier) {
+        DirectoryProperty directoryProperty = (DirectoryProperty) bundleDirectory;
+        FileTree fileTree = directoryProperty.getAsFileTree();
+        Set<File> files = fileTree.getFiles();
+        files.forEach(file -> addBundleArtifact(artifactHandler, new DefaultProvider<RegularFile>(() -> () -> file), generatedTask, nameSupplier, classifier));
+
     }
 
     private static void addBundleArtifact(

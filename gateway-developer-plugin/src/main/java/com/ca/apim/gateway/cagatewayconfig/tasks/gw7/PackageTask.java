@@ -15,16 +15,11 @@ import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.*;
 import static org.apache.commons.collections4.SetUtils.union;
@@ -33,13 +28,13 @@ import static org.apache.commons.collections4.SetUtils.union;
  * The BuildBundle task will take local source files and create a bundle document that can be bootstrapped into a gateway container
  */
 public class PackageTask extends DefaultTask {
-    private static final Logger LOGGER = Logger.getLogger(PackageTask.class.getName());
+
     private ConfigurableFileCollection dependencyBundles;
     private ConfigurableFileCollection containerApplicationDependencies;
     private ConfigurableFileCollection dependencyModularAssertions;
     private ConfigurableFileCollection dependencyCustomAssertions;
     private RegularFileProperty into;
-    private RegularFileProperty bundle;
+    //private RegularFileProperty bundle;
     private DirectoryProperty bundleDirectory;
 
     private final FileUtils fileUtils;
@@ -56,7 +51,7 @@ public class PackageTask extends DefaultTask {
 
     PackageTask(final FileUtils fileUtils, GW7Builder gw7Builder) {
         into = newOutputFile();
-        bundle = newInputFile();
+       // bundle = newInputFile();
         bundleDirectory = newInputDirectory();
         dependencyBundles = getProject().files();
         containerApplicationDependencies = getProject().files();
@@ -68,11 +63,12 @@ public class PackageTask extends DefaultTask {
         this.dependencyBundlesProcessor = InjectionRegistry.getInstance(DependencyBundlesProcessor.class);
     }
 
-    @InputFile
+    /*@InputFile
     public RegularFileProperty getBundle() {
         return bundle;
-    }
+    }*/
 
+    @InputDirectory
     public DirectoryProperty getBundleDirectory(){
         return bundleDirectory;
     }
@@ -108,13 +104,10 @@ public class PackageTask extends DefaultTask {
         final Set<File> bundleDependencies = dependencyBundles.getAsFileTree().getFiles();
         FileTree fileTree = bundleDirectory.getAsFileTree();
         Set<File> files = fileTree.getFiles();
-        LOGGER.log(Level.WARNING, "built bundles " + files);
         files.forEach(file -> {
             File out = into.getAsFile().get();
             File outDirectory = out.getParentFile();
-            LOGGER.log(Level.WARNING, "outDirectory" + outDirectory.getPath());
             File artifact = new File(outDirectory, file.getName() + ".gw7");
-            LOGGER.log(Level.WARNING, "output file path " + artifact.getPath());
             packager.buildPackage(artifact,
                     file,
                     filterBundleFiles(bundleDependencies),
