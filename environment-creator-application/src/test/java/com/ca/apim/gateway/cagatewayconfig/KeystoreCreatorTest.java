@@ -122,7 +122,6 @@ class KeystoreCreatorTest {
         Files.delete(systemProperties.toPath());
     }
 
-    @Test
     void createKeystore_errorPropertiesFile() throws IOException {
         final KeystoreHelper keystoreHelper = new KeystoreHelper();
 

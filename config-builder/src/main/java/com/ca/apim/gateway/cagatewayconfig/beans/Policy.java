@@ -18,6 +18,7 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,7 @@ public class Policy extends Folderable {
     private String tag;
     @JsonIgnore
     private PolicyType policyType;
+    private Map<String, String> dependentEntities = new HashMap<>();
 
     public Policy() {}
 
@@ -52,6 +54,14 @@ public class Policy extends Folderable {
         this.policyXML = builder.policy;
         this.tag = builder.tag;
         setParentFolder(builder.parentFolderId != null ? new Folder(builder.parentFolderId, null) : null);
+    }
+
+    public Map<String, String> getDependentEntities() {
+        return dependentEntities;
+    }
+
+    public void setDependentEntities(Map<String, String> dependentEntities) {
+        this.dependentEntities = dependentEntities;
     }
 
     public String getPolicyXML() {
@@ -105,6 +115,7 @@ public class Policy extends Folderable {
         this.guid = firstNonNull(otherPolicy.guid, this.guid);
         this.policyDocument = firstNonNull(otherPolicy.policyDocument, this.policyDocument);
         this.dependencies.addAll(otherPolicy.dependencies);
+        this.dependentEntities.putAll(otherPolicy.dependentEntities);
         this.setId(firstNonNull(otherPolicy.getId(), this.getId()));
         this.tag = firstNonNull(otherPolicy.tag, this.tag);
         this.policyType = firstNonNull(otherPolicy.policyType, this.policyType);

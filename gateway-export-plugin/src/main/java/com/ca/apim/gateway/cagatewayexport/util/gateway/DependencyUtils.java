@@ -2,6 +2,7 @@ package com.ca.apim.gateway.cagatewayexport.util.gateway;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +33,7 @@ public class DependencyUtils {
 
         return bundle.getEntities(dependentEntityType).values().stream()
                 //keep only entities the are dependencies of entities in the filtered bundle
-                .filter(entity -> dependentEntities.contains(new Dependency(entity.getId(), dependentEntityType)) || includeEntity.test(entity))
+                .filter(entity -> dependentEntities.contains(new Dependency(entity.getId(), dependentEntityType, entity.getName(), EntityUtils.getEntityType(dependentEntityType))) || includeEntity.test(entity))
                 .collect(Collectors.toList());
     }
 

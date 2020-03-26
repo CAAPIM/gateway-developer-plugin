@@ -13,6 +13,6 @@ import java.io.File;
 @FunctionalInterface
 public interface EntityWriter {
 
-    void write(Bundle bundle, File rootFolder);
+    void write(Bundle bundle, File rootFolder, Bundle rawbundle);
 
 }

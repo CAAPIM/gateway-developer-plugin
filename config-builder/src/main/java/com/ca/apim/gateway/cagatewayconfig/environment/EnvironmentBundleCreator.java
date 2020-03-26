@@ -20,6 +20,8 @@ import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.processDeploymentBundles;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.setTemplatizedBundlesFolderPath;
@@ -66,8 +68,11 @@ public class EnvironmentBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
-        documentFileUtils.createFile(bundleElement, new File(bundleFolderPath, bundleFileName).toPath());
+        Map<String, Element> bundleElements = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
+        Set<Map.Entry<String, Element>> entrySet =  bundleElements.entrySet();
+        for(Map.Entry<String, Element> entry: entrySet) {
+            documentFileUtils.createFile(entry.getValue(), new File(bundleFolderPath, entry.getKey() + "-env.bundle").toPath());
+        }
         return environmentBundle;
     }
 

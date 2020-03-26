@@ -35,7 +35,7 @@ public class SoapResourceWriter implements EntityWriter {
     }
 
     @Override
-    public void write(Bundle bundle, File rootFolder) {
+    public void write(Bundle bundle, File rootFolder, Bundle rawBundle) {
         //write wsdl to file
         Map<String, Service> services = bundle.getEntities(Service.class);
         services.values().stream().filter(s -> isNotEmpty(s.getSoapResources())).forEach(serviceEntity -> serviceEntity.getSoapResources().forEach(resource ->

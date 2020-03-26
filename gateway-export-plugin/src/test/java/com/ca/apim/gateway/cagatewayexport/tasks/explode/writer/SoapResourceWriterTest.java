@@ -362,7 +362,7 @@ class SoapResourceWriterTest {
         service.setWssProcessingEnabled(true);
         bundle.getServices().put("service", service);
 
-        writer.write(bundle, temporaryFolder.getRoot());
+        writer.write(bundle, temporaryFolder.getRoot(), new Bundle());
 
         File wsdlFolder = new File(temporaryFolder.getRoot(), SOAP_RESOURCES_FOLDER);
         assertTrue(wsdlFolder.exists());
@@ -393,7 +393,7 @@ class SoapResourceWriterTest {
         service.setWssProcessingEnabled(true);
         bundle.getServices().put("service", service);
 
-        writer.write(bundle, temporaryFolder.getRoot());
+        writer.write(bundle, temporaryFolder.getRoot(), new Bundle());
 
         File wsdlFolder = new File(temporaryFolder.getRoot(), SOAP_RESOURCES_FOLDER);
         assertTrue(wsdlFolder.exists());
@@ -419,7 +419,7 @@ class SoapResourceWriterTest {
         service.setPolicy(POLICY_XML);
         bundle.getServices().put("service", service);
 
-        writer.write(bundle, temporaryFolder.getRoot());
+        writer.write(bundle, temporaryFolder.getRoot(), new Bundle());
 
         File wsdlFolder = new File(temporaryFolder.getRoot(), SOAP_RESOURCES_FOLDER);
         assertFalse(wsdlFolder.exists());

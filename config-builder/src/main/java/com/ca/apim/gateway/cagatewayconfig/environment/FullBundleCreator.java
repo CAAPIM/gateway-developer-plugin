@@ -16,6 +16,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.SystemUtils;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.*;
@@ -75,25 +77,28 @@ public class FullBundleCreator {
                                  String bundleFolderPath,
                                  String bundleFileName,
                                  boolean detemplatizeDeploymentBundles) {
-        final String bundle = createFullBundleAsString(environmentProperties, deploymentBundles, detemplatizeDeploymentBundles);
-        // write the full bundle to a temporary file first
-        final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), bundleFileName);
-        try {
-            writeStringToFile(fullBundleFile, bundle, defaultCharset());
-        } catch (IOException e) {
-            throw new DocumentFileUtilsException("Error writing to file '" + bundleFileName + "': " + e.getMessage(), e);
-        }
+        final Map<String, String> bundles = createFullBundleAsString(environmentProperties, deploymentBundles, detemplatizeDeploymentBundles);
+        Set<Map.Entry<String, String>> entrySet =  bundles.entrySet();
+        for(Map.Entry<String, String> entry: entrySet) {
+            // write the full bundle to a temporary file first
+            final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), entry.getKey() + "-full.bundle");
+            try {
+                writeStringToFile(fullBundleFile, entry.getValue(), defaultCharset());
+            } catch (IOException e) {
+                throw new DocumentFileUtilsException("Error writing to file '" + bundleFileName + "': " + e.getMessage(), e);
+            }
 
-        // process for reattaching loose encasses and write to the final path
-        dependencyBundlesProcessor.process(singletonList(fullBundleFile), bundleFolderPath);
-        // delete the temp file
-        boolean deleted = fullBundleFile.delete();
-        if (!deleted) {
-            LOGGER.log(Level.WARNING, "Temporary bundle file was not deleted: " + fullBundleFile.toString());
+            // process for reattaching loose encasses and write to the final path
+            dependencyBundlesProcessor.process(singletonList(fullBundleFile), bundleFolderPath);
+            // delete the temp file
+            boolean deleted = fullBundleFile.delete();
+            if (!deleted) {
+                LOGGER.log(Level.WARNING, "Temporary bundle file was not deleted: " + fullBundleFile.toString());
+            }
         }
     }
 
-    private String createFullBundleAsString(Map<String, String> environmentProperties,
+    private Map<String, String> createFullBundleAsString(Map<String, String> environmentProperties,
                                             List<File> deploymentBundles,
                                             boolean detemplatizeDeploymentBundles) {
         // load all deployment bundles to strings
@@ -109,28 +114,40 @@ public class FullBundleCreator {
         // generate the environment bundle
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
-        Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
-        Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
-        Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
+        Map<String, Element> bundleElements = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
+        Map<String, String> fullBundleStrings = new HashMap<>();
+        Set<Map.Entry<String, Element>> entrySet =  bundleElements.entrySet();
+        for(Map.Entry<String, Element> entry: entrySet) {
+            Element bundleElement = entry.getValue();
+            Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
+            Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
+            List<Element> items = DocumentUtils.getChildElements(referencesElement, ITEM);
+            Set<String> environmentItems = items.stream().map(e -> buildBundleItemKey(e)).collect(Collectors.toSet());
+            List<Element> mappings = DocumentUtils.getChildElements(mappingsElement, MAPPING);
+            Set<String> environmentMappings = mappings.stream().map(e -> buildBundleMappingKey(e)).collect(Collectors.toSet());
+            // store Set of elements previously added so avoiding repetition in the resulting bundle
+            Set<String> addedItems = new HashSet<>();
+            Set<String> addedMappings = new HashSet<>();
 
-        // store Set of elements previously added so avoiding repetition in the resulting bundle
-        Set<String> addedItems = new HashSet<>();
-        Set<String> addedMappings = new HashSet<>();
+            // merge the deployment bundles into the environment one to get the full bundle
+            templatizedBundles.forEach(tb -> {
+                try {
+                    final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> {
+                        final String key = buildBundleItemKey(item);
+                        return environmentItems.contains(key) && addedItems.add(key);
+                    });
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
+                        final String key = buildBundleMappingKey(mapping);
+                        return environmentMappings.contains(key) && addedItems.contains(key) && addedMappings.add(key);
+                    });
+                } catch (DocumentParseException e) {
+                    throw new EntityBuilderException("Unable to read bundle " + tb.getName(), e);
+                }
+            });
+            fullBundleStrings.put(entry.getKey(), documentTools.elementToString(bundleElement));
+        }
 
-        // merge the deployment bundles into the environment one to get the full bundle
-        templatizedBundles.forEach(tb -> {
-            try {
-                final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
-                copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
-                copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
-                    final String key = buildBundleMappingKey(mapping);
-                    return addedItems.contains(key) && addedMappings.add(key);
-                });
-            } catch (DocumentParseException e) {
-                throw new EntityBuilderException("Unable to read bundle " + tb.getName(), e);
-            }
-        });
-
-        return documentTools.elementToString(bundleElement);
+        return fullBundleStrings;
     }
 }

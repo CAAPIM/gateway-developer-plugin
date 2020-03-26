@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.Collections;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
@@ -29,7 +30,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  * This is the definition for the developer plugin tasks and operations and properties.
  */
 public class CAGatewayDeveloper implements Plugin<Project> {
-
+    private static final Logger LOGGER = Logger.getLogger(CAGatewayDeveloper.class.getName());
     private static final String BUNDLE_CONFIGURATION = "bundle";
     private static final String MODULAR_ASSERTION_CONFIGURATION = "assertion";
     private static final String CUSTOM_ASSERTION_CONFIGURATION = "customassertion";
@@ -126,7 +127,8 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         return project.getTasks().create("package-gw7", PackageTask.class, t -> {
             t.dependsOn(buildDeploymentBundleTask);
             t.getInto().set(new DefaultProvider<RegularFile>(() -> () -> new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), getBuiltArtifactName(project, EMPTY,"gw7"))));
-            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, EMPTY, BUNDLE_FILE_EXTENSION))));
+            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> "Demo.bundle")));
+            t.getBundleDirectory().set(pluginConfig.getBuiltBundleDir());
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getContainerApplicationDependencies().setFrom(project.getConfigurations().getByName(ENV_APPLICATION_CONFIGURATION));
             t.getDependencyModularAssertions().setFrom(project.getConfigurations().getByName(MODULAR_ASSERTION_CONFIGURATION));

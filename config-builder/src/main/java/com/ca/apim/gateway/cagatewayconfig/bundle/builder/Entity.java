@@ -58,4 +58,8 @@ public class Entity {
     void setMappingAction(String mappingAction) {
         this.mappingAction = mappingAction;
     }
+
+    public String toString(){
+        return id + ":" + name + ":" + type;
+    }
 }

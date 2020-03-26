@@ -28,8 +28,8 @@ class BundleEntityBuilderTest {
     void build() {
         BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()), new BundleDocumentBuilder());
 
-        final Element element = builder.build(new Bundle(), BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
-        assertNotNull(element);
+        final List<Element> elements = builder.build(new Bundle(), BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        assertNotNull(elements);
     }
 
     private static class TestEntityBuilder implements EntityBuilder {
