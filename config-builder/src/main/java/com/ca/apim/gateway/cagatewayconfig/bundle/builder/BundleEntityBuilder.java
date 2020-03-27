@@ -6,9 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
-import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -39,47 +38,69 @@ public class BundleEntityBuilder {
     public Map<String, Element> build(Bundle bundle, EntityBuilder.BundleType bundleType, Document document) {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
-        List<Entity> serviceEntities = new ArrayList<>();
+        List<Entity> annotatedEntities = new ArrayList<>();
         //TODO this should be for annotated entities(service, encass, policy)
-        entityBuilders.forEach(builder -> serviceEntities.addAll(builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document).stream().filter(e -> e.getType().equals("POLICY")).collect(Collectors.toList())));
+        entityBuilders.forEach(builder -> annotatedEntities.addAll(builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document).stream().filter(e -> e.getType().equals("POLICY")).collect(Collectors.toList())));
 
-        Map<String, Element> serviceElements = new HashMap<>();
-        for (Entity serviceEntity : serviceEntities) {
+        Map<String, Element> annotatedElements = new HashMap<>();
+        for (Entity annotatedEntity : annotatedEntities) {
 
-            List<Entity> entityList = getServiceDependencies(serviceEntity, entities, bundle);
-            LOGGER.log(Level.WARNING, "Service dependencies" + entityList);
+            List<Entity> entityList = getEntityDependencies(annotatedEntity, entities, bundle);
+            LOGGER.log(Level.WARNING, "Annotated entity dependencies" + entityList);
             if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
-                entityList.add(serviceEntity);
+                entityList.add(annotatedEntity);
             }
-            serviceElements.put(serviceEntity.getName(), bundleDocumentBuilder.build(document, entityList));
+            annotatedElements.put(annotatedEntity.getName(), bundleDocumentBuilder.build(document, entityList));
         }
-        return serviceElements;
+        return annotatedElements;
 
     }
 
-    private List<Entity> getServiceDependencies(Entity entity, List<Entity> entities, Bundle bundle) {
-        List<Entity> serviceDependenciesList = new ArrayList<>();
+    private void populatedDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity annotatedItem) {
+
+        if (annotatedItem instanceof Folderable) {
+            Folder folder = ((Folderable) annotatedItem).getParentFolder();
+            while (folder != null) {
+                final String id = folder.getId();
+                Optional<Entity> optionalEntity = entities.stream().filter(e -> id.equals(e.getId())).findFirst();
+                if (optionalEntity.isPresent()) {
+                    entityDependenciesList.add(optionalEntity.get());
+                }
+                folder = folder.getParentFolder();
+            }
+        }
+    }
+
+    private List<Entity> getEntityDependencies(Entity entity, List<Entity> entities, Bundle bundle) {
+        List<Entity> entityDependenciesList = new ArrayList<>();
         Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
-        if(dependencyListMap != null) {
+        if (dependencyListMap != null) {
             Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
             for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
-                Dependency service = entry.getKey();
-                if (service.getName().equals(entity.getName())) {
+                Dependency annotatedEntity = entry.getKey();
+                if (annotatedEntity.getName().equals(entity.getName())) {
                     List<Dependency> dependencyList = entry.getValue();
                     for (Dependency dependency : dependencyList) {
                         for (Entity depEntity : entities) {
                             if (dependency.getName().equals(depEntity.getName()) && depEntity.getType().equals(dependency.getEntityType())) {
-                                serviceDependenciesList.add(depEntity);
+                                entityDependenciesList.add(depEntity);
                             }
                         }
                     }
-                    LOGGER.log(Level.WARNING, "serviceDependenciesList" + serviceDependenciesList);
-                    return serviceDependenciesList;
+
+                    Map<String, ? extends GatewayEntity> entityMap = bundle.getEntities(annotatedEntity.getType());
+                    if (entityMap != null) {
+                        GatewayEntity annotatedItem = entityMap.get(annotatedEntity.getName());
+                        populatedDependentFolders(entityDependenciesList, entities, annotatedItem);
+                    }
+
+                    LOGGER.log(Level.WARNING, "entityDependenciesList" + entityDependenciesList);
+                    return entityDependenciesList;
                 }
             }
         }
 
-        return serviceDependenciesList;
+        return entityDependenciesList;
     }
 
     @VisibleForTesting
