@@ -46,6 +46,11 @@ public class EntityBundleLoader {
         return bundle;
     }
 
+    public Bundle load(Bundle bundle, List<File> fileSet, BundleLoadingOperation loadingMode, String... entityTypes) {
+        fileSet.forEach(f -> loadBundleFile(f, bundle, loadingMode, entityTypes));
+        return bundle;
+    }
+
     public Bundle load(File dependencyBundlePath, BundleLoadingOperation loadingMode, String... entityTypes) {
         final Bundle bundle = new Bundle();
 

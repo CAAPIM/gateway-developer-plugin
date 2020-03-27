@@ -82,7 +82,7 @@ public class EnvironmentCreatorApplication {
     void run() {
         //create bundle from environment
         EnvironmentBundleCreator bundleCreator = InjectionRegistry.getInjector().getInstance(EnvironmentBundleCreator.class);
-        Bundle environmentBundle = bundleCreator.createEnvironmentBundle(
+        Bundle environmentBundle = bundleCreator.createEnvironmentBundle(null,
                 environmentProperties,
                 bootstrapBundleFolderPath,
                 templatizedBundleFolderPath,

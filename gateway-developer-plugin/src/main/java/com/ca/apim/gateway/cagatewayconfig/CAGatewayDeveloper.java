@@ -107,6 +107,10 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Create build-environment-bundle task
         final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create(BUILD_ENVIRONMENT_BUNDLE, BuildEnvironmentBundleTask.class, t -> {
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
+            t.getFrom().set(new DefaultProvider<>(() -> {
+                Directory dir = pluginConfig.getSolutionDir().get();
+                return dir.getAsFile().exists() ? dir : null;
+            }));
             t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
         });
         buildEnvironmentBundleTask.dependsOn(buildDeploymentBundleTask);

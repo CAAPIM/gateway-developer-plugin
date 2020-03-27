@@ -73,7 +73,7 @@ public class EnvironmentBundleUtils {
                                                  BundleEnvironmentValidator bundleEnvironmentValidator,
                                                  BundleDetemplatizer bundleDetemplatizer,
                                                  EnvironmentBundleCreationMode mode) {
-        logger.log(Level.FINE, () -> "Processing deployment bundle: " + templatizedBundle.getName());
+        logger.log(Level.WARNING, () -> "Processing deployment bundle: " + templatizedBundle.getName());
         String bundleString = templatizedBundle.getContents();
 
         // check deployment bundles to validated that all required environment is provided.

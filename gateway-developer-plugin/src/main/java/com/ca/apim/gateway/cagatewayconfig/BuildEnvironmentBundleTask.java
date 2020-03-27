@@ -11,9 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigura
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -26,7 +24,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  * The BuildEnvironmentBundle task will grab provided environment properties and build a bundle.
  */
 public class BuildEnvironmentBundleTask extends DefaultTask {
-
+    private DirectoryProperty from;
     private final DirectoryProperty into;
     private final Property<Map> environmentConfig;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
@@ -34,10 +32,15 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     @Inject
     public BuildEnvironmentBundleTask() {
         into = newOutputDirectory();
+        from = newInputDirectory();
         environmentConfig = getProject().getObjects().property(Map.class);
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
     }
-
+    @InputDirectory
+    @Optional
+    public DirectoryProperty getFrom() {
+        return from;
+    }
     @OutputDirectory
     DirectoryProperty getInto() {
         return into;
@@ -54,7 +57,7 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
 
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
         final String bundleFileName = getProject().getName() + '-' + getProject().getVersion() + "-environment.bundle";
-        environmentBundleCreator.createEnvironmentBundle(
+        environmentBundleCreator.createEnvironmentBundle(from.isPresent() ? from.getAsFile().get() : null,
                 environmentValues,
                 into.getAsFile().get().getPath(),
                 into.getAsFile().get().getPath(),

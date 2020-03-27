@@ -41,7 +41,7 @@ public class BundleEntityBuilder {
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
         List<Entity> serviceEntities = new ArrayList<>();
         //TODO this should be for annotated entities(service, encass, policy)
-        entityBuilders.forEach(builder -> serviceEntities.addAll(builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document).stream().filter(e -> e.getType().equals("SERVICE")).collect(Collectors.toList())));
+        entityBuilders.forEach(builder -> serviceEntities.addAll(builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document).stream().filter(e -> e.getType().equals("POLICY")).collect(Collectors.toList())));
 
         Map<String, Element> serviceElements = new HashMap<>();
         for (Entity serviceEntity : serviceEntities) {
@@ -60,20 +60,22 @@ public class BundleEntityBuilder {
     private List<Entity> getServiceDependencies(Entity entity, List<Entity> entities, Bundle bundle) {
         List<Entity> serviceDependenciesList = new ArrayList<>();
         Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
-        Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
-        for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
-            Dependency service = entry.getKey();
-            if (service.getName().equals(entity.getName())) {
-                List<Dependency> dependencyList = entry.getValue();
-                for (Dependency dependency : dependencyList) {
-                    for (Entity depEntity : entities) {
-                        if (dependency.getName().equals(depEntity.getName()) && depEntity.getType().equals(dependency.getEntityType())) {
-                            serviceDependenciesList.add(depEntity);
+        if(dependencyListMap != null) {
+            Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
+            for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
+                Dependency service = entry.getKey();
+                if (service.getName().equals(entity.getName())) {
+                    List<Dependency> dependencyList = entry.getValue();
+                    for (Dependency dependency : dependencyList) {
+                        for (Entity depEntity : entities) {
+                            if (dependency.getName().equals(depEntity.getName()) && depEntity.getType().equals(dependency.getEntityType())) {
+                                serviceDependenciesList.add(depEntity);
+                            }
                         }
                     }
+                    LOGGER.log(Level.WARNING, "serviceDependenciesList" + serviceDependenciesList);
+                    return serviceDependenciesList;
                 }
-                LOGGER.log(Level.WARNING, "serviceDependenciesList" + serviceDependenciesList);
-                return serviceDependenciesList;
             }
         }
 
