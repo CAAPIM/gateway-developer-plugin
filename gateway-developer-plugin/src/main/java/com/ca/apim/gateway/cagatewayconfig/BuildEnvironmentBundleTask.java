@@ -47,13 +47,15 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     }
 
     @Input
+    @Optional
     Property<Map> getEnvironmentConfig() {
         return environmentConfig;
     }
 
     @TaskAction
     public void perform() {
-        final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrNull());
+        Map providedEnvironmentValues = environmentConfig.getOrNull();
+        final Map<String, String> environmentValues = providedEnvironmentValues == null ? null : environmentConfigurationUtils.parseEnvironmentValues(providedEnvironmentValues);
 
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
         final String bundleFileName = getProject().getName() + '-' + getProject().getVersion() + "-environment.bundle";
