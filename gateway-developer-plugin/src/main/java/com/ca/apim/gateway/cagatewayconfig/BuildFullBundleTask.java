@@ -10,12 +10,10 @@ import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -32,7 +30,7 @@ import static org.apache.commons.collections4.ListUtils.union;
  * The BuildFullBundleTask task will grab provided environment properties and build a single bundle merged with the deployment bundles.
  */
 public class BuildFullBundleTask extends DefaultTask {
-
+    private DirectoryProperty from;
     private final Property<Map> environmentConfig;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
     private final ConfigurableFileCollection dependencyBundles;
@@ -42,10 +40,16 @@ public class BuildFullBundleTask extends DefaultTask {
     @Inject
     public BuildFullBundleTask() {
         environmentConfig = getProject().getObjects().property(Map.class);
+        from = newInputDirectory();
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
         dependencyBundles = getProject().files();
         outputBundle = newOutputFile();
         detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
+    }
+    @InputDirectory
+    @Optional
+    public DirectoryProperty getFrom() {
+        return from;
     }
 
     @Input
@@ -78,7 +82,7 @@ public class BuildFullBundleTask extends DefaultTask {
         );
 
         final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
-        fullBundleCreator.createFullBundle(
+        fullBundleCreator.createFullBundle(from.isPresent() ? from.getAsFile().get() : null,
                 environmentValues,
                 bundleFiles,
                 bundleDirectory,

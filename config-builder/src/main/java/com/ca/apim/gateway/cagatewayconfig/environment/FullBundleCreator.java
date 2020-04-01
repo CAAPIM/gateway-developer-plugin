@@ -10,6 +10,9 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.bundle.DependencyBundlesProcessor;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
@@ -59,25 +62,27 @@ public class FullBundleCreator {
     private final BundleEntityBuilder bundleEntityBuilder;
     private final FileUtils fileUtils;
     private final DependencyBundlesProcessor dependencyBundlesProcessor;
+    private final EntityLoaderRegistry entityLoaderRegistry;
 
     @Inject
     FullBundleCreator(DocumentTools documentTools,
                       EnvironmentBundleBuilder environmentBundleBuilder,
                       BundleEntityBuilder bundleEntityBuilder,
-                      FileUtils fileUtils, DependencyBundlesProcessor dependencyBundlesProcessor) {
+                      FileUtils fileUtils, DependencyBundlesProcessor dependencyBundlesProcessor, EntityLoaderRegistry entityLoaderRegistry) {
         this.documentTools = documentTools;
         this.environmentBundleBuilder = environmentBundleBuilder;
         this.bundleEntityBuilder = bundleEntityBuilder;
         this.fileUtils = fileUtils;
         this.dependencyBundlesProcessor = dependencyBundlesProcessor;
+        this.entityLoaderRegistry = entityLoaderRegistry;
     }
 
-    public void createFullBundle(Map<String, String> environmentProperties,
+    public void createFullBundle(File rootDir, Map<String, String> environmentProperties,
                                  List<File> deploymentBundles,
                                  String bundleFolderPath,
                                  String bundleFileName,
                                  boolean detemplatizeDeploymentBundles) {
-        final Map<String, String> bundles = createFullBundleAsString(environmentProperties, deploymentBundles, detemplatizeDeploymentBundles);
+        final Map<String, String> bundles = createFullBundleAsString(rootDir, environmentProperties, deploymentBundles, detemplatizeDeploymentBundles);
         Set<Map.Entry<String, String>> entrySet =  bundles.entrySet();
         for(Map.Entry<String, String> entry: entrySet) {
             // write the full bundle to a temporary file first
@@ -98,7 +103,7 @@ public class FullBundleCreator {
         }
     }
 
-    private Map<String, String> createFullBundleAsString(Map<String, String> environmentProperties,
+    private Map<String, String> createFullBundleAsString(File rootDir, Map<String, String> environmentProperties,
                                             List<File> deploymentBundles,
                                             boolean detemplatizeDeploymentBundles) {
         // load all deployment bundles to strings
@@ -107,6 +112,14 @@ public class FullBundleCreator {
         // generate the environment one
         Bundle environmentBundle = new Bundle();
         environmentBundleBuilder.build(environmentBundle, environmentProperties, EMPTY, PLUGIN);
+        if (rootDir != null) {
+            // Load the entities to build a deployment bundle
+            final Collection<EntityLoader> entityLoaders = entityLoaderRegistry.getEntityLoaders();
+            entityLoaders.parallelStream().forEach(e -> e.load(environmentBundle, rootDir));
+
+            // create the folder tree
+            FolderLoaderUtils.createFolders(environmentBundle, rootDir, environmentBundle.getServices());
+        }
 
         // validate and detemplatize
         processDeploymentBundles(environmentBundle, templatizedBundles, PLUGIN, detemplatizeDeploymentBundles);
@@ -118,6 +131,7 @@ public class FullBundleCreator {
         Map<String, String> fullBundleStrings = new HashMap<>();
         Set<Map.Entry<String, Element>> entrySet =  bundleElements.entrySet();
         for(Map.Entry<String, Element> entry: entrySet) {
+            // generate the environment bundle
             Element bundleElement = entry.getValue();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
             Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
@@ -131,18 +145,21 @@ public class FullBundleCreator {
 
             // merge the deployment bundles into the environment one to get the full bundle
             templatizedBundles.forEach(tb -> {
-                try {
-                    final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
-                    copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> {
-                        final String key = buildBundleItemKey(item);
-                        return environmentItems.contains(key) && addedItems.add(key);
-                    });
-                    copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
-                        final String key = buildBundleMappingKey(mapping);
-                        return environmentMappings.contains(key) && addedItems.contains(key) && addedMappings.add(key);
-                    });
-                } catch (DocumentParseException e) {
-                    throw new EntityBuilderException("Unable to read bundle " + tb.getName(), e);
+                LOGGER.log(Level.WARNING, "bundle name {0}, env name {1} ", new String[]{ tb.getName(), entry.getKey()});
+                if(tb.getName().equals(entry.getKey() + ".bundle")){
+                    try {
+                        final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
+                        copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> {
+                            final String key = buildBundleItemKey(item);
+                            return !environmentItems.contains(key) && addedItems.add(key);
+                        });
+                        copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
+                            final String key = buildBundleMappingKey(mapping);
+                            return !environmentMappings.contains(key) && addedItems.contains(key) && addedMappings.add(key);
+                        });
+                    } catch (DocumentParseException e) {
+                        throw new EntityBuilderException("Unable to read bundle " + tb.getName(), e);
+                    }
                 }
             });
             fullBundleStrings.put(entry.getKey(), documentTools.elementToString(bundleElement));
