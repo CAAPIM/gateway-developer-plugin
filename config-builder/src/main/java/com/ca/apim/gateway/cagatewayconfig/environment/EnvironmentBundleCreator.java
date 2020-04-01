@@ -61,7 +61,6 @@ public class EnvironmentBundleCreator {
                                           EnvironmentBundleCreationMode mode,
                                           String bundleFileName) {
         Bundle environmentBundle = new Bundle();
-        environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, mode);
 
         if (rootDir != null) {
             // Load the entities to build a deployment bundle
@@ -70,6 +69,8 @@ public class EnvironmentBundleCreator {
 
             // create the folder tree
             FolderLoaderUtils.createFolders(environmentBundle, rootDir, environmentBundle.getServices());
+        } else {
+            environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, mode);
         }
 
         processDeploymentBundles(
