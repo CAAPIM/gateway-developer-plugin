@@ -69,7 +69,7 @@ public class ExplodeBundle {
 
         //write the bundle in the exploded format
         final Collection<EntityWriter> entityBuilders = entityWriterRegistry.getEntityWriters();
-        entityBuilders.parallelStream().forEach(e -> e.write(filteredBundle, explodeDirectory));
+        entityBuilders.parallelStream().forEach(e -> e.write(filteredBundle, explodeDirectory, bundle));
     }
 
 }
