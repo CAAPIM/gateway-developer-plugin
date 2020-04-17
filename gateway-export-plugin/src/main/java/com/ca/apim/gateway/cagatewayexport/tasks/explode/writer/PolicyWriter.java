@@ -13,7 +13,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Element;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
@@ -55,7 +54,7 @@ public class PolicyWriter implements EntityWriter {
         services.values().parallelStream().forEach(serviceEntity -> {
             final String id = serviceEntity.getId();
             final String name = serviceEntity.getName();
-            final PolicyMetadata policyMetadata = writePolicy(bundle, policyFolder, serviceEntity.getParentFolder().getId(), name, serviceEntity.getId(), serviceEntity.getPolicyXML());
+            final PolicyMetadata policyMetadata = writePolicy(bundle, policyFolder, serviceEntity.getParentFolder().getId(), name, id, serviceEntity.getPolicyXML());
             final Set<Dependency> policyDependencies = getPolicyDependencies(id, rawBundle);
             policyMetadata.setDependencies(policyDependencies);
             policyMetadataMap.put(name, policyMetadata);

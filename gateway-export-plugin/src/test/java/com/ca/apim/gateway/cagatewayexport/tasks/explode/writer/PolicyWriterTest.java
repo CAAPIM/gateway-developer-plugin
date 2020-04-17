@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.FolderTree;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.AssertionJSPolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.XMLPolicyConverter;
@@ -21,9 +22,9 @@ import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import java.io.File;
-
+import org.w3c.dom.Document;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,13 +35,13 @@ class PolicyWriterTest {
 
     @Test
     void testNoPolicies(final TemporaryFolder temporaryFolder) {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
         bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
 
-        writer.write(bundle, temporaryFolder.getRoot());
+        writer.write(bundle, temporaryFolder.getRoot(), bundle);
 
         File policyFolder = new File(temporaryFolder.getRoot(), "policy");
         assertTrue(policyFolder.exists());
@@ -50,7 +51,7 @@ class PolicyWriterTest {
 
     @Test
     void testWriteAssertionJS(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -71,13 +72,89 @@ class PolicyWriterTest {
         policy.setPolicyDocument(DocumentTools.INSTANCE.parse(policy.getPolicyXML()).getDocumentElement());
         bundle.getPolicies().put("assertionPolicy", policy);
 
-        writer.write(bundle, temporaryFolder.getRoot());
+        writer.write(bundle, temporaryFolder.getRoot(), bundle);
 
         File policyFolder = new File(temporaryFolder.getRoot(), "policy");
         assertTrue(policyFolder.exists());
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-
+        File policyMetadataFile = new File(policyFolder, "policy.yml");
+        assertTrue(policyMetadataFile.exists());
     }
+
+    @Test
+    void testWritePolicyWithSubfolder(final TemporaryFolder temporaryFolder) throws DocumentParseException {
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+
+        Bundle bundle = new Bundle();
+        bundle.addEntity(ROOT_FOLDER);
+        Folder folder = new Folder("0000000000000000ffffffffffff54", "Test");
+        folder.setParentFolder(ROOT_FOLDER);
+        bundle.addEntity(folder);
+        bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
+        Policy policy = new Policy();
+        policy.setGuid("123");
+        policy.setPath("assertionPolicy");
+        policy.setParentFolder(folder);
+        policy.setName("assertionPolicy");
+        policy.setId("asd");
+        policy.setPolicyXML("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\" xmlns:L7p=\"http://www.layer7tech.com/ws/policy\">\n" +
+                "    <wsp:All wsp:Usage=\"Required\"><L7p:JavaScript>\n" +
+                "            <L7p:ExecutionTimeout stringValue=\"\"/>\n" +
+                "            <L7p:Name stringValue=\"assertionPolicy\"/>\n" +
+                "            <L7p:Script stringValueReference=\"inline\"><![CDATA[var js = {};]]></L7p:Script>\n" +
+                "        </L7p:JavaScript></wsp:All>\n" +
+                "</wsp:Policy>");
+        policy.setPolicyDocument(DocumentTools.INSTANCE.parse(policy.getPolicyXML()).getDocumentElement());
+        bundle.getPolicies().put("assertionPolicy", policy);
+
+        writer.write(bundle, temporaryFolder.getRoot(), bundle);
+
+        File policyFolder = new File(temporaryFolder.getRoot(), "policy");
+        assertTrue(policyFolder.exists());
+
+        File testFolder = new File(policyFolder, "Test");
+        assertTrue(testFolder.exists());
+
+        File policyFile = new File(testFolder, "assertionPolicy.assertion.js");
+        assertTrue(policyFile.exists());
+        File policyMetadataFile = new File(policyFolder, "policy.yml");
+        assertTrue(policyMetadataFile.exists());
+    }
+
+    @Test
+    void testWriteServicePolicy(final TemporaryFolder temporaryFolder) throws DocumentParseException {
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+
+        Bundle bundle = new Bundle();
+        bundle.addEntity(ROOT_FOLDER);
+        bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
+        Service service = new Service();
+        service.setPath("assertionPolicy");
+        service.setParentFolder(ROOT_FOLDER);
+        service.setName("assertionPolicy");
+        service.setId("asd");
+        DocumentTools documentTools = DocumentTools.INSTANCE;
+        Document document = documentTools.parse("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\" xmlns:L7p=\"http://www.layer7tech.com/ws/policy\">\n" +
+                "    <wsp:All wsp:Usage=\"Required\"><L7p:JavaScript>\n" +
+                "            <L7p:ExecutionTimeout stringValue=\"\"/>\n" +
+                "            <L7p:Name stringValue=\"assertionPolicy\"/>\n" +
+                "            <L7p:Script stringValueReference=\"inline\"><![CDATA[var js = {};]]></L7p:Script>\n" +
+                "        </L7p:JavaScript></wsp:All>\n" +
+                "</wsp:Policy>");
+        service.setPolicyXML(document.getDocumentElement());
+        bundle.getServices().put("assertionPolicy", service);
+
+        writer.write(bundle, temporaryFolder.getRoot(), bundle);
+
+        File policyFolder = new File(temporaryFolder.getRoot(), "policy");
+        assertTrue(policyFolder.exists());
+
+        File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
+        assertTrue(policyFile.exists());
+        File policyMetadataFile = new File(policyFolder, "policy.yml");
+        assertTrue(policyMetadataFile.exists());
+    }
+
 }
