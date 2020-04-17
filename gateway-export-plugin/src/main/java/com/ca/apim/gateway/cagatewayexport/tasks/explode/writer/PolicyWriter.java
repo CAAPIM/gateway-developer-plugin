@@ -7,33 +7,21 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.databind.type.MapType;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 @Singleton
 public class PolicyWriter implements EntityWriter {
@@ -93,10 +81,7 @@ public class PolicyWriter implements EntityWriter {
         if (!policyMetadataMap.isEmpty()) {
             //build yml file with dependencies
             ObjectWriter objectWriter = jsonTools.getObjectWriter();
-
-            // check if a current file exists and merge contents
             File policyMetadataFile = new File(policyFolder, "policy" + jsonTools.getFileExtension());
-            // last write the merged map of beans to the config file
             try (OutputStream fileStream = Files.newOutputStream(policyMetadataFile.toPath())) {
                 objectWriter.writeValue(fileStream, policyMetadataMap);
             } catch (IOException e) {
@@ -116,10 +101,10 @@ public class PolicyWriter implements EntityWriter {
 
     private void populateDependencies(Map<Dependency, List<Dependency>> dependencyListMap, String rootId, String id, Set<Dependency> dependencies) {
         Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
-        for (Map.Entry<Dependency, List<Dependency>> e : entrySet) {
-            Dependency entry = e.getKey();
-            if (entry.getId().equals(id)) {
-                List<Dependency> dependencyList = e.getValue();
+        for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
+            Dependency parent = entry.getKey();
+            if (parent.getId().equals(id)) {
+                List<Dependency> dependencyList = entry.getValue();
                 for (Dependency dependency : dependencyList) {
                     if (!rootId.equals(dependency.getId()) && dependencies.add(dependency)) {
                         populateDependencies(dependencyListMap, rootId, dependency.getId(), dependencies);
