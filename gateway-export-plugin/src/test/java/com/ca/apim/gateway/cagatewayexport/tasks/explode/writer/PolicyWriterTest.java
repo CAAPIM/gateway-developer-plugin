@@ -6,14 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.FolderTree;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.AssertionJSPolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.XMLPolicyConverter;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -23,8 +20,15 @@ import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.w3c.dom.Document;
+
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -146,6 +150,52 @@ class PolicyWriterTest {
         service.setPolicyXML(document.getDocumentElement());
         bundle.getServices().put("assertionPolicy", service);
 
+        writer.write(bundle, temporaryFolder.getRoot(), bundle);
+
+        File policyFolder = new File(temporaryFolder.getRoot(), "policy");
+        assertTrue(policyFolder.exists());
+
+        File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
+        assertTrue(policyFile.exists());
+        File policyMetadataFile = new File(policyFolder, "policy.yml");
+        assertTrue(policyMetadataFile.exists());
+    }
+
+    @Test
+    void testWritePolicyWithDependencies(final TemporaryFolder temporaryFolder) throws DocumentParseException {
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+
+        Bundle bundle = new Bundle();
+        bundle.addEntity(ROOT_FOLDER);
+        bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
+        Policy policy = new Policy();
+        policy.setGuid("123");
+        policy.setPath("assertionPolicy");
+        policy.setParentFolder(ROOT_FOLDER);
+        policy.setName("assertionPolicy");
+        policy.setId("asd");
+        policy.setPolicyXML("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\" xmlns:L7p=\"http://www.layer7tech.com/ws/policy\">\n" +
+                "    <wsp:All wsp:Usage=\"Required\"><L7p:JavaScript>\n" +
+                "            <L7p:ExecutionTimeout stringValue=\"\"/>\n" +
+                "            <L7p:Name stringValue=\"assertionPolicy\"/>\n" +
+                "            <L7p:Script stringValueReference=\"inline\"><![CDATA[var js = {};]]></L7p:Script>\n" +
+                "        </L7p:JavaScript></wsp:All>\n" +
+                "</wsp:Policy>");
+        policy.setPolicyDocument(DocumentTools.INSTANCE.parse(policy.getPolicyXML()).getDocumentElement());
+        bundle.getPolicies().put("assertionPolicy", policy);
+
+        JdbcConnection.Builder builder = new JdbcConnection.Builder();
+        builder.id("jdbcid");
+        builder.name("testjdbc");
+        builder.driverClass("testDriver");
+        builder.jdbcUrl("jdbc:localhost:3306");
+        JdbcConnection jdbcConnection = builder.build();
+        bundle.addEntity(jdbcConnection);
+        Map<Dependency, List<Dependency>> dependencyListMap = new HashMap<>();
+        List<Dependency> dependencies = new ArrayList<>();
+        dependencies.add(new Dependency("jdbcid", JdbcConnection.class, "testjdbc", EntityTypes.JDBC_CONNECTION));
+        dependencyListMap.put(new Dependency("asd", Policy.class, "assertionPolicy", EntityTypes.POLICY_TYPE), dependencies);
+        bundle.setDependencyMap(dependencyListMap);
         writer.write(bundle, temporaryFolder.getRoot(), bundle);
 
         File policyFolder = new File(temporaryFolder.getRoot(), "policy");
