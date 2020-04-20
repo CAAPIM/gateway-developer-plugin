@@ -68,7 +68,7 @@ public class PolicyWriter implements EntityWriter {
                 .forEach(policyEntity -> {
                     final String id = policyEntity.getId();
                     final String name = policyEntity.getName();
-                    final PolicyMetadata policyMetadata = writePolicy(bundle, policyFolder, policyEntity.getParentFolder().getId(), policyEntity.getName(), id, policyEntity.getPolicyDocument());
+                    final PolicyMetadata policyMetadata = writePolicy(bundle, policyFolder, policyEntity.getParentFolder().getId(), name, id, policyEntity.getPolicyDocument());
                     final Set<Dependency> policyDependencies = getPolicyDependencies(id, rawBundle);
                     policyMetadata.setDependencies(policyDependencies);
                     policyMetadataMap.put(name, policyMetadata);
@@ -76,6 +76,11 @@ public class PolicyWriter implements EntityWriter {
         writePolicyMetadata(policyMetadataMap, policyFolder);
     }
 
+    /**
+     * Writes policy metadata to policy.yml file
+     * @param policyMetadataMap
+     * @param policyFolder
+     */
     private void writePolicyMetadata(final Map<String, PolicyMetadata> policyMetadataMap, final File policyFolder){
         if (!policyMetadataMap.isEmpty()) {
             //build yml file with dependencies

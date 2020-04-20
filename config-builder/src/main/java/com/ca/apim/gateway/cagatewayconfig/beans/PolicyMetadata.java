@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Set;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+/**
+ * Metadata file for Policy entities
+ */
 
 @JsonInclude
 public class PolicyMetadata {
