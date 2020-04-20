@@ -15,11 +15,13 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 @JsonInclude(NON_EMPTY)
 public class Dependency {
-    private final String id;
+    private  String id;
     @JsonIgnore
-    private final Class<? extends GatewayEntity> type;
-    private final String name;
-    private final String entityType;
+    private  Class<? extends GatewayEntity> type;
+    private  String name;
+    private  String entityType;
+    public Dependency(){
+    }
     public Dependency(String id, Class<? extends GatewayEntity> type){
         this(id, type, null, null);
     }
@@ -56,6 +58,22 @@ public class Dependency {
                 Objects.equals(name, that.name) &&
                 Objects.equals(entityType, that.entityType) &&
                 Objects.equals(type, that.type);
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setType(Class<? extends GatewayEntity> type) {
+        this.type = type;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
     }
 
     @Override
