@@ -83,7 +83,7 @@ class PolicyWriterTest {
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policy.yml");
+        File policyMetadataFile = new File(policyFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
@@ -123,7 +123,7 @@ class PolicyWriterTest {
 
         File policyFile = new File(testFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policy.yml");
+        File policyMetadataFile = new File(policyFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
@@ -157,7 +157,7 @@ class PolicyWriterTest {
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policy.yml");
+        File policyMetadataFile = new File(policyFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
@@ -203,7 +203,7 @@ class PolicyWriterTest {
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policy.yml");
+        File policyMetadataFile = new File(policyFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 

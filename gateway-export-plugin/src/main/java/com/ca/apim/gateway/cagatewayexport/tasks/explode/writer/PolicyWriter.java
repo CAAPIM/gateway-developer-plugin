@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Element;
@@ -18,6 +19,7 @@ import javax.inject.Singleton;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
@@ -56,8 +58,8 @@ public class PolicyWriter implements EntityWriter {
             final String name = serviceEntity.getName();
             final PolicyMetadata policyMetadata = writePolicy(bundle, policyFolder, serviceEntity.getParentFolder().getId(), name, id, serviceEntity.getPolicyXML());
             final Set<Dependency> policyDependencies = getPolicyDependencies(id, rawBundle);
-            policyMetadata.setDependencies(policyDependencies);
-            policyMetadataMap.put(name, policyMetadata);
+            policyMetadata.setUsedEntities(policyDependencies);
+            policyMetadataMap.put(policyMetadata.getNameWithPath(), policyMetadata);
         });
 
         Stream.of(
@@ -70,8 +72,8 @@ public class PolicyWriter implements EntityWriter {
                     final String name = policyEntity.getName();
                     final PolicyMetadata policyMetadata = writePolicy(bundle, policyFolder, policyEntity.getParentFolder().getId(), name, id, policyEntity.getPolicyDocument());
                     final Set<Dependency> policyDependencies = getPolicyDependencies(id, rawBundle);
-                    policyMetadata.setDependencies(policyDependencies);
-                    policyMetadataMap.put(name, policyMetadata);
+                    policyMetadata.setUsedEntities(policyDependencies);
+                    policyMetadataMap.put(policyMetadata.getNameWithPath(), policyMetadata);
                 });
         writePolicyMetadata(policyMetadataMap, policyFolder);
     }
@@ -85,7 +87,7 @@ public class PolicyWriter implements EntityWriter {
         if (!policyMetadataMap.isEmpty()) {
             //build yml file with dependencies
             ObjectWriter objectWriter = jsonTools.getObjectWriter();
-            File policyMetadataFile = new File(policyFolder, "policy" + jsonTools.getFileExtension());
+            File policyMetadataFile = new File(policyFolder, "policies" + jsonTools.getFileExtension());
             try (OutputStream fileStream = Files.newOutputStream(policyMetadataFile.toPath())) {
                 objectWriter.writeValue(fileStream, policyMetadataMap);
             } catch (IOException e) {
@@ -126,7 +128,8 @@ public class PolicyWriter implements EntityWriter {
         documentFileUtils.createFolders(folderPath);
         PolicyConverter policyConverter = policyConverterRegistry.getFromPolicyElement(name, policy);
         Path policyPath = folderPath.resolve(name + policyConverter.getPolicyTypeExtension());
-        policyMetadata.setPath(policyFolderPath.toString());
+        policyMetadata.setPath(PathUtils.unixPath(policyFolderPath));
+        policyMetadata.setName(name);
         try (InputStream policyStream = policyConverter.convertFromPolicyElement(policy)) {
             FileUtils.copyInputStreamToFile(policyStream, policyPath.toFile());
         } catch (IOException e) {
