@@ -73,6 +73,11 @@ public class PolicyWriter implements EntityWriter {
                     final PolicyMetadata policyMetadata = writePolicy(bundle, policyFolder, policyEntity.getParentFolder().getId(), name, id, policyEntity.getPolicyDocument());
                     final Set<Dependency> policyDependencies = getPolicyDependencies(id, rawBundle);
                     policyMetadata.setUsedEntities(policyDependencies);
+                    final PolicyType policyType = policyEntity.getPolicyType();
+                    if(policyType != null){
+                        policyMetadata.setType(policyType.getType());
+                    }
+                    policyMetadata.setTag(policyMetadata.getTag());
                     policyMetadataMap.put(policyMetadata.getNameWithPath(), policyMetadata);
                 });
         writePolicyMetadata(policyMetadataMap, policyFolder);

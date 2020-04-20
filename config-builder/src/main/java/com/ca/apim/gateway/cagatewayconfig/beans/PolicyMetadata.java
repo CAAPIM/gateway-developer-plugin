@@ -15,6 +15,8 @@ public class PolicyMetadata {
     private String name;
     @JsonIgnore
     private String path;
+    private String type;
+    private String tag;
     private Set<Dependency> usedEntities;
 
     public String getName() {
@@ -39,6 +41,22 @@ public class PolicyMetadata {
 
     public void setUsedEntities(Set<Dependency> usedEntities) {
         this.usedEntities = usedEntities;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     @JsonIgnore
