@@ -27,6 +27,7 @@ import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,7 +57,7 @@ class BundleFileBuilder {
         this.cache = cache;
     }
 
-    void buildBundle(File rootDir, File outputDir, List<File> dependencies, String name) {
+    void buildBundle(File rootDir, File outputDir, List<File> dependencies, String bundleName, String bundleVersion) {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
@@ -83,8 +84,12 @@ class BundleFileBuilder {
         }
 
         //Zip
-        Element bundleElement = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document);
-        documentFileUtils.createFile(bundleElement, new File(outputDir, name + ".bundle").toPath());
+        Map<String, Element> bundleElementMap = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document, bundleName, bundleVersion);
+        Set<Map.Entry<String, Element>> entrySet = bundleElementMap.entrySet();
+        for (Map.Entry<String, Element> entry : entrySet) {
+            documentFileUtils.createFile(entry.getValue(), new File(outputDir, entry.getKey() + ".bundle").toPath());
+        }
+
     }
 
     protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entityClass) {

@@ -19,7 +19,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.processDeploymentBundles;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.setTemplatizedBundlesFolderPath;
@@ -29,7 +33,7 @@ import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class EnvironmentBundleCreator {
-
+    private static final Logger LOGGER = Logger.getLogger(EnvironmentBundleCreator.class.getName());
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
     private final EnvironmentBundleBuilder environmentBundleBuilder;
@@ -66,8 +70,13 @@ public class EnvironmentBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
-        documentFileUtils.createFile(bundleElement, new File(bundleFolderPath, bundleFileName).toPath());
+        //ToDo : Need to handle bundle name and version properly
+        Map<String, Element> bundleElements = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "");
+        LOGGER.log(Level.WARNING, "bundleElements" + bundleElements);
+        Set<Map.Entry<String, Element>> entrySet = bundleElements.entrySet();
+        for (Map.Entry<String, Element> entry : entrySet) {
+            documentFileUtils.createFile(entry.getValue(), new File(bundleFolderPath, entry.getKey() + "-env.bundle").toPath());
+        }
         return environmentBundle;
     }
 
