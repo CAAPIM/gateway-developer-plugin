@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
@@ -46,8 +47,8 @@ class JmsDestinationFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", JmsDestination.class), new Dependency("3", JmsDestination.class)),
-                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", JmsDestination.class))));
+                        new Dependency("1", Policy.class, "my-policy", EntityTypes.POLICY_TYPE), Arrays.asList(new Dependency("2", JmsDestination.class, "jms2", EntityTypes.JMS_DESTINATION_TYPE), new Dependency("3", JmsDestination.class, "jms3", EntityTypes.JMS_DESTINATION_TYPE)),
+                        new Dependency("2", Policy.class, "my-policy2", EntityTypes.POLICY_TYPE), Collections.singletonList(new Dependency("4", JmsDestination.class, "jms4", EntityTypes.JMS_DESTINATION_TYPE))));
         bundle.addEntity(TestUtils.createJmsDestination("jms1", "1"));
         bundle.addEntity(TestUtils.createJmsDestination("jms2", "2"));
         bundle.addEntity(TestUtils.createJmsDestination("jms3", "3"));
