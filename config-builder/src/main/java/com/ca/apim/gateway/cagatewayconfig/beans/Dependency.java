@@ -15,38 +15,41 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 @JsonInclude(NON_EMPTY)
 public class Dependency {
-    private  String id;
     @JsonIgnore
-    private  Class<? extends GatewayEntity> type;
-    private  String name;
-    private  String entityType;
-    public Dependency(){
-    }
-    public Dependency(String id, Class<? extends GatewayEntity> type){
-        this(id, type, null, null);
+    private String id;
+    @JsonIgnore
+    private Class<? extends GatewayEntity> typeClass;
+    private String name;
+    private String type;
+
+    public Dependency() {
     }
 
-    public Dependency(String id, Class<? extends GatewayEntity> type, String name, String entityType) {
+    public Dependency(String id, Class<? extends GatewayEntity> typeClass) {
+        this(id, typeClass, null, null);
+    }
+
+    public Dependency(String id, Class<? extends GatewayEntity> typeClass, String name, String type) {
         this.id = id;
-        this.type = type;
+        this.typeClass = typeClass;
         this.name = name;
-        this.entityType = entityType;
+        this.type = type;
     }
 
     public String getId() {
         return id;
     }
 
-    public Class<? extends GatewayEntity> getType() {
-        return type;
+    public Class<? extends GatewayEntity> getTypeClass() {
+        return typeClass;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getEntityType(){
-        return entityType;
+    public String getType() {
+        return type;
     }
 
     @Override
@@ -56,34 +59,34 @@ public class Dependency {
         Dependency that = (Dependency) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(name, that.name) &&
-                Objects.equals(entityType, that.entityType) &&
-                Objects.equals(type, that.type);
+                Objects.equals(type, that.type) &&
+                Objects.equals(typeClass, that.typeClass);
     }
 
     public void setId(String id) {
         this.id = id;
     }
 
-    public void setType(Class<? extends GatewayEntity> type) {
-        this.type = type;
+    public void setTypeClass(Class<? extends GatewayEntity> typeClass) {
+        this.typeClass = typeClass;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setEntityType(String entityType) {
-        this.entityType = entityType;
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, type, name, entityType);
+        return Objects.hash(id, typeClass, name, type);
     }
 
     @Override
-    public String toString(){
-        return id + ":" + name +":" + entityType;
+    public String toString() {
+        return id + ":" + name + ":" + type;
     }
 }
