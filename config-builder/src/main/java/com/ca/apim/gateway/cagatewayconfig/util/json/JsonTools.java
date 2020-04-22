@@ -17,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -175,5 +177,14 @@ public class JsonTools {
             });
         }
         return objectMapper;
+    }
+
+    public void writeObject(Object object, File file) throws IOException {
+        ObjectWriter objectWriter = getObjectWriter();
+        try (OutputStream fileStream = Files.newOutputStream(file.toPath())) {
+            objectWriter.writeValue(fileStream, object);
+        } catch (IOException e) {
+            throw e;
+        }
     }
 }
