@@ -77,7 +77,8 @@ public class PolicyWriter implements EntityWriter {
                     if(policyType != null){
                         policyMetadata.setType(policyType.getType());
                     }
-                    policyMetadata.setTag(policyMetadata.getTag());
+                    policyMetadata.setTag(policyEntity.getTag());
+                    policyMetadata.setSubtag(policyEntity.getSubtag());
                     policyMetadataMap.put(policyMetadata.getNameWithPath(), policyMetadata);
                 });
         writePolicyMetadata(policyMetadataMap, policyFolder);
