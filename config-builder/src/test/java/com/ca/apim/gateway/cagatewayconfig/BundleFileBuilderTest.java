@@ -56,9 +56,9 @@ class BundleFileBuilderTest {
     @Test
     void buildBundleNoSource() {
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
-        bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptyList(), "my-bundle");
+        bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptyList(), "my-bundle", "1.0");
 
-        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
+        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()), eq(EntityBuilder.BundleType.DEPLOYMENT), any(), "my-bundle", "1.0");
     }
 
     @Test
@@ -68,9 +68,9 @@ class BundleFileBuilderTest {
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
-        bundleFileBuilder.buildBundle(new File("input"), new File("output"), Collections.emptyList(), "my-bundle");
+        bundleFileBuilder.buildBundle(new File("input"), new File("output"), Collections.emptyList(), "my-bundle", "1.0");
 
-        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
+        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any(), "my-bundle", "1.0");
     }
 
     @Test
@@ -84,7 +84,7 @@ class BundleFileBuilderTest {
         when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
 
         BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache));
-        bundleFileBuilder.buildBundle(new File("input"), new File("output"), dummyList, "my-bundle");
+        bundleFileBuilder.buildBundle(new File("input"), new File("output"), dummyList, "my-bundle", "1.0");
 
         verify(bundleFileBuilder, Mockito.times(2)).logOverriddenEntities(any(Bundle.class), any(), any());
     }

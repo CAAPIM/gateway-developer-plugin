@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.LISTEN_PORT_TYPE;
 import static java.util.Collections.singleton;
@@ -28,7 +29,7 @@ class BundleEntityBuilderTest {
     void build() {
         BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()), new BundleDocumentBuilder());
 
-        final Element element = builder.build(new Bundle(), BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final Map<String, Element> element = builder.build(new Bundle(), BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "1.0");
         assertNotNull(element);
     }
 
