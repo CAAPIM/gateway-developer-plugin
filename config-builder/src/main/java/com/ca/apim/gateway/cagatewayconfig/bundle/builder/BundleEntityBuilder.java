@@ -12,7 +12,10 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folderable;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.metadata.BundleMetadata;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -36,20 +39,25 @@ public class BundleEntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(BundleEntityBuilder.class.getName());
     private final Set<EntityBuilder> entityBuilders;
     private final BundleDocumentBuilder bundleDocumentBuilder;
+    private final BundleMetadataBuilder bundleMetadataBuilder;
 
     @Inject
-    BundleEntityBuilder(final Set<EntityBuilder> entityBuilders, final BundleDocumentBuilder bundleDocumentBuilder) {
+    BundleEntityBuilder(final Set<EntityBuilder> entityBuilders, final BundleDocumentBuilder bundleDocumentBuilder,
+                        final BundleMetadataBuilder bundleMetadataBuilder) {
         // treeset is needed here to sort the builders in the proper order to get a correct bundle builded
         // Ordering is necessary for the bundle, for the gateway to load it properly.
         this.entityBuilders = unmodifiableSet(new TreeSet<>(entityBuilders));
         this.bundleDocumentBuilder = bundleDocumentBuilder;
+        this.bundleMetadataBuilder = bundleMetadataBuilder;
     }
 
-    public Map<String, Element> build(Bundle bundle, EntityBuilder.BundleType bundleType, Document document, String bundleName, String bundleVersion) {
+    public Map<String, Pair<Element, BundleMetadata>> build(Bundle bundle, EntityBuilder.BundleType bundleType,
+                                                            Document document, String bundleName,
+                                                            String bundleVersion) {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
 
-        Map<String, Entity> annotatedEntities = new HashMap<>();
+        Map<String, Pair<Entity, GatewayEntity>> annotatedEntities = new HashMap<>();
         // Filter the bundle to export only annotated entities
         // TODO : Enhance this logic to support services and policies
         final Map<String, Encass> encassEntities = bundle.getEntities(Encass.class);
@@ -61,30 +69,34 @@ public class BundleEntityBuilder {
                         final String annotatedEntityName = entityAnnotation.getName();
                         final String annotatedEntityDesc = entityAnnotation.getDescription();
                         final Entity filteredEntity = entities.parallelStream().filter(entity -> encassEntry.getKey().equals(entity.getName())).findAny().get();
-                        annotatedEntities.put(annotatedEntityName != null ? annotatedEntityName + '-' + bundleVersion : encassEntry.getKey() + '-' + bundleVersion, filteredEntity);
+                        annotatedEntities.put(annotatedEntityName != null ?
+                                annotatedEntityName + '-' + bundleVersion :
+                                encassEntry.getKey() + '-' + bundleVersion, ImmutablePair.of(filteredEntity, encass));
                     }
                 });
             }
         });
 
         if (annotatedEntities.size() > 0) {
-            Map<String, Element> annotatedElements = new HashMap<>();
+            Map<String, Pair<Element, BundleMetadata>> annotatedElements = new HashMap<>();
             annotatedEntities.entrySet().parallelStream().forEach(annotatedEntity -> {
-                List<Entity> entityList = getEntityDependencies(annotatedEntity.getValue(), entities, bundle);
+                List<Entity> entityList = getEntityDependencies(annotatedEntity.getValue().getLeft(), entities, bundle);
                 LOGGER.log(Level.WARNING, "Annotated entity dependencies" + entityList);
                 if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
-                    entityList.add(annotatedEntity.getValue());
+                    entityList.add(annotatedEntity.getValue().getLeft());
                 }
-                annotatedElements.put(annotatedEntity.getKey(), bundleDocumentBuilder.build(document, entityList));
+                final Element bundleElement = bundleDocumentBuilder.build(document, entityList);
+                final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(bundleName, bundleVersion,
+                        annotatedEntity.getValue().getRight());
+                annotatedElements.put(annotatedEntity.getKey(), ImmutablePair.of(bundleElement, bundleMetadata));
             });
             return annotatedElements;
         }
 
-        return new HashMap<String, Element>() {
-            {
-                put(bundleName + '-' + bundleVersion, bundleDocumentBuilder.build(document, entities));
-            }
-        };
+        final Map<String, Pair<Element, BundleMetadata>> artifacts = new HashMap<>();
+        artifacts.put(bundleName + '-' + bundleVersion, ImmutablePair.of(bundleDocumentBuilder.build(document,
+                entities), null));
+        return artifacts;
     }
 
     private List<Entity> getEntityDependencies(Entity entity, List<Entity> entities, Bundle bundle) {
@@ -126,9 +138,7 @@ public class BundleEntityBuilder {
             while (folder != null) {
                 final String id = folder.getId();
                 Optional<Entity> optionalEntity = entities.stream().filter(e -> id.equals(e.getId())).findFirst();
-                if (optionalEntity.isPresent()) {
-                    entityDependenciesList.add(optionalEntity.get());
-                }
+                optionalEntity.ifPresent(entityDependenciesList::add);
                 folder = folder.getParentFolder();
             }
         }

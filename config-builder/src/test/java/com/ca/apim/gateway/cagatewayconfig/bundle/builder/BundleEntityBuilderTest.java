@@ -7,8 +7,10 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.metadata.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -16,6 +18,7 @@ import org.w3c.dom.Element;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.LISTEN_PORT_TYPE;
 import static java.util.Collections.singleton;
@@ -26,10 +29,12 @@ class BundleEntityBuilderTest {
     // This class is covered by testing others, so a simple testing is enough here.
     @Test
     void build() {
-        BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()), new BundleDocumentBuilder());
+        BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()),
+                new BundleDocumentBuilder(), new BundleMetadataBuilder());
 
-        final Element element = builder.build(new Bundle(), BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
-        assertNotNull(element);
+        final Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(new Bundle(), BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "test-bundle", "1.0.0");
+        assertNotNull(bundles);
     }
 
     private static class TestEntityBuilder implements EntityBuilder {

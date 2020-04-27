@@ -6,10 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({"type", "name"})
 public class EncassArgument {
 
     private String name;
     private String type;
+    @JsonIgnore
     private Boolean requireExplicit;
 
     public EncassArgument() {

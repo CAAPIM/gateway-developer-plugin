@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.beans.metadata.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
@@ -17,7 +18,10 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -37,6 +41,7 @@ import java.util.stream.Collectors;
 class BundleFileBuilder {
 
     private final DocumentFileUtils documentFileUtils;
+    private final JsonFileUtils jsonFileUtils;
     private final EntityLoaderRegistry entityLoaderRegistry;
     private final BundleEntityBuilder bundleEntityBuilder;
     private final BundleCache cache;
@@ -47,10 +52,12 @@ class BundleFileBuilder {
     @Inject
     BundleFileBuilder(final DocumentTools documentTools,
                       final DocumentFileUtils documentFileUtils,
+                      final JsonFileUtils jsonFileUtils,
                       final EntityLoaderRegistry entityLoaderRegistry,
                       final BundleEntityBuilder bundleEntityBuilder,
                       final BundleCache cache) {
         this.documentFileUtils = documentFileUtils;
+        this.jsonFileUtils = jsonFileUtils;
         this.documentTools = documentTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
         this.bundleEntityBuilder = bundleEntityBuilder;
@@ -84,12 +91,14 @@ class BundleFileBuilder {
         }
 
         //Zip
-        Map<String, Element> bundleElementMap = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document, bundleName, bundleVersion);
-        Set<Map.Entry<String, Element>> entrySet = bundleElementMap.entrySet();
-        for (Map.Entry<String, Element> entry : entrySet) {
-            documentFileUtils.createFile(entry.getValue(), new File(outputDir, entry.getKey() + ".bundle").toPath());
+        final Map<String, Pair<Element, BundleMetadata>> bundleElementMap = bundleEntityBuilder.build(bundle,
+                EntityBuilder.BundleType.DEPLOYMENT, document, bundleName, bundleVersion);
+        for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundleElementMap.entrySet()) {
+            documentFileUtils.createFile(entry.getValue().getLeft(),
+                    new File(outputDir, entry.getKey() + ".bundle").toPath());
+            jsonFileUtils.createFile(entry.getValue().getRight(),
+                    new File(outputDir, entry.getKey() + JsonTools.INSTANCE.getFileExtension()).toPath());
         }
-
     }
 
     protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entityClass) {

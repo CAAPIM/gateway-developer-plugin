@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.metadata.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
@@ -19,6 +20,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -110,12 +112,12 @@ public class FullBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
         //ToDo : Need to handle bundle name and version properly
-        Map<String, Element> bundleElements = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "");
-        Set<Map.Entry<String, Element>> entrySet =  bundleElements.entrySet();
+        Map<String, Pair<Element, BundleMetadata>> bundleElements = bundleEntityBuilder.build(environmentBundle,
+                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "");
         Element bundleElement = null;
-        for(Map.Entry<String, Element> entry: entrySet) {
+        for(Map.Entry<String, Pair<Element, BundleMetadata>> entry: bundleElements.entrySet()) {
             // generate the environment bundle
-            bundleElement = entry.getValue();
+            bundleElement = entry.getValue().getLeft();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
             Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
 
@@ -127,8 +129,10 @@ public class FullBundleCreator {
             templatizedBundles.forEach(tb -> {
                 try {
                     final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
-                    copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
-                    copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document,
+                            referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document,
+                            mappingsElement, mapping -> {
                         final String key = buildBundleMappingKey(mapping);
                         return addedItems.contains(key) && addedMappings.add(key);
                     });

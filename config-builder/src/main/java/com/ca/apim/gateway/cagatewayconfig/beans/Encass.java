@@ -110,6 +110,7 @@ public class Encass extends GatewayEntity {
     @Override
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
+        setName(entityKey);
     }
 
     @Override
