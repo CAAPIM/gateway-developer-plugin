@@ -1,32 +1,7 @@
 /*
- *
- *  * Copyright (c) 2018 CA. All rights reserved.
- *  * This software may be modified and distributed under the terms
- *  * of the MIT license.  See the LICENSE file for details.
- *
- *
- */
-
-/**
- * AnnotationDeserializer deserializes the "annotations" tag in the entity elements. Annotation on entities are
- * supported in 2 ways:
- * 1) Array of objects containing "type" and the other optional fields like "name", "description" and "tags"
- * field. For example,
- * annotations:
- * - type: "@bundle"
- *   name: "encass-example"
- *   description: "description for encass-example"
- *   tags:
- *   - "anytag"
- *   - "sometag"
- *
- * 2) Array of Strings containing only "type". For example,
- * annotations:
- * - "@bundle"
- * - "@reusable"
- *
- * This deserialization implementation takes care of both these types and deserializes the input into
- * {@link java.util.Set} of {@link com.ca.apim.gateway.cagatewayconfig.beans.Annotation}
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
  */
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;

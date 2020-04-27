@@ -53,7 +53,8 @@ class BundleEntityBuilderTest {
         final Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(new Bundle(), BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "test-bundle", "1.0.0");
         assertNotNull(bundles);
-        final Map<String, Element> element = builder.build(new Bundle(), BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "1.0");
+        final Map<String, Pair<Element, BundleMetadata>> element = builder.build(new Bundle(), BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "1.0");
         assertNotNull(element);
     }
 
@@ -113,13 +114,15 @@ class BundleEntityBuilderTest {
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
 
-        BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder());
-        Map<String, Element> bundles = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "1.0");
+        BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(),
+                new BundleMetadataBuilder());
+        Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "1.0");
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        for (Map.Entry<String, Element> bundleEntry : bundles.entrySet()) {
+        for (Map.Entry<String, Pair<Element, BundleMetadata>> bundleEntry : bundles.entrySet()) {
             assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-" + "1.0", bundleEntry.getKey());
-            final Element element = bundleEntry.getValue();
+            final Element element = bundleEntry.getValue().getLeft();
             assertNotNull(element);
             assertEquals(BundleDocumentBuilder.GATEWAY_MANAGEMENT, element.getAttribute(BundleDocumentBuilder.L7));
             assertEquals(BUNDLE, element.getTagName());
@@ -149,12 +152,11 @@ class BundleEntityBuilderTest {
         encass.setPolicy(policyPath);
         encass.setId(TEST_ENCASS_ID);
         encass.setGuid(encassGuid);
-        encass.setAnnotations(new HashSet<>());
-        encass.getAnnotations().add(new HashMap<String, String>()
-        {{
-            put("type", "@bundle");
-            put("name", TEST_ENCASS_ANNOTATION_NAME);
-        }});
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation annotation = new Annotation("@bundle");
+        annotation.setName(TEST_ENCASS_ANNOTATION_NAME);
+        annotations.add(annotation);
+        encass.setAnnotations(annotations);
         encass.setProperties(ImmutableMap.of(
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
                 PALETTE_ICON_RESOURCE_NAME, "someImage",

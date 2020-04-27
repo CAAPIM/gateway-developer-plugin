@@ -48,12 +48,8 @@ public class EnvironmentConfigurationUtils {
         final Map envConfig = ofNullable(providedEnvironmentValues).orElseThrow(() -> new MissingEnvironmentException("Environment configuration was not specified into gradle configuration file."));
         final Map<String, String> environmentValues = new HashMap<>();
         envConfig.entrySet().forEach((Consumer<Entry>) e -> environmentValues.put(PREFIX_ENV + e.getKey().toString(), getEnvValue(e.getKey().toString(), e.getValue())));
-        return new HashMap<String, String>() {
-            {
-                put("", "");
-            }
-        };
-        //return unmodifiableMap(environmentValues);
+
+        return unmodifiableMap(environmentValues);
     }
 
     private String getEnvValue(String key, Object o) {
