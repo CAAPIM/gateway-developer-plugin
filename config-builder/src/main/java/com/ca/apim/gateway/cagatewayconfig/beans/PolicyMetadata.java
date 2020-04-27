@@ -15,6 +15,8 @@ public class PolicyMetadata {
     private String tag;
     private String subtag;
     private Set<Dependency> usedEntities;
+    @JsonIgnore
+    private String path;
 
     public Set<Dependency> getUsedEntities() {
         return usedEntities;
@@ -48,4 +50,11 @@ public class PolicyMetadata {
         this.subtag = subtag;
     }
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
 }
