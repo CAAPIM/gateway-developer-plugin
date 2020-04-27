@@ -6,32 +6,25 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folderable;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.beans.metadata.BundleMetadata;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_BUNDLE;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
 import static java.util.Collections.unmodifiableSet;
 
 @Singleton
@@ -57,6 +50,7 @@ public class BundleEntityBuilder {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
 
+        List<AnnotatedEntity> annotatedEntities = new ArrayList<>();
         Map<String, Pair<Entity, GatewayEntity>> annotatedEntities = new HashMap<>();
         // Filter the bundle to export only annotated entities
         // TODO : Enhance this logic to support services and policies
@@ -64,65 +58,128 @@ public class BundleEntityBuilder {
         encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
             Encass encass = encassEntry.getValue();
             if (encass.getAnnotations() != null) {
-                encass.getAnnotations().forEach(entityAnnotation -> {
-                    if (entityAnnotation.getType().equals(ANNOTATION_TYPE_BUNDLE)) {
-                        final String annotatedEntityName = entityAnnotation.getName();
-                        final String annotatedEntityDesc = entityAnnotation.getDescription();
-                        final Entity filteredEntity = entities.parallelStream().filter(entity -> encassEntry.getKey().equals(entity.getName())).findAny().get();
-                        annotatedEntities.put(annotatedEntityName != null ?
-                                annotatedEntityName + '-' + bundleVersion :
-                                encassEntry.getKey() + '-' + bundleVersion, ImmutablePair.of(filteredEntity, encass));
+                encass.getAnnotations().forEach(annotation -> {
+                    AnnotatedEntity annotatedEntity = new AnnotatedEntity();
+                    if (annotation instanceof Map) {
+                        if (((Map) annotation).containsKey("type")) {
+                            try {
+                                switch (((Map) annotation).get("type").toString()) {
+                                    case ANNOTATION_TYPE_BUNDLE:
+                                        final String annotatedBundleName = ((Map) annotation).containsKey("name") ? ((Map) annotation).get("name").toString() : null;
+                                        final ArrayList<String> tags = ((Map) annotation).containsKey("tags") ? (ArrayList<String>) ((Map) annotation).get("tags") : null;
+                                        if (CollectionUtils.isNotEmpty(tags)) {
+                                            //ToDo : Tags logic
+                                        }
+                                        annotatedEntity.setBundleType(true);
+                                        annotatedEntity.setEntityName(encassEntry.getKey());
+                                        annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+                                        annotatedEntity.setBundleName(annotatedBundleName != null ? annotatedBundleName + '-' + bundleVersion : encassEntry.getKey() + '-' + bundleVersion);
+                                        annotatedEntity.setPolicyName(encass.getPolicy());
+                                        break;
+                                    case ANNOTATION_TYPE_REUSABLE:
+                                        annotatedEntity.setReusableType(true);
+                                        break;
+                                    case ANNOTATION_TYPE_REDEPLOYABLE:
+                                        annotatedEntity.setRedeployableType(true);
+                                        break;
+                                    case ANNOTATION_TYPE_EXCLUDE:
+                                        annotatedEntity.setExcludeType(true);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            } catch (ClassCastException ex) {
+                                throw new EntityBuilderException("Unable to build bundle for entity : " + encassEntry.getKey() + ", please check the annotations syntax.", ex);
+                            }
+                        }
                     }
+
+                    if (annotation instanceof String) {
+                        switch (annotation.toString()) {
+                            case ANNOTATION_TYPE_BUNDLE:
+                                annotatedEntity.setBundleType(true);
+                                annotatedEntity.setEntityName(encassEntry.getKey());
+                                annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+                                annotatedEntity.setBundleName(encassEntry.getKey() + '-' + bundleVersion);
+                                annotatedEntity.setPolicyName(encass.getPolicy());
+                                break;
+                            case ANNOTATION_TYPE_REUSABLE:
+                                annotatedEntity.setReusableType(true);
+                                break;
+                            case ANNOTATION_TYPE_REDEPLOYABLE:
+                                annotatedEntity.setRedeployableType(true);
+                                break;
+                            case ANNOTATION_TYPE_EXCLUDE:
+                                annotatedEntity.setExcludeType(true);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    annotatedEntities.add(annotatedEntity);
                 });
             }
         });
 
-        if (annotatedEntities.size() > 0) {
-            Map<String, Pair<Element, BundleMetadata>> annotatedElements = new HashMap<>();
-            annotatedEntities.entrySet().parallelStream().forEach(annotatedEntity -> {
-                List<Entity> entityList = getEntityDependencies(annotatedEntity.getValue().getLeft(), entities, bundle);
-                LOGGER.log(Level.WARNING, "Annotated entity dependencies" + entityList);
-                if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
-                    entityList.add(annotatedEntity.getValue().getLeft());
-                }
-                final Element bundleElement = bundleDocumentBuilder.build(document, entityList);
-                final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(bundleName, bundleVersion,
-                        annotatedEntity.getValue().getRight());
-                annotatedElements.put(annotatedEntity.getKey(), ImmutablePair.of(bundleElement, bundleMetadata));
-            });
+        if(!annotatedEntities.isEmpty()) {
+            Map<String, Element> annotatedElements = new LinkedHashMap<>();
+            if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
+                annotatedEntities.stream().forEach(annotatedEntity -> {
+                    if (annotatedEntity.isBundleTypeEnabled()) {
+                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(), annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
+                        LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
+                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(bundleName, bundleVersion,
+                                annotatedEntity.getValue().getRight());
+                        annotatedElements.put(annotatedEntity.getBundleName(), bundleDocumentBuilder.build(document, entityList));
+                    }
+                });
+            }
             return annotatedElements;
         }
 
+        Map<String, Element> bundles = new HashMap<>();
+        bundles.put(bundleName + '-' + bundleVersion, bundleDocumentBuilder.build(document, entities));
+        return bundles;
         final Map<String, Pair<Element, BundleMetadata>> artifacts = new HashMap<>();
         artifacts.put(bundleName + '-' + bundleVersion, ImmutablePair.of(bundleDocumentBuilder.build(document,
                 entities), null));
         return artifacts;
     }
 
-    private List<Entity> getEntityDependencies(Entity entity, List<Entity> entities, Bundle bundle) {
+    private List<Entity> getEntityDependencies(String annotatedEntityName, String annotatedEntityType, String policyNameWithPath, List<Entity> entities, Bundle bundle) {
         List<Entity> entityDependenciesList = new ArrayList<>();
         Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
         if (dependencyListMap != null) {
+            int pathIndex = policyNameWithPath.lastIndexOf("/");
+            final String policyName = pathIndex > -1 ? policyNameWithPath.substring(pathIndex + 1) : policyNameWithPath;
             Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
             for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
-                Dependency annotatedEntity = entry.getKey();
-                if (annotatedEntity.getName().equals(entity.getName())) {
-                    List<Dependency> dependencyList = entry.getValue();
-                    for (Dependency dependency : dependencyList) {
-                        for (Entity depEntity : entities) {
-                            if (dependency.getName().equals(depEntity.getName()) && depEntity.getType().equals(dependency.getEntityType())) {
-                                entityDependenciesList.add(depEntity);
+                final Dependency dependencyParent = entry.getKey();
+                if (dependencyParent.getName().equals(policyName)) {
+                    //Add the dependant folders first
+                    final Map<String, Policy> entityMap = bundle.getPolicies();
+                    if (entityMap != null) {
+                        final GatewayEntity policyEntity = entityMap.get(policyNameWithPath);
+                        populatedDependentFolders(entityDependenciesList, entities, policyEntity);
+                    }
+
+                    //Add the policy dependencies
+                    for (Dependency dependency : entry.getValue()) {
+                        if (!dependency.getName().equals(annotatedEntityName) && !dependency.getType().equals(annotatedEntityType)) {
+                            for (Entity entity : entities) {
+                                int index = entity.getName().lastIndexOf("/");
+                                final String entityName = index > -1 ? entity.getName().substring(index + 1) : entity.getName();
+                                if (dependency.getName().equals(entityName) && dependency.getType().equals(entity.getType())) {
+                                    entityDependenciesList.add(entity);
+                                }
                             }
                         }
                     }
 
-                    Map<String, ? extends GatewayEntity> entityMap = bundle.getEntities(annotatedEntity.getType());
-                    if (entityMap != null) {
-                        GatewayEntity annotatedItem = entityMap.get(annotatedEntity.getName());
-                        populatedDependentFolders(entityDependenciesList, entities, annotatedItem);
-                    }
+                    //Add the parent entities
+                    final List<Entity> parentEntities = entities.stream().filter(entity -> policyNameWithPath.equals(entity.getName()) || annotatedEntityName.equals(entity.getName())).collect(Collectors.toList());
+                    entityDependenciesList.addAll(parentEntities);
 
-                    LOGGER.log(Level.WARNING, "entityDependenciesList" + entityDependenciesList);
                     return entityDependenciesList;
                 }
             }
@@ -131,16 +188,16 @@ public class BundleEntityBuilder {
         return entityDependenciesList;
     }
 
-    private void populatedDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity annotatedItem) {
-
-        if (annotatedItem instanceof Folderable) {
-            Folder folder = ((Folderable) annotatedItem).getParentFolder();
+    private void populatedDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity policyEntity) {
+        if (policyEntity instanceof Folderable) {
+            Folder folder = ((Folderable) policyEntity).getParentFolder();
+            final Set<String> folderIds = new HashSet<>();
             while (folder != null) {
-                final String id = folder.getId();
-                Optional<Entity> optionalEntity = entities.stream().filter(e -> id.equals(e.getId())).findFirst();
-                optionalEntity.ifPresent(entityDependenciesList::add);
+                folderIds.add(folder.getId());
                 folder = folder.getParentFolder();
             }
+            final List<Entity> folderDependencies = entities.stream().filter(e -> folderIds.contains(e.getId())).collect(Collectors.toList());
+            entityDependenciesList.addAll(folderDependencies);
         }
     }
 

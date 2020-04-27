@@ -25,6 +25,7 @@ import org.testcontainers.shaded.com.google.common.io.Files;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
@@ -70,7 +71,7 @@ class EncassLoaderTest {
                 "    " + ALLOW_TRACING + ": \"false\"\n" +
                 "    " + DESCRIPTION + ": \"some description\"\n" +
                 "    " + PASS_METRICS_TO_PARENT + ": \"false\"\n";
-        load(yaml, "yml", false);
+        load(yaml, "yml", false, false);
     }
 
     @Test
@@ -107,7 +108,7 @@ class EncassLoaderTest {
                 "      }\n" +
                 "   }\n" +
                 "}";
-        load(json, "json", false);
+        load(json, "json", false, false);
     }
 
     @Test
@@ -123,7 +124,7 @@ class EncassLoaderTest {
                 "   type: \"string\"\n" +
                 "   name: \"goodbye-again\"\n" +
                 "   type: \"message\"\n";
-        load(yaml, "yml", true);
+        load(yaml, "yml", true, false);
     }
 
     @Test
@@ -150,10 +151,37 @@ class EncassLoaderTest {
                 "         }\n" +
                 "      ]\n" +
                 "   }";
-        load(json, "json", true);
+        load(json, "json", true, false);
     }
 
-    private void load(String content, String fileTyoe, boolean expectException) throws IOException {
+    @Test
+    void loadAnnotatedYaml() throws IOException {
+        String yaml = NAME + ":\n" +
+                "  annotations:\n" +
+                "  - type: \"@bundle\"\n" +
+                "    name: \"encass-bundle\"\n" +
+                "    description: \"some description\"\n" +
+                "  policy: " + POLICY_PATH + "\n" +
+                "  arguments:\n" +
+                "  - name: \"hello\"\n" +
+                "    type: \"string\"\n" +
+                "  - name: \"hello-again\"\n" +
+                "    type: \"message\"\n" +
+                "  results:\n" +
+                "  - name: \"goodbye\"\n" +
+                "    type: \"string\"\n" +
+                "  - name: \"goodbye-again\"\n" +
+                "    type: \"message\"\n" +
+                "  properties:\n" +
+                "    " + PALETTE_FOLDER + ": \"policyLogic\"\n" +
+                "    " + PALETTE_ICON_RESOURCE_NAME + ": \"OversizedElement16.gif\"\n" +
+                "    " + ALLOW_TRACING + ": \"false\"\n" +
+                "    " + DESCRIPTION + ": \"some description\"\n" +
+                "    " + PASS_METRICS_TO_PARENT + ": \"false\"\n";
+        load(yaml, "yml", false, true);
+    }
+
+    private void load(String content, String fileTyoe, boolean expectException, boolean isAnnotated) throws IOException {
         EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(Encass.class));
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "encass." + fileTyoe);
@@ -168,14 +196,14 @@ class EncassLoaderTest {
         } else {
             load(loader, bundle, rootProjectDir);
         }
-        check(bundle);
+        check(bundle, isAnnotated);
     }
 
     private static void load(EntityLoader loader, Bundle bundle, TemporaryFolder rootProjectDir) {
         loader.load(bundle, rootProjectDir.getRoot());
     }
 
-    private static void check(Bundle bundle) {
+    private static void check(Bundle bundle, boolean isAnnotated) {
         assertFalse(bundle.getEncasses().isEmpty(), "No encapsulated assertions loaded");
         assertEquals(1, bundle.getEncasses().size(), () -> "Expected 1 encapsulated assertion, found " + bundle.getEncasses().size());
         assertNotNull(bundle.getEncasses().get(NAME), NAME + " not found");
@@ -199,6 +227,12 @@ class EncassLoaderTest {
         assertEquals("false", encass.getProperties().get(ALLOW_TRACING));
         assertEquals("some description", encass.getProperties().get(DESCRIPTION));
         assertEquals("false", encass.getProperties().get(PASS_METRICS_TO_PARENT));
+        if (isAnnotated) {
+            assertNotNull(encass.getAnnotations());
+            assertFalse(encass.getAnnotations().isEmpty());
+            assertEquals(1, encass.getAnnotations().size());
+            encass.getAnnotations().forEach(e -> assertTrue(((((Map) e).get("type").toString()).equals("@bundle") && (((Map) e).get("name").toString()).equals("encass-bundle") && (((Map) e).get("description").toString()).equals("some description"))));
+        }
     }
 
 }
