@@ -35,7 +35,7 @@ public class Encass extends GatewayEntity {
     private Set<EncassArgument> arguments;
     private Set<EncassResult> results;
     private Map<String, Object> properties;
-    private Set<EntityAnnotation> annotations;
+    private Set<Object> annotations;
     @JsonIgnore
     private String guid;
     @JsonIgnore
@@ -67,11 +67,11 @@ public class Encass extends GatewayEntity {
         this.properties = properties;
     }
 
-    public Set<EntityAnnotation> getAnnotations() {
+    public Set<Object> getAnnotations() {
         return annotations;
     }
 
-    public void setAnnotations(Set<EntityAnnotation> annotations) {
+    public void setAnnotations(Set<Object> annotations) {
         this.annotations = annotations;
     }
 
