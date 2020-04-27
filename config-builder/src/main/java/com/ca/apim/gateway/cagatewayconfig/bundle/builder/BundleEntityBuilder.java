@@ -106,7 +106,6 @@ public class BundleEntityBuilder {
                                 break;
                         }
                     }
-                    final Entity filteredEntity = entities.parallelStream().filter(entity -> encassEntry.getKey().equals(entity.getName())).findAny().get();
                     annotatedEntities.add(annotatedEntity);
                 });
             }
@@ -114,13 +113,15 @@ public class BundleEntityBuilder {
 
         if(!annotatedEntities.isEmpty()) {
             Map<String, Element> annotatedElements = new LinkedHashMap<>();
-            annotatedEntities.stream().forEach(annotatedEntity -> {
-                if (annotatedEntity.isBundleTypeEnabled() && EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
-                    List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(), annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
-                    LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
-                    annotatedElements.put(annotatedEntity.getBundleName(), bundleDocumentBuilder.build(document, entityList));
-                }
-            });
+            if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
+                annotatedEntities.stream().forEach(annotatedEntity -> {
+                    if (annotatedEntity.isBundleTypeEnabled()) {
+                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(), annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
+                        LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
+                        annotatedElements.put(annotatedEntity.getBundleName(), bundleDocumentBuilder.build(document, entityList));
+                    }
+                });
+            }
             return annotatedElements;
         }
 
