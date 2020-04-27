@@ -1,8 +1,12 @@
+/*
+ * Copyright (c) 2018 CA. All rights reserved.
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
+
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity;
-
-import java.util.Map;
+import java.util.Collection;
 
 public class AnnotatedEntity {
     private String entityName;
@@ -14,6 +18,7 @@ public class AnnotatedEntity {
     private boolean isReusableType;
     private boolean isRedeployableType;
     private boolean isExcludeType;
+    private Collection<String> tags;
 
     public void setEntityName(String entityName) {
         this.entityName = entityName;
@@ -85,5 +90,13 @@ public class AnnotatedEntity {
 
     public void setExcludeType(boolean isExcludeType) {
         this.isExcludeType = isExcludeType;
+    }
+
+    public Collection<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Collection<String> tags) {
+        this.tags = tags;
     }
 }

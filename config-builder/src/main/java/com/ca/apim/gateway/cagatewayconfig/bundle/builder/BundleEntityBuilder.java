@@ -8,9 +8,8 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.beans.metadata.BundleMetadata;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -50,96 +49,43 @@ public class BundleEntityBuilder {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
 
-        List<AnnotatedEntity> annotatedEntities = new ArrayList<>();
-        Map<String, Pair<Entity, GatewayEntity>> annotatedEntities = new HashMap<>();
+        List<Pair<AnnotatedEntity, Encass>> annotatedEntities = new ArrayList<>();
+
         // Filter the bundle to export only annotated entities
         // TODO : Enhance this logic to support services and policies
         final Map<String, Encass> encassEntities = bundle.getEntities(Encass.class);
         encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
             Encass encass = encassEntry.getValue();
             if (encass.getAnnotations() != null) {
-                encass.getAnnotations().forEach(annotation -> {
-                    AnnotatedEntity annotatedEntity = new AnnotatedEntity();
-                    if (annotation instanceof Map) {
-                        if (((Map) annotation).containsKey("type")) {
-                            try {
-                                switch (((Map) annotation).get("type").toString()) {
-                                    case ANNOTATION_TYPE_BUNDLE:
-                                        final String annotatedBundleName = ((Map) annotation).containsKey("name") ? ((Map) annotation).get("name").toString() : null;
-                                        final ArrayList<String> tags = ((Map) annotation).containsKey("tags") ? (ArrayList<String>) ((Map) annotation).get("tags") : null;
-                                        if (CollectionUtils.isNotEmpty(tags)) {
-                                            //ToDo : Tags logic
-                                        }
-                                        annotatedEntity.setBundleType(true);
-                                        annotatedEntity.setEntityName(encassEntry.getKey());
-                                        annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                                        annotatedEntity.setBundleName(annotatedBundleName != null ? annotatedBundleName + '-' + bundleVersion : encassEntry.getKey() + '-' + bundleVersion);
-                                        annotatedEntity.setPolicyName(encass.getPolicy());
-                                        break;
-                                    case ANNOTATION_TYPE_REUSABLE:
-                                        annotatedEntity.setReusableType(true);
-                                        break;
-                                    case ANNOTATION_TYPE_REDEPLOYABLE:
-                                        annotatedEntity.setRedeployableType(true);
-                                        break;
-                                    case ANNOTATION_TYPE_EXCLUDE:
-                                        annotatedEntity.setExcludeType(true);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            } catch (ClassCastException ex) {
-                                throw new EntityBuilderException("Unable to build bundle for entity : " + encassEntry.getKey() + ", please check the annotations syntax.", ex);
-                            }
-                        }
-                    }
-
-                    if (annotation instanceof String) {
-                        switch (annotation.toString()) {
-                            case ANNOTATION_TYPE_BUNDLE:
-                                annotatedEntity.setBundleType(true);
-                                annotatedEntity.setEntityName(encassEntry.getKey());
-                                annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                                annotatedEntity.setBundleName(encassEntry.getKey() + '-' + bundleVersion);
-                                annotatedEntity.setPolicyName(encass.getPolicy());
-                                break;
-                            case ANNOTATION_TYPE_REUSABLE:
-                                annotatedEntity.setReusableType(true);
-                                break;
-                            case ANNOTATION_TYPE_REDEPLOYABLE:
-                                annotatedEntity.setRedeployableType(true);
-                                break;
-                            case ANNOTATION_TYPE_EXCLUDE:
-                                annotatedEntity.setExcludeType(true);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    annotatedEntities.add(annotatedEntity);
-                });
+                annotatedEntities.add(ImmutablePair.of(createAnnotatedEntity(encass, bundleVersion), encass));
             }
         });
 
         if(!annotatedEntities.isEmpty()) {
-            Map<String, Element> annotatedElements = new LinkedHashMap<>();
+            final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
             if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
-                annotatedEntities.stream().forEach(annotatedEntity -> {
-                    if (annotatedEntity.isBundleTypeEnabled()) {
-                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(), annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
+                annotatedEntities.stream().forEach(annotatedEntityPair -> {
+                    if (annotatedEntityPair.getLeft().isBundleTypeEnabled()) {
+                        AnnotatedEntity annotatedEntity = annotatedEntityPair.getLeft();
+                        Encass encass = annotatedEntityPair.getRight();
+
+                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(),
+                                annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
                         LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
-                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(bundleName, bundleVersion,
-                                annotatedEntity.getValue().getRight());
-                        annotatedElements.put(annotatedEntity.getBundleName(), bundleDocumentBuilder.build(document, entityList));
+
+                        // Create bundle and its metadata
+                        final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
+                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(bundleVersion, encass,
+                                annotatedEntity);
+
+                        annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
+                                bundleMetadata));
                     }
                 });
             }
             return annotatedElements;
         }
 
-        Map<String, Element> bundles = new HashMap<>();
-        bundles.put(bundleName + '-' + bundleVersion, bundleDocumentBuilder.build(document, entities));
-        return bundles;
         final Map<String, Pair<Element, BundleMetadata>> artifacts = new HashMap<>();
         artifacts.put(bundleName + '-' + bundleVersion, ImmutablePair.of(bundleDocumentBuilder.build(document,
                 entities), null));
@@ -199,6 +145,51 @@ public class BundleEntityBuilder {
             final List<Entity> folderDependencies = entities.stream().filter(e -> folderIds.contains(e.getId())).collect(Collectors.toList());
             entityDependenciesList.addAll(folderDependencies);
         }
+    }
+
+    /**
+     * Creates AnnotatedEntity object by scanning all the annotations and gathering all the information required to
+     * generate the bundle and its metadata.
+     *
+     * @param encass Encapsulated assertion
+     * @param bundleVersion Bundle version
+     * @return AnnotatedEntity
+     */
+    private AnnotatedEntity createAnnotatedEntity(final Encass encass, final String bundleVersion) {
+        AnnotatedEntity annotatedEntity = new AnnotatedEntity();
+        encass.getAnnotations().forEach(annotation -> {
+            switch (annotation.getType()) {
+                case ANNOTATION_TYPE_BUNDLE:
+                    String annotatedBundleName = annotation.getName();
+                    if (StringUtils.isBlank(annotatedBundleName)) {
+                        annotatedBundleName = encass.getName();
+                    }
+                    String description = annotation.getDescription();
+                    if (StringUtils.isBlank(annotatedBundleName)) {
+                        description = encass.getProperties().getOrDefault("description", "").toString();
+                    }
+                    annotatedEntity.setTags(annotation.getTags());
+                    annotatedEntity.setBundleType(true);
+                    annotatedEntity.setEntityName(encass.getName());
+                    annotatedEntity.setDescription(description);
+                    annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+                    annotatedEntity.setBundleName(annotatedBundleName + "-" + bundleVersion);
+                    annotatedEntity.setPolicyName(encass.getPolicy());
+                    break;
+                case ANNOTATION_TYPE_REUSABLE:
+                    annotatedEntity.setReusableType(true);
+                    break;
+                case ANNOTATION_TYPE_REDEPLOYABLE:
+                    annotatedEntity.setRedeployableType(true);
+                    break;
+                case ANNOTATION_TYPE_EXCLUDE:
+                    annotatedEntity.setExcludeType(true);
+                    break;
+                default:
+                    break;
+            }
+        });
+        return annotatedEntity;
     }
 
     @VisibleForTesting
