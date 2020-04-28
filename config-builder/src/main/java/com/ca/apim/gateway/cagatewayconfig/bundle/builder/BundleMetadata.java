@@ -20,19 +20,23 @@ public class BundleMetadata implements Metadata {
     private String name;
     private String id;
     private String version;
+    private String groupName;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String description;
-    private List<Metadata> definedEntities;
+    private Collection<Metadata> definedEntities;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Collection<String> tags;
     private boolean reusable;
     private boolean redeployable;
     private boolean hasRouting;
     private boolean environmentIncluded;
+    private Collection<Metadata> environmentEntities;
 
-    private BundleMetadata(String type, String name, String version) {
+    private BundleMetadata(String type, String id, String name, String groupName, String version) {
+        this.id = id;
         this.type = type;
         this.name = name;
+        this.groupName = groupName;
         this.version = version;
     }
 
@@ -54,11 +58,15 @@ public class BundleMetadata implements Metadata {
         return version;
     }
 
+    public String getGroupName() {
+        return groupName;
+    }
+
     public String getDescription() {
         return description;
     }
 
-    public List<Metadata> getDefinedEntities() {
+    public Collection<Metadata> getDefinedEntities() {
         return definedEntities;
     }
 
@@ -82,29 +90,40 @@ public class BundleMetadata implements Metadata {
         return environmentIncluded;
     }
 
+    public Collection<Metadata> getEnvironmentEntities() {
+        return environmentEntities;
+    }
+
     public static class Builder {
         private final String id;
         private final String name;
         private final String type;
+        private String groupName;
         private final String version;
         private String description;
         private boolean reusable;
         private boolean redeployable;
         private Collection<String> tags;
-        private List<Metadata> definedEntities = new LinkedList<>();
-        private List<Metadata> environmentEntities = new LinkedList<>();
-        private List<Metadata> dependencies = new LinkedList<>();
+        private Collection<Metadata> definedEntities = new LinkedList<>();
+        private Collection<Metadata> environmentEntities = new LinkedList<>();
+        private Collection<Metadata> dependencies = new LinkedList<>();
 
-        public Builder(String type, String id, String name, String version) {
+        public Builder(String type, String id, String name, String groupName, String version) {
             this.id = id;
             this.type = type;
             this.name = name;
+            this.groupName = groupName;
             this.version = version;
         }
 
-        public Builder definedEntities(final List<Metadata> entities) {
+        public Builder definedEntities(final Collection<Metadata> entities) {
             definedEntities.clear();
             definedEntities.addAll(entities);
+            return this;
+        }
+
+        public Builder environmentEntities(final Collection<Metadata> environmentEntities) {
+            this.environmentEntities = environmentEntities;
             return this;
         }
 
@@ -125,13 +144,13 @@ public class BundleMetadata implements Metadata {
         }
 
         public BundleMetadata build() {
-            BundleMetadata bundleMetadata = new BundleMetadata(type, name, version);
-            bundleMetadata.id = id;
+            BundleMetadata bundleMetadata = new BundleMetadata(type, id, name, groupName, version);
             bundleMetadata.description = description;
             bundleMetadata.definedEntities = definedEntities;
             bundleMetadata.reusable = reusable;
             bundleMetadata.redeployable = redeployable;
             bundleMetadata.tags = tags;
+            bundleMetadata.environmentEntities = environmentEntities;
             return bundleMetadata;
         }
     }

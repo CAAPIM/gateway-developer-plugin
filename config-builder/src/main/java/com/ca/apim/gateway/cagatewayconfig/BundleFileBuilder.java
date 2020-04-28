@@ -64,7 +64,8 @@ class BundleFileBuilder {
         this.cache = cache;
     }
 
-    void buildBundle(File rootDir, File outputDir, List<File> dependencies, String bundleName, String bundleVersion) {
+    void buildBundle(File rootDir, File outputDir, List<File> dependencies, String projectName,
+                     String projectGroupName, String projectVersion) {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
@@ -92,7 +93,7 @@ class BundleFileBuilder {
 
         //Zip
         final Map<String, Pair<Element, BundleMetadata>> bundleElementMap = bundleEntityBuilder.build(bundle,
-                EntityBuilder.BundleType.DEPLOYMENT, document, bundleName, bundleVersion);
+                EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion);
         for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundleElementMap.entrySet()) {
             documentFileUtils.createFile(entry.getValue().getLeft(),
                     new File(outputDir, entry.getKey() + ".bundle").toPath());

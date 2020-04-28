@@ -44,8 +44,8 @@ public class BundleEntityBuilder {
     }
 
     public Map<String, Pair<Element, BundleMetadata>> build(Bundle bundle, EntityBuilder.BundleType bundleType,
-                                                            Document document, String bundleName,
-                                                            String bundleVersion) {
+                                                            Document document, String projectName,
+                                                            String projectGroupName, String projectVersion) {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
 
@@ -57,7 +57,8 @@ public class BundleEntityBuilder {
         encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
             Encass encass = encassEntry.getValue();
             if (encass.getAnnotations() != null) {
-                annotatedEntities.add(ImmutablePair.of(createAnnotatedEntity(encass, bundleVersion), encass));
+                annotatedEntities.add(ImmutablePair.of(createAnnotatedEntity(encass, projectName, projectVersion),
+                        encass));
             }
         });
 
@@ -75,8 +76,8 @@ public class BundleEntityBuilder {
 
                         // Create bundle and its metadata
                         final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
-                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(bundleVersion, encass,
-                                annotatedEntity);
+                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(encass, annotatedEntity,
+                                entityList, projectGroupName, projectVersion);
 
                         annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
                                 bundleMetadata));
@@ -87,7 +88,7 @@ public class BundleEntityBuilder {
         }
 
         final Map<String, Pair<Element, BundleMetadata>> artifacts = new HashMap<>();
-        artifacts.put(bundleName + '-' + bundleVersion, ImmutablePair.of(bundleDocumentBuilder.build(document,
+        artifacts.put(projectName + '-' + projectVersion, ImmutablePair.of(bundleDocumentBuilder.build(document,
                 entities), null));
         return artifacts;
     }
@@ -152,17 +153,19 @@ public class BundleEntityBuilder {
      * generate the bundle and its metadata.
      *
      * @param encass Encapsulated assertion
-     * @param bundleVersion Bundle version
+     * @param projectName Project name
+     * @param projectVersion Project version
      * @return AnnotatedEntity
      */
-    private AnnotatedEntity createAnnotatedEntity(final Encass encass, final String bundleVersion) {
+    private AnnotatedEntity createAnnotatedEntity(final Encass encass, final String projectName,
+                                                  final String projectVersion) {
         AnnotatedEntity annotatedEntity = new AnnotatedEntity();
         encass.getAnnotations().forEach(annotation -> {
             switch (annotation.getType()) {
                 case ANNOTATION_TYPE_BUNDLE:
                     String annotatedBundleName = annotation.getName();
                     if (StringUtils.isBlank(annotatedBundleName)) {
-                        annotatedBundleName = encass.getName();
+                        annotatedBundleName = projectName + "." + encass.getName();
                     }
                     String description = annotation.getDescription();
                     if (StringUtils.isBlank(annotatedBundleName)) {
@@ -173,7 +176,7 @@ public class BundleEntityBuilder {
                     annotatedEntity.setEntityName(encass.getName());
                     annotatedEntity.setDescription(description);
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                    annotatedEntity.setBundleName(annotatedBundleName + "-" + bundleVersion);
+                    annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
                     annotatedEntity.setPolicyName(encass.getPolicy());
                     break;
                 case ANNOTATION_TYPE_REUSABLE:

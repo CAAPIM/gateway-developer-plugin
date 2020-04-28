@@ -10,31 +10,31 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import static java.util.stream.Collectors.toList;
+
 @Singleton
 public class PolicyWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
+    private final JsonFileUtils jsonFileUtils;
     private PolicyConverterRegistry policyConverterRegistry;
-    private final JsonTools jsonTools;
 
     @Inject
-    PolicyWriter(PolicyConverterRegistry policyConverterRegistry, DocumentFileUtils documentFileUtils, JsonTools jsonTools) {
+    PolicyWriter(PolicyConverterRegistry policyConverterRegistry, DocumentFileUtils documentFileUtils,
+                 JsonFileUtils jsonFileUtils) {
         this.policyConverterRegistry = policyConverterRegistry;
         this.documentFileUtils = documentFileUtils;
-        this.jsonTools = jsonTools;
+        this.jsonFileUtils = jsonFileUtils;
     }
 
     @Override
@@ -85,18 +85,14 @@ public class PolicyWriter implements EntityWriter {
 
     /**
      * Writes policy metadata to policy.yml file
-     * @param policyMetadataMap
-     * @param policyFolder
+     * @param policyMetadataMap policy metadata to write
+     * @param policyFolder parent folder to the generated metadata file
      */
     private void writePolicyMetadata(final Map<String, PolicyMetadata> policyMetadataMap, final File policyFolder) {
         if (!policyMetadataMap.isEmpty()) {
             //build yml file with dependencies
-            File policyMetadataFile = new File(policyFolder, "policies" + jsonTools.getFileExtension());
-            try {
-                jsonTools.writeObject(policyMetadataMap, policyMetadataFile);
-            } catch (IOException e) {
-                throw new WriteException("Error writing policy metadata file", e);
-            }
+            File policyMetadataFile = new File(policyFolder, "policies" + JsonTools.INSTANCE.getFileExtension());
+            jsonFileUtils.createFile(policyMetadataMap, policyMetadataFile.toPath());
         }
     }
 
