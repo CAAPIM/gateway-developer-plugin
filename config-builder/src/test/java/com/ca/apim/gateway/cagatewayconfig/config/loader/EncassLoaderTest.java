@@ -231,7 +231,8 @@ class EncassLoaderTest {
             assertNotNull(encass.getAnnotations());
             assertFalse(encass.getAnnotations().isEmpty());
             assertEquals(1, encass.getAnnotations().size());
-            encass.getAnnotations().forEach(e -> assertTrue(((((Map) e).get("type").toString()).equals("@bundle") && (((Map) e).get("name").toString()).equals("encass-bundle") && (((Map) e).get("description").toString()).equals("some description"))));
+            encass.getAnnotations().forEach(e -> assertTrue((e.getType().equals("@bundle")
+                    && e.getName().equals("encass-bundle") && e.getDescription().equals("some description"))));
         }
     }
 

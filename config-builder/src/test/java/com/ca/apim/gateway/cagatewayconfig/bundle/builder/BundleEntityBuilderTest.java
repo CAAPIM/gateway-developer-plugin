@@ -144,12 +144,11 @@ class BundleEntityBuilderTest {
         encass.setPolicy(policyPath);
         encass.setId(TEST_ENCASS_ID);
         encass.setGuid(encassGuid);
-        encass.setAnnotations(new HashSet<>());
-        encass.getAnnotations().add(new HashMap<String, String>()
-        {{
-            put("type", "@bundle");
-            put("name", TEST_ENCASS_ANNOTATION_NAME);
-        }});
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation annotation = new Annotation("@bundle");
+        annotation.setName(TEST_ENCASS_ANNOTATION_NAME);
+        annotations.add(annotation);
+        encass.setAnnotations(annotations);
         encass.setProperties(ImmutableMap.of(
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
                 PALETTE_ICON_RESOURCE_NAME, "someImage",
