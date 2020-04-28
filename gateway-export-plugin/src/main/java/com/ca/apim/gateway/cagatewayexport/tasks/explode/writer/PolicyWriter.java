@@ -88,15 +88,14 @@ public class PolicyWriter implements EntityWriter {
      * @param policyMetadataMap
      * @param policyFolder
      */
-    private void writePolicyMetadata(final Map<String, PolicyMetadata> policyMetadataMap, final File policyFolder){
+    private void writePolicyMetadata(final Map<String, PolicyMetadata> policyMetadataMap, final File policyFolder) {
         if (!policyMetadataMap.isEmpty()) {
             //build yml file with dependencies
-            ObjectWriter objectWriter = jsonTools.getObjectWriter();
             File policyMetadataFile = new File(policyFolder, "policies" + jsonTools.getFileExtension());
-            try (OutputStream fileStream = Files.newOutputStream(policyMetadataFile.toPath())) {
-                objectWriter.writeValue(fileStream, policyMetadataMap);
+            try {
+                jsonTools.writeObject(policyMetadataMap, policyMetadataFile);
             } catch (IOException e) {
-                throw new WriteException("Error writing policy metadata", e);
+                throw new WriteException("Error writing policy metadata file", e);
             }
         }
     }
