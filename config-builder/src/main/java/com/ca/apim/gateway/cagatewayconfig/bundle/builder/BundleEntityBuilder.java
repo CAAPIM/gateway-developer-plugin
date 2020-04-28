@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -37,7 +37,9 @@ public class BundleEntityBuilder {
         this.bundleDocumentBuilder = bundleDocumentBuilder;
     }
 
-    public Map<String, Element> build(Bundle bundle, EntityBuilder.BundleType bundleType, Document document, String bundleName, String bundleVersion) {
+    public Map<String, Element> build(Bundle bundle, EntityBuilder.BundleType bundleType,
+                                                            Document document, String bundleName,
+                                                            String bundleVersion) {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
 
@@ -48,86 +50,31 @@ public class BundleEntityBuilder {
         encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
             Encass encass = encassEntry.getValue();
             if (encass.getAnnotations() != null) {
-                encass.getAnnotations().forEach(annotation -> {
-                    AnnotatedEntity annotatedEntity = new AnnotatedEntity();
-                    if (annotation instanceof Map) {
-                        if (((Map) annotation).containsKey("type")) {
-                            try {
-                                switch (((Map) annotation).get("type").toString()) {
-                                    case ANNOTATION_TYPE_BUNDLE:
-                                        final String annotatedBundleName = ((Map) annotation).containsKey("name") ? ((Map) annotation).get("name").toString() : null;
-                                        final ArrayList<String> tags = ((Map) annotation).containsKey("tags") ? (ArrayList<String>) ((Map) annotation).get("tags") : null;
-                                        if (CollectionUtils.isNotEmpty(tags)) {
-                                            //ToDo : Tags logic
-                                        }
-                                        annotatedEntity.setBundleType(true);
-                                        annotatedEntity.setEntityName(encassEntry.getKey());
-                                        annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                                        annotatedEntity.setBundleName(annotatedBundleName != null ? annotatedBundleName + '-' + bundleVersion : encassEntry.getKey() + '-' + bundleVersion);
-                                        annotatedEntity.setPolicyName(encass.getPolicy());
-                                        break;
-                                    case ANNOTATION_TYPE_REUSABLE:
-                                        annotatedEntity.setReusableType(true);
-                                        break;
-                                    case ANNOTATION_TYPE_REDEPLOYABLE:
-                                        annotatedEntity.setRedeployableType(true);
-                                        break;
-                                    case ANNOTATION_TYPE_EXCLUDE:
-                                        annotatedEntity.setExcludeType(true);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            } catch (ClassCastException ex) {
-                                throw new EntityBuilderException("Unable to build bundle for entity : " + encassEntry.getKey() + ", please check the annotations syntax.", ex);
-                            }
-                        }
-                    }
-
-                    if (annotation instanceof String) {
-                        switch (annotation.toString()) {
-                            case ANNOTATION_TYPE_BUNDLE:
-                                annotatedEntity.setBundleType(true);
-                                annotatedEntity.setEntityName(encassEntry.getKey());
-                                annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                                annotatedEntity.setBundleName(encassEntry.getKey() + '-' + bundleVersion);
-                                annotatedEntity.setPolicyName(encass.getPolicy());
-                                break;
-                            case ANNOTATION_TYPE_REUSABLE:
-                                annotatedEntity.setReusableType(true);
-                                break;
-                            case ANNOTATION_TYPE_REDEPLOYABLE:
-                                annotatedEntity.setRedeployableType(true);
-                                break;
-                            case ANNOTATION_TYPE_EXCLUDE:
-                                annotatedEntity.setExcludeType(true);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    annotatedEntities.add(annotatedEntity);
-                });
+                annotatedEntities.add(createAnnotatedEntity(encass, bundleVersion, encassEntry.getKey()));
             }
         });
 
         if(!annotatedEntities.isEmpty()) {
-            Map<String, Element> annotatedElements = new LinkedHashMap<>();
+            final Map<String, Element> annotatedElements = new LinkedHashMap<>();
             if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
                 annotatedEntities.stream().forEach(annotatedEntity -> {
                     if (annotatedEntity.isBundleTypeEnabled()) {
-                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(), annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
-                        LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
-                        annotatedElements.put(annotatedEntity.getBundleName(), bundleDocumentBuilder.build(document, entityList));
+                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(),
+                                annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
+                        LOGGER.log(Level.FINE, "Entity list : " + entityList);
+
+                        // Create bundle
+                        final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
+                        annotatedElements.put(annotatedEntity.getBundleName(), annotatedBundle);
                     }
                 });
             }
             return annotatedElements;
         }
 
-        Map<String, Element> bundles = new HashMap<>();
-        bundles.put(bundleName + '-' + bundleVersion, bundleDocumentBuilder.build(document, entities));
-        return bundles;
+        final Map<String, Element> artifacts = new HashMap<>();
+        artifacts.put(bundleName + '-' + bundleVersion, bundleDocumentBuilder.build(document, entities));
+        return artifacts;
     }
 
     private List<Entity> getEntityDependencies(String annotatedEntityName, String annotatedEntityType, String policyNameWithPath, List<Entity> entities, Bundle bundle) {
@@ -144,7 +91,7 @@ public class BundleEntityBuilder {
                     final Map<String, Policy> entityMap = bundle.getPolicies();
                     if (entityMap != null) {
                         final GatewayEntity policyEntity = entityMap.get(policyNameWithPath);
-                        populatedDependentFolders(entityDependenciesList, entities, policyEntity);
+                        populateDependentFolders(entityDependenciesList, entities, policyEntity);
                     }
 
                     //Add the policy dependencies
@@ -172,7 +119,7 @@ public class BundleEntityBuilder {
         return entityDependenciesList;
     }
 
-    private void populatedDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity policyEntity) {
+    private void populateDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity policyEntity) {
         if (policyEntity instanceof Folderable) {
             Folder folder = ((Folderable) policyEntity).getParentFolder();
             final Set<String> folderIds = new HashSet<>();
@@ -183,6 +130,51 @@ public class BundleEntityBuilder {
             final List<Entity> folderDependencies = entities.stream().filter(e -> folderIds.contains(e.getId())).collect(Collectors.toList());
             entityDependenciesList.addAll(folderDependencies);
         }
+    }
+
+    /**
+     * Creates AnnotatedEntity object by scanning all the annotations and gathering all the information required to
+     * generate the bundle and its metadata.
+     *
+     * @param encass Encapsulated assertion
+     * @param bundleVersion Bundle version
+     * @return AnnotatedEntity
+     */
+    private AnnotatedEntity createAnnotatedEntity(final Encass encass, final String bundleVersion, final String entityName) {
+        AnnotatedEntity annotatedEntity = new AnnotatedEntity();
+        encass.getAnnotations().forEach(annotation -> {
+            switch (annotation.getType()) {
+                case ANNOTATION_TYPE_BUNDLE:
+                    String annotatedBundleName = annotation.getName();
+                    if (StringUtils.isBlank(annotatedBundleName)) {
+                        annotatedBundleName = entityName;
+                    }
+                    String description = annotation.getDescription();
+                    if (StringUtils.isBlank(annotatedBundleName)) {
+                        description = encass.getProperties().getOrDefault("description", "").toString();
+                    }
+                    annotatedEntity.setTags(annotation.getTags());
+                    annotatedEntity.setBundleType(true);
+                    annotatedEntity.setEntityName(entityName);
+                    annotatedEntity.setDescription(description);
+                    annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+                    annotatedEntity.setBundleName(annotatedBundleName + "-" + bundleVersion);
+                    annotatedEntity.setPolicyName(encass.getPolicy());
+                    break;
+                case ANNOTATION_TYPE_REUSABLE:
+                    annotatedEntity.setReusableType(true);
+                    break;
+                case ANNOTATION_TYPE_REDEPLOYABLE:
+                    annotatedEntity.setRedeployableType(true);
+                    break;
+                case ANNOTATION_TYPE_EXCLUDE:
+                    annotatedEntity.setExcludeType(true);
+                    break;
+                default:
+                    break;
+            }
+        });
+        return annotatedEntity;
     }
 
     @VisibleForTesting

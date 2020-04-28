@@ -84,9 +84,9 @@ class BundleFileBuilder {
         }
 
         //Zip
-        Map<String, Element> bundleElementMap = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document, bundleName, bundleVersion);
-        Set<Map.Entry<String, Element>> entrySet = bundleElementMap.entrySet();
-        for (Map.Entry<String, Element> entry : entrySet) {
+        final Map<String, Element> bundleElementMap = bundleEntityBuilder.build(bundle,
+                EntityBuilder.BundleType.DEPLOYMENT, document, bundleName, bundleVersion);
+        for (Map.Entry<String, Element> entry : bundleElementMap.entrySet()) {
             documentFileUtils.createFile(entry.getValue(), new File(outputDir, entry.getKey() + ".bundle").toPath());
         }
 
