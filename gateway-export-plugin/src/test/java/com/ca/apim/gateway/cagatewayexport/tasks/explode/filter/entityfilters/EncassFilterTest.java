@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -40,8 +41,8 @@ class EncassFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", Encass.class), new Dependency("3", Encass.class)),
-                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", Encass.class))));
+                        new Dependency("1", Policy.class, "my-policy", EntityTypes.POLICY_TYPE), Arrays.asList(new Dependency("2", Encass.class, "encass2", EntityTypes.ENCAPSULATED_ASSERTION_TYPE), new Dependency("3", Encass.class, "encass1", EntityTypes.ENCAPSULATED_ASSERTION_TYPE)),
+                        new Dependency("2", Policy.class, "my-policy2", EntityTypes.POLICY_TYPE), Collections.singletonList(new Dependency("4", Encass.class, "encass4", EntityTypes.ENCAPSULATED_ASSERTION_TYPE))));
         bundle.addEntity(createEncass("encass1", "1", "", "zzz"));
         bundle.addEntity(createEncass("encass2", "2", "", "1"));
         bundle.addEntity(createEncass("encass3", "3", "", "1"));

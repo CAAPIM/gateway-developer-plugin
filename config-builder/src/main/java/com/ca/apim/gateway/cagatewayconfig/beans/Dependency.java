@@ -25,12 +25,13 @@ public class Dependency {
     public Dependency() {
     }
 
-    public Dependency(String id, Class<? extends GatewayEntity> typeClass) {
-        this(id, typeClass, null, null);
-    }
-
     public Dependency(String name, String type) {
         this(null, null, name, type);
+    }
+
+
+    public Dependency(String id, Class<? extends GatewayEntity> typeClass) {
+        this(id, typeClass, null, null);
     }
 
     public Dependency(String id, Class<? extends GatewayEntity> typeClass, String name, String type) {

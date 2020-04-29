@@ -54,12 +54,9 @@ public class PolicyWriter implements EntityWriter {
         Map<String, PolicyMetadata> policyMetadataMap = new HashMap<>();
         Map<String, Service> services = bundle.getEntities(Service.class);
         services.values().parallelStream().forEach(serviceEntity -> {
-            final String id = serviceEntity.getId();
-            final String name = serviceEntity.getName();
-            final PolicyMetadata policyMetadata = writePolicy(bundle, policyFolder, serviceEntity.getParentFolder().getId(), name, id, serviceEntity.getPolicyXML());
-            final Set<Dependency> policyDependencies = getPolicyDependencies(id, rawBundle);
-            policyMetadata.setUsedEntities(policyDependencies);
-            policyMetadataMap.put(policyMetadata.getNameWithPath(), policyMetadata);
+            writePolicy(bundle, policyFolder, serviceEntity, serviceEntity.getPolicyXML());
+            final PolicyMetadata policyMetadata = createPolicyMetadata(bundle, rawBundle, null, serviceEntity);
+            policyMetadataMap.put(policyMetadata.getPath(), policyMetadata);
         });
 
         Stream.of(
@@ -68,19 +65,30 @@ public class PolicyWriter implements EntityWriter {
                 bundle.getEntities(AuditPolicy.class).values().stream().map(Policy.class::cast).collect(toList()).stream()
         ).flatMap(s -> s)
                 .forEach(policyEntity -> {
-                    final String id = policyEntity.getId();
-                    final String name = policyEntity.getName();
-                    final PolicyMetadata policyMetadata = writePolicy(bundle, policyFolder, policyEntity.getParentFolder().getId(), name, id, policyEntity.getPolicyDocument());
-                    final Set<Dependency> policyDependencies = getPolicyDependencies(id, rawBundle);
-                    policyMetadata.setUsedEntities(policyDependencies);
-                    final PolicyType policyType = policyEntity.getPolicyType();
-                    if(policyType != null){
-                        policyMetadata.setType(policyType.getType());
-                    }
-                    policyMetadata.setTag(policyMetadata.getTag());
-                    policyMetadataMap.put(policyMetadata.getNameWithPath(), policyMetadata);
+                    writePolicy(bundle, policyFolder, policyEntity, policyEntity.getPolicyDocument());
+                    final PolicyMetadata policyMetadata = createPolicyMetadata(bundle, rawBundle, policyEntity, policyEntity);
+                    policyMetadataMap.put(policyMetadata.getPath(), policyMetadata);
                 });
         writePolicyMetadata(policyMetadataMap, policyFolder);
+    }
+
+    private PolicyMetadata createPolicyMetadata(final Bundle bundle, final Bundle rawBundle, final Policy policyEntity, final Folderable folderableEntity) {
+        final PolicyMetadata policyMetadata = new PolicyMetadata();
+        final Folder folder = bundle.getFolderTree().getFolderById(folderableEntity.getParentFolderId());
+        final Path policyPath = bundle.getFolderTree().getPath(folder);
+        final String path = PathUtils.unixPathEndingWithSeparator(policyPath);
+        policyMetadata.setPath(path.length() > 1 ? path + folderableEntity.getName() : folderableEntity.getName());
+        final Set<Dependency> policyDependencies = getPolicyDependencies(folderableEntity.getId(), rawBundle);
+        policyMetadata.setUsedEntities(policyDependencies);
+        if (policyEntity != null) {
+            final PolicyType policyType = policyEntity.getPolicyType();
+            if (policyType != null) {
+                policyMetadata.setType(policyType.getType());
+            }
+            policyMetadata.setTag(policyEntity.getTag());
+            policyMetadata.setSubtag(policyEntity.getSubtag());
+        }
+        return policyMetadata;
     }
 
     /**
@@ -124,21 +132,16 @@ public class PolicyWriter implements EntityWriter {
         }
     }
 
-    private PolicyMetadata writePolicy(Bundle bundle, File policyFolder, String folderId, String name, String id, Element policy) {
-        final  PolicyMetadata policyMetadata = new PolicyMetadata();
-        Folder folder = bundle.getFolderTree().getFolderById(folderId);
-        Path policyFolderPath = bundle.getFolderTree().getPath(folder);
-        Path folderPath = policyFolder.toPath().resolve(policyFolderPath);
+    private void writePolicy(Bundle bundle, File policyFolder, Folderable folderableEntity, Element policy) {
+        final Folder folder = bundle.getFolderTree().getFolderById(folderableEntity.getParentFolderId());
+        Path folderPath = policyFolder.toPath().resolve(bundle.getFolderTree().getPath(folder));
         documentFileUtils.createFolders(folderPath);
-        PolicyConverter policyConverter = policyConverterRegistry.getFromPolicyElement(name, policy);
-        Path policyPath = folderPath.resolve(name + policyConverter.getPolicyTypeExtension());
-        policyMetadata.setPath(PathUtils.unixPath(policyFolderPath));
-        policyMetadata.setName(name);
+        PolicyConverter policyConverter = policyConverterRegistry.getFromPolicyElement(folderableEntity.getName(), policy);
+        Path policyPath = folderPath.resolve(folderableEntity.getName() + policyConverter.getPolicyTypeExtension());
         try (InputStream policyStream = policyConverter.convertFromPolicyElement(policy)) {
             FileUtils.copyInputStreamToFile(policyStream, policyPath.toFile());
         } catch (IOException e) {
             throw new WriteException("Unable to write assertion js policy", e);
         }
-        return policyMetadata;
     }
 }

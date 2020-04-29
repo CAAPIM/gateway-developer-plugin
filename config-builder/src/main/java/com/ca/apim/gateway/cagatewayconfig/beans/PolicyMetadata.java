@@ -11,29 +11,12 @@ import java.util.Set;
 
 @JsonInclude
 public class PolicyMetadata {
-    @JsonIgnore
-    private String name;
-    @JsonIgnore
-    private String path;
     private String type;
     private String tag;
+    private String subtag;
     private Set<Dependency> usedEntities;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
+    @JsonIgnore
+    private String path;
 
     public Set<Dependency> getUsedEntities() {
         return usedEntities;
@@ -59,9 +42,19 @@ public class PolicyMetadata {
         this.tag = tag;
     }
 
-    @JsonIgnore
-    public String getNameWithPath() {
-        return path == null || path.isEmpty() ? name : path + "/" + name;
+    public String getSubtag() {
+        return subtag;
     }
 
+    public void setSubtag(String subtag) {
+        this.subtag = subtag;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
 }

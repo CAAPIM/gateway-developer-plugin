@@ -1,6 +1,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -44,8 +45,8 @@ class ServiceFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", Service.class), new Dependency("3", Service.class)),
-                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", Service.class))));
+                        new Dependency("1", Policy.class, "policy1", EntityTypes.POLICY_TYPE), Arrays.asList(new Dependency("2", Service.class, "service2", EntityTypes.SERVICE_TYPE), new Dependency("3", Service.class, "service3", EntityTypes.SERVICE_TYPE)),
+                        new Dependency("2", Policy.class, "policy2", EntityTypes.POLICY_TYPE), Collections.singletonList(new Dependency("4", Service.class, "service4", EntityTypes.SERVICE_TYPE))));
         bundle.addEntity(createService("service1", "1", folder2, null, ""));
         bundle.addEntity(createService("service2", "2", createFolder("folder5", "5", null), null, ""));
         bundle.addEntity(createService("service3", "3", null, null, ""));
