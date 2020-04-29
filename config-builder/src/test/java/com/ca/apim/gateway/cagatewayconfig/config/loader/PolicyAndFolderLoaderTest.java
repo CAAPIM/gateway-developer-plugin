@@ -126,6 +126,9 @@ class PolicyAndFolderLoaderTest {
         File policyFolder = temporaryFolder.createDirectory("policy");
         File policy = new File(policyFolder, "policy.blah");
         Files.touch(policy);
+        File policyDep = new File(policyFolder, "policies.yml");
+        Map<String, PolicyMetadata> policyMetadataMap = new HashMap<>();
+        JsonTools.INSTANCE.writeObject(policyMetadataMap, policyDep);
 
         Bundle bundle = new Bundle();
         policyAndFolderLoader.load(bundle, temporaryFolder.getRoot());
