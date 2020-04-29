@@ -34,7 +34,7 @@ public class EntityWriterRegistry {
         EntityTypeRegistry entityTypeRegistry = InjectionRegistry.getInstance(EntityTypeRegistry.class);
         entityTypeRegistry.getEntityTypeMap().values().forEach(info -> {
             if (info.getFileName() != null && info.getFileType() != null) {
-                allWriters.add((bundle, rootFolder) -> write(bundle, rootFolder, info, documentFileUtils, jsonTools));
+                allWriters.add((bundle, rootFolder, rawBundle) -> write(bundle, rootFolder, info, documentFileUtils, jsonTools));
             }
         });
 

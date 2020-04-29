@@ -96,10 +96,11 @@ public class BundleBuilder {
     private Dependency buildDependency(Element dependencyElement) {
         final String id = getSingleChildElement(dependencyElement, ID).getTextContent();
         final String type = getSingleChildElement(dependencyElement, TYPE).getTextContent();
+        final String name = getSingleChildElement(dependencyElement, NAME).getTextContent();
 
         Class<? extends GatewayEntity> typeClass = entityTypeRegistry.getEntityClass(type);
         if (typeClass != null) {
-            return new Dependency(id, typeClass);
+            return new Dependency(id, typeClass, name, type);
         }
 
         return null;

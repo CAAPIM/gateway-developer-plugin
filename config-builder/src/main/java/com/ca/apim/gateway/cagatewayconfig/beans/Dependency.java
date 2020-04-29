@@ -6,14 +6,33 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Objects;
 
-public class Dependency {
-    private final String id;
-    private final Class<? extends GatewayEntity> type;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
-    public Dependency(String id, Class<? extends GatewayEntity> type) {
+@JsonInclude(NON_EMPTY)
+public class Dependency {
+    @JsonIgnore
+    private String id;
+    @JsonIgnore
+    private Class<? extends GatewayEntity> typeClass;
+    private String name;
+    private String type;
+
+    public Dependency() {
+    }
+
+    public Dependency(String id, Class<? extends GatewayEntity> typeClass) {
+        this(id, typeClass, null, null);
+    }
+
+    public Dependency(String id, Class<? extends GatewayEntity> typeClass, String name, String type) {
         this.id = id;
+        this.typeClass = typeClass;
+        this.name = name;
         this.type = type;
     }
 
@@ -21,7 +40,15 @@ public class Dependency {
         return id;
     }
 
-    public Class<? extends GatewayEntity> getType() {
+    public Class<? extends GatewayEntity> getTypeClass() {
+        return typeClass;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
         return type;
     }
 
@@ -31,12 +58,35 @@ public class Dependency {
         if (o == null || getClass() != o.getClass()) return false;
         Dependency that = (Dependency) o;
         return Objects.equals(id, that.id) &&
-                Objects.equals(type, that.type);
+                Objects.equals(name, that.name) &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(typeClass, that.typeClass);
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setTypeClass(Class<? extends GatewayEntity> typeClass) {
+        this.typeClass = typeClass;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, type);
+        return Objects.hash(id, typeClass, name, type);
+    }
+
+    @Override
+    public String toString() {
+        return id + ":" + name + ":" + type;
     }
 }
