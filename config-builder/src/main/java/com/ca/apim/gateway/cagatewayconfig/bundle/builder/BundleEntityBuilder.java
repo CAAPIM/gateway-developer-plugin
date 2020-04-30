@@ -118,6 +118,7 @@ public class BundleEntityBuilder {
                                 final String entityName = index > -1 ? entity.getName().substring(index + 1) : entity.getName();
                                 if (dependency.getName().equals(entityName) && dependency.getType().equals(entity.getType())) {
                                     entityDependenciesList.add(entity);
+                                    break;
                                 }
                             }
                         }
@@ -168,7 +169,7 @@ public class BundleEntityBuilder {
                         annotatedBundleName = projectName + "." + encass.getName();
                     }
                     String description = annotation.getDescription();
-                    if (StringUtils.isBlank(annotatedBundleName)) {
+                    if (StringUtils.isBlank(description)) {
                         description = encass.getProperties().getOrDefault("description", "").toString();
                     }
                     annotatedEntity.setTags(annotation.getTags());
