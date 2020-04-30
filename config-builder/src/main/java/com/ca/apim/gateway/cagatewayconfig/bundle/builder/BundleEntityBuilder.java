@@ -64,26 +64,25 @@ public class BundleEntityBuilder {
 
         if(!annotatedEntities.isEmpty()) {
             final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
-            if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
-                annotatedEntities.stream().forEach(annotatedEntityPair -> {
-                    if (annotatedEntityPair.getLeft().isBundleTypeEnabled()) {
-                        AnnotatedEntity annotatedEntity = annotatedEntityPair.getLeft();
-                        Encass encass = annotatedEntityPair.getRight();
 
-                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(),
-                                annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
-                        LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
+            annotatedEntities.stream().forEach(annotatedEntityPair -> {
+                if (annotatedEntityPair.getLeft().isBundleTypeEnabled()) {
+                    AnnotatedEntity annotatedEntity = annotatedEntityPair.getLeft();
+                    Encass encass = annotatedEntityPair.getRight();
 
-                        // Create bundle and its metadata
-                        final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
-                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(encass, annotatedEntity,
-                                entityList, projectGroupName, projectVersion);
+                    List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(),
+                            annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
+                    LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
 
-                        annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
-                                bundleMetadata));
-                    }
-                });
-            }
+                    // Create bundle
+                    final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
+                    final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(encass, annotatedEntity,
+                            entityList, projectGroupName, projectVersion);
+                    annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
+                            bundleMetadata));
+                }
+            });
+
             return annotatedElements;
         }
 
@@ -107,7 +106,7 @@ public class BundleEntityBuilder {
                     final Map<String, Policy> entityMap = bundle.getPolicies();
                     if (entityMap != null) {
                         final GatewayEntity policyEntity = entityMap.get(policyNameWithPath);
-                        populatedDependentFolders(entityDependenciesList, entities, policyEntity);
+                        populateDependentFolders(entityDependenciesList, entities, policyEntity);
                     }
 
                     //Add the policy dependencies
@@ -136,7 +135,7 @@ public class BundleEntityBuilder {
         return entityDependenciesList;
     }
 
-    private void populatedDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity policyEntity) {
+    private void populateDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity policyEntity) {
         if (policyEntity instanceof Folderable) {
             Folder folder = ((Folderable) policyEntity).getParentFolder();
             final Set<String> folderIds = new HashSet<>();

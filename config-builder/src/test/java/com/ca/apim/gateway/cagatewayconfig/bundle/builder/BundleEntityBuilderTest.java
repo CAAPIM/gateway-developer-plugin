@@ -71,10 +71,6 @@ class BundleEntityBuilderTest {
         final Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(new Bundle(), BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "test-bundle","test-bundle-group", "1.0.0");
         assertNotNull(bundles);
-        final Map<String, Pair<Element, BundleMetadata>> element = builder.build(new Bundle(), BundleType.DEPLOYMENT,
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
-
-        assertNotNull(element);
     }
 
     @Test
