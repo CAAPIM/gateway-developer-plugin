@@ -94,7 +94,7 @@ class BundleFileBuilder {
         //Zip
         final Map<String, Pair<Element, BundleMetadata>> bundleElementMap = bundleEntityBuilder.build(bundle,
                 EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion);
-        for (Map.Entry<String, Element> entry : bundleElementMap.entrySet()) {
+        for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundleElementMap.entrySet()) {
             documentFileUtils.createFile(entry.getValue().getLeft(),
                     new File(outputDir, entry.getKey() + ".bundle").toPath());
             jsonFileUtils.createFile(entry.getValue().getRight(),
