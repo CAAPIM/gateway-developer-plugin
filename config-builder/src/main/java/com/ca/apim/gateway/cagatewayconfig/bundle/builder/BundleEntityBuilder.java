@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -15,6 +16,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -73,11 +76,11 @@ public class BundleEntityBuilder {
                         List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(),
                                 annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
                         LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
-
+                        List<Entity> bundleEntities = renameNonReusableEntities(entityList, bundle, annotatedEntity, projectGroupName, projectVersion);
                         // Create bundle and its metadata
-                        final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
+                        final Element annotatedBundle = bundleDocumentBuilder.build(document, bundleEntities);
                         final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(encass, annotatedEntity,
-                                entityList, projectGroupName, projectVersion);
+                                bundleEntities, projectGroupName, projectVersion);
 
                         annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
                                 bundleMetadata));
@@ -93,6 +96,62 @@ public class BundleEntityBuilder {
         return artifacts;
     }
 
+    private List<Entity> renameNonReusableEntities(List<Entity> entityList, Bundle bundle, AnnotatedEntity annotatedEntity, String projectGroupName, String projectVersion) {
+        List<Entity> bundleEntities = new ArrayList<>();
+        final Map<String, Policy> policyMap = bundle.getPolicies();
+        final Map<String, Encass> encassMapMap = bundle.getEncasses();
+        for(Entity entity : entityList){
+            if(EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(entity.getType())){
+                Encass encassEntity = encassMapMap.get(entity.getName());
+                Set<Annotation> annotations = encassEntity.getAnnotations();
+                if(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE.equals(annotation.getType()))){
+                    bundleEntities.add(entity);
+                } else {
+                    bundleEntities.add(getUniqueEntity(entity, annotatedEntity, projectGroupName, projectVersion));
+                }
+
+            } else if(EntityTypes.POLICY_TYPE.equals(entity.getType())){
+                Policy policyEntity = policyMap.get(entity.getName());
+            } else {
+                bundleEntities.add(entity);
+            }
+        }
+        return bundleEntities;
+    }
+
+    private Entity getUniqueEntity(final Entity entity, final AnnotatedEntity annotatedEntity, final String projectName, final String projectVersion) {
+        String nameWithPath = entity.getName();
+        String uniqueName = getUniqueName(projectName, projectVersion, annotatedEntity, nameWithPath);
+        String uniqueNameWithPath = PathUtils.extractPath(nameWithPath) + uniqueName;
+
+        Element modifiedElement = (Element) entity.getXml().cloneNode(true);
+        NodeList nodeList = modifiedElement.getElementsByTagName("l7:Name");
+        Node nameNode = nodeList.item(0);
+        nameNode.setTextContent(uniqueName);
+
+        return EntityBuilderHelper.getEntityWithMappings(entity.getType(), uniqueNameWithPath, entity.getId(), modifiedElement, entity.getMappingAction(), entity.getMappingProperties());
+    }
+
+    private String getUniqueName(final String projectName, final String projectVersion, final AnnotatedEntity annotatedEntity, final String nameWithPath) {
+        StringBuilder uniqueName = new StringBuilder(projectName);
+        uniqueName.append("-");
+        if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(annotatedEntity.getEntityType())) {
+            uniqueName.append("encass");
+        } else if (EntityTypes.SERVICE_TYPE.equals(annotatedEntity.getEntityType())) {
+            uniqueName.append("service");
+        } else {
+            uniqueName.append("policy");
+        }
+
+        uniqueName.append("-");
+        uniqueName.append(PathUtils.extractName(annotatedEntity.getEntityName()));
+        uniqueName.append("-");
+        uniqueName.append(PathUtils.extractName(nameWithPath));
+        uniqueName.append("-");
+        uniqueName.append(projectVersion);
+        return uniqueName.toString();
+    }
+
     private List<Entity> getEntityDependencies(String annotatedEntityName, String annotatedEntityType, String policyNameWithPath, List<Entity> entities, Bundle bundle) {
         List<Entity> entityDependenciesList = new ArrayList<>();
         Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
@@ -104,9 +163,9 @@ public class BundleEntityBuilder {
                 final Dependency dependencyParent = entry.getKey();
                 if (dependencyParent.getName().equals(policyName)) {
                     //Add the dependant folders first
-                    final Map<String, Policy> entityMap = bundle.getPolicies();
-                    if (entityMap != null) {
-                        final GatewayEntity policyEntity = entityMap.get(policyNameWithPath);
+                    final Map<String, Policy> policyMap = bundle.getPolicies();
+                    if (policyMap != null) {
+                        final GatewayEntity policyEntity = policyMap.get(policyNameWithPath);
                         populatedDependentFolders(entityDependenciesList, entities, policyEntity);
                     }
 

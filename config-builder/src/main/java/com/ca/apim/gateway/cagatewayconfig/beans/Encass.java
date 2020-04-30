@@ -32,7 +32,7 @@ import static java.util.stream.Collectors.toCollection;
 @Named("ENCAPSULATED_ASSERTION")
 @ConfigurationFile(name = "encass", type = JSON_YAML)
 @EnvironmentType("ENCAPSULATED_ASSERTION")
-public class Encass extends GatewayEntity {
+public class Encass extends GatewayEntity implements AnnotatableEntity {
 
     private String policy;
     private Set<EncassArgument> arguments;
