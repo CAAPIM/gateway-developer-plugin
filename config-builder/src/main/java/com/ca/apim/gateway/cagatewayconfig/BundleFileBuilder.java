@@ -19,7 +19,6 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
@@ -97,8 +96,7 @@ class BundleFileBuilder {
         for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundleElementMap.entrySet()) {
             documentFileUtils.createFile(entry.getValue().getLeft(),
                     new File(outputDir, entry.getKey() + ".bundle").toPath());
-            jsonFileUtils.createFile(entry.getValue().getRight(),
-                    new File(outputDir, entry.getKey() + JsonTools.INSTANCE.getFileExtension()).toPath());
+            jsonFileUtils.createBundleMetadataFile(entry.getValue().getRight(), entry.getKey(), outputDir);
         }
     }
 

@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterR
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.XMLPolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableSet;
@@ -39,7 +40,7 @@ class PolicyWriterTest {
 
     @Test
     void testNoPolicies(final TemporaryFolder temporaryFolder) {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -55,7 +56,7 @@ class PolicyWriterTest {
 
     @Test
     void testWriteAssertionJS(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -89,7 +90,7 @@ class PolicyWriterTest {
 
     @Test
     void testWritePolicyWithSubfolder(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -129,7 +130,7 @@ class PolicyWriterTest {
 
     @Test
     void testWriteServicePolicy(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -163,7 +164,7 @@ class PolicyWriterTest {
 
     @Test
     void testWritePolicyWithDependencies(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);

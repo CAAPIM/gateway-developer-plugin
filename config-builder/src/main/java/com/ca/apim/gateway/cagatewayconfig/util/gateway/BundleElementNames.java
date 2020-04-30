@@ -88,6 +88,7 @@ public class BundleElementNames {
     public static final String ARGUMENT_TYPE = "l7:ArgumentType";
     public static final String ORDINAL = "l7:Ordinal";
     public static final String GUI_PROMPT = "l7:GuiPrompt";
+    public static final String GUI_LABEL = "l7:GuiLabel";
 
     // Policy Backed Services
     public static final String POLICY_BACKED_SERVICE = "l7:PolicyBackedService";

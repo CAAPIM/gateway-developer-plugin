@@ -8,12 +8,12 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.AssertionJSPolicyConverter;
-import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterException;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.XMLPolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableSet;
@@ -66,7 +66,8 @@ class PolicyAndFolderLoaderTest {
         dependencySet.add(new Dependency("jdbc", EntityTypes.JDBC_CONNECTION));
         policyMetadata.setUsedEntities(dependencySet);
         policyMetadataMap.put("a/b/c/policy", policyMetadata);
-        JsonTools.INSTANCE.writeObject(policyMetadataMap, policyDep);
+
+        JsonFileUtils.INSTANCE.createFile(policyMetadataMap, policyDep.toPath());
 
         Bundle bundle = new Bundle();
         policyAndFolderLoader.load(bundle, temporaryFolder.getRoot());

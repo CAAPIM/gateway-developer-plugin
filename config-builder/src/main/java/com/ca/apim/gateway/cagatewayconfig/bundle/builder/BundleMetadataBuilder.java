@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.AnnotatedEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;

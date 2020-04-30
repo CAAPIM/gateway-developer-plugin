@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"type", "name"})
@@ -14,8 +13,8 @@ public class EncassArgument {
 
     private String name;
     private String type;
-    @JsonIgnore
     private Boolean requireExplicit;
+    private String label;
 
     public EncassArgument() {
     }
@@ -25,9 +24,10 @@ public class EncassArgument {
         this.type = type;
     }
 
-    public EncassArgument(String name, String type, Boolean requireExplicit) {
+    public EncassArgument(String name, String type, Boolean requireExplicit, String label) {
         this(name, type);
         this.requireExplicit = requireExplicit;
+        this.label = label;
     }
 
     public String getName() {
@@ -52,5 +52,13 @@ public class EncassArgument {
 
     public void setRequireExplicit(Boolean requireExplicit) {
         this.requireExplicit = requireExplicit;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

@@ -118,6 +118,7 @@ public class EncassEntityBuilder implements EntityBuilder {
                             createElementWithTextContent(document, ORDINAL, String.valueOf(ordinal.getAndIncrement())),
                             createElementWithTextContent(document, ARGUMENT_NAME, param.getName()),
                             createElementWithTextContent(document, ARGUMENT_TYPE, param.getType()),
+                            createElementWithTextContent(document, GUI_LABEL, param.getLabel()),
                             createElementWithTextContent(document, GUI_PROMPT, firstNonNull(param.getRequireExplicit(), FALSE).toString())
                     )
             ));

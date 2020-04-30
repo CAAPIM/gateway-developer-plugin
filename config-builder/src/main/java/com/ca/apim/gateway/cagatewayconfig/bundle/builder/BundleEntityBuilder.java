@@ -215,6 +215,7 @@ public class BundleEntityBuilder {
                                 final String entityName = index > -1 ? entity.getName().substring(index + 1) : entity.getName();
                                 if (dependency.getName().equals(entityName) && dependency.getType().equals(entity.getType())) {
                                     entityDependenciesList.add(entity);
+                                    break;
                                 }
                             }
                         }
@@ -232,7 +233,7 @@ public class BundleEntityBuilder {
         return entityDependenciesList;
     }
 
-    private void populatedDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity policyEntity) {
+    private void populateDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity policyEntity) {
         if (policyEntity instanceof Folderable) {
             Folder folder = ((Folderable) policyEntity).getParentFolder();
             final Set<String> folderIds = new HashSet<>();
@@ -265,7 +266,7 @@ public class BundleEntityBuilder {
                         annotatedBundleName = projectName + "." + encass.getName();
                     }
                     String description = annotation.getDescription();
-                    if (StringUtils.isBlank(annotatedBundleName)) {
+                    if (StringUtils.isBlank(description)) {
                         description = encass.getProperties().getOrDefault("description", "").toString();
                     }
                     annotatedEntity.setTags(annotation.getTags());
