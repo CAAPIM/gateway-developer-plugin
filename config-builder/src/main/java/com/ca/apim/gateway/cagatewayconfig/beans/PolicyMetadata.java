@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * Metadata file for Policy entities
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude
 public class PolicyMetadata {
     @JsonIgnore
     private String name;

@@ -123,7 +123,8 @@ public class BundleMetadata implements Metadata {
         }
 
         public Builder environmentEntities(final Collection<Metadata> environmentEntities) {
-            this.environmentEntities = environmentEntities;
+            environmentEntities.clear();
+            this.environmentEntities.addAll(environmentEntities);
             return this;
         }
 
