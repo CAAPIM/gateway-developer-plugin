@@ -169,7 +169,7 @@ class BundleEntityBuilderTest {
      * only "@bundle" without name, description and tags
      */
     @Test
-    public void testAnnotatedEncassMetadataWithOnlyAnnotationType() throws JsonProcessingException {
+    public void testAnnotatedEncassMetadata_ExcludingOptionalAnnotationFields() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
         Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true);
@@ -225,7 +225,7 @@ class BundleEntityBuilderTest {
         assertEquals(encass.getName(), definedEntities.get().getName());
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(definedEntities.get());
-        Assert.assertThat(json, CoreMatchers.containsString("\"arguments\":[{\"type\":\"message\",\"name\":\"source\"}]"));
+        Assert.assertThat(json, CoreMatchers.containsString("\"arguments\":[{\"type\":\"message\",\"name\":\"source\",\"requireExplicit\":true,\"label\":\"Some label\"}]"));
         Assert.assertThat(json, CoreMatchers.containsString("\"results\":[{\"name\":\"result.msg\",\"type\":\"message\"}]"));
         assertEquals(4, metadata.getEnvironmentEntities().size());
 
@@ -328,7 +328,8 @@ class BundleEntityBuilderTest {
         encass.setName(TEST_ENCASS);
         encass.setPolicy(policyPath);
         encass.setId(TEST_ENCASS_ID);
-        encass.setArguments(new LinkedHashSet<>(Collections.singletonList(new EncassArgument("source", "message"))));
+        encass.setArguments(new LinkedHashSet<>(Collections.singletonList(new EncassArgument("source", "message",
+                true, "Some label"))));
         encass.setResults(new LinkedHashSet<>(Collections.singletonList(new EncassResult("result.msg", "message"))));
         encass.setGuid(encassGuid);
         Set<Annotation> annotations = new HashSet<>();
