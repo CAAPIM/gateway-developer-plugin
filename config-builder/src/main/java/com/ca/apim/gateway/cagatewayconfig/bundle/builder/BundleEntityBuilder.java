@@ -54,25 +54,25 @@ public class BundleEntityBuilder {
             }
         });
 
-        if(!annotatedEntities.isEmpty()) {
-            final Map<String, Element> annotatedElements = new LinkedHashMap<>();
-            if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
-                annotatedEntities.stream().forEach(annotatedEntity -> {
-                    if (annotatedEntity.isBundleTypeEnabled()) {
-                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(),
-                                annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
-                        LOGGER.log(Level.FINE, "Entity list : " + entityList);
+        if (!annotatedEntities.isEmpty()) {
+            Map<String, Element> annotatedElements = new LinkedHashMap<>();
 
-                        // Create bundle
-                        final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
-                        annotatedElements.put(annotatedEntity.getBundleName(), annotatedBundle);
-                    }
-                });
-            }
+            annotatedEntities.stream().forEach(annotatedEntity -> {
+                if (annotatedEntity.isBundleTypeEnabled()) {
+                    List<Entity> entitiesToFilter = new ArrayList<>();
+                    entityBuilders.forEach(builder -> entitiesToFilter.addAll(builder.build(bundle, bundleType, document)));
+                    List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(), annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entitiesToFilter, bundle);
+                    LOGGER.log(Level.FINE, "Entity list : " + entityList);
+                    // Create bundle
+                    final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
+                    annotatedElements.put(annotatedEntity.getBundleName(), annotatedBundle);
+                }
+            });
+
             return annotatedElements;
         }
 
-        final Map<String, Element> artifacts = new HashMap<>();
+        Map<String, Element> artifacts = new HashMap<>();
         artifacts.put(bundleName + '-' + bundleVersion, bundleDocumentBuilder.build(document, entities));
         return artifacts;
     }

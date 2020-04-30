@@ -33,7 +33,6 @@ import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class EnvironmentBundleCreator {
-    private static final Logger LOGGER = Logger.getLogger(EnvironmentBundleCreator.class.getName());
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
     private final EnvironmentBundleBuilder environmentBundleBuilder;
@@ -72,10 +71,9 @@ public class EnvironmentBundleCreator {
 
         //ToDo : Need to handle bundle name and version properly
         Map<String, Element> bundleElements = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "");
-        LOGGER.log(Level.WARNING, "bundleElements" + bundleElements);
-        Set<Map.Entry<String, Element>> entrySet = bundleElements.entrySet();
-        for (Map.Entry<String, Element> entry : entrySet) {
-            documentFileUtils.createFile(entry.getValue(), new File(bundleFolderPath, entry.getKey() + "-env.bundle").toPath());
+        for (Map.Entry<String, Element> entry : bundleElements.entrySet()) {
+            documentFileUtils.createFile(entry.getValue(), new File(bundleFolderPath,
+                    entry.getKey() + "-env.bundle").toPath());
         }
         return environmentBundle;
     }

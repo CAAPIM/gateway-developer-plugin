@@ -58,7 +58,8 @@ class BundleFileBuilderTest {
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
         bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptyList(), "my-bundle", "1.0");
 
-        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()), eq(EntityBuilder.BundleType.DEPLOYMENT), any(), "my-bundle", "1.0");
+        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()),
+                eq(EntityBuilder.BundleType.DEPLOYMENT), any(), eq("my-bundle"), eq("1.0"));
     }
 
     @Test
@@ -70,7 +71,7 @@ class BundleFileBuilderTest {
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
         bundleFileBuilder.buildBundle(new File("input"), new File("output"), Collections.emptyList(), "my-bundle", "1.0");
 
-        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any(), "my-bundle", "1.0");
+        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any(), eq("my-bundle"), eq("1.0"));
     }
 
     @Test
