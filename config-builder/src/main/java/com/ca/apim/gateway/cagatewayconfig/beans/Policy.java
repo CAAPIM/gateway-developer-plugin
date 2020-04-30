@@ -6,11 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -37,6 +39,8 @@ public class Policy extends Folderable {
     private String guid;
     @JsonIgnore
     private Element policyDocument;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
     @JsonIgnore
     private final Set<Policy> dependencies = new HashSet<>();
     private String tag;
@@ -92,6 +96,14 @@ public class Policy extends Folderable {
 
     public PolicyType getPolicyType() {
         return policyType;
+    }
+
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
     }
 
     public void setPolicyType(PolicyType policyType) {
@@ -182,5 +194,6 @@ public class Policy extends Folderable {
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         setPath(PathUtils.unixPath(getPath()));
+        setName(entityKey);
     }
 }

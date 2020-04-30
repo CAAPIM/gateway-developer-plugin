@@ -93,7 +93,9 @@ public class PolicyAndFolderLoader implements EntityLoader {
                 final String policyNameWithPath = metadataEntry.getKey();
                 int index = policyNameWithPath.lastIndexOf("/");
                 final String policyName = index > -1 ? policyNameWithPath.substring(index+1) : policyNameWithPath;
-                policyDependencyMap.put(new Dependency(policyName, EntityTypes.POLICY_TYPE), new LinkedList<>(metadataEntry.getValue().getUsedEntities()));
+                Set<Dependency> dependencies = metadataEntry.getValue().getUsedEntities();
+                List<Dependency> dependencyList = dependencies != null ? new LinkedList<>(dependencies) : new LinkedList<>();
+                policyDependencyMap.put(new Dependency(policyName, EntityTypes.POLICY_TYPE), dependencyList);
             }
         }
         return policyDependencyMap;
