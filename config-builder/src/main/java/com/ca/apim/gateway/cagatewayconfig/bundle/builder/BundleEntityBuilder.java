@@ -56,10 +56,9 @@ public class BundleEntityBuilder {
 
         if (!annotatedEntities.isEmpty()) {
             Map<String, Element> annotatedElements = new LinkedHashMap<>();
-
             annotatedEntities.stream().forEach(annotatedEntity -> {
                 if (annotatedEntity.isBundleTypeEnabled()) {
-                    List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(), annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
+                    List<Entity> entityList = getEntityDependencies(annotatedEntity.getPolicyName(), entities, bundle);
                     LOGGER.log(Level.FINE, "Entity list : " + entityList);
                     // Create bundle
                     final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
@@ -75,8 +74,9 @@ public class BundleEntityBuilder {
         return artifacts;
     }
 
-    private List<Entity> getEntityDependencies(String annotatedEntityName, String annotatedEntityType, String policyNameWithPath, List<Entity> entities, Bundle bundle) {
+    private List<Entity> getEntityDependencies(String policyNameWithPath, List<Entity> entities, Bundle bundle) {
         List<Entity> entityDependenciesList = new ArrayList<>();
+        Set<String> filteredEntityIds = new HashSet<>();
         Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
         if (dependencyListMap != null) {
             int pathIndex = policyNameWithPath.lastIndexOf("/");
@@ -85,29 +85,27 @@ public class BundleEntityBuilder {
             for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
                 final Dependency dependencyParent = entry.getKey();
                 if (dependencyParent.getName().equals(policyName)) {
-                    //Add the dependant folders first
+                    //Add the policy dependant folders
                     final Map<String, Policy> entityMap = bundle.getPolicies();
-                    if (entityMap != null) {
+                    if (!entityMap.isEmpty()) {
                         final GatewayEntity policyEntity = entityMap.get(policyNameWithPath);
-                        populateDependentFolders(entityDependenciesList, entities, policyEntity);
+                        populateDependentFolders(filteredEntityIds, policyEntity);
+                        filteredEntityIds.add(policyEntity.getId());
                     }
 
                     //Add the policy dependencies
                     for (Dependency dependency : entry.getValue()) {
-                        if (!dependency.getName().equals(annotatedEntityName) && !dependency.getType().equals(annotatedEntityType)) {
-                            for (Entity entity : entities) {
-                                int index = entity.getName().lastIndexOf("/");
-                                final String entityName = index > -1 ? entity.getName().substring(index + 1) : entity.getName();
-                                if (dependency.getName().equals(entityName) && dependency.getType().equals(entity.getType())) {
-                                    entityDependenciesList.add(entity);
-                                }
+                        for (Entity entity : entities) {
+                            int index = entity.getName().lastIndexOf("/");
+                            final String entityName = index > -1 ? entity.getName().substring(index + 1) : entity.getName();
+                            if (dependency.getName().equals(entityName) && dependency.getType().equals(entity.getType())) {
+                                filteredEntityIds.add(entity.getId());
                             }
                         }
                     }
 
-                    //Add the parent entities
-                    final List<Entity> parentEntities = entities.stream().filter(entity -> policyNameWithPath.equals(entity.getName()) || annotatedEntityName.equals(entity.getName())).collect(Collectors.toList());
-                    entityDependenciesList.addAll(parentEntities);
+                    final List<Entity> filteredEntities = entities.stream().filter(entity -> filteredEntityIds.contains(entity.getId())).collect(Collectors.toList());
+                    entityDependenciesList.addAll(filteredEntities);
 
                     return entityDependenciesList;
                 }
@@ -117,16 +115,13 @@ public class BundleEntityBuilder {
         return entityDependenciesList;
     }
 
-    private void populateDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity policyEntity) {
+    private void populateDependentFolders(Set<String> filteredEntityIds, GatewayEntity policyEntity) {
         if (policyEntity instanceof Folderable) {
             Folder folder = ((Folderable) policyEntity).getParentFolder();
-            final Set<String> folderIds = new HashSet<>();
             while (folder != null) {
-                folderIds.add(folder.getId());
+                filteredEntityIds.add(folder.getId());
                 folder = folder.getParentFolder();
             }
-            final List<Entity> folderDependencies = entities.stream().filter(e -> folderIds.contains(e.getId())).collect(Collectors.toList());
-            entityDependenciesList.addAll(folderDependencies);
         }
     }
 
