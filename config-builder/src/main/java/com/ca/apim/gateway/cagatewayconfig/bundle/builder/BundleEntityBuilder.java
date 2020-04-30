@@ -59,9 +59,7 @@ public class BundleEntityBuilder {
 
             annotatedEntities.stream().forEach(annotatedEntity -> {
                 if (annotatedEntity.isBundleTypeEnabled()) {
-                    List<Entity> entitiesToFilter = new ArrayList<>();
-                    entityBuilders.forEach(builder -> entitiesToFilter.addAll(builder.build(bundle, bundleType, document)));
-                    List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(), annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entitiesToFilter, bundle);
+                    List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(), annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
                     LOGGER.log(Level.FINE, "Entity list : " + entityList);
                     // Create bundle
                     final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
