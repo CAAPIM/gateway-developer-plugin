@@ -204,7 +204,7 @@ public class BundleEntityBuilder {
                     final Map<String, Policy> policyMap = bundle.getPolicies();
                     if (policyMap != null) {
                         final GatewayEntity policyEntity = policyMap.get(policyNameWithPath);
-                        populatedDependentFolders(entityDependenciesList, entities, policyEntity);
+                        populateDependentFolders(entityDependenciesList, entities, policyEntity);
                     }
 
                     //Add the policy dependencies

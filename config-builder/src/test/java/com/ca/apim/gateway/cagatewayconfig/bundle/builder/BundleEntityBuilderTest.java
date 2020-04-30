@@ -66,7 +66,7 @@ class BundleEntityBuilderTest {
     @Test
     void build() {
         BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()),
-                new BundleDocumentBuilder(), new BundleMetadataBuilder());
+                new BundleDocumentBuilder(), new BundleMetadataBuilder(), DocumentTools.INSTANCE);
 
         final Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(new Bundle(), BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "test-bundle","test-bundle-group", "1.0.0");
@@ -314,7 +314,7 @@ class BundleEntityBuilderTest {
         entityBuilders.add(clusterPropertyEntityBuilder);
         entityBuilders.add(trustedCertEntityBuilder);
 
-        return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder());
+        return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), DocumentTools.INSTANCE);
     }
 
 
