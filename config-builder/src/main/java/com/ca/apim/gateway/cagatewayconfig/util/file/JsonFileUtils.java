@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.file;
 
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -34,5 +35,9 @@ public class JsonFileUtils {
         } finally {
             closeQuietly(fos);
         }
+    }
+
+    public void createBundleMetadataFile(Object objectToWrite, String fileName, File outputDir) {
+        createFile(objectToWrite, new File(outputDir, fileName + JsonTools.INSTANCE.getFileExtension()).toPath());
     }
 }

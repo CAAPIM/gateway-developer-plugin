@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-package com.ca.apim.gateway.cagatewayconfig.beans;
+package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import java.util.Collection;
 
