@@ -31,15 +31,13 @@ public class PolicyAndFolderLoader implements EntityLoader {
     private final PolicyConverterRegistry policyConverterRegistry;
     private final FileUtils fileUtils;
     private final IdGenerator idGenerator;
-    private final EntityTypeRegistry entityTypeRegistry;
     private final JsonTools jsonTools;
 
     @Inject
-    PolicyAndFolderLoader(PolicyConverterRegistry policyConverterRegistry, FileUtils fileUtils, IdGenerator idGenerator, EntityTypeRegistry entityTypeRegistry, JsonTools jsonTools) {
+    PolicyAndFolderLoader(PolicyConverterRegistry policyConverterRegistry, FileUtils fileUtils, IdGenerator idGenerator, JsonTools jsonTools) {
         this.policyConverterRegistry = policyConverterRegistry;
         this.fileUtils = fileUtils;
         this.idGenerator = idGenerator;
-        this.entityTypeRegistry = entityTypeRegistry;
         this.jsonTools = jsonTools;
     }
 
@@ -50,12 +48,12 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
         final Map<String, Policy> policies = new HashMap<>();
         loadPolicies(policyRootDir, policyRootDir, null, policies, bundle);
-        loadPolicyMetadata(policyRootDir, policies, bundle);
+        loadPoliciesMetadata(policyRootDir, policies, bundle);
         bundle.putAllPolicies(policies);
     }
 
-    private void loadPolicyMetadata(final File policyRootDir, final Map<String, Policy> policies, final Bundle bundle){
-        final Map<String, PolicyMetadata> policyMetadataMap = readPolicyMetadata(policyRootDir);
+    private void loadPoliciesMetadata(final File policyRootDir, final Map<String, Policy> policies, final Bundle bundle){
+        final Map<String, PolicyMetadata> policyMetadataMap = readPoliciesMetadata(policyRootDir);
         final Map<Dependency, List<Dependency>> policyDependencyMap = new HashMap<>();
         if (policyMetadataMap != null) {
             for(Map.Entry<String, PolicyMetadata> metadataEntry : policyMetadataMap.entrySet()){
@@ -72,7 +70,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
         bundle.setDependencyMap(policyDependencyMap);
     }
 
-    private Map<String, PolicyMetadata> readPolicyMetadata(final File policyRootDir){
+    private Map<String, PolicyMetadata> readPoliciesMetadata(final File policyRootDir){
         File policyMetadataFile = new File(policyRootDir, "policies" + jsonTools.getFileExtension());
         final ObjectMapper objectMapper = jsonTools.getObjectMapper();
         final MapType type = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, PolicyMetadata.class);
