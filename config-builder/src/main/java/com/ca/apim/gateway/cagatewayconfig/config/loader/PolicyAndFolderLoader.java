@@ -30,15 +30,13 @@ public class PolicyAndFolderLoader implements EntityLoader {
     private final PolicyConverterRegistry policyConverterRegistry;
     private final FileUtils fileUtils;
     private final IdGenerator idGenerator;
-    private final EntityTypeRegistry entityTypeRegistry;
     private final JsonTools jsonTools;
 
     @Inject
-    PolicyAndFolderLoader(PolicyConverterRegistry policyConverterRegistry, FileUtils fileUtils, IdGenerator idGenerator, EntityTypeRegistry entityTypeRegistry, JsonTools jsonTools) {
+    PolicyAndFolderLoader(PolicyConverterRegistry policyConverterRegistry, FileUtils fileUtils, IdGenerator idGenerator, JsonTools jsonTools) {
         this.policyConverterRegistry = policyConverterRegistry;
         this.fileUtils = fileUtils;
         this.idGenerator = idGenerator;
-        this.entityTypeRegistry = entityTypeRegistry;
         this.jsonTools = jsonTools;
     }
 
@@ -50,8 +48,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
         final Map<String, Policy> policies = new HashMap<>();
         loadPolicies(policyRootDir, policyRootDir, null, policies, bundle);
         bundle.putAllPolicies(policies);
-        final Map<Dependency, List<Dependency>> policyDependencyMap = getPolicyDependencies(policyRootDir);
-        bundle.setDependencyMap(policyDependencyMap);
+        bundle.setDependencyMap(getPolicyDependencies(policyRootDir));
     }
 
     @Override
