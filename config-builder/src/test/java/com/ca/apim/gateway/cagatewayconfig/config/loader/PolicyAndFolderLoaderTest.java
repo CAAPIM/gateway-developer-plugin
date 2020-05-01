@@ -45,7 +45,7 @@ class PolicyAndFolderLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoad(TemporaryFolder temporaryFolder) throws IOException {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, fileUtils, new IdGenerator(), entityTypeRegistry, JsonTools.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, fileUtils, new IdGenerator(), JsonTools.INSTANCE);
         Mockito.when(fileUtils.getFileAsString(Mockito.any(File.class))).thenReturn("policy-content");
 
         File policyFolder = temporaryFolder.createDirectory("policy");
@@ -92,14 +92,14 @@ class PolicyAndFolderLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoadSingle(TemporaryFolder temporaryFolder) {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), entityTypeRegistry, JsonTools.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), JsonTools.INSTANCE);
         assertThrows(ConfigLoadException.class, () -> policyAndFolderLoader.loadSingle("Policy", temporaryFolder.getRoot()));
     }
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoadNoPolicyFolder(TemporaryFolder temporaryFolder) {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), entityTypeRegistry, JsonTools.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), JsonTools.INSTANCE);
 
         Bundle bundle = new Bundle();
         policyAndFolderLoader.load(bundle, temporaryFolder.getRoot());
@@ -110,7 +110,7 @@ class PolicyAndFolderLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoadPolicyFolderIsFile(TemporaryFolder temporaryFolder) throws IOException {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), entityTypeRegistry, JsonTools.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), JsonTools.INSTANCE);
 
         temporaryFolder.createFile("policy");
 
@@ -122,7 +122,7 @@ class PolicyAndFolderLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoadPolicyUnknownType(TemporaryFolder temporaryFolder) throws IOException {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), entityTypeRegistry, JsonTools.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), JsonTools.INSTANCE);
 
         File policyFolder = temporaryFolder.createDirectory("policy");
         File policy = new File(policyFolder, "policy.blah");
@@ -138,7 +138,7 @@ class PolicyAndFolderLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoadPolicySameNameDifferentType(TemporaryFolder temporaryFolder) throws IOException {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), entityTypeRegistry, JsonTools.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), JsonTools.INSTANCE);
 
         File policyFolder = temporaryFolder.createDirectory("policy");
         File policy = new File(policyFolder, "policy.xml");
@@ -152,7 +152,7 @@ class PolicyAndFolderLoaderTest {
 
     @Test
     void loadFromEnvironment() {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), entityTypeRegistry, JsonTools.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, FileUtils.INSTANCE, new IdGenerator(), JsonTools.INSTANCE);
         assertThrows(ConfigLoadException.class, () -> policyAndFolderLoader.load(new Bundle(), "policy", "policy"));
     }
 }
