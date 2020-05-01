@@ -19,6 +19,8 @@ public class PolicyMetadata {
     private String type;
     private String tag;
     private Set<Dependency> usedEntities;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
 
     public Set<Annotation> getAnnotations() {
         return annotations;
@@ -27,9 +29,6 @@ public class PolicyMetadata {
     public void setAnnotations(Set<Annotation> annotations) {
         this.annotations = annotations;
     }
-
-    @JsonDeserialize(using = AnnotationDeserializer.class)
-    private Set<Annotation> annotations;
 
     public String getName() {
         return name;

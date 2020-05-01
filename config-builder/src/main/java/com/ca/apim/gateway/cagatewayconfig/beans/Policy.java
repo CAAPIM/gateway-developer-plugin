@@ -6,17 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
-import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
-import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -27,7 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
@@ -199,22 +194,5 @@ public class Policy extends Folderable {
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         setPath(PathUtils.unixPath(getPath()));
-        setName(entityKey);
-    }
-
-    @JsonIgnore
-    @Override
-    public Metadata getMetadata() {
-        return new Metadata() {
-            @Override
-            public String getType() {
-                return EntityTypes.POLICY_TYPE;
-            }
-
-            @Override
-            public String getName() {
-                return Policy.this.getName();
-            }
-        };
     }
 }
