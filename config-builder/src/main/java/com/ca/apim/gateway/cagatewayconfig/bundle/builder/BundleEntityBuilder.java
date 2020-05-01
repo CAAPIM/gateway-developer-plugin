@@ -117,7 +117,7 @@ public class BundleEntityBuilder {
                 if (annotations != null && annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE.equals(annotation.getType()))) {
                     bundleEntities.add(entity);
                 } else {
-                    bundleEntities.add(getUniqueEntity(entity, annotatedEntity, projectGroupName, projectVersion));
+                    bundleEntities.add(getUniqueEntity(entity, annotatedEntity, encassMap, projectGroupName, projectVersion));
                 }
 
             } else {
@@ -127,15 +127,24 @@ public class BundleEntityBuilder {
         return bundleEntities;
     }
 
-    private Entity getUniqueEntity(final Entity entity, final AnnotatedEntity annotatedEntity, final String projectName, final String projectVersion) {
+    private Entity getUniqueEntity(final Entity entity, final AnnotatedEntity annotatedEntity, final Map<String, Encass> encassMap, final String projectName, final String projectVersion) {
         final String nameWithPath = entity.getName();
         final String uniqueName = getUniqueName(projectName, projectVersion, annotatedEntity, nameWithPath);
         final String uniqueNameWithPath = PathUtils.extractPath(nameWithPath) + uniqueName;
-        final Element entityXml = EntityTypes.POLICY_TYPE.equals(entity.getType()) ? getUniqueEntityXml(entity.getXml(), annotatedEntity, projectName, projectVersion, uniqueName) : entity.getXml();
+        Element entityXml = null;
+        if(EntityTypes.POLICY_TYPE.equals(entity.getType())){
+            entityXml = getUniquePolicyXml(entity.getXml(), annotatedEntity, encassMap, projectName, projectVersion, uniqueName);
+        } else if(EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(entity.getType())){
+            entityXml = (Element) entity.getXml().cloneNode(true);
+            final Element nameElement = getSingleChildElement(entityXml, NAME);
+            nameElement.setTextContent(uniqueName);
+        }  else {
+            entityXml = entity.getXml();
+        }
         return EntityBuilderHelper.getEntityWithMappings(entity.getType(), uniqueNameWithPath, entity.getId(), entityXml, MappingActions.NEW_OR_UPDATE, entity.getMappingProperties());
     }
 
-    private Element getUniqueEntityXml(final Element entityXml, final AnnotatedEntity annotatedEntity, final String projectName, final String projectVersion, final String uniqueName) {
+    private Element getUniquePolicyXml(final Element entityXml, final AnnotatedEntity annotatedEntity, final Map<String, Encass> encassMap, final String projectName, final String projectVersion, final String uniqueName) {
         Element policyElement = (Element) entityXml.cloneNode(true);
         final Element policyDetails = getSingleChildElement(policyElement, POLICY_DETAIL);
         Element nameElement = getSingleChildElement(policyDetails, NAME);
@@ -162,7 +171,12 @@ public class BundleEntityBuilder {
                     Element encassElement = (Element) assertionElement;
                     Element encassConfigElement = getSingleChildElement(encassElement, PolicyXMLElements.ENCAPSULATED_ASSERTION_CONFIG_NAME);
                     final Node encassNameNode = encassConfigElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
-                    encassNameNode.setNodeValue(getUniqueName(projectName, projectVersion, annotatedEntity, encassNameNode.getNodeValue()));
+                    final String encassName = encassNameNode.getNodeValue();
+                    final Encass encassEntity = encassMap.get(encassName);
+                    Set<Annotation> annotations = encassEntity != null ? encassEntity.getAnnotations() : null;
+                    if (annotations == null || ! (annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE.equals(annotation.getType())))) {
+                        encassNameNode.setNodeValue(getUniqueName(projectName, projectVersion, annotatedEntity, encassName));
+                    }
                 }
                 resource.setTextContent(documentTools.elementToString(policy));
             }
