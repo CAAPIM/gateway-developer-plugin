@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
@@ -69,7 +70,7 @@ public class PolicyWriter implements EntityWriter {
                     final PolicyMetadata policyMetadata = createPolicyMetadata(bundle, rawBundle, policyEntity, policyEntity);
                     policyMetadataMap.put(policyMetadata.getPath(), policyMetadata);
                 });
-        writePolicyMetadata(policyMetadataMap, policyFolder);
+        writePolicyMetadata(policyMetadataMap, rootFolder);
     }
 
     private PolicyMetadata createPolicyMetadata(final Bundle bundle, final Bundle rawBundle, final Policy policyEntity, final Folderable folderableEntity) {
@@ -94,12 +95,16 @@ public class PolicyWriter implements EntityWriter {
     /**
      * Writes policy metadata to policy.yml file
      * @param policyMetadataMap
-     * @param policyFolder
+     * @param rootFolder
      */
-    private void writePolicyMetadata(final Map<String, PolicyMetadata> policyMetadataMap, final File policyFolder) {
+    private void writePolicyMetadata(final Map<String, PolicyMetadata> policyMetadataMap, final File rootFolder) {
         if (!policyMetadataMap.isEmpty()) {
+            File configFolder = FolderLoaderUtils.getConfigRootDir(rootFolder);
+            if(!configFolder.exists()) {
+                documentFileUtils.createFolder(configFolder.toPath());
+            }
             //build yml file with dependencies
-            File policyMetadataFile = new File(policyFolder, "policies" + jsonTools.getFileExtension());
+            File policyMetadataFile = new File(configFolder, "policies" + jsonTools.getFileExtension());
             try {
                 jsonTools.writeObject(policyMetadataMap, policyMetadataFile);
             } catch (IOException e) {

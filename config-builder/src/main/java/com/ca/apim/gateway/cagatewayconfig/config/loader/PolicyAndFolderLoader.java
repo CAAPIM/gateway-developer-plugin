@@ -47,12 +47,13 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
         final Map<String, Policy> policies = new HashMap<>();
         loadPolicies(policyRootDir, policyRootDir, null, policies, bundle);
-        loadPoliciesMetadata(policyRootDir, policies, bundle);
+        loadPoliciesMetadata(rootDir, policies, bundle);
         bundle.putAllPolicies(policies);
     }
 
-    private void loadPoliciesMetadata(final File policyRootDir, final Map<String, Policy> policies, final Bundle bundle){
-        final Map<String, PolicyMetadata> policyMetadataMap = readPoliciesMetadata(policyRootDir);
+    private void loadPoliciesMetadata(final File rootDir, final Map<String, Policy> policies, final Bundle bundle){
+        final File configRootDir = FolderLoaderUtils.getConfigRootDir(rootDir);
+        final Map<String, PolicyMetadata> policyMetadataMap = readPoliciesMetadata(configRootDir);
         final Map<Dependency, List<Dependency>> policyDependencyMap = new HashMap<>();
         if (policyMetadataMap != null) {
             for(Map.Entry<String, PolicyMetadata> metadataEntry : policyMetadataMap.entrySet()){
@@ -70,11 +71,14 @@ public class PolicyAndFolderLoader implements EntityLoader {
         bundle.setDependencyMap(policyDependencyMap);
     }
 
-    private Map<String, PolicyMetadata> readPoliciesMetadata(final File policyRootDir){
-        File policyMetadataFile = new File(policyRootDir, "policies" + jsonTools.getFileExtension());
-        final ObjectMapper objectMapper = jsonTools.getObjectMapper();
-        final MapType type = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, PolicyMetadata.class);
-        return jsonTools.readDocumentFile(policyMetadataFile, type);
+    private Map<String, PolicyMetadata> readPoliciesMetadata(final File configRootDir){
+        File policyMetadataFile = new File(configRootDir, "policies" + jsonTools.getFileExtension());
+        if(policyMetadataFile.exists()) {
+            final ObjectMapper objectMapper = jsonTools.getObjectMapper();
+            final MapType type = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, PolicyMetadata.class);
+            return jsonTools.readDocumentFile(policyMetadataFile, type);
+        }
+        return null;
     }
 
     @Override

@@ -72,6 +72,12 @@ public class FolderLoaderUtils {
     }
 
     @Nullable
+    public static File getConfigRootDir(File rootDir) {
+        final File configRootDir = new File(rootDir, "config");
+        return configRootDir;
+    }
+
+    @Nullable
     static File getSoapResourcesRootDir(File rootDir) {
         final File soapResourceRootDir = new File(rootDir, SOAP_RESOURCES_FOLDER);
 
