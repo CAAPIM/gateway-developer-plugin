@@ -49,7 +49,7 @@ public class BundleEntityBuilder {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
 
-        Map<String, Pair<Element, BundleMetadata>> artifacts = buildAnnotatedEntities(entities, bundle, bundleType, document, projectName,
+        Map<String, Pair<Element, BundleMetadata>> artifacts = buildAnnotatedEntities(entities, bundle, document, projectName,
                 projectGroupName, projectVersion);
         if (artifacts.isEmpty()) {
             artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
@@ -59,25 +59,26 @@ public class BundleEntityBuilder {
         return artifacts;
     }
 
-    private Map<String, Pair<Element, BundleMetadata>> buildAnnotatedEntities(List<Entity> entities, Bundle bundle, EntityBuilder.BundleType bundleType,
-                                                        Document document, String projectName,
-                                                        String projectGroupName, String projectVersion) {
+    private Map<String, Pair<Element, BundleMetadata>> buildAnnotatedEntities(List<Entity> entities, Bundle bundle,
+                                                                              Document document, String projectName,
+                                                                              String projectGroupName,
+                                                                              String projectVersion) {
         final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
 
         // Filter the bundle to export only annotated entities
         // TODO : Enhance this logic to support services and policies
-        bundle.getEntities(Encass.class).entrySet().stream()
-                .filter(entry -> entry.getValue().hasAnnotated())
-                .map(entry -> createAnnotatedEntity(entry.getValue(), projectName, projectVersion))
+        bundle.getEntities(Encass.class).values().stream()
+                .filter(Encass::hasAnnotated)
+                .map(encass -> createAnnotatedEntity(encass, projectName, projectVersion))
                 .forEach(annotatedEntity -> {
                     if (annotatedEntity.isBundleTypeEnabled()) {
                         // buildEncassDependencies
                         List<Entity> entityList = getEntityDependencies(annotatedEntity.getPolicyName(), entities, bundle);
-                        LOGGER.log(Level.FINE, "Entity list : " + entityList);
+                        LOGGER.log(Level.FINE, () -> "Entity list : " + entityList);
                         // Create bundle
                         final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
-                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity.getEntity(),
-                                annotatedEntity, entityList, projectGroupName, projectVersion);
+                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity, entityList
+                                , projectGroupName, projectVersion);
                         annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
                                 bundleMetadata));
                     }

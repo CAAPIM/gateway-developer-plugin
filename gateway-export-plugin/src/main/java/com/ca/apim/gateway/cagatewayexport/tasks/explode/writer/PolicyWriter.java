@@ -12,7 +12,6 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterR
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Element;
 import javax.inject.Inject;
@@ -21,7 +20,6 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
 import static java.util.stream.Collectors.toList;
 
@@ -102,11 +100,7 @@ public class PolicyWriter implements EntityWriter {
      */
     private void writePolicyMetadata(final Map<String, PolicyMetadata> policyMetadataMap, final File rootDir) {
         if (!policyMetadataMap.isEmpty()) {
-            try {
-                jsonTools.writePoliciesConfigFile(policyMetadataMap, rootDir);
-            } catch (IOException e) {
-                throw new WriteException("Error writing policy metadata file", e);
-            }
+            jsonFileUtils.writePoliciesConfigFile(policyMetadataMap, rootDir);
         }
     }
 
