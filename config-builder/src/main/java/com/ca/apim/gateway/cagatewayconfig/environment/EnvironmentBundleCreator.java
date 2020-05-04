@@ -19,11 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.processDeploymentBundles;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.setTemplatizedBundlesFolderPath;
@@ -69,11 +65,9 @@ public class EnvironmentBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        //ToDo : Need to handle bundle name and version properly
-        Map<String, Element> bundleElements = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "");
+        Map<String, Element> bundleElements = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, null);
         for (Map.Entry<String, Element> entry : bundleElements.entrySet()) {
-            documentFileUtils.createFile(entry.getValue(), new File(bundleFolderPath,
-                    entry.getKey() + "-env.bundle").toPath());
+            documentFileUtils.createFile(entry.getValue(), new File(bundleFolderPath, entry.getKey()).toPath());
         }
         return environmentBundle;
     }

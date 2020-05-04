@@ -45,7 +45,7 @@ public class BundleEntityBuilder {
 
         Map<String, Element> artifacts = buildAnnotatedEntities(entities, bundle, bundleType, document, bundleName, bundleVersion);
         if (artifacts.isEmpty()) {
-            artifacts.put(bundleName + '-' + bundleVersion, bundleDocumentBuilder.build(document, entities));
+            artifacts.put(StringUtils.isBlank(bundleVersion) ? bundleName : bundleName + "-" + bundleVersion, bundleDocumentBuilder.build(document, entities));
         }
 
         return artifacts;
@@ -80,53 +80,20 @@ public class BundleEntityBuilder {
         return index > -1 ? fullPath.substring(index + 1) : fullPath;
     }
 
-    private List<Entity> buildEncassDependencies(final AnnotatedEntity<Encass> annotatedEntity, final List<Entity> entities, final Bundle bundle) {
-        Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
-        Set<Entity> filteredEntities = new HashSet<>();
-
-        if (dependencyListMap != null) {
-            collectDependencies(filteredEntities, entities, bundle, new Dependency(getPolicyName(annotatedEntity.getEntity().getPolicy()), EntityTypes.POLICY_TYPE));
-        }
-
-        return new ArrayList<>(filteredEntities);
-    }
-
-    private void collectDependencies(final Set<Entity> filteredEntities, final List<Entity> entities, final Bundle bundle, Dependency dependency) {
-        Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
-        if (dependencyListMap != null) {
-            List<Dependency> dependencies = dependencyListMap.get(dependency);
-            if (dependencies != null) {
-                dependencies.forEach(dependencyItem -> {
-                    for (Entity entity : entities) {
-                        int index = entity.getName().lastIndexOf("/");
-                        final String entityName = index > -1 ? entity.getName().substring(index + 1) : entity.getName();
-                        if (dependencyItem.getName().equals(entityName) && dependencyItem.getEntityType().equals(entity.getType())) {
-                            filteredEntities.add(entity);
-                            // TODO: I expect to call collectDependencies recursively for every filtered entity.
-                            // collectDependencies(...)
-                            break;
-                        }
-                    }
-                });
-            }
-        }
-    }
-
     private List<Entity> getEntityDependencies(String policyNameWithPath, List<Entity> entities, Bundle bundle) {
         List<Entity> entityDependenciesList = new ArrayList<>();
         Set<String> filteredEntityIds = new HashSet<>();
         Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
         if (dependencyListMap != null) {
-            int pathIndex = policyNameWithPath.lastIndexOf("/");
-            final String policyName = pathIndex > -1 ? policyNameWithPath.substring(pathIndex + 1) : policyNameWithPath;
+            final String policyName = getPolicyName(policyNameWithPath);
             Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
             for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
                 final Dependency dependencyParent = entry.getKey();
                 if (dependencyParent.getName().equals(policyName)) {
                     //Add the policy dependant folders
                     final Map<String, Policy> entityMap = bundle.getPolicies();
-                    if (!entityMap.isEmpty()) {
-                        final GatewayEntity policyEntity = entityMap.get(policyNameWithPath);
+                    final GatewayEntity policyEntity = entityMap.get(policyNameWithPath);
+                    if (policyEntity != null) {
                         populateDependentFolders(filteredEntityIds, policyEntity);
                         filteredEntityIds.add(policyEntity.getId());
                     }
@@ -189,7 +156,7 @@ public class BundleEntityBuilder {
                     annotatedEntity.setEntityName(entityName);
                     annotatedEntity.setDescription(description);
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                    annotatedEntity.setBundleName(annotatedBundleName + "-" + bundleVersion);
+                    annotatedEntity.setBundleName(StringUtils.isBlank(bundleVersion) ? annotatedBundleName : annotatedBundleName + "-" + bundleVersion);
                     annotatedEntity.setPolicyName(encass.getPolicy());
                     break;
                 case ANNOTATION_TYPE_REUSABLE:
