@@ -123,7 +123,7 @@ class CAGatewayDeveloperTest {
                 .build();
 
         assertMultiProject(testProjectDir, result);
-        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + "-environment.bundle");
+        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + ".environment.bundle");
         assertTrue(projectC_EnvBundle.exists());
         assertFalse(readFileToString(projectC_EnvBundle, defaultCharset()).isEmpty());
     }
@@ -259,7 +259,7 @@ class CAGatewayDeveloperTest {
         File buildDir = new File(testProjectDir, "build");
         File buildGatewayDir = validateBuildDirExceptGW7File(projectFolder, buildDir);
 
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), projectFolder + projectVersion + "-environment.bundle");
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), projectFolder + projectVersion + ".environment.bundle");
         assertTrue(builtBundleFile.isFile());
     }
 
