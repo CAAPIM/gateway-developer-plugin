@@ -6,19 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayconfig.config.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils.getPath;
@@ -29,12 +28,14 @@ public class PolicyAndFolderLoader implements EntityLoader {
     private final PolicyConverterRegistry policyConverterRegistry;
     private final FileUtils fileUtils;
     private final IdGenerator idGenerator;
+    private final JsonTools jsonTools;
 
     @Inject
-    PolicyAndFolderLoader(PolicyConverterRegistry policyConverterRegistry, FileUtils fileUtils, IdGenerator idGenerator) {
+    PolicyAndFolderLoader(PolicyConverterRegistry policyConverterRegistry, FileUtils fileUtils, IdGenerator idGenerator, JsonTools jsonTools) {
         this.policyConverterRegistry = policyConverterRegistry;
         this.fileUtils = fileUtils;
         this.idGenerator = idGenerator;
+        this.jsonTools = jsonTools;
     }
 
     @Override
@@ -44,7 +45,29 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
         final Map<String, Policy> policies = new HashMap<>();
         loadPolicies(policyRootDir, policyRootDir, null, policies, bundle);
+        loadPoliciesMetadata(rootDir, policies, bundle);
         bundle.putAllPolicies(policies);
+    }
+
+    private void loadPoliciesMetadata(final File rootDir, final Map<String, Policy> policies, final Bundle bundle) {
+        final Map<String, PolicyMetadata> policyMetadataMap = jsonTools.readPoliciesConfigFile(rootDir, PolicyMetadata.class);
+        final Map<Dependency, List<Dependency>> policyDependencyMap = new HashMap<>();
+
+        if (policyMetadataMap != null) {
+            policyMetadataMap.forEach((fullPath, policyMetadata) -> {
+                policyMetadata.setFullPath(fullPath);
+
+                final Set<Dependency> dependencies = Optional.ofNullable(policyMetadata.getUsedEntities())
+                        .orElse(Collections.emptySet());
+                policyDependencyMap.put(new Dependency(policyMetadata.getName(), EntityTypes.POLICY_TYPE),
+                        new LinkedList<>(dependencies));
+
+                //Policy policy = policies.get(policyMetadata.getFullPath());
+                //policy.setAnnotations(policyMetadata.getAnnotations());
+            });
+        }
+
+        bundle.setDependencyMap(policyDependencyMap);
     }
 
     @Override

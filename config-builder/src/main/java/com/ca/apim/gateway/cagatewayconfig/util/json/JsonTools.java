@@ -17,6 +17,9 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,11 +34,14 @@ public class JsonTools {
     private static final Logger LOGGER = Logger.getLogger(JsonTools.class.getName());
     public static final JsonTools INSTANCE = new JsonTools(FileUtils.INSTANCE);
 
+    private static final String CONFIG_DIR = "config";
+    private static final String POLICY_DIR = "policy";
     public static final String JSON = "json";
     public static final String YAML = "yaml";
     public static final String JSON_EXTENSION = "json";
     public static final String YML_EXTENSION = "yml";
     private static final String YAML_EXTENSION = "yaml";
+    private static final String POLICIES_CONFIG_FILE = "policies." + YML_EXTENSION;
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
     private final FileUtils fileUtils;
     private String outputType;
@@ -175,5 +181,32 @@ public class JsonTools {
             });
         }
         return objectMapper;
+    }
+
+    public void writeObject(Object object, File file) throws IOException {
+        ObjectWriter objectWriter = getObjectWriter();
+        try (OutputStream fileStream = Files.newOutputStream(file.toPath())) {
+            objectWriter.writeValue(fileStream, object);
+        } catch (IOException e) {
+            throw e;
+        }
+    }
+
+    private File getPoliciesConfigFile(final File rootDir) {
+        return new File(new File(rootDir, CONFIG_DIR), POLICIES_CONFIG_FILE);
+    }
+
+    public <T> Map<String, T> readPoliciesConfigFile(final File rootDir, Class<T> tClass) {
+        final File file = getPoliciesConfigFile(rootDir);
+        return file.exists() ? readDocumentFile(getPoliciesConfigFile(rootDir),
+                getObjectMapper().getTypeFactory().constructMapType(HashMap.class, String.class, tClass)) : null;
+    }
+
+    public void writePoliciesConfigFile(Object object, final File rootDir) throws IOException {
+        if (!rootDir.getParentFile().exists()) {
+            Files.createDirectory(Paths.get(rootDir.getParentFile().getPath()));
+        }
+
+        writeObject(object, getPoliciesConfigFile(rootDir));
     }
 }

@@ -48,11 +48,11 @@ public class DependencyUtils {
     private static <E extends GatewayEntity> Set<Dependency> filterDependencies(Class<E> dependentEntityType, Map<Dependency, List<Dependency>> dependencies, Bundle bundle) {
         return dependencies.entrySet().stream()
                 // filter out dependencies that are not in the bundle
-                .filter(e -> bundle.getEntities(e.getKey().getType()).get(e.getKey().getId()) != null)
+                .filter(e -> bundle.getEntities(e.getKey().getTypeClass()).get(e.getKey().getId()) != null)
                 // keep only the dependencies
                 .flatMap(e -> e.getValue().stream())
                 // keep only dependencies that are of the given type.
-                .filter(d -> d.getType() == dependentEntityType)
+                .filter(d -> d.getTypeClass() == dependentEntityType)
                 .collect(Collectors.toSet());
     }
 

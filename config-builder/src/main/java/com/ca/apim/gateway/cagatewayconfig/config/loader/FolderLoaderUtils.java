@@ -72,6 +72,20 @@ public class FolderLoaderUtils {
     }
 
     @Nullable
+    public static File getConfigRootDir(File rootDir) {
+        final File configRootDir = new File(rootDir, "config");
+
+        if (!configRootDir.exists()) {
+            // no configuration to bundle. Just return
+            return null;
+        } else if (!configRootDir.isDirectory()) {
+            throw new ConfigLoadException("Expected directory but was file: " + configRootDir);
+        }
+
+        return configRootDir;
+    }
+
+    @Nullable
     static File getSoapResourcesRootDir(File rootDir) {
         final File soapResourceRootDir = new File(rootDir, SOAP_RESOURCES_FOLDER);
 

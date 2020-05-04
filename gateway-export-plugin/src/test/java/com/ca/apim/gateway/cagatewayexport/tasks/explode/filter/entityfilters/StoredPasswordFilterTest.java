@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
@@ -40,8 +41,8 @@ class StoredPasswordFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", StoredPassword.class), new Dependency("3", StoredPassword.class)),
-                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", StoredPassword.class))));
+                        new Dependency("1", Policy.class, "my-policy", EntityTypes.POLICY_TYPE), Arrays.asList(new Dependency("2", StoredPassword.class, "password2", EntityTypes.STORED_PASSWORD_TYPE), new Dependency("3", StoredPassword.class, "password3", EntityTypes.STORED_PASSWORD_TYPE)),
+                        new Dependency("2", Policy.class, "my-policy2", EntityTypes.POLICY_TYPE), Collections.singletonList(new Dependency("4", StoredPassword.class, "password4", EntityTypes.STORED_PASSWORD_TYPE))));
         bundle.addEntity(new StoredPassword.Builder().name("password1").id("1").properties(ImmutableMap.of("type", StoredPassword.Type.PASSWORD.getName())).build());
         bundle.addEntity(new StoredPassword.Builder().name("password2").id("2").properties(ImmutableMap.of("type", StoredPassword.Type.PASSWORD.getName())).build());
         bundle.addEntity(new StoredPassword.Builder().name("password3").id("3").properties(ImmutableMap.of("type", StoredPassword.Type.PEM_PRIVATE_KEY.getName())).build());
