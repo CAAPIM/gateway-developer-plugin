@@ -83,7 +83,10 @@ class PolicyWriterTest {
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policies.yml");
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+        File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
@@ -123,7 +126,11 @@ class PolicyWriterTest {
 
         File policyFile = new File(testFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policies.yml");
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+
+        File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
@@ -157,7 +164,11 @@ class PolicyWriterTest {
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policies.yml");
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+
+        File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
@@ -203,7 +214,11 @@ class PolicyWriterTest {
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policies.yml");
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+
+        File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
