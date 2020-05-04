@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.json;
 
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -203,10 +204,9 @@ public class JsonTools {
     }
 
     public void writePoliciesConfigFile(Object object, final File rootDir) throws IOException {
-        if (!rootDir.getParentFile().exists()) {
-            Files.createDirectory(Paths.get(rootDir.getParentFile().getPath()));
-        }
-
+        File configFolder = new File(rootDir, CONFIG_DIR);
+        DocumentFileUtils documentFileUtils = DocumentFileUtils.INSTANCE;
+        documentFileUtils.createFolder(configFolder.toPath());
         writeObject(object, getPoliciesConfigFile(rootDir));
     }
 }
