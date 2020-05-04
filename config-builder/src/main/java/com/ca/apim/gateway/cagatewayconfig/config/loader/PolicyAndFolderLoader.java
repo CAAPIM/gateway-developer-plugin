@@ -72,9 +72,12 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
     private Map<String, PolicyMetadata> readPoliciesMetadata(final File policyRootDir){
         File policyMetadataFile = new File(policyRootDir, "policies" + jsonTools.getFileExtension());
-        final ObjectMapper objectMapper = jsonTools.getObjectMapper();
-        final MapType type = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, PolicyMetadata.class);
-        return jsonTools.readDocumentFile(policyMetadataFile, type);
+        if(policyMetadataFile.exists()) {
+            final ObjectMapper objectMapper = jsonTools.getObjectMapper();
+            final MapType type = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, PolicyMetadata.class);
+            return jsonTools.readDocumentFile(policyMetadataFile, type);
+        }
+        return null;
     }
 
     @Override

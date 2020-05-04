@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
@@ -74,6 +75,10 @@ class PolicyEntityBuilderTest {
         policy.setName(policy.getPath());
         Encass encass = new Encass();
         encass.setGuid("encass");
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation annotation = new Annotation("@reusableEntity");
+        annotations.add(annotation);
+        policy.setAnnotations(annotations);
         bundle.getEncasses().put(TEST_ENCASS, encass);
         bundle.getPolicies().put("Policy", policy);
         Policy include = new Policy();
@@ -82,6 +87,10 @@ class PolicyEntityBuilderTest {
         include.setName(include.getPath());
         include.setId("includeID");
         include.setGuid("includeGuid");
+        annotations = new HashSet<>();
+        annotation = new Annotation("@reusableEntity");
+        annotations.add(annotation);
+        include.setAnnotations(annotations);
         include.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<wsp:Policy xmlns:L7p=\"http://www.layer7tech.com/ws/policy\" xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\">\n" +
                 "    <wsp:All wsp:Usage=\"Required\">\n" +
@@ -92,7 +101,7 @@ class PolicyEntityBuilderTest {
                 "</wsp:Policy>");
         bundle.getPolicies().put("include", include);
 
-        PolicyEntityBuilder builder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
+        PolicyEntityBuilder builder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
         final List<Entity> entities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
@@ -527,7 +536,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTest() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("/path");
@@ -545,7 +554,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestPBS() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/path.xml");
@@ -567,7 +576,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestGlobal() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/global.xml");
@@ -598,7 +607,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestInternal() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/internal.xml");

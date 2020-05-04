@@ -7,16 +7,17 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.bundle.DependencyBundlesProcessor;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,6 +33,8 @@ import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_EXCLUDE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.copyNodes;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
@@ -109,8 +112,33 @@ public class FullBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
         //ToDo : Need to handle bundle name, Project GroupName and version properly
-        Map<String, Pair<Element, BundleMetadata>> bundleElements = bundleEntityBuilder.build(environmentBundle,
-                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", "");
+        List<Pair<AnnotatedEntity, Encass>> annotatedEntities = new ArrayList<>();
+
+        // Filter the bundle to export only annotated entities
+        // TODO : Enhance this logic to support services and policies
+        final Map<String, Encass> encassEntities = environmentBundle.getEntities(Encass.class);
+        final AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
+        encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
+            Encass encass = encassEntry.getValue();
+            if (encass.getAnnotations() != null) {
+                annotatedEntities.add(ImmutablePair.of(annotatedEntityCreator.createEntity("", "", encass),
+                        encass));
+            }
+        });
+        final Map<String, Pair<Element, BundleMetadata>> bundleElements = new LinkedHashMap<>();
+        if(!annotatedEntities.isEmpty()) {
+            annotatedEntities.stream().forEach(annotatedEntityPair -> {
+                if (annotatedEntityPair.getLeft().isBundleTypeEnabled()) {
+                    final Pair<Element, BundleMetadata> bundleMetadataPair = bundleEntityBuilder.build(environmentBundle,
+                            EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", "", annotatedEntityPair);
+                    bundleElements.put(annotatedEntityPair.getKey().getBundleName(), bundleMetadataPair);
+                }
+            });
+        } else {
+            bundleElements.put("" + '-' + "", bundleEntityBuilder.build(environmentBundle,
+                    EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", "", null));
+        }
+
         Element bundleElement = null;
         for(Map.Entry<String, Pair<Element, BundleMetadata>> entry: bundleElements.entrySet()) {
             // generate the environment bundle

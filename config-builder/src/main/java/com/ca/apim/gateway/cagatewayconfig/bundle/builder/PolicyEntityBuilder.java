@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
@@ -31,6 +32,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_REUSABLE;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.insertPrefixToEnvironmentVariable;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -57,10 +60,12 @@ public class PolicyEntityBuilder implements EntityBuilder {
     public static final String ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 
     private final DocumentTools documentTools;
+    private final IdGenerator idGenerator;
 
     @Inject
-    PolicyEntityBuilder(DocumentTools documentTools) {
+    PolicyEntityBuilder(DocumentTools documentTools, IdGenerator idGenerator) {
         this.documentTools = documentTools;
+        this.idGenerator = idGenerator;
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
@@ -321,6 +326,11 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
     @VisibleForTesting
     Entity buildPolicyEntity(Policy policy, Bundle bundle, Document document) {
+        Set<Annotation> annotations = policy.getAnnotations();
+        if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
+            policy.setId(idGenerator.generate());
+            policy.setGuid(idGenerator.generateGuid());
+        }
         String id = policy.getId();
         PolicyTags policyTags = getPolicyTags(policy, bundle);
 

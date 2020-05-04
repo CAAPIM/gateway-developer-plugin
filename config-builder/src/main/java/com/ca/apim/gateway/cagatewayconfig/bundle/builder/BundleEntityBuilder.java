@@ -55,54 +55,33 @@ public class BundleEntityBuilder {
         this.documentTools = documentTools;
     }
 
-    public Map<String, Pair<Element, BundleMetadata>> build(Bundle bundle, EntityBuilder.BundleType bundleType,
-                                                            Document document, String projectName,
-                                                            String projectGroupName, String projectVersion) {
+    public Pair<Element, BundleMetadata> build(Bundle bundle, EntityBuilder.BundleType bundleType,
+                                               Document document, String projectName,
+                                               String projectGroupName, String projectVersion, Pair<AnnotatedEntity, Encass> annotatedEntityPair) {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
-
-        List<Pair<AnnotatedEntity, Encass>> annotatedEntities = new ArrayList<>();
-
-        // Filter the bundle to export only annotated entities
-        // TODO : Enhance this logic to support services and policies
-        final Map<String, Encass> encassEntities = bundle.getEntities(Encass.class);
-        encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
-            Encass encass = encassEntry.getValue();
-            if (encass.getAnnotations() != null) {
-                annotatedEntities.add(ImmutablePair.of(createAnnotatedEntity(encass, projectName, projectVersion),
-                        encass));
-            }
-        });
-
-        if(!annotatedEntities.isEmpty()) {
-            final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
+        if(annotatedEntityPair != null){
             if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
-                annotatedEntities.stream().forEach(annotatedEntityPair -> {
-                    if (annotatedEntityPair.getLeft().isBundleTypeEnabled()) {
-                        AnnotatedEntity annotatedEntity = annotatedEntityPair.getLeft();
-                        Encass encass = annotatedEntityPair.getRight();
+                AnnotatedEntity annotatedEntity = annotatedEntityPair.getLeft();
+                Encass encass = annotatedEntityPair.getRight();
 
-                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(),
-                                annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
-                        LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
-                        List<Entity> bundleEntities = renameNonReusableEntities(entityList, bundle, annotatedEntity, projectGroupName, projectVersion);
-                        // Create bundle and its metadata
-                        final Element annotatedBundle = bundleDocumentBuilder.build(document, bundleEntities);
-                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(encass, annotatedEntity,
-                                bundleEntities, projectGroupName, projectVersion);
+                List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(),
+                        annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
+                LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
+                List<Entity> bundleEntities = renameNonReusableEntities(entityList, bundle, annotatedEntity, projectGroupName, projectVersion);
+                // Create bundle and its metadata
+                final Element annotatedBundle = bundleDocumentBuilder.build(document, bundleEntities);
+                final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(encass, annotatedEntity,
+                        bundleEntities, projectGroupName, projectVersion);
 
-                        annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
-                                bundleMetadata));
-                    }
-                });
+                return ImmutablePair.of(annotatedBundle,
+                        bundleMetadata);
             }
-            return annotatedElements;
+            return null;
+        } else {
+            return ImmutablePair.of(bundleDocumentBuilder.build(document,
+                    entities), null);
         }
-
-        final Map<String, Pair<Element, BundleMetadata>> artifacts = new HashMap<>();
-        artifacts.put(projectName + '-' + projectVersion, ImmutablePair.of(bundleDocumentBuilder.build(document,
-                entities), null));
-        return artifacts;
     }
 
     private List<Entity> renameNonReusableEntities(List<Entity> entityList, Bundle bundle, AnnotatedEntity annotatedEntity, String projectGroupName, String projectVersion) {
@@ -260,56 +239,7 @@ public class BundleEntityBuilder {
         }
     }
 
-    /**
-     * Creates AnnotatedEntity object by scanning all the annotations and gathering all the information required to
-     * generate the bundle and its metadata.
-     *
-     * @param encass Encapsulated assertion
-     * @param projectName Project name
-     * @param projectVersion Project version
-     * @return AnnotatedEntity
-     */
-    private AnnotatedEntity createAnnotatedEntity(final Encass encass, final String projectName,
-                                                  final String projectVersion) {
-        AnnotatedEntity annotatedEntity = new AnnotatedEntity();
-        encass.getAnnotations().forEach(annotation -> {
-            switch (annotation.getType()) {
-                case ANNOTATION_TYPE_BUNDLE:
-                    String annotatedBundleName = annotation.getName();
-                    if (StringUtils.isBlank(annotatedBundleName)) {
-                        annotatedBundleName = projectName + "." + encass.getName();
-                    }
-                    String description = annotation.getDescription();
-                    if (StringUtils.isBlank(description)) {
-                        description = encass.getProperties().getOrDefault("description", "").toString();
-                    }
-                    annotatedEntity.setTags(annotation.getTags());
-                    annotatedEntity.setBundleType(true);
-                    annotatedEntity.setEntityName(encass.getName());
-                    annotatedEntity.setDescription(description);
-                    annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                    annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
-                    annotatedEntity.setPolicyName(encass.getPolicy());
-                    break;
-                case ANNOTATION_TYPE_REUSABLE:
-                case ANNOTATION_TYPE_REUSABLE_BUNDLE:
-                    annotatedEntity.setReusableType(true);
-                    break;
-                case ANNOTATION_TYPE_REUSABLE_ENTITY:
-                    annotatedEntity.setReusableEntity(true);
-                    break;
-                case ANNOTATION_TYPE_REDEPLOYABLE:
-                    annotatedEntity.setRedeployableType(true);
-                    break;
-                case ANNOTATION_TYPE_EXCLUDE:
-                    annotatedEntity.setExcludeType(true);
-                    break;
-                default:
-                    break;
-            }
-        });
-        return annotatedEntity;
-    }
+
 
     @VisibleForTesting
     public Set<EntityBuilder> getEntityBuilders() {
