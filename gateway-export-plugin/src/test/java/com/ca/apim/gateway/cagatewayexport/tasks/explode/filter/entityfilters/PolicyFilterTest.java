@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -45,8 +46,8 @@ class PolicyFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", Policy.class), new Dependency("3", Policy.class)),
-                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", Policy.class))));
+                        new Dependency("1", Policy.class, "policy1", EntityTypes.POLICY_TYPE), Arrays.asList(new Dependency("2", Policy.class, "policy2", EntityTypes.POLICY_TYPE), new Dependency("3", Policy.class, "policy3", EntityTypes.POLICY_TYPE)),
+                        new Dependency("2", Policy.class, "policy2", EntityTypes.POLICY_TYPE), Collections.singletonList(new Dependency("4", Policy.class, "policy4", EntityTypes.POLICY_TYPE))));
         bundle.addEntity(createPolicy("policy1", "1", "", "2", null, ""));
         bundle.addEntity(createPolicy("policy2", "2", "", "5", null, ""));
         bundle.addEntity(createPolicy("policy3", "3", "", null, null, ""));

@@ -1,7 +1,9 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
 
@@ -11,29 +13,16 @@ import java.util.Set;
 
 @JsonInclude
 public class PolicyMetadata {
-    @JsonIgnore
-    private String name;
-    @JsonIgnore
-    private String path;
     private String type;
     private String tag;
+    private String subtag;
     private Set<Dependency> usedEntities;
 
-    public String getName() {
-        return name;
-    }
+    @JsonIgnore
+    private String name;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
+    @JsonIgnore
+    private String path;
 
     public Set<Dependency> getUsedEntities() {
         return usedEntities;
@@ -59,9 +48,43 @@ public class PolicyMetadata {
         this.tag = tag;
     }
 
-    @JsonIgnore
-    public String getNameWithPath() {
-        return path == null || path.isEmpty() ? name : path + "/" + name;
+    public String getSubtag() {
+        return subtag;
     }
 
+    public void setSubtag(String subtag) {
+        this.subtag = subtag;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @JsonIgnore
+    public String getName() {
+        return name;
+    }
+
+    @JsonIgnore
+    public String getFullPath() {
+        return StringUtils.isEmpty(getPath()) ? getName() : PathUtils.unixPath(getPath(), getName());
+    }
+
+    public void setFullPath(final String fullPath) {
+        final int index = fullPath.lastIndexOf("/");
+        if (index != -1) {
+            setName(fullPath.substring(index + 1));
+            setPath(fullPath.substring(0, index));
+        } else {
+            setName(fullPath);
+        }
+    }
 }

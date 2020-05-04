@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import org.junit.jupiter.api.Test;
@@ -40,8 +41,8 @@ class PrivateKeyFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", PrivateKey.class), new Dependency("3", PrivateKey.class)),
-                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", PrivateKey.class))));
+                        new Dependency("1", Policy.class, "my-policy", EntityTypes.POLICY_TYPE), Arrays.asList(new Dependency("2", PrivateKey.class, "SSL", EntityTypes.PRIVATE_KEY_TYPE), new Dependency("3", PrivateKey.class, "pk3", EntityTypes.PRIVATE_KEY_TYPE)),
+                        new Dependency("2", Policy.class, "my-policy2", EntityTypes.POLICY_TYPE), Collections.singletonList(new Dependency("4", PrivateKey.class, "pk4", EntityTypes.PRIVATE_KEY_TYPE))));
         bundle.addEntity(new PrivateKey.Builder().setAlias("pk1").setId("1").build());
         bundle.addEntity(new PrivateKey.Builder().setAlias("SSL").setId("2").build());
         bundle.addEntity(new PrivateKey.Builder().setAlias("pk3").setId("3").build());

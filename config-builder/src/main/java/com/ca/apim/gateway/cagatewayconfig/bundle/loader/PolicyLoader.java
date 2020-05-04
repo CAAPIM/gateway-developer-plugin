@@ -25,6 +25,7 @@ import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOpe
 import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_SUBTAG;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_TAG;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
@@ -65,6 +66,7 @@ public class PolicyLoader implements BundleEntityLoader {
         final Element resource = getSingleChildElement(resourceSet, RESOURCE);
         final String policyString = resource.getTextContent();
         final PolicyType type = PolicyType.fromType(policyType);
+        final String policySubtag = (String) policyDetailProperties.get(PROPERTY_SUBTAG);
 
         Folder parentFolder = getFolder(bundle, folderId);
 
@@ -75,6 +77,7 @@ public class PolicyLoader implements BundleEntityLoader {
         policy.setGuid(guid);
         policy.setId(id);
         policy.setTag(policyTag);
+        policy.setSubtag(policySubtag);
         policy.setPolicyType(type);
         policy.setPolicyDocument(policyElement);
         policy.setPolicyXML(policyString);
