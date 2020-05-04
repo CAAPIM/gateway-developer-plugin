@@ -13,8 +13,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.MapType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -47,34 +45,29 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
         final Map<String, Policy> policies = new HashMap<>();
         loadPolicies(policyRootDir, policyRootDir, null, policies, bundle);
-        loadPoliciesMetadata(policyRootDir, policies, bundle);
+        loadPoliciesMetadata(rootDir, policies, bundle);
         bundle.putAllPolicies(policies);
     }
 
-    private void loadPoliciesMetadata(final File policyRootDir, final Map<String, Policy> policies, final Bundle bundle){
-        final Map<String, PolicyMetadata> policyMetadataMap = readPoliciesMetadata(policyRootDir);
+    private void loadPoliciesMetadata(final File rootDir, final Map<String, Policy> policies, final Bundle bundle) {
+        final Map<String, PolicyMetadata> policyMetadataMap = jsonTools.readPoliciesConfigFile(rootDir, PolicyMetadata.class);
         final Map<Dependency, List<Dependency>> policyDependencyMap = new HashMap<>();
-        if (policyMetadataMap != null) {
-            for(Map.Entry<String, PolicyMetadata> metadataEntry : policyMetadataMap.entrySet()){
-                final String policyNameWithPath = metadataEntry.getKey();
-                final PolicyMetadata policyMetadata = metadataEntry.getValue();
-                int index = policyNameWithPath.lastIndexOf("/");
-                final String policyName = index > -1 ? policyNameWithPath.substring(index+1) : policyNameWithPath;
-                Set<Dependency> dependencies = policyMetadata.getUsedEntities();
-                List<Dependency> dependencyList = dependencies != null ? new LinkedList<>(dependencies) : new LinkedList<>();
-                policyDependencyMap.put(new Dependency(policyName, EntityTypes.POLICY_TYPE), dependencyList);
-                //Policy policy = policies.get(policyNameWithPath);
-                //policy.setAnnotations(policyMetadata.getAnnotations());
-            }
-        }
-        bundle.setDependencyMap(policyDependencyMap);
-    }
 
-    private Map<String, PolicyMetadata> readPoliciesMetadata(final File policyRootDir){
-        File policyMetadataFile = new File(policyRootDir, "policies" + jsonTools.getFileExtension());
-        final ObjectMapper objectMapper = jsonTools.getObjectMapper();
-        final MapType type = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, PolicyMetadata.class);
-        return jsonTools.readDocumentFile(policyMetadataFile, type);
+        if (policyMetadataMap != null) {
+            policyMetadataMap.forEach((fullPath, policyMetadata) -> {
+                policyMetadata.setFullPath(fullPath);
+
+                final Set<Dependency> dependencies = Optional.ofNullable(policyMetadata.getUsedEntities())
+                        .orElse(Collections.emptySet());
+                policyDependencyMap.put(new Dependency(policyMetadata.getName(), EntityTypes.POLICY_TYPE),
+                        new LinkedList<>(dependencies));
+
+                //Policy policy = policies.get(policyMetadata.getFullPath());
+                //policy.setAnnotations(policyMetadata.getAnnotations());
+            });
+        }
+
+        bundle.setDependencyMap(policyDependencyMap);
     }
 
     @Override

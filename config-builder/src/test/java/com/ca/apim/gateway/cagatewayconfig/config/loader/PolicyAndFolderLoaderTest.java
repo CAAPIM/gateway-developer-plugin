@@ -60,12 +60,14 @@ class PolicyAndFolderLoaderTest {
         File policyDep = new File(policyFolder, "policies.yml");
         Map<String, PolicyMetadata> policyMetadataMap = new HashMap<>();
         PolicyMetadata policyMetadata = new PolicyMetadata();
+        policyMetadata.setPath("a/b/c");
+        policyMetadata.setName("policy");
         policyMetadata.setTag("tag");
-        policyMetadata.setType("inclulde");
+        policyMetadata.setType("include");
         Set<Dependency> dependencySet = new HashSet<>();
         dependencySet.add(new Dependency("jdbc", EntityTypes.JDBC_CONNECTION));
         policyMetadata.setUsedEntities(dependencySet);
-        policyMetadataMap.put("a/b/c/policy", policyMetadata);
+        policyMetadataMap.put(policyMetadata.getFullPath(), policyMetadata);
         JsonTools.INSTANCE.writeObject(policyMetadataMap, policyDep);
 
         Bundle bundle = new Bundle();

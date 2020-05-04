@@ -1,7 +1,9 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
 
@@ -15,6 +17,10 @@ public class PolicyMetadata {
     private String tag;
     private String subtag;
     private Set<Dependency> usedEntities;
+
+    @JsonIgnore
+    private String name;
+
     @JsonIgnore
     private String path;
 
@@ -56,5 +62,29 @@ public class PolicyMetadata {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @JsonIgnore
+    public String getName() {
+        return name;
+    }
+
+    @JsonIgnore
+    public String getFullPath() {
+        return StringUtils.isEmpty(getPath()) ? getName() : PathUtils.unixPath(getPath(), getName());
+    }
+
+    public void setFullPath(final String fullPath) {
+        final int index = fullPath.lastIndexOf("/");
+        if (index != -1) {
+            setName(fullPath.substring(index + 1));
+            setPath(fullPath.substring(0, index));
+        } else {
+            setName(fullPath);
+        }
     }
 }
