@@ -55,6 +55,7 @@ class PolicyAndFolderLoaderTest {
         Assert.assertTrue(b.mkdir());
         File c = new File(b, "c");
         Assert.assertTrue(c.mkdir());
+
         File policy = new File(c, "policy.xml");
         Files.touch(policy);
         File policyDep = new File(policyFolder, "policies.yml");
@@ -68,6 +69,20 @@ class PolicyAndFolderLoaderTest {
         policyMetadataMap.put("a/b/c/policy", policyMetadata);
 
         JsonFileUtils.INSTANCE.createFile(policyMetadataMap, policyDep.toPath());
+
+        File configFolder = temporaryFolder.createDirectory("config");
+        File policyDep = new File(configFolder, "policies.yml");
+        Map<String, PolicyMetadata> policyMetadataMap = new HashMap<>();
+        PolicyMetadata policyMetadata = new PolicyMetadata();
+        policyMetadata.setPath("a/b/c");
+        policyMetadata.setName("policy");
+        policyMetadata.setTag("tag");
+        policyMetadata.setType("include");
+        Set<Dependency> dependencySet = new HashSet<>();
+        dependencySet.add(new Dependency("jdbc", EntityTypes.JDBC_CONNECTION));
+        policyMetadata.setUsedEntities(dependencySet);
+        policyMetadataMap.put(policyMetadata.getFullPath(), policyMetadata);
+        JsonTools.INSTANCE.writeObject(policyMetadataMap, policyDep);
 
         Bundle bundle = new Bundle();
         policyAndFolderLoader.load(bundle, temporaryFolder.getRoot());
@@ -127,6 +142,11 @@ class PolicyAndFolderLoaderTest {
         File policyFolder = temporaryFolder.createDirectory("policy");
         File policy = new File(policyFolder, "policy.blah");
         Files.touch(policy);
+
+        File configFolder = temporaryFolder.createDirectory("config");
+        File policyDep = new File(configFolder, "policies.yml");
+        Map<String, PolicyMetadata> policyMetadataMap = new HashMap<>();
+        JsonTools.INSTANCE.writeObject(policyMetadataMap, policyDep);
 
         Bundle bundle = new Bundle();
         policyAndFolderLoader.load(bundle, temporaryFolder.getRoot());

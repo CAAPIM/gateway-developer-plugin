@@ -40,6 +40,7 @@ class PolicyWriterTest {
 
     @Test
     void testNoPolicies(final TemporaryFolder temporaryFolder) {
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
         PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
 
         Bundle bundle = new Bundle();
@@ -56,7 +57,7 @@ class PolicyWriterTest {
 
     @Test
     void testWriteAssertionJS(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -84,13 +85,16 @@ class PolicyWriterTest {
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policies.yml");
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+        File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
     @Test
     void testWritePolicyWithSubfolder(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -124,13 +128,17 @@ class PolicyWriterTest {
 
         File policyFile = new File(testFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policies.yml");
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+
+        File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
     @Test
     void testWriteServicePolicy(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -158,13 +166,17 @@ class PolicyWriterTest {
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policies.yml");
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+
+        File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
 
     @Test
     void testWritePolicyWithDependencies(final TemporaryFolder temporaryFolder) throws DocumentParseException {
-        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE);
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
 
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
@@ -204,8 +216,11 @@ class PolicyWriterTest {
 
         File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
         assertTrue(policyFile.exists());
-        File policyMetadataFile = new File(policyFolder, "policies.yml");
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+
+        File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
     }
-
 }

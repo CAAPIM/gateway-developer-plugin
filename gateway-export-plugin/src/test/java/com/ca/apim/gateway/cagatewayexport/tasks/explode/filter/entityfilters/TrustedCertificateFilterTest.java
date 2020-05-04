@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
@@ -40,8 +41,8 @@ class TrustedCertificateFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", TrustedCert.class), new Dependency("3", TrustedCert.class)),
-                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", TrustedCert.class))));
+                        new Dependency("1", Policy.class, "my-policy", EntityTypes.POLICY_TYPE), Arrays.asList(new Dependency("2", TrustedCert.class, "cert2", EntityTypes.TRUSTED_CERT_TYPE), new Dependency("3", TrustedCert.class, "cert3", EntityTypes.TRUSTED_CERT_TYPE)),
+                        new Dependency("2", Policy.class, "my-policy2", EntityTypes.POLICY_TYPE), Collections.singletonList(new Dependency("4", TrustedCert.class, "cert4", EntityTypes.TRUSTED_CERT_TYPE))));
         bundle.addEntity(new TrustedCert.Builder().name("cert1").id("1").build());
         bundle.addEntity(new TrustedCert.Builder().name("cert2").id("2").build());
         bundle.addEntity(new TrustedCert.Builder().name("cert3").id("3").build());

@@ -30,7 +30,6 @@ public class PolicyAndFolderLoader implements EntityLoader {
     private final PolicyConverterRegistry policyConverterRegistry;
     private final FileUtils fileUtils;
     private final IdGenerator idGenerator;
-    private final EntityTypeRegistry entityTypeRegistry;
     private final JsonTools jsonTools;
 
     @Inject
@@ -38,7 +37,6 @@ public class PolicyAndFolderLoader implements EntityLoader {
         this.policyConverterRegistry = policyConverterRegistry;
         this.fileUtils = fileUtils;
         this.idGenerator = idGenerator;
-        this.entityTypeRegistry = entityTypeRegistry;
         this.jsonTools = jsonTools;
     }
 
@@ -49,8 +47,30 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
         final Map<String, Policy> policies = new HashMap<>();
         loadPolicies(policyRootDir, policyRootDir, null, policies, bundle);
+        loadPoliciesMetadata(rootDir, policies, bundle);
         bundle.putAllPolicies(policies);
         final Map<Dependency, List<Dependency>> policyDependencyMap = getPolicyDependencies(policyRootDir);
+        bundle.setDependencyMap(policyDependencyMap);
+    }
+
+    private void loadPoliciesMetadata(final File rootDir, final Map<String, Policy> policies, final Bundle bundle) {
+        final Map<String, PolicyMetadata> policyMetadataMap = jsonTools.readPoliciesConfigFile(rootDir, PolicyMetadata.class);
+        final Map<Dependency, List<Dependency>> policyDependencyMap = new HashMap<>();
+
+        if (policyMetadataMap != null) {
+            policyMetadataMap.forEach((fullPath, policyMetadata) -> {
+                policyMetadata.setFullPath(fullPath);
+
+                final Set<Dependency> dependencies = Optional.ofNullable(policyMetadata.getUsedEntities())
+                        .orElse(Collections.emptySet());
+                policyDependencyMap.put(new Dependency(policyMetadata.getName(), EntityTypes.POLICY_TYPE),
+                        new LinkedList<>(dependencies));
+
+                //Policy policy = policies.get(policyMetadata.getFullPath());
+                //policy.setAnnotations(policyMetadata.getAnnotations());
+            });
+        }
+
         bundle.setDependencyMap(policyDependencyMap);
     }
 

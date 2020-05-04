@@ -53,7 +53,7 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrNull());
 
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
-        final String bundleFileName = getProject().getName() + '-' + getProject().getVersion() + "-environment.bundle";
+        final String bundleFileName = getProject().getName() + '-' + getProject().getVersion() + ".environment.bundle";
         environmentBundleCreator.createEnvironmentBundle(
                 environmentValues,
                 into.getAsFile().get().getPath(),

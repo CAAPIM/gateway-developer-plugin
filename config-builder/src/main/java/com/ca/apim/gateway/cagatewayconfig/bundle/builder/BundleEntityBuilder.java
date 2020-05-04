@@ -49,83 +49,79 @@ public class BundleEntityBuilder {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
 
-        List<Pair<AnnotatedEntity, Encass>> annotatedEntities = new ArrayList<>();
-
-        // Filter the bundle to export only annotated entities
-        // TODO : Enhance this logic to support services and policies
-        final Map<String, Encass> encassEntities = bundle.getEntities(Encass.class);
-        encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
-            Encass encass = encassEntry.getValue();
-            if (encass.getAnnotations() != null) {
-                annotatedEntities.add(ImmutablePair.of(createAnnotatedEntity(encass, projectName, projectVersion),
-                        encass));
-            }
-        });
-
-        if(!annotatedEntities.isEmpty()) {
-            final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
-
-            annotatedEntities.stream().forEach(annotatedEntityPair -> {
-                if (annotatedEntityPair.getLeft().isBundleTypeEnabled()) {
-                    AnnotatedEntity annotatedEntity = annotatedEntityPair.getLeft();
-                    Encass encass = annotatedEntityPair.getRight();
-
-                    List<Entity> entityList = getEntityDependencies(annotatedEntity.getEntityName(),
-                            annotatedEntity.getEntityType(), annotatedEntity.getPolicyName(), entities, bundle);
-                    LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
-
-                    // Create bundle
-                    final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
-                    final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(encass, annotatedEntity,
-                            entityList, projectGroupName, projectVersion);
-                    annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
-                            bundleMetadata));
-                }
-            });
-
-            return annotatedElements;
+        Map<String, Pair<Element, BundleMetadata>> artifacts = buildAnnotatedEntities(entities, bundle, bundleType, document, projectName,
+                projectGroupName, projectVersion);
+        if (artifacts.isEmpty()) {
+            artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
+                    ImmutablePair.of(bundleDocumentBuilder.build(document, entities), null));
         }
 
-        final Map<String, Pair<Element, BundleMetadata>> artifacts = new HashMap<>();
-        artifacts.put(projectName + '-' + projectVersion, ImmutablePair.of(bundleDocumentBuilder.build(document,
-                entities), null));
         return artifacts;
     }
 
-    private List<Entity> getEntityDependencies(String annotatedEntityName, String annotatedEntityType, String policyNameWithPath, List<Entity> entities, Bundle bundle) {
+    private Map<String, Pair<Element, BundleMetadata>> buildAnnotatedEntities(List<Entity> entities, Bundle bundle, EntityBuilder.BundleType bundleType,
+                                                        Document document, String projectName,
+                                                        String projectGroupName, String projectVersion) {
+        final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
+
+        // Filter the bundle to export only annotated entities
+        // TODO : Enhance this logic to support services and policies
+        bundle.getEntities(Encass.class).entrySet().stream()
+                .filter(entry -> entry.getValue().hasAnnotated())
+                .map(entry -> createAnnotatedEntity(entry.getValue(), projectName, projectVersion))
+                .forEach(annotatedEntity -> {
+                    if (annotatedEntity.isBundleTypeEnabled()) {
+                        // buildEncassDependencies
+                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getPolicyName(), entities, bundle);
+                        LOGGER.log(Level.FINE, "Entity list : " + entityList);
+                        // Create bundle
+                        final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
+                        final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity.getEntity(),
+                                annotatedEntity, entityList, projectGroupName, projectVersion);
+                        annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
+                                bundleMetadata));
+                    }
+                });
+
+        return annotatedElements;
+    }
+
+    private String getPolicyName(final String fullPath) {
+        final int index = fullPath.lastIndexOf("/");
+        return index > -1 ? fullPath.substring(index + 1) : fullPath;
+    }
+
+    private List<Entity> getEntityDependencies(String policyNameWithPath, List<Entity> entities, Bundle bundle) {
         List<Entity> entityDependenciesList = new ArrayList<>();
+        Set<String> filteredEntityIds = new HashSet<>();
         Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
         if (dependencyListMap != null) {
-            int pathIndex = policyNameWithPath.lastIndexOf("/");
-            final String policyName = pathIndex > -1 ? policyNameWithPath.substring(pathIndex + 1) : policyNameWithPath;
+            final String policyName = getPolicyName(policyNameWithPath);
             Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
             for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
                 final Dependency dependencyParent = entry.getKey();
                 if (dependencyParent.getName().equals(policyName)) {
-                    //Add the dependant folders first
+                    //Add the policy dependant folders
                     final Map<String, Policy> entityMap = bundle.getPolicies();
-                    if (entityMap != null) {
-                        final GatewayEntity policyEntity = entityMap.get(policyNameWithPath);
-                        populateDependentFolders(entityDependenciesList, entities, policyEntity);
+                    final GatewayEntity policyEntity = entityMap.get(policyNameWithPath);
+                    if (policyEntity != null) {
+                        populateDependentFolders(filteredEntityIds, policyEntity);
+                        filteredEntityIds.add(policyEntity.getId());
                     }
 
                     //Add the policy dependencies
                     for (Dependency dependency : entry.getValue()) {
-                        if (!dependency.getName().equals(annotatedEntityName) && !dependency.getType().equals(annotatedEntityType)) {
-                            for (Entity entity : entities) {
-                                int index = entity.getName().lastIndexOf("/");
-                                final String entityName = index > -1 ? entity.getName().substring(index + 1) : entity.getName();
-                                if (dependency.getName().equals(entityName) && dependency.getType().equals(entity.getType())) {
-                                    entityDependenciesList.add(entity);
-                                    break;
-                                }
+                        for (Entity entity : entities) {
+                            int index = entity.getName().lastIndexOf("/");
+                            final String entityName = index > -1 ? entity.getName().substring(index + 1) : entity.getName();
+                            if (dependency.getName().equals(entityName) && dependency.getType().equals(entity.getType())) {
+                                filteredEntityIds.add(entity.getId());
                             }
                         }
                     }
 
-                    //Add the parent entities
-                    final List<Entity> parentEntities = entities.stream().filter(entity -> policyNameWithPath.equals(entity.getName()) || annotatedEntityName.equals(entity.getName())).collect(Collectors.toList());
-                    entityDependenciesList.addAll(parentEntities);
+                    final List<Entity> filteredEntities = entities.stream().filter(entity -> filteredEntityIds.contains(entity.getId())).collect(Collectors.toList());
+                    entityDependenciesList.addAll(filteredEntities);
 
                     return entityDependenciesList;
                 }
@@ -135,16 +131,13 @@ public class BundleEntityBuilder {
         return entityDependenciesList;
     }
 
-    private void populateDependentFolders(List<Entity> entityDependenciesList, List<Entity> entities, GatewayEntity policyEntity) {
+    private void populateDependentFolders(Set<String> filteredEntityIds, GatewayEntity policyEntity) {
         if (policyEntity instanceof Folderable) {
             Folder folder = ((Folderable) policyEntity).getParentFolder();
-            final Set<String> folderIds = new HashSet<>();
             while (folder != null) {
-                folderIds.add(folder.getId());
+                filteredEntityIds.add(folder.getId());
                 folder = folder.getParentFolder();
             }
-            final List<Entity> folderDependencies = entities.stream().filter(e -> folderIds.contains(e.getId())).collect(Collectors.toList());
-            entityDependenciesList.addAll(folderDependencies);
         }
     }
 
@@ -157,9 +150,9 @@ public class BundleEntityBuilder {
      * @param projectVersion Project version
      * @return AnnotatedEntity
      */
-    private AnnotatedEntity createAnnotatedEntity(final Encass encass, final String projectName,
-                                                  final String projectVersion) {
-        AnnotatedEntity annotatedEntity = new AnnotatedEntity();
+    private AnnotatedEntity<Encass> createAnnotatedEntity(final Encass encass, final String projectName,
+                                                          final String projectVersion) {
+        AnnotatedEntity<Encass> annotatedEntity = new AnnotatedEntity<>(encass);
         encass.getAnnotations().forEach(annotation -> {
             switch (annotation.getType()) {
                 case ANNOTATION_TYPE_BUNDLE:

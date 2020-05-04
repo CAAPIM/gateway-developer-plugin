@@ -72,6 +72,10 @@ public class Encass extends GatewayEntity {
         this.properties = properties;
     }
 
+    public boolean hasAnnotated() {
+        return annotations != null && !annotations.isEmpty();
+    }
+
     public Set<Annotation> getAnnotations() {
         return annotations;
     }

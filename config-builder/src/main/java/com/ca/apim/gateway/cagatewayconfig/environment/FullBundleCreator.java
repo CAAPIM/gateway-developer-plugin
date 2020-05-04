@@ -126,10 +126,8 @@ public class FullBundleCreator {
             templatizedBundles.forEach(tb -> {
                 try {
                     final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
-                    copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document,
-                            referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
-                    copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document,
-                            mappingsElement, mapping -> {
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
                         final String key = buildBundleMappingKey(mapping);
                         return addedItems.contains(key) && addedMappings.add(key);
                     });

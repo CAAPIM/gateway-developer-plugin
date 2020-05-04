@@ -10,6 +10,8 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
@@ -48,8 +50,8 @@ class CassandraConnectionFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", CassandraConnection.class), new Dependency("3", CassandraConnection.class)),
-                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", CassandraConnection.class))));
+                        new Dependency("1", Policy.class, "my-policy", EntityTypes.POLICY_TYPE), Arrays.asList(new Dependency("2", CassandraConnection.class, "cassandra2", EntityTypes.CASSANDRA_CONNECTION_TYPE), new Dependency("3", CassandraConnection.class, "cassandra3", EntityTypes.CASSANDRA_CONNECTION_TYPE)),
+                        new Dependency("2", Policy.class, "policy2", EntityTypes.POLICY_TYPE), Collections.singletonList(new Dependency("4", CassandraConnection.class, "cassandra4", EntityTypes.CASSANDRA_CONNECTION_TYPE))));
         bundle.addEntity(TestUtils.createCassandraConnection("cassandra1", "1"));
         bundle.addEntity(TestUtils.createCassandraConnection("cassandra2", "2"));
         bundle.addEntity(TestUtils.createCassandraConnection("cassandra3", "3"));
