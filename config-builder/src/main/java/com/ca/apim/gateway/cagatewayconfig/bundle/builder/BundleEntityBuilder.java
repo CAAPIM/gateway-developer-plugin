@@ -43,35 +43,35 @@ public class BundleEntityBuilder {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
 
-        List<AnnotatedEntity> annotatedEntities = new ArrayList<>();
-        // Filter the bundle to export only annotated entities
-        // TODO : Enhance this logic to support services and policies
-        final Map<String, Encass> encassEntities = bundle.getEntities(Encass.class);
-        encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
-            Encass encass = encassEntry.getValue();
-            if (encass.getAnnotations() != null) {
-                annotatedEntities.add(createAnnotatedEntity(encass, bundleVersion, encassEntry.getKey()));
-            }
-        });
-
-        if (!annotatedEntities.isEmpty()) {
-            Map<String, Element> annotatedElements = new LinkedHashMap<>();
-            annotatedEntities.stream().forEach(annotatedEntity -> {
-                if (annotatedEntity.isBundleTypeEnabled()) {
-                    List<Entity> entityList = getEntityDependencies(annotatedEntity.getPolicyName(), entities, bundle);
-                    LOGGER.log(Level.FINE, "Entity list : " + entityList);
-                    // Create bundle
-                    final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
-                    annotatedElements.put(annotatedEntity.getBundleName(), annotatedBundle);
-                }
-            });
-
-            return annotatedElements;
+        Map<String, Element> artifacts = buildAnnotatedEntities(entities, bundle, bundleType, document, bundleName, bundleVersion);
+        if (artifacts.isEmpty()) {
+            artifacts.put(bundleName + '-' + bundleVersion, bundleDocumentBuilder.build(document, entities));
         }
 
-        Map<String, Element> artifacts = new HashMap<>();
-        artifacts.put(bundleName + '-' + bundleVersion, bundleDocumentBuilder.build(document, entities));
         return artifacts;
+    }
+
+    private Map<String, Element> buildAnnotatedEntities(List<Entity> entities, Bundle bundle, EntityBuilder.BundleType bundleType,
+                                                        Document document, String bundleName,
+                                                        String bundleVersion) {
+        Map<String, Element> annotatedElements = new LinkedHashMap<>();
+
+        // Filter the bundle to export only annotated entities
+        // TODO : Enhance this logic to support services and policies
+        bundle.getEntities(Encass.class).entrySet().stream()
+                .filter(entry -> entry.getValue().hasAnnotated())
+                .map(entry -> createAnnotatedEntity(entry.getValue(), bundleVersion, entry.getKey()))
+                .forEach(annotatedEntity -> {
+                    if (annotatedEntity.isBundleTypeEnabled()) {
+                        List<Entity> entityList = getEntityDependencies(annotatedEntity.getPolicyName(), entities, bundle);
+                        LOGGER.log(Level.FINE, "Entity list : " + entityList);
+                        // Create bundle
+                        final Element annotatedBundle = bundleDocumentBuilder.build(document, entityList);
+                        annotatedElements.put(annotatedEntity.getBundleName(), annotatedBundle);
+                    }
+                });
+
+        return annotatedElements;
     }
 
     private List<Entity> getEntityDependencies(String policyNameWithPath, List<Entity> entities, Bundle bundle) {
