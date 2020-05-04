@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -192,15 +193,20 @@ public class JsonTools {
     }
 
     private File getPoliciesConfigFile(final File rootDir) {
-        return new File(new File(rootDir, POLICY_DIR), POLICIES_CONFIG_FILE);
+        return new File(new File(rootDir, CONFIG_DIR), POLICIES_CONFIG_FILE);
     }
 
     public <T> Map<String, T> readPoliciesConfigFile(final File rootDir, Class<T> tClass) {
-        return readDocumentFile(getPoliciesConfigFile(rootDir),
-                getObjectMapper().getTypeFactory().constructMapType(HashMap.class, String.class, tClass));
+        final File file = getPoliciesConfigFile(rootDir);
+        return file.exists() ? readDocumentFile(getPoliciesConfigFile(rootDir),
+                getObjectMapper().getTypeFactory().constructMapType(HashMap.class, String.class, tClass)) : null;
     }
 
     public void writePoliciesConfigFile(Object object, final File rootDir) throws IOException {
+        if (!rootDir.getParentFile().exists()) {
+            Files.createDirectory(Paths.get(rootDir.getParentFile().getPath()));
+        }
+
         writeObject(object, getPoliciesConfigFile(rootDir));
     }
 }
