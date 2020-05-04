@@ -31,6 +31,7 @@ public class BundleMetadataBuilder {
                                 final List<Entity> dependentEntities, final String projectGroupName,
                                 final String projectVersion) {
         final Encass encass = (Encass) entity;
+
         final String name = annotatedEntity.getBundleName().substring(0,
                 annotatedEntity.getBundleName().indexOf(projectVersion) - 1);
 
@@ -49,7 +50,7 @@ public class BundleMetadataBuilder {
     }
 
     private Collection<Metadata> getEnvironmentDependenciesMetadata(final List<Entity> dependentEntities) {
-        return dependentEntities.parallelStream().filter(e -> !NON_ENV_ENTITY_TYPES.contains(e.getType()))
+        return dependentEntities.stream().filter(e -> !NON_ENV_ENTITY_TYPES.contains(e.getType()))
                         .map(Entity::getMetadata).collect(Collectors.toList());
     }
 }

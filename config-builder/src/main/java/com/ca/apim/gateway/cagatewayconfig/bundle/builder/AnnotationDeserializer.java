@@ -4,6 +4,18 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
+package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
+
+import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.IOException;
+import java.util.*;
+
 /**
  * AnnotationDeserializer deserializes the "annotations" tag in the entity elements. Annotation on entities are
  * supported in 2 ways:
@@ -25,31 +37,19 @@
  * This deserialization implementation takes care of both these types and deserializes the input into
  * {@link java.util.Set} of {@link com.ca.apim.gateway.cagatewayconfig.beans.Annotation}
  */
-package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
-
-import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-
-import java.io.IOException;
-import java.util.*;
-
 public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
 
     /**
      * Deserializes the input into set of annotations.
-     * @param p Parser
-     * @param ctxt Context
+     * @param parser JSON/YAML Parser
+     * @param context Context
      * @return Set of Annotations parsed from the input
      * @throws IOException if parser failed
      */
     @Override
-    public Set<Annotation> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        ObjectCodec oc = p.getCodec();
-        JsonNode node = oc.readTree(p);
+    public Set<Annotation> deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        ObjectCodec codec = parser.getCodec();
+        JsonNode node = codec.readTree(parser);
 
         if (node.isArray()) {
             final Set<Annotation> annotations = new HashSet<>();
