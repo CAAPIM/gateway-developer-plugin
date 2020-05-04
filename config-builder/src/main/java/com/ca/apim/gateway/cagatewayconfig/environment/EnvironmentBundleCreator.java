@@ -29,7 +29,6 @@ import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class EnvironmentBundleCreator {
-
     private final DocumentTools documentTools;
     private final DocumentFileUtils documentFileUtils;
     private final EnvironmentBundleBuilder environmentBundleBuilder;
@@ -66,8 +65,10 @@ public class EnvironmentBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
-        documentFileUtils.createFile(bundleElement, new File(bundleFolderPath, bundleFileName).toPath());
+        Map<String, Element> bundleElements = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, null);
+        for (Map.Entry<String, Element> entry : bundleElements.entrySet()) {
+            documentFileUtils.createFile(entry.getValue(), new File(bundleFolderPath, entry.getKey()).toPath());
+        }
         return environmentBundle;
     }
 

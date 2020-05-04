@@ -22,9 +22,9 @@ public class Entity {
 
     public Entity(String type, String name, String id, Element xml) {
         this.type = type;
+        this.name = name;
         this.id = id;
         this.xml = xml;
-        this.name = name;
     }
 
     public String getType() {
@@ -36,6 +36,9 @@ public class Entity {
     }
 
     public Element getXml() {
+        if(xml != null) {
+            return (Element) xml.cloneNode(true);
+        }
         return xml;
     }
 

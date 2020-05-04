@@ -6,12 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Named;
@@ -35,6 +37,8 @@ public class Encass extends GatewayEntity {
     private Set<EncassArgument> arguments;
     private Set<EncassResult> results;
     private Map<String, Object> properties;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
     @JsonIgnore
     private String guid;
     @JsonIgnore
@@ -64,6 +68,18 @@ public class Encass extends GatewayEntity {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    public boolean hasAnnotated() {
+        return annotations != null && !annotations.isEmpty();
+    }
+
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
     }
 
     public String getGuid() {
