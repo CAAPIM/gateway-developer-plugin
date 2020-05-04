@@ -18,7 +18,16 @@ public class AnnotatedEntity {
     private boolean isReusableType;
     private boolean isRedeployableType;
     private boolean isExcludeType;
+    private boolean reusableEntity;
     private Collection<String> tags;
+
+    public boolean isReusableEntity() {
+        return reusableEntity;
+    }
+
+    public void setReusableEntity(boolean reusableEntity) {
+        this.reusableEntity = reusableEntity;
+    }
 
     public void setEntityName(String entityName) {
         this.entityName = entityName;

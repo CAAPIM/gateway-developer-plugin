@@ -114,7 +114,7 @@ public class BundleEntityBuilder {
                 Encass encassEntity = encassMap.get(entity.getName());
                 Policy policyEntity = policyMap.get(entity.getName());
                 Set<Annotation> annotations = policyEntity != null ? policyEntity.getAnnotations() : encassEntity.getAnnotations();
-                if (annotations != null && annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE.equals(annotation.getType()))) {
+                if (annotations != null && annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType()))) {
                     bundleEntities.add(entity);
                 } else {
                     bundleEntities.add(getUniqueEntity(entity, annotatedEntity, encassMap, projectGroupName, projectVersion));
@@ -174,7 +174,7 @@ public class BundleEntityBuilder {
                     final String encassName = encassNameNode.getNodeValue();
                     final Encass encassEntity = encassMap.get(encassName);
                     Set<Annotation> annotations = encassEntity != null ? encassEntity.getAnnotations() : null;
-                    if (annotations == null || ! (annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE.equals(annotation.getType())))) {
+                    if (annotations == null || ! (annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
                         encassNameNode.setNodeValue(getUniqueName(projectName, projectVersion, annotatedEntity, encassName));
                     }
                 }
@@ -292,7 +292,11 @@ public class BundleEntityBuilder {
                     annotatedEntity.setPolicyName(encass.getPolicy());
                     break;
                 case ANNOTATION_TYPE_REUSABLE:
+                case ANNOTATION_TYPE_REUSABLE_BUNDLE:
                     annotatedEntity.setReusableType(true);
+                    break;
+                case ANNOTATION_TYPE_REUSABLE_ENTITY:
+                    annotatedEntity.setReusableEntity(true);
                     break;
                 case ANNOTATION_TYPE_REDEPLOYABLE:
                     annotatedEntity.setRedeployableType(true);
