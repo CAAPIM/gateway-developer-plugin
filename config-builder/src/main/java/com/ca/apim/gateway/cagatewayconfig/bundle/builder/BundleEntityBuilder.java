@@ -63,6 +63,7 @@ public class BundleEntityBuilder {
                 .map(entry -> createAnnotatedEntity(entry.getValue(), bundleVersion, entry.getKey()))
                 .forEach(annotatedEntity -> {
                     if (annotatedEntity.isBundleTypeEnabled()) {
+                        // buildEncassDependencies
                         List<Entity> entityList = getEntityDependencies(annotatedEntity.getPolicyName(), entities, bundle);
                         LOGGER.log(Level.FINE, "Entity list : " + entityList);
                         // Create bundle
@@ -72,6 +73,43 @@ public class BundleEntityBuilder {
                 });
 
         return annotatedElements;
+    }
+
+    private String getPolicyName(final String fullPath) {
+        final int index = fullPath.lastIndexOf("/");
+        return index > -1 ? fullPath.substring(index + 1) : fullPath;
+    }
+
+    private List<Entity> buildEncassDependencies(final AnnotatedEntity<Encass> annotatedEntity, final List<Entity> entities, final Bundle bundle) {
+        Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
+        Set<Entity> filteredEntities = new HashSet<>();
+
+        if (dependencyListMap != null) {
+            collectDependencies(filteredEntities, entities, bundle, new Dependency(getPolicyName(annotatedEntity.getEntity().getPolicy()), EntityTypes.POLICY_TYPE));
+        }
+
+        return new ArrayList<>(filteredEntities);
+    }
+
+    private void collectDependencies(final Set<Entity> filteredEntities, final List<Entity> entities, final Bundle bundle, Dependency dependency) {
+        Map<Dependency, List<Dependency>> dependencyListMap = bundle.getDependencyMap();
+        if (dependencyListMap != null) {
+            List<Dependency> dependencies = dependencyListMap.get(dependency);
+            if (dependencies != null) {
+                dependencies.forEach(dependencyItem -> {
+                    for (Entity entity : entities) {
+                        int index = entity.getName().lastIndexOf("/");
+                        final String entityName = index > -1 ? entity.getName().substring(index + 1) : entity.getName();
+                        if (dependencyItem.getName().equals(entityName) && dependencyItem.getEntityType().equals(entity.getType())) {
+                            filteredEntities.add(entity);
+                            // TODO: I expect to call collectDependencies recursively for every filtered entity.
+                            // collectDependencies(...)
+                            break;
+                        }
+                    }
+                });
+            }
+        }
     }
 
     private List<Entity> getEntityDependencies(String policyNameWithPath, List<Entity> entities, Bundle bundle) {
@@ -133,8 +171,8 @@ public class BundleEntityBuilder {
      * @param bundleVersion Bundle version
      * @return AnnotatedEntity
      */
-    private AnnotatedEntity createAnnotatedEntity(final Encass encass, final String bundleVersion, final String entityName) {
-        AnnotatedEntity annotatedEntity = new AnnotatedEntity();
+    private AnnotatedEntity<Encass> createAnnotatedEntity(final Encass encass, final String bundleVersion, final String entityName) {
+        AnnotatedEntity<Encass> annotatedEntity = new AnnotatedEntity<>(encass);
         encass.getAnnotations().forEach(annotation -> {
             switch (annotation.getType()) {
                 case ANNOTATION_TYPE_BUNDLE:

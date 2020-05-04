@@ -22,6 +22,11 @@ public class Dependency {
     private  String entityType;
     public Dependency(){
     }
+
+    public Dependency(String name, String type) {
+        this(null, null, name, type);
+    }
+
     public Dependency(String id, Class<? extends GatewayEntity> type){
         this(id, type, null, null);
     }

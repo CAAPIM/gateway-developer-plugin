@@ -8,7 +8,8 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import java.util.Collection;
 
-public class AnnotatedEntity {
+public class AnnotatedEntity<T> {
+    private final T entity;
     private String entityName;
     private String entityType;
     private String bundleName;
@@ -19,6 +20,10 @@ public class AnnotatedEntity {
     private boolean isRedeployableType;
     private boolean isExcludeType;
     private Collection<String> tags;
+
+    public AnnotatedEntity(T entity) {
+        this.entity = entity;
+    }
 
     public void setEntityName(String entityName) {
         this.entityName = entityName;
@@ -98,5 +103,9 @@ public class AnnotatedEntity {
 
     public void setTags(Collection<String> tags) {
         this.tags = tags;
+    }
+
+    T getEntity() {
+        return entity;
     }
 }
