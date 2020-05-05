@@ -73,19 +73,17 @@ public class BundleEntityBuilder {
                         entityList.add(foundEntity.get());
                     }
                 }
-                List<Entity> bundleEntities = renameNonReusableEntities(entityList, bundle, annotatedEntity, projectGroupName, projectVersion);
+                List<Entity> bundleEntities = renameNonReusableEntities(entityList, bundle, annotatedEntity, projectName, projectVersion);
                 // Create bundle and its metadata
                 final Element annotatedBundle = bundleDocumentBuilder.build(document, bundleEntities);
                 final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity,
                         bundleEntities, projectGroupName, projectVersion);
 
-                return ImmutablePair.of(annotatedBundle,
-                        bundleMetadata);
+                return ImmutablePair.of(annotatedBundle, bundleMetadata);
             }
             return null;
         } else {
-            return ImmutablePair.of(bundleDocumentBuilder.build(document,
-                    entities), null);
+            return ImmutablePair.of(bundleDocumentBuilder.build(document, entities), null);
         }
     }
 
@@ -171,6 +169,7 @@ public class BundleEntityBuilder {
         return policyElement;
     }
 
+    //returns name in the format <proejctName>-<bundleType>-<annotatedEntityName>-enityName-<projectVersion>
     private String getUniqueName(final String projectName, final String projectVersion, final AnnotatedEntity annotatedEntity,
                                                                                                        final String nameWithPath) {
         StringBuilder uniqueName = new StringBuilder(projectName);

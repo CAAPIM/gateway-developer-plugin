@@ -34,9 +34,6 @@ public class AnnotatedEntityCreator {
                         annotatedBundleName = projectName + "-" + encass.getName();
                     }
 
-                    if (StringUtils.isBlank(projectVersion)) {
-                        annotatedBundleName = annotatedBundleName + "-" + projectVersion;
-                    }
                     String description = annotation.getDescription();
                     if (StringUtils.isBlank(description)) {
                         description = encass.getProperties().getOrDefault("description", "").toString();
