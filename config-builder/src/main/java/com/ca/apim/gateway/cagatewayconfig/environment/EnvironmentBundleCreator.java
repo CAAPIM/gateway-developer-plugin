@@ -12,8 +12,9 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.FileTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -22,9 +23,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.processDeploymentBundles;
@@ -72,27 +71,8 @@ public class EnvironmentBundleCreator {
         final Document document = documentBuilder.newDocument();
 
         final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
-        final AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
-        // Filter the bundle to export only annotated entities
-        // TODO : Enhance this logic to support services and policies
-        environmentBundle.getEntities(Encass.class).values().stream()
-                .filter(Encass::hasAnnotated)
-                .map(encass -> annotatedEntityCreator.createAnnotatedEntity(encass, bundleFileName, null))
-                .forEach(annotatedEntity -> {
-                    if (annotatedEntity.isBundleTypeEnabled()) {
-                        // buildEncassDependencies
-                        final Pair<Element, BundleMetadata> bundleMetadataPair = bundleEntityBuilder.build(environmentBundle,
-                                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null, annotatedEntity);
-                        if(bundleMetadataPair != null){
-                            annotatedElements.put(annotatedEntity.getBundleName(), bundleMetadataPair);
-                        }
-                    }
-                });
-
-        if(annotatedElements.isEmpty()) {
-            annotatedElements.put(bundleFileName, bundleEntityBuilder.build(environmentBundle,
-                    EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null, null));
-        }
+        annotatedElements.put(bundleFileName, bundleEntityBuilder.build(environmentBundle,
+                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null, null));
 
         for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : annotatedElements.entrySet()) {
             Pair<Element, BundleMetadata> elementBundleMetadataPair = entry.getValue();

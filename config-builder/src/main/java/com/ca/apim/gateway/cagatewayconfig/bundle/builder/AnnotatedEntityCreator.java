@@ -33,7 +33,8 @@ public class AnnotatedEntityCreator {
                     if (StringUtils.isBlank(annotatedBundleName)) {
                         annotatedBundleName = projectName + "-" + encass.getName();
                     }
-                    if(StringUtils.isBlank(projectVersion)){
+
+                    if (StringUtils.isBlank(projectVersion)) {
                         annotatedBundleName = annotatedBundleName + "-" + projectVersion;
                     }
                     String description = annotation.getDescription();
@@ -45,7 +46,7 @@ public class AnnotatedEntityCreator {
                     annotatedEntity.setEntityName(encass.getName());
                     annotatedEntity.setDescription(description);
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                    annotatedEntity.setBundleName(annotatedBundleName);
+                    annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
                     annotatedEntity.setPolicyName(encass.getPolicy());
                     break;
                 case ANNOTATION_TYPE_REUSABLE:

@@ -8,16 +8,21 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,11 +36,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_EXCLUDE;
-
 @Singleton
-class BundleFileBuilder {
+public class BundleFileBuilder {
 
     private final DocumentFileUtils documentFileUtils;
     private final JsonFileUtils jsonFileUtils;
@@ -47,7 +49,7 @@ class BundleFileBuilder {
     private static final Logger LOGGER = Logger.getLogger(BundleFileBuilder.class.getName());
 
     @Inject
-    BundleFileBuilder(final DocumentTools documentTools,
+    public BundleFileBuilder(final DocumentTools documentTools,
                       final DocumentFileUtils documentFileUtils,
                       final JsonFileUtils jsonFileUtils,
                       final EntityLoaderRegistry entityLoaderRegistry,
@@ -61,7 +63,7 @@ class BundleFileBuilder {
         this.cache = cache;
     }
 
-    void buildBundle(File rootDir, File outputDir, List<File> dependencies, String projectName,
+    public void buildBundle(File rootDir, File outputDir, List<File> dependencies, String projectName,
                      String projectGroupName, String projectVersion) {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
