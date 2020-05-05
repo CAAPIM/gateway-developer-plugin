@@ -67,7 +67,9 @@ public class BundleEntityBuilder {
                 Optional<Entity> rootEntity = entityList.stream().filter(entity -> annotatedEntity.getEntityName().equals(entity.getName())).findFirst();
                 if(!rootEntity.isPresent()){
                     Optional<Entity> foundEntity = entities.stream().filter(entity -> annotatedEntity.getEntityName().equals(entity.getName())).findFirst();
-                    entityList.add(foundEntity.get());
+                    if(foundEntity.isPresent()) {
+                        entityList.add(foundEntity.get());
+                    }
                 }
                 List<Entity> bundleEntities = renameNonReusableEntities(entityList, bundle, annotatedEntity, projectGroupName, projectVersion);
                 // Create bundle and its metadata
