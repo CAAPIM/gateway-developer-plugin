@@ -31,9 +31,9 @@ public class AnnotatedEntityCreator {
                 case ANNOTATION_TYPE_BUNDLE:
                     String annotatedBundleName = annotation.getName();
                     if (StringUtils.isBlank(annotatedBundleName)) {
-                        annotatedBundleName = projectName + "." + encass.getName();
+                        annotatedBundleName = projectName + "-" + encass.getName();
                     }
-                    if(projectVersion != null){
+                    if(StringUtils.isBlank(projectVersion)){
                         annotatedBundleName = annotatedBundleName + "-" + projectVersion;
                     }
                     String description = annotation.getDescription();

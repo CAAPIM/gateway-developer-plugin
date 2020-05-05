@@ -43,6 +43,7 @@ public class BundleEntityBuilder {
     private final BundleMetadataBuilder bundleMetadataBuilder;
     private final DocumentTools documentTools;
 
+
     @Inject
     BundleEntityBuilder(final Set<EntityBuilder> entityBuilders, final BundleDocumentBuilder bundleDocumentBuilder,
                         final BundleMetadataBuilder bundleMetadataBuilder, final DocumentTools documentTools) {
@@ -59,15 +60,16 @@ public class BundleEntityBuilder {
                                                String projectGroupName, String projectVersion, AnnotatedEntity annotatedEntity) {
         List<Entity> entities = new ArrayList<>();
         entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
-        if(annotatedEntity != null){
+        if (annotatedEntity != null) {
             if (EntityBuilder.BundleType.DEPLOYMENT == bundleType) {
-
                 List<Entity> entityList = getEntityDependencies(annotatedEntity.getPolicyName(), entities, bundle);
                 LOGGER.log(Level.FINE, "Annotated entity list : " + entityList);
-                Optional<Entity> rootEntity = entityList.stream().filter(entity -> annotatedEntity.getEntityName().equals(entity.getName())).findFirst();
-                if(!rootEntity.isPresent()){
-                    Optional<Entity> foundEntity = entities.stream().filter(entity -> annotatedEntity.getEntityName().equals(entity.getName())).findFirst();
-                    if(foundEntity.isPresent()) {
+                Optional<Entity> rootEntity = entityList.stream().filter(entity -> annotatedEntity.getEntityName().equals(entity.getName())
+                                                                                            && annotatedEntity.getEntityType().equals(entity.getType())).findFirst();
+                if (!rootEntity.isPresent()) {
+                    Optional<Entity> foundEntity = entities.stream().filter(entity -> annotatedEntity.getEntityName().equals(entity.getName())
+                                                                                            && annotatedEntity.getEntityType().equals(entity.getType())).findFirst();
+                    if (foundEntity.isPresent()) {
                         entityList.add(foundEntity.get());
                     }
                 }
@@ -87,12 +89,13 @@ public class BundleEntityBuilder {
         }
     }
 
-    private List<Entity> renameNonReusableEntities(List<Entity> entityList, Bundle bundle, AnnotatedEntity annotatedEntity, String projectGroupName, String projectVersion) {
+    private List<Entity> renameNonReusableEntities(List<Entity> entityList, Bundle bundle, AnnotatedEntity annotatedEntity,
+                                                                                            String projectGroupName, String projectVersion) {
         List<Entity> bundleEntities = new ArrayList<>();
         final Map<String, Policy> policyMap = bundle.getPolicies();
         final Map<String, Encass> encassMap = bundle.getEncasses();
-        for(Entity entity : entityList){
-            if(EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(entity.getType()) || EntityTypes.POLICY_TYPE.equals(entity.getType())) {
+        for (Entity entity : entityList) {
+            if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(entity.getType()) || EntityTypes.POLICY_TYPE.equals(entity.getType())) {
                 Encass encassEntity = encassMap.get(entity.getName());
                 Policy policyEntity = policyMap.get(entity.getName());
                 Set<Annotation> annotations = policyEntity != null ? policyEntity.getAnnotations() : encassEntity.getAnnotations();
@@ -109,24 +112,26 @@ public class BundleEntityBuilder {
         return bundleEntities;
     }
 
-    private Entity getUniqueEntity(final Entity entity, final AnnotatedEntity annotatedEntity, final Map<String, Encass> encassMap, final String projectName, final String projectVersion) {
+    private Entity getUniqueEntity(final Entity entity, final AnnotatedEntity annotatedEntity, final Map<String, Encass> encassMap,
+                                                                                                 final String projectName, final String projectVersion) {
         final String nameWithPath = entity.getName();
         final String uniqueName = getUniqueName(projectName, projectVersion, annotatedEntity, nameWithPath);
         final String uniqueNameWithPath = PathUtils.extractPath(nameWithPath) + uniqueName;
         Element entityXml = null;
-        if(EntityTypes.POLICY_TYPE.equals(entity.getType())){
+        if (EntityTypes.POLICY_TYPE.equals(entity.getType())) {
             entityXml = getUniquePolicyXml(entity.getXml(), annotatedEntity, encassMap, projectName, projectVersion, uniqueName);
-        } else if(EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(entity.getType())){
-            entityXml = (Element) entity.getXml().cloneNode(true);
+        } else if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(entity.getType())) {
+            entityXml = (Element) entity.getXml();
             final Element nameElement = getSingleChildElement(entityXml, NAME);
             nameElement.setTextContent(uniqueName);
-        }  else {
+        } else {
             entityXml = entity.getXml();
         }
         return EntityBuilderHelper.getEntityWithMappings(entity.getType(), uniqueNameWithPath, entity.getId(), entityXml, MappingActions.NEW_OR_UPDATE, entity.getMappingProperties());
     }
 
-    private Element getUniquePolicyXml(final Element entityXml, final AnnotatedEntity annotatedEntity, final Map<String, Encass> encassMap, final String projectName, final String projectVersion, final String uniqueName) {
+    private Element getUniquePolicyXml(final Element entityXml, final AnnotatedEntity annotatedEntity, final Map<String, Encass> encassMap,
+                                                                             final String projectName, final String projectVersion, final String uniqueName) {
         Element policyElement = (Element) entityXml.cloneNode(true);
         final Element policyDetails = getSingleChildElement(policyElement, POLICY_DETAIL);
         Element nameElement = getSingleChildElement(policyDetails, NAME);
@@ -156,7 +161,7 @@ public class BundleEntityBuilder {
                     final String encassName = encassNameNode.getNodeValue();
                     final Encass encassEntity = encassMap.get(encassName);
                     Set<Annotation> annotations = encassEntity != null ? encassEntity.getAnnotations() : null;
-                    if (annotations == null || ! (annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
+                    if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
                         encassNameNode.setNodeValue(getUniqueName(projectName, projectVersion, annotatedEntity, encassName));
                     }
                 }
@@ -166,15 +171,16 @@ public class BundleEntityBuilder {
         return policyElement;
     }
 
-    private String getUniqueName(final String projectName, final String projectVersion, final AnnotatedEntity annotatedEntity, final String nameWithPath) {
+    private String getUniqueName(final String projectName, final String projectVersion, final AnnotatedEntity annotatedEntity,
+                                                                                                       final String nameWithPath) {
         StringBuilder uniqueName = new StringBuilder(projectName);
         uniqueName.append("-");
         if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(annotatedEntity.getEntityType())) {
-            uniqueName.append("encass");
+            uniqueName.append(BuilderConstants.ENCASS_TYPE);
         } else if (EntityTypes.SERVICE_TYPE.equals(annotatedEntity.getEntityType())) {
-            uniqueName.append("service");
+            uniqueName.append(BuilderConstants.SERVICE_TYPE);
         } else {
-            uniqueName.append("policy");
+            uniqueName.append(BuilderConstants.POLICY_TYPE);
         }
 
         uniqueName.append("-");

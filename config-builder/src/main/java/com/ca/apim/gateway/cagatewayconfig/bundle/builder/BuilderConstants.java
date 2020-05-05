@@ -11,6 +11,11 @@ public final class BuilderConstants {
 
     public static final String STORED_PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
 
+    public static final String ENCASS_TYPE="encass";
+    public static final String SERVICE_TYPE="service";
+    public static final String POLICY_TYPE="policy";
+
+
     private BuilderConstants(){
     }
 }
