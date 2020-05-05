@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
@@ -40,8 +41,8 @@ class ListenPortFilterTest {
         Bundle bundle = FilterTestUtils.getBundle();
         bundle.setDependencyMap(
                 ImmutableMap.of(
-                        new Dependency("1", Policy.class), Arrays.asList(new Dependency("2", ListenPort.class), new Dependency("3", ListenPort.class)),
-                        new Dependency("2", Policy.class), Collections.singletonList(new Dependency("4", ListenPort.class))));
+                        new Dependency("1", Policy.class, "my-policy", EntityTypes.POLICY_TYPE), Arrays.asList(new Dependency("2", ListenPort.class, "lp2", EntityTypes.LISTEN_PORT_TYPE), new Dependency("3", ListenPort.class, "lp3", EntityTypes.LISTEN_PORT_TYPE)),
+                        new Dependency("2", Policy.class, "my-policy2", EntityTypes.POLICY_TYPE), Collections.singletonList(new Dependency("4", ListenPort.class, "lp4", EntityTypes.LISTEN_PORT_TYPE))));
         bundle.addEntity(new ListenPort.Builder().name("lp1").id("1").build());
         bundle.addEntity(new ListenPort.Builder().name("lp2").id("2").build());
         bundle.addEntity(new ListenPort.Builder().name("lp3").id("3").build());

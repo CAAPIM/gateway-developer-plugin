@@ -4,6 +4,8 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Set;
 
@@ -18,9 +20,11 @@ public class PolicyMetadata {
     private String path;
     private String type;
     private String tag;
+    private String subtag;
     private Set<Dependency> usedEntities;
     @JsonDeserialize(using = AnnotationDeserializer.class)
     private Set<Annotation> annotations;
+
 
     public Set<Annotation> getAnnotations() {
         return annotations;
@@ -28,22 +32,6 @@ public class PolicyMetadata {
 
     public void setAnnotations(Set<Annotation> annotations) {
         this.annotations = annotations;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public Set<Dependency> getUsedEntities() {
@@ -70,9 +58,43 @@ public class PolicyMetadata {
         this.tag = tag;
     }
 
-    @JsonIgnore
-    public String getNameWithPath() {
-        return path == null || path.isEmpty() ? name : path + "/" + name;
+    public String getSubtag() {
+        return subtag;
     }
 
+    public void setSubtag(String subtag) {
+        this.subtag = subtag;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @JsonIgnore
+    public String getName() {
+        return name;
+    }
+
+    @JsonIgnore
+    public String getFullPath() {
+        return StringUtils.isEmpty(getPath()) ? getName() : PathUtils.unixPath(getPath(), getName());
+    }
+
+    public void setFullPath(final String fullPath) {
+        final int index = fullPath.lastIndexOf("/");
+        if (index != -1) {
+            setName(fullPath.substring(index + 1));
+            setPath(fullPath.substring(0, index));
+        } else {
+            setName(fullPath);
+        }
+    }
 }

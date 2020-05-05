@@ -70,10 +70,10 @@ class BundleEntityBuilderTest {
                 new BundleDocumentBuilder(), new BundleMetadataBuilder(), DocumentTools.INSTANCE);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
         AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
-        Pair<AnnotatedEntity, Encass> pair = ImmutablePair.of(annotatedEntityCreator.createEntity("projectName", "1.0.0", encass),
+        Pair<AnnotatedEntity, Encass> pair = ImmutablePair.of(annotatedEntityCreator.createAnnotatedEntity(encass, "projectName", "1.0.0"),
                 encass);
         final Pair<Element, BundleMetadata> bundle = builder.build(new Bundle(), BundleType.DEPLOYMENT,
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "test-bundle","test-bundle-group", "1.0.0", pair);
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle","my-bundle-group", "1.0.0", pair.getLeft());
         assertNotNull(bundle);
     }
 
@@ -86,11 +86,11 @@ class BundleEntityBuilderTest {
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
-        Pair<AnnotatedEntity, Encass> pair = ImmutablePair.of(annotatedEntityCreator.createEntity("my-bundle", "1.0", encass),
+        Pair<AnnotatedEntity, Encass> pair = ImmutablePair.of(annotatedEntityCreator.createAnnotatedEntity(encass, "my-bundle", "1.0"),
                 encass);
 
         Pair<Element, BundleMetadata> bundleEntry = builder.build(bundle, BundleType.DEPLOYMENT,
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0", pair);
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0", pair.getLeft());
         assertNotNull(bundleEntry);
         final Element element = bundleEntry.getLeft();
         assertNotNull(element);
@@ -151,11 +151,11 @@ class BundleEntityBuilderTest {
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
         AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
-        Pair<AnnotatedEntity, Encass> pair = ImmutablePair.of(annotatedEntityCreator.createEntity("my-bundle", "1.0", encass),
+        Pair<AnnotatedEntity, Encass> pair = ImmutablePair.of(annotatedEntityCreator.createAnnotatedEntity(encass,"my-bundle", "1.0"),
                 encass);
 
         Pair<Element, BundleMetadata> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0", pair);
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0", pair.getLeft());
         assertNotNull(bundles);
         BundleMetadata metadata = bundles.getRight();
         assertNotNull(metadata);
@@ -183,10 +183,10 @@ class BundleEntityBuilderTest {
         });
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
         AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
-        Pair<AnnotatedEntity, Encass> pair = ImmutablePair.of(annotatedEntityCreator.createEntity("my-bundle", "1.0", encass),
+        Pair<AnnotatedEntity, Encass> pair = ImmutablePair.of(annotatedEntityCreator.createAnnotatedEntity(encass, "my-bundle", "1.0"),
                 encass);
         Pair<Element, BundleMetadata> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0", pair);
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0", pair.getLeft());
         assertNotNull(bundles);
         BundleMetadata metadata = bundles.getRight();
         assertNotNull(metadata);
@@ -326,8 +326,6 @@ class BundleEntityBuilderTest {
 
         return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), DocumentTools.INSTANCE);
     }
-
-
 
     private static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath) {
         Encass encass = new Encass();

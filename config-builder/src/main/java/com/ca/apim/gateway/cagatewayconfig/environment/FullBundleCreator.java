@@ -111,36 +111,33 @@ public class FullBundleCreator {
         // generate the environment bundle
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
-        //ToDo : Need to handle bundle name, Project GroupName and version properly
-        List<Pair<AnnotatedEntity, Encass>> annotatedEntities = new ArrayList<>();
 
+
+        final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
+        final AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
         // Filter the bundle to export only annotated entities
         // TODO : Enhance this logic to support services and policies
-        final Map<String, Encass> encassEntities = environmentBundle.getEntities(Encass.class);
-        final AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
-        encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
-            Encass encass = encassEntry.getValue();
-            if (encass.getAnnotations() != null) {
-                annotatedEntities.add(ImmutablePair.of(annotatedEntityCreator.createEntity("", "", encass),
-                        encass));
-            }
-        });
-        final Map<String, Pair<Element, BundleMetadata>> bundleElements = new LinkedHashMap<>();
-        if(!annotatedEntities.isEmpty()) {
-            annotatedEntities.stream().forEach(annotatedEntityPair -> {
-                if (annotatedEntityPair.getLeft().isBundleTypeEnabled()) {
-                    final Pair<Element, BundleMetadata> bundleMetadataPair = bundleEntityBuilder.build(environmentBundle,
-                            EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", "", annotatedEntityPair);
-                    bundleElements.put(annotatedEntityPair.getKey().getBundleName(), bundleMetadataPair);
-                }
-            });
-        } else {
-            bundleElements.put("" + '-' + "", bundleEntityBuilder.build(environmentBundle,
-                    EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", "", null));
+        environmentBundle.getEntities(Encass.class).values().stream()
+                .filter(Encass::hasAnnotated)
+                .map(encass -> annotatedEntityCreator.createAnnotatedEntity(encass, bundleFileName, null))
+                .forEach(annotatedEntity -> {
+                    if (annotatedEntity.isBundleTypeEnabled()) {
+                        // buildEncassDependencies
+                        final Pair<Element, BundleMetadata> bundleMetadataPair = bundleEntityBuilder.build(environmentBundle,
+                                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null, annotatedEntity);
+                        if(bundleMetadataPair != null){
+                            annotatedElements.put(annotatedEntity.getBundleName(), bundleMetadataPair);
+                        }
+                    }
+                });
+
+        if(annotatedElements.isEmpty()) {
+            annotatedElements.put(bundleFileName, bundleEntityBuilder.build(environmentBundle,
+                    EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null, null));
         }
 
         Element bundleElement = null;
-        for(Map.Entry<String, Pair<Element, BundleMetadata>> entry: bundleElements.entrySet()) {
+        for(Map.Entry<String, Pair<Element, BundleMetadata>> entry: annotatedElements.entrySet()) {
             // generate the environment bundle
             bundleElement = entry.getValue().getLeft();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
@@ -154,10 +151,8 @@ public class FullBundleCreator {
             templatizedBundles.forEach(tb -> {
                 try {
                     final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
-                    copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document,
-                            referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
-                    copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document,
-                            mappingsElement, mapping -> {
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
                         final String key = buildBundleMappingKey(mapping);
                         return addedItems.contains(key) && addedMappings.add(key);
                     });

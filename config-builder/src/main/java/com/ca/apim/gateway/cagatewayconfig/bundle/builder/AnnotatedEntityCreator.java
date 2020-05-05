@@ -18,21 +18,23 @@ public class AnnotatedEntityCreator {
      * Creates AnnotatedEntity object by scanning all the annotations and gathering all the information required to
      * generate the bundle and its metadata.
      *
+     * @param encass Encapsulated assertion
      * @param projectName Project name
      * @param projectVersion Project version
-     * @param  encass Encass entity
      * @return AnnotatedEntity
      */
-    public AnnotatedEntity createEntity(final String projectName,
-                                        final String projectVersion, final Encass encass) {
-        AnnotatedEntity annotatedEntity = new AnnotatedEntity();
-        Set<Annotation> annotations =  encass.getAnnotations();
-        annotations.forEach(annotation -> {
+    public AnnotatedEntity<Encass> createAnnotatedEntity(final Encass encass, final String projectName,
+                                                          final String projectVersion) {
+        AnnotatedEntity<Encass> annotatedEntity = new AnnotatedEntity<>(encass);
+        encass.getAnnotations().forEach(annotation -> {
             switch (annotation.getType()) {
                 case ANNOTATION_TYPE_BUNDLE:
                     String annotatedBundleName = annotation.getName();
                     if (StringUtils.isBlank(annotatedBundleName)) {
                         annotatedBundleName = projectName + "." + encass.getName();
+                    }
+                    if(projectVersion != null){
+                        annotatedBundleName = annotatedBundleName + "-" + projectVersion;
                     }
                     String description = annotation.getDescription();
                     if (StringUtils.isBlank(description)) {
@@ -43,7 +45,7 @@ public class AnnotatedEntityCreator {
                     annotatedEntity.setEntityName(encass.getName());
                     annotatedEntity.setDescription(description);
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                    annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
+                    annotatedEntity.setBundleName(annotatedBundleName);
                     annotatedEntity.setPolicyName(encass.getPolicy());
                     break;
                 case ANNOTATION_TYPE_REUSABLE:

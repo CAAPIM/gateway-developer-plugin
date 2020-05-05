@@ -45,6 +45,8 @@ public class Policy extends Folderable {
     private final Set<Policy> dependencies = new HashSet<>();
     private String tag;
     @JsonIgnore
+    private String subtag;
+    @JsonIgnore
     private PolicyType policyType;
 
     public Policy() {}
@@ -55,6 +57,7 @@ public class Policy extends Folderable {
         this.guid = builder.guid;
         this.policyXML = builder.policy;
         this.tag = builder.tag;
+        this.subtag = builder.subtag;
         setParentFolder(builder.parentFolderId != null ? new Folder(builder.parentFolderId, null) : null);
     }
 
@@ -94,6 +97,14 @@ public class Policy extends Folderable {
         this.tag = tag;
     }
 
+    public String getSubtag() {
+        return subtag;
+    }
+
+    public void setSubtag(String subtag) {
+        this.subtag = subtag;
+    }
+
     public PolicyType getPolicyType() {
         return policyType;
     }
@@ -131,6 +142,7 @@ public class Policy extends Folderable {
         private String guid;
         private String policy;
         private String tag;
+        private String subtag;
         private String parentFolderId;
 
         public Builder setName(String name) {
@@ -155,6 +167,11 @@ public class Policy extends Folderable {
 
         public Builder setTag(String tag) {
             this.tag = tag;
+            return this;
+        }
+
+        public Builder setSubtag(String subtag) {
+            this.subtag = subtag;
             return this;
         }
 

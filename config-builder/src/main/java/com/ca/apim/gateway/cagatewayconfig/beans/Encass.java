@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -71,6 +72,10 @@ public class Encass extends GatewayEntity {
         this.properties = properties;
     }
 
+    public boolean hasAnnotated() {
+        return annotations != null && !annotations.isEmpty();
+    }
+
     public Set<Annotation> getAnnotations() {
         return annotations;
     }
@@ -114,6 +119,7 @@ public class Encass extends GatewayEntity {
     @Override
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
+        setId(idGenerator.generate());
         setName(entityKey);
     }
 
@@ -128,7 +134,7 @@ public class Encass extends GatewayEntity {
         return new Metadata() {
             @Override
             public String getType() {
-                return "ENCAPSULATED_ASSERTION";
+                return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
             }
 
             @Override

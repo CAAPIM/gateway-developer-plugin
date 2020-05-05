@@ -89,36 +89,30 @@ class BundleFileBuilder {
         }
 
         //Zip
-        List<Pair<AnnotatedEntity, Encass>> annotatedEntities = new ArrayList<>();
-
+        final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
+        final AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
         // Filter the bundle to export only annotated entities
         // TODO : Enhance this logic to support services and policies
-        final Map<String, Encass> encassEntities = bundle.getEntities(Encass.class);
-        final AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
-        encassEntities.entrySet().parallelStream().forEach(encassEntry -> {
-            Encass encass = encassEntry.getValue();
-            if (encass.getAnnotations() != null) {
-                annotatedEntities.add(ImmutablePair.of(annotatedEntityCreator.createEntity(projectName, projectVersion, encass),
-                        encass));
-            }
-        });
-        final Map<String, Pair<Element, BundleMetadata>> bundles = new LinkedHashMap<>();
-        if(!annotatedEntities.isEmpty()) {
-            annotatedEntities.stream().forEach(annotatedEntityPair -> {
-                if (annotatedEntityPair.getLeft().isBundleTypeEnabled()) {
-                    final Pair<Element, BundleMetadata> bundleMetadataPair = bundleEntityBuilder.build(bundle,
-                            EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion, annotatedEntityPair);
-                    if(bundleMetadataPair != null){
-                        bundles.put(annotatedEntityPair.getKey().getBundleName(), bundleMetadataPair);
+        bundle.getEntities(Encass.class).values().stream()
+                .filter(Encass::hasAnnotated)
+                .map(encass -> annotatedEntityCreator.createAnnotatedEntity(encass, projectName, projectVersion))
+                .forEach(annotatedEntity -> {
+                    if (annotatedEntity.isBundleTypeEnabled()) {
+                        // buildEncassDependencies
+                        final Pair<Element, BundleMetadata> bundleMetadataPair = bundleEntityBuilder.build(bundle,
+                                EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion, annotatedEntity);
+                        if(bundleMetadataPair != null){
+                            annotatedElements.put(annotatedEntity.getBundleName(), bundleMetadataPair);
+                        }
                     }
-                }
-            });
-        } else {
-            bundles.put(projectName + '-' + projectVersion, bundleEntityBuilder.build(bundle,
+                });
+
+        if(annotatedElements.isEmpty()) {
+            annotatedElements.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion, bundleEntityBuilder.build(bundle,
                     EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion, null));
         }
 
-        for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundles.entrySet()) {
+        for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : annotatedElements.entrySet()) {
             Pair<Element, BundleMetadata> elementBundleMetadataPair = entry.getValue();
             if(elementBundleMetadataPair != null) {
                 documentFileUtils.createFile(elementBundleMetadataPair.getLeft(),
@@ -137,6 +131,4 @@ class BundleFileBuilder {
             })
         );
     }
-
-
 }
