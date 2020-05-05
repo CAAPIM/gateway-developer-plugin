@@ -159,7 +159,7 @@ public class BundleEntityBuilder {
                 case ANNOTATION_TYPE_BUNDLE:
                     String annotatedBundleName = annotation.getName();
                     if (StringUtils.isBlank(annotatedBundleName)) {
-                        annotatedBundleName = projectName + "." + encass.getName();
+                        annotatedBundleName = projectName + "-" + encass.getName();
                     }
                     String description = annotation.getDescription();
                     if (StringUtils.isBlank(description)) {

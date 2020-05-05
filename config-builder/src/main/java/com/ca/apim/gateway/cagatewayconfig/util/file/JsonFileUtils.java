@@ -20,7 +20,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.closeQuiet
 
 public class JsonFileUtils {
 
-    private static final String METADATA_FILE_NAME_SUFFIX = ".metadata" + JsonTools.INSTANCE.getFileExtension();
+    public static final String METADATA_FILE_NAME_SUFFIX = ".metadata" + JsonTools.INSTANCE.getFileExtension();
     private static final String CONFIG_DIR = "config";
     private static final String POLICIES_CONFIG_FILE = "policies" + JsonTools.INSTANCE.getFileExtension();
 

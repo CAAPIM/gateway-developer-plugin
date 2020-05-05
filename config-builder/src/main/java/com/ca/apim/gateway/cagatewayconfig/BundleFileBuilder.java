@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Singleton
-class BundleFileBuilder {
+public class BundleFileBuilder {
 
     private final DocumentFileUtils documentFileUtils;
     private final JsonFileUtils jsonFileUtils;
@@ -49,7 +49,7 @@ class BundleFileBuilder {
     private static final Logger LOGGER = Logger.getLogger(BundleFileBuilder.class.getName());
 
     @Inject
-    BundleFileBuilder(final DocumentTools documentTools,
+    public BundleFileBuilder(final DocumentTools documentTools,
                       final DocumentFileUtils documentFileUtils,
                       final JsonFileUtils jsonFileUtils,
                       final EntityLoaderRegistry entityLoaderRegistry,
@@ -63,7 +63,7 @@ class BundleFileBuilder {
         this.cache = cache;
     }
 
-    void buildBundle(File rootDir, File outputDir, List<File> dependencies, String projectName,
+    public void buildBundle(File rootDir, File outputDir, List<File> dependencies, String projectName,
                      String projectGroupName, String projectVersion) {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
