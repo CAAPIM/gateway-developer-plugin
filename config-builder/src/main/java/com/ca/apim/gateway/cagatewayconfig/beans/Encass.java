@@ -6,10 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -117,11 +119,36 @@ public class Encass extends GatewayEntity {
     @Override
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
+        setName(entityKey);
     }
 
     @Override
     public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
         sortArgumentsAndResults();
+    }
+
+    @JsonIgnore
+    @Override
+    public Metadata getMetadata() {
+        return new Metadata() {
+            @Override
+            public String getType() {
+                return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
+            }
+
+            @Override
+            public String getName() {
+                return Encass.this.getName();
+            }
+
+            public Set<EncassArgument> getArguments() {
+                return Encass.this.getArguments();
+            }
+
+            public Set<EncassResult> getResults() {
+                return Encass.this.getResults();
+            }
+        };
     }
 
     @VisibleForTesting

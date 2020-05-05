@@ -8,12 +8,12 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Objects;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-
-@JsonInclude(NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({"type", "name"})
 public class Dependency {
     @JsonIgnore
     private String id;
@@ -28,7 +28,6 @@ public class Dependency {
     public Dependency(String name, String type) {
         this(null, null, name, type);
     }
-
 
     public Dependency(String id, Class<? extends GatewayEntity> typeClass) {
         this(id, typeClass, null, null);

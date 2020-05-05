@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.json;
 
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtilsException;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
@@ -19,8 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,20 +29,18 @@ import java.util.logging.Logger;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY;
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_DOC_START_MARKER;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public class JsonTools {
     private static final Logger LOGGER = Logger.getLogger(JsonTools.class.getName());
     public static final JsonTools INSTANCE = new JsonTools(FileUtils.INSTANCE);
 
-    private static final String CONFIG_DIR = "config";
-    private static final String POLICY_DIR = "policy";
     public static final String JSON = "json";
     public static final String YAML = "yaml";
     public static final String JSON_EXTENSION = "json";
     public static final String YML_EXTENSION = "yml";
     private static final String YAML_EXTENSION = "yaml";
-    private static final String POLICIES_CONFIG_FILE = "policies." + YML_EXTENSION;
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
     private final FileUtils fileUtils;
     private String outputType;
@@ -163,7 +161,6 @@ public class JsonTools {
         return fileExtension;
     }
 
-
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {
         ObjectMapper objectMapper = new ObjectMapper(jf);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -184,29 +181,12 @@ public class JsonTools {
         return objectMapper;
     }
 
-    public void writeObject(Object object, File file) throws IOException {
+    public void writeObject(final Object object, OutputStream outputStream) {
         ObjectWriter objectWriter = getObjectWriter();
-        try (OutputStream fileStream = Files.newOutputStream(file.toPath())) {
-            objectWriter.writeValue(fileStream, object);
+        try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, UTF_8)) {
+            objectWriter.writeValue(writer, object);
         } catch (IOException e) {
-            throw e;
+            throw new JsonFileUtilsException("Exception writing " + this.outputType + " to stream.", e);
         }
-    }
-
-    private File getPoliciesConfigFile(final File rootDir) {
-        return new File(new File(rootDir, CONFIG_DIR), POLICIES_CONFIG_FILE);
-    }
-
-    public <T> Map<String, T> readPoliciesConfigFile(final File rootDir, Class<T> tClass) {
-        final File file = getPoliciesConfigFile(rootDir);
-        return file.exists() ? readDocumentFile(getPoliciesConfigFile(rootDir),
-                getObjectMapper().getTypeFactory().constructMapType(HashMap.class, String.class, tClass)) : null;
-    }
-
-    public void writePoliciesConfigFile(Object object, final File rootDir) throws IOException {
-        File configFolder = new File(rootDir, CONFIG_DIR);
-        DocumentFileUtils documentFileUtils = DocumentFileUtils.INSTANCE;
-        documentFileUtils.createFolder(configFolder.toPath());
-        writeObject(object, getPoliciesConfigFile(rootDir));
     }
 }

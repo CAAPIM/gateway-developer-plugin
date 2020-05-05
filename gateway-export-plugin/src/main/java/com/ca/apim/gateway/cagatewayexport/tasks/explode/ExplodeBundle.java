@@ -65,7 +65,7 @@ public class ExplodeBundle {
         Bundle filteredBundle = bundleFilter.filter(folderPath, filterConfiguration, bundle);
         //Link, simplify and process entities
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
-        entityLinkers.parallelStream().forEach(e -> e.link(filteredBundle, bundle, explodeDirectory));
+        entityLinkers.forEach(e -> e.link(filteredBundle, bundle, explodeDirectory));
 
         //write the bundle in the exploded format
         final Collection<EntityWriter> entityBuilders = entityWriterRegistry.getEntityWriters();

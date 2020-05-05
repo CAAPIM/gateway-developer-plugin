@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.w3c.dom.Element;
 
 import java.util.HashMap;
@@ -60,5 +61,20 @@ public class Entity {
 
     void setMappingAction(String mappingAction) {
         this.mappingAction = mappingAction;
+    }
+
+    @JsonIgnore
+    public Metadata getMetadata() {
+        return new Metadata() {
+            @Override
+            public String getType() {
+                return type;
+            }
+
+            @Override
+            public String getName() {
+                return name;
+            }
+        };
     }
 }

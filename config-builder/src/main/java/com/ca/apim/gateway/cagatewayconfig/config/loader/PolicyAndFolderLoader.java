@@ -12,7 +12,10 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterR
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapType;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,14 +31,15 @@ public class PolicyAndFolderLoader implements EntityLoader {
     private final PolicyConverterRegistry policyConverterRegistry;
     private final FileUtils fileUtils;
     private final IdGenerator idGenerator;
-    private final JsonTools jsonTools;
+    private final JsonFileUtils jsonFileUtils;
 
     @Inject
-    PolicyAndFolderLoader(PolicyConverterRegistry policyConverterRegistry, FileUtils fileUtils, IdGenerator idGenerator, JsonTools jsonTools) {
+    PolicyAndFolderLoader(PolicyConverterRegistry policyConverterRegistry, FileUtils fileUtils,
+                          IdGenerator idGenerator, JsonFileUtils jsonFileUtils) {
         this.policyConverterRegistry = policyConverterRegistry;
         this.fileUtils = fileUtils;
         this.idGenerator = idGenerator;
-        this.jsonTools = jsonTools;
+        this.jsonFileUtils = jsonFileUtils;
     }
 
     @Override
@@ -50,7 +54,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
     }
 
     private void loadPoliciesMetadata(final File rootDir, final Map<String, Policy> policies, final Bundle bundle) {
-        final Map<String, PolicyMetadata> policyMetadataMap = jsonTools.readPoliciesConfigFile(rootDir, PolicyMetadata.class);
+        final Map<String, PolicyMetadata> policyMetadataMap = jsonFileUtils.readPoliciesConfigFile(rootDir, PolicyMetadata.class);
         final Map<Dependency, List<Dependency>> policyDependencyMap = new HashMap<>();
 
         if (policyMetadataMap != null) {

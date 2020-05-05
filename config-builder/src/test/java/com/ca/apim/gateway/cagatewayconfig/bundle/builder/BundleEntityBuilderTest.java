@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleTy
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -46,9 +47,11 @@ class BundleEntityBuilderTest {
     // This class is covered by testing others, so a simple testing is enough here.
     @Test
     void build() {
-        BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()), new BundleDocumentBuilder());
+        BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()),
+                new BundleDocumentBuilder(), new BundleMetadataBuilder());
 
-        final Map<String, Element> element = builder.build(new Bundle(), BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "1.0");
+        final Map<String, Pair<Element, BundleMetadata>> element = builder.build(new Bundle(), BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
         assertNotNull(element);
     }
 
@@ -108,13 +111,14 @@ class BundleEntityBuilderTest {
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
 
-        BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder());
-        Map<String, Element> bundles = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "1.0");
+        BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder());
+        Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        for (Map.Entry<String, Element> bundleEntry : bundles.entrySet()) {
+        for (Map.Entry<String, Pair<Element, BundleMetadata>> bundleEntry : bundles.entrySet()) {
             assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-" + "1.0", bundleEntry.getKey());
-            final Element element = bundleEntry.getValue();
+            final Element element = bundleEntry.getValue().getLeft();
             assertNotNull(element);
             assertEquals(BundleDocumentBuilder.GATEWAY_MANAGEMENT, element.getAttribute(BundleDocumentBuilder.L7));
             assertEquals(BUNDLE, element.getTagName());

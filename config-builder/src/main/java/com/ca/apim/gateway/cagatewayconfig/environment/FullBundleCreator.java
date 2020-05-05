@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
@@ -16,9 +17,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -109,13 +108,13 @@ public class FullBundleCreator {
         // generate the environment bundle
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
-        //ToDo : Need to handle bundle name and version properly
-        Map<String, Element> bundleElements = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "");
-        Set<Map.Entry<String, Element>> entrySet =  bundleElements.entrySet();
+        //ToDo : Need to handle bundle name, Project GroupName and version properly
+        Map<String, Pair<Element, BundleMetadata>> bundleElements = bundleEntityBuilder.build(environmentBundle,
+                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", "");
         Element bundleElement = null;
-        for(Map.Entry<String, Element> entry: entrySet) {
+        for(Map.Entry<String, Pair<Element, BundleMetadata>> entry: bundleElements.entrySet()) {
             // generate the environment bundle
-            bundleElement = entry.getValue();
+            bundleElement = entry.getValue().getLeft();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
             Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
 

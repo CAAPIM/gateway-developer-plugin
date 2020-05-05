@@ -95,7 +95,8 @@ public class EncassLoader implements BundleEntityLoader {
             String argumentName = getSingleChildElementTextContent(encassArgElement, ARGUMENT_NAME);
             String argumentType = getSingleChildElementTextContent(encassArgElement, ARGUMENT_TYPE);
             Boolean guiPrompt = Boolean.parseBoolean(getSingleChildElementTextContent(encassArgElement, GUI_PROMPT));
-            encassArguments.add(new EncassArgument(argumentName, argumentType, guiPrompt));
+            String guiLabel = getSingleChildElementTextContent(encassArgElement, GUI_LABEL);
+            encassArguments.add(new EncassArgument(argumentName, argumentType, guiPrompt, guiLabel));
         }
         return encassArguments;
     }
