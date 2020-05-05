@@ -119,11 +119,9 @@ public class BundleEntityBuilder {
                 case ANNOTATION_TYPE_BUNDLE:
                     String annotatedBundleName = annotation.getName();
                     if (StringUtils.isBlank(annotatedBundleName)) {
-                        annotatedBundleName = projectName + "." + encass.getName();
+                        annotatedBundleName = projectName + "-" + encass.getName();
                     }
-                    if(projectVersion != null){
-                        annotatedBundleName = annotatedBundleName + "-" + projectVersion;
-                    }
+
                     String description = annotation.getDescription();
                     if (StringUtils.isBlank(description)) {
                         description = encass.getProperties().getOrDefault("description", "").toString();
@@ -133,8 +131,10 @@ public class BundleEntityBuilder {
                     annotatedEntity.setEntityName(encass.getName());
                     annotatedEntity.setDescription(description);
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                    annotatedEntity.setBundleName(annotatedBundleName);
+                    annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
                     annotatedEntity.setPolicyName(encass.getPolicy());
+                    annotatedEntity.setUniquePrefix(projectName + "-encass-" + PathUtils.extractName(encass.getName()) + "-");
+                    annotatedEntity.setUniqueSuffix("-" + projectVersion);
                     break;
                 case ANNOTATION_TYPE_REUSABLE:
                 case ANNOTATION_TYPE_REUSABLE_BUNDLE:

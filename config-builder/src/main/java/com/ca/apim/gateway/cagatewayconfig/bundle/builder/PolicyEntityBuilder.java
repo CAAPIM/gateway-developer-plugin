@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -91,7 +92,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getPolicies(), bundle, bundleType, document);
+        return buildEntities(bundle.getPolicies(), null, bundle, bundleType, document);
     }
 
     @NotNull
@@ -338,21 +339,27 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
     @VisibleForTesting
     Entity buildPolicyEntity(Policy policy, AnnotatedEntity annotatedEntity, Bundle bundle, Document document) {
-        Set<Annotation> annotations = policy.getAnnotations();
         boolean reusableEntity = true;
-        if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
-            reusableEntity = false;
-            policy.setId(idGenerator.generate());
-            policy.setGuid(idGenerator.generateGuid());
+        if (annotatedEntity != null) {
+            Set<Annotation> annotations = policy.getAnnotations();
+            if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
+                reusableEntity = false;
+                policy.setId(idGenerator.generate());
+                policy.setGuid(idGenerator.generateGuid());
+            }
         }
+
         String id = policy.getId();
         PolicyTags policyTags = getPolicyTags(policy, bundle);
+        final String policyName = getPolicyName(reusableEntity, policy.getName(), annotatedEntity);
+        policy.setName(policyName);
+        policy.setPath(policyName);
 
         Element policyDetailElement = createElementWithAttributesAndChildren(
                 document,
                 POLICY_DETAIL,
                 ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_GUID, policy.getGuid(), ATTRIBUTE_FOLDER_ID, policy.getParentFolder().getId()),
-                createElementWithTextContent(document, NAME, policy.getName()),
+                createElementWithTextContent(document, NAME, policyName),
                 createElementWithTextContent(document, POLICY_TYPE, policyTags == null ? PolicyType.INCLUDE.getType() : policyTags.type.getType())
         );
 
@@ -378,7 +385,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Element resourcesElement = document.createElement(RESOURCES);
         Element resourceSetElement = createElementWithAttribute(document, RESOURCE_SET, PROPERTY_TAG, POLICY);
         Element resourceElement = createElementWithAttribute(document, RESOURCE, TYPE, POLICY);
-        resourceElement.setTextContent(documentTools.elementToString(policy.getPolicyDocument()));
+        Element policyDocument = getPolicyDocument(policy, annotatedEntity, reusableEntity);
+        resourceElement.setTextContent(documentTools.elementToString(policyDocument));
 
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
@@ -388,6 +396,42 @@ public class PolicyEntityBuilder implements EntityBuilder {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         }
         return entity;
+    }
+
+    private String getPolicyName(boolean reusableEntity, String nameWithPath, AnnotatedEntity annotatedEntity) {
+        if (reusableEntity) {
+            return nameWithPath;
+        }
+        final String policyName = PathUtils.extractName(nameWithPath);
+        final String uniqueNameWithPath = PathUtils.extractPath(nameWithPath) + annotatedEntity.getUniquePrefix()
+                                                                            + policyName + annotatedEntity.getUniqueSuffix();
+        return uniqueNameWithPath;
+    }
+
+    private Element getPolicyDocument(final Policy policy, final AnnotatedEntity annotatedEntity, final boolean reusableEntity) {
+        if(reusableEntity){
+            return policy.getPolicyDocument();
+        }
+        Element policyElement = (Element) policy.getPolicyDocument().cloneNode(true);
+        NodeList assertionReferences = policyElement.getElementsByTagName(PolicyXMLElements.ENCAPSULATED);
+        if (assertionReferences != null && assertionReferences.getLength() > 0) {
+            for (int i = 0; i < assertionReferences.getLength(); i++) {
+                Node assertionElement = assertionReferences.item(i);
+                if (!(assertionElement instanceof Element)) {
+                    throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
+                }
+                Element encassElement = (Element) assertionElement;
+                Element encassConfigElement = getSingleChildElement(encassElement, PolicyXMLElements.ENCAPSULATED_ASSERTION_CONFIG_NAME);
+                final Node encassNameNode = encassConfigElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
+                final String encassName = encassNameNode.getNodeValue();
+                final Encass encassEntity = encassMap.get(encassName);
+                Set<Annotation> annotations = encassEntity != null ? encassEntity.getAnnotations() : null;
+                if (annotations == null || ! (annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
+                    encassNameNode.setNodeValue(annotatedEntity.getUniquePrefix() + encassName + annotatedEntity.getUniqueSuffix());
+                }
+            }
+        }
+        return policyElement;
     }
 
     private PolicyTags getPolicyTags(Policy policy, Bundle bundle) {

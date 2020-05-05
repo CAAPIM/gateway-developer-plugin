@@ -20,7 +20,25 @@ public class AnnotatedEntity<T> {
     private boolean isRedeployableType;
     private boolean isExcludeType;
     private boolean reusableEntity;
+    private String uniquePrefix;
+    private String uniqueSuffix;
     private Collection<String> tags;
+
+    public String getUniquePrefix() {
+        return uniquePrefix;
+    }
+
+    public void setUniquePrefix(String uniquePrefix) {
+        this.uniquePrefix = uniquePrefix;
+    }
+
+    public String getUniqueSuffix() {
+        return uniqueSuffix;
+    }
+
+    public void setUniqueSuffix(String uniqueSuffix) {
+        this.uniqueSuffix = uniqueSuffix;
+    }
 
     public AnnotatedEntity(T entity) {
         this.entity = entity;
