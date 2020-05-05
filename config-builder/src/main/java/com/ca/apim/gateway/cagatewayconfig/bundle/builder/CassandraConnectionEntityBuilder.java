@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.google.common.annotations.VisibleForTesting;
@@ -18,7 +19,9 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CASSANDRA_CONNECTION_TYPE;
@@ -41,19 +44,31 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+    public List<Entity> build(Map<String, GatewayEntity> entities, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, CassandraConnection> entityMap = new HashMap<>();
+        entities.entrySet().stream().filter(e -> e.getValue() instanceof CassandraConnection).map(e -> entityMap.put(e.getKey(), (CassandraConnection)e));
+        return buildEntities(entityMap, bundle, bundleType, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, CassandraConnection> entities, Bundle bundle, BundleType bundleType, Document document){
         switch (bundleType) {
             case DEPLOYMENT:
-                return bundle.getCassandraConnections().entrySet().stream()
+                return entities.entrySet().stream()
                         .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, e.getKey(), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
-                return bundle.getCassandraConnections().entrySet().stream().map(e ->
+                return entities.entrySet().stream().map(e ->
                         buildEntity(bundle, e.getKey(), e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
+    }
+
+    @Override
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, CassandraConnection> entities = bundle.getCassandraConnections();
+        return buildEntities(entities, bundle, bundleType, document);
     }
 
     @VisibleForTesting

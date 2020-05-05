@@ -7,17 +7,16 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.bundle.DependencyBundlesProcessor;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,8 +32,6 @@ import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_EXCLUDE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.copyNodes;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
@@ -111,33 +108,11 @@ public class FullBundleCreator {
         // generate the environment bundle
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
-
-
-        final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
-        final AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
-        // Filter the bundle to export only annotated entities
-        // TODO : Enhance this logic to support services and policies
-        environmentBundle.getEntities(Encass.class).values().stream()
-                .filter(Encass::hasAnnotated)
-                .map(encass -> annotatedEntityCreator.createAnnotatedEntity(encass, bundleFileName, null))
-                .forEach(annotatedEntity -> {
-                    if (annotatedEntity.isBundleTypeEnabled()) {
-                        // buildEncassDependencies
-                        final Pair<Element, BundleMetadata> bundleMetadataPair = bundleEntityBuilder.build(environmentBundle,
-                                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null, annotatedEntity);
-                        if(bundleMetadataPair != null){
-                            annotatedElements.put(annotatedEntity.getBundleName(), bundleMetadataPair);
-                        }
-                    }
-                });
-
-        if(annotatedElements.isEmpty()) {
-            annotatedElements.put(bundleFileName, bundleEntityBuilder.build(environmentBundle,
-                    EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null, null));
-        }
-
+        //ToDo : Need to handle bundle name, Project GroupName and version properly
+        Map<String, Pair<Element, BundleMetadata>> bundleElements = bundleEntityBuilder.build(environmentBundle,
+                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", "");
         Element bundleElement = null;
-        for(Map.Entry<String, Pair<Element, BundleMetadata>> entry: annotatedElements.entrySet()) {
+        for(Map.Entry<String, Pair<Element, BundleMetadata>> entry: bundleElements.entrySet()) {
             // generate the environment bundle
             bundleElement = entry.getValue().getLeft();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);

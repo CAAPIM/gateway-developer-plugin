@@ -6,18 +6,20 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,13 +28,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_EXCLUDE;
 
 @Singleton
 class BundleFileBuilder {
@@ -89,46 +91,22 @@ class BundleFileBuilder {
         }
 
         //Zip
-        final Map<String, Pair<Element, BundleMetadata>> annotatedElements = new LinkedHashMap<>();
-        final AnnotatedEntityCreator annotatedEntityCreator = AnnotatedEntityCreator.INSTANCE;
-        // Filter the bundle to export only annotated entities
-        // TODO : Enhance this logic to support services and policies
-        bundle.getEntities(Encass.class).values().stream()
-                .filter(Encass::hasAnnotated)
-                .map(encass -> annotatedEntityCreator.createAnnotatedEntity(encass, projectName, projectVersion))
-                .forEach(annotatedEntity -> {
-                    if (annotatedEntity.isBundleTypeEnabled()) {
-                        // buildEncassDependencies
-                        final Pair<Element, BundleMetadata> bundleMetadataPair = bundleEntityBuilder.build(bundle,
-                                EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion, annotatedEntity);
-                        if(bundleMetadataPair != null){
-                            annotatedElements.put(annotatedEntity.getBundleName(), bundleMetadataPair);
-                        }
-                    }
-                });
-
-        if(annotatedElements.isEmpty()) {
-            annotatedElements.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion, bundleEntityBuilder.build(bundle,
-                    EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion, null));
-        }
-
-        for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : annotatedElements.entrySet()) {
-            Pair<Element, BundleMetadata> elementBundleMetadataPair = entry.getValue();
-            if(elementBundleMetadataPair != null) {
-                documentFileUtils.createFile(elementBundleMetadataPair.getLeft(),
-                        new File(outputDir, entry.getKey() + ".bundle").toPath());
-                jsonFileUtils.createBundleMetadataFile(entry.getValue().getRight(), entry.getKey(), outputDir);
-            }
+        final Map<String, Pair<Element, BundleMetadata>> bundleElementMap = bundleEntityBuilder.build(bundle,
+                EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion);
+        for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundleElementMap.entrySet()) {
+            documentFileUtils.createFile(entry.getValue().getLeft(),
+                    new File(outputDir, entry.getKey() + ".bundle").toPath());
+            jsonFileUtils.createBundleMetadataFile(entry.getValue().getRight(), entry.getKey(), outputDir);
         }
     }
 
     protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entityClass) {
         bundle.getEntities(entityClass).keySet().forEach(entityName ->
-            dependencyBundles.forEach(dependencyBundle -> {
-                if (dependencyBundle.getEntities(entityClass).containsKey(entityName)) {
-                    LOGGER.log(Level.INFO,"{0} policy will be overwritten by local version", entityName);
-                }
-            })
+                dependencyBundles.forEach(dependencyBundle -> {
+                    if (dependencyBundle.getEntities(entityClass).containsKey(entityName)) {
+                        LOGGER.log(Level.INFO,"{0} policy will be overwritten by local version", entityName);
+                    }
+                })
         );
     }
 }

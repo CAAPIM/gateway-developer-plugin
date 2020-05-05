@@ -71,18 +71,27 @@ public class PolicyEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+    public List<Entity> build(Map<String, GatewayEntity> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, Policy> map = entityMap.entrySet().stream().filter(e -> e.getValue() instanceof Policy).collect(Collectors.toMap(entry-> entry.getKey(), entry->(Policy)entry.getValue()));
+        return buildEntities(map, annotatedEntity, bundle, bundleType, document);
+    }
+
+    public List<Entity> buildEntities(Map<String, Policy> policyMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
         // no policy has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
-        bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle));
+        policyMap.values().forEach(policy -> preparePolicy(policy, bundle));
 
         List<Policy> orderedPolicies = new LinkedList<>();
-        bundle.getPolicies().forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
+        policyMap.forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
 
-        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle, document)).collect(toList());
+        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, annotatedEntity, bundle, document)).collect(toList());
+    }
+
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        return buildEntities(bundle.getPolicies(), bundle, bundleType, document);
     }
 
     @NotNull
@@ -328,7 +337,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    Entity buildPolicyEntity(Policy policy, Bundle bundle, Document document) {
+    Entity buildPolicyEntity(Policy policy, AnnotatedEntity annotatedEntity, Bundle bundle, Document document) {
         Set<Annotation> annotations = policy.getAnnotations();
         boolean reusableEntity = true;
         if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {

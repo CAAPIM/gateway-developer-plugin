@@ -49,6 +49,17 @@ public class Policy extends Folderable {
     @JsonIgnore
     private PolicyType policyType;
 
+    public PolicyMetadata getPolicyMetadata() {
+        return policyMetadata;
+    }
+
+    public void setPolicyMetadata(PolicyMetadata policyMetadata) {
+        this.policyMetadata = policyMetadata;
+    }
+
+    @JsonIgnore
+    private PolicyMetadata policyMetadata;
+
     public Policy() {}
 
     public Policy(final Builder builder) {

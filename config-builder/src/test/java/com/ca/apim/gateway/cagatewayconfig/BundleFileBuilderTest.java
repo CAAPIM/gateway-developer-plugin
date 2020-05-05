@@ -64,7 +64,7 @@ class BundleFileBuilderTest {
                 "my-bundle-group", "1.0");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()),
-                eq(EntityBuilder.BundleType.DEPLOYMENT), any(), eq("my-bundle"), eq("my-bundle-group"), eq("1.0"), eq(null));
+                eq(EntityBuilder.BundleType.DEPLOYMENT), any(), eq("my-bundle"), eq("my-bundle-group"), eq("1.0"));
     }
 
     @Test
@@ -79,7 +79,7 @@ class BundleFileBuilderTest {
                 "my-bundle-group", "1.0");
 
         verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)),
-                eq(EntityBuilder.BundleType.DEPLOYMENT), any(), eq("my-bundle"), eq("my-bundle-group"), eq("1.0"), eq(null));
+                eq(EntityBuilder.BundleType.DEPLOYMENT), any(), eq("my-bundle"), eq("my-bundle-group"), eq("1.0"));
     }
 
     @Test
