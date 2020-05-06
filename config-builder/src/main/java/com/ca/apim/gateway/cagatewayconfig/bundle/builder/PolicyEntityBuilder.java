@@ -121,7 +121,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Element policyElement = policyDocument.getDocumentElement();
 
         prepareAssertion(policyElement, PolicyXMLElements.INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
-        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElemen, annotatedEntityt));
+        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement, annotatedEntity));
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policy.getName(), policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
@@ -224,11 +224,12 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    static void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement, AnnotatedEntity annotatedEntity) {
+     void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement, AnnotatedEntity annotatedEntity) {
         if (encapsulatedAssertionElement.hasAttribute(ENCASS_NAME)) {
             final String encassName = encapsulatedAssertionElement.getAttribute(ENCASS_NAME);
-            final String guid = findEncassReferencedGuid(policy, bundle, encapsulatedAssertionElement, encassName);
-            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encassName, guid, annotatedEntity);
+            Encass encass = getEncass(bundle, encassName);
+            final String guid = findEncassReferencedGuid(policy, encass, encapsulatedAssertionElement, encassName);
+            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encass, guid, annotatedEntity);
         } else if (!isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
             Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
             Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
@@ -237,19 +238,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             LOGGER.log(Level.FINE, "No encassName specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
         }
     }
-    private Encass getEncass(Bundle bundle, String name){
-        final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(name));
-        if (referenceEncass.get() == null) {
-            bundle.getDependencies().forEach(b -> {
-                Encass encass = b.getEncasses().get(name);
-                if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
-                    throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
-                }
-            });
-        }
-    }
-
-    private static String findEncassReferencedGuid(Policy policy, Bundle bundle, Element encapsulatedAssertionElement, String name) {
+    private  Encass getEncass(Bundle bundle, String name){
         LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", name);
         final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(name));
         if (referenceEncass.get() == null) {
@@ -260,8 +249,12 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 }
             });
         }
+        return referenceEncass.get();
+    }
+
+    private static String findEncassReferencedGuid(Policy policy, Encass encass, Element encapsulatedAssertionElement, String name) {
         final String guid;
-        if (referenceEncass.get() == null) {
+        if (encass == null) {
             if (isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
                 LOGGER.log(Level.FINE, "Could not find referenced encass with name: \"{0}\". In policy: \"{1}\". Since NoOp is true, this will be treated as a No Op.", new String[]{name, policy.getPath()});
                 guid = ZERO_GUID;
@@ -269,18 +262,23 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 throw new EntityBuilderException("Could not find referenced encass with name: '" + name + "'. In policy: " + policy.getPath());
             }
         } else {
-            guid = referenceEncass.get().getGuid();
+            guid = encass.getGuid();
         }
         return guid;
     }
 
-    private static void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, String encassName, String encassGuid, AnnotatedEntity annotatedEntity) {
-
+    private  void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, Encass encass, String encassGuid, AnnotatedEntity annotatedEntity) {
+        Set<Annotation> annotations = encass.getAnnotations();
+        if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
+            encass.setGuid(idGenerator.generateGuid());
+            encass.setId(idGenerator.generate());
+            encass.setName(annotatedEntity.getUniquePrefix() + encass.getName() + annotatedEntity.getUniqueSuffix());
+        }
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
                 policyDocument,
                 ENCAPSULATED_ASSERTION_CONFIG_NAME,
                 STRING_VALUE,
-                encassName
+                encass.getName()
         );
         Node firstChild = encapsulatedAssertionElement.getFirstChild();
         if (firstChild != null) {
@@ -293,7 +291,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 policyDocument,
                 ENCAPSULATED_ASSERTION_CONFIG_GUID,
                 STRING_VALUE,
-                encassGuid
+                encass.getGuid()
         );
         encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
 
@@ -397,8 +395,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Element resourcesElement = document.createElement(RESOURCES);
         Element resourceSetElement = createElementWithAttribute(document, RESOURCE_SET, PROPERTY_TAG, POLICY);
         Element resourceElement = createElementWithAttribute(document, RESOURCE, TYPE, POLICY);
-        Element policyDocument = getPolicyDocument(policy, annotatedEntity, reusableEntity);
-        resourceElement.setTextContent(documentTools.elementToString(policyDocument));
+        resourceElement.setTextContent(documentTools.elementToString(policy.getPolicyDocument()));
 
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
@@ -418,32 +415,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
         final String uniqueNameWithPath = PathUtils.extractPath(nameWithPath) + annotatedEntity.getUniquePrefix()
                                                                             + policyName + annotatedEntity.getUniqueSuffix();
         return uniqueNameWithPath;
-    }
-
-    private Element getPolicyDocument(final Policy policy, final AnnotatedEntity annotatedEntity, final boolean reusableEntity) {
-        if(reusableEntity){
-            return policy.getPolicyDocument();
-        }
-        Element policyElement = (Element) policy.getPolicyDocument().cloneNode(true);
-        NodeList assertionReferences = policyElement.getElementsByTagName(PolicyXMLElements.ENCAPSULATED);
-        if (assertionReferences != null && assertionReferences.getLength() > 0) {
-            for (int i = 0; i < assertionReferences.getLength(); i++) {
-                Node assertionElement = assertionReferences.item(i);
-                if (!(assertionElement instanceof Element)) {
-                    throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
-                }
-                Element encassElement = (Element) assertionElement;
-                Element encassConfigElement = getSingleChildElement(encassElement, PolicyXMLElements.ENCAPSULATED_ASSERTION_CONFIG_NAME);
-                final Node encassNameNode = encassConfigElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
-                final String encassName = encassNameNode.getNodeValue();
-                final Encass encassEntity = encassMap.get(encassName);
-                Set<Annotation> annotations = encassEntity != null ? encassEntity.getAnnotations() : null;
-                if (annotations == null || ! (annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
-                    encassNameNode.setNodeValue(annotatedEntity.getUniquePrefix() + encassName + annotatedEntity.getUniqueSuffix());
-                }
-            }
-        }
-        return policyElement;
     }
 
     private PolicyTags getPolicyTags(Policy policy, Bundle bundle) {
