@@ -83,7 +83,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             return emptyList();
         }
 
-        policyMap.values().forEach(policy -> preparePolicy(policy, bundle));
+        policyMap.values().forEach(policy -> preparePolicy(policy, bundle, annotatedEntity));
 
         List<Policy> orderedPolicies = new LinkedList<>();
         policyMap.forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
@@ -116,12 +116,12 @@ public class PolicyEntityBuilder implements EntityBuilder {
         orderedPolicies.add(policy);
     }
 
-    private void preparePolicy(Policy policy, Bundle bundle) {
+    private void preparePolicy(Policy policy, Bundle bundle, AnnotatedEntity annotatedEntity) {
         Document policyDocument = loadPolicyDocument(policy);
         Element policyElement = policyDocument.getDocumentElement();
 
         prepareAssertion(policyElement, PolicyXMLElements.INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
-        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement));
+        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElemen, annotatedEntityt));
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policy.getName(), policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
@@ -224,17 +224,28 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    static void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement) {
+    static void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement, AnnotatedEntity annotatedEntity) {
         if (encapsulatedAssertionElement.hasAttribute(ENCASS_NAME)) {
             final String encassName = encapsulatedAssertionElement.getAttribute(ENCASS_NAME);
             final String guid = findEncassReferencedGuid(policy, bundle, encapsulatedAssertionElement, encassName);
-            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encassName, guid);
+            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encassName, guid, annotatedEntity);
         } else if (!isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
             Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
             Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
             throw new EntityBuilderException("No encassName specified for encass in policy: '" + policy.getPath() + "' GUID: '" + (guidElement != null ? guidElement.getAttribute(STRING_VALUE) : null) + "' Name: '" + (nameElement != null ? nameElement.getAttribute(STRING_VALUE) : null) + "'");
         } else {
             LOGGER.log(Level.FINE, "No encassName specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
+        }
+    }
+    private Encass getEncass(Bundle bundle, String name){
+        final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(name));
+        if (referenceEncass.get() == null) {
+            bundle.getDependencies().forEach(b -> {
+                Encass encass = b.getEncasses().get(name);
+                if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
+                    throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
+                }
+            });
         }
     }
 
@@ -263,7 +274,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return guid;
     }
 
-    private static void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, String encassName, String encassGuid) {
+    private static void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, String encassName, String encassGuid, AnnotatedEntity annotatedEntity) {
+
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
                 policyDocument,
                 ENCAPSULATED_ASSERTION_CONFIG_NAME,
