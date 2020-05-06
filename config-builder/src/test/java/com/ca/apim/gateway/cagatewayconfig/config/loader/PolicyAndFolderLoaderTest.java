@@ -44,7 +44,8 @@ class PolicyAndFolderLoaderTest {
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testLoad(TemporaryFolder temporaryFolder) throws IOException {
-        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, fileUtils, new IdGenerator(), JsonFileUtils.INSTANCE);
+        PolicyAndFolderLoader policyAndFolderLoader = new PolicyAndFolderLoader(policyConverterRegistry, fileUtils,
+                new IdGenerator(), JsonFileUtils.INSTANCE);
         Mockito.when(fileUtils.getFileAsString(Mockito.any(File.class))).thenReturn("policy-content");
 
         File policyFolder = temporaryFolder.createDirectory("policy");

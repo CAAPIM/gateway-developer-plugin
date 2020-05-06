@@ -20,6 +20,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.closeQuiet
 
 public class JsonFileUtils {
 
+    public static final String METADATA_FILE_NAME_SUFFIX = ".metadata" + JsonTools.INSTANCE.getFileExtension();
     private static final String CONFIG_DIR = "config";
     private static final String POLICIES_CONFIG_FILE = "policies" + JsonTools.INSTANCE.getFileExtension();
 
@@ -62,6 +63,6 @@ public class JsonFileUtils {
     }
 
     public void createBundleMetadataFile(Object objectToWrite, String fileName, File outputDir) {
-        createFile(objectToWrite, new File(outputDir, fileName + JsonTools.INSTANCE.getFileExtension()).toPath());
+        createFile(objectToWrite, new File(outputDir, fileName + METADATA_FILE_NAME_SUFFIX).toPath());
     }
 }

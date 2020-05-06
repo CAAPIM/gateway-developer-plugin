@@ -88,7 +88,7 @@ public class BundleEntityBuilder {
                         List<Entity> entities = new ArrayList<>();
                         Map<String, GatewayEntity> entityMap = getEntityDependencies(annotatedEntity.getPolicyName(), bundle);
                         entityMap.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-                        entityBuilders.forEach(builder -> entities.addAll(builder.build(entityMap, bundle, bundleType, document)));
+                        entityBuilders.forEach(builder -> entities.addAll(builder.build(entityMap, annotatedEntity, bundle, bundleType, document)));
                         List<Entity> bundleEntities = renameNonReusableEntities(entities, bundle, annotatedEntity, projectGroupName, projectVersion);
                         // Create bundle
                         final Element annotatedBundle = bundleDocumentBuilder.build(document, bundleEntities);
