@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -31,6 +32,7 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @JsonInclude(NON_EMPTY)
 @Named("POLICY")
+@BundleGeneration
 public class Policy extends Folderable {
 
     @JsonIgnore
@@ -48,17 +50,8 @@ public class Policy extends Folderable {
     private String subtag;
     @JsonIgnore
     private PolicyType policyType;
-
-    public PolicyMetadata getPolicyMetadata() {
-        return policyMetadata;
-    }
-
-    public void setPolicyMetadata(PolicyMetadata policyMetadata) {
-        this.policyMetadata = policyMetadata;
-    }
-
     @JsonIgnore
-    private PolicyMetadata policyMetadata;
+    private Set<Dependency> usedEntities;
 
     public Policy() {}
 
@@ -70,6 +63,14 @@ public class Policy extends Folderable {
         this.tag = builder.tag;
         this.subtag = builder.subtag;
         setParentFolder(builder.parentFolderId != null ? new Folder(builder.parentFolderId, null) : null);
+    }
+
+    public Set<Dependency> getUsedEntities() {
+        return usedEntities;
+    }
+
+    public void setUsedEntities(Set<Dependency> usedEntities) {
+        this.usedEntities = usedEntities;
     }
 
     public String getPolicyXML() {

@@ -6,8 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntityCreator;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -17,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.annotations.VisibleForTesting;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
 
 import javax.inject.Named;
 import java.io.File;
@@ -33,6 +37,7 @@ import static java.util.stream.Collectors.toCollection;
 @Named("ENCAPSULATED_ASSERTION")
 @ConfigurationFile(name = "encass", type = JSON_YAML)
 @EnvironmentType("ENCAPSULATED_ASSERTION")
+@BundleGeneration
 public class Encass extends GatewayEntity {
 
     private String policy;
@@ -156,5 +161,19 @@ public class Encass extends GatewayEntity {
     public void sortArgumentsAndResults() {
         setArguments(getArguments().stream().collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassArgument::getName)))));
         setResults(getResults().stream().collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassResult::getName)))));
+    }
+
+    @Override
+    public boolean hasBundleAnnotation(){
+        if(hasAnnotated()){
+            return annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_BUNDLE.equals(annotation.getType()));
+        }
+        return false;
+    }
+
+    @Override
+    public AnnotatedEntity<GatewayEntity> getAnnotatedEntity(final String projectName,
+                                                      final String projectVersion) {
+        return AnnotatedEntityCreator.createAnnotatedEntity(this, projectName, projectVersion);
     }
 }

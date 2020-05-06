@@ -64,7 +64,10 @@ public class PolicyAndFolderLoader implements EntityLoader {
 
                 Policy policy = policies.get(policyMetadata.getFullPath());
                 policy.setAnnotations(policyMetadata.getAnnotations());
-                policy.setPolicyMetadata(policyMetadata);
+                policy.setTag(policyMetadata.getTag());
+                policy.setSubtag(policyMetadata.getSubtag());
+                policy.setPolicyType(PolicyType.fromType(policyMetadata.getType()));
+                policy.setUsedEntities(policyMetadata.getUsedEntities());
             });
         }
         bundle.setDependencyMap(policyDependencyMap);

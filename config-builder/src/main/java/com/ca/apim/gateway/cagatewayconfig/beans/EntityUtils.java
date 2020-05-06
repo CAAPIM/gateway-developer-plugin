@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
@@ -35,7 +36,7 @@ public class EntityUtils {
         String type = getEntityType(entityClass);
         if (type != null) {
             final Pair<String, FileType> configFileInfo = getEntityConfigFileInfo(entityClass);
-            return new GatewayEntityInfo(type, entityClass, configFileInfo.getLeft(), configFileInfo.getRight(), getEntityEnvironmentType(entityClass));
+            return new GatewayEntityInfo(type, entityClass, configFileInfo.getLeft(), configFileInfo.getRight(), getEntityEnvironmentType(entityClass), getBundleGeneration(entityClass));
         }
         return null;
     }
@@ -70,6 +71,16 @@ public class EntityUtils {
         return environmentType != null ? environmentType.value() : null;
     }
 
+    /**
+     * @param entityClass entity class
+     * @param <E> entity type
+     * @return boolean, checks if the entity type supports bundle generation
+     */
+    static <E extends GatewayEntity> boolean getBundleGeneration(Class<E> entityClass) {
+        BundleGeneration bundleGeneration = entityClass.getAnnotation(BundleGeneration.class);
+        return bundleGeneration != null;
+    }
+
     public static class GatewayEntityInfo {
 
         private String type;
@@ -78,15 +89,18 @@ public class EntityUtils {
         private FileType fileType;
         private String environmentType;
 
+        private boolean bundleGenerationSupported;
+
         private GatewayEntityInfo() {
         }
 
-        private GatewayEntityInfo(String type, Class<? extends GatewayEntity> entityClass, String fileName, FileType fileType, String environmentType) {
+        private GatewayEntityInfo(String type, Class<? extends GatewayEntity> entityClass, String fileName, FileType fileType, String environmentType, boolean bundleGenerationSupported) {
             this.type = type;
             this.entityClass = entityClass;
             this.fileName = fileName;
             this.fileType = fileType;
             this.environmentType = environmentType;
+            this.bundleGenerationSupported = bundleGenerationSupported;
         }
 
         public String getType() {
@@ -109,5 +123,10 @@ public class EntityUtils {
         public String getEnvironmentType() {
             return environmentType;
         }
+
+        public boolean isBundleGenerationSupported() {
+            return bundleGenerationSupported;
+        }
+
     }
 }

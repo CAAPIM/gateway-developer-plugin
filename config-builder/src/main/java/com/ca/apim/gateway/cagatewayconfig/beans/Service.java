@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
@@ -26,6 +27,7 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @Named("SERVICE")
 @ConfigurationFile(name = "services", type = JSON_YAML)
 @EnvironmentType("SERVICE")
+@BundleGeneration
 public class Service extends Folderable {
 
     private String url;
