@@ -72,21 +72,21 @@ public class PolicyEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Map<String, GatewayEntity> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, Policy> map = entityMap.entrySet().stream().filter(e -> e.getValue() instanceof Policy).collect(Collectors.toMap(entry-> entry.getKey(), entry->(Policy)entry.getValue()));
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> map = entityMap.get(Policy.class);
         return buildEntities(map, annotatedEntity, bundle, bundleType, document);
     }
 
-    public List<Entity> buildEntities(Map<String, Policy> policyMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+    public List<Entity> buildEntities(Map<String, ?> policyMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
         // no policy has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
-        policyMap.values().forEach(policy -> preparePolicy(policy, bundle, annotatedEntity));
+        policyMap.values().forEach(policy -> preparePolicy((Policy)policy, bundle, annotatedEntity));
 
         List<Policy> orderedPolicies = new LinkedList<>();
-        policyMap.forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
+        policyMap.forEach((path, policy) -> maybeAddPolicy(bundle, (Policy)policy, orderedPolicies, new HashSet<Policy>()));
 
         return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, annotatedEntity, bundle, document)).collect(toList());
     }

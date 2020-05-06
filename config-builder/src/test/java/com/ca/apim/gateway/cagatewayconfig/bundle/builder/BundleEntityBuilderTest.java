@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -39,16 +40,18 @@ class BundleEntityBuilderTest {
     private static final String TEST_ENCASS = "TestEncass";
     private static final String TEST_ENCASS_POLICY = "TestEncassPolicy";
     private static final String TEST_ENCASS_ANNOTATION_NAME = "TestEncassAnnotationName";
-    private static final String TEST_POLICY_PATH= "test/policy.xml";
+    private static final String TEST_POLICY_PATH = "test/policy.xml";
     private static final String TEST_GUID = UUID.randomUUID().toString();
     private static final String TEST_POLICY_ID = "PolicyID";
     private static final String TEST_ENCASS_ID = "EncassID";
+    @Mock
+    private EntityTypeRegistry entityTypeRegistry;
 
     // This class is covered by testing others, so a simple testing is enough here.
     @Test
     void build() {
         BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()),
-                new BundleDocumentBuilder(), new BundleMetadataBuilder());
+                new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
 
         final Map<String, Pair<Element, BundleMetadata>> element = builder.build(new Bundle(), BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
@@ -62,6 +65,11 @@ class BundleEntityBuilderTest {
         }
 
         @Override
+        public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entities, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+            return Collections.singletonList(EntityBuilderHelper.getEntityWithOnlyMapping(LISTEN_PORT_TYPE, "Test", "Test"));
+        }
+
+        @Override
         public @NotNull Integer getOrder() {
             return 0;
         }
@@ -70,7 +78,7 @@ class BundleEntityBuilderTest {
     @Test
     void testEncassAnnotatedBundle() {
         FolderEntityBuilder folderBuilder = new FolderEntityBuilder(ID_GENERATOR);
-        PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR);
         EncassEntityBuilder encassBuilder = new EncassEntityBuilder(ID_GENERATOR);
 
         Bundle bundle = new Bundle();
@@ -111,7 +119,7 @@ class BundleEntityBuilderTest {
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
 
-        BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder());
+        BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
         Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
         assertNotNull(bundles);
