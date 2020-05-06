@@ -18,6 +18,7 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import static java.util.Collections.unmodifiableSet;
@@ -69,8 +70,9 @@ public class BundleEntityBuilder {
                         .map(entity -> entity.getAnnotatedEntity(projectName, projectVersion))
                         .forEach(annotatedEntity -> {
                             List<Entity> entities = new ArrayList<>();
-                            Map<String, GatewayEntity> entityMap = getEntityDependencies(annotatedEntity.getPolicyName(), bundle);
-                            entityMap.put(getKeyPrefix(annotatedEntity.getEntity()) + annotatedEntity.getEntityName(), annotatedEntity.getEntity());
+                            Map<Class, Map<String, GatewayEntity>> entityMap = getEntityDependencies(annotatedEntity.getPolicyName(), bundle);
+                            Map<String, GatewayEntity> dependencyMap = getEntities(annotatedEntity.getEntity().getClass(), entityMap);
+                            dependencyMap.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
                             entityBuilders.forEach(builder -> entities.addAll(builder.build(entityMap, annotatedEntity, bundle, bundleType, document)));
                             // Create bundle
                             final Element annotatedBundle = bundleDocumentBuilder.build(document, entities);
@@ -83,35 +85,41 @@ public class BundleEntityBuilder {
         return annotatedElements;
     }
 
-    private Map<String, GatewayEntity> getEntityDependencies(String policyNameWithPath, Bundle bundle) {
-        Map<String, GatewayEntity> entityDependenciesMap = new HashMap<>();
+    private Map<Class, Map<String, GatewayEntity>> getEntityDependencies(String policyNameWithPath, Bundle bundle) {
+        Map<Class, Map<String, GatewayEntity>> entityDependenciesMap = new HashMap<>();
         final Map<String, Policy> entityMap = bundle.getPolicies();
         final Policy policyEntity = entityMap.get(policyNameWithPath);
         if (policyEntity != null) {
             populateDependentFolders(entityDependenciesMap, policyEntity);
-            entityDependenciesMap.put(getKeyPrefix(policyEntity) + policyNameWithPath, policyEntity);
+            Map<String, GatewayEntity> policyMap = new HashMap<>();
+            policyMap.put(policyNameWithPath, policyEntity);
+            entityDependenciesMap.put(Policy.class, policyMap);
             Set<Dependency> dependencies = policyEntity.getUsedEntities();
             for (Dependency dependency : dependencies) {
-                Map<String, ? extends GatewayEntity> entities = bundle.getEntities(entityTypeRegistry.getEntityClass(dependency.getType()));
+                Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
+                Map<String, ? extends GatewayEntity> entities = bundle.getEntities(entityClass);
                 GatewayEntity dependentEntity = entities.get(dependency.getName());
-                entityDependenciesMap.put(dependency.getType() + ":" + dependency.getName(), dependentEntity);
+                Map<String, GatewayEntity> dependencyMap = getEntities(entityClass, entityDependenciesMap);
+                dependencyMap.put(dependency.getName(),  dependentEntity);
             }
         }
         return entityDependenciesMap;
     }
 
-    private void populateDependentFolders(Map<String, GatewayEntity> gatewayEntities, GatewayEntity policyEntity) {
-        if (policyEntity instanceof Folderable) {
-            Folder folder = ((Folderable) policyEntity).getParentFolder();
-            while (folder != null) {
-                gatewayEntities.put(getKeyPrefix(folder) + folder.getPath(), folder);
-                folder = folder.getParentFolder();
-            }
-        }
+    public  Map<String, GatewayEntity> getEntities(Class entityType, Map<Class, Map<String, GatewayEntity>> entityDependenciesMap) {
+        return (Map<String, GatewayEntity>) entityDependenciesMap.computeIfAbsent(entityType, (Function<Class, Map<String, GatewayEntity>>) aClass -> new HashMap<>());
     }
 
-    private String getKeyPrefix(GatewayEntity entity) {
-        return EntityUtils.getEntityType(entity.getClass()) + ":";
+    private void populateDependentFolders(Map<Class, Map<String, GatewayEntity>> entityDependenciesMap, GatewayEntity policyEntity) {
+        if (policyEntity instanceof Folderable) {
+            Folder folder = ((Folderable) policyEntity).getParentFolder();
+            Map<String, GatewayEntity> folderMap = new HashMap<>();
+            while (folder != null) {
+                folderMap.put(folder.getPath(), folder);
+                folder = folder.getParentFolder();
+            }
+            entityDependenciesMap.put(Folder.class, folderMap);
+        }
     }
 
     @VisibleForTesting
