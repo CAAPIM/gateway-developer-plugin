@@ -33,8 +33,8 @@ import java.util.stream.Collectors;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.ENCAPSULATED_ASSERTION_CONFIG_GUID;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.stringToXMLDocument;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.POLICY_GUID;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.Collections.unmodifiableSet;
 
 @Singleton
@@ -102,7 +102,7 @@ public class BundleEntityBuilder {
                 if (annotations != null && annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType()))) {
                     bundleEntities.add(entity);
                 } else {
-                    bundleEntities.add(getUniqueEntity(entity, annotatedEntity, encassMap, projectGroupName, projectVersion));
+                    bundleEntities.add(getUniqueEntity(entity, policyEntity, annotatedEntity, bundle, projectGroupName, projectVersion));
                 }
 
             } else {
@@ -112,14 +112,14 @@ public class BundleEntityBuilder {
         return bundleEntities;
     }
 
-    private Entity getUniqueEntity(final Entity entity, final AnnotatedEntity annotatedEntity, final Map<String, Encass> encassMap,
+    private Entity getUniqueEntity(final Entity entity, final Policy policyEntity, final AnnotatedEntity annotatedEntity, final Bundle bundle,
                                                                                                  final String projectName, final String projectVersion) {
         final String nameWithPath = entity.getName();
         final String uniqueName = getUniqueName(projectName, projectVersion, annotatedEntity, nameWithPath);
         final String uniqueNameWithPath = PathUtils.extractPath(nameWithPath) + uniqueName;
         Element entityXml = null;
         if (EntityTypes.POLICY_TYPE.equals(entity.getType())) {
-            entityXml = getUniquePolicyXml(entity.getXml(), annotatedEntity, encassMap, projectName, projectVersion, uniqueName);
+            entityXml = getUniquePolicyXml(entity.getXml(), policyEntity, annotatedEntity, bundle, projectName, projectVersion, uniqueName);
         } else if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(entity.getType())) {
             entityXml = (Element) entity.getXml();
             final Element nameElement = getSingleChildElement(entityXml, NAME);
@@ -130,7 +130,7 @@ public class BundleEntityBuilder {
         return EntityBuilderHelper.getEntityWithMappings(entity.getType(), uniqueNameWithPath, entity.getId(), entityXml, MappingActions.NEW_OR_UPDATE, entity.getMappingProperties());
     }
 
-    private Element getUniquePolicyXml(final Element entityXml, final AnnotatedEntity annotatedEntity, final Map<String, Encass> encassMap,
+    private Element getUniquePolicyXml(final Element entityXml, final Policy policyEntity, final AnnotatedEntity annotatedEntity, final Bundle bundle,
                                                                              final String projectName, final String projectVersion, final String uniqueName) {
         Element policyElement = (Element) entityXml.cloneNode(true);
         final Element policyDetails = getSingleChildElement(policyElement, POLICY_DETAIL);
@@ -148,32 +148,73 @@ public class BundleEntityBuilder {
         }
         if (policyDocument != null) {
             Element policy = policyDocument.getDocumentElement();
-            NodeList assertionReferences = policy.getElementsByTagName(PolicyXMLElements.ENCAPSULATED);
-            if (assertionReferences != null && assertionReferences.getLength() > 0) {
-                for (int i = 0; i < assertionReferences.getLength(); i++) {
-                    Node assertionElement = assertionReferences.item(i);
-                    if (!(assertionElement instanceof Element)) {
-                        throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
-                    }
-                    Element encassElement = (Element) assertionElement;
-                    Element encassConfigElement = getSingleChildElement(encassElement, PolicyXMLElements.ENCAPSULATED_ASSERTION_CONFIG_NAME);
-                    Element guidElement = getSingleChildElement(encassElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
-                    final Node encassNameNode = encassConfigElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
-                    final String encassName = encassNameNode.getNodeValue();
-                    final Encass encassEntity = encassMap.get(encassName);
-
-                    final Node encassGuidNode = guidElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
-                    Set<Annotation> annotations = encassEntity != null ? encassEntity.getAnnotations() : null;
-                    if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
-                        encassNameNode.setNodeValue(getUniqueName(projectName, projectVersion, annotatedEntity, encassName));
-                        encassEntity.setGuid(new IdGenerator().generateGuid());
-                        encassGuidNode.setNodeValue(encassEntity.getGuid());
-                    }
-                }
-                resource.setTextContent(documentTools.elementToString(policy));
-            }
+            renameEncapsulatedAssertion(policy, annotatedEntity, bundle.getEncasses(), projectName, projectVersion);
+            renamePolicyInclude(policy, policyEntity, bundle.getPolicies());
+            resource.setTextContent(documentTools.elementToString(policy));
         }
         return policyElement;
+    }
+
+    private void renameEncapsulatedAssertion(Element policy, final AnnotatedEntity annotatedEntity, final Map<String, Encass> encassMap, final String projectName, final String projectVersion){
+        NodeList assertionReferences = policy.getElementsByTagName(PolicyXMLElements.ENCAPSULATED);
+        if (assertionReferences != null && assertionReferences.getLength() > 0) {
+            for (int i = 0; i < assertionReferences.getLength(); i++) {
+                Node assertionElement = assertionReferences.item(i);
+                if (!(assertionElement instanceof Element)) {
+                    throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
+                }
+                Element encassElement = (Element) assertionElement;
+                Element encassConfigElement = getSingleChildElement(encassElement, PolicyXMLElements.ENCAPSULATED_ASSERTION_CONFIG_NAME);
+                Element guidElement = getSingleChildElement(encassElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
+                final Node encassNameNode = encassConfigElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
+                final String encassName = encassNameNode.getNodeValue();
+                final Encass encassEntity = encassMap.get(encassName);
+
+                final Node encassGuidNode = guidElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
+                Set<Annotation> annotations = encassEntity != null ? encassEntity.getAnnotations() : null;
+                if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
+                    encassNameNode.setNodeValue(getUniqueName(projectName, projectVersion, annotatedEntity, encassName));
+                    encassGuidNode.setNodeValue(encassEntity.getGuid());
+                }
+            }
+        }
+    }
+
+    private void renamePolicyInclude(Element policy, final Policy policyEntity, final Map<String, Policy> policyMap){
+        NodeList assertionReferences = policy.getElementsByTagName(PolicyXMLElements.INCLUDE);
+        Document policyDocument;
+        try {
+            policyDocument = stringToXMLDocument(documentTools, policyEntity.getPolicyXML());
+        } catch (DocumentParseException e) {
+            throw new EntityBuilderException("Could not load policy: " + e.getMessage(), e);
+        }
+        Element policyElement = policyDocument.getDocumentElement();
+        NodeList includeReferences = policyElement.getElementsByTagName(PolicyXMLElements.INCLUDE);
+        if (assertionReferences != null && assertionReferences.getLength() > 0) {
+            for (int i = 0; i < assertionReferences.getLength(); i++) {
+                Node assertionElement = assertionReferences.item(i);
+                Node policyAssertionElement = includeReferences.item(i);
+                if (!(assertionElement instanceof Element)) {
+                    throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
+                }
+                Element includeElement = (Element) assertionElement;
+                Element includePolicyElement = (Element) policyAssertionElement;
+                Element policyGuidElement;
+                Element policyEntityGuidElement;
+                try {
+                    policyGuidElement = getSingleElement(includeElement, POLICY_GUID);
+                    policyEntityGuidElement = getSingleElement(includePolicyElement, POLICY_GUID);
+                } catch (DocumentParseException e) {
+                    throw new EntityBuilderException("Could not find PolicyGuid element in Include Assertion", e);
+                }
+                Optional<Map.Entry<String, Policy>> optionalPolicy = policyMap.entrySet().stream().filter(e -> e.getKey().equals(policyEntityGuidElement.getAttribute("policyPath"))).findFirst();
+                if(optionalPolicy.isPresent()){
+                    Policy depPolicy = optionalPolicy.get().getValue();
+                    final Node policyGuidNode = policyGuidElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
+                    policyGuidNode.setNodeValue(depPolicy.getGuid());
+                }
+            }
+        }
     }
 
     //returns name in the format <proejctName>-<bundleType>-<annotatedEntityName>-enityName-<projectVersion>

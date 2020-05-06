@@ -78,6 +78,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
             reusableEntity = false;
             encass.setId(idGenerator.generate());
+            encass.setGuid(idGenerator.generateGuid());
         }
 
         Element encassAssertionElement = createElementWithAttributesAndChildren(
