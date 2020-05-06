@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.ENCAPSULATED_ASSERTION_CONFIG_GUID;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.stringToXMLDocument;
 import static java.util.Collections.unmodifiableSet;
@@ -155,12 +157,17 @@ public class BundleEntityBuilder {
                     }
                     Element encassElement = (Element) assertionElement;
                     Element encassConfigElement = getSingleChildElement(encassElement, PolicyXMLElements.ENCAPSULATED_ASSERTION_CONFIG_NAME);
+                    Element guidElement = getSingleChildElement(encassElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
                     final Node encassNameNode = encassConfigElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
                     final String encassName = encassNameNode.getNodeValue();
                     final Encass encassEntity = encassMap.get(encassName);
+
+                    final Node encassGuidNode = guidElement.getAttributeNode(ATTRIBUTE_STRING_VALUE);
                     Set<Annotation> annotations = encassEntity != null ? encassEntity.getAnnotations() : null;
                     if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
                         encassNameNode.setNodeValue(getUniqueName(projectName, projectVersion, annotatedEntity, encassName));
+                        encassEntity.setGuid(new IdGenerator().generateGuid());
+                        encassGuidNode.setNodeValue(encassEntity.getGuid());
                     }
                 }
                 resource.setTextContent(documentTools.elementToString(policy));
