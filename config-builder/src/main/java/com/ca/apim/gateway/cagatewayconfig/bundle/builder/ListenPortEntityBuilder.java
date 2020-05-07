@@ -5,13 +5,10 @@
  */
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ClientAuthentication;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.Feature;
 import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.ListenPortTlsSettings;
-import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
-import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -59,14 +56,18 @@ public class ListenPortEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        final Stream<Entity> userPorts = bundle.getListenPorts().entrySet().stream().map(listenPortEntry ->
-                buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document));
+        return buildEntities(bundle.getListenPorts(), bundle, bundleType, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
+        final Stream<Entity> userPorts = entities.entrySet().stream().map(listenPortEntry ->
+                buildListenPortEntity(bundle, listenPortEntry.getKey(), (ListenPort)listenPortEntry.getValue(), document));
 
         switch (bundleType) {
             case DEPLOYMENT:
                 return userPorts.collect(toList());
             case ENVIRONMENT:
-                final Stream<Entity> defaultPorts = DEFAULT_PORTS.entrySet().stream().filter(p -> bundle.getListenPorts().values().stream().noneMatch(up -> up.getPort() == p.getValue().getPort()))
+                final Stream<Entity> defaultPorts = DEFAULT_PORTS.entrySet().stream().filter(p -> entities.values().stream().noneMatch(up -> ((ListenPort)up).getPort() == p.getValue().getPort()))
                         .map(listenPortEntry -> {
                             Entity entity = buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document);
                             entity.setMappingAction(NEW_OR_EXISTING);
@@ -76,6 +77,12 @@ public class ListenPortEntityBuilder implements EntityBuilder {
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
+    }
+
+    @Override
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> map = entityMap.get(ListenPort.class);
+        return buildEntities(map, bundle, bundleType, document);
     }
 
     // also visible for testing

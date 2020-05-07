@@ -62,18 +62,28 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
     
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        return buildEntities(bundle.getJmsDestinations(), bundle, bundleType, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                return bundle.getJmsDestinations().entrySet().stream()
+                return entities.entrySet().stream()
                         .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(JMS_DESTINATION_TYPE, e.getKey(), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
-                return bundle.getJmsDestinations().entrySet().stream().map(e ->
-                        buildEntity(bundle, e.getKey(), e.getValue(), document)
+                return entities.entrySet().stream().map(e ->
+                        buildEntity(bundle, e.getKey(), (JmsDestination)e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
+    }
+
+    @Override
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> map = entityMap.get(JmsDestination.class);
+        return buildEntities(map, bundle, bundleType, document);
     }
 
     @Override

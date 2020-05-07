@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -17,6 +18,7 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
@@ -38,14 +40,24 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        return buildEntities(bundle.getPolicyBackedServices(), bundle, bundleType, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         // no pbs has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
-        return bundle.getPolicyBackedServices().entrySet().stream().map(pbsEntry ->
-                buildPBSEntity(bundle, pbsEntry.getKey(), pbsEntry.getValue(), document)
+        return entities.entrySet().stream().map(pbsEntry ->
+                buildPBSEntity(bundle, pbsEntry.getKey(), (PolicyBackedService)pbsEntry.getValue(), document)
         ).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> map = entityMap.get(PolicyBackedService.class);
+        return buildEntities(map, bundle, bundleType, document);
     }
 
     private Entity buildPBSEntity(Bundle bundle, String name, PolicyBackedService policyBackedService, Document document) {

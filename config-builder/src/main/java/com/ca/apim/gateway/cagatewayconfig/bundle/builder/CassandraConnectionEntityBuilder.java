@@ -19,7 +19,6 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,13 +43,12 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public List<Entity> build(Map<String, GatewayEntity> entities, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, CassandraConnection> entityMap = new HashMap<>();
-        entities.entrySet().stream().filter(e -> e.getValue() instanceof CassandraConnection).map(e -> entityMap.put(e.getKey(), (CassandraConnection)e));
-        return buildEntities(entityMap, bundle, bundleType, document);
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> entities = entityMap.get(CassandraConnection.class);
+        return buildEntities(entities, bundle, bundleType, document);
     }
 
-    private List<Entity> buildEntities(Map<String, CassandraConnection> entities, Bundle bundle, BundleType bundleType, Document document){
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document){
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
@@ -58,7 +56,7 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
-                        buildEntity(bundle, e.getKey(), e.getValue(), document)
+                        buildEntity(bundle, e.getKey(), (CassandraConnection)e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

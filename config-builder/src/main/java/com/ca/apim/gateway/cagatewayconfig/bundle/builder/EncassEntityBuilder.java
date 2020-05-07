@@ -6,10 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.google.common.collect.ImmutableMap;
@@ -52,14 +49,24 @@ public class EncassEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        return buildEntities(bundle.getEncasses(), bundle, bundleType, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         // no encass has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
-        return bundle.getEncasses().entrySet().stream().map(encassEntry ->
-                buildEncassEntity(bundle, encassEntry.getKey(), encassEntry.getValue(), document)
+        return entities.entrySet().stream().map(encassEntry ->
+                buildEncassEntity(bundle, encassEntry.getKey(), (Encass) encassEntry.getValue(), document)
         ).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> map = entityMap.get(Encass.class);
+        return buildEntities(map, bundle, bundleType, document);
     }
 
     @NotNull
@@ -94,7 +101,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, encass.getId(), encassAssertionElement);
-        if(reusableEntity){
+        if (reusableEntity) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         }
         return entity;

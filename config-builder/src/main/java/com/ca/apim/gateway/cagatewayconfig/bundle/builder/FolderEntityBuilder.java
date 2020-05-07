@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import org.w3c.dom.Document;
@@ -58,16 +59,22 @@ public class FolderEntityBuilder implements EntityBuilder {
         return entity;
     }
 
-    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+    @Override
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> map = entityMap.get(Folder.class);
+        return buildEntities(map, bundleType, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, BundleType bundleType, Document document) {
         // no folder has to be added to environment bundle
-        if (bundle.getFolders().isEmpty() || bundleType == ENVIRONMENT) {
+        if (entities.isEmpty() || bundleType == ENVIRONMENT) {
             return Collections.emptyList();
         }
         Map<Folder, Collection<Folder>> folderChildrenMap = new HashMap<>();
 
-        bundle.getFolders().values().forEach(folder -> addFolder(folder, folderChildrenMap));
+        entities.values().forEach(folder -> addFolder((Folder)folder, folderChildrenMap));
 
-        Folder rootFolder = bundle.getFolders().get("");
+        Folder rootFolder = (Folder)entities.get("");
         if (rootFolder == null) {
             throw new EntityBuilderException("Could not locate root folder.");
         }
@@ -83,6 +90,10 @@ public class FolderEntityBuilder implements EntityBuilder {
             return buildFolderEntity(f, f.getId(), parentFolderId, document);
         })
                 .collect(Collectors.toList());
+    }
+
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        return buildEntities(bundle.getFolders(), bundleType, document);
     }
 
     @Override

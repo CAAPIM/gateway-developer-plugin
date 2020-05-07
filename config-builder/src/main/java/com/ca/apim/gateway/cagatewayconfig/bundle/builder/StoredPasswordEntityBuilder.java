@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.w3c.dom.Document;
@@ -15,6 +16,7 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.STORED_PASSWORD_TYPE;
@@ -37,16 +39,26 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        return buildEntities(bundle.getStoredPasswords(), bundle, bundleType, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                return bundle.getStoredPasswords().entrySet().stream()
+                return entities.entrySet().stream()
                         .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(STORED_PASSWORD_TYPE, e.getKey(), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
-                return bundle.getStoredPasswords().entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), e.getValue(), document)).collect(toList());
+                return entities.entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), (StoredPassword)e.getValue(), document)).collect(toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
+    }
+
+    @Override
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> map = entityMap.get(StoredPassword.class);
+        return buildEntities(map, bundle, bundleType, document);
     }
 
     private Entity buildStoredPasswordEntity(String name, StoredPassword storedPassword, Document document) {

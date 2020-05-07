@@ -6,10 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.beans.SoapResource;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -50,14 +47,24 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        return buildEntities(bundle.getServices(), bundle, bundleType, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         // no service has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
-        return bundle.getServices().entrySet().stream().map(serviceEntry ->
-                buildServiceEntity(bundle, serviceEntry.getKey(), serviceEntry.getValue(), document)
+        return entities.entrySet().stream().map(serviceEntry ->
+                buildServiceEntity(bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
         ).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> map = entityMap.get(Service.class);
+        return buildEntities(map, bundle, bundleType, document);
     }
 
     @NotNull
@@ -100,16 +107,16 @@ public class ServiceEntityBuilder implements EntityBuilder {
                     .entrySet()
                     .stream()
                     .collect(Collectors
-                            .toMap(p -> "property." + p.getKey(), 
-                                p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + insertPrefixToEnvironmentVariable(p.getKey(), service.getName()) : p.getValue()));
+                            .toMap(p -> "property." + p.getKey(),
+                                    p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + insertPrefixToEnvironmentVariable(p.getKey(), service.getName()) : p.getValue()));
         }
 
-        if(properties == null) {
+        if (properties == null) {
             properties = new HashMap<>();
         }
 
         properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, false);
-        if(isSoapService) {
+        if (isSoapService) {
             properties.put(KEY_VALUE_SOAP, true);
             properties.put(KEY_VALUE_SOAP_VERSION, service.getSoapVersion());
             properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, service.isWssProcessingEnabled());
@@ -146,7 +153,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         Element httpMappingElement = document.createElement(HTTP_MAPPING);
         serviceMappingsElement.appendChild(httpMappingElement);
 
-        if(service.getUrl() != null) {
+        if (service.getUrl() != null) {
             httpMappingElement.appendChild(createElementWithTextContent(document, URL_PATTERN, service.getUrl()));
         }
         Element verbsElement = document.createElement(VERBS);

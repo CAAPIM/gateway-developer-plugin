@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.ScheduledTask;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -18,15 +19,14 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.SCHEDULED_TASK_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttributesAndChildren;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.Collections.emptyList;
 
 @Singleton
@@ -41,14 +41,24 @@ public class ScheduledTaskEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        return buildEntities(bundle.getScheduledTasks(), bundle, bundleType, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         // no sched task has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
-        return bundle.getScheduledTasks().entrySet().stream().map(scheduledTaskEntry ->
-                buildScheduledTaskEntity(bundle, scheduledTaskEntry.getKey(), scheduledTaskEntry.getValue(), document)
+        return entities.entrySet().stream().map(scheduledTaskEntry ->
+                buildScheduledTaskEntity(bundle, scheduledTaskEntry.getKey(), (ScheduledTask)scheduledTaskEntry.getValue(), document)
         ).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GatewayEntity> map = entityMap.get(ScheduledTask.class);
+        return buildEntities(map, bundle, bundleType, document);
     }
 
     private Entity buildScheduledTaskEntity(Bundle bundle, String name, ScheduledTask scheduledTask, Document document) {
