@@ -80,18 +80,14 @@ public class EncassEntityBuilder implements EntityBuilder {
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + encass.getPolicy());
         }
-        Set<Annotation> annotations = encass.getAnnotations();
-        boolean reusableEntity = true;
-        if (annotations == null || !(annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType())))) {
-            reusableEntity = false;
-        }
+        final String id = idGenerator.generate();
 
         Element encassAssertionElement = createElementWithAttributesAndChildren(
                 document,
                 ENCAPSULATED_ASSERTION,
                 ImmutableMap.of(ATTRIBUTE_ID, encass.getId()),
                 createElementWithTextContent(document, NAME, name),
-                createElementWithTextContent(document, GUID, encass.getGuid()),
+                createElementWithTextContent(document, GUID, id),
                 createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policy.getId()),
                 buildArguments(encass, document),
                 buildResults(encass, document)
@@ -100,11 +96,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         final Map<String, Object> properties = Optional.ofNullable(encass.getProperties()).orElse(new HashMap<>());
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
-        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, encass.getId(), encassAssertionElement);
-        if (reusableEntity) {
-            entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
-        }
-        return entity;
+        return getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, id, encassAssertionElement);
     }
 
     private Element buildResults(Encass encass, Document document) {
