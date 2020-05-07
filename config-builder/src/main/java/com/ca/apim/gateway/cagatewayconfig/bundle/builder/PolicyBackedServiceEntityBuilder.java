@@ -17,8 +17,10 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
@@ -56,7 +58,7 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = entityMap.get(PolicyBackedService.class);
+        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(PolicyBackedService.class)).orElse(Collections.emptyMap());
         return buildEntities(map, bundle, bundleType, document);
     }
 

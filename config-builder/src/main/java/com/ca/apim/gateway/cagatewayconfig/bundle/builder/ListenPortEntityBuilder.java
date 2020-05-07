@@ -16,10 +16,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.getDeploymentBundle;
@@ -81,7 +78,7 @@ public class ListenPortEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = entityMap.get(ListenPort.class);
+        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(ListenPort.class)).orElse(Collections.emptyMap());
         return buildEntities(map, bundle, bundleType, document);
     }
 

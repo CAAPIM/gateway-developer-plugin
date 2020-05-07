@@ -6,9 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -22,7 +24,6 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderHelper.getEntityWithNameMapping;
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -65,7 +66,7 @@ public class EncassEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = entityMap.get(Encass.class);
+        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(Encass.class)).orElse(Collections.emptyMap());
         return buildEntities(map, bundle, bundleType, document);
     }
 
@@ -85,9 +86,9 @@ public class EncassEntityBuilder implements EntityBuilder {
         Element encassAssertionElement = createElementWithAttributesAndChildren(
                 document,
                 ENCAPSULATED_ASSERTION,
-                ImmutableMap.of(ATTRIBUTE_ID, encass.getId()),
+                ImmutableMap.of(ATTRIBUTE_ID, id),
                 createElementWithTextContent(document, NAME, name),
-                createElementWithTextContent(document, GUID, id),
+                createElementWithTextContent(document, GUID, encass.getGuid()),
                 createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policy.getId()),
                 buildArguments(encass, document),
                 buildResults(encass, document)

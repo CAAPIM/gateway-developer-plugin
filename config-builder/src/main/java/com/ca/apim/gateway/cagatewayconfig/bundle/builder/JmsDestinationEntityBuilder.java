@@ -24,10 +24,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType.ON_COMPLETION;
@@ -82,7 +79,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = entityMap.get(JmsDestination.class);
+        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(JmsDestination.class)).orElse(Collections.emptyMap());
         return buildEntities(map, bundle, bundleType, document);
     }
 

@@ -13,9 +13,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ID_PROVIDER_CONFIG_TYPE;
@@ -55,7 +53,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = entityMap.get(IdentityProvider.class);
+        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(IdentityProvider.class)).orElse(Collections.emptyMap());
         return buildEntities(map, bundle, bundleType, document);
     }
 

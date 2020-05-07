@@ -66,7 +66,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = entityMap.get(Policy.class);
+        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(Policy.class)).orElse(Collections.emptyMap());
         return buildEntities(map, annotatedEntity, bundle, bundleType, document);
     }
 

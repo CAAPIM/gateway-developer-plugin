@@ -94,12 +94,14 @@ public class BundleEntityBuilder {
             policyMap.put(policyNameWithPath, policyEntity);
             entityDependenciesMap.put(Policy.class, policyMap);
             Set<Dependency> dependencies = policyEntity.getUsedEntities();
-            for (Dependency dependency : dependencies) {
-                Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
-                Map<String, ? extends GatewayEntity> entities = bundle.getEntities(entityClass);
-                GatewayEntity dependentEntity = entities.get(dependency.getName());
-                Map<String, GatewayEntity> dependencyMap = getEntities(entityClass, entityDependenciesMap);
-                dependencyMap.put(dependency.getName(),  dependentEntity);
+            if(dependencies != null){
+                for (Dependency dependency : dependencies) {
+                    Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
+                    Map<String, ? extends GatewayEntity> entities = bundle.getEntities(entityClass);
+                    GatewayEntity dependentEntity = entities.get(dependency.getName());
+                    Map<String, GatewayEntity> dependencyMap = getEntities(entityClass, entityDependenciesMap);
+                    dependencyMap.put(dependency.getName(),  dependentEntity);
+                }
             }
         }
         return entityDependenciesMap;

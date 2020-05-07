@@ -19,8 +19,10 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CASSANDRA_CONNECTION_TYPE;
@@ -44,7 +46,7 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> entities = entityMap.get(CassandraConnection.class);
+        Map<String, GatewayEntity> entities = Optional.ofNullable(entityMap.get(CassandraConnection.class)).orElse(Collections.emptyMap());
         return buildEntities(entities, bundle, bundleType, document);
     }
 

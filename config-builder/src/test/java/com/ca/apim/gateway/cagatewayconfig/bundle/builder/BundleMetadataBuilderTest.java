@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.reflections.Reflections;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 
@@ -70,6 +71,7 @@ public class BundleMetadataBuilderTest {
     EntityLoaderRegistry entityLoaderRegistry;
     @Mock
     BundleCache bundleCache;
+    private EntityTypeRegistry entityTypeRegistry = new EntityTypeRegistry(new Reflections());
 
     @BeforeAll
     public static void setUp() throws Exception {
@@ -293,7 +295,7 @@ public class BundleMetadataBuilderTest {
 
     private BundleEntityBuilder createBundleEntityBuilder() {
         FolderEntityBuilder folderBuilder = new FolderEntityBuilder(ID_GENERATOR);
-        PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE);
+        PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR);
         EncassEntityBuilder encassBuilder = new EncassEntityBuilder(ID_GENERATOR);
         StoredPasswordEntityBuilder storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(ID_GENERATOR);
         JdbcConnectionEntityBuilder jdbcConnectionEntityBuilder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
@@ -309,7 +311,7 @@ public class BundleMetadataBuilderTest {
         entityBuilders.add(clusterPropertyEntityBuilder);
         entityBuilders.add(trustedCertEntityBuilder);
 
-        return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder());
+        return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
     }
 
     private static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath) {

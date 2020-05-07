@@ -61,7 +61,7 @@ public class FolderEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = entityMap.get(Folder.class);
+        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(Folder.class)).orElse(Collections.emptyMap());
         return buildEntities(map, bundleType, document);
     }
 

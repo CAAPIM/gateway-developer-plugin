@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,17 +38,17 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
     }
     @Override
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> globalProperties = entityMap.get(GlobalEnvironmentProperty.class);
-        Map<String, GatewayEntity> clusterProperties = entityMap.get(ClusterProperty.class);
-        return buildEntities(globalProperties, clusterProperties, bundle, bundleType, document);
+        Map<String, GatewayEntity> globalProperties = Optional.ofNullable(entityMap.get(GlobalEnvironmentProperty.class)).orElse(Collections.emptyMap());
+        Map<String, GatewayEntity> clusterProperties = Optional.ofNullable(entityMap.get(ClusterProperty.class)).orElse(Collections.emptyMap());
+        return buildEntities(globalProperties, clusterProperties, bundleType, document);
     }
 
-    private List<Entity> buildEntities(Map<String, ?> globalProperties, Map<String, ?> clusterProperties, Bundle bundle, BundleType bundleType, Document document){
+    private List<Entity> buildEntities(Map<String, ?> globalProperties, Map<String, ?> clusterProperties, BundleType bundleType, Document document){
         Stream.Builder<Entity> streamBuilder = Stream.builder();
         switch (bundleType) {
             case DEPLOYMENT:
                 clusterProperties.entrySet().stream().map(propertyEntry -> {
-                        if (bundle.getGlobalEnvironmentProperties().containsKey(PREFIX_GATEWAY + propertyEntry.getKey())) {
+                        if (globalProperties.containsKey(PREFIX_GATEWAY + propertyEntry.getKey())) {
                             throw new EntityBuilderException("The Cluster property: '" + propertyEntry.getKey() + "' is defined in both static.properties and env.properties");
                         }
                         return buildClusterPropertyEntity(propertyEntry.getKey(), (ClusterProperty)propertyEntry.getValue(), document);
@@ -74,7 +75,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         Map<String, ClusterProperty> clusterPropertyMap = bundle.getStaticProperties();
         Map<String, GlobalEnvironmentProperty>  globalEnvironmentProperties = bundle.getGlobalEnvironmentProperties();
-        return buildEntities(globalEnvironmentProperties, clusterPropertyMap, bundle, bundleType, document);
+        return buildEntities(globalEnvironmentProperties, clusterPropertyMap, bundleType, document);
     }
 
     @Override

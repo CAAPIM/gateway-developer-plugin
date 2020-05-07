@@ -13,14 +13,17 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
+import org.reflections.Reflections;
+import java.security.cert.CertificateFactory;
 import java.util.*;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
@@ -33,6 +36,7 @@ import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 class BundleEntityBuilderTest {
 
@@ -44,8 +48,7 @@ class BundleEntityBuilderTest {
     private static final String TEST_GUID = UUID.randomUUID().toString();
     private static final String TEST_POLICY_ID = "PolicyID";
     private static final String TEST_ENCASS_ID = "EncassID";
-    @Mock
-    private EntityTypeRegistry entityTypeRegistry;
+    private EntityTypeRegistry entityTypeRegistry = new EntityTypeRegistry(new Reflections());
 
     // This class is covered by testing others, so a simple testing is enough here.
     @Test
