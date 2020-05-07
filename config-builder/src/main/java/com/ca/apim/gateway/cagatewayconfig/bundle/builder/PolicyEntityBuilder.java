@@ -236,7 +236,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             final String encassName = encapsulatedAssertionElement.getAttribute(ENCASS_NAME);
             Encass encass = getEncass(bundle, encassName);
             final String guid = findEncassReferencedGuid(policy, encass, encapsulatedAssertionElement, encassName);
-            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encass, guid, annotatedEntity);
+            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encass, encassName, guid, annotatedEntity);
         } else if (!isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
             Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
             Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
@@ -275,10 +275,10 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return guid;
     }
 
-    private void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, Encass encass, String guid, AnnotatedEntity annotatedEntity) {
-        String encassName = encass.getName();
+    private void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, Encass encass, String name, String guid, AnnotatedEntity annotatedEntity) {
+        String encassName = name;
         String encassGuid = guid;
-        if (!encass.isReusableEntity()) {
+        if (encass != null && !encass.isReusableEntity()) {
             encassGuid = idGenerator.generateGuid();
             encass.setGuid(encassGuid);
             encass.setId(idGenerator.generate());

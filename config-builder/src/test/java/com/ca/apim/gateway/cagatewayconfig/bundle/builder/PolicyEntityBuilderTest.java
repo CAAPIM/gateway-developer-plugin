@@ -76,6 +76,7 @@ class PolicyEntityBuilderTest {
         policy.setName(policy.getPath());
         Encass encass = new Encass();
         encass.setGuid("encass");
+        encass.setName(TEST_ENCASS);
         Set<Annotation> annotations = new HashSet<>();
         Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY);
         annotations.add(annotation);
@@ -270,6 +271,7 @@ class PolicyEntityBuilderTest {
         String policyPath = "my/policy/path.xml";
         Encass encass = new Encass();
         encass.setGuid("123");
+        encass.setName(TEST_ENCASS);
         encass.setPolicy(policyPath);
         bundle.getEncasses().put(TEST_ENCASS, encass);
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
@@ -289,6 +291,7 @@ class PolicyEntityBuilderTest {
         String policyPath = "my/policy-_¯-¯_/_¯-¯_-path.xml";
         Encass encass = new Encass();
         encass.setGuid("123");
+        encass.setName(TEST_ENCASS);
         encass.setPolicy(policyPath);
         bundle.getEncasses().put(TEST_ENCASS, encass);
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
@@ -309,6 +312,7 @@ class PolicyEntityBuilderTest {
         Encass encass = new Encass();
         encass.setGuid("123");
         encass.setPolicy(policyPath);
+        encass.setName(TEST_ENCASS);
         Bundle dependencyBundle = new Bundle();
         dependencyBundle.getEncasses().put(TEST_ENCASS, encass);
         bundle.getDependencies().add(dependencyBundle);
@@ -582,7 +586,7 @@ class PolicyEntityBuilderTest {
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/global.xml");
-        policyToBuild.setName(policyToBuild.getPath());
+        policyToBuild.setName("global.xml");
         policyToBuild.setId("global-policy-id");
         policyToBuild.setGuid("global-policy-guid-123");
         policyToBuild.setTag("global-policy");
@@ -594,7 +598,7 @@ class PolicyEntityBuilderTest {
         Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
 
         assertEquals(policyToBuild.getId(), policyEntity.getId());
-        assertEquals(policyToBuild.getName(), policyEntity.getName());
+        assertEquals(policyToBuild.getPath(), policyEntity.getName());
         assertNotNull(policyEntity.getXml());
         Element policyDetail = getSingleChildElement(policyEntity.getXml(), POLICY_DETAIL);
         assertNotNull(policyDetail);
@@ -613,7 +617,7 @@ class PolicyEntityBuilderTest {
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/internal.xml");
-        policyToBuild.setName(policyToBuild.getPath());
+        policyToBuild.setName("internal.xml");
         policyToBuild.setId("internal-policy-id");
         policyToBuild.setGuid("internal-policy-guid-123");
         policyToBuild.setTag("internal-policy");
@@ -625,7 +629,7 @@ class PolicyEntityBuilderTest {
         Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
 
         assertEquals(policyToBuild.getId(), policyEntity.getId());
-        assertEquals(policyToBuild.getName(), policyEntity.getName());
+        assertEquals(policyToBuild.getPath(), policyEntity.getName());
         assertNotNull(policyEntity.getXml());
         Element policyDetail = getSingleChildElement(policyEntity.getXml(), POLICY_DETAIL);
         assertNotNull(policyDetail);

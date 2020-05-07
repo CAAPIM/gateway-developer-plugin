@@ -147,6 +147,7 @@ class EncassEntityBuilderTest {
         Encass encass = new Encass();
         encass.setPolicy(policyPath);
         encass.setGuid(encassGuid);
+        encass.setId("testId");
         encass.setArguments(new HashSet<>());
         EncassArgument param1 = new EncassArgument();
         param1.setName("Param1");

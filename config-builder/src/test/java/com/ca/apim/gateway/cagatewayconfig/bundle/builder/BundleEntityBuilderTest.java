@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang3.tuple.Pair;
@@ -143,7 +144,7 @@ class BundleEntityBuilderTest {
             assertEquals(EntityTypes.FOLDER_TYPE, getSingleChildElementTextContent(item1, TYPE));
             assertNotNull(getSingleChildElement(item1, RESOURCE));
             final Element item2 = itemList.get(1);
-            assertEquals(TEST_ENCASS_POLICY, getSingleChildElementTextContent(item2, NAME));
+            assertEquals("my-bundle-encass-TestEncass-" +TEST_ENCASS_POLICY + "-1.0", getSingleChildElementTextContent(item2, NAME));
             assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item2, TYPE));
             assertNotNull(getSingleChildElement(item2, RESOURCE));
             final Element item3 = itemList.get(2);
@@ -163,6 +164,7 @@ class BundleEntityBuilderTest {
         Annotation annotation = new Annotation("@bundle");
         annotation.setName(TEST_ENCASS_ANNOTATION_NAME);
         annotations.add(annotation);
+        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY));
         encass.setAnnotations(annotations);
         encass.setProperties(ImmutableMap.of(
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
