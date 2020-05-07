@@ -24,6 +24,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_BUNDLE;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
@@ -223,5 +225,24 @@ public class Policy extends Folderable {
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         setPath(PathUtils.unixPath(getPath()));
+    }
+
+    public boolean hasAnnotated() {
+        return annotations != null && !annotations.isEmpty();
+    }
+
+    @Override
+    public boolean hasBundleAnnotation(){
+        if(hasAnnotated()){
+            return annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_BUNDLE.equals(annotation.getType()));
+        }
+        return false;
+    }
+
+    public boolean isReusableEntity(){
+        if(hasAnnotated()){
+            return annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType()));
+        }
+        return false;
     }
 }

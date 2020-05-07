@@ -176,4 +176,11 @@ public class Encass extends GatewayEntity {
                                                       final String projectVersion) {
         return AnnotatedEntityCreator.createAnnotatedEntity(this, projectName, projectVersion);
     }
+
+    public boolean isReusableEntity(){
+        if(hasAnnotated()){
+            return annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType()));
+        }
+        return false;
+    }
 }

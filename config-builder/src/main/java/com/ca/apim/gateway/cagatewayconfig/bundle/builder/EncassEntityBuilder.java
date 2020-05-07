@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -50,24 +51,24 @@ public class EncassEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getEncasses(), bundle, bundleType, document);
+        return buildEntities(bundle.getEncasses(), null, bundle, bundleType, document);
     }
 
-    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> entities, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
         // no encass has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
         return entities.entrySet().stream().map(encassEntry ->
-                buildEncassEntity(bundle, encassEntry.getKey(), (Encass) encassEntry.getValue(), document)
+                buildEncassEntity(annotatedEntity, bundle, encassEntry.getKey(), (Encass) encassEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
     @Override
     public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
         Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(Encass.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundle, bundleType, document);
+        return buildEntities(map, annotatedEntity, bundle, bundleType, document);
     }
 
     @NotNull
@@ -76,19 +77,31 @@ public class EncassEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildEncassEntity(Bundle bundle, String name, Encass encass, Document document) {
+    private Entity buildEncassEntity(AnnotatedEntity annotatedEntity, Bundle bundle, String name, Encass encass, Document document) {
         Policy policy = bundle.getPolicies().get(encass.getPolicy());
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + encass.getPolicy());
         }
-        final String id = idGenerator.generate();
+        final boolean reusableEntity = encass.isReusableEntity();
+        String encassName = name;
+        String guid = encass.getGuid();
+        String id = encass.getId();
+        if (!reusableEntity) {
+            encassName = annotatedEntity.getUniquePrefix() + name + annotatedEntity.getUniqueSuffix();
+            //guid and id are regenerated in policy entity builder if this encass is referred by policy
+            //if the annotated entity is encass then it will not be referred by policy so id and guid should be regenerated here.
+            if (annotatedEntity.getEntityName().equals(name)) {
+                guid = idGenerator.generateGuid();
+                id = idGenerator.generate();
+            }
+        }
 
         Element encassAssertionElement = createElementWithAttributesAndChildren(
                 document,
                 ENCAPSULATED_ASSERTION,
                 ImmutableMap.of(ATTRIBUTE_ID, id),
-                createElementWithTextContent(document, NAME, name),
-                createElementWithTextContent(document, GUID, encass.getGuid()),
+                createElementWithTextContent(document, NAME, encassName),
+                createElementWithTextContent(document, GUID, guid),
                 createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policy.getId()),
                 buildArguments(encass, document),
                 buildResults(encass, document)
@@ -97,7 +110,13 @@ public class EncassEntityBuilder implements EntityBuilder {
         final Map<String, Object> properties = Optional.ofNullable(encass.getProperties()).orElse(new HashMap<>());
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
-        return getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, id, encassAssertionElement);
+        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, encassName, id, encassAssertionElement);
+        if (reusableEntity) {
+            entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
+        } else {
+            entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
+        }
+        return entity;
     }
 
     private Element buildResults(Encass encass, Document document) {
