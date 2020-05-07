@@ -87,12 +87,14 @@ public class EncassEntityBuilder implements EntityBuilder {
         String guid = encass.getGuid();
         String id = encass.getId();
         if (!reusableEntity) {
-            encassName = annotatedEntity.getUniquePrefix() + name + annotatedEntity.getUniqueSuffix();
-            //guid and id are regenerated in policy entity builder if this encass is referred by policy
-            //if the annotated entity is encass then it will not be referred by policy so id and guid should be regenerated here.
-            if (annotatedEntity.getEntityName().equals(name)) {
-                guid = idGenerator.generateGuid();
-                id = idGenerator.generate();
+            if(annotatedEntity != null){
+                encassName = annotatedEntity.getUniquePrefix() + name + annotatedEntity.getUniqueSuffix();
+                //guid and id are regenerated in policy entity builder if this encass is referred by policy
+                //if the annotated entity is encass then it will not be referred by policy so id and guid should be regenerated here.
+                if (annotatedEntity.getEntityName().equals(name)) {
+                    guid = idGenerator.generateGuid();
+                    id = idGenerator.generate();
+                }
             }
         }
 

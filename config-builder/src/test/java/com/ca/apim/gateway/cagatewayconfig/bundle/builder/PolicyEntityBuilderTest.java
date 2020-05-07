@@ -274,8 +274,8 @@ class PolicyEntityBuilderTest {
         bundle.getEncasses().put(TEST_ENCASS, encass);
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
         document.appendChild(encapsulatedAssertionElement);
-
-        PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
         assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -293,8 +293,8 @@ class PolicyEntityBuilderTest {
         bundle.getEncasses().put(TEST_ENCASS, encass);
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
         document.appendChild(encapsulatedAssertionElement);
-
-        PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
         assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -315,7 +315,8 @@ class PolicyEntityBuilderTest {
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
         document.appendChild(encapsulatedAssertionElement);
 
-        PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
         assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -340,8 +341,8 @@ class PolicyEntityBuilderTest {
 
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
         document.appendChild(encapsulatedAssertionElement);
-
-        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement));
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null));
         assertTrue(exception.getMessage().contains(TEST_ENCASS));
     }
 
@@ -349,8 +350,8 @@ class PolicyEntityBuilderTest {
     void testPrepareEncapsulatedAssertionMissingEncass() {
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
         document.appendChild(encapsulatedAssertionElement);
-
-        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement));
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null));
         assertTrue(exception.getMessage().contains(TEST_ENCASS));
     }
 
@@ -362,8 +363,8 @@ class PolicyEntityBuilderTest {
         Element noOpElement = document.createElement(NO_OP_IF_CONFIG_MISSING);
         encapsulatedAssertionElement.appendChild(noOpElement);
         noOpElement.setAttribute(PolicyEntityBuilder.BOOLEAN_VALUE, "true");
-
-        PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
         assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -376,8 +377,8 @@ class PolicyEntityBuilderTest {
     void testPrepareEncapsulatedAssertionMissingPolicyPath() {
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, "my-encass", "ad620794-a27f-4d94-85b7-669ba838367b");
         document.appendChild(encapsulatedAssertionElement);
-
-        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement));
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null));
         assertTrue(exception.getMessage().contains(policy.getPath()));
     }
 
@@ -389,8 +390,8 @@ class PolicyEntityBuilderTest {
         Element noOpElement = document.createElement(NO_OP_IF_CONFIG_MISSING);
         encapsulatedAssertionElement.appendChild(noOpElement);
         noOpElement.setAttribute(PolicyEntityBuilder.BOOLEAN_VALUE, "true");
-
-        PolicyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
         assertEquals("my-encass", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
@@ -548,7 +549,7 @@ class PolicyEntityBuilderTest {
         parentFolder.setId("folder-id");
         policyToBuild.setParentFolder(parentFolder);
 
-        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
+        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
 
         assertEquals(policyToBuild.getId(), policyEntity.getId());
     }
@@ -570,7 +571,7 @@ class PolicyEntityBuilderTest {
         policyBackedService.setInterfaceName("pbs-interface");
         policyBackedService.setOperations(Sets.newHashSet(new PolicyBackedServiceOperation("my-op", policyToBuild.getPath())));
         bundle.getPolicyBackedServices().put("pbs", policyBackedService);
-        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
+        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
 
         assertEquals(policyToBuild.getId(), policyEntity.getId());
     }
@@ -590,7 +591,7 @@ class PolicyEntityBuilderTest {
         parentFolder.setId("folder-id");
         policyToBuild.setParentFolder(parentFolder);
 
-        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
+        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
 
         assertEquals(policyToBuild.getId(), policyEntity.getId());
         assertEquals(policyToBuild.getName(), policyEntity.getName());
@@ -621,7 +622,7 @@ class PolicyEntityBuilderTest {
         parentFolder.setId("folder-id");
         policyToBuild.setParentFolder(parentFolder);
 
-        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, bundle, document);
+        Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
 
         assertEquals(policyToBuild.getId(), policyEntity.getId());
         assertEquals(policyToBuild.getName(), policyEntity.getName());

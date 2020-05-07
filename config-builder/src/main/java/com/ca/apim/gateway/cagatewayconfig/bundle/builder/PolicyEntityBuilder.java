@@ -123,7 +123,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         Element policyElement = policyDocument.getDocumentElement();
         final String policyName;
         if (!policy.isReusableEntity()) {
-            policyName = annotatedEntity.getUniquePrefix() + policy.getName() + annotatedEntity.getUniqueSuffix();
+            policyName = annotatedEntity != null ? annotatedEntity.getUniquePrefix() + policy.getName() + annotatedEntity.getUniqueSuffix() : policy.getName();
         } else {
             policyName = policy.getName();
         }
@@ -282,7 +282,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             encassGuid = idGenerator.generateGuid();
             encass.setGuid(encassGuid);
             encass.setId(idGenerator.generate());
-            encassName = annotatedEntity.getUniquePrefix() + encassName + annotatedEntity.getUniqueSuffix();
+            encassName = annotatedEntity != null ? annotatedEntity.getUniquePrefix() + encassName + annotatedEntity.getUniqueSuffix() : encassName;
         }
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
                 policyDocument,
@@ -363,7 +363,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String policyName = policy.getName();
         String policyNameWithPath = policy.getPath();
         if (!reusableEntity) {
-            policyName = annotatedEntity.getUniquePrefix() + policyName + annotatedEntity.getUniqueSuffix();
+            policyName = annotatedEntity != null ? annotatedEntity.getUniquePrefix() + policyName + annotatedEntity.getUniqueSuffix(): policyName;
             policyNameWithPath = PathUtils.extractPath(policy.getPath()) + policyName;
         }
 
