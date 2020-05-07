@@ -37,7 +37,7 @@ public class Entity {
     }
 
     public Element getXml() {
-        if(xml != null) {
+        if (xml != null) {
             return (Element) xml.cloneNode(true);
         }
         return xml;

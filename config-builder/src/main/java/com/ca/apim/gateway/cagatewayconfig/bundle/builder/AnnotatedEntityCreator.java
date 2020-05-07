@@ -10,6 +10,8 @@ import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstant
 
 public class AnnotatedEntityCreator {
 
+    private AnnotatedEntityCreator() {}
+
     /**
      * Creates AnnotatedEntity object by scanning all the annotations and gathering all the information required to
      * generate the bundle and its metadata.
@@ -35,7 +37,7 @@ public class AnnotatedEntityCreator {
                         description = encass.getProperties().getOrDefault("description", "").toString();
                     }
                     annotatedEntity.setTags(annotation.getTags());
-                    annotatedEntity.setBundleType(true);
+                    annotatedEntity.setBundle(true);
                     annotatedEntity.setEntityName(encass.getName());
                     annotatedEntity.setDescription(description);
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
@@ -46,16 +48,16 @@ public class AnnotatedEntityCreator {
                     break;
                 case ANNOTATION_TYPE_REUSABLE:
                 case ANNOTATION_TYPE_REUSABLE_BUNDLE:
-                    annotatedEntity.setReusableType(true);
+                    annotatedEntity.setReusable(true);
                     break;
                 case ANNOTATION_TYPE_REUSABLE_ENTITY:
                     annotatedEntity.setReusableEntity(true);
                     break;
                 case ANNOTATION_TYPE_REDEPLOYABLE:
-                    annotatedEntity.setRedeployableType(true);
+                    annotatedEntity.setRedeployable(true);
                     break;
                 case ANNOTATION_TYPE_EXCLUDE:
-                    annotatedEntity.setExcludeType(true);
+                    annotatedEntity.setExclude(true);
                     break;
                 default:
                     break;

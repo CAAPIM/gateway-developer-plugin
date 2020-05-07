@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -47,8 +48,8 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                return entities.entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(STORED_PASSWORD_TYPE, e.getKey(), idGenerator.generate()))
+                return entities.keySet().stream()
+                        .map(o -> EntityBuilderHelper.getEntityWithOnlyMapping(STORED_PASSWORD_TYPE, o, idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), (StoredPassword)e.getValue(), document)).collect(toList());
@@ -77,7 +78,7 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public Integer getOrder() {
+    public @NotNull Integer getOrder() {
         return ORDER;
     }
 }

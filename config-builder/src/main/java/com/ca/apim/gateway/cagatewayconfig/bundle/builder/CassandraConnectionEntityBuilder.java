@@ -45,7 +45,8 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity,
+                              Bundle bundle, BundleType bundleType, Document document) {
         Map<String, GatewayEntity> entities = Optional.ofNullable(entityMap.get(CassandraConnection.class)).orElse(Collections.emptyMap());
         return buildEntities(entities, bundle, bundleType, document);
     }
@@ -53,8 +54,8 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document){
         switch (bundleType) {
             case DEPLOYMENT:
-                return entities.entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, e.getKey(), idGenerator.generate()))
+                return entities.keySet().stream()
+                        .map(key -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, key, idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->

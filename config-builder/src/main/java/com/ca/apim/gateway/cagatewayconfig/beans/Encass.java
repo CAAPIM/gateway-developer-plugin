@@ -77,7 +77,7 @@ public class Encass extends GatewayEntity {
         this.properties = properties;
     }
 
-    public boolean hasAnnotated() {
+    public boolean hasAnnotation() {
         return annotations != null && !annotations.isEmpty();
     }
 
@@ -165,8 +165,8 @@ public class Encass extends GatewayEntity {
 
     @Override
     public boolean hasBundleAnnotation(){
-        if(hasAnnotated()){
-            return annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_BUNDLE.equals(annotation.getType()));
+        if (hasAnnotation()){
+            return annotations.contains(new Annotation(ANNOTATION_TYPE_BUNDLE));
         }
         return false;
     }

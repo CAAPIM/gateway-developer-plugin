@@ -39,8 +39,8 @@ public class BundleMetadataBuilder {
         builder.description(annotatedEntity.getDescription());
         builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
         builder.tags(annotatedEntity.getTags());
-        builder.reusableAndRedeployable(annotatedEntity.isReusableTypeEnabled(),
-                annotatedEntity.isRedeployableTypeEnabled());
+        builder.reusableAndRedeployable(annotatedEntity.isReusable(),
+                annotatedEntity.isRedeployable());
 
         final List<Metadata> desiredEntities = new ArrayList<>();
         desiredEntities.add(annotatedEntity.getEntity().getMetadata());

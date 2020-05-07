@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -53,18 +54,18 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
                         }
                         return buildClusterPropertyEntity(propertyEntry.getKey(), (ClusterProperty)propertyEntry.getValue(), document);
                 }).forEach(streamBuilder);
-                globalProperties.entrySet().stream()
-                        .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
-                        .map(propertyEntry ->
-                                EntityBuilderHelper.getEntityWithOnlyMapping(CLUSTER_PROPERTY_TYPE, propertyEntry.getKey().substring(PREFIX_GATEWAY.length()), idGenerator.generate())
-                        ).forEach(streamBuilder);
+                globalProperties.keySet().stream()
+                        .filter(o -> o.startsWith(PREFIX_GATEWAY))
+                        .map(o -> EntityBuilderHelper.getEntityWithOnlyMapping(CLUSTER_PROPERTY_TYPE, o.substring(PREFIX_GATEWAY.length()), idGenerator.generate()))
+                        .forEach(streamBuilder);
                 break;
             case ENVIRONMENT:
                 globalProperties.entrySet().stream()
                         .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
                         .map(propertyEntry ->
-                                buildClusterPropertyEntity(propertyEntry.getKey().substring(PREFIX_GATEWAY.length()), (GlobalEnvironmentProperty)propertyEntry.getValue(), document)
-                        ).forEach(streamBuilder);
+                                buildClusterPropertyEntity(propertyEntry.getKey().substring(PREFIX_GATEWAY.length()),
+                                        (GlobalEnvironmentProperty) propertyEntry.getValue(), document))
+                        .forEach(streamBuilder);
                 break;
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
@@ -79,7 +80,7 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public Integer getOrder() {
+    public @NotNull Integer getOrder() {
         return ORDER;
     }
 
