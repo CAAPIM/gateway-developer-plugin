@@ -289,6 +289,13 @@ public class BundleMetadataBuilderTest {
             bundle.getDependencyMap().get(policyDependency).add(clusterDependency);
             bundle.getDependencyMap().get(policyDependency).add(passwordDependency);
             bundle.getDependencyMap().get(policyDependency).add(trustedCertDependency);
+            Set<Dependency> dependencies = new HashSet<>();
+            dependencies.add(jdbcDependency);
+            dependencies.add(clusterDependency);
+            dependencies.add(passwordDependency);
+            dependencies.add(trustedCertDependency);
+
+            policy.setUsedEntities(dependencies);
         }
         return bundle;
     }
