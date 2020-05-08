@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -97,7 +98,7 @@ public class FolderEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public Integer getOrder() {
+    public @NotNull Integer getOrder() {
         return ORDER;
     }
 

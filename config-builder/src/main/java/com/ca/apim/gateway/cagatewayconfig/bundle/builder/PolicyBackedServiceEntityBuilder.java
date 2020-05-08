@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.PolicyBackedService;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -99,7 +100,7 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public Integer getOrder() {
+    public @NotNull Integer getOrder() {
         return ORDER;
     }
 }

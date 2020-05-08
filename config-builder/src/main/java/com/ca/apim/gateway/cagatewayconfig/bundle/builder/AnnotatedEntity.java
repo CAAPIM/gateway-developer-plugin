@@ -15,10 +15,10 @@ public class AnnotatedEntity<T> {
     private String bundleName;
     private String policyName;
     private String description;
-    private boolean isBundleType;
-    private boolean isReusableType;
-    private boolean isRedeployableType;
-    private boolean isExcludeType;
+    private boolean bundle;
+    private boolean reusable;
+    private boolean redeployable;
+    private boolean exclude;
     private boolean reusableEntity;
     private String uniquePrefix;
     private String uniqueSuffix;
@@ -92,36 +92,36 @@ public class AnnotatedEntity<T> {
         return description;
     }
 
-    public boolean isBundleTypeEnabled() {
-        return isBundleType;
+    public boolean isBundle() {
+        return bundle;
     }
 
-    public void setBundleType(boolean isBundleType) {
-        this.isBundleType = isBundleType;
+    public void setBundle(boolean isBundleType) {
+        this.bundle = isBundleType;
     }
 
-    public boolean isReusableTypeEnabled() {
-        return isReusableType;
+    public boolean isReusable() {
+        return reusable;
     }
 
-    public void setReusableType(boolean isReusableType) {
-        this.isReusableType = isReusableType;
+    public void setReusable(boolean isReusableType) {
+        this.reusable = isReusableType;
     }
 
-    public boolean isRedeployableTypeEnabled() {
-        return isRedeployableType;
+    public boolean isRedeployable() {
+        return redeployable;
     }
 
-    public void setRedeployableType(boolean isRedeployableType) {
-        this.isRedeployableType = isRedeployableType;
+    public void setRedeployable(boolean isRedeployableType) {
+        this.redeployable = isRedeployableType;
     }
 
-    public boolean isExcludeTypeEnabled() {
-        return isExcludeType;
+    public boolean exclude() {
+        return exclude;
     }
 
-    public void setExcludeType(boolean isExcludeType) {
-        this.isExcludeType = isExcludeType;
+    public void setExclude(boolean isExcludeType) {
+        this.exclude = isExcludeType;
     }
 
     public Collection<String> getTags() {

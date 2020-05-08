@@ -41,10 +41,13 @@ class EntityBuilderHelper {
         return entity;
     }
 
-    static Entity getEntityWithMappings(final String type, final String path, final String id, final Element element, final String mappingAction, final Map<String, Object> mappingProperties) {
+    static Entity getEntityWithMappings(final String type, final String path, final String id, final Element element,
+                                        final String mappingAction, final Map<String, Object> mappingProperties) {
         Entity entity = new Entity(type, path, id, element);
         entity.setMappingAction(mappingAction);
-        mappingProperties.entrySet().forEach(entry -> entity.setMappingProperty(entry.getKey(), entry.getValue()));
+
+        mappingProperties.forEach(entity::setMappingProperty);
+
         String mapBy = (String) entity.getMappingProperties().get(MappingProperties.MAP_BY);
         if (MappingProperties.PATH.equals(mapBy)) {
             entity.setMappingProperty(MappingProperties.MAP_TO, path);
