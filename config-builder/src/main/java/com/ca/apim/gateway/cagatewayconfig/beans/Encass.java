@@ -178,8 +178,8 @@ public class Encass extends GatewayEntity {
     }
 
     public boolean isReusableEntity(){
-        if(hasAnnotated()){
-            return annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType()));
+        if(hasAnnotation()){
+            return annotations.contains(new Annotation(ANNOTATION_TYPE_REUSABLE_ENTITY));
         }
         return false;
     }

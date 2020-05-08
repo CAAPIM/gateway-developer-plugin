@@ -227,21 +227,21 @@ public class Policy extends Folderable {
         setPath(PathUtils.unixPath(getPath()));
     }
 
-    public boolean hasAnnotated() {
+    public boolean hasAnnotation() {
         return annotations != null && !annotations.isEmpty();
     }
 
     @Override
     public boolean hasBundleAnnotation(){
-        if(hasAnnotated()){
-            return annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_BUNDLE.equals(annotation.getType()));
+        if (hasAnnotation()){
+            return annotations.contains(new Annotation(ANNOTATION_TYPE_BUNDLE));
         }
         return false;
     }
 
     public boolean isReusableEntity(){
-        if(hasAnnotated()){
-            return annotations.stream().anyMatch(annotation -> ANNOTATION_TYPE_REUSABLE_ENTITY.equals(annotation.getType()));
+        if(hasAnnotation()){
+            return annotations.contains(new Annotation(ANNOTATION_TYPE_REUSABLE_ENTITY));
         }
         return false;
     }
