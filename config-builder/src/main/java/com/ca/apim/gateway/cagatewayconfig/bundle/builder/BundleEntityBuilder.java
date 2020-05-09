@@ -63,23 +63,25 @@ public class BundleEntityBuilder {
         // Filter the bundle to export only annotated entities
         entityTypeMap.values().stream().filter(EntityUtils.GatewayEntityInfo::isBundleGenerationSupported).forEach(entityInfo ->
                 bundle.getEntities(entityInfo.getEntityClass()).values().stream()
-                        .filter(GatewayEntity::hasBundleAnnotation)
-                        .map(entity -> entity.getAnnotatedEntity(projectName, projectVersion))
+                        .filter(entity -> entity instanceof AnnotatableEntity)
+                        .map(entity -> ((AnnotatableEntity)entity).getAnnotatedEntity(projectName, projectVersion))
                         .forEach(annotatedEntity -> {
-                            List<Entity> entities = new ArrayList<>();
-                            Map<Class, Map<String, GatewayEntity>> entityMap =
-                                    getEntityDependencies(annotatedEntity.getPolicyName(), bundle);
-                            Map<String, GatewayEntity> dependencyMap =
-                                    getEntities(annotatedEntity.getEntity().getClass(), entityMap);
-                            dependencyMap.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-                            entityBuilders.forEach(builder -> entities.addAll(builder.build(entityMap,
-                                    annotatedEntity, bundle, bundleType, document)));
-                            // Create bundle
-                            final Element annotatedBundle = bundleDocumentBuilder.build(document, entities);
-                            final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity,
-                                    entities, projectGroupName, projectVersion);
-                            annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
-                                bundleMetadata));
+                            if(annotatedEntity != null && annotatedEntity.isBundle()){
+                                List<Entity> entities = new ArrayList<>();
+                                Map<Class, Map<String, GatewayEntity>> entityMap =
+                                        getEntityDependencies(annotatedEntity.getPolicyName(), bundle);
+                                Map<String, GatewayEntity> dependencyMap =
+                                        getEntities(annotatedEntity.getEntity().getClass(), entityMap);
+                                dependencyMap.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
+                                entityBuilders.forEach(builder -> entities.addAll(builder.build(entityMap,
+                                        annotatedEntity, bundle, bundleType, document)));
+                                // Create bundle
+                                final Element annotatedBundle = bundleDocumentBuilder.build(document, entities);
+                                final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity,
+                                        entities, projectGroupName, projectVersion);
+                                annotatedElements.put(annotatedEntity.getBundleName(), ImmutablePair.of(annotatedBundle,
+                                        bundleMetadata));
+                            }
                         })
         );
 
