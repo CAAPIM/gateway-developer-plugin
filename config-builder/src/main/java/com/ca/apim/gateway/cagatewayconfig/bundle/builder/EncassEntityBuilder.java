@@ -83,12 +83,13 @@ public class EncassEntityBuilder implements EntityBuilder {
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + encass.getPolicy());
         }
-        final boolean reusableEntity = encass.isReusableEntity();
         String encassName = name;
         String guid = encass.getGuid();
         String id = encass.getId();
-        if (!reusableEntity) {
-            if(annotatedEntity != null){
+        AnnotatedEntity annotatedEncassEntity = null;
+        if (annotatedEntity != null) {
+            annotatedEncassEntity = encass.getAnnotatedEntity(annotatedEntity.getProjectName(), annotatedEntity.getProjectVersion());
+            if(annotatedEncassEntity == null || !annotatedEncassEntity.isReusableEntity()){
                 encassName = annotatedEntity.getUniquePrefix() + name + annotatedEntity.getUniqueSuffix();
                 //guid and id are regenerated in policy entity builder if this encass is referred by policy
                 //if the annotated entity is encass then it will not be referred by policy so id and guid should be regenerated here.
@@ -114,7 +115,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, encassName, id, encassAssertionElement);
-        if (reusableEntity) {
+        if (annotatedEncassEntity != null && annotatedEncassEntity.isReusableEntity()) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);

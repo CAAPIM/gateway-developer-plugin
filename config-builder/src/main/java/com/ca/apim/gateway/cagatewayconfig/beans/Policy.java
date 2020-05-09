@@ -6,14 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -21,6 +22,7 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,7 +37,7 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 @JsonInclude(NON_EMPTY)
 @Named("POLICY")
 @BundleGeneration
-public class Policy extends Folderable {
+public class Policy extends Folderable implements AnnotatableEntity {
 
     @JsonIgnore
     private String policyXML;
@@ -54,8 +56,11 @@ public class Policy extends Folderable {
     private PolicyType policyType;
     @JsonIgnore
     private Set<Dependency> usedEntities;
+    @JsonIgnore
+    private AnnotatedEntity<GatewayEntity> annotatedEntity;
 
-    public Policy() {}
+    public Policy() {
+    }
 
     public Policy(final Builder builder) {
         setName(builder.name);
@@ -213,8 +218,8 @@ public class Policy extends Folderable {
                                         policyType.getType(),
                                         key,
                                         String.join(", ", value.stream().map(Policy::getPath).collect(toList())
-                                )
-                        ));
+                                        )
+                                ));
                     }
                 });
         if (!errors.isEmpty()) {
@@ -227,22 +232,28 @@ public class Policy extends Folderable {
         setPath(PathUtils.unixPath(getPath()));
     }
 
-    public boolean hasAnnotation() {
-        return annotations != null && !annotations.isEmpty();
-    }
-
     @Override
-    public boolean hasBundleAnnotation(){
-        if (hasAnnotation()){
-            return annotations.contains(new Annotation(ANNOTATION_TYPE_BUNDLE));
-        }
-        return false;
+    public AnnotatedEntity<GatewayEntity> getAnnotatedEntity(final String projectName,
+                                                             final String projectVersion) {
+        return annotatedEntity == null ? createAnnotatedEntity(annotations, projectName, projectVersion) : annotatedEntity;
     }
 
-    public boolean isReusableEntity(){
-        if(hasAnnotation()){
-            return annotations.contains(new Annotation(ANNOTATION_TYPE_REUSABLE_ENTITY));
+    public void populateBundleInfo(final AnnotatedEntity<GatewayEntity> annotatedEntity, final Annotation bundleAnnotation, final String projectName,
+                                   final String projectVersion) {
+        String annotatedBundleName = bundleAnnotation.getName();
+        if (StringUtils.isBlank(annotatedBundleName)) {
+            annotatedBundleName = projectName + "-" + getName();
         }
-        return false;
+        annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
+        String description = bundleAnnotation.getDescription();
+        if (StringUtils.isBlank(description)) {
+            description = "";
+        }
+        annotatedEntity.setDescription(description);
+        annotatedEntity.setPolicyName(getName());
+
+        annotatedEntity.setUniquePrefix(projectName + "-policy-" + PathUtils.extractName(getName()) + "-");
+        annotatedEntity.setUniqueSuffix("-" + projectVersion);
+        annotatedEntity.setEntityName(getName());
     }
 }
