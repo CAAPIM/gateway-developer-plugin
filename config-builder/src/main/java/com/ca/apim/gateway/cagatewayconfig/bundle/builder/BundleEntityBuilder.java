@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -102,10 +103,10 @@ public class BundleEntityBuilder {
                 for (Dependency dependency : dependencies) {
                     Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
                     Map<String, ? extends GatewayEntity> entities = bundle.getEntities(entityClass);
-                    Optional<? extends  GatewayEntity> optionalGatewayEntity =  entities.values().stream()
-                            .filter(e-> e.getName().equals(dependency.getName())).findFirst();
+                    Optional<? extends Map.Entry<String, ? extends GatewayEntity>> optionalGatewayEntity =  entities.entrySet().stream()
+                            .filter(e-> dependency.getName().equals(PathUtils.extractName(e.getKey()))).findFirst();
                     Map<String, GatewayEntity> dependencyMap = getEntities(entityClass, entityDependenciesMap);
-                    optionalGatewayEntity.ifPresent(entity -> dependencyMap.put(dependency.getName(), entity));
+                    optionalGatewayEntity.ifPresent(entityEntry -> dependencyMap.put(entityEntry.getKey(), entityEntry.getValue()));
                 }
             }
         }
