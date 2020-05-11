@@ -101,7 +101,6 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // Create build-environment-bundle task
         final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create(BUILD_ENVIRONMENT_BUNDLE, BuildEnvironmentBundleTask.class, t -> {
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
-            t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
             t.getConfigFolder().set(pluginConfig.getConfigFolder());
             t.getConfigName().set(pluginConfig.getConfigName());
         });
@@ -112,12 +111,12 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     private static BuildFullBundleTask createBuildFullBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
         // Create build-full-bundle task
         final BuildFullBundleTask buildFullBundleTask = project.getTasks().create(BUILD_FULL_BUNDLE, BuildFullBundleTask.class, t -> {
-            t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig().getOrElse(Collections.emptyMap()));
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getDetemplatizeDeploymentBundles().set(pluginConfig.getDetemplatizeDeploymentBundles().getOrElse(true));
+            t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
+            t.getConfigFolder().set(pluginConfig.getConfigFolder());
+            t.getConfigName().set(pluginConfig.getConfigName());
         });
-        project.afterEvaluate(p ->
-                buildFullBundleTask.getOutputBundle().set(new File(pluginConfig.getBuiltEnvironmentBundleDir().getAsFile().get(), getBuiltArtifactName(project, "-full", BUNDLE_FILE_EXTENSION))));
         buildFullBundleTask.dependsOn(buildDeploymentBundleTask);
         return buildFullBundleTask;
     }
@@ -149,7 +148,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         project.artifacts(artifactHandler -> addBundleArtifact(artifactHandler, packageGW7Task.getBundle(), buildDeploymentBundleTask, project::getName, "deployment"));
 
         // add the environment bundle to the artifacts only if the environment bundle task was triggered
-        String artifactName = getBuiltArtifactName(project, "-environment", BUNDLE_FILE_EXTENSION);
+        final String artifactName = getBuiltArtifactName(project, "." + pluginConfig.getConfigName() + ".environment", BUNDLE_FILE_EXTENSION);
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_ENVIRONMENT_BUNDLE)) {
             project.artifacts(artifactHandler -> addBundleArtifact(
                 artifactHandler,
@@ -159,10 +158,11 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                 "environment"));
         }
         // add the full bundle to the artifacts only if the full bundle task was triggered
+        final String fullBundleArtifactName = getBuiltArtifactName(project, "." + pluginConfig.getConfigName() + ".full", BUNDLE_FILE_EXTENSION);
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_FULL_BUNDLE)) {
             project.artifacts(artifactHandler -> addBundleArtifact(
                     artifactHandler,
-                    pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, "-full", BUNDLE_FILE_EXTENSION))),
+                    pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> fullBundleArtifactName)),
                     buildFullBundleTask,
                     project::getName,
                     "full"));
@@ -173,7 +173,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         // set the env bundle as property as well
         project.afterEvaluate(p -> project.getExtensions().add("environment-bundle-file", new File(buildEnvironmentBundleTask.getInto().getAsFile().get(), artifactName).toString()));
         // and the full bundle as property too
-        project.afterEvaluate(p -> project.getExtensions().add("full-bundle-file", buildFullBundleTask.getOutputBundle().getAsFile().get().toString()));
+        project.afterEvaluate(p -> project.getExtensions().add("full-bundle-file", new File(buildFullBundleTask.getInto().getAsFile().get(), fullBundleArtifactName).toString()));
     }
 
     private static void addBundleArtifact(

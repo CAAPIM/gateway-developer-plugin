@@ -10,8 +10,6 @@ dependencies {
 }
 
 GatewaySourceConfig {
-    environmentConfig = [
-            "PASSWORD.gateway": "test",
-            "PROPERTY.gateway.log_levels":  "com.l7tech.server.policy.level = FINEST"
-    ]
+    configFolder = 'src/main/gateway/config'
+    configName = 'config'
 }

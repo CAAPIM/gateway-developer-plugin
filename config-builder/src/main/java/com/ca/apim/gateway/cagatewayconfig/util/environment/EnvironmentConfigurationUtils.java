@@ -53,15 +53,6 @@ public class EnvironmentConfigurationUtils {
         this.entityLoaderRegistry = entityLoaderRegistry;
     }
 
-    @SuppressWarnings("unchecked")
-    public Map<String, String> parseEnvironmentValues(Map providedEnvironmentValues) {
-        final Map envConfig = ofNullable(providedEnvironmentValues).orElseThrow(() -> new MissingEnvironmentException("Environment configuration was not specified into gradle configuration file."));
-        final Map<String, String> environmentValues = new HashMap<>();
-        envConfig.entrySet().forEach((Consumer<Entry>) e -> environmentValues.put(PREFIX_ENV + e.getKey().toString(), getEnvValue(e.getKey().toString(), e.getValue())));
-
-        return unmodifiableMap(environmentValues);
-    }
-
     /**
      * Creates the Map of entity names with their environment config file names.
      *
@@ -135,20 +126,6 @@ public class EnvironmentConfigurationUtils {
         }
 
         return null;
-    }
-
-    private String getEnvValue(String key, Object o) {
-        if (o instanceof String) {
-            return (String) o;
-        }
-        if (o instanceof File) {
-            // get the entity type and name
-            String entityType = key.substring(0, key.indexOf('.'));
-            String entityName = key.substring(key.indexOf('.') + 1);
-            return loadConfigFromFile((File) o, entityType, entityName);
-        }
-
-        throw new MissingEnvironmentException("Unable to load environment from specified property '" + o.toString() + "' due to unsupported value, it has to be a text content or a file");
     }
 
     @NotNull

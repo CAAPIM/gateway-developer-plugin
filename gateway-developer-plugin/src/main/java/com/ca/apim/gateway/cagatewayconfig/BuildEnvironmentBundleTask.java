@@ -34,7 +34,6 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 public class BuildEnvironmentBundleTask extends DefaultTask {
 
     private final DirectoryProperty into;
-    private final Property<Map> environmentConfig;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
     private final Property<String> configFolder;
     private final Property<String> configName;
@@ -42,7 +41,6 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     @Inject
     public BuildEnvironmentBundleTask() {
         into = newOutputDirectory();
-        environmentConfig = getProject().getObjects().property(Map.class);
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
         configFolder = getProject().getObjects().property(String.class);
         configName = getProject().getObjects().property(String.class);
@@ -51,11 +49,6 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     @OutputDirectory
     DirectoryProperty getInto() {
         return into;
-    }
-
-    @Input
-    Property<Map> getEnvironmentConfig() {
-        return environmentConfig;
     }
 
     @Input
