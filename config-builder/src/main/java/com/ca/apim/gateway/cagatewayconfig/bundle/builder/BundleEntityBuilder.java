@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -63,41 +64,41 @@ public class BundleEntityBuilder {
         // Filter the bundle to export only annotated entities
         entityTypeMap.values().stream().filter(EntityUtils.GatewayEntityInfo::isBundleGenerationSupported).forEach(entityInfo ->
                 bundle.getEntities(entityInfo.getEntityClass()).values().stream()
-                        .filter(GatewayEntity::hasBundleAnnotation)
-                        .map(entity -> entity.getAnnotatedEntity(projectName, projectVersion))
+                        .filter(entity -> entity instanceof AnnotatableEntity)
+                        .map(entity -> ((AnnotatableEntity)entity).getAnnotatedEntity(projectName, projectVersion))
                         .forEach(annotatedEntity -> {
-                            List<Entity> entities = new ArrayList<>();
-                            Map<Class, Map<String, GatewayEntity>> entityMap =
-                                    getEntityDependencies(annotatedEntity.getPolicyName(), bundle, false);
+                            if (annotatedEntity != null && annotatedEntity.isBundle()){
+                                List<Entity> entities = new ArrayList<>();
+                                Map<Class, Map<String, GatewayEntity>> entityMap =
+                                        getEntityDependencies(annotatedEntity.getPolicyName(), bundle, false);
 
-                            // Insert the annotated GatewayEntity into the dependent Entities Map.
-                            putGatewayEntityByType(entityMap, annotatedEntity.getEntity());
+                                // Insert the annotated GatewayEntity into the dependent Entities Map.
+                                putGatewayEntityByType(entityMap, annotatedEntity.getEntity());
 
-                            entityBuilders.forEach(builder -> entities.addAll(builder.build(entityMap,
-                                    annotatedEntity, bundle, bundleType, document)));
+                                entityBuilders.forEach(builder -> entities.addAll(builder.build(entityMap,
+                                        annotatedEntity, bundle, bundleType, document)));
 
-                            // Create deployment bundle
-                            final Element annotatedBundle = bundleDocumentBuilder.build(document, entities);
+                                // Create deployment bundle
+                                final Element annotatedBundle = bundleDocumentBuilder.build(document, entities);
 
-                            // Create DELETE bundle - ALWAYS skip environment entities
-                            final List<Entity> deleteBundleEntities = new ArrayList<>();
-                            if (annotatedEntity.isRedeployable()) {
-                                // If the bundle is marked as @redeployable, blindly include all dependencies in
-                                // delete bundle
-                                deleteBundleEntities.addAll(entities);
-                            } else {
-                                // Else, include only non-reusable entities
-                                deleteBundleEntities.addAll(getNonReusableEntities(entities));
+                                // Create DELETE bundle - ALWAYS skip environment entities
+                                final List<Entity> deleteBundleEntities = new ArrayList<>();
+                                if (annotatedEntity.isRedeployable()) {
+                                    // If the bundle is marked as @redeployable, blindly include all dependencies in
+                                    // delete bundle
+                                    deleteBundleEntities.addAll(entities);
+                                } else {
+                                    // Else, include only non-reusable entities
+                                    deleteBundleEntities.addAll(getNonReusableEntities(entities));
+                                }
+                                final Element annotatedDeleteBundle = bundleDocumentBuilder.buildDeleteBundle(document,
+                                        deleteBundleEntities);
+
+                                final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity,
+                                        entities, projectGroupName, projectVersion);
+                                annotatedElements.put(annotatedEntity.getBundleName(),
+                                        new BundleArtifacts(annotatedBundle, annotatedDeleteBundle, bundleMetadata));
                             }
-                            final Element annotatedDeleteBundle = bundleDocumentBuilder.buildDeleteBundle(document,
-                                    deleteBundleEntities);
-
-                            // Create Bundle Metadata
-                            final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity,
-                                    entities, projectGroupName, projectVersion);
-
-                            annotatedElements.put(annotatedEntity.getBundleName(),
-                                    new BundleArtifacts(annotatedBundle, annotatedDeleteBundle, bundleMetadata));
                         })
         );
 
@@ -127,13 +128,12 @@ public class BundleEntityBuilder {
             Set<Dependency> dependencies = policyEntity.getUsedEntities();
             if (dependencies != null) {
                 for (Dependency dependency : dependencies) {
-                    Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
                     Map<String, ? extends GatewayEntity> allEntitiesOfDependencyType = bundle.getEntities(entityClass);
                     // Find the dependency
-                    Optional<? extends  GatewayEntity> gatewayEntity = allEntitiesOfDependencyType.values()
-                            .stream().filter(e-> e.getName().equals(dependency.getName())).findFirst();
+                    Optional<? extends Map.Entry<String, ? extends GatewayEntity>> optionalGatewayEntity = entities.entrySet().stream()
+                            .filter(e-> dependency.getName().equals(PathUtils.extractName(e.getKey()))).findFirst();
                     // Put the found entity
-                    gatewayEntity.ifPresent(e -> putGatewayEntityByType(entityDependenciesMap, e));
+                    optionalGatewayEntity.ifPresent(e -> putGatewayEntityByType(entityDependenciesMap, e));
                 }
             }
         }

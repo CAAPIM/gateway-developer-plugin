@@ -72,12 +72,4 @@ public class GatewayEntity {
         return null;
     }
 
-    public boolean hasBundleAnnotation(){
-        return false;
-    }
-
-    public AnnotatedEntity<? extends  GatewayEntity> getAnnotatedEntity(final String projectName,
-                                                                        final String projectVersion){
-        return null;
-    }
 }
