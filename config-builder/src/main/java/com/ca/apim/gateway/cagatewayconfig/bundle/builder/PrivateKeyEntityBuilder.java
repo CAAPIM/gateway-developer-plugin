@@ -54,17 +54,12 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getPrivateKeys(), document);
+        Map<String, PrivateKey> privateKeyMap = Optional.ofNullable(bundle.getPrivateKeys()).orElse(Collections.emptyMap());
+        return buildEntities(privateKeyMap, document);
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Document document) {
         return entities.entrySet().stream().map(e -> buildPrivateKeyEntity(e.getKey(), (PrivateKey)e.getValue(), document)).collect(toList());
-    }
-
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(PrivateKey.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, document);
     }
 
     private Entity buildPrivateKeyEntity(String alias, PrivateKey privateKey, Document document) {

@@ -20,8 +20,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
-
 import javax.inject.Named;
 import java.io.File;
 import java.util.Comparator;
@@ -38,7 +36,7 @@ import static java.util.stream.Collectors.toCollection;
 @ConfigurationFile(name = "encass", type = JSON_YAML)
 @EnvironmentType("ENCAPSULATED_ASSERTION")
 @BundleGeneration
-public class Encass extends GatewayEntity implements AnnotatableEntity {
+public class Encass extends GatewayEntity implements AnnotableEntity {
 
     private String policy;
     private Set<EncassArgument> arguments;
@@ -53,7 +51,7 @@ public class Encass extends GatewayEntity implements AnnotatableEntity {
     @JsonIgnore
     private String path;
     @JsonIgnore
-    private AnnotatedEntity<GatewayEntity> annotatedEntity;
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
     public Set<EncassArgument> getArguments() {
         return arguments;
@@ -162,33 +160,29 @@ public class Encass extends GatewayEntity implements AnnotatableEntity {
     }
 
     @Override
-    public AnnotatedEntity<GatewayEntity> getAnnotatedEntity(final String projectName,
-                                                             final String projectVersion) {
-        return annotatedEntity == null ? createAnnotatedEntity(annotations, projectName, projectVersion) :
-                annotatedEntity;
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity(annotations);
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                Map<String, Object> properties = getProperties();
+                if (properties != null) {
+                    annotatedEntity.setDescription(properties.getOrDefault("description", "").toString());
+                }
+
+            }
+            annotatedEntity.setPolicyName(getPolicy());
+            annotatedEntity.setEntityName(getName());
+        }
+        return annotatedEntity;
     }
 
-    public void populateBundleInfo(final AnnotatedEntity<GatewayEntity> annotatedEntity, final Annotation bundleAnnotation, final String projectName,
-                                   final String projectVersion) {
-        String annotatedBundleName = bundleAnnotation.getName();
-        if (StringUtils.isBlank(annotatedBundleName)) {
-            annotatedBundleName = projectName + "-" + getName();
-        }
-        annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
-        String description = bundleAnnotation.getDescription();
-        if (StringUtils.isBlank(description)) {
-            Map<String, Object> properties = getProperties();
-            if (properties != null) {
-                description = properties.getOrDefault("description", "").toString();
-            }
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity){
+        this.annotatedEntity = annotatedEntity;
+    }
 
-        }
-        annotatedEntity.setDescription(description);
-        annotatedEntity.setPolicyName(getPolicy());
-
-        annotatedEntity.setUniquePrefix(projectName + "-encass-" + PathUtils.extractName(getName()) + "-");
-        annotatedEntity.setUniqueSuffix("-" + projectVersion);
-        annotatedEntity.setEntityName(getName());
+    public String getType(){
+        return "encass";
     }
 
 }

@@ -42,22 +42,6 @@ public class AnnotatedEntity<T> {
         this.projectVersion = projectVersion;
     }
 
-    public String getUniquePrefix() {
-        return uniquePrefix;
-    }
-
-    public void setUniquePrefix(String uniquePrefix) {
-        this.uniquePrefix = uniquePrefix;
-    }
-
-    public String getUniqueSuffix() {
-        return uniqueSuffix;
-    }
-
-    public void setUniqueSuffix(String uniqueSuffix) {
-        this.uniqueSuffix = uniqueSuffix;
-    }
-
     public AnnotatedEntity(T entity) {
         this.entity = entity;
     }
@@ -74,7 +58,7 @@ public class AnnotatedEntity<T> {
         this.entityName = entityName;
     }
 
-    public String getEntityName(){
+    public String getEntityName() {
         return entityName;
     }
 
@@ -82,7 +66,7 @@ public class AnnotatedEntity<T> {
         this.entityType = entityType;
     }
 
-    public String getEntityType(){
+    public String getEntityType() {
         return entityType;
     }
 
@@ -134,7 +118,7 @@ public class AnnotatedEntity<T> {
         this.redeployable = isRedeployableType;
     }
 
-    public boolean exclude() {
+    public boolean isExclude() {
         return exclude;
     }
 

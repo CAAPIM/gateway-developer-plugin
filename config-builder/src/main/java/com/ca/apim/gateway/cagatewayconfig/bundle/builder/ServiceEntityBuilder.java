@@ -44,7 +44,12 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getServices(), bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, Service> serviceMap = Optional.ofNullable(bundle.getServices()).orElse(Collections.emptyMap());
+            return buildEntities(serviceMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getServices(), bundle, bundleType, document);
+        }
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
@@ -56,12 +61,6 @@ public class ServiceEntityBuilder implements EntityBuilder {
         return entities.entrySet().stream().map(serviceEntry ->
                 buildServiceEntity(bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
         ).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(Service.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundle, bundleType, document);
     }
 
     @NotNull

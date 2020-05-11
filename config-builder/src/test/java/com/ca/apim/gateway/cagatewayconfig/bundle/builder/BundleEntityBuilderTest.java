@@ -69,11 +69,6 @@ class BundleEntityBuilderTest {
         }
 
         @Override
-        public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entities, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-            return Collections.singletonList(EntityBuilderHelper.getEntityWithOnlyMapping(LISTEN_PORT_TYPE, "Test", "Test"));
-        }
-
-        @Override
         public @NotNull Integer getOrder() {
             return 0;
         }

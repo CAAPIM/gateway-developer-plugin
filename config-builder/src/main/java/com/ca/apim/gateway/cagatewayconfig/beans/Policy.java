@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
@@ -37,7 +37,7 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 @JsonInclude(NON_EMPTY)
 @Named("POLICY")
 @BundleGeneration
-public class Policy extends Folderable implements AnnotatableEntity {
+public class Policy extends Folderable implements AnnotableEntity {
 
     @JsonIgnore
     private String policyXML;
@@ -57,7 +57,7 @@ public class Policy extends Folderable implements AnnotatableEntity {
     @JsonIgnore
     private Set<Dependency> usedEntities;
     @JsonIgnore
-    private AnnotatedEntity<GatewayEntity> annotatedEntity;
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
     public Policy() {
     }
@@ -233,27 +233,19 @@ public class Policy extends Folderable implements AnnotatableEntity {
     }
 
     @Override
-    public AnnotatedEntity<GatewayEntity> getAnnotatedEntity(final String projectName,
-                                                             final String projectVersion) {
-        return annotatedEntity == null ? createAnnotatedEntity(annotations, projectName, projectVersion) : annotatedEntity;
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity(annotations);
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                annotatedEntity.setDescription("");
+            }
+            annotatedEntity.setPolicyName(getName());
+            annotatedEntity.setEntityName(getName());
+        }
+        return annotatedEntity;
     }
 
-    public void populateBundleInfo(final AnnotatedEntity<GatewayEntity> annotatedEntity, final Annotation bundleAnnotation, final String projectName,
-                                   final String projectVersion) {
-        String annotatedBundleName = bundleAnnotation.getName();
-        if (StringUtils.isBlank(annotatedBundleName)) {
-            annotatedBundleName = projectName + "-" + getName();
-        }
-        annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
-        String description = bundleAnnotation.getDescription();
-        if (StringUtils.isBlank(description)) {
-            description = "";
-        }
-        annotatedEntity.setDescription(description);
-        annotatedEntity.setPolicyName(getName());
-
-        annotatedEntity.setUniquePrefix(projectName + "-policy-" + PathUtils.extractName(getName()) + "-");
-        annotatedEntity.setUniqueSuffix("-" + projectVersion);
-        annotatedEntity.setEntityName(getName());
+    public String getType(){
+        return "policy";
     }
 }

@@ -116,6 +116,7 @@ public class BundleMetadataBuilderTest {
                 .filter(ann -> AnnotationConstants.ANNOTATION_TYPE_BUNDLE.equals(ann.getType()))
                 .findFirst().get().setName(null);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+        encass.setAnnotatedEntity(null);
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestBundleLoader(bundle)));
 
         bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), temporaryFolder.createDirectory("output"), dummyList,
