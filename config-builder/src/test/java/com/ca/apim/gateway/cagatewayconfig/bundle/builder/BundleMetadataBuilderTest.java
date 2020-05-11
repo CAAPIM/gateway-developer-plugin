@@ -23,7 +23,6 @@ import com.google.common.collect.Maps;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,7 +32,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reflections.Reflections;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
-import org.w3c.dom.Element;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -71,7 +69,7 @@ public class BundleMetadataBuilderTest {
     EntityLoaderRegistry entityLoaderRegistry;
     @Mock
     BundleCache bundleCache;
-    private EntityTypeRegistry entityTypeRegistry = new EntityTypeRegistry(new Reflections());
+    private final EntityTypeRegistry entityTypeRegistry = new EntityTypeRegistry(new Reflections());
 
     @BeforeAll
     public static void setUp() throws Exception {
@@ -94,21 +92,26 @@ public class BundleMetadataBuilderTest {
 
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(DocumentTools.INSTANCE, DocumentFileUtils.INSTANCE,
                 JsonFileUtils.INSTANCE, entityLoaderRegistry, builder, bundleCache);
-        bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), temporaryFolder.createDirectory("output"), dummyList,
-                "my-bundle", "my-bundle-group", "1.0");
 
-        File bundleOutput = new File(temporaryFolder.getRoot(), "output");
-        assertTrue(bundleOutput.exists());
-        assertEquals(2, bundleOutput.listFiles().length);
-        for (File generatedFile : bundleOutput.listFiles()) {
-            if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {
-                assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0.bundle", generatedFile.getName());
-            } else {
-                assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + JsonFileUtils.METADATA_FILE_NAME_SUFFIX, generatedFile.getName());
+        File bundleOutput = temporaryFolder.createDirectory("output");
+        try {
+            bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), bundleOutput, dummyList,
+                    "my-bundle", "my-bundle-group", "1.0");
+
+            assertTrue(bundleOutput.exists());
+            assertEquals(3, bundleOutput.listFiles().length);
+            for (File generatedFile : bundleOutput.listFiles()) {
+                if (StringUtils.endsWith(generatedFile.getName(), ".delete.bundle")) {
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0.delete.bundle", generatedFile.getName());
+                } else if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0.bundle", generatedFile.getName());
+                } else {
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + JsonFileUtils.METADATA_FILE_NAME_SUFFIX, generatedFile.getName());
+                }
             }
+        } finally {
+            deleteDirectory(bundleOutput);
         }
-
-        deleteDirectory(bundleOutput);
 
         bundle.getEncasses().clear();
         // Remove "name" attribute from the @bundle annotation.
@@ -118,22 +121,27 @@ public class BundleMetadataBuilderTest {
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestBundleLoader(bundle)));
 
-        bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), temporaryFolder.createDirectory("output"), dummyList,
-                "my-bundle", "my-bundle-group", "1.0");
+        bundleOutput = temporaryFolder.createDirectory("output");
+        try {
+            bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), bundleOutput, dummyList, "my-bundle",
+                    "my-bundle-group", "1.0");
 
-        bundleOutput = new File(temporaryFolder.getRoot(), "output");
-        assertTrue(bundleOutput.exists());
-        assertEquals(2, bundleOutput.listFiles().length);
-        for (File generatedFile : bundleOutput.listFiles()) {
-            if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {
-                assertEquals("my-bundle-" + encass.getName() + "-1.0.bundle", generatedFile.getName());
-            } else {
-                assertEquals("my-bundle-" + encass.getName() + "-1.0" + JsonFileUtils.METADATA_FILE_NAME_SUFFIX,
-                        generatedFile.getName());
+            bundleOutput = new File(temporaryFolder.getRoot(), "output");
+            assertTrue(bundleOutput.exists());
+            assertEquals(3, bundleOutput.listFiles().length);
+            for (File generatedFile : bundleOutput.listFiles()) {
+                if (StringUtils.endsWith(generatedFile.getName(), ".delete.bundle")) {
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0.delete.bundle", generatedFile.getName());
+                } else if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0.bundle", generatedFile.getName());
+                } else {
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0" + JsonFileUtils.METADATA_FILE_NAME_SUFFIX,
+                            generatedFile.getName());
+                }
             }
+        } finally {
+            deleteDirectory(bundleOutput);
         }
-
-        deleteDirectory(bundleOutput);
     }
 
     @Test

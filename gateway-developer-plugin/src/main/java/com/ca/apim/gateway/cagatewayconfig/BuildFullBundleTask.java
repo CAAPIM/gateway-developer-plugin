@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
@@ -21,6 +22,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.BUNDLE_EXTENSION;
@@ -73,7 +75,7 @@ public class BuildFullBundleTask extends DefaultTask {
         final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrNull());
         final String bundleDirectory = outputBundle.getAsFile().get().getParentFile().getPath();
         final List<File> bundleFiles = union(
-                collectFiles(bundleDirectory, BUNDLE_EXTENSION),
+                collectBundleFiles(bundleDirectory),
                 filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
         );
 
@@ -85,5 +87,10 @@ public class BuildFullBundleTask extends DefaultTask {
                 outputBundle.getAsFile().get().getName(),
                 detemplatizeDeploymentBundles.get()
         );
+    }
+
+    private List<File> collectBundleFiles(final String bundleDirectory) {
+        return collectFiles(bundleDirectory, BUNDLE_EXTENSION).stream().filter(file -> !StringUtils.endsWithIgnoreCase(
+                file.getName(), ".delete" + BUNDLE_EXTENSION)).collect(Collectors.toList());
     }
 }

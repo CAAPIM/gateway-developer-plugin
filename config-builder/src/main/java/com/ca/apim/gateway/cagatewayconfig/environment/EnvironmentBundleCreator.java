@@ -13,12 +13,14 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.FileTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.processDeploymentBundles;
@@ -57,7 +59,7 @@ public class EnvironmentBundleCreator {
         setTemplatizedBundlesFolderPath(templatizedBundleFolderPath);
         processDeploymentBundles(
                 environmentBundle,
-                collectFiles(templatizedBundleFolderPath, BUNDLE_EXTENSION).stream().map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName()))).collect(toList()),
+                collectTemplatizedBundleFiles(templatizedBundleFolderPath, bundleFolderPath),
                 mode,
                 true);
 
@@ -75,4 +77,11 @@ public class EnvironmentBundleCreator {
         return environmentBundle;
     }
 
+    private List<TemplatizedBundle> collectTemplatizedBundleFiles(final String templatizedBundleFolderPath,
+                                                                  final String bundleFolderPath) {
+        return collectFiles(templatizedBundleFolderPath, BUNDLE_EXTENSION).stream()
+                .filter(file -> !StringUtils.endsWithIgnoreCase(file.getName(), ".delete.bundle"))
+                .map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName())))
+                .collect(toList());
+    }
 }

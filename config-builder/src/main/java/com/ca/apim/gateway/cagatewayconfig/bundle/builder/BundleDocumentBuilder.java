@@ -6,13 +6,16 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_UPDATE;
@@ -35,6 +38,23 @@ public class BundleDocumentBuilder {
         return bundle;
     }
 
+    public Element buildDeleteBundle(Document document, List<Entity> entities) {
+        // SKIP all environment entities from DELETE bundle
+        entities.removeAll(entities.stream().filter(FILTER_ENV_ENTITIES).collect(Collectors.toList()));
+
+        final Element references = document.createElement(REFERENCES);
+        final Element mappings = document.createElement(MAPPINGS);
+
+        final Element bundle = createElementWithChildren(document, BUNDLE, references, mappings);
+
+        entities.forEach(e -> {
+            e.setMappingAction(MappingActions.DELETE); // Set Mapping Action to DELETE
+            addEntity(references, mappings, e, document);
+        });
+        bundle.setAttribute(L7, GATEWAY_MANAGEMENT);
+        return bundle;
+    }
+
     private void addEntity(final Element references, final Element mappings, final Entity entity, final Document document) {
         if (entity.getXml() != null) {
             final Element entityItem = buildEntityItem(entity, document);
@@ -45,7 +65,9 @@ public class BundleDocumentBuilder {
     }
 
     private Element buildEntityMapping(final Entity entity, final Document document) {
-        final Element mapping = createElementWithAttributes(document, MAPPING, ImmutableMap.of(ATTRIBUTE_ACTION, entity.getMappingAction() == null ? NEW_OR_UPDATE : entity.getMappingAction(), ATTRIBUTE_SRCID, entity.getId(), ATTRIBUTE_TYPE, entity.getType()));
+        final Element mapping = createElementWithAttributes(document, MAPPING, ImmutableMap.of(ATTRIBUTE_ACTION,
+                entity.getMappingAction() == null ? NEW_OR_UPDATE : entity.getMappingAction(), ATTRIBUTE_SRCID,
+                entity.getId(), ATTRIBUTE_TYPE, entity.getType()));
         buildAndAppendPropertiesElement(entity.getMappingProperties(), document, mapping);
 
         return mapping;

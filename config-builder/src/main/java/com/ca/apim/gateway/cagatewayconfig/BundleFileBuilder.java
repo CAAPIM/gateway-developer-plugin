@@ -97,8 +97,8 @@ public class BundleFileBuilder {
     private void writeBundleArtifacts(final String key, final BundleArtifacts bundleArtifacts, File outputDir) {
         documentFileUtils.createFile(bundleArtifacts.getDeploymentBundle(),
                 new File(outputDir, key + ".bundle").toPath());
-        /*documentFileUtils.createFile(bundleArtifacts.getDeleteDeploymentBundle(),
-                new File(outputDir, key + ".bundle").toPath());*/
+        documentFileUtils.createFile(bundleArtifacts.getDeleteDeploymentBundle(),
+                new File(outputDir, key + ".delete.bundle").toPath());
         jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), key, outputDir);
     }
 
