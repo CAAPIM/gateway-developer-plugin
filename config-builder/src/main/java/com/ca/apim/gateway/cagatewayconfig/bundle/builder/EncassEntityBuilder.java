@@ -115,7 +115,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, encassName, id, encassAssertionElement);
-        if (annotatedEncassEntity != null && annotatedEncassEntity.isReusableEntity()) {
+        if (annotatedEncassEntity != null && annotatedEncassEntity.isReusableEntity() && !annotatedEncassEntity.isRedeployable()) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);

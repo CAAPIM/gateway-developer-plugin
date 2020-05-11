@@ -420,7 +420,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE, policyNameWithPath, policy.getId(), policyElement);
-        if (annotatedPolicyEntity != null && annotatedPolicyEntity.isReusableEntity()) {
+        if (annotatedPolicyEntity != null && annotatedPolicyEntity.isReusableEntity() && !annotatedPolicyEntity.isRedeployable()) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
