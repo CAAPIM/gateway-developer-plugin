@@ -51,7 +51,7 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     @JsonIgnore
     private String path;
     @JsonIgnore
-    private AnnotatedEntity<GatewayEntity> annotatedEntity;
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
     public Set<EncassArgument> getArguments() {
         return arguments;
@@ -160,32 +160,29 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     }
 
     @Override
-    public AnnotatedEntity<GatewayEntity> getAnnotatedEntity(final String projectName,
-                                                             final String projectVersion) {
-        return annotatedEntity == null ? createAnnotatedEntity(annotations, projectName, projectVersion) :
-                annotatedEntity;
-    }
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity(annotations);
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                Map<String, Object> properties = getProperties();
+                if (properties != null) {
+                    annotatedEntity.setDescription(properties.getOrDefault("description", "").toString());
+                }
 
-    public void populateBundleInfo(final AnnotatedEntity<GatewayEntity> annotatedEntity, final Annotation bundleAnnotation, final String projectName,
-                                   final String projectVersion) {
-        String annotatedBundleName = bundleAnnotation.getName();
-        if (StringUtils.isBlank(annotatedBundleName)) {
-            annotatedBundleName = projectName + "-" + getName();
-        }
-        annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
-        String description = bundleAnnotation.getDescription();
-        if (StringUtils.isBlank(description)) {
-            Map<String, Object> properties = getProperties();
-            if (properties != null) {
-                description = properties.getOrDefault("description", "").toString();
             }
-
+            annotatedEntity.setPolicyName(getPolicy());
+            annotatedEntity.setEntityName(getName());
         }
-        annotatedEntity.setDescription(description);
-        annotatedEntity.setPolicyName(getPolicy());
-
-        annotatedEntity.setUniquePrefix(projectName + "-encass-" + PathUtils.extractName(getName()) + "-");
-        annotatedEntity.setUniqueSuffix("-" + projectVersion);
-        annotatedEntity.setEntityName(getName());
+        return annotatedEntity;
     }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity){
+        this.annotatedEntity = annotatedEntity;
+    }
+
+    public String getType(){
+        return "encass";
+    }
+
 }

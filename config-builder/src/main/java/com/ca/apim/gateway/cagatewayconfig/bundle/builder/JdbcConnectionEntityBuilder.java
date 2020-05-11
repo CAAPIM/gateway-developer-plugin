@@ -43,7 +43,8 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-       return buildEntities(bundle.getJdbcConnections(), bundleType, document);
+        Map<String, JdbcConnection> jdbcConnectionMap = Optional.ofNullable(bundle.getJdbcConnections()).orElse(Collections.emptyMap());
+       return buildEntities(jdbcConnectionMap, bundleType, document);
     }
     private List<Entity> buildEntities(Map<String, ?> entities, BundleType bundleType, Document document) {
         switch (bundleType) {
@@ -58,12 +59,6 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
-    }
-
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(JdbcConnection.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundleType, document);
     }
 
     @VisibleForTesting
