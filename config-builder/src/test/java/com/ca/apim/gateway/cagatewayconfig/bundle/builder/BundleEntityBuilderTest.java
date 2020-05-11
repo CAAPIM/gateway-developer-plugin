@@ -56,7 +56,7 @@ class BundleEntityBuilderTest {
         BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()),
                 new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
 
-        final Map<String, Pair<Element, BundleMetadata>> element = builder.build(new Bundle(), BundleType.DEPLOYMENT,
+        final Map<String, BundleArtifacts> element = builder.build(new Bundle(), BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
         assertNotNull(element);
     }
@@ -123,13 +123,13 @@ class BundleEntityBuilderTest {
         entityBuilders.add(encassBuilder);
 
         BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
-        Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        for (Map.Entry<String, Pair<Element, BundleMetadata>> bundleEntry : bundles.entrySet()) {
+        for (Map.Entry<String, BundleArtifacts> bundleEntry : bundles.entrySet()) {
             assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-" + "1.0", bundleEntry.getKey());
-            final Element element = bundleEntry.getValue().getLeft();
+            final Element element = bundleEntry.getValue().getDeploymentBundle();
             assertNotNull(element);
             assertEquals(BundleDocumentBuilder.GATEWAY_MANAGEMENT, element.getAttribute(BundleDocumentBuilder.L7));
             assertEquals(BUNDLE, element.getTagName());

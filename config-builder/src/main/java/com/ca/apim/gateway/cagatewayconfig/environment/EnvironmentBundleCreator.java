@@ -7,15 +7,13 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleArtifacts;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.FileTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -68,11 +66,11 @@ public class EnvironmentBundleCreator {
         final Document document = documentBuilder.newDocument();
 
         //ToDo : Need to handle bundle name, Project GroupName and version properly
-        Map<String, Pair<Element, BundleMetadata>> bundleElements = bundleEntityBuilder.build(environmentBundle,
+        Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
                 EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null);
-        for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundleElements.entrySet()) {
-            documentFileUtils.createFile(entry.getValue().getLeft(),
-                    new File(bundleFolderPath, entry.getKey()).toPath());
+        for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
+            documentFileUtils.createFile(entry.getValue().getDeploymentBundle(), new File(bundleFolderPath,
+                    entry.getKey()).toPath());
         }
         return environmentBundle;
     }

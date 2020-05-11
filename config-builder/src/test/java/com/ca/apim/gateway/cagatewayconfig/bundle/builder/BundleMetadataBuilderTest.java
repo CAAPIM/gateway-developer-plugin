@@ -144,11 +144,11 @@ public class BundleMetadataBuilderTest {
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
-        Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        BundleMetadata metadata = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getRight();
+        BundleMetadata metadata = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
         assertEquals(TEST_ENCASS_ANNOTATION_NAME, metadata.getName());
         assertEquals(TEST_ENCASS_ANNOTATION_DESC, metadata.getDescription());
@@ -174,11 +174,11 @@ public class BundleMetadataBuilderTest {
         });
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
-        Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        BundleMetadata metadata = bundles.get("my-bundle-" + encass.getName() + "-1.0").getRight();
+        BundleMetadata metadata = bundles.get("my-bundle-" + encass.getName() + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
         assertEquals("my-bundle-" + encass.getName(), metadata.getName());
         assertEquals(encass.getProperties().get("description"), metadata.getDescription());
@@ -187,7 +187,7 @@ public class BundleMetadataBuilderTest {
         verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass);
     }
 
-    private void verifyAnnotatedEncassBundleMetadata(Map<String, Pair<Element, BundleMetadata>> bundles,
+    private void verifyAnnotatedEncassBundleMetadata(Map<String, BundleArtifacts> bundles,
                                                      Bundle bundle, Encass encass) throws JsonProcessingException {
         Map<String, Metadata> expectedEnvMetadata = new HashMap<>();
         for (Dependency dependency : bundle.getDependencyMap().entrySet().iterator().next().getValue()) {
@@ -206,7 +206,7 @@ public class BundleMetadataBuilderTest {
 
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        BundleMetadata metadata = bundles.entrySet().iterator().next().getValue().getRight();
+        BundleMetadata metadata = bundles.entrySet().iterator().next().getValue().getBundleMetadata();
         assertNotNull(metadata);
         assertEquals("my-bundle-group", metadata.getGroupName());
         assertEquals("encass", metadata.getType());
