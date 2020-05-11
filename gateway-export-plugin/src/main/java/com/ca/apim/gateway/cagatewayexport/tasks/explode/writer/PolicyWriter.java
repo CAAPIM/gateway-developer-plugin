@@ -12,6 +12,8 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterR
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
+import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Element;
 import javax.inject.Inject;
@@ -28,13 +30,15 @@ public class PolicyWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
     private final JsonFileUtils jsonFileUtils;
     private PolicyConverterRegistry policyConverterRegistry;
+    private final EntityLinkerRegistry entityLinkerRegistry;
 
     @Inject
     PolicyWriter(PolicyConverterRegistry policyConverterRegistry, DocumentFileUtils documentFileUtils,
-                 JsonFileUtils jsonFileUtils) {
+                 JsonFileUtils jsonFileUtils, EntityLinkerRegistry entityLinkerRegistry) {
         this.policyConverterRegistry = policyConverterRegistry;
         this.documentFileUtils = documentFileUtils;
         this.jsonFileUtils = jsonFileUtils;
+        this.entityLinkerRegistry = entityLinkerRegistry;
     }
 
     @Override
@@ -88,8 +92,14 @@ public class PolicyWriter implements EntityWriter {
             policyMetadata.setTag(policyEntity.getTag());
             policyMetadata.setSubtag(policyEntity.getSubtag());
         }
-
-        policyMetadata.setUsedEntities(getPolicyDependencies(folderableEntity.getId(), rawBundle));
+        Set<Dependency> dependencies = getPolicyDependencies(folderableEntity.getId(), rawBundle);
+        final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
+        entityLinkers.forEach(e -> {
+            if (e != null) {
+                e.link(dependencies);
+            }
+        });
+        policyMetadata.setUsedEntities(dependencies);
         return policyMetadata;
     }
 

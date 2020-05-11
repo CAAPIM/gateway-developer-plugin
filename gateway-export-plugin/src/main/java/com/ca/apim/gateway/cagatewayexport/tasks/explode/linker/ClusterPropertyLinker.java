@@ -8,7 +8,9 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.ClusterProperty;
+import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.GlobalEnvironmentProperty;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 
 import javax.inject.Singleton;
 import java.io.File;
@@ -41,6 +43,11 @@ public class ClusterPropertyLinker implements EntitiesLinker {
             }
         }
         idsToRemove.forEach(clusterPropertyMap::remove);
+    }
+
+    @Override
+    public void link(Set<Dependency> dependencies) {
+        dependencies.stream().filter(entity -> EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entity.getType())).forEach(e -> e.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE));
     }
 
 }
