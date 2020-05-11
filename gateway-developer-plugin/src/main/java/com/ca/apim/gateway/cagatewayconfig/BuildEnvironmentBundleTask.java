@@ -7,7 +7,9 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
+import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
@@ -16,10 +18,14 @@ import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
 import javax.inject.Inject;
+import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
+import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YML_EXTENSION;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
@@ -30,12 +36,16 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     private final DirectoryProperty into;
     private final Property<Map> environmentConfig;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
+    private final Property<String> configFolder;
+    private final Property<String> configName;
 
     @Inject
     public BuildEnvironmentBundleTask() {
         into = newOutputDirectory();
         environmentConfig = getProject().getObjects().property(Map.class);
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
+        configFolder = getProject().getObjects().property(String.class);
+        configName = getProject().getObjects().property(String.class);
     }
 
     @OutputDirectory
@@ -48,19 +58,37 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         return environmentConfig;
     }
 
+    @Input
+    Property<String> getConfigFolder() {
+        return configFolder;
+    }
+
+    @Input
+    Property<String> getConfigName() {
+        return configName;
+    }
+
     @TaskAction
     public void perform() {
-        final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrNull());
-
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
-        final String bundleFileName = getProject().getName() + '-' + getProject().getVersion() + ".environment.bundle";
-        environmentBundleCreator.createEnvironmentBundle(
-                environmentValues,
-                into.getAsFile().get().getPath(),
-                into.getAsFile().get().getPath(),
-                EMPTY,
-                PLUGIN,
-                bundleFileName
-        );
+        final List<File> metaDataFiles = collectFiles(into.getAsFile().get().getPath(), YML_EXTENSION);
+        if(metaDataFiles.isEmpty()) {
+            throw new MissingEnvironmentException("Metadata file does not exist.");
+        }
+        metaDataFiles.stream().forEach(metaDataFile-> {
+            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.get());
+            if (null != bundleEnvironmentValues) {
+                final String bundleFileName = bundleEnvironmentValues.getLeft() + "." + configName.get() + ".environment.bundle";
+                environmentBundleCreator.createEnvironmentBundle(
+                        bundleEnvironmentValues.getRight(),
+                        into.getAsFile().get().getPath(),
+                        into.getAsFile().get().getPath(),
+                        EMPTY,
+                        PLUGIN,
+                        bundleFileName,
+                        bundleEnvironmentValues.getLeft()
+                );
+            }
+        });
     }
 }

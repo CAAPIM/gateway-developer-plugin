@@ -19,6 +19,8 @@ public class GatewayDeveloperPluginConfig {
     private final Property<Map> environmentConfig;
     private DirectoryProperty builtEnvironmentBundleDir;
     private final Property<Boolean> detemplatizeDeploymentBundles;
+    private final Property<String> configFolder;
+    private final Property<String> configName;
 
     public GatewayDeveloperPluginConfig(Project project) {
         solutionDir = project.getLayout().directoryProperty();
@@ -26,6 +28,8 @@ public class GatewayDeveloperPluginConfig {
         environmentConfig = project.getObjects().property(Map.class);
         builtEnvironmentBundleDir = project.getLayout().directoryProperty();
         detemplatizeDeploymentBundles = project.getObjects().property(Boolean.class);
+        configFolder = project.getObjects().property(String.class);
+        configName = project.getObjects().property(String.class);
     }
 
     DirectoryProperty getSolutionDir() {
@@ -46,5 +50,13 @@ public class GatewayDeveloperPluginConfig {
 
     public Property<Boolean> getDetemplatizeDeploymentBundles() {
         return detemplatizeDeploymentBundles;
+    }
+
+    Property<String> getConfigFolder() {
+        return configFolder;
+    }
+
+    Property<String> getConfigName() {
+        return configName;
     }
 }

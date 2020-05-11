@@ -102,6 +102,8 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create(BUILD_ENVIRONMENT_BUNDLE, BuildEnvironmentBundleTask.class, t -> {
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
             t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
+            t.getConfigFolder().set(pluginConfig.getConfigFolder());
+            t.getConfigName().set(pluginConfig.getConfigName());
         });
         buildEnvironmentBundleTask.dependsOn(buildDeploymentBundleTask);
         return buildEnvironmentBundleTask;
@@ -218,6 +220,12 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         }
         if (!pluginConfig.getBuiltEnvironmentBundleDir().isPresent()) {
             pluginConfig.getBuiltEnvironmentBundleDir().set(defaultBuildDir);
+        }
+        if (!pluginConfig.getConfigFolder().isPresent()) {
+            pluginConfig.getConfigFolder().set("src/main/gateway/config");
+        }
+        if (!pluginConfig.getConfigName().isPresent()) {
+            pluginConfig.getConfigName().set("config");
         }
     }
 }
