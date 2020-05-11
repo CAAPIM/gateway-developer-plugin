@@ -8,8 +8,12 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Named;
+
+import java.io.File;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.PROPERTIES;
 
@@ -27,5 +31,12 @@ public class GlobalEnvironmentProperty extends EnvironmentProperty {
     @Override
     public String getKey() {
         return "gateway." + getName();
+    }
+
+    @Override
+    public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
+        String name = getName();
+        int index = name.indexOf(".");
+        setName(name.substring(index + 1));
     }
 }
