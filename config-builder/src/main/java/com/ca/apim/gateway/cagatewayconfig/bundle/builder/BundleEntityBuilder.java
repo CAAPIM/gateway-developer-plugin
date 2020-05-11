@@ -104,7 +104,14 @@ public class BundleEntityBuilder {
                     Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
                     Map<String, ? extends GatewayEntity> entities = bundle.getEntities(entityClass);
                     Optional<? extends Map.Entry<String, ? extends GatewayEntity>> optionalGatewayEntity =  entities.entrySet().stream()
-                            .filter(e-> dependency.getName().equals(PathUtils.extractName(e.getKey()))).findFirst();
+                            .filter(e-> {
+                                GatewayEntity gatewayEntity = e.getValue();
+                                if (gatewayEntity.getName() != null) {
+                                    return dependency.getName().equals(gatewayEntity.getName());
+                                } else {
+                                    return dependency.getName().equals(PathUtils.extractName(e.getKey()));
+                                }
+                            }).findFirst();
                     Map<String, GatewayEntity> dependencyMap = getEntities(entityClass, entityDependenciesMap);
                     optionalGatewayEntity.ifPresent(entityEntry -> dependencyMap.put(entityEntry.getKey(), entityEntry.getValue()));
                 }
