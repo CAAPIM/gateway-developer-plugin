@@ -20,8 +20,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
-
 import javax.inject.Named;
 import java.io.File;
 import java.util.Comparator;
@@ -38,7 +36,7 @@ import static java.util.stream.Collectors.toCollection;
 @ConfigurationFile(name = "encass", type = JSON_YAML)
 @EnvironmentType("ENCAPSULATED_ASSERTION")
 @BundleGeneration
-public class Encass extends GatewayEntity implements AnnotatableEntity {
+public class Encass extends GatewayEntity implements AnnotableEntity {
 
     private String policy;
     private Set<EncassArgument> arguments;

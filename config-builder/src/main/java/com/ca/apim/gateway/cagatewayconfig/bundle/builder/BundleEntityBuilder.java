@@ -64,8 +64,8 @@ public class BundleEntityBuilder {
         // Filter the bundle to export only annotated entities
         entityTypeMap.values().stream().filter(EntityUtils.GatewayEntityInfo::isBundleGenerationSupported).forEach(entityInfo ->
                 bundle.getEntities(entityInfo.getEntityClass()).values().stream()
-                        .filter(entity -> entity instanceof AnnotatableEntity)
-                        .map(entity -> ((AnnotatableEntity)entity).getAnnotatedEntity(projectName, projectVersion))
+                        .filter(entity -> entity instanceof AnnotableEntity)
+                        .map(entity -> ((AnnotableEntity)entity).getAnnotatedEntity(projectName, projectVersion))
                         .forEach(annotatedEntity -> {
                             if(annotatedEntity != null && annotatedEntity.isBundle()){
                                 List<Entity> entities = new ArrayList<>();

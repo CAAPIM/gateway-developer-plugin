@@ -20,6 +20,10 @@ public interface EntitiesLinker {
         link(filteredBundle, bundle);
     }
 
+    /**
+     *  It has to be overridden in entity specific likers to change the dependency name or type
+     * @param dependencies
+     */
     default void link(Set<Dependency> dependencies) {
     }
 }

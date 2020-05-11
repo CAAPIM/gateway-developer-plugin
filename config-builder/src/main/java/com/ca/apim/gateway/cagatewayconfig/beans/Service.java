@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
@@ -34,7 +34,7 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @ConfigurationFile(name = "services", type = JSON_YAML)
 @EnvironmentType("SERVICE")
 @BundleGeneration
-public class Service extends Folderable implements AnnotatableEntity {
+public class Service extends Folderable implements AnnotableEntity {
 
     private String url;
     private String policy;

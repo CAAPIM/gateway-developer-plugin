@@ -8,7 +8,7 @@ import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
 
-public interface AnnotatableEntity {
+public interface AnnotableEntity {
     AnnotatedEntity<GatewayEntity> getAnnotatedEntity(final String projectName,
                                                       final String projectVersion);
 
