@@ -162,13 +162,12 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     @Override
     public AnnotatedEntity getAnnotatedEntity() {
         if (annotatedEntity == null && annotations != null) {
-            annotatedEntity = createAnnotatedEntity(annotations);
+            annotatedEntity = createAnnotatedEntity();
             if (StringUtils.isBlank(annotatedEntity.getDescription())) {
-                Map<String, Object> properties = getProperties();
-                if (properties != null) {
-                    annotatedEntity.setDescription(properties.getOrDefault("description", "").toString());
+                Map<String, Object> props = getProperties();
+                if (props != null) {
+                    annotatedEntity.setDescription(props.getOrDefault("description", "").toString());
                 }
-
             }
             annotatedEntity.setPolicyName(getPolicy());
             annotatedEntity.setEntityName(getName());

@@ -232,7 +232,7 @@ public class Policy extends Folderable implements AnnotableEntity {
     @Override
     public AnnotatedEntity getAnnotatedEntity() {
         if (annotatedEntity == null && annotations != null) {
-            annotatedEntity = createAnnotatedEntity(annotations);
+            annotatedEntity = createAnnotatedEntity();
             if (StringUtils.isBlank(annotatedEntity.getDescription())) {
                 annotatedEntity.setDescription("");
             }
