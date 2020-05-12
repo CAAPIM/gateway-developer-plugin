@@ -53,18 +53,23 @@ public class ListenPortEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getListenPorts(), bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, ListenPort> listenPortMap = Optional.ofNullable(bundle.getListenPorts()).orElse(Collections.emptyMap());
+            return buildEntities(listenPortMap, ((AnnotatedBundle) bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getListenPorts(), bundle, bundleType, document);
+        }
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         final Stream<Entity> userPorts = entities.entrySet().stream().map(listenPortEntry ->
-                buildListenPortEntity(bundle, listenPortEntry.getKey(), (ListenPort)listenPortEntry.getValue(), document));
+                buildListenPortEntity(bundle, listenPortEntry.getKey(), (ListenPort) listenPortEntry.getValue(), document));
 
         switch (bundleType) {
             case DEPLOYMENT:
                 return userPorts.collect(toList());
             case ENVIRONMENT:
-                final Stream<Entity> defaultPorts = DEFAULT_PORTS.entrySet().stream().filter(p -> entities.values().stream().noneMatch(up -> ((ListenPort)up).getPort() == p.getValue().getPort()))
+                final Stream<Entity> defaultPorts = DEFAULT_PORTS.entrySet().stream().filter(p -> entities.values().stream().noneMatch(up -> ((ListenPort) up).getPort() == p.getValue().getPort()))
                         .map(listenPortEntry -> {
                             Entity entity = buildListenPortEntity(bundle, listenPortEntry.getKey(), listenPortEntry.getValue(), document);
                             entity.setMappingAction(NEW_OR_EXISTING);
@@ -74,12 +79,6 @@ public class ListenPortEntityBuilder implements EntityBuilder {
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
-    }
-
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(ListenPort.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundle, bundleType, document);
     }
 
     // also visible for testing

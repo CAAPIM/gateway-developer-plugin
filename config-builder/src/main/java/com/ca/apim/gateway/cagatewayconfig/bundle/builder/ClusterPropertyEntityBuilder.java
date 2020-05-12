@@ -37,12 +37,6 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
     ClusterPropertyEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> globalProperties = Optional.ofNullable(entityMap.get(GlobalEnvironmentProperty.class)).orElse(Collections.emptyMap());
-        Map<String, GatewayEntity> clusterProperties = Optional.ofNullable(entityMap.get(ClusterProperty.class)).orElse(Collections.emptyMap());
-        return buildEntities(globalProperties, clusterProperties, bundleType, document);
-    }
 
     private List<Entity> buildEntities(Map<String, ?> globalProperties, Map<String, ?> clusterProperties, BundleType bundleType, Document document){
         Stream.Builder<Entity> streamBuilder = Stream.builder();
@@ -74,8 +68,8 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, ClusterProperty> clusterPropertyMap = bundle.getStaticProperties();
-        Map<String, GlobalEnvironmentProperty>  globalEnvironmentProperties = bundle.getGlobalEnvironmentProperties();
+        Map<String, GlobalEnvironmentProperty> globalEnvironmentProperties = Optional.ofNullable(bundle.getGlobalEnvironmentProperties()).orElse(Collections.emptyMap());
+        Map<String, ClusterProperty> clusterPropertyMap = Optional.ofNullable(bundle.getStaticProperties()).orElse(Collections.emptyMap());
         return buildEntities(globalEnvironmentProperties, clusterPropertyMap, bundleType, document);
     }
 
