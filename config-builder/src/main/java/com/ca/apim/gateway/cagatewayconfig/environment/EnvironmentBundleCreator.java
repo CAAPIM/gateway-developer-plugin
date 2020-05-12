@@ -25,7 +25,8 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.processDeploymentBundles;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.setTemplatizedBundlesFolderPath;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static java.util.stream.Collectors.toList;
 
@@ -80,7 +81,7 @@ public class EnvironmentBundleCreator {
     private List<TemplatizedBundle> collectTemplatizedBundleFiles(final String templatizedBundleFolderPath,
                                                                   final String bundleFolderPath) {
         return collectFiles(templatizedBundleFolderPath, BUNDLE_EXTENSION).stream()
-                .filter(file -> !StringUtils.endsWithIgnoreCase(file.getName(), ".delete.bundle"))
+                .filter(file -> !StringUtils.endsWithIgnoreCase(file.getName(), DELETE_BUNDLE_EXTENSION))
                 .map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName())))
                 .collect(toList());
     }

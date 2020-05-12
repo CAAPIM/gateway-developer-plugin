@@ -25,7 +25,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static org.apache.commons.collections4.ListUtils.union;
@@ -91,6 +92,6 @@ public class BuildFullBundleTask extends DefaultTask {
 
     private List<File> collectBundleFiles(final String bundleDirectory) {
         return collectFiles(bundleDirectory, BUNDLE_EXTENSION).stream().filter(file -> !StringUtils.endsWithIgnoreCase(
-                file.getName(), ".delete" + BUNDLE_EXTENSION)).collect(Collectors.toList());
+                file.getName(), DELETE_BUNDLE_EXTENSION)).collect(Collectors.toList());
     }
 }

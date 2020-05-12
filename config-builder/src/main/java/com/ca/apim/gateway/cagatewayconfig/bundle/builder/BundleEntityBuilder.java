@@ -168,6 +168,22 @@ public class BundleEntityBuilder {
     }
 
     /**
+     * Inserts the Gateway entity into the Entity Map based on the Gateway entity type. It skip adding the entity if
+     * excludeReusable is TRUE and the Gateway Entity is Reusable
+     *
+     * @param entityMapToUpdate Entity Map where GatewayEntity needs to be inserted
+     * @param gatewayEntity Gateway entity to be inserted
+     * @param excludeReusable Exclude inserting reusable entity
+     */
+    private void includeGatewayEntity(Map<Class, Map<String, GatewayEntity>> entityMapToUpdate,
+                                      GatewayEntity gatewayEntity, final boolean excludeReusable) {
+        if (excludeReusable && gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable()) {
+            return; // Return without inserting is Reusable entity
+        }
+        putGatewayEntityByType(entityMapToUpdate, gatewayEntity);
+    }
+
+    /**
      * Inserts the Gateway entity into the Entity Map based on the Gateway entity type. If the Gateway entity type
      * doesn't exist in the Entity Map, initializes the Entity Map with the type before inserting the Gateway entity.
      *
@@ -178,22 +194,6 @@ public class BundleEntityBuilder {
                                        GatewayEntity gatewayEntity) {
         entityMapToUpdate.computeIfAbsent(gatewayEntity.getClass(), klass -> new HashMap<>())
                 .put(gatewayEntity.getName(), gatewayEntity);
-    }
-
-    /**
-     * Inserts the Gateway entity into the Entity Map based on the Gateway entity type. It skip adding the entity if
-     * excludeReusable is TRUE and the Gateway Entity is Reusable
-     *
-     * @param entityMapToUpdate Entity Map where GatewayEntity needs to be inserted
-     * @param gatewayEntity Gateway entity to be inserted
-     * @param excludeReusable Exclude inserting reusable entity
-     */
-    private void includeGatewayEntity(Map<Class, Map<String, GatewayEntity>> entityMapToUpdate,
-                                         GatewayEntity gatewayEntity, final boolean excludeReusable) {
-        if (excludeReusable && gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable()) {
-            return; // Return without inserting is Reusable entity
-        }
-        putGatewayEntityByType(entityMapToUpdate, gatewayEntity);
     }
 
     private void populateDependentFolders(Map<Class, Map<String, GatewayEntity>> entityDependenciesMap, GatewayEntity policyEntity) {

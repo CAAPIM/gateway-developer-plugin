@@ -2,7 +2,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 
 import java.util.Set;
@@ -20,13 +19,13 @@ public interface AnnotableEntity {
      * Creates AnnotatedEntity object by scanning all the annotations and gathering all the information required to
      * generate the bundle and its metadata.
      *
-     * @param annotations
      * @param projectName    Project name
      * @param projectVersion Project version
      * @return AnnotatedEntity
      */
-    default AnnotatedEntity<GatewayEntity> createAnnotatedEntity(final Set<Annotation> annotations, final String projectName,
+    default AnnotatedEntity<GatewayEntity> createAnnotatedEntity(final String projectName,
                                                                  final String projectVersion) {
+        final Set<Annotation> annotations = getAnnotations();
         if (annotations != null) {
             AnnotatedEntity<GatewayEntity> annotatedEntity = new AnnotatedEntity(this);
             annotations.forEach(annotation -> {

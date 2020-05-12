@@ -29,6 +29,9 @@ import java.io.File;
 import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilderTestHelper.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -67,12 +70,14 @@ public class BundleMetadataBuilderTest {
             assertTrue(bundleOutput.exists());
             assertEquals(3, bundleOutput.listFiles().length);
             for (File generatedFile : bundleOutput.listFiles()) {
-                if (StringUtils.endsWith(generatedFile.getName(), ".delete.bundle")) {
-                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0.delete.bundle", generatedFile.getName());
-                } else if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {
-                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0.bundle", generatedFile.getName());
+                if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + DELETE_BUNDLE_EXTENSION,
+                            generatedFile.getName());
+                } else if (StringUtils.endsWith(generatedFile.getName(), BUNDLE_EXTENSION)) {
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + BUNDLE_EXTENSION, generatedFile.getName());
                 } else {
-                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + JsonFileUtils.METADATA_FILE_NAME_SUFFIX, generatedFile.getName());
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + METADATA_FILE_NAME_SUFFIX,
+                            generatedFile.getName());
                 }
             }
         } finally {
@@ -97,11 +102,12 @@ public class BundleMetadataBuilderTest {
             assertEquals(3, bundleOutput.listFiles().length);
             for (File generatedFile : bundleOutput.listFiles()) {
                 if (StringUtils.endsWith(generatedFile.getName(), ".delete.bundle")) {
-                    assertEquals("my-bundle-" + encass.getName() + "-1.0.delete.bundle", generatedFile.getName());
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0" + DELETE_BUNDLE_EXTENSION,
+                            generatedFile.getName());
                 } else if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {
-                    assertEquals("my-bundle-" + encass.getName() + "-1.0.bundle", generatedFile.getName());
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0" + BUNDLE_EXTENSION, generatedFile.getName());
                 } else {
-                    assertEquals("my-bundle-" + encass.getName() + "-1.0" + JsonFileUtils.METADATA_FILE_NAME_SUFFIX,
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0" + METADATA_FILE_NAME_SUFFIX,
                             generatedFile.getName());
                 }
             }

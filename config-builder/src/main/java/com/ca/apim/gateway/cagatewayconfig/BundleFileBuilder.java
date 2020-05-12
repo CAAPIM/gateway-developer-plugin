@@ -34,6 +34,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
+
 @Singleton
 public class BundleFileBuilder {
 
@@ -95,10 +98,10 @@ public class BundleFileBuilder {
     }
 
     private void writeBundleArtifacts(final String key, final BundleArtifacts bundleArtifacts, File outputDir) {
-        documentFileUtils.createFile(bundleArtifacts.getDeploymentBundle(),
-                new File(outputDir, key + ".bundle").toPath());
-        documentFileUtils.createFile(bundleArtifacts.getDeleteDeploymentBundle(),
-                new File(outputDir, key + ".delete.bundle").toPath());
+        documentFileUtils.createFile(bundleArtifacts.getDeploymentBundle(), new File(outputDir,
+                key + BUNDLE_EXTENSION).toPath());
+        documentFileUtils.createFile(bundleArtifacts.getDeleteDeploymentBundle(), new File(outputDir,
+                key + DELETE_BUNDLE_EXTENSION).toPath());
         jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), key, outputDir);
     }
 
