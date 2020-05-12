@@ -77,7 +77,7 @@ public class AnnotatedEntity<T> {
         return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isRedeployable();
     }
 
-    public boolean isExclude() {
+    public boolean isExcluded() {
         return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isExcluded();
     }
 
