@@ -45,21 +45,26 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public class JmsDestinationEntityBuilder implements EntityBuilder {
     private static final Integer ORDER = 1500;
-    
+
     private static final String INBOUND_CONTENT_TYPE_SOURCE_NONE = "";
     private static final String INBOUND_CONTENT_TYPE_SOURCE_FREE_FORM = "com.l7tech.server.jms.prop.contentType.freeform";
     private static final String INBOUND_CONTENT_TYPE_SOURCE_JMS_PROPERTY = "com.l7tech.server.jms.prop.contentType.header";
-    
+
     private final IdGenerator idGenerator;
-    
+
     @Inject
     JmsDestinationEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
-    
+
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getJmsDestinations(), bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, JmsDestination> jmsDestinationMap = Optional.ofNullable(bundle.getJmsDestinations()).orElse(Collections.emptyMap());
+            return buildEntities(jmsDestinationMap, ((AnnotatedBundle) bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getJmsDestinations(), bundle, bundleType, document);
+        }
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
@@ -70,7 +75,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
-                        buildEntity(bundle, e.getKey(), (JmsDestination)e.getValue(), document)
+                        buildEntity(bundle, e.getKey(), (JmsDestination) e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
@@ -78,20 +83,14 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
     }
 
     @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(JmsDestination.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundle, bundleType, document);
-    }
-
-    @Override
     public @NotNull Integer getOrder() {
         return ORDER;
     }
-    
+
     private Entity buildEntity(Bundle bundle, String name, JmsDestination jmsDestination, Document document) {
         String id = jmsDestination.getId();
         boolean isInbound = jmsDestination.getInboundDetail() != null;
-        
+
         // Build JMS Destination element.
         Element jmsDestinationDetailEle = createElementWithAttributesAndChildren(
                 document,
@@ -101,17 +100,17 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 createElementWithTextContent(document, JMS_DESTINATION_NAME, jmsDestination.getDestinationName()),
                 createElementWithTextContent(document, INBOUND, isInbound)
         );
-        
+
         Map<String, Object> jmsDestinationDetailProps = new HashMap<>();
         jmsDestinationDetailProps.put(DESTINATION_TYPE, jmsDestination.getDestinationType().getType());
         jmsDestinationDetailProps.put(PROPERTY_USERNAME, jmsDestination.getDestinationUsername());
         jmsDestinationDetailProps.put(PROPERTY_PASSWORD, this.getPassword(bundle, jmsDestination.getDestinationPasswordRef(), jmsDestination.getDestinationPassword()));
-        
+
         Map<String, Object> contextPropertiesTemplateProps =
                 Optional.ofNullable(jmsDestination.getJndiProperties()).orElseGet(HashMap::new);
         contextPropertiesTemplateProps.put(JNDI_USERNAME, jmsDestination.getJndiUsername());
         contextPropertiesTemplateProps.put(JNDI_PASSWORD, this.getPassword(bundle, jmsDestination.getJndiPasswordRef(), jmsDestination.getJndiPassword()));
-        
+
         boolean isTemplate = false;
 
         if (isInbound) {
@@ -137,7 +136,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 JMS_CONNECTION,
                 ImmutableMap.of(ATTRIBUTE_ID, jmsConnectionEleId)
         );
-        
+
         if (StringUtils.isNotEmpty(providerType)) {
             jmsConnectionEle.appendChild(createElementWithTextContent(document, JMS_PROVIDER_TYPE, providerType));
         }
@@ -162,18 +161,18 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
 
         return EntityBuilderHelper.getEntityWithNameMapping(EntityTypes.JMS_DESTINATION_TYPE, name, id, jmsDestinationEle);
     }
-    
+
     private String getPassword(final Bundle bundle, final String passwordRef, final String plaintext) {
         if (passwordRef != null) {
             if (bundle.getStoredPasswords().get(passwordRef) == null) {
-                throw new EntityBuilderException("JMS destination is referencing missing stored password '" + passwordRef +"'");
+                throw new EntityBuilderException("JMS destination is referencing missing stored password '" + passwordRef + "'");
             }
             return String.format(STORED_PASSWORD_REF_FORMAT, passwordRef);
         } else {
             return plaintext;
         }
     }
-    
+
     private void buildPrivateKeyReferences(
             final Bundle bundle,
             final String providerType,
@@ -183,13 +182,13 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             if (null == bundle.getPrivateKeys().get(alias)) {
                 throw new EntityBuilderException("Jms destination is referencing missing private key '" + alias + "'");
             }
-            
+
             contextPropertiesTemplateProps.put(DESTINATION_CLIENT_AUTH_KEYSTORE_ID, KeyStoreType.GENERIC.getId());
-            
-            if(PROVIDER_TYPE_TIBCO_EMS.equals(providerType)) {
-                contextPropertiesTemplateProps.put(DESTINATION_CLIENT_AUTH_IDENTITY, 
+
+            if (PROVIDER_TYPE_TIBCO_EMS.equals(providerType)) {
+                contextPropertiesTemplateProps.put(DESTINATION_CLIENT_AUTH_IDENTITY,
                         "com.l7tech.server.jms.prop.keystore.bytes\t" + KeyStoreType.GENERIC.getId() + "\t" + alias);
-                contextPropertiesTemplateProps.put(DESTINATION_CLIENT_AUTH_PASSWORD, 
+                contextPropertiesTemplateProps.put(DESTINATION_CLIENT_AUTH_PASSWORD,
                         "com.l7tech.server.jms.prop.keystore.password\t" + KeyStoreType.GENERIC.getId() + "\t" + alias);
             }
         }
@@ -199,8 +198,8 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             if (null == bundle.getPrivateKeys().get(alias)) {
                 throw new EntityBuilderException("Jms destination is referencing missing private key '" + alias + "'");
             }
-            
-            if(PROVIDER_TYPE_TIBCO_EMS.equals(providerType)) {
+
+            if (PROVIDER_TYPE_TIBCO_EMS.equals(providerType)) {
                 contextPropertiesTemplateProps.put(JNDI_CLIENT_AUT_KEYSTORE_ID, KeyStoreType.GENERIC.getId());
                 contextPropertiesTemplateProps.put(JNDI_CLIENT_AUT_AUTH_IDENTITY,
                         "com.l7tech.server.jms.prop.keystore\t" + KeyStoreType.GENERIC.getId() + "\t" + alias);
@@ -209,8 +208,8 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             }
         }
     }
-    
-    private void buildInboundDestination (
+
+    private void buildInboundDestination(
             final Bundle bundle,
             final String name,
             final JmsDestination jmsDestination,
@@ -253,7 +252,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                     contextPropertiesTemplateProps,
                     SOAP_ACTION_MSG_PROP_NAME,
                     serviceResolutionSettings.getSoapActionMessagePropertyName());
-            
+
             contextPropertiesTemplateProps.put(CONTENT_TYPE_SOURCE, this.getContentTypeSource(serviceResolutionSettings));
 
             String contentType = serviceResolutionSettings.getContentType();
@@ -262,7 +261,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             contextPropertiesTemplateProps.put(CONTENT_TYPE_VALUE, contentType);
         }
 
-        if (ON_COMPLETION.equals(inboundDetail.getAcknowledgeType())){
+        if (ON_COMPLETION.equals(inboundDetail.getAcknowledgeType())) {
             putToMapIfValueIsNotNull(
                     jmsDestinationDetailProps,
                     INBOUND_FAILURE_QUEUE_NAME,
@@ -287,8 +286,8 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         if (serviceResolutionSettings.getContentTypeSource() == null) {
             return INBOUND_CONTENT_TYPE_SOURCE_NONE;
         }
-        
-        String contentTypeSource ;
+
+        String contentTypeSource;
         switch (serviceResolutionSettings.getContentTypeSource()) {
             case NONE:
                 contentTypeSource = INBOUND_CONTENT_TYPE_SOURCE_NONE;
@@ -305,8 +304,8 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         }
         return contentTypeSource;
     }
-    
-    private void buildOutboundDestination (
+
+    private void buildOutboundDestination(
             final JmsDestination jmsDestination,
             final Map<String, Object> jmsDestinationDetailProps,
             final Map<String, Object> contextPropertiesTemplateProps) {
@@ -337,7 +336,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
             if (sessionPoolingSettings != null) {
                 putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_SIZE, sessionPoolingSettings.getSize());
                 putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_MAX_IDLE, sessionPoolingSettings.getMaxIdle());
-                putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_MAX_WAIT, sessionPoolingSettings.getMaxWaitMs()); 
+                putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_MAX_WAIT, sessionPoolingSettings.getMaxWaitMs());
             }
         }
     }

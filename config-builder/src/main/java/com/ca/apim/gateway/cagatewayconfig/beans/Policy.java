@@ -22,6 +22,7 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,7 +55,7 @@ public class Policy extends Folderable implements AnnotableEntity {
     @JsonIgnore
     private Set<Dependency> usedEntities;
     @JsonIgnore
-    private AnnotatedEntity<GatewayEntity> annotatedEntity;
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
     public Policy() {}
 
@@ -229,27 +230,19 @@ public class Policy extends Folderable implements AnnotableEntity {
     }
 
     @Override
-    public AnnotatedEntity<GatewayEntity> getAnnotatedEntity(final String projectName,
-                                                             final String projectVersion) {
-        return annotatedEntity == null ? createAnnotatedEntity(annotations, projectName, projectVersion) : annotatedEntity;
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity(annotations);
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                annotatedEntity.setDescription("");
+            }
+            annotatedEntity.setPolicyName(getName());
+            annotatedEntity.setEntityName(getName());
+        }
+        return annotatedEntity;
     }
 
-    public void populateBundleInfo(final AnnotatedEntity<GatewayEntity> annotatedEntity, final Annotation bundleAnnotation, final String projectName,
-                                   final String projectVersion) {
-        String annotatedBundleName = bundleAnnotation.getName();
-        if (StringUtils.isBlank(annotatedBundleName)) {
-            annotatedBundleName = projectName + "-" + getName();
-        }
-        annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
-        String description = bundleAnnotation.getDescription();
-        if (StringUtils.isBlank(description)) {
-            description = "";
-        }
-        annotatedEntity.setDescription(description);
-        annotatedEntity.setPolicyName(getName());
-
-        annotatedEntity.setUniquePrefix(projectName + "-policy-" + PathUtils.extractName(getName()) + "-");
-        annotatedEntity.setUniqueSuffix("-" + projectVersion);
-        annotatedEntity.setEntityName(getName());
+    public String getType(){
+        return "policy";
     }
 }

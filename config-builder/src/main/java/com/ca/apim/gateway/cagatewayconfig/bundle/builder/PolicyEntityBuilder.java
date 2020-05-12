@@ -65,11 +65,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(Policy.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, annotatedEntity, bundle, bundleType, document);
-    }
-
     public List<Entity> buildEntities(Map<String, ?> policyMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
         // no policy has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
@@ -85,7 +80,13 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getPolicies(), null, bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            AnnotatedBundle annotatedBundle = (AnnotatedBundle) bundle;
+            Map<String, Policy> map = Optional.ofNullable(bundle.getPolicies()).orElse(Collections.emptyMap());
+            return buildEntities(map, annotatedBundle.getAnnotatedEntity(), annotatedBundle.getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getPolicies(), null, bundle, bundleType, document);
+        }
     }
 
     @NotNull

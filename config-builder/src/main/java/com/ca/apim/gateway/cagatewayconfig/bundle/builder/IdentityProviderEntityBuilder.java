@@ -32,7 +32,12 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getIdentityProviders(), bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, IdentityProvider> identityProviderMap = Optional.ofNullable(bundle.getIdentityProviders()).orElse(Collections.emptyMap());
+            return buildEntities(identityProviderMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getIdentityProviders(), bundle, bundleType, document);
+        }
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
@@ -49,12 +54,6 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
-    }
-
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(IdentityProvider.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundle, bundleType, document);
     }
 
     private Entity buildIdentityProviderEntity(Bundle bundle, String name, IdentityProvider identityProvider, Document document) {
