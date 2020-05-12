@@ -8,6 +8,12 @@ import java.util.Set;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
 
 public interface AnnotableEntity {
+
+    Annotation BUNDLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_BUNDLE);
+    Annotation REUSABLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_REUSABLE);
+    Annotation REDEPLOYABLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_REDEPLOYABLE);
+    Annotation EXCLUDE_ANNOTATION = new Annotation(ANNOTATION_TYPE_EXCLUDE);
+
     /**
      * This method creates annotated entity from annotations defined and then returns AnnotatedEntity
      *
@@ -58,7 +64,7 @@ public interface AnnotableEntity {
      * @return TRUE if "@bundle" annotation is added
      */
     default boolean isBundle() {
-        return getAnnotations() != null && getAnnotations().contains(new Annotation(ANNOTATION_TYPE_BUNDLE));
+        return getAnnotations() != null && getAnnotations().contains(BUNDLE_ANNOTATION);
     }
 
     /**
@@ -67,7 +73,7 @@ public interface AnnotableEntity {
      * @return TRUE if "@redeployable" annotation is added
      */
     default boolean isRedeployable() {
-        return getAnnotations() != null && getAnnotations().contains(new Annotation(ANNOTATION_TYPE_REDEPLOYABLE));
+        return getAnnotations() != null && getAnnotations().contains(REDEPLOYABLE_ANNOTATION);
     }
 
     /**
@@ -76,7 +82,7 @@ public interface AnnotableEntity {
      * @return TRUE if "@reusable" annotation is added
      */
     default boolean isReusable() {
-        return getAnnotations() != null && getAnnotations().contains(new Annotation(ANNOTATION_TYPE_REUSABLE));
+        return getAnnotations() != null && getAnnotations().contains(REUSABLE_ANNOTATION);
     }
 
     /**
@@ -85,6 +91,6 @@ public interface AnnotableEntity {
      * @return TRUE if "@exclude" annotation is added
      */
     default boolean isExcluded() {
-        return getAnnotations() != null && getAnnotations().contains(new Annotation(ANNOTATION_TYPE_EXCLUDE));
+        return getAnnotations() != null && getAnnotations().contains(EXCLUDE_ANNOTATION);
     }
 }
