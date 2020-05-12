@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -46,12 +47,14 @@ public class EnvironmentConfigurationUtils {
 
     private final JsonTools jsonTools;
     private final EntityLoaderRegistry entityLoaderRegistry;
+    private final JsonFileUtils jsonFileUtils;
     private static final Map<String, Pair<String,String>> ENTITY_FILE_MAP = unmodifiableMap(createEntityFileMap());
 
     @Inject
-    EnvironmentConfigurationUtils(JsonTools jsonTools, EntityLoaderRegistry entityLoaderRegistry) {
+    EnvironmentConfigurationUtils(JsonTools jsonTools, EntityLoaderRegistry entityLoaderRegistry, JsonFileUtils jsonFileUtils) {
         this.jsonTools = jsonTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
+        this.jsonFileUtils = jsonFileUtils;
     }
 
     /**
@@ -86,22 +89,14 @@ public class EnvironmentConfigurationUtils {
         if (!metaDataFile.exists()) {
             throw new MissingEnvironmentException("Metadata file " + metaDataFile.toString() + " does not exist.");
         }
-
+        final EnvironmentBundleData environmentBundleData = jsonFileUtils.readBundleMetadataFile(metaDataFile, EnvironmentBundleData.class);
         final String envConfigPath = new File(configFolder).getAbsolutePath();
-        final EnvironmentBundleData environmentBundleData;
-        try {
-            final ObjectMapper objectMapper = jsonTools.getObjectMapper(YAML_EXTENSION);
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            environmentBundleData = objectMapper.readValue(metaDataFile, EnvironmentBundleData.class);
-        } catch (IOException e) {
-            throw new MissingEnvironmentException("Unable to parse the data from metadata file " + metaDataFile.toString(), e);
-        }
 
         if (environmentBundleData != null && environmentBundleData.getEnvironmentEntities() != null && !environmentBundleData.getEnvironmentEntities().isEmpty()) {
             final String bundleName = environmentBundleData.getName();
             final String bundleVersion = environmentBundleData.getVersion();
             final Map<String, String> environmentValues = new LinkedHashMap<>();
-            final List<LinkedHashMap<String, String>> environmentEntities = environmentBundleData.getEnvironmentEntities();
+            final List<Map<String, String>> environmentEntities = environmentBundleData.getEnvironmentEntities();
             environmentEntities.stream().forEach(environmentEntitiy -> {
                 final String entityType = environmentEntitiy.get("type");
                 final String entityName = !EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entityType) ? environmentEntitiy.get("name") : PREFIX_GATEWAY + environmentEntitiy.get("name");

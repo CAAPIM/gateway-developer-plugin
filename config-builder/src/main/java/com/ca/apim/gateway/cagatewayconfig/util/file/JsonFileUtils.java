@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.util.file;
 
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.closeQuietly;
+import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YAML_EXTENSION;
 
 public class JsonFileUtils {
 
@@ -64,5 +66,14 @@ public class JsonFileUtils {
 
     public void createBundleMetadataFile(Object objectToWrite, String fileName, File outputDir) {
         createFile(objectToWrite, new File(outputDir, fileName + METADATA_FILE_NAME_SUFFIX).toPath());
+    }
+
+    public <T> T readBundleMetadataFile(final File metaDataFile, Class<T> tClass) {
+        try {
+            return jsonTools.getObjectMapper(YAML_EXTENSION).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).
+                    readValue(metaDataFile, tClass);
+        } catch (IOException e) {
+            throw new JsonFileUtilsException("Error reading the bundle metadata file " + metaDataFile.toString(), e);
+        }
     }
 }

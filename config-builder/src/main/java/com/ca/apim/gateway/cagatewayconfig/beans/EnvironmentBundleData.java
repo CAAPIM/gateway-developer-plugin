@@ -1,14 +1,14 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EnvironmentBundleData {
     private String type;
     private String name;
     private String version;
     private Boolean environmentIncluded;
-    private List<LinkedHashMap<String, String>> environmentEntities;
+    private List<Map<String, String>> environmentEntities;
 
     public String getType() {
         return type;
@@ -42,11 +42,11 @@ public class EnvironmentBundleData {
         this.environmentIncluded = environmentIncluded;
     }
 
-    public List<LinkedHashMap<String, String>> getEnvironmentEntities() {
+    public List<Map<String, String>> getEnvironmentEntities() {
         return environmentEntities;
     }
 
-    public void setEnvironmentEntities(List<LinkedHashMap<String, String>> environmentEntities) {
+    public void setEnvironmentEntities(List<Map<String, String>> environmentEntities) {
         this.environmentEntities = environmentEntities;
     }
 }
