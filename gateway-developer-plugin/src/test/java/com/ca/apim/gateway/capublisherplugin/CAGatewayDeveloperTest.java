@@ -235,19 +235,8 @@ class CAGatewayDeveloperTest {
                         "build-environment-bundle",
                         "--stacktrace",
                         "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DpasswordGateway=7layer",
-                        "-DldapConfig={" +
-                                "    \"type\": \"BIND_ONLY_LDAP\"," +
-                                "    \"identityProviderDetail\": {" +
-                                "      \"serverUrls\": [" +
-                                "        \"ldaps://1.2.3.4:636\"" +
-                                "      ]," +
-                                "      \"useSslClientAuthentication\": true," +
-                                "      \"bindPatternPrefix\": \"\"," +
-                                "      \"bindPatternSuffix\": \"\"" +
-                                "    }" +
-                                "  }",
-                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.yml")
+                        "-DconfigFolder=./src/main/gateway/config",
+                        "-DconfigName=config")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build();
@@ -273,9 +262,8 @@ class CAGatewayDeveloperTest {
         assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
                 .withProjectDir(testProjectDir)
                 .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DpasswordGateway=",
-                        "-DldapConfig=",
-                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.yml")
+                        "-DconfigFolder=./src/main/gateway/config",
+                        "-DconfigName=config")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build());
@@ -291,9 +279,8 @@ class CAGatewayDeveloperTest {
         assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
                 .withProjectDir(testProjectDir)
                 .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DpasswordGateway=",
-                        "-DldapConfig=",
-                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections.ymla")
+                        "-DconfigFolder=./src/main/gateway/config_invalid",
+                        "-DconfigName=config")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build());
@@ -309,9 +296,8 @@ class CAGatewayDeveloperTest {
         assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
                 .withProjectDir(testProjectDir)
                 .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DpasswordGateway=",
-                        "-DldapConfig=",
-                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections-wrong.yml")
+                        "-DconfigFolder=./src/main/gateway/config/jdbc_wrong",
+                        "-DconfigName=jdbc_wrong")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build());
@@ -327,9 +313,8 @@ class CAGatewayDeveloperTest {
         assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
                 .withProjectDir(testProjectDir)
                 .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DpasswordGateway=",
-                        "-DldapConfig=",
-                        "-DjdbcConfigPath=./src/main/gateway/config/jdbc-connections-malformed.yml")
+                        "-DconfigFolder=./src/main/gateway/config/jdbc_malformed",
+                        "-DconfigName=jdbc_malformed")
                 .withPluginClasspath()
                 .withDebug(true)
                 .build());

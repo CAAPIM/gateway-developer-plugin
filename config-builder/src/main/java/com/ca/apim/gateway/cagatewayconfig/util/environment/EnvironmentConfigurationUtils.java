@@ -71,8 +71,6 @@ public class EnvironmentConfigurationUtils {
         entityFileMap.put(EntityTypes.LISTEN_PORT_TYPE, ImmutablePair.of("LISTEN_PORT","listen-ports.yml"));
         entityFileMap.put(EntityTypes.STORED_PASSWORD_TYPE, ImmutablePair.of("PASSWORD","stored-passwords.properties"));
         entityFileMap.put(EntityTypes.CLUSTER_PROPERTY_TYPE, ImmutablePair.of("PROPERTY","global-env.properties"));
-        entityFileMap.put("CONTEXT_VARIABLE_PROPERTY", ImmutablePair.of("CONTEXT_VARIABLE_PROPERTY","context-env.properties"));
-        entityFileMap.put("SERVICE_PROPERTY", ImmutablePair.of("SERVICE_PROPERTY","service-env.properties"));
 
         return entityFileMap;
     }

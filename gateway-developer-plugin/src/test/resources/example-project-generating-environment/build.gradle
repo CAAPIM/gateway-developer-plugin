@@ -26,6 +26,6 @@ dependencies {
 }
 
 GatewaySourceConfig {
-    configFolder = 'src/main/gateway/config'
-    configName = 'config'
+    configFolder = System.properties.get("configFolder")
+    configName = System.properties.get("configName")
 }
