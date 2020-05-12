@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
@@ -78,6 +79,8 @@ public class EntityUtils {
         private FileType fileType;
         private String environmentType;
 
+        private boolean bundleGenerationSupported;
+
         private GatewayEntityInfo() {
         }
 
@@ -109,5 +112,11 @@ public class EntityUtils {
         public String getEnvironmentType() {
             return environmentType;
         }
+
+        public boolean isBundleGenerationSupported() {
+            BundleGeneration bundleGeneration = entityClass.getAnnotation(BundleGeneration.class);
+            return bundleGeneration != null;
+        }
+
     }
 }

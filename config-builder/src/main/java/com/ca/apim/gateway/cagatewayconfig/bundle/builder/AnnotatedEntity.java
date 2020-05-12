@@ -15,21 +15,32 @@ public class AnnotatedEntity<T> {
     private String bundleName;
     private String policyName;
     private String description;
-    private boolean isBundleType;
-    private boolean isReusableType;
-    private boolean isRedeployableType;
-    private boolean isExcludeType;
+    private boolean bundle;
+    private boolean reusable=true;
+    private boolean redeployable;
+    private boolean exclude;
+    private boolean reusableEntity;
+    private String uniquePrefix;
+    private String uniqueSuffix;
     private Collection<String> tags;
 
     public AnnotatedEntity(T entity) {
         this.entity = entity;
     }
 
+    public boolean isReusableEntity() {
+        return reusableEntity;
+    }
+
+    public void setReusableEntity(boolean reusableEntity) {
+        this.reusableEntity = reusableEntity;
+    }
+
     public void setEntityName(String entityName) {
         this.entityName = entityName;
     }
 
-    public String getEntityName(){
+    public String getEntityName() {
         return entityName;
     }
 
@@ -37,7 +48,7 @@ public class AnnotatedEntity<T> {
         this.entityType = entityType;
     }
 
-    public String getEntityType(){
+    public String getEntityType() {
         return entityType;
     }
 
@@ -65,36 +76,32 @@ public class AnnotatedEntity<T> {
         return description;
     }
 
-    public boolean isBundleTypeEnabled() {
-        return isBundleType;
+    public boolean isBundle() {
+        return bundle;
     }
 
-    public void setBundleType(boolean isBundleType) {
-        this.isBundleType = isBundleType;
+    public void setBundle(boolean isBundleType) {
+        this.bundle = isBundleType;
     }
 
-    public boolean isReusableTypeEnabled() {
-        return isReusableType;
+    public boolean isReusable() {
+        return reusable;
     }
 
-    public void setReusableType(boolean isReusableType) {
-        this.isReusableType = isReusableType;
+    public boolean isRedeployable() {
+        return redeployable;
     }
 
-    public boolean isRedeployableTypeEnabled() {
-        return isRedeployableType;
+    public void setRedeployable(boolean isRedeployableType) {
+        this.redeployable = isRedeployableType;
     }
 
-    public void setRedeployableType(boolean isRedeployableType) {
-        this.isRedeployableType = isRedeployableType;
+    public boolean isExclude() {
+        return exclude;
     }
 
-    public boolean isExcludeTypeEnabled() {
-        return isExcludeType;
-    }
-
-    public void setExcludeType(boolean isExcludeType) {
-        this.isExcludeType = isExcludeType;
+    public void setExclude(boolean isExcludeType) {
+        this.exclude = isExcludeType;
     }
 
     public Collection<String> getTags() {

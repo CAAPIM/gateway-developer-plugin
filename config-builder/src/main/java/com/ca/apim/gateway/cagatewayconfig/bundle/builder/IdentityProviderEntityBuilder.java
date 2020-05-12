@@ -6,20 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.FederatedIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
-import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
-import com.ca.apim.gateway.cagatewayconfig.beans.BindOnlyLdapIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ID_PROVIDER_CONFIG_TYPE;
@@ -38,15 +32,24 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, IdentityProvider> identityProviderMap = Optional.ofNullable(bundle.getIdentityProviders()).orElse(Collections.emptyMap());
+            return buildEntities(identityProviderMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getIdentityProviders(), bundle, bundleType, document);
+        }
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                return bundle.getIdentityProviders().entrySet().stream()
+                return entities.entrySet().stream()
                         .map(
-                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, identityProviderEntry.getKey(), identityProviderEntry.getValue().getId())
+                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, identityProviderEntry.getKey(), ((IdentityProvider)identityProviderEntry.getValue()).getId())
                         ).collect(Collectors.toList());
             case ENVIRONMENT:
-                return bundle.getIdentityProviders().entrySet().stream().map(identityProviderEntry ->
-                        buildIdentityProviderEntity(bundle, identityProviderEntry.getKey(), identityProviderEntry.getValue(), document)
+                return entities.entrySet().stream().map(identityProviderEntry ->
+                        buildIdentityProviderEntity(bundle, identityProviderEntry.getKey(), (IdentityProvider)identityProviderEntry.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

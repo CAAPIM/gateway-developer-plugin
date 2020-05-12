@@ -13,10 +13,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.MapType;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
@@ -66,11 +62,14 @@ public class PolicyAndFolderLoader implements EntityLoader {
                 policyDependencyMap.put(new Dependency(policyMetadata.getName(), EntityTypes.POLICY_TYPE),
                         new LinkedList<>(dependencies));
 
-                //Policy policy = policies.get(policyMetadata.getFullPath());
-                //policy.setAnnotations(policyMetadata.getAnnotations());
+                Policy policy = policies.get(policyMetadata.getFullPath());
+                policy.setAnnotations(policyMetadata.getAnnotations());
+                policy.setTag(policyMetadata.getTag());
+                policy.setSubtag(policyMetadata.getSubtag());
+                policy.setPolicyType(PolicyType.fromType(policyMetadata.getType()));
+                policy.setUsedEntities(policyMetadata.getUsedEntities());
             });
         }
-
         bundle.setDependencyMap(policyDependencyMap);
     }
 

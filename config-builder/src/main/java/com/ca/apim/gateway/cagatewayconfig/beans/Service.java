@@ -6,12 +6,19 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Named;
@@ -26,12 +33,15 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @Named("SERVICE")
 @ConfigurationFile(name = "services", type = JSON_YAML)
 @EnvironmentType("SERVICE")
-public class Service extends Folderable {
+@BundleGeneration
+public class Service extends Folderable implements AnnotableEntity {
 
     private String url;
     private String policy;
     private Set<String> httpMethods;
     private Map<String,Object> properties;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
     @JsonIgnore
     private Element serviceDetailsElement;
     @JsonIgnore
@@ -40,6 +50,16 @@ public class Service extends Folderable {
     private String soapVersion;
     private boolean wssProcessingEnabled;
     private String wsdlRootUrl;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
+
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
+    }
 
     public String getUrl() {
         return url;
@@ -139,4 +159,26 @@ public class Service extends Folderable {
     public void setWsdlRootUrl(String wsdlRootUrl) {
         this.wsdlRootUrl = wsdlRootUrl;
     }
+
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity(annotations);
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                Map<String, Object> properties = getProperties();
+                if (properties != null) {
+                    annotatedEntity.setDescription(properties.getOrDefault("description", "").toString());
+                }
+
+            }
+            annotatedEntity.setPolicyName(getPolicy());
+            annotatedEntity.setEntityName(getName());
+        }
+        return annotatedEntity;
+    }
+
+    public String getType(){
+        return "service";
+    }
+
 }

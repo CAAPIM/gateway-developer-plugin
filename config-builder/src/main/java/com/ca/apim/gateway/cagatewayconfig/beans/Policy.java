@@ -6,11 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -18,6 +22,7 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,7 +34,8 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @JsonInclude(NON_EMPTY)
 @Named("POLICY")
-public class Policy extends Folderable {
+@BundleGeneration
+public class Policy extends Folderable implements AnnotableEntity {
 
     @JsonIgnore
     private String policyXML;
@@ -38,12 +44,18 @@ public class Policy extends Folderable {
     @JsonIgnore
     private Element policyDocument;
     @JsonIgnore
+    private Set<Annotation> annotations;
+    @JsonIgnore
     private final Set<Policy> dependencies = new HashSet<>();
     private String tag;
     @JsonIgnore
     private String subtag;
     @JsonIgnore
     private PolicyType policyType;
+    @JsonIgnore
+    private Set<Dependency> usedEntities;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
     public Policy() {}
 
@@ -55,6 +67,14 @@ public class Policy extends Folderable {
         this.tag = builder.tag;
         this.subtag = builder.subtag;
         setParentFolder(builder.parentFolderId != null ? new Folder(builder.parentFolderId, null) : null);
+    }
+
+    public Set<Dependency> getUsedEntities() {
+        return usedEntities;
+    }
+
+    public void setUsedEntities(Set<Dependency> usedEntities) {
+        this.usedEntities = usedEntities;
     }
 
     public String getPolicyXML() {
@@ -103,6 +123,14 @@ public class Policy extends Folderable {
 
     public PolicyType getPolicyType() {
         return policyType;
+    }
+
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
     }
 
     public void setPolicyType(PolicyType policyType) {
@@ -199,5 +227,22 @@ public class Policy extends Folderable {
     @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         setPath(PathUtils.unixPath(getPath()));
+    }
+
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity(annotations);
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                annotatedEntity.setDescription("");
+            }
+            annotatedEntity.setPolicyName(getName());
+            annotatedEntity.setEntityName(getName());
+        }
+        return annotatedEntity;
+    }
+
+    public String getType(){
+        return "policy";
     }
 }

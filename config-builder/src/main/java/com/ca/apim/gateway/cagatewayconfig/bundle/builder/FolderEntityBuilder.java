@@ -8,8 +8,10 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -58,16 +60,16 @@ public class FolderEntityBuilder implements EntityBuilder {
         return entity;
     }
 
-    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> entities, BundleType bundleType, Document document) {
         // no folder has to be added to environment bundle
-        if (bundle.getFolders().isEmpty() || bundleType == ENVIRONMENT) {
+        if (entities.isEmpty() || bundleType == ENVIRONMENT) {
             return Collections.emptyList();
         }
         Map<Folder, Collection<Folder>> folderChildrenMap = new HashMap<>();
 
-        bundle.getFolders().values().forEach(folder -> addFolder(folder, folderChildrenMap));
+        entities.values().forEach(folder -> addFolder((Folder)folder, folderChildrenMap));
 
-        Folder rootFolder = bundle.getFolders().get("");
+        Folder rootFolder = (Folder)entities.get("");
         if (rootFolder == null) {
             throw new EntityBuilderException("Could not locate root folder.");
         }
@@ -85,8 +87,13 @@ public class FolderEntityBuilder implements EntityBuilder {
                 .collect(Collectors.toList());
     }
 
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, Folder> folderMap = Optional.ofNullable(bundle.getFolders()).orElse(Collections.emptyMap());
+        return buildEntities(folderMap, bundleType, document);
+    }
+
     @Override
-    public Integer getOrder() {
+    public @NotNull Integer getOrder() {
         return ORDER;
     }
 

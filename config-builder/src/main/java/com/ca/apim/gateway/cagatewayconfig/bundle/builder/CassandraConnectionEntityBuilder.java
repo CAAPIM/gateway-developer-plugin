@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.google.common.annotations.VisibleForTesting;
@@ -18,7 +19,10 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.CASSANDRA_CONNECTION_TYPE;
@@ -40,19 +44,29 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    @Override
-    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                return bundle.getCassandraConnections().entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, e.getKey(), idGenerator.generate()))
+                return entities.keySet().stream()
+                        .map(key -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, key, idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
-                return bundle.getCassandraConnections().entrySet().stream().map(e ->
-                        buildEntity(bundle, e.getKey(), e.getValue(), document)
+                return entities.entrySet().stream().map(e ->
+                        buildEntity(bundle, e.getKey(), (CassandraConnection) e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
+    }
+
+    @Override
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, CassandraConnection> entities = Optional.ofNullable(bundle.getCassandraConnections()).orElse(Collections.emptyMap());
+            return buildEntities(entities, ((AnnotatedBundle) bundle).getFullBundle(), bundleType, document);
+        } else {
+            Map<String, CassandraConnection> entities = bundle.getCassandraConnections();
+            return buildEntities(entities, bundle, bundleType, document);
         }
     }
 
@@ -72,7 +86,7 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
         if (connection.getStoredPasswordName() != null) {
             StoredPassword password = bundle.getStoredPasswords().get(connection.getStoredPasswordName());
             if (password == null) {
-                throw new EntityBuilderException("Cassandra Connection is referencing missing password '" + connection.getStoredPasswordName() +"'");
+                throw new EntityBuilderException("Cassandra Connection is referencing missing password '" + connection.getStoredPasswordName() + "'");
             }
             cassandraElement.appendChild(createElementWithTextContent(document, PASSWORD_ID, password.getId()));
         }

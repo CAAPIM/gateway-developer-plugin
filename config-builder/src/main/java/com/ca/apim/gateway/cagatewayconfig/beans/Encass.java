@@ -6,17 +6,19 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Named;
 import java.io.File;
@@ -33,7 +35,8 @@ import static java.util.stream.Collectors.toCollection;
 @Named("ENCAPSULATED_ASSERTION")
 @ConfigurationFile(name = "encass", type = JSON_YAML)
 @EnvironmentType("ENCAPSULATED_ASSERTION")
-public class Encass extends GatewayEntity {
+@BundleGeneration
+public class Encass extends GatewayEntity implements AnnotableEntity {
 
     private String policy;
     private Set<EncassArgument> arguments;
@@ -47,6 +50,8 @@ public class Encass extends GatewayEntity {
     private String policyId;
     @JsonIgnore
     private String path;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
     public Set<EncassArgument> getArguments() {
         return arguments;
@@ -70,10 +75,6 @@ public class Encass extends GatewayEntity {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
-    }
-
-    public boolean hasAnnotated() {
-        return annotations != null && !annotations.isEmpty();
     }
 
     public Set<Annotation> getAnnotations() {
@@ -119,6 +120,7 @@ public class Encass extends GatewayEntity {
     @Override
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
+        setId(idGenerator.generate());
         setName(entityKey);
     }
 
@@ -156,4 +158,31 @@ public class Encass extends GatewayEntity {
         setArguments(getArguments().stream().collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassArgument::getName)))));
         setResults(getResults().stream().collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassResult::getName)))));
     }
+
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity(annotations);
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                Map<String, Object> properties = getProperties();
+                if (properties != null) {
+                    annotatedEntity.setDescription(properties.getOrDefault("description", "").toString());
+                }
+
+            }
+            annotatedEntity.setPolicyName(getPolicy());
+            annotatedEntity.setEntityName(getName());
+        }
+        return annotatedEntity;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity){
+        this.annotatedEntity = annotatedEntity;
+    }
+
+    public String getType(){
+        return "encass";
+    }
+
 }

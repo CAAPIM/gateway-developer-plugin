@@ -27,20 +27,21 @@ public class BundleMetadataBuilder {
         NON_ENV_ENTITY_TYPES.add(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
     }
 
-    public BundleMetadata build(final AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
+    public BundleMetadata build(final AnnotatedBundle annotatedBundle, final AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
                                 final List<Entity> dependentEntities, final String projectGroupName,
                                 final String projectVersion) {
         final Encass encass = (Encass) annotatedEntity.getEntity();
-        final String name = annotatedEntity.getBundleName().substring(0,
-                annotatedEntity.getBundleName().indexOf(projectVersion) - 1);
+        final String bundleName = annotatedBundle.getBundleName();
+        final String name = bundleName.substring(0,
+                bundleName.indexOf(projectVersion) - 1);
 
         BundleMetadata.Builder builder = new BundleMetadata.Builder("encass", encass.getGuid(), name,
                 projectGroupName, projectVersion);
         builder.description(annotatedEntity.getDescription());
         builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
         builder.tags(annotatedEntity.getTags());
-        builder.reusableAndRedeployable(annotatedEntity.isReusableTypeEnabled(),
-                annotatedEntity.isRedeployableTypeEnabled());
+        builder.reusableAndRedeployable(annotatedEntity.isReusable(),
+                annotatedEntity.isRedeployable());
 
         final List<Metadata> desiredEntities = new ArrayList<>();
         desiredEntities.add(annotatedEntity.getEntity().getMetadata());

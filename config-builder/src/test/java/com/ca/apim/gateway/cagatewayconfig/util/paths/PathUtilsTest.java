@@ -45,4 +45,18 @@ class PathUtilsTest {
         assertEquals("test/path/", PathUtils.unixPathEndingWithSeparator(Paths.get("test", "path")));
         assertEquals("test/path/subpath/", PathUtils.unixPathEndingWithSeparator(Paths.get("test", "path", "subpath")));
     }
+
+    @Test
+    void testExtractName() {
+        assertEquals("test", PathUtils.extractName("test"));
+        assertEquals("test", PathUtils.extractName("path/test"));
+        assertEquals("test", PathUtils.extractName("/path/subpath/test"));
+    }
+
+    @Test
+    void testExtractPath() {
+        assertEquals("", PathUtils.extractPath("test"));
+        assertEquals("path/", PathUtils.extractPath("path/test"));
+        assertEquals("/path/subpath/", PathUtils.extractPath("/path/subpath/test"));
+    }
 }

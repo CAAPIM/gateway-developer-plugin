@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert.CertificateData;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -29,9 +30,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.TRUSTED_CERT_TYPE;
@@ -60,15 +59,24 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, TrustedCert> trustedCertMap = Optional.ofNullable(bundle.getTrustedCerts()).orElse(Collections.emptyMap());
+            return buildEntities(trustedCertMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getTrustedCerts(), bundle, bundleType, document);
+        }
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                return bundle.getTrustedCerts().entrySet().stream()
+                return entities.entrySet().stream()
                         .map(
                                 trustedCertEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(TRUSTED_CERT_TYPE, trustedCertEntry.getKey(), idGenerator.generate())
                         ).collect(Collectors.toList());
             case ENVIRONMENT:
-                return bundle.getTrustedCerts().entrySet().stream().map(trustedCertEntry ->
-                        buildTrustedCertEntity(trustedCertEntry.getKey(), trustedCertEntry.getValue(), bundle.getCertificateFiles(), document)
+                return entities.entrySet().stream().map(trustedCertEntry ->
+                        buildTrustedCertEntity(trustedCertEntry.getKey(), (TrustedCert) trustedCertEntry.getValue(), bundle.getCertificateFiles(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
@@ -132,8 +140,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
                 }
             }
             throw new EntityBuilderException("No certificates were found in the given url.");
-        }
-         catch (IOException | CertificateEncodingException e) {
+        } catch (IOException | CertificateEncodingException e) {
             throw new EntityBuilderException(e.getMessage());
         }
     }

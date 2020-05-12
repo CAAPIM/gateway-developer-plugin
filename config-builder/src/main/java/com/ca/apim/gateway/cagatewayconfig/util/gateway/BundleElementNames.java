@@ -25,6 +25,7 @@ public class BundleElementNames {
     public static final String ATTRIBUTE_TAG = "tag";
     public static final String ATTRIBUTE_ROOT_URL = "rootUrl";
     public static final String ATTRIBUTE_SOURCE_URL = "sourceUrl";
+    public static final String ATTRIBUTE_STRING_VALUE="stringValue";
 
     // Common Elements
     public static final String NAME = "l7:Name";

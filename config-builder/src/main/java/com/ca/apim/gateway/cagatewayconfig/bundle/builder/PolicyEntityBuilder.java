@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
@@ -57,24 +58,35 @@ public class PolicyEntityBuilder implements EntityBuilder {
     public static final String ZERO_GUID = "00000000-0000-0000-0000-000000000000";
 
     private final DocumentTools documentTools;
-
+    private final IdGenerator idGenerator;
     @Inject
-    PolicyEntityBuilder(DocumentTools documentTools) {
+    PolicyEntityBuilder(DocumentTools documentTools, IdGenerator idGenerator) {
         this.documentTools = documentTools;
+        this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+    public List<Entity> buildEntities(Map<String, ?> policyMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
         // no policy has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
-        bundle.getPolicies().values().forEach(policy -> preparePolicy(policy, bundle));
+        policyMap.values().forEach(policy -> preparePolicy((Policy)policy, bundle));
 
         List<Policy> orderedPolicies = new LinkedList<>();
-        bundle.getPolicies().forEach((path, policy) -> maybeAddPolicy(bundle, policy, orderedPolicies, new HashSet<Policy>()));
+        policyMap.forEach((path, policy) -> maybeAddPolicy(bundle, (Policy)policy, orderedPolicies, new HashSet<Policy>()));
 
         return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle, document)).collect(toList());
+    }
+
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        if (bundle instanceof AnnotatedBundle) {
+            AnnotatedBundle annotatedBundle = (AnnotatedBundle) bundle;
+            Map<String, Policy> map = Optional.ofNullable(bundle.getPolicies()).orElse(Collections.emptyMap());
+            return buildEntities(map, annotatedBundle.getAnnotatedEntity(), annotatedBundle.getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getPolicies(), null, bundle, bundleType, document);
+        }
     }
 
     @NotNull
