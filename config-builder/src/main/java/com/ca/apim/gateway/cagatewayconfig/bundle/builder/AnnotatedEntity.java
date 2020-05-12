@@ -16,7 +16,7 @@ public class AnnotatedEntity<T> {
     private String policyName;
     private String description;
     private boolean bundle;
-    private boolean reusable;
+    private boolean reusable=true;
     private boolean redeployable;
     private boolean exclude;
     private boolean reusableEntity;
@@ -86,10 +86,6 @@ public class AnnotatedEntity<T> {
 
     public boolean isReusable() {
         return reusable;
-    }
-
-    public void setReusable(boolean isReusableType) {
-        this.reusable = isReusableType;
     }
 
     public boolean isRedeployable() {
