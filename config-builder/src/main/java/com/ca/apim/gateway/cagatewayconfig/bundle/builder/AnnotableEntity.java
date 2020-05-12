@@ -2,13 +2,14 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 
 import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
 
-public interface AnnotatableEntity {
+public interface AnnotableEntity {
     AnnotatedEntity<GatewayEntity> getAnnotatedEntity(final String projectName,
                                                       final String projectVersion);
 
@@ -59,4 +60,17 @@ public interface AnnotatableEntity {
         return null;
     }
 
+    Set<Annotation> getAnnotations();
+
+    default boolean isBundle() {
+        return getAnnotations() != null && getAnnotations().contains(new Annotation(ANNOTATION_TYPE_BUNDLE));
+    }
+
+    default boolean isRedeployable() {
+        return getAnnotations() != null && getAnnotations().contains(new Annotation(ANNOTATION_TYPE_REDEPLOYABLE));
+    }
+
+    default boolean isReusable() {
+        return getAnnotations() != null && getAnnotations().contains(new Annotation(ANNOTATION_TYPE_REUSABLE));
+    }
 }

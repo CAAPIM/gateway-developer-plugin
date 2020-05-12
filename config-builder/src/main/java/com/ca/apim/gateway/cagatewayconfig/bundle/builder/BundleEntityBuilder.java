@@ -16,7 +16,6 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.unmodifiableSet;
 
@@ -64,8 +63,8 @@ public class BundleEntityBuilder {
         // Filter the bundle to export only annotated entities
         entityTypeMap.values().stream().filter(EntityUtils.GatewayEntityInfo::isBundleGenerationSupported).forEach(entityInfo ->
                 bundle.getEntities(entityInfo.getEntityClass()).values().stream()
-                        .filter(entity -> entity instanceof AnnotatableEntity)
-                        .map(entity -> ((AnnotatableEntity)entity).getAnnotatedEntity(projectName, projectVersion))
+                        .filter(entity -> entity instanceof AnnotableEntity)
+                        .map(entity -> ((AnnotableEntity)entity).getAnnotatedEntity(projectName, projectVersion))
                         .forEach(annotatedEntity -> {
                             if (annotatedEntity != null && annotatedEntity.isBundle()){
                                 List<Entity> entities = new ArrayList<>();
@@ -82,17 +81,8 @@ public class BundleEntityBuilder {
                                 final Element annotatedBundle = bundleDocumentBuilder.build(document, entities);
 
                                 // Create DELETE bundle - ALWAYS skip environment entities
-                                final List<Entity> deleteBundleEntities = new ArrayList<>();
-                                if (annotatedEntity.isRedeployable()) {
-                                    // If the bundle is marked as @redeployable, blindly include all dependencies in
-                                    // delete bundle
-                                    deleteBundleEntities.addAll(entities);
-                                } else {
-                                    // Else, include only non-reusable entities
-                                    deleteBundleEntities.addAll(getNonReusableEntities(entities));
-                                }
-                                final Element annotatedDeleteBundle = bundleDocumentBuilder.buildDeleteBundle(document,
-                                        deleteBundleEntities);
+                                final Element annotatedDeleteBundle = createDeleteBundle(document, entities, bundle,
+                                        annotatedEntity);
 
                                 final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity,
                                         entities, projectGroupName, projectVersion);
@@ -103,6 +93,32 @@ public class BundleEntityBuilder {
         );
 
         return annotatedElements;
+    }
+
+    private Element createDeleteBundle(final Document document, List<Entity> entities,
+                                       final Bundle bundle, final AnnotatedEntity<GatewayEntity> annotatedEntity) {
+        List<Entity> deleteBundleEntities = new ArrayList<>(entities);
+
+        // If @redeployable annotation is added, we can blindly include all the dependencies in the DELETE bundle.
+        // Else, we have to include only non-reusable entities
+        if (!annotatedEntity.isRedeployable()) {
+            // Include only non-reusable entities
+            Map<Class, Map<String, GatewayEntity>> entityMap = getEntityDependencies(annotatedEntity.getPolicyName(),
+                    bundle, true);
+            Iterator<Entity> it = deleteBundleEntities.iterator();
+            while (it.hasNext()) {
+                final Entity entity = it.next();
+                final Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(entity.getType());
+                if (entityMap.containsKey(entityClass)) {
+                    final Map<String, GatewayEntity> map = entityMap.get(entityClass);
+                    if (!map.containsKey(entity.getName())) {
+                        it.remove();
+                    }
+                }
+            }
+        }
+
+        return bundleDocumentBuilder.buildDeleteBundle(document, deleteBundleEntities);
     }
 
     /**
@@ -128,12 +144,16 @@ public class BundleEntityBuilder {
             Set<Dependency> dependencies = policyEntity.getUsedEntities();
             if (dependencies != null) {
                 for (Dependency dependency : dependencies) {
+                    Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
                     Map<String, ? extends GatewayEntity> allEntitiesOfDependencyType = bundle.getEntities(entityClass);
                     // Find the dependency
-                    Optional<? extends Map.Entry<String, ? extends GatewayEntity>> optionalGatewayEntity = entities.entrySet().stream()
-                            .filter(e-> dependency.getName().equals(PathUtils.extractName(e.getKey()))).findFirst();
+                    Optional<? extends Map.Entry<String, ? extends GatewayEntity>> gatewayEntity =
+                            allEntitiesOfDependencyType.entrySet().stream()
+                                    .filter(e-> dependency.getName().equals(PathUtils.extractName(e.getKey()))).findFirst();
+
                     // Put the found entity
-                    optionalGatewayEntity.ifPresent(e -> putGatewayEntityByType(entityDependenciesMap, e));
+                    gatewayEntity.ifPresent(e -> includeGatewayEntity(entityDependenciesMap, e.getValue(),
+                            excludeReusable));
                 }
             }
         }
@@ -153,6 +173,22 @@ public class BundleEntityBuilder {
                 .put(gatewayEntity.getName(), gatewayEntity);
     }
 
+    /**
+     * Inserts the Gateway entity into the Entity Map based on the Gateway entity type. It skip adding the entity if
+     * excludeReusable is TRUE and the Gateway Entity is Reusable
+     *
+     * @param entityMapToUpdate Entity Map where GatewayEntity needs to be inserted
+     * @param gatewayEntity Gateway entity to be inserted
+     * @param excludeReusable Exclude inserting reusable entity
+     */
+    private void includeGatewayEntity(Map<Class, Map<String, GatewayEntity>> entityMapToUpdate,
+                                         GatewayEntity gatewayEntity, final boolean excludeReusable) {
+        if (excludeReusable && gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable()) {
+            return; // Return without inserting is Reusable entity
+        }
+        putGatewayEntityByType(entityMapToUpdate, gatewayEntity);
+    }
+
     private void populateDependentFolders(Map<Class, Map<String, GatewayEntity>> entityDependenciesMap, GatewayEntity policyEntity) {
         if (policyEntity instanceof Folderable) {
             Folder folder = ((Folderable) policyEntity).getParentFolder();
@@ -163,10 +199,6 @@ public class BundleEntityBuilder {
             }
             entityDependenciesMap.put(Folder.class, folderMap);
         }
-    }
-
-    private List<Entity> getNonReusableEntities(final List<Entity> entities) {
-        return entities.stream().collect(Collectors.toList());
     }
 
     @VisibleForTesting

@@ -10,33 +10,29 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.apache.commons.lang3.tuple.Pair;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.reflections.Reflections;
-import java.security.cert.CertificateFactory;
 import java.util.*;
 
-import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilderTestHelper.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createRoot;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.LISTEN_PORT_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
 
 class BundleEntityBuilderTest {
 
@@ -153,23 +149,53 @@ class BundleEntityBuilderTest {
         }
     }
 
-    private static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath) {
-        Encass encass = new Encass();
-        encass.setName(TEST_ENCASS);
-        encass.setPolicy(policyPath);
-        encass.setId(TEST_ENCASS_ID);
-        encass.setGuid(encassGuid);
-        Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation("@bundle");
-        annotation.setName(TEST_ENCASS_ANNOTATION_NAME);
-        annotations.add(annotation);
-        encass.setAnnotations(annotations);
-        encass.setProperties(ImmutableMap.of(
-                PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
-                PALETTE_ICON_RESOURCE_NAME, "someImage",
-                ALLOW_TRACING, "false",
-                DESCRIPTION, "someDescription",
-                PASS_METRICS_TO_PARENT, "false"));
-        return encass;
+    @Test
+    public void testAnnotatedEncassDeleteBundle() throws JsonProcessingException {
+        BundleEntityBuilder builder = createBundleEntityBuilder();
+
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true);
+        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
+        bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteDeploymentBundle();
+        assertNotNull(deleteBundleElement);
+
+        // Assert Bundle
+        assertEquals(BundleDocumentBuilder.GATEWAY_MANAGEMENT, deleteBundleElement.getAttribute(BundleDocumentBuilder.L7));
+        assertEquals(BUNDLE, deleteBundleElement.getTagName());
+
+        final int expectedElementCountBundle = 2;
+
+        // Assert References
+        final Element references = getSingleChildElement(deleteBundleElement, REFERENCES);
+        assertNotNull(references);
+        final List<Element> itemList = getChildElements(references, ITEM);
+        assertNotNull(itemList);
+        assertEquals(expectedElementCountBundle, itemList.size());
+        final Element item1 = itemList.get(0);
+        assertEquals(TEST_ENCASS_POLICY, getSingleChildElementTextContent(item1, NAME));
+        assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item1, TYPE));
+        assertNotNull(getSingleChildElement(item1, RESOURCE));
+        final Element item2 = itemList.get(1);
+        assertEquals(TEST_ENCASS, getSingleChildElementTextContent(item2, NAME));
+        assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, getSingleChildElementTextContent(item2, TYPE));
+        assertNotNull(getSingleChildElement(item2, RESOURCE));
+
+        // Assert Mappings
+        final Element mappings = getSingleChildElement(deleteBundleElement, MAPPINGS);
+        assertNotNull(mappings);
+        final List<Element> mappingItemList = getChildElements(mappings, MAPPING);
+        assertEquals(expectedElementCountBundle, mappingItemList.size());
+        final Element mapping1 = mappingItemList.get(0);
+        assertEquals(MappingActions.DELETE, mapping1.getAttribute("action"));
+        assertEquals(EntityTypes.POLICY_TYPE, mapping1.getAttribute("type"));
+
+        final Element mapping2 = mappingItemList.get(1);
+        assertEquals(MappingActions.DELETE, mapping2.getAttribute("action"));
+        assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, mapping2.getAttribute("type"));
     }
 }

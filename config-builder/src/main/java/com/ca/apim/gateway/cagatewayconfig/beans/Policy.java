@@ -6,7 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
@@ -22,7 +22,6 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,7 +34,7 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 @JsonInclude(NON_EMPTY)
 @Named("POLICY")
 @BundleGeneration
-public class Policy extends Folderable implements AnnotatableEntity {
+public class Policy extends Folderable implements AnnotableEntity {
 
     @JsonIgnore
     private String policyXML;

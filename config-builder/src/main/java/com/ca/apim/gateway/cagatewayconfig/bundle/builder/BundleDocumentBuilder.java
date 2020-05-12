@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_UPDATE;
@@ -39,8 +40,7 @@ public class BundleDocumentBuilder {
     }
 
     public Element buildDeleteBundle(Document document, List<Entity> entities) {
-        // SKIP all environment entities from DELETE bundle
-        entities.removeAll(entities.stream().filter(FILTER_ENV_ENTITIES).collect(Collectors.toList()));
+        removeEntitiesForDeleteBundle(entities); // Filter entities for delete bundle based on type
 
         final Element references = document.createElement(REFERENCES);
         final Element mappings = document.createElement(MAPPINGS);
@@ -82,5 +82,19 @@ public class BundleDocumentBuilder {
                 createElementWithTextContent(document, TYPE, entity.getType()),
                 createElementWithChildren(document, RESOURCE, entity.getXml())
         );
+    }
+
+    /**
+     * Remove environment entities and folders from the entity list. Environment entities and Folders should not be
+     * part of DELETE bundle.
+     *
+     * @param entities list of entities to be included in the delete bundle
+     */
+    private void removeEntitiesForDeleteBundle(final List<Entity> entities) {
+        // SKIP all environment entities from DELETE bundle
+        entities.removeAll(entities.stream().filter(FILTER_ENV_ENTITIES).collect(Collectors.toList()));
+
+        // SKIP all Folders from DELETE bundle
+        entities.removeAll(entities.stream().filter(e -> FOLDER_TYPE.equals(e.getType())).collect(Collectors.toList()));
     }
 }
