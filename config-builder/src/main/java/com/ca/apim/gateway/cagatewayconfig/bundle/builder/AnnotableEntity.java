@@ -43,10 +43,8 @@ public interface AnnotableEntity {
                 if (ANNOTATION_TYPE_BUNDLE.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setTags(annotation.getTags());
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                    String annotatedBundleName = annotation.getName();
-                    annotatedEntity.setBundleName(annotatedBundleName);
-                    String description = annotation.getDescription();
-                    annotatedEntity.setDescription(description);
+                    annotatedEntity.setBundleName(annotation.getName());
+                    annotatedEntity.setDescription(annotation.getDescription());
                 }
             });
             return annotatedEntity;
