@@ -47,10 +47,6 @@ public interface AnnotableEntity {
                         String description = annotation.getDescription();
                         annotatedEntity.setDescription(description);
                         break;
-                    case ANNOTATION_TYPE_REUSABLE:
-                    case ANNOTATION_TYPE_REUSABLE_BUNDLE:
-                        annotatedEntity.setReusable(true);
-                        break;
                     case ANNOTATION_TYPE_REUSABLE_ENTITY:
                         annotatedEntity.setReusableEntity(true);
                         break;

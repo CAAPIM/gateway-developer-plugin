@@ -6,9 +6,7 @@ public class AnnotationConstants {
      */
 
     public static final String ANNOTATION_TYPE_BUNDLE = "@bundle";
-    public static final String ANNOTATION_TYPE_REUSABLE = "@reusable";
-    public static final String ANNOTATION_TYPE_REUSABLE_BUNDLE = "@reusable-bundle";
-    public static final String ANNOTATION_TYPE_REUSABLE_ENTITY = "@reusable-entity";
+    public static final String ANNOTATION_TYPE_REUSABLE_ENTITY = "@reusable";
     public static final String ANNOTATION_TYPE_REDEPLOYABLE = "@redeployable";
     public static final String ANNOTATION_TYPE_EXCLUDE = "@exclude";
 
