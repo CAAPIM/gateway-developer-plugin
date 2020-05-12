@@ -89,7 +89,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
             annotatedEncassEntity = encass.getAnnotatedEntity();
-            if(annotatedEncassEntity == null || !annotatedEncassEntity.isReusableEntity()){
+            if (annotatedEncassEntity == null || !annotatedEncassEntity.isReusableEntity()) {
                 encassName = annotatedBundle.getUniquePrefix() + name + annotatedBundle.getUniqueSuffix();
                 //guid and id are regenerated in policy entity builder if this encass is referred by policy
                 //if the annotated entity is encass then it will not be referred by policy so id and guid should be regenerated here.
@@ -121,6 +121,7 @@ public class EncassEntityBuilder implements EntityBuilder {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         }
         return entity;
+
     }
 
     private Element buildResults(Encass encass, Document document) {
