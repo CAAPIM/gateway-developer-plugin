@@ -157,7 +157,6 @@ public class BundleEntityBuilder {
                                     return dependency.getName().equals(PathUtils.extractName(e.getKey()));
                                 }
                             }).findFirst();
-                    Map<String, GatewayEntity> dependencyMap = getEntities(entityClass, entityDependenciesMap);
 
                     // Put the found entity
                     optionalGatewayEntity.ifPresent(e -> includeGatewayEntity(entityDependenciesMap, e.getValue(),
