@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.PEM_CERT_FILE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -72,7 +73,6 @@ public class EnvironmentConfigurationUtils {
         entityFileMap.put(EntityTypes.CLUSTER_PROPERTY_TYPE, ImmutablePair.of("PROPERTY","global-env.properties"));
         entityFileMap.put("CONTEXT_VARIABLE_PROPERTY", ImmutablePair.of("CONTEXT_VARIABLE_PROPERTY","context-env.properties"));
         entityFileMap.put("SERVICE_PROPERTY", ImmutablePair.of("SERVICE_PROPERTY","service-env.properties"));
-        entityFileMap.put("STATIC_PROPERTY", ImmutablePair.of("SERVICE_PROPERTY","static.properties"));
 
         return entityFileMap;
     }
@@ -86,7 +86,7 @@ public class EnvironmentConfigurationUtils {
      */
     public Pair<String, Map<String, String>> parseBundleMetadata(File metaDataFile, String configFolder) {
         if (!metaDataFile.exists()) {
-            throw new MissingEnvironmentException("Specified metadata file " + metaDataFile.toString() + " does not exist.");
+            throw new MissingEnvironmentException("Metadata file " + metaDataFile.toString() + " does not exist.");
         }
 
         final String envConfigPath = new File(configFolder).getAbsolutePath();
@@ -96,7 +96,7 @@ public class EnvironmentConfigurationUtils {
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             environmentBundleData = objectMapper.readValue(metaDataFile, EnvironmentBundleData.class);
         } catch (IOException e) {
-            throw new MissingEnvironmentException("Unable to parse the data from metadata file " + metaDataFile, e);
+            throw new MissingEnvironmentException("Unable to parse the data from metadata file " + metaDataFile.toString(), e);
         }
 
         if (environmentBundleData != null && environmentBundleData.getEnvironmentEntities() != null && !environmentBundleData.getEnvironmentEntities().isEmpty()) {
@@ -106,7 +106,7 @@ public class EnvironmentConfigurationUtils {
             final List<LinkedHashMap<String, String>> environmentEntities = environmentBundleData.getEnvironmentEntities();
             environmentEntities.stream().forEach(environmentEntitiy -> {
                 final String entityType = environmentEntitiy.get("type");
-                final String entityName = environmentEntitiy.get("name");
+                final String entityName = !EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entityType) ? environmentEntitiy.get("name") : PREFIX_GATEWAY + environmentEntitiy.get("name");
                 final Pair<String, String> entityFilePair = ENTITY_FILE_MAP.get(entityType);
                 if (null == entityFilePair) {
                     throw new MissingEnvironmentException("Unexpected entity type " + entityType);
@@ -115,7 +115,8 @@ public class EnvironmentConfigurationUtils {
                 final File envConfigFile = new File(envConfigPath, entityFilePair.getRight());
                 environmentValues.put(PREFIX_ENV + entityFilePair.getLeft() + "." + entityName,
                         loadConfigFromFile(envConfigFile, entityFilePair.getLeft(), entityName));
-                if (entityType.equals(EntityTypes.TRUSTED_CERT_TYPE)) {
+
+                if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
                     final File certDataFile = new File(envConfigPath + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
                     environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entityName + PEM_CERT_FILE_EXTENSION,
                             loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entityName));
@@ -131,7 +132,7 @@ public class EnvironmentConfigurationUtils {
     @NotNull
     public String loadConfigFromFile(File configFile, String entityType, String entityName) {
         if (!configFile.exists()) {
-            throw new MissingEnvironmentException("Specified environment config file " + configFile.toString() + " does not exist.");
+            throw new MissingEnvironmentException("Environment config file " + configFile.toString() + " does not exist.");
         }
 
         // read a single file to the map of entities (or strings, if is a properties or certificate)
@@ -140,7 +141,7 @@ public class EnvironmentConfigurationUtils {
         // find the entity value
         Object entity = loader.loadSingle(entityName, configFile);
         if (entity == null) {
-            throw new MissingEnvironmentException("Specified environment config file " + configFile.toString() + " does not have the configuration for entity " + entityName + ", type " + entityType + ".");
+            throw new MissingEnvironmentException("Environment config file " + configFile.toString() + " does not have the configuration for entity " + entityName + ", type " + entityType + ".");
         }
 
         // in case of properties or certificates will be the string value

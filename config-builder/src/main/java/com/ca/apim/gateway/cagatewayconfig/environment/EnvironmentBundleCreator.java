@@ -69,7 +69,6 @@ public class EnvironmentBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        //ToDo : Need to handle bundle name, Project GroupName and version properly
         Map<String, Pair<Element, BundleMetadata>> bundleElements = bundleEntityBuilder.build(environmentBundle,
                 EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null);
         for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundleElements.entrySet()) {
