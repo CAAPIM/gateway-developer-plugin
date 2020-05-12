@@ -116,7 +116,7 @@ public class AnnotatedEntity<T> {
         this.redeployable = isRedeployableType;
     }
 
-    public boolean exclude() {
+    public boolean isExclude() {
         return exclude;
     }
 

@@ -47,7 +47,7 @@ public class ClusterPropertyLinker implements EntitiesLinker {
 
     @Override
     public void link(Set<Dependency> dependencies) {
-        dependencies.stream().filter(entity -> EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entity.getType())).forEach(e -> e.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE));
+        dependencies.stream().filter(entity -> EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entity.getType())).forEach(e -> e.setType("ENVIRONMENT_PROPERTY"));
     }
 
 }

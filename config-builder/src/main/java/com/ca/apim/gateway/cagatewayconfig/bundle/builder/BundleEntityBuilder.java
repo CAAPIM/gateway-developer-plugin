@@ -66,7 +66,7 @@ public class BundleEntityBuilder {
                         .filter(entity -> entity instanceof AnnotableEntity)
                         .map(entity -> ((AnnotableEntity)entity).getAnnotatedEntity(projectName, projectVersion))
                         .forEach(annotatedEntity -> {
-                            if (annotatedEntity != null && annotatedEntity.isBundle()){
+                            if (annotatedEntity != null && annotatedEntity.isBundle()) {
                                 List<Entity> entities = new ArrayList<>();
                                 Map<Class, Map<String, GatewayEntity>> entityMap =
                                         getEntityDependencies(annotatedEntity.getPolicyName(), bundle, false);
@@ -145,14 +145,22 @@ public class BundleEntityBuilder {
             if (dependencies != null) {
                 for (Dependency dependency : dependencies) {
                     Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
-                    Map<String, ? extends GatewayEntity> allEntitiesOfDependencyType = bundle.getEntities(entityClass);
+                    Map<String, ? extends GatewayEntity> allEntitiesOfType = bundle.getEntities(entityClass);
                     // Find the dependency
-                    Optional<? extends Map.Entry<String, ? extends GatewayEntity>> gatewayEntity =
-                            allEntitiesOfDependencyType.entrySet().stream()
-                                    .filter(e-> dependency.getName().equals(PathUtils.extractName(e.getKey()))).findFirst();
+                    Optional<? extends Map.Entry<String, ? extends GatewayEntity>> optionalGatewayEntity =
+                            allEntitiesOfType.entrySet().stream()
+                            .filter(e-> {
+                                GatewayEntity gatewayEntity = e.getValue();
+                                if (gatewayEntity.getName() != null) {
+                                    return dependency.getName().equals(gatewayEntity.getName());
+                                } else {
+                                    return dependency.getName().equals(PathUtils.extractName(e.getKey()));
+                                }
+                            }).findFirst();
+                    Map<String, GatewayEntity> dependencyMap = getEntities(entityClass, entityDependenciesMap);
 
                     // Put the found entity
-                    gatewayEntity.ifPresent(e -> includeGatewayEntity(entityDependenciesMap, e.getValue(),
+                    optionalGatewayEntity.ifPresent(e -> includeGatewayEntity(entityDependenciesMap, e.getValue(),
                             excludeReusable));
                 }
             }
