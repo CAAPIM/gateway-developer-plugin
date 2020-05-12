@@ -1,0 +1,14 @@
+example project/db-service:
+  type: "Include"
+  tag:
+  subtag:
+  usedEntities:
+  - type: "JDBC_CONNECTION"
+    name: "MySQL"
+  - type: "ENCAPSULATED_ASSERTION"
+    name: "encass_env"
+  - type: "SECURE_PASSWORD"
+    name: "gateway"
+  - type: "ID_PROVIDER_CONFIG"
+    name: "Tacoma MSAD"
+  annotations:

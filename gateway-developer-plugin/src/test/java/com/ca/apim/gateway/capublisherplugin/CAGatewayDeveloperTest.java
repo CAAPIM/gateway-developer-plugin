@@ -248,7 +248,7 @@ class CAGatewayDeveloperTest {
         File buildDir = new File(testProjectDir, "build");
         File buildGatewayDir = validateBuildDirExceptGW7File(projectFolder, buildDir);
 
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), projectFolder + projectVersion + ".environment.bundle");
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), "encass_bundle" + projectVersion + ".config" + ".environment.bundle");
         assertTrue(builtBundleFile.isFile());
     }
 
@@ -262,7 +262,7 @@ class CAGatewayDeveloperTest {
         assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
                 .withProjectDir(testProjectDir)
                 .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DconfigFolder=./src/main/gateway/config",
+                        "-DconfigFolder=./src/main/gateway/config_missing",
                         "-DconfigName=config")
                 .withPluginClasspath()
                 .withDebug(true)
