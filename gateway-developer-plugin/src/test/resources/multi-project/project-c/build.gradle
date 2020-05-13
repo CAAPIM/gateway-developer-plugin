@@ -10,6 +10,6 @@ dependencies {
 }
 
 GatewaySourceConfig {
-    configFolder = 'src/main/gateway/config'
+    configFolder = file('src/main/gateway/config')
     configName = 'config'
 }

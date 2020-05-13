@@ -80,13 +80,11 @@ public class EnvironmentConfigurationUtils {
      * @param configFolder config folder path to look for environmental files.
      * @return pair of bundle file name and environmental entities map.
      */
-    public Pair<String, Map<String, String>> parseBundleMetadata(File metaDataFile, String configFolder) {
+    public Pair<String, Map<String, String>> parseBundleMetadata(File metaDataFile, File configFolder) {
         if (!metaDataFile.exists()) {
             throw new MissingEnvironmentException("Metadata file " + metaDataFile.toString() + " does not exist.");
         }
         final EnvironmentBundleData environmentBundleData = jsonFileUtils.readBundleMetadataFile(metaDataFile, EnvironmentBundleData.class);
-        final String envConfigPath = new File(configFolder).getAbsolutePath();
-
         if (environmentBundleData != null && environmentBundleData.getEnvironmentEntities() != null && !environmentBundleData.getEnvironmentEntities().isEmpty()) {
             final String bundleName = environmentBundleData.getName();
             final String bundleVersion = environmentBundleData.getVersion();
@@ -100,12 +98,12 @@ public class EnvironmentConfigurationUtils {
                     throw new MissingEnvironmentException("Unexpected entity type " + entityType);
                 }
 
-                final File envConfigFile = new File(envConfigPath, entityFilePair.getRight());
+                final File envConfigFile = new File(configFolder, entityFilePair.getRight());
                 environmentValues.put(PREFIX_ENV + entityFilePair.getLeft() + "." + entityName,
                         loadConfigFromFile(envConfigFile, entityFilePair.getLeft(), entityName));
 
                 if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
-                    final File certDataFile = new File(envConfigPath + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
+                    final File certDataFile = new File(configFolder + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
                     environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entityName + PEM_CERT_FILE_EXTENSION,
                             loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entityName));
                 }

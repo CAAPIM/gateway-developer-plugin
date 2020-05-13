@@ -222,7 +222,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             pluginConfig.getBuiltEnvironmentBundleDir().set(defaultBuildDir);
         }
         if (!pluginConfig.getConfigFolder().isPresent()) {
-            pluginConfig.getConfigFolder().set("src/main/gateway/config");
+            pluginConfig.getConfigFolder().set(new File(project.getProjectDir(),"src/main/gateway/config"));
         }
         if (!pluginConfig.getConfigName().isPresent()) {
             pluginConfig.getConfigName().set("config");

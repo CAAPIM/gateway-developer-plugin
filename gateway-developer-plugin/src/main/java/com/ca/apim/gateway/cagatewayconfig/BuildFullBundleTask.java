@@ -14,10 +14,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -40,7 +37,7 @@ public class BuildFullBundleTask extends DefaultTask {
     private final ConfigurableFileCollection dependencyBundles;
     private final DirectoryProperty into;
     private final Property<Boolean> detemplatizeDeploymentBundles;
-    private final Property<String> configFolder;
+    private final DirectoryProperty configFolder;
     private final Property<String> configName;
 
     @Inject
@@ -49,7 +46,7 @@ public class BuildFullBundleTask extends DefaultTask {
         dependencyBundles = getProject().files();
         into = newOutputDirectory();
         detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
-        configFolder = getProject().getObjects().property(String.class);
+        configFolder = newInputDirectory();
         configName = getProject().getObjects().property(String.class);
     }
 
@@ -68,8 +65,8 @@ public class BuildFullBundleTask extends DefaultTask {
         return detemplatizeDeploymentBundles;
     }
 
-    @Input
-    Property<String> getConfigFolder() {
+    @InputDirectory
+    DirectoryProperty getConfigFolder() {
         return configFolder;
     }
 
@@ -87,7 +84,7 @@ public class BuildFullBundleTask extends DefaultTask {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
         metaDataFiles.stream().forEach(metaDataFile-> {
-            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.get());
+            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
             if (null != bundleEnvironmentValues) {
                 final String bundleFileName = bundleEnvironmentValues.getLeft() + "." + configName.get() + ".full.bundle";
                 final List<File> bundleFiles = union(
