@@ -143,6 +143,16 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
                 return Encass.this.getName();
             }
 
+            @Override
+            public String getId() {
+                return Encass.this.getId();
+            }
+
+            @Override
+            public String getGuid() {
+                return Encass.this.getGuid();
+            }
+
             public Set<EncassArgument> getArguments() {
                 return Encass.this.getArguments();
             }

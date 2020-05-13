@@ -48,6 +48,8 @@ public interface AnnotableEntity {
                         annotatedEntity.setDescription(description);
                         break;
                     case ANNOTATION_TYPE_REUSABLE_ENTITY:
+                        annotatedEntity.setId(annotation.getId());
+                        annotatedEntity.setGuid(annotation.getGuid());
                         annotatedEntity.setReusableEntity(true);
                         break;
                     case ANNOTATION_TYPE_REDEPLOYABLE:

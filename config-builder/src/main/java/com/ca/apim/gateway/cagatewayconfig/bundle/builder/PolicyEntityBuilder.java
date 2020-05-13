@@ -78,7 +78,14 @@ public class PolicyEntityBuilder implements EntityBuilder {
             Policy policyEntity = (Policy) policy;
             if (annotatedEntity != null) {
                 AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
-                if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusableEntity()) {
+                if (annotatedPolicyEntity != null && annotatedPolicyEntity.isReusableEntity()) {
+                    if (annotatedPolicyEntity.getId() != null) {
+                        policyEntity.setId(annotatedPolicyEntity.getId());
+                    }
+                    if (annotatedPolicyEntity.getGuid() != null) {
+                        policyEntity.setGuid(annotatedPolicyEntity.getGuid());
+                    }
+                } else {
                     policyEntity.setId(idGenerator.generate());
                     policyEntity.setGuid(idGenerator.generateGuid());
                 }
@@ -130,10 +137,10 @@ public class PolicyEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
             AnnotatedEntity annotatedPolicyEntity = policy.getAnnotatedEntity();
-            if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusableEntity()) {
-                policyName = annotatedBundle.getUniquePrefix() + policy.getName() + annotatedBundle.getUniqueSuffix();
-            } else {
+            if (annotatedPolicyEntity != null && annotatedPolicyEntity.isReusableEntity()) {
                 policyName = policy.getName();
+            } else {
+                policyName = annotatedBundle.getUniquePrefix() + policy.getName() + annotatedBundle.getUniqueSuffix();
             }
         } else {
             policyName = policy.getName();
@@ -262,12 +269,31 @@ public class PolicyEntityBuilder implements EntityBuilder {
         LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", name);
         final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(name));
         if (referenceEncass.get() == null) {
-            bundle.getDependencies().forEach(b -> {
-                Encass encass = b.getEncasses().get(name);
-                if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
-                    throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
+            Set<BundleMetadata> bundleMetadataSet = bundle.getMetadataDependencyBundles();
+            Encass encass = null;
+            if (bundleMetadataSet != null) {
+                for (BundleMetadata bundleMetadata : bundleMetadataSet) {
+                    Collection<Metadata> metadataCollection = bundleMetadata.getDefinedEntities();
+                    if (metadataCollection != null) {
+                        Optional<Metadata> optionalMetadata = metadataCollection.stream().
+                                filter(metadata -> metadata.getName().equals(name)
+                                        && metadata.getType().equals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE)).findFirst();
+                        if (optionalMetadata.isPresent()) {
+                            Metadata metadata = optionalMetadata.get();
+                            encass = new Encass();
+                            encass.setId(metadata.getId());
+                            encass.setGuid(metadata.getGuid());
+                            encass.setName(name);
+                            AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
+                            annotatedEntity.setReusableEntity(true);
+                            encass.setAnnotatedEntity(annotatedEntity);
+                        }
+                    }
+                    if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
+                        throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
+                    }
                 }
-            });
+            }
         }
         return referenceEncass.get();
     }
@@ -293,7 +319,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (encass != null && annotatedEntity != null) {
             AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (annotatedEncassEntity == null || !annotatedEncassEntity.isReusableEntity()) {
+            // bundle hints has more precedence than reusable annotation
+            if (annotatedEncassEntity != null && annotatedEncassEntity.isReusableEntity()) {
+                if (annotatedEncassEntity.getGuid() != null) {
+                    encassGuid = annotatedEncassEntity.getGuid();
+                    encass.setGuid(encassGuid);
+                }
+                if (annotatedEncassEntity.getId() != null) {
+                    encass.setId(annotatedEncassEntity.getId());
+                }
+            } else {
                 encassGuid = idGenerator.generateGuid();
                 encass.setGuid(encassGuid);
                 encass.setId(idGenerator.generate());
@@ -348,12 +383,30 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (includedPolicy.get() != null) {
             policy.getDependencies().add(includedPolicy.get());
         } else {
-            bundle.getDependencies().forEach(b -> {
-                Policy policyForPath = b.getPolicies().get(policyPath);
-                if (policyForPath != null && !includedPolicy.compareAndSet(null, policyForPath)) {
-                    throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
+            Set<BundleMetadata> bundleMetadataSet = bundle.getMetadataDependencyBundles();
+            Policy policyForPath = null;
+            if (bundleMetadataSet != null) {
+                for (BundleMetadata bundleMetadata : bundleMetadataSet) {
+                    Collection<Metadata> metadataCollection = bundleMetadata.getDefinedEntities();
+                    if (metadataCollection != null) {
+                        Optional<Metadata> optionalMetadata = metadataCollection.stream().
+                                filter(metadata -> metadata.getName().equals(PathUtils.extractName(policyPath))
+                                        && metadata.getType().equals(EntityTypes.POLICY_TYPE)).findFirst();
+                        if (optionalMetadata.isPresent()) {
+                            Metadata metadata = optionalMetadata.get();
+                            policyForPath = new Policy();
+                            policyForPath.setId(metadata.getId());
+                            policyForPath.setGuid(metadata.getGuid());
+                            policyForPath.setPath(policyPath);
+                        }
+                    }
+
+                    if (policyForPath != null && !includedPolicy.compareAndSet(null, policyForPath)) {
+                        throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
+                    }
                 }
-            });
+            }
+
         }
         if (includedPolicy.get() == null) {
             throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
@@ -382,7 +435,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (annotatedBundle != null) {
             annotatedPolicyEntity = policy.getAnnotatedEntity();
             if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusableEntity()) {
-                policyName = annotatedEntity != null ? annotatedBundle.getUniquePrefix() + policyName + annotatedBundle.getUniqueSuffix() : policyName;
+                policyName = annotatedBundle.getUniquePrefix() + policyName + annotatedBundle.getUniqueSuffix();
                 policyNameWithPath = PathUtils.extractPath(policy.getPath()) + policyName;
             }
         }

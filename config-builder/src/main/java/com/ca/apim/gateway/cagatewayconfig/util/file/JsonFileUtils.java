@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.file;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
 import java.io.File;
@@ -64,5 +65,11 @@ public class JsonFileUtils {
 
     public void createBundleMetadataFile(Object objectToWrite, String fileName, File outputDir) {
         createFile(objectToWrite, new File(outputDir, fileName + METADATA_FILE_NAME_SUFFIX).toPath());
+    }
+
+    public BundleMetadata readBundleMetadataFile(final File metaDataFile){
+        return metaDataFile.exists() ? jsonTools.readDocumentFile(metaDataFile,
+                jsonTools.getObjectMapper().getTypeFactory().constructType(BundleMetadata.class)) :
+                null;
     }
 }

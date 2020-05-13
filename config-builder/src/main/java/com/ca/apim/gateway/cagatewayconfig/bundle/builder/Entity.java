@@ -16,16 +16,22 @@ public class Entity {
 
     private String type;
     private String id;
+    private String guid;
     private Element xml;
     private String name;
     private String mappingAction;
     private Map<String, Object> mappingProperties = new HashMap<>();
 
     public Entity(String type, String name, String id, Element xml) {
+        this(type, name, id, xml, null);
+    }
+
+    public Entity(String type, String name, String id, Element xml, String guid) {
         this.type = type;
         this.name = name;
         this.id = id;
         this.xml = xml;
+        this.guid = guid;
     }
 
     public String getType() {
@@ -75,6 +81,18 @@ public class Entity {
             public String getName() {
                 return name;
             }
+
+            @Override
+            public String getId() {
+                return id;
+            }
+
+            @Override
+            public String getGuid() {
+                return guid;
+            }
+
+
         };
     }
 }

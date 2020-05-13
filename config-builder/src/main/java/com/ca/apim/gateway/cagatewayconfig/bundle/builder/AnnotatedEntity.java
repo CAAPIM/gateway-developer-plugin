@@ -20,11 +20,28 @@ public class AnnotatedEntity<T> {
     private boolean redeployable;
     private boolean exclude;
     private boolean reusableEntity;
-    private String uniquePrefix;
-    private String uniqueSuffix;
     private Collection<String> tags;
     private String projectName;
     private String projectVersion;
+    private String id;
+    private String guid;
+
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
 
     public String getProjectName() {
         return projectName;

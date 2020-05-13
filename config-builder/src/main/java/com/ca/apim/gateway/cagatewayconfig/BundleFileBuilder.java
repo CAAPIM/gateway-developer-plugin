@@ -78,16 +78,11 @@ public class BundleFileBuilder {
             // create the folder tree
             FolderLoaderUtils.createFolders(bundle, rootDir, bundle.getServices());
 
-            //Load Dependencies
-            final Set<Bundle> dependencyBundles = dependencies.stream().map(cache::getBundleFromFile).collect(Collectors.toSet());
+            //Load metadata Dependencies
+            final Set<BundleMetadata> metadataDependencyBundles = dependencies.stream().filter(file -> file.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX))
+                                                                                .map(cache::getBundleMetadataFromFile).collect(Collectors.toSet());
 
-            // Log overridden entities
-            if (!dependencyBundles.isEmpty()) {
-                logOverriddenEntities(bundle, dependencyBundles, Service.class);
-                logOverriddenEntities(bundle, dependencyBundles, Policy.class);
-            }
-
-            bundle.setDependencies(dependencyBundles);
+            bundle.setMetadataDependencyBundles(metadataDependencyBundles);
         }
 
         //Zip

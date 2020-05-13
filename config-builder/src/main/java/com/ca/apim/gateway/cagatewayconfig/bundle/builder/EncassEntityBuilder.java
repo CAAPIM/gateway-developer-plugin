@@ -11,7 +11,9 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -77,11 +79,39 @@ public class EncassEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildEncassEntity(AnnotatedBundle annotatedBundle, Bundle bundle, String name, Encass encass, Document document) {
-        Policy policy = bundle.getPolicies().get(encass.getPolicy());
+    private String getPolicyId(String policyWithPath, Bundle bundle) {
+        Policy policy = bundle.getPolicies().get(policyWithPath);
+        String policyId = null;
         if (policy == null) {
-            throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + encass.getPolicy());
+            Set<BundleMetadata> bundleMetadataSet = bundle.getMetadataDependencyBundles();
+            if (bundleMetadataSet != null) {
+                for (BundleMetadata bundleMetadata : bundleMetadataSet) {
+                    Collection<Metadata> metadataCollection = bundleMetadata.getDefinedEntities();
+                    if (metadataCollection != null) {
+                        Optional<Metadata> optionalMetadata = metadataCollection.stream().
+                                filter(metadata -> metadata.getName().equals(PathUtils.extractName(policyWithPath))
+                                        && metadata.getType().equals(EntityTypes.POLICY_TYPE)).findFirst();
+                        if (optionalMetadata.isPresent()) {
+                            if (policyId == null) {
+                                policyId = optionalMetadata.get().getId();
+                            } else {
+                                throw new EntityBuilderException("Found multiple policies in dependency bundles with name: " + policyWithPath);
+                            }
+                        }
+                    }
+                }
+            }
+            if (policyId == null) {
+                throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + policyWithPath);
+            }
+        } else {
+            policyId = policy.getId();
         }
+        return policyId;
+    }
+
+    private Entity buildEncassEntity(AnnotatedBundle annotatedBundle, Bundle bundle, String name, Encass encass, Document document) {
+        String policyId = getPolicyId(encass.getPolicy(), bundle);
         String encassName = name;
         String guid = encass.getGuid();
         String id = encass.getId();
@@ -89,9 +119,16 @@ public class EncassEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
             annotatedEncassEntity = encass.getAnnotatedEntity();
-            if(annotatedEncassEntity == null || !annotatedEncassEntity.isReusableEntity()){
+            if (annotatedEncassEntity != null && annotatedEncassEntity.isReusableEntity()) {
+                if (annotatedEncassEntity.getGuid() != null) {
+                    guid = annotatedEncassEntity.getGuid();
+                }
+                if (annotatedEncassEntity.getId() != null) {
+                    id = annotatedEncassEntity.getId();
+                }
+            } else {
                 encassName = annotatedBundle.getUniquePrefix() + name + annotatedBundle.getUniqueSuffix();
-                //guid and id are regenerated in policy entity builder if this encass is referred by policy
+                //guid and id are regenerated in policy entity builder if this encass is referred by policy and it runs before this builder
                 //if the annotated entity is encass then it will not be referred by policy so id and guid should be regenerated here.
                 if (annotatedEntity.getEntityName().equals(name)) {
                     guid = idGenerator.generateGuid();
@@ -106,7 +143,7 @@ public class EncassEntityBuilder implements EntityBuilder {
                 ImmutableMap.of(ATTRIBUTE_ID, id),
                 createElementWithTextContent(document, NAME, encassName),
                 createElementWithTextContent(document, GUID, guid),
-                createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policy.getId()),
+                createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policyId),
                 buildArguments(encass, document),
                 buildResults(encass, document)
         );
