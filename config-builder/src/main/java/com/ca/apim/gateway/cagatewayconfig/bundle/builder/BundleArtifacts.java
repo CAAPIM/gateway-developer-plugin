@@ -10,22 +10,22 @@ import org.w3c.dom.Element;
 
 public class BundleArtifacts {
 
-    private final Element deploymentBundle;
-    private final Element deleteDeploymentBundle;
+    private final Element bundle;
+    private final Element deleteBundle;
     private final BundleMetadata bundleMetadata;
 
-    public BundleArtifacts(Element deploymentBundle, Element deleteDeploymentBundle, BundleMetadata bundleMetadata) {
-        this.deploymentBundle = deploymentBundle;
-        this.deleteDeploymentBundle = deleteDeploymentBundle;
+    public BundleArtifacts(Element bundle, Element deleteBundle, BundleMetadata bundleMetadata) {
+        this.bundle = bundle;
+        this.deleteBundle = deleteBundle;
         this.bundleMetadata = bundleMetadata;
     }
 
-    public Element getDeploymentBundle() {
-        return deploymentBundle;
+    public Element getBundle() {
+        return bundle;
     }
 
-    public Element getDeleteDeploymentBundle() {
-        return deleteDeploymentBundle;
+    public Element getDeleteBundle() {
+        return deleteBundle;
     }
 
     public BundleMetadata getBundleMetadata() {

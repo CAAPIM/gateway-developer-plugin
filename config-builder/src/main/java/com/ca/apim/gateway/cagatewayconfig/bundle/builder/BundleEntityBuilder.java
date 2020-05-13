@@ -73,21 +73,22 @@ public class BundleEntityBuilder {
                                 annotatedBundle.setProjectVersion(projectVersion);
                                 Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
                                 bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-                                loadEntityDependencies(annotatedEntity.getPolicyName(), annotatedBundle, bundle);
+                                loadEntityDependencies(annotatedEntity.getPolicyName(), annotatedBundle, bundle, false);
                                 entityBuilders.forEach(builder -> entities.addAll(builder.build(annotatedBundle, bundleType, document)));
 
                                 // Create deployment bundle
-                                final Element annotatedElement = bundleDocumentBuilder.build(document, entities);
+                                final Element bundleElement = bundleDocumentBuilder.build(document, entities);
 
                                 // Create DELETE bundle - ALWAYS skip environment entities
-                                final Element annotatedDeleteBundle = createDeleteBundle(document, entities, bundle,
+                                final Element deleteBundleElement = createDeleteBundle(document, entities, bundle,
                                         annotatedEntity);
 
                                 // Create bundle metadata
-                                final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity,
-                                        entities, projectGroupName, projectVersion);
-                                annotatedElements.put(annotatedEntity.getBundleName(),
-                                        new BundleArtifacts(annotatedBundle, annotatedDeleteBundle, bundleMetadata));
+                                final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedBundle,
+                                        annotatedEntity, entities, projectGroupName, projectVersion);
+
+                                annotatedElements.put(annotatedBundle.getBundleName(),
+                                        new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata));
                             }
                         })
         );
@@ -95,25 +96,26 @@ public class BundleEntityBuilder {
         return annotatedElements;
     }
 
-    private Element createDeleteBundle(final Document document, List<Entity> entities,
-                                       final Bundle bundle, final AnnotatedEntity<GatewayEntity> annotatedEntity) {
+    private Element createDeleteBundle(final Document document, List<Entity> entities, final Bundle bundle,
+                                       final AnnotatedEntity<GatewayEntity> annotatedEntity) {
         List<Entity> deleteBundleEntities = new ArrayList<>(entities);
 
         // If @redeployable annotation is added, we can blindly include all the dependencies in the DELETE bundle.
         // Else, we have to include only non-reusable entities
         if (!annotatedEntity.isRedeployable()) {
             // Include only non-reusable entities
-            Map<Class, Map<String, GatewayEntity>> entityMap = getEntityDependencies(annotatedEntity.getPolicyName(),
-                    bundle, true);
+            AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+            Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
+            bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
+            loadEntityDependencies(annotatedEntity.getPolicyName(), annotatedBundle, bundle, true);
+
             Iterator<Entity> it = deleteBundleEntities.iterator();
             while (it.hasNext()) {
                 final Entity entity = it.next();
                 final Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(entity.getType());
-                if (entityMap.containsKey(entityClass)) {
-                    final Map<String, GatewayEntity> map = entityMap.get(entityClass);
-                    if (!map.containsKey(entity.getName())) {
-                        it.remove();
-                    }
+                Map entityMap = annotatedBundle.getEntities(entityClass);
+                if (!entityMap.containsKey(entity.getName())) {
+                    it.remove();
                 }
             }
         }

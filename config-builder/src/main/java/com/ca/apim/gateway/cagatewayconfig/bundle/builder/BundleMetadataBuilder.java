@@ -18,7 +18,8 @@ import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstant
 @Singleton
 public class BundleMetadataBuilder {
 
-    public BundleMetadata build(final AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
+    public BundleMetadata build(final AnnotatedBundle annotatedBundle,
+                                final AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
                                 final List<Entity> dependentEntities, final String projectGroupName,
                                 final String projectVersion) {
         final Encass encass = (Encass) annotatedEntity.getEntity();

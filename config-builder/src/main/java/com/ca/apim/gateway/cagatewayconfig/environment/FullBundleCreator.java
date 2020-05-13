@@ -112,7 +112,7 @@ public class FullBundleCreator {
         Element bundleElement = null;
         for(Map.Entry<String, BundleArtifacts> entry: bundleElements.entrySet()) {
             // generate the environment bundle
-            bundleElement = entry.getValue().getDeploymentBundle();
+            bundleElement = entry.getValue().getBundle();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
             Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
 

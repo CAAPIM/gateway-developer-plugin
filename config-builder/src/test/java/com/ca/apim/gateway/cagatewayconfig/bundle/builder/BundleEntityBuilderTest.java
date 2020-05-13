@@ -14,9 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,7 +33,6 @@ import static java.util.Collections.singleton;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
 
 class BundleEntityBuilderTest {
 
@@ -63,11 +60,6 @@ class BundleEntityBuilderTest {
     private static class TestEntityBuilder implements EntityBuilder {
         @Override
         public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-            return Collections.singletonList(EntityBuilderHelper.getEntityWithOnlyMapping(LISTEN_PORT_TYPE, "Test", "Test"));
-        }
-
-        @Override
-        public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entities, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
             return Collections.singletonList(EntityBuilderHelper.getEntityWithOnlyMapping(LISTEN_PORT_TYPE, "Test", "Test"));
         }
 
@@ -128,7 +120,7 @@ class BundleEntityBuilderTest {
         assertEquals(1, bundles.size());
         for (Map.Entry<String, BundleArtifacts> bundleEntry : bundles.entrySet()) {
             assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-" + "1.0", bundleEntry.getKey());
-            final Element element = bundleEntry.getValue().getDeploymentBundle();
+            final Element element = bundleEntry.getValue().getBundle();
             assertNotNull(element);
             assertEquals(BundleDocumentBuilder.GATEWAY_MANAGEMENT, element.getAttribute(BundleDocumentBuilder.L7));
             assertEquals(BUNDLE, element.getTagName());
@@ -164,7 +156,7 @@ class BundleEntityBuilderTest {
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteDeploymentBundle();
+        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteBundle();
         assertNotNull(deleteBundleElement);
 
         // Assert Bundle
