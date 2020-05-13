@@ -6,9 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.environment;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
 import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentBundleData;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
@@ -21,14 +25,12 @@ import org.jetbrains.annotations.NotNull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.PEM_CERT_FILE_EXTENSION;
-import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.JSON;
-import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YAML;
+import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static java.util.Collections.unmodifiableMap;
@@ -43,34 +45,15 @@ public class EnvironmentConfigurationUtils {
     private final JsonTools jsonTools;
     private final EntityLoaderRegistry entityLoaderRegistry;
     private final JsonFileUtils jsonFileUtils;
-    private static final Map<String, Pair<String,String>> ENTITY_FILE_MAP = unmodifiableMap(createEntityFileMap());
+    private final EntityTypeRegistry entityTypeRegistry;
 
     @Inject
-    EnvironmentConfigurationUtils(JsonTools jsonTools, EntityLoaderRegistry entityLoaderRegistry, JsonFileUtils jsonFileUtils) {
+    EnvironmentConfigurationUtils(JsonTools jsonTools, EntityLoaderRegistry entityLoaderRegistry,
+                                  JsonFileUtils jsonFileUtils, final EntityTypeRegistry entityTypeRegistry) {
         this.jsonTools = jsonTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
         this.jsonFileUtils = jsonFileUtils;
-    }
-
-    /**
-     * Creates the Map of entity names with their environment config file names.
-     *
-     * @return entity names with config file names.
-     */
-    private static Map<String, Pair<String,String>> createEntityFileMap() {
-        Map<String, Pair<String,String>> entityFileMap = new HashMap<>();
-        entityFileMap.put(EntityTypes.ID_PROVIDER_CONFIG_TYPE, ImmutablePair.of("IDENTITY_PROVIDER", "identity-providers.yml"));
-        entityFileMap.put(EntityTypes.JDBC_CONNECTION, ImmutablePair.of("JDBC_CONNECTION","jdbc-connections.yml"));
-        entityFileMap.put(EntityTypes.TRUSTED_CERT_TYPE, ImmutablePair.of("CERTIFICATE","trusted-certs.yml"));
-        entityFileMap.put(EntityTypes.PRIVATE_KEY_TYPE, ImmutablePair.of("PRIVATE_KEY","private-keys.yml"));
-        entityFileMap.put(EntityTypes.CASSANDRA_CONNECTION_TYPE, ImmutablePair.of("CASSANDRA_CONNECTION","cassandra-connections.yml"));
-        entityFileMap.put(EntityTypes.JMS_DESTINATION_TYPE, ImmutablePair.of("JMS_DESTINATION","jms-destinations.yml"));
-        entityFileMap.put(EntityTypes.SCHEDULED_TASK_TYPE, ImmutablePair.of("SCHEDULED_TASK", "scheduled-tasks.yml"));
-        entityFileMap.put(EntityTypes.LISTEN_PORT_TYPE, ImmutablePair.of("LISTEN_PORT","listen-ports.yml"));
-        entityFileMap.put(EntityTypes.STORED_PASSWORD_TYPE, ImmutablePair.of("PASSWORD","stored-passwords.properties"));
-        entityFileMap.put(EntityTypes.CLUSTER_PROPERTY_TYPE, ImmutablePair.of("PROPERTY","global-env.properties"));
-
-        return entityFileMap;
+        this.entityTypeRegistry = entityTypeRegistry;
     }
 
     /**
@@ -91,16 +74,25 @@ public class EnvironmentConfigurationUtils {
             final Map<String, String> environmentValues = new LinkedHashMap<>();
             final List<Map<String, String>> environmentEntities = environmentBundleData.getEnvironmentEntities();
             environmentEntities.stream().forEach(environmentEntitiy -> {
-                final String entityType = environmentEntitiy.get("type");
-                final String entityName = !EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entityType) ? environmentEntitiy.get("name") : PREFIX_GATEWAY + environmentEntitiy.get("name");
-                final Pair<String, String> entityFilePair = ENTITY_FILE_MAP.get(entityType);
-                if (null == entityFilePair) {
+                String entityType = environmentEntitiy.get("type");
+                String entityName = environmentEntitiy.get("name");
+                if (EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entityType)) {
+                    entityName = PREFIX_GATEWAY + environmentEntitiy.get("name");
+                    entityType = "ENVIRONMENT_PROPERTY";
+                }
+
+                Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(entityType);
+                final Pair<String, ConfigurationFile.FileType> configFileInfo = EntityUtils.getEntityConfigFileInfo(entityClass);
+                final String environmentType = EntityUtils.getEntityEnvironmentType(entityClass);
+                if (configFileInfo == null || environmentType == null) {
                     throw new MissingEnvironmentException("Unexpected entity type " + entityType);
                 }
 
-                final File envConfigFile = new File(configFolder, entityFilePair.getRight());
-                environmentValues.put(PREFIX_ENV + entityFilePair.getLeft() + "." + entityName,
-                        loadConfigFromFile(envConfigFile, entityFilePair.getLeft(), entityName));
+                final String configFileName = configFileInfo.getLeft() + "." + (configFileInfo.getRight().equals(ConfigurationFile.FileType.JSON_YAML)? YML_EXTENSION :
+                        configFileInfo.getRight().name().toLowerCase());
+                final File envConfigFile = new File(configFolder, configFileName);
+                environmentValues.put(PREFIX_ENV + environmentType + "." + entityName,
+                        loadConfigFromFile(envConfigFile, environmentType, entityName));
 
                 if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
                     final File certDataFile = new File(configFolder + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);

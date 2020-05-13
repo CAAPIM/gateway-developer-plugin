@@ -56,7 +56,7 @@ public class EntityUtils {
      * @param <E> entity type
      * @return a pair containing the file name and type for the config file of this entity or an empty pair if not configured
      */
-    static <E extends GatewayEntity> Pair<String, FileType> getEntityConfigFileInfo(Class<E> entityClass) {
+    public static <E extends GatewayEntity> Pair<String, FileType> getEntityConfigFileInfo(Class<E> entityClass) {
         ConfigurationFile configurationFile = entityClass.getAnnotation(ConfigurationFile.class);
         return configurationFile != null ? ImmutablePair.of(configurationFile.name(), configurationFile.type()) : nullPair();
     }
@@ -66,7 +66,7 @@ public class EntityUtils {
      * @param <E> entity type
      * @return the environment type of the entity configured by {@link EnvironmentType} annotation, otherwise null if not configured
      */
-    static <E extends GatewayEntity> String getEntityEnvironmentType(Class<E> entityClass) {
+    public static <E extends GatewayEntity> String getEntityEnvironmentType(Class<E> entityClass) {
         EnvironmentType environmentType = entityClass.getAnnotation(EnvironmentType.class);
         return environmentType != null ? environmentType.value() : null;
     }
