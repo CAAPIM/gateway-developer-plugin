@@ -83,6 +83,7 @@ class EncassEntityBuilderTest {
     private static void buildBundleWithEncass(Bundle bundle, BundleType deployment, String policyPath, String encassName) {
         EncassEntityBuilder builder = new EncassEntityBuilder(ID_GENERATOR);
         Encass encass = buildTestEncass(EncassEntityBuilderTest.TEST_GUID, policyPath);
+        encass.setName(encassName);
         bundle.putAllEncasses(ImmutableMap.of(encassName, encass));
 
         final List<Entity> entities = builder.build(bundle, deployment, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -147,6 +148,7 @@ class EncassEntityBuilderTest {
         Encass encass = new Encass();
         encass.setPolicy(policyPath);
         encass.setGuid(encassGuid);
+        encass.setId("testId");
         encass.setArguments(new HashSet<>());
         EncassArgument param1 = new EncassArgument();
         param1.setName("Param1");
