@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +18,10 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static java.util.Collections.unmodifiableSet;
 
 @Singleton
@@ -96,6 +101,15 @@ public class BundleEntityBuilder {
         return annotatedElements;
     }
 
+    /**
+     * Creates the DELETE bundle element.
+     *
+     * @param document Document
+     * @param entities Entities packaged in the deployment bundle
+     * @param bundle Bundle containing all the Gateway entities
+     * @param annotatedEntity Annotated Bundle for which bundle is being created.
+     * @return Delete bundle Element for the Annotated Bundle
+     */
     private Element createDeleteBundle(final Document document, List<Entity> entities, final Bundle bundle,
                                        final AnnotatedEntity<GatewayEntity> annotatedEntity) {
         List<Entity> deleteBundleEntities = new ArrayList<>(entities);
@@ -120,7 +134,23 @@ public class BundleEntityBuilder {
             }
         }
 
-        return bundleDocumentBuilder.buildDeleteBundle(document, deleteBundleEntities);
+        removeEntitiesForDeleteBundle(deleteBundleEntities); // Filter entities for delete bundle based on type
+        deleteBundleEntities.forEach(e -> e.setMappingAction(MappingActions.DELETE)); // Set Mapping Action to DELETE
+        return bundleDocumentBuilder.build(document, deleteBundleEntities);
+    }
+
+    /**
+     * Remove environment entities and folders from the entity list. Environment entities and Folders should not be
+     * part of DELETE bundle.
+     *
+     * @param entities list of entities to be included in the delete bundle
+     */
+    private void removeEntitiesForDeleteBundle(final List<Entity> entities) {
+        // SKIP all environment entities from DELETE bundle
+        entities.removeAll(entities.stream().filter(FILTER_ENV_ENTITIES).collect(Collectors.toList()));
+
+        // SKIP all Folders from DELETE bundle
+        entities.removeAll(entities.stream().filter(e -> FOLDER_TYPE.equals(e.getType())).collect(Collectors.toList()));
     }
 
     /**
@@ -140,6 +170,7 @@ public class BundleEntityBuilder {
             Map<String, Policy> annotatedPolicyMap = annotatedBundle.getEntities(Policy.class);
             annotatedPolicyMap.put(policyNameWithPath, policyEntity);
             Set<Dependency> dependencies = policyEntity.getUsedEntities();
+            List<GatewayEntity> excludedReusableEntities = new ArrayList<>();
             if (dependencies != null) {
                 for (Dependency dependency : dependencies) {
                     Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
@@ -154,11 +185,19 @@ public class BundleEntityBuilder {
                                     return dependency.getName().equals(PathUtils.extractName(e.getKey()));
                                 }
                             }).findFirst();
-                    Map entityMap = annotatedBundle.getEntities(entityClass);
+                    Map<String, ? extends GatewayEntity> entityMap = annotatedBundle.getEntities(entityClass);
                     optionalGatewayEntity.ifPresent(entry -> insertGatewayEntity(entityMap, entry.getKey(),
-                            entry.getValue(), excludeReusable));
+                            entry.getValue(), excludeReusable, excludedReusableEntities));
                 }
             }
+            // Remove policies of excluded Encasses
+            excludedReusableEntities.forEach(ex -> {
+                if (ex instanceof Encass) {
+                    Map<String, ? extends GatewayEntity> policyEntities =
+                            annotatedBundle.getEntities(entityTypeRegistry.getEntityClass(EntityTypes.POLICY_TYPE));
+                    policyEntities.remove(((Encass) ex).getPolicy());
+                }
+            });
         }
     }
 
@@ -172,8 +211,9 @@ public class BundleEntityBuilder {
      * @param excludeReusable Exclude inserting reusable entity
      */
     private void insertGatewayEntity(Map entityMapToUpdate, String key, GatewayEntity gatewayEntity,
-                                      final boolean excludeReusable) {
+                                     boolean excludeReusable, List<GatewayEntity> excludedReusableEntities) {
         if (excludeReusable && gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable()) {
+            excludedReusableEntities.add(gatewayEntity);
             return; // Return without inserting as its reusable entity
         }
         entityMapToUpdate.put(key, gatewayEntity);
