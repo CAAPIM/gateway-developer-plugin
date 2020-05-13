@@ -53,6 +53,7 @@ public class Service extends Folderable implements AnnotableEntity {
     @JsonIgnore
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
+    @Override
     public Set<Annotation> getAnnotations() {
         return annotations;
     }

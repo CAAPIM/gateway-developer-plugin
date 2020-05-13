@@ -77,6 +77,7 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
         this.properties = properties;
     }
 
+    @Override
     public Set<Annotation> getAnnotations() {
         return annotations;
     }
