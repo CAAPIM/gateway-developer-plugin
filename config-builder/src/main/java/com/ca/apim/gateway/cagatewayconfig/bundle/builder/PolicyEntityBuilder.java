@@ -68,36 +68,38 @@ public class PolicyEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(Policy.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, annotatedEntity, bundle, bundleType, document);
-    }
-
-    public List<Entity> buildEntities(Map<String, ?> policyMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
+    public List<Entity> buildEntities(Map<String, ?> policyMap, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
         // no policy has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
+        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         policyMap.values().forEach(policy -> {
             Policy policyEntity = (Policy) policy;
             if (annotatedEntity != null) {
-                AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity(annotatedEntity.getProjectName(), annotatedEntity.getProjectVersion());
-                if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusableEntity()) {
+                AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
+                if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusable()) {
                     policyEntity.setId(idGenerator.generate());
                     policyEntity.setGuid(idGenerator.generateGuid());
                 }
             }
         });
-        policyMap.values().forEach(policy -> preparePolicy((Policy) policy, bundle, annotatedEntity));
+        policyMap.values().forEach(policy -> preparePolicy((Policy) policy, bundle, annotatedBundle));
 
         List<Policy> orderedPolicies = new LinkedList<>();
         policyMap.forEach((path, policy) -> maybeAddPolicy(bundle, (Policy) policy, orderedPolicies, new HashSet<Policy>()));
 
-        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, annotatedEntity, bundle, document)).collect(toList());
+        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, annotatedBundle, bundle, document)).collect(toList());
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getPolicies(), null, bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            AnnotatedBundle annotatedBundle = (AnnotatedBundle) bundle;
+            Map<String, Policy> map = Optional.ofNullable(bundle.getPolicies()).orElse(Collections.emptyMap());
+            return buildEntities(map, annotatedBundle, annotatedBundle.getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getPolicies(), null, bundle, bundleType, document);
+        }
     }
 
     @NotNull
@@ -121,14 +123,15 @@ public class PolicyEntityBuilder implements EntityBuilder {
         orderedPolicies.add(policy);
     }
 
-    private void preparePolicy(Policy policy, Bundle bundle, AnnotatedEntity annotatedEntity) {
+    private void preparePolicy(Policy policy, Bundle bundle, AnnotatedBundle annotatedBundle) {
         Document policyDocument = loadPolicyDocument(policy);
         Element policyElement = policyDocument.getDocumentElement();
         final String policyName;
+        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
-            AnnotatedEntity annotatedPolicyEntity = policy.getAnnotatedEntity(annotatedEntity.getProjectName(), annotatedEntity.getProjectVersion());
-            if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusableEntity()) {
-                policyName = annotatedEntity.getUniquePrefix() + policy.getName() + annotatedEntity.getUniqueSuffix();
+            AnnotatedEntity annotatedPolicyEntity = policy.getAnnotatedEntity();
+            if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusable()) {
+                policyName = annotatedBundle.getUniquePrefix() + policy.getName() + annotatedBundle.getUniqueSuffix();
             } else {
                 policyName = policy.getName();
             }
@@ -137,7 +140,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
 
         prepareAssertion(policyElement, PolicyXMLElements.INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
-        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement, annotatedEntity));
+        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement, annotatedBundle));
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyName, policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
 
@@ -240,12 +243,12 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement, AnnotatedEntity annotatedEntity) {
+    void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement, AnnotatedBundle annotatedBundle) {
         if (encapsulatedAssertionElement.hasAttribute(ENCASS_NAME)) {
             final String encassName = encapsulatedAssertionElement.getAttribute(ENCASS_NAME);
             Encass encass = getEncass(bundle, encassName);
             final String guid = findEncassReferencedGuid(policy, encass, encapsulatedAssertionElement, encassName);
-            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encass, encassName, guid, annotatedEntity);
+            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encass, encassName, guid, annotatedBundle);
         } else if (!isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
             Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
             Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
@@ -284,16 +287,17 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return guid;
     }
 
-    private void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, Encass encass, String name, String guid, AnnotatedEntity annotatedEntity) {
+    private void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, Encass encass, String name, String guid, AnnotatedBundle annotatedBundle) {
         String encassName = name;
         String encassGuid = guid;
+        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (encass != null && annotatedEntity != null) {
-            AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity(annotatedEntity.getProjectName(), annotatedEntity.getProjectVersion());
-            if (annotatedEncassEntity == null || !annotatedEncassEntity.isReusableEntity()) {
+            AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
+            if (annotatedEncassEntity == null || !annotatedEncassEntity.isReusable()) {
                 encassGuid = idGenerator.generateGuid();
                 encass.setGuid(encassGuid);
                 encass.setId(idGenerator.generate());
-                encassName = annotatedEntity.getUniquePrefix() + encassName + annotatedEntity.getUniqueSuffix();
+                encassName = annotatedBundle.getUniquePrefix() + encassName + annotatedBundle.getUniqueSuffix();
             }
         }
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
@@ -370,14 +374,15 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    Entity buildPolicyEntity(Policy policy, AnnotatedEntity annotatedEntity, Bundle bundle, Document document) {
+    Entity buildPolicyEntity(Policy policy, AnnotatedBundle annotatedBundle, Bundle bundle, Document document) {
         String policyName = policy.getName();
         String policyNameWithPath = policy.getPath();
         AnnotatedEntity annotatedPolicyEntity = null;
-        if (annotatedEntity != null) {
-            annotatedPolicyEntity = policy.getAnnotatedEntity(annotatedEntity.getProjectName(), annotatedEntity.getProjectVersion());
-            if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusableEntity()) {
-                policyName = annotatedEntity != null ? annotatedEntity.getUniquePrefix() + policyName + annotatedEntity.getUniqueSuffix() : policyName;
+        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+        if (annotatedBundle != null) {
+            annotatedPolicyEntity = policy.getAnnotatedEntity();
+            if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusable()) {
+                policyName = annotatedEntity != null ? annotatedBundle.getUniquePrefix() + policyName + annotatedBundle.getUniqueSuffix() : policyName;
                 policyNameWithPath = PathUtils.extractPath(policy.getPath()) + policyName;
             }
         }
@@ -420,7 +425,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE, policyNameWithPath, policy.getId(), policyElement);
-        if (annotatedPolicyEntity != null && annotatedPolicyEntity.isReusableEntity() && !annotatedPolicyEntity.isRedeployable()) {
+        if (annotatedPolicyEntity != null && annotatedPolicyEntity.isReusable()) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);

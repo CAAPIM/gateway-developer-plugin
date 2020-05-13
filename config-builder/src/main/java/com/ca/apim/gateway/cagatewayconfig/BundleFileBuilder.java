@@ -36,6 +36,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+
 @Singleton
 public class BundleFileBuilder {
 
@@ -94,8 +96,8 @@ public class BundleFileBuilder {
         final Map<String, Pair<Element, BundleMetadata>> bundleElementMap = bundleEntityBuilder.build(bundle,
                 EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion);
         for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundleElementMap.entrySet()) {
-            documentFileUtils.createFile(entry.getValue().getLeft(),
-                    new File(outputDir, entry.getKey() + ".bundle").toPath());
+            documentFileUtils.createFile(entry.getValue().getLeft(), new File(outputDir,
+                    entry.getKey() + BUNDLE_EXTENSION).toPath());
             jsonFileUtils.createBundleMetadataFile(entry.getValue().getRight(), entry.getKey(), outputDir);
         }
     }

@@ -43,6 +43,8 @@ import java.util.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createRoot;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PASS_METRICS_TO_PARENT;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -101,10 +103,10 @@ public class BundleMetadataBuilderTest {
         assertTrue(bundleOutput.exists());
         assertEquals(2, bundleOutput.listFiles().length);
         for (File generatedFile : bundleOutput.listFiles()) {
-            if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {
-                assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0.bundle", generatedFile.getName());
+            if (StringUtils.endsWith(generatedFile.getName(), BUNDLE_EXTENSION)) {
+                assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + BUNDLE_EXTENSION, generatedFile.getName());
             } else {
-                assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + JsonFileUtils.METADATA_FILE_NAME_SUFFIX, generatedFile.getName());
+                assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + METADATA_FILE_NAME_SUFFIX, generatedFile.getName());
             }
         }
 
@@ -116,6 +118,7 @@ public class BundleMetadataBuilderTest {
                 .filter(ann -> AnnotationConstants.ANNOTATION_TYPE_BUNDLE.equals(ann.getType()))
                 .findFirst().get().setName(null);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+        encass.setAnnotatedEntity(null);
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestBundleLoader(bundle)));
 
         bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), temporaryFolder.createDirectory("output"), dummyList,
@@ -125,10 +128,10 @@ public class BundleMetadataBuilderTest {
         assertTrue(bundleOutput.exists());
         assertEquals(2, bundleOutput.listFiles().length);
         for (File generatedFile : bundleOutput.listFiles()) {
-            if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {
-                assertEquals("my-bundle-" + encass.getName() + "-1.0.bundle", generatedFile.getName());
+            if (StringUtils.endsWith(generatedFile.getName(), BUNDLE_EXTENSION)) {
+                assertEquals("my-bundle-" + encass.getName() + "-1.0" + BUNDLE_EXTENSION, generatedFile.getName());
             } else {
-                assertEquals("my-bundle-" + encass.getName() + "-1.0" + JsonFileUtils.METADATA_FILE_NAME_SUFFIX,
+                assertEquals("my-bundle-" + encass.getName() + "-1.0" + METADATA_FILE_NAME_SUFFIX,
                         generatedFile.getName());
             }
         }

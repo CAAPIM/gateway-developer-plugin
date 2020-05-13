@@ -44,14 +44,7 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity,
-                              Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> entities = Optional.ofNullable(entityMap.get(CassandraConnection.class)).orElse(Collections.emptyMap());
-        return buildEntities(entities, bundle, bundleType, document);
-    }
-
-    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document){
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.keySet().stream()
@@ -59,7 +52,7 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
-                        buildEntity(bundle, e.getKey(), (CassandraConnection)e.getValue(), document)
+                        buildEntity(bundle, e.getKey(), (CassandraConnection) e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
@@ -68,8 +61,13 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, CassandraConnection> entities = bundle.getCassandraConnections();
-        return buildEntities(entities, bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, CassandraConnection> entities = Optional.ofNullable(bundle.getCassandraConnections()).orElse(Collections.emptyMap());
+            return buildEntities(entities, ((AnnotatedBundle) bundle).getFullBundle(), bundleType, document);
+        } else {
+            Map<String, CassandraConnection> entities = bundle.getCassandraConnections();
+            return buildEntities(entities, bundle, bundleType, document);
+        }
     }
 
     @VisibleForTesting
@@ -88,7 +86,7 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
         if (connection.getStoredPasswordName() != null) {
             StoredPassword password = bundle.getStoredPasswords().get(connection.getStoredPasswordName());
             if (password == null) {
-                throw new EntityBuilderException("Cassandra Connection is referencing missing password '" + connection.getStoredPasswordName() +"'");
+                throw new EntityBuilderException("Cassandra Connection is referencing missing password '" + connection.getStoredPasswordName() + "'");
             }
             cassandraElement.appendChild(createElementWithTextContent(document, PASSWORD_ID, password.getId()));
         }

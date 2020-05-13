@@ -69,11 +69,6 @@ class BundleEntityBuilderTest {
         }
 
         @Override
-        public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entities, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-            return Collections.singletonList(EntityBuilderHelper.getEntityWithOnlyMapping(LISTEN_PORT_TYPE, "Test", "Test"));
-        }
-
-        @Override
         public @NotNull Integer getOrder() {
             return 0;
         }
@@ -164,7 +159,7 @@ class BundleEntityBuilderTest {
         Annotation annotation = new Annotation("@bundle");
         annotation.setName(TEST_ENCASS_ANNOTATION_NAME);
         annotations.add(annotation);
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY));
+        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
         encass.setAnnotations(annotations);
         encass.setProperties(ImmutableMap.of(
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,

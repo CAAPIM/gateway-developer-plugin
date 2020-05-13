@@ -43,7 +43,12 @@ public class ScheduledTaskEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getScheduledTasks(), bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, ScheduledTask> scheduledTaskMap = Optional.ofNullable(bundle.getScheduledTasks()).orElse(Collections.emptyMap());
+            return buildEntities(scheduledTaskMap, ((AnnotatedBundle) bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getScheduledTasks(), bundle, bundleType, document);
+        }
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
@@ -53,14 +58,8 @@ public class ScheduledTaskEntityBuilder implements EntityBuilder {
         }
 
         return entities.entrySet().stream().map(scheduledTaskEntry ->
-                buildScheduledTaskEntity(bundle, scheduledTaskEntry.getKey(), (ScheduledTask)scheduledTaskEntry.getValue(), document)
+                buildScheduledTaskEntity(bundle, scheduledTaskEntry.getKey(), (ScheduledTask) scheduledTaskEntry.getValue(), document)
         ).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(ScheduledTask.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundle, bundleType, document);
     }
 
     private Entity buildScheduledTaskEntity(Bundle bundle, String name, ScheduledTask scheduledTask, Document document) {

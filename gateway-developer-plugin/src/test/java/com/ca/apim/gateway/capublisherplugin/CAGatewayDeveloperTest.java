@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.capublisherplugin;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -36,6 +37,7 @@ import java.util.zip.GZIPInputStream;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleItemKey;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleMappingKey;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.nio.charset.Charset.defaultCharset;
@@ -87,7 +89,7 @@ class CAGatewayDeveloperTest {
 
         File buildGatewayDir = new File(testProjectDir, "dist");
         assertTrue(buildGatewayDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayDir, projectFolder + projectVersion + ".bundle");
+        File builtBundleFile = new File(buildGatewayDir, projectFolder + projectVersion + BUNDLE_EXTENSION);
         assertTrue(builtBundleFile.isFile());
     }
 
@@ -349,7 +351,7 @@ class CAGatewayDeveloperTest {
         assertTrue(buildGatewayDir.isDirectory());
         File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
         assertTrue(buildGatewayBundlesDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayBundlesDir, projectName + projectVersion + ".bundle");
+        File builtBundleFile = new File(buildGatewayBundlesDir, projectName + projectVersion + BUNDLE_EXTENSION);
         assertTrue(builtBundleFile.isFile());
         return buildGatewayDir;
     }
@@ -391,7 +393,7 @@ class CAGatewayDeveloperTest {
         File buildDir = new File(testProjectDir, "build");
         File buildGatewayDir = validateBuildDirExceptGW7File(projectFolder, buildDir);
 
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), projectFolder + projectVersion + ".bundle");
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), projectFolder + projectVersion + BUNDLE_EXTENSION);
         assertTrue(builtBundleFile.isFile());
         final Element bundleElement = DocumentTools.INSTANCE.parse(builtBundleFile).getDocumentElement();
         final Set<String> bundleItemsIds = getChildElements(getSingleChildElement(bundleElement, REFERENCES), ITEM).stream().map(EnvironmentBundleUtils::buildBundleItemKey).collect(toSet());

@@ -24,8 +24,6 @@ public interface EntityBuilder extends Comparable<EntityBuilder> {
 
     List<Entity> build(Bundle bundle, BundleType bundleType, Document document);
 
-    List<Entity> build(Map<Class, Map<String, GatewayEntity>> entities, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document);
-
     /**
      * Types of bundles.
      */

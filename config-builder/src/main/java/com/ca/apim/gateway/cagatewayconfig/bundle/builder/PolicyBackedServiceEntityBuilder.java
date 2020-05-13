@@ -43,7 +43,12 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getPolicyBackedServices(), bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, PolicyBackedService> policyBackedServiceMap = Optional.ofNullable(bundle.getPolicyBackedServices()).orElse(Collections.emptyMap());
+            return buildEntities(policyBackedServiceMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getPolicyBackedServices(), bundle, bundleType, document);
+        }
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
@@ -55,12 +60,6 @@ public class PolicyBackedServiceEntityBuilder implements EntityBuilder {
         return entities.entrySet().stream().map(pbsEntry ->
                 buildPBSEntity(bundle, pbsEntry.getKey(), (PolicyBackedService)pbsEntry.getValue(), document)
         ).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(PolicyBackedService.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundle, bundleType, document);
     }
 
     private Entity buildPBSEntity(Bundle bundle, String name, PolicyBackedService policyBackedService, Document document) {
