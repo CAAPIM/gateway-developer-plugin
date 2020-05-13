@@ -376,6 +376,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String policyNameWithPath = policy.getPath();
         AnnotatedEntity annotatedPolicyEntity = null;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+        final boolean isRedeployableBundle = annotatedEntity != null && annotatedEntity.isBundle() && annotatedEntity.isRedeployable();
         if (annotatedBundle != null) {
             annotatedPolicyEntity = policy.getAnnotatedEntity();
             if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusable()) {
@@ -422,7 +423,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE, policyNameWithPath, policy.getId(), policyElement);
-        if (annotatedPolicyEntity != null && annotatedPolicyEntity.isReusable()) {
+        if (annotatedPolicyEntity != null && annotatedPolicyEntity.isReusable() && !isRedeployableBundle) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
