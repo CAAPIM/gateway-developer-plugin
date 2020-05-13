@@ -57,8 +57,7 @@ public class Policy extends Folderable implements AnnotableEntity {
     @JsonIgnore
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
-    public Policy() {
-    }
+    public Policy() {}
 
     public Policy(final Builder builder) {
         setName(builder.name);
