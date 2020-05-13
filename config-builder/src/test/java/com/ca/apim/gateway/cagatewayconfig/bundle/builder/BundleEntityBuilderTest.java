@@ -159,7 +159,7 @@ class BundleEntityBuilderTest {
         Annotation annotation = new Annotation("@bundle");
         annotation.setName(TEST_ENCASS_ANNOTATION_NAME);
         annotations.add(annotation);
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY));
+        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
         encass.setAnnotations(annotations);
         encass.setProperties(ImmutableMap.of(
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
