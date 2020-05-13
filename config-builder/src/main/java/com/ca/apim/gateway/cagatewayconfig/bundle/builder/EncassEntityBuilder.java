@@ -62,7 +62,6 @@ public class EncassEntityBuilder implements EntityBuilder {
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
-
         // no encass has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
@@ -77,6 +76,11 @@ public class EncassEntityBuilder implements EntityBuilder {
     @Override
     public Integer getOrder() {
         return ORDER;
+    }
+
+    private boolean isAnnotatedEntity(Encass encass, AnnotatedEntity annotatedEntity) {
+        return annotatedEntity != null && annotatedEntity.getEntityName().equals(encass.getName()) &&
+                EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(annotatedEntity.getEntityType());
     }
 
     private String getPolicyId(String policyWithPath, Bundle bundle) {
@@ -119,7 +123,8 @@ public class EncassEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
             annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (annotatedEncassEntity != null && annotatedEncassEntity.isReusableEntity()) {
+            if (encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity)) {
+                //use the id and guid defined at reusable annotation or bundle annotatino (if its annotated bundle)
                 if (annotatedEncassEntity.getGuid() != null) {
                     guid = annotatedEncassEntity.getGuid();
                 }
@@ -129,11 +134,7 @@ public class EncassEntityBuilder implements EntityBuilder {
             } else {
                 encassName = annotatedBundle.getUniquePrefix() + name + annotatedBundle.getUniqueSuffix();
                 //guid and id are regenerated in policy entity builder if this encass is referred by policy and it runs before this builder
-                //if the annotated entity is encass then it will not be referred by policy so id and guid should be regenerated here.
-                if (annotatedEntity.getEntityName().equals(name)) {
-                    guid = idGenerator.generateGuid();
-                    id = idGenerator.generate();
-                }
+                //no need to regenerate id and guid
             }
         }
 
@@ -152,12 +153,14 @@ public class EncassEntityBuilder implements EntityBuilder {
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, encassName, id, encassAssertionElement);
-        if (annotatedEncassEntity != null && annotatedEncassEntity.isReusableEntity()) {
+
+        if (encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity)) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         }
         return entity;
+
     }
 
     private Element buildResults(Encass encass, Document document) {

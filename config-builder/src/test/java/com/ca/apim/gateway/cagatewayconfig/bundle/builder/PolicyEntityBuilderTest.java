@@ -314,13 +314,16 @@ class PolicyEntityBuilderTest {
         encass.setId("id1");
         encass.setPolicy(policyPath);
         encass.setName(TEST_ENCASS);
-        BundleMetadata.Builder bundleMetadataBuilder = new BundleMetadata.Builder(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, encass.getId(), encass.getName(), "group", "1.0.0", encass.getGuid());
+        /*BundleMetadata.Builder bundleMetadataBuilder = new BundleMetadata.Builder(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, encass.getId(), encass.getName(), "group", "1.0.0", encass.getGuid());
         Set<Metadata> metadataSet = new HashSet<>();
         metadataSet.add(encass.getMetadata());
         bundleMetadataBuilder.definedEntities(metadataSet);
         Set<BundleMetadata> bundleMetadataSet = new HashSet<>();
         bundleMetadataSet.add(bundleMetadataBuilder.build());
-        bundle.setMetadataDependencyBundles(bundleMetadataSet);
+        bundle.setMetadataDependencyBundles(bundleMetadataSet);*/
+        Bundle dependencyBundle = new Bundle();
+        dependencyBundle.getEncasses().put(TEST_ENCASS, encass);
+        bundle.getDependencies().add(dependencyBundle);
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
         document.appendChild(encapsulatedAssertionElement);
 
