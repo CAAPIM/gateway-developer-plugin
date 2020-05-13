@@ -27,7 +27,6 @@ public class FileUtils {
     private static final Logger LOGGER = Logger.getLogger(FileUtils.class.getName());
     public static final boolean POSIX_ENABLED = FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
     public static final FileUtils INSTANCE = new FileUtils();
-    public static final String BUNDLE_EXTENSION = ".bundle";
 
     public InputStream getInputStream(final File file) {
         final InputStream stream;
