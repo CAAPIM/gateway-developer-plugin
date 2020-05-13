@@ -24,12 +24,9 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_BUNDLE;
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
@@ -130,6 +127,7 @@ public class Policy extends Folderable implements AnnotableEntity {
         return policyType;
     }
 
+    @Override
     public Set<Annotation> getAnnotations() {
         return annotations;
     }
@@ -237,7 +235,7 @@ public class Policy extends Folderable implements AnnotableEntity {
     @Override
     public AnnotatedEntity getAnnotatedEntity() {
         if (annotatedEntity == null && annotations != null) {
-            annotatedEntity = createAnnotatedEntity(annotations);
+            annotatedEntity = createAnnotatedEntity();
             if (StringUtils.isBlank(annotatedEntity.getDescription())) {
                 annotatedEntity.setDescription("");
             }
@@ -277,4 +275,5 @@ public class Policy extends Folderable implements AnnotableEntity {
 
         };
     }
+
 }
