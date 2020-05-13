@@ -301,7 +301,7 @@ class CAGatewayDeveloperTest {
         assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
                 .withProjectDir(testProjectDir)
                 .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DconfigFolder=src/main/gateway/jdbc_wrong",
+                        "-DconfigFolder=src/main/gateway/config/jdbc_wrong",
                         "-DconfigName=jdbc_wrong")
                 .withPluginClasspath()
                 .withDebug(true)
@@ -318,7 +318,7 @@ class CAGatewayDeveloperTest {
         assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
                 .withProjectDir(testProjectDir)
                 .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DconfigFolder=src/main/gateway/jdbc_malformed",
+                        "-DconfigFolder=src/main/gateway/config/jdbc_malformed",
                         "-DconfigName=jdbc_malformed")
                 .withPluginClasspath()
                 .withDebug(true)

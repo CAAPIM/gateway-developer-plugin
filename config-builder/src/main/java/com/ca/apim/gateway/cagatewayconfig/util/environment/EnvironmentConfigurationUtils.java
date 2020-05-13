@@ -76,8 +76,8 @@ public class EnvironmentConfigurationUtils {
     /**
      * Parses the deployment bundle metadata file to extract environmental dependencies.
      *
-     * @param metaDataFile deployment bundle metadata
-     * @param configFolder config folder path to look for environmental files.
+     * @param metaDataFile deployment bundle metadata.
+     * @param configFolder config folder to look for environmental files.
      * @return pair of bundle file name and environmental entities map.
      */
     public Pair<String, Map<String, String>> parseBundleMetadata(File metaDataFile, File configFolder) {
