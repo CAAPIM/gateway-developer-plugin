@@ -83,10 +83,9 @@ public class FullBundleCreator {
         // process for reattaching loose encasses and write to the final path
         dependencyBundlesProcessor.process(singletonList(fullBundleFile), bundleFolderPath);
         // delete the temp file
-        try {
-            Files.delete(fullBundleFile.toPath());
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, e, () -> "Temporary bundle file was not deleted: " + fullBundleFile.toString());
+        boolean deleted = fullBundleFile.delete();
+        if (!deleted) {
+            LOGGER.log(Level.WARNING, "Temporary bundle file was not deleted: " + fullBundleFile.toString());
         }
     }
 

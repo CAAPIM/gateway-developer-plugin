@@ -9,7 +9,6 @@ public class AnnotatedBundle extends Bundle {
     private Bundle fullBundle;
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
     private String projectName;
-    private String projectGroupName;
     private String projectVersion;
 
     public AnnotatedBundle(Bundle fullBundle, AnnotatedEntity<? extends GatewayEntity> annotatedEntity) {
@@ -39,14 +38,6 @@ public class AnnotatedBundle extends Bundle {
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
-    }
-
-    public String getProjectGroupName() {
-        return projectGroupName;
-    }
-
-    public void setProjectGroupName(String projectGroupName) {
-        this.projectGroupName = projectGroupName;
     }
 
     public String getProjectVersion() {

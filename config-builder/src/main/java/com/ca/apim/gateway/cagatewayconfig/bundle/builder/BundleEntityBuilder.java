@@ -174,7 +174,7 @@ public class BundleEntityBuilder {
     private void insertGatewayEntity(Map entityMapToUpdate, String key, GatewayEntity gatewayEntity,
                                       final boolean excludeReusable) {
         if (excludeReusable && gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable()) {
-            return; // Return without inserting is Reusable entity
+            return; // Return without inserting as its reusable entity
         }
         entityMapToUpdate.put(key, gatewayEntity);
     }

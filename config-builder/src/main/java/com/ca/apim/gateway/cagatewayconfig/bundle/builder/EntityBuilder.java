@@ -7,10 +7,12 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * An implementation of entity builder is responsible for collecting the entity information stored in yaml/json/properties files or environment properties
