@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.reflections.Reflections;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 
 import java.io.File;
@@ -90,6 +91,7 @@ public class BundleMetadataBuilderTest {
                 .filter(ann -> AnnotationConstants.ANNOTATION_TYPE_BUNDLE.equals(ann.getType()))
                 .findFirst().get().setName(null);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+        encass.setAnnotatedEntity(null);
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestBundleLoader(bundle)));
 
         bundleOutput = temporaryFolder.createDirectory("output");
@@ -165,6 +167,165 @@ public class BundleMetadataBuilderTest {
         assertEquals(0, metadata.getTags().size());
 
         verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass);
+    }
+
+    private void verifyAnnotatedEncassBundleMetadata(Map<String, Pair<Element, BundleMetadata>> bundles,
+                                                     Bundle bundle, Encass encass) throws JsonProcessingException {
+        Map<String, Metadata> expectedEnvMetadata = new HashMap<>();
+        for (Dependency dependency : bundle.getDependencyMap().entrySet().iterator().next().getValue()) {
+            expectedEnvMetadata.put(dependency.getType(), new Metadata() {
+                @Override
+                public String getType() {
+                    return dependency.getType();
+                }
+
+                @Override
+                public String getName() {
+                    return dependency.getName();
+                }
+            });
+        }
+
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        BundleMetadata metadata = bundles.entrySet().iterator().next().getValue().getRight();
+        assertNotNull(metadata);
+        assertEquals("my-bundle-group", metadata.getGroupName());
+        assertEquals("encass", metadata.getType());
+        assertEquals("1.0", metadata.getVersion());
+        assertEquals(1, metadata.getDefinedEntities().size());
+        Optional<Metadata> definedEntities = metadata.getDefinedEntities().stream().findFirst();
+        assertTrue(definedEntities.isPresent());
+        assertEquals("ENCAPSULATED_ASSERTION", definedEntities.get().getType());
+        assertEquals(encass.getName(), definedEntities.get().getName());
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(definedEntities.get());
+        Assert.assertThat(json, CoreMatchers.containsString("\"arguments\":[{\"type\":\"message\",\"name\":\"source\",\"requireExplicit\":true,\"label\":\"Some label\"}]"));
+        Assert.assertThat(json, CoreMatchers.containsString("\"results\":[{\"name\":\"result.msg\",\"type\":\"message\"}]"));
+        assertEquals(4, metadata.getEnvironmentEntities().size());
+
+        for (Metadata envMeta : metadata.getEnvironmentEntities()) {
+            assertTrue(expectedEnvMetadata.containsKey(envMeta.getType()));
+            assertEquals(expectedEnvMetadata.get(envMeta.getType()).getName(), envMeta.getName());
+        }
+    }
+
+    private Bundle createBundle(String policyXmlString, boolean includeDependencies) {
+        Bundle bundle = new Bundle();
+        Folder root = createRoot();
+        bundle.getFolders().put(EMPTY, root);
+
+        Folder dummyFolder = createFolder("dummy", TEST_GUID, ROOT_FOLDER);
+        dummyFolder.setParentFolder(Folder.ROOT_FOLDER);
+        bundle.getFolders().put(dummyFolder.getPath(), dummyFolder);
+
+        Policy policy = new Policy();
+        policy.setParentFolder(Folder.ROOT_FOLDER);
+        policy.setName(TEST_ENCASS_POLICY);
+        policy.setId(TEST_POLICY_ID);
+        policy.setGuid(TEST_GUID);
+        policy.setPolicyXML(policyXmlString);
+        policy.setPath(TEST_ENCASS_POLICY);
+        bundle.getPolicies().put(TEST_ENCASS_POLICY, policy);
+        Dependency policyDependency = new Dependency(TEST_POLICY_ID, Policy.class, TEST_ENCASS_POLICY,
+                EntityTypes.POLICY_TYPE);
+        Dependency encassDependency = new Dependency(TEST_ENCASS_ID, Encass.class, TEST_ENCASS,
+                EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        bundle.setDependencyMap(new HashMap<>());
+        bundle.getDependencyMap().put(policyDependency, new ArrayList<>(Collections.singletonList(encassDependency)));
+
+        if (includeDependencies) {
+            JdbcConnection jdbcConnection = new JdbcConnection();
+            jdbcConnection.setDriverClass("com.l7tech.jdbc.mysql.MySQLDriver");
+            jdbcConnection.setJdbcUrl("jdbc:mysql://localhost:3306/ssg");
+            jdbcConnection.setUser("root");
+            jdbcConnection.setName("some-jdbc");
+            bundle.getJdbcConnections().put("some-jdbc", jdbcConnection);
+            Dependency jdbcDependency = new Dependency(jdbcConnection.getName(), "JDBC_CONNECTION");
+
+            ClusterProperty clusterProperty = new ClusterProperty();
+            clusterProperty.setName("email.useDefaultSsl");
+            clusterProperty.setValue("true");
+            bundle.getClusterProperties().put("email.useDefaultSsl", clusterProperty);
+            Dependency clusterDependency = new Dependency(clusterProperty.getName(), "CLUSTER_PROPERTY");
+
+            StoredPassword storedPassword = new StoredPassword();
+            storedPassword.setName("secure-pass");
+            storedPassword.setProperties(Maps.newHashMap(ImmutableMap.of("description", "sec pass", "type", "Password", "usageFromVariable", true)));
+            bundle.getStoredPasswords().put("secure-pass", storedPassword);
+            Dependency passwordDependency = new Dependency(storedPassword.getName(), "SECURE_PASSWORD");
+
+            TrustedCert trustedCert = new TrustedCert(Maps.newHashMap(ImmutableMap.of(
+                    "revocationCheckingEnabled", "true",
+                    "trustedForSigningServerCerts", "true",
+                    "trustedForSsl", "true")));
+            trustedCert.setName("apim-hugh-new.lvn.broadcom.net");
+            TrustedCert.CertificateData certificateData = new TrustedCert.CertificateData("CN=apim-hugh-new.lvn" +
+                    ".broadcom.net", new BigInteger("12718618715409400804"), "CN=pim-hugh-new.lvn.broadcom.net", "MIIDAjCCAeqgAwIBAgIJALCBnFXlnMPkMA0GCSqGSIb3DQEBCwUAMCkxJzAlBgNVBAMTHmFwaW0taHVnaC1uZXcubHZuLmJyb2FkY29tLm5ldDAeFw0xOTAyMDUwNDQ4NTVaFw0yOTAyMDIwNDQ4NTVaMCkxJzAlBgNVBAMTHmFwaW0taHVnaC1uZXcubHZuLmJyb2FkY29tLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALb1txkLi40e0DUXl1MNzDPplB0IKdUDD1Hsx4VgBqAa5TbZZwwQKfGx+oEsDlZamTpu8h1yjuguLNbLbOZFbZ71RBCqKGAy1g2oi6mBiJoTGOzcUzLhUS1M4uC2HQIZzWcNeMbBJWn203IwfvYLpLlenVs6UKTGqJq+TUT6DzqYMypzSj7J4/z5Eml5SUjYq6L/OOkHKjX6dvKBu25mcbahaqV0yIoaF2bO7GR1jrCsIxTv/b/jV+hMbyOpkS+kmYtDecPQs3+rfKNf/N81cidjf/u7vTfXj+IdFQpsw0V3fyLG2WWN4bVgmqAjQFO3ImdwO9RuIGmDzojZ7madJ1UCAwEAAaMtMCswKQYDVR0RBCIwIIIeYXBpbS1odWdoLW5ldy5sdm4uYnJvYWRjb20ubmV0MA0GCSqGSIb3DQEBCwUAA4IBAQAx1YWgkJXt9esh7GHvpx9DDeBLQckEI7YmgVtY8f3OJubcaTbNWEHPpmqz/pelVEh2nTeu5XOPby2SiDipMDLEprGjw92R6Uye/yvvtmoi1Rrnkzmq9jaTb8aWOCU9KdirvaWGnLJPHsovLgfLOrUtmDfUZjjAX/zrPQXI4NGDAJ52gUCK3NNYNCKedduMuLrtSxx1PVqkJpW8IC2ozh0HijezcuwgmK1gu3vzyS8POTrqBLxOk0PD/NggZEDiR3AdxpnWWygGJIEbC4wd84WVg8ENcyrBSWSPQhU9Rtql3HXcCQn7XrS9Qu+sx0bAby8JebKfgV0wRCPUk/xC5MBd");
+            trustedCert.setCertificateData(certificateData);
+            bundle.getTrustedCerts().put(trustedCert.getName(), trustedCert);
+            Dependency trustedCertDependency = new Dependency(trustedCert.getName(), "TRUSTED_CERT");
+
+            // Add dependencies
+            bundle.getDependencyMap().get(policyDependency).add(jdbcDependency);
+            bundle.getDependencyMap().get(policyDependency).add(clusterDependency);
+            bundle.getDependencyMap().get(policyDependency).add(passwordDependency);
+            bundle.getDependencyMap().get(policyDependency).add(trustedCertDependency);
+            Set<Dependency> dependencies = new HashSet<>();
+            dependencies.add(jdbcDependency);
+            dependencies.add(clusterDependency);
+            dependencies.add(passwordDependency);
+            dependencies.add(trustedCertDependency);
+
+            policy.setUsedEntities(dependencies);
+        }
+        return bundle;
+    }
+
+    private BundleEntityBuilder createBundleEntityBuilder() {
+        FolderEntityBuilder folderBuilder = new FolderEntityBuilder(ID_GENERATOR);
+        PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR);
+        EncassEntityBuilder encassBuilder = new EncassEntityBuilder(ID_GENERATOR);
+        StoredPasswordEntityBuilder storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(ID_GENERATOR);
+        JdbcConnectionEntityBuilder jdbcConnectionEntityBuilder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
+        ClusterPropertyEntityBuilder clusterPropertyEntityBuilder = new ClusterPropertyEntityBuilder(ID_GENERATOR);
+        TrustedCertEntityBuilder trustedCertEntityBuilder = new TrustedCertEntityBuilder(ID_GENERATOR, null, certFact);
+
+        Set<EntityBuilder> entityBuilders = new HashSet<>();
+        entityBuilders.add(folderBuilder);
+        entityBuilders.add(policyBuilder);
+        entityBuilders.add(encassBuilder);
+        entityBuilders.add(storedPasswordEntityBuilder);
+        entityBuilders.add(jdbcConnectionEntityBuilder);
+        entityBuilders.add(clusterPropertyEntityBuilder);
+        entityBuilders.add(trustedCertEntityBuilder);
+
+        return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
+    }
+
+    private static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath) {
+        Encass encass = new Encass();
+        encass.setName(TEST_ENCASS);
+        encass.setPolicy(policyPath);
+        encass.setId(TEST_ENCASS_ID);
+        encass.setArguments(new LinkedHashSet<>(Collections.singletonList(new EncassArgument("source", "message",
+                true, "Some label"))));
+        encass.setResults(new LinkedHashSet<>(Collections.singletonList(new EncassResult("result.msg", "message"))));
+        encass.setGuid(encassGuid);
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation annotation = new Annotation("@bundle");
+        annotation.setName(TEST_ENCASS_ANNOTATION_NAME);
+        annotation.setDescription(TEST_ENCASS_ANNOTATION_DESC);
+        annotation.setTags(TEST_ENCASS_ANNOTATION_TAGS);
+        annotations.add(annotation);
+        encass.setAnnotations(annotations);
+        encass.setProperties(ImmutableMap.of(
+                PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
+                PALETTE_ICON_RESOURCE_NAME, "someImage",
+                ALLOW_TRACING, "false",
+                DESCRIPTION, "someDescription",
+                PASS_METRICS_TO_PARENT, "false"));
+        return encass;
     }
 
     private void deleteDirectory(File directory) {

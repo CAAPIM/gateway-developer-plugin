@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+
 import java.util.Collection;
 
 public class AnnotatedEntity<T> {
@@ -15,48 +17,19 @@ public class AnnotatedEntity<T> {
     private String bundleName;
     private String policyName;
     private String description;
-    private boolean bundle;
-    private boolean reusable;
-    private boolean redeployable;
-    private boolean exclude;
-    private boolean reusableEntity;
     private String uniquePrefix;
     private String uniqueSuffix;
     private Collection<String> tags;
 
-    public String getUniquePrefix() {
-        return uniquePrefix;
-    }
-
-    public void setUniquePrefix(String uniquePrefix) {
-        this.uniquePrefix = uniquePrefix;
-    }
-
-    public String getUniqueSuffix() {
-        return uniqueSuffix;
-    }
-
-    public void setUniqueSuffix(String uniqueSuffix) {
-        this.uniqueSuffix = uniqueSuffix;
-    }
-
     public AnnotatedEntity(T entity) {
         this.entity = entity;
-    }
-
-    public boolean isReusableEntity() {
-        return reusableEntity;
-    }
-
-    public void setReusableEntity(boolean reusableEntity) {
-        this.reusableEntity = reusableEntity;
     }
 
     public void setEntityName(String entityName) {
         this.entityName = entityName;
     }
 
-    public String getEntityName(){
+    public String getEntityName() {
         return entityName;
     }
 
@@ -64,7 +37,7 @@ public class AnnotatedEntity<T> {
         this.entityType = entityType;
     }
 
-    public String getEntityType(){
+    public String getEntityType() {
         return entityType;
     }
 
@@ -93,35 +66,19 @@ public class AnnotatedEntity<T> {
     }
 
     public boolean isBundle() {
-        return bundle;
-    }
-
-    public void setBundle(boolean isBundleType) {
-        this.bundle = isBundleType;
+        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isBundle();
     }
 
     public boolean isReusable() {
-        return reusable;
-    }
-
-    public void setReusable(boolean isReusableType) {
-        this.reusable = isReusableType;
+        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isReusable();
     }
 
     public boolean isRedeployable() {
-        return redeployable;
+        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isRedeployable();
     }
 
-    public void setRedeployable(boolean isRedeployableType) {
-        this.redeployable = isRedeployableType;
-    }
-
-    public boolean isExclude() {
-        return exclude;
-    }
-
-    public void setExclude(boolean isExcludeType) {
-        this.exclude = isExcludeType;
+    public boolean isExcluded() {
+        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isExcluded();
     }
 
     public Collection<String> getTags() {

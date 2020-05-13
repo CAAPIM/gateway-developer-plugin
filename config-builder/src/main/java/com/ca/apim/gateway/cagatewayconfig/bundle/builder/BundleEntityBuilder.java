@@ -64,26 +64,26 @@ public class BundleEntityBuilder {
         entityTypeMap.values().stream().filter(EntityUtils.GatewayEntityInfo::isBundleGenerationSupported).forEach(entityInfo ->
                 bundle.getEntities(entityInfo.getEntityClass()).values().stream()
                         .filter(entity -> entity instanceof AnnotableEntity)
-                        .map(entity -> ((AnnotableEntity)entity).getAnnotatedEntity(projectName, projectVersion))
+                        .map(entity -> ((AnnotableEntity) entity).getAnnotatedEntity())
                         .forEach(annotatedEntity -> {
                             if (annotatedEntity != null && annotatedEntity.isBundle()) {
                                 List<Entity> entities = new ArrayList<>();
-                                Map<Class, Map<String, GatewayEntity>> entityMap =
-                                        getEntityDependencies(annotatedEntity.getPolicyName(), bundle, false);
-
-                                // Insert the annotated GatewayEntity into the dependent Entities Map.
-                                putGatewayEntityByType(entityMap, annotatedEntity.getEntity());
-
-                                entityBuilders.forEach(builder -> entities.addAll(builder.build(entityMap,
-                                        annotatedEntity, bundle, bundleType, document)));
+                                AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+                                annotatedBundle.setProjectName(projectName);
+                                annotatedBundle.setProjectVersion(projectVersion);
+                                Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
+                                bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
+                                loadEntityDependencies(annotatedEntity.getPolicyName(), annotatedBundle, bundle);
+                                entityBuilders.forEach(builder -> entities.addAll(builder.build(annotatedBundle, bundleType, document)));
 
                                 // Create deployment bundle
-                                final Element annotatedBundle = bundleDocumentBuilder.build(document, entities);
+                                final Element annotatedElement = bundleDocumentBuilder.build(document, entities);
 
                                 // Create DELETE bundle - ALWAYS skip environment entities
                                 final Element annotatedDeleteBundle = createDeleteBundle(document, entities, bundle,
                                         annotatedEntity);
 
+                                // Create bundle metadata
                                 final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedEntity,
                                         entities, projectGroupName, projectVersion);
                                 annotatedElements.put(annotatedEntity.getBundleName(),
@@ -122,34 +122,29 @@ public class BundleEntityBuilder {
     }
 
     /**
-     * Returns all the gateway entities used in the policy including the environment or global dependencies.
+     * Loads all the gateway entities used in the policy including the environment or global dependencies.
      *
      * @param policyNameWithPath Name of the policy for which gateway dependencies needs to be found.
+     * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param bundle Bundle containing all the entities of the gateway.
-     * @return Map of Gateway Entity type ({@link Class}) as Key and the Entity as Value.
+     * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
      */
-    private Map<Class, Map<String, GatewayEntity>> getEntityDependencies(String policyNameWithPath, Bundle bundle,
-                                                                         boolean excludeReusable) {
-        Map<Class, Map<String, GatewayEntity>> entityDependenciesMap = new HashMap<>();
-        final Map<String, Policy> entityMap = bundle.getPolicies();
-        final Policy policyEntity = entityMap.get(policyNameWithPath);
+    private void loadEntityDependencies(String policyNameWithPath, AnnotatedBundle annotatedBundle, Bundle bundle,
+                                        boolean excludeReusable) {
+        final Map<String, Policy> policyMap = bundle.getPolicies();
+        final Policy policyEntity = policyMap.get(policyNameWithPath);
         if (policyEntity != null) {
-            // Add folder tree for the policy.
-            populateDependentFolders(entityDependenciesMap, policyEntity);
-
-            // Add entities used in Policy.
-            Map<String, GatewayEntity> policyMap = new HashMap<>();
-            policyMap.put(policyNameWithPath, policyEntity);
-            entityDependenciesMap.put(Policy.class, policyMap);
+            populateDependentFolders(annotatedBundle, policyEntity);
+            Map<String, Policy> annotatedPolicyMap = annotatedBundle.getEntities(Policy.class);
+            annotatedPolicyMap.put(policyNameWithPath, policyEntity);
             Set<Dependency> dependencies = policyEntity.getUsedEntities();
             if (dependencies != null) {
                 for (Dependency dependency : dependencies) {
                     Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
                     Map<String, ? extends GatewayEntity> allEntitiesOfType = bundle.getEntities(entityClass);
-                    // Find the dependency
                     Optional<? extends Map.Entry<String, ? extends GatewayEntity>> optionalGatewayEntity =
                             allEntitiesOfType.entrySet().stream()
-                            .filter(e-> {
+                            .filter(e -> {
                                 GatewayEntity gatewayEntity = e.getValue();
                                 if (gatewayEntity.getName() != null) {
                                     return dependency.getName().equals(gatewayEntity.getName());
@@ -157,54 +152,39 @@ public class BundleEntityBuilder {
                                     return dependency.getName().equals(PathUtils.extractName(e.getKey()));
                                 }
                             }).findFirst();
-
-                    // Put the found entity
-                    optionalGatewayEntity.ifPresent(e -> includeGatewayEntity(entityDependenciesMap, e.getValue(),
-                            excludeReusable));
+                    Map entityMap = annotatedBundle.getEntities(entityClass);
+                    optionalGatewayEntity.ifPresent(entry -> insertGatewayEntity(entityMap, entry.getKey(),
+                            entry.getValue(), excludeReusable));
                 }
             }
         }
-        return entityDependenciesMap;
     }
 
     /**
-     * Inserts the Gateway entity into the Entity Map based on the Gateway entity type. It skip adding the entity if
-     * excludeReusable is TRUE and the Gateway Entity is Reusable
+     * Inserts the Gateway entity into the Entity Map. It skip adding the entity if excludeReusable is TRUE and the
+     * Gateway Entity is Reusable
      *
      * @param entityMapToUpdate Entity Map where GatewayEntity needs to be inserted
+     * @param key Gateway entity key to store against
      * @param gatewayEntity Gateway entity to be inserted
      * @param excludeReusable Exclude inserting reusable entity
      */
-    private void includeGatewayEntity(Map<Class, Map<String, GatewayEntity>> entityMapToUpdate,
-                                      GatewayEntity gatewayEntity, final boolean excludeReusable) {
+    private void insertGatewayEntity(Map entityMapToUpdate, String key, GatewayEntity gatewayEntity,
+                                      final boolean excludeReusable) {
         if (excludeReusable && gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable()) {
             return; // Return without inserting is Reusable entity
         }
-        putGatewayEntityByType(entityMapToUpdate, gatewayEntity);
+        entityMapToUpdate.put(key, gatewayEntity);
     }
 
-    /**
-     * Inserts the Gateway entity into the Entity Map based on the Gateway entity type. If the Gateway entity type
-     * doesn't exist in the Entity Map, initializes the Entity Map with the type before inserting the Gateway entity.
-     *
-     * @param entityMapToUpdate Entity Map where GatewayEntity needs to be inserted
-     * @param gatewayEntity Gateway entity to be inserted
-     */
-    public void putGatewayEntityByType(Map<Class, Map<String, GatewayEntity>> entityMapToUpdate,
-                                       GatewayEntity gatewayEntity) {
-        entityMapToUpdate.computeIfAbsent(gatewayEntity.getClass(), klass -> new HashMap<>())
-                .put(gatewayEntity.getName(), gatewayEntity);
-    }
-
-    private void populateDependentFolders(Map<Class, Map<String, GatewayEntity>> entityDependenciesMap, GatewayEntity policyEntity) {
+    private void populateDependentFolders(AnnotatedBundle annotatedBundle, GatewayEntity policyEntity) {
         if (policyEntity instanceof Folderable) {
             Folder folder = ((Folderable) policyEntity).getParentFolder();
-            Map<String, GatewayEntity> folderMap = new HashMap<>();
+            Map<String, Folder> folderMap = annotatedBundle.getEntities(Folder.class);
             while (folder != null) {
                 folderMap.put(folder.getPath(), folder);
                 folder = folder.getParentFolder();
             }
-            entityDependenciesMap.put(Folder.class, folderMap);
         }
     }
 

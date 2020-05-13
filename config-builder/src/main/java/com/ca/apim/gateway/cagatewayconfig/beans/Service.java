@@ -51,8 +51,9 @@ public class Service extends Folderable implements AnnotableEntity {
     private boolean wssProcessingEnabled;
     private String wsdlRootUrl;
     @JsonIgnore
-    private AnnotatedEntity<GatewayEntity> annotatedEntity;
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
+    @Override
     public Set<Annotation> getAnnotations() {
         return annotations;
     }
@@ -161,32 +162,22 @@ public class Service extends Folderable implements AnnotableEntity {
     }
 
     @Override
-    public AnnotatedEntity<GatewayEntity> getAnnotatedEntity(final String projectName,
-                                                             final String projectVersion) {
-        return annotatedEntity == null ? createAnnotatedEntity(annotations, projectName, projectVersion) :
-                annotatedEntity;
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                Map<String, Object> props = getProperties();
+                if (props != null) {
+                    annotatedEntity.setDescription(props.getOrDefault("description", "").toString());
+                }
+            }
+            annotatedEntity.setPolicyName(getPolicy());
+            annotatedEntity.setEntityName(getName());
+        }
+        return annotatedEntity;
     }
 
-    public void populateBundleInfo(final AnnotatedEntity<GatewayEntity> annotatedEntity, final Annotation bundleAnnotation, final String projectName,
-                                   final String projectVersion) {
-        String annotatedBundleName = bundleAnnotation.getName();
-        if (StringUtils.isBlank(annotatedBundleName)) {
-            annotatedBundleName = projectName + "-" + getName();
-        }
-        annotatedEntity.setBundleName(annotatedBundleName + "-" + projectVersion);
-        String description = bundleAnnotation.getDescription();
-        if (StringUtils.isBlank(description)) {
-            Map<String, Object> properties = getProperties();
-            if (properties != null) {
-                description = properties.getOrDefault("description", "").toString();
-            }
-
-        }
-        annotatedEntity.setDescription(description);
-        annotatedEntity.setPolicyName(getPolicy());
-
-        annotatedEntity.setUniquePrefix(projectName + "-service-" + PathUtils.extractName(getName()) + "-");
-        annotatedEntity.setUniqueSuffix("-" + projectVersion);
-        annotatedEntity.setEntityName(getName());
+    public String getType(){
+        return "service";
     }
 }

@@ -60,12 +60,6 @@ public class FolderEntityBuilder implements EntityBuilder {
         return entity;
     }
 
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(Folder.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundleType, document);
-    }
-
     private List<Entity> buildEntities(Map<String, ?> entities, BundleType bundleType, Document document) {
         // no folder has to be added to environment bundle
         if (entities.isEmpty() || bundleType == ENVIRONMENT) {
@@ -94,7 +88,8 @@ public class FolderEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getFolders(), bundleType, document);
+        Map<String, Folder> folderMap = Optional.ofNullable(bundle.getFolders()).orElse(Collections.emptyMap());
+        return buildEntities(folderMap, bundleType, document);
     }
 
     @Override

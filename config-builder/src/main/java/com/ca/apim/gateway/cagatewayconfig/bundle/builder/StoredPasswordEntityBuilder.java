@@ -42,7 +42,12 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getStoredPasswords(), bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, StoredPassword> storedPasswordMap = Optional.ofNullable(bundle.getStoredPasswords()).orElse(Collections.emptyMap());
+            return buildEntities(storedPasswordMap, ((AnnotatedBundle) bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getStoredPasswords(), bundle, bundleType, document);
+        }
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
@@ -52,16 +57,10 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
                         .map(o -> EntityBuilderHelper.getEntityWithOnlyMapping(STORED_PASSWORD_TYPE, o, idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
-                return entities.entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), (StoredPassword)e.getValue(), document)).collect(toList());
+                return entities.entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), (StoredPassword) e.getValue(), document)).collect(toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
-    }
-
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(StoredPassword.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundle, bundleType, document);
     }
 
     private Entity buildStoredPasswordEntity(String name, StoredPassword storedPassword, Document document) {

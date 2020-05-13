@@ -77,7 +77,7 @@ class PolicyEntityBuilderTest {
         Encass encass = new Encass();
         encass.setGuid("encass");
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY);
+        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
         annotations.add(annotation);
         policy.setAnnotations(annotations);
         bundle.getEncasses().put(TEST_ENCASS, encass);
@@ -89,7 +89,7 @@ class PolicyEntityBuilderTest {
         include.setId("includeID");
         include.setGuid("includeGuid");
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE_ENTITY);
+        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
         annotations.add(annotation);
         include.setAnnotations(annotations);
         include.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +

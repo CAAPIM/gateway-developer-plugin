@@ -59,7 +59,12 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return buildEntities(bundle.getTrustedCerts(), bundle, bundleType, document);
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, TrustedCert> trustedCertMap = Optional.ofNullable(bundle.getTrustedCerts()).orElse(Collections.emptyMap());
+            return buildEntities(trustedCertMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getTrustedCerts(), bundle, bundleType, document);
+        }
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
@@ -76,12 +81,6 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }
-    }
-
-    @Override
-    public List<Entity> build(Map<Class, Map<String, GatewayEntity>> entityMap, AnnotatedEntity annotatedEntity, Bundle bundle, BundleType bundleType, Document document) {
-        Map<String, GatewayEntity> map = Optional.ofNullable(entityMap.get(TrustedCert.class)).orElse(Collections.emptyMap());
-        return buildEntities(map, bundle, bundleType, document);
     }
 
     private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
