@@ -20,6 +20,7 @@ public class DocumentFileUtils {
 
     public static final DocumentFileUtils INSTANCE = new DocumentFileUtils(DocumentTools.INSTANCE);
     private final DocumentTools documentTools;
+    public static final String BUNDLE_EXTENSION = ".bundle";
 
     private DocumentFileUtils(DocumentTools documentTools) {
         this.documentTools = documentTools;

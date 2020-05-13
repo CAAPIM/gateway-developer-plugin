@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
 import static java.util.stream.Collectors.toCollection;
 
 /**

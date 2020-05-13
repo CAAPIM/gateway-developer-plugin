@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+
 import java.util.Collection;
 
 public class AnnotatedEntity<T> {
@@ -15,11 +17,6 @@ public class AnnotatedEntity<T> {
     private String bundleName;
     private String policyName;
     private String description;
-    private boolean bundle;
-    private boolean reusable=true;
-    private boolean redeployable;
-    private boolean exclude;
-    private boolean reusableEntity;
     private String uniquePrefix;
     private String uniqueSuffix;
     private Collection<String> tags;
@@ -44,14 +41,6 @@ public class AnnotatedEntity<T> {
 
     public AnnotatedEntity(T entity) {
         this.entity = entity;
-    }
-
-    public boolean isReusableEntity() {
-        return reusableEntity;
-    }
-
-    public void setReusableEntity(boolean reusableEntity) {
-        this.reusableEntity = reusableEntity;
     }
 
     public void setEntityName(String entityName) {
@@ -95,31 +84,19 @@ public class AnnotatedEntity<T> {
     }
 
     public boolean isBundle() {
-        return bundle;
-    }
-
-    public void setBundle(boolean isBundleType) {
-        this.bundle = isBundleType;
+        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isBundle();
     }
 
     public boolean isReusable() {
-        return reusable;
+        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isReusable();
     }
 
     public boolean isRedeployable() {
-        return redeployable;
+        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isRedeployable();
     }
 
-    public void setRedeployable(boolean isRedeployableType) {
-        this.redeployable = isRedeployableType;
-    }
-
-    public boolean isExclude() {
-        return exclude;
-    }
-
-    public void setExclude(boolean isExcludeType) {
-        this.exclude = isExcludeType;
+    public boolean isExcluded() {
+        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isExcluded();
     }
 
     public Collection<String> getTags() {
