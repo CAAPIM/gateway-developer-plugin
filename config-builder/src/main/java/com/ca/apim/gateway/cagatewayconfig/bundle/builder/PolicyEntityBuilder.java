@@ -77,8 +77,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyMap.values().forEach(policy -> {
             Policy policyEntity = (Policy) policy;
             if (annotatedEntity != null) {
-                AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
-                if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusable()) {
+                if (!policyEntity.isReusable()) {
                     policyEntity.setId(idGenerator.generate());
                     policyEntity.setGuid(idGenerator.generateGuid());
                 }
@@ -129,8 +128,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         final String policyName;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
-            AnnotatedEntity annotatedPolicyEntity = policy.getAnnotatedEntity();
-            if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusable()) {
+            if (!policy.isReusable()) {
                 policyName = annotatedBundle.getUniquePrefix() + policy.getName() + annotatedBundle.getUniqueSuffix();
             } else {
                 policyName = policy.getName();
@@ -292,8 +290,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String encassGuid = guid;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (encass != null && annotatedEntity != null) {
-            AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (annotatedEncassEntity == null || !annotatedEncassEntity.isReusable()) {
+            if (!encass.isReusable()) {
                 encassGuid = idGenerator.generateGuid();
                 encass.setGuid(encassGuid);
                 encass.setId(idGenerator.generate());
