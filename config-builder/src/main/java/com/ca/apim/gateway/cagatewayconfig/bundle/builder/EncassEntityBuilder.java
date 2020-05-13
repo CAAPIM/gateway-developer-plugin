@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
@@ -89,7 +88,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
             annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (annotatedEncassEntity == null || !annotatedEncassEntity.isReusableEntity()) {
+            if (annotatedEncassEntity == null || !annotatedEncassEntity.isReusable()) {
                 encassName = annotatedBundle.getUniquePrefix() + name + annotatedBundle.getUniqueSuffix();
                 //guid and id are regenerated in policy entity builder if this encass is referred by policy
                 //if the annotated entity is encass then it will not be referred by policy so id and guid should be regenerated here.
@@ -115,7 +114,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, encassName, id, encassAssertionElement);
-        if (annotatedEncassEntity != null && annotatedEncassEntity.isReusableEntity()) {
+        if (annotatedEncassEntity != null && annotatedEncassEntity.isReusable()) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
