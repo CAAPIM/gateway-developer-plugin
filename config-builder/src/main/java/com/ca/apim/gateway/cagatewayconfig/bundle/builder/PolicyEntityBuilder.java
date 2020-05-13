@@ -141,7 +141,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
         final String policyName;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
-            AnnotatedEntity annotatedPolicyEntity = policy.getAnnotatedEntity();
             if (policy.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = policy.getName();
             } else {
@@ -276,7 +275,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (referenceEncass.get() == null) {
             Set<BundleMetadata> bundleMetadataSet = bundle.getMetadataDependencyBundles();
             Encass encass = null;
-            if (bundleMetadataSet != null) {
+            if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
                 for (BundleMetadata bundleMetadata : bundleMetadataSet) {
                     Collection<Metadata> metadataCollection = bundleMetadata.getDefinedEntities();
                     if (metadataCollection != null) {
@@ -284,25 +283,34 @@ public class PolicyEntityBuilder implements EntityBuilder {
                                 filter(metadata -> metadata.getName().equals(name)
                                         && metadata.getType().equals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE)).findFirst();
                         if (optionalMetadata.isPresent()) {
-                            Metadata metadata = optionalMetadata.get();
-                            encass = new Encass();
-                            encass.setId(metadata.getId());
-                            encass.setGuid(metadata.getGuid());
+                            encass = getEncassFromMetadata(optionalMetadata.get());
                             encass.setName(name);
-                            Set<Annotation> annotations = new HashSet<>();
-                            annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
-                            encass.setAnnotations(annotations);
-                            AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
-                            encass.setAnnotatedEntity(annotatedEntity);
                         }
                     }
                     if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
                         throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
                     }
                 }
+            } else {
+                bundle.getDependencies().forEach(b -> {
+                    Encass encassDependency = b.getEncasses().get(name);
+                    if (encassDependency != null && !referenceEncass.compareAndSet(null, encassDependency)) {
+                        throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
+                    }
+                });
             }
         }
         return referenceEncass.get();
+    }
+
+    private Encass getEncassFromMetadata(final Metadata metadata) {
+        Encass encass = new Encass();
+        encass.setId(metadata.getId());
+        encass.setGuid(metadata.getGuid());
+        Set<Annotation> annotations = new HashSet<>();
+        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
+        encass.setAnnotations(annotations);
+        return encass;
     }
 
     private static String findEncassReferencedGuid(Policy policy, Encass encass, Element encapsulatedAssertionElement, String name) {
@@ -390,8 +398,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
             policy.getDependencies().add(includedPolicy.get());
         } else {
             Set<BundleMetadata> bundleMetadataSet = bundle.getMetadataDependencyBundles();
-            Policy policyForPath = null;
-            if (bundleMetadataSet != null) {
+            if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
+                Policy policyFromMetadata = null;
                 for (BundleMetadata bundleMetadata : bundleMetadataSet) {
                     Collection<Metadata> metadataCollection = bundleMetadata.getDefinedEntities();
                     if (metadataCollection != null) {
@@ -400,17 +408,22 @@ public class PolicyEntityBuilder implements EntityBuilder {
                                         && metadata.getType().equals(EntityTypes.POLICY_TYPE)).findFirst();
                         if (optionalMetadata.isPresent()) {
                             Metadata metadata = optionalMetadata.get();
-                            policyForPath = new Policy();
-                            policyForPath.setId(metadata.getId());
-                            policyForPath.setGuid(metadata.getGuid());
-                            policyForPath.setPath(policyPath);
+                            policyFromMetadata = getPolicyFromMetadata(metadata);
+                            policyFromMetadata.setPath(policyPath);
                         }
                     }
 
-                    if (policyForPath != null && !includedPolicy.compareAndSet(null, policyForPath)) {
+                    if (policyFromMetadata != null && !includedPolicy.compareAndSet(null, policyFromMetadata)) {
                         throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
                     }
                 }
+            } else {
+                bundle.getDependencies().forEach(b -> {
+                    Policy policyFromDependencies = b.getPolicies().get(policyPath);
+                    if (policyFromDependencies != null && !includedPolicy.compareAndSet(null, policyFromDependencies)) {
+                        throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
+                    }
+                });
             }
 
         }
@@ -419,6 +432,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
         policyGuidElement.setAttribute(STRING_VALUE, includedPolicy.get().getGuid());
         policyGuidElement.removeAttribute(POLICY_PATH);
+    }
+
+    private static Policy getPolicyFromMetadata(final Metadata metadata) {
+        Policy policy = new Policy();
+        policy.setId(metadata.getId());
+        policy.setGuid(metadata.getGuid());
+        Set<Annotation> annotations = new HashSet<>();
+        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
+        policy.setAnnotations(annotations);
+        return policy;
     }
 
     private void prepareAssertion(Element policyElement, String assertionTag, Consumer<Element> prepareAssertionMethod) {

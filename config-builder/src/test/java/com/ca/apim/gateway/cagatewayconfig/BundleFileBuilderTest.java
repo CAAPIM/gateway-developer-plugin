@@ -90,14 +90,14 @@ class BundleFileBuilderTest {
 
         List<File> dummyList = new ArrayList<>();
         dummyList.add(new File("test"));
-        //when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
+        when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
 
         BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils,
                 jsonFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache));
         bundleFileBuilder.buildBundle(new File("input"), new File("output"), dummyList, "my-bundle",
                 "my-bundle-group", "1.0");
 
-        //verify(bundleFileBuilder, Mockito.times(2)).logOverriddenEntities(any(Bundle.class), any(), any());
+        verify(bundleFileBuilder, Mockito.times(2)).logOverriddenEntities(any(Bundle.class), any(), any());
     }
 
     static class TestPolicyLoader implements EntityLoader {

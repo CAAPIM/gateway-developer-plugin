@@ -28,10 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -52,11 +49,11 @@ public class BundleFileBuilder {
 
     @Inject
     public BundleFileBuilder(final DocumentTools documentTools,
-                      final DocumentFileUtils documentFileUtils,
-                      final JsonFileUtils jsonFileUtils,
-                      final EntityLoaderRegistry entityLoaderRegistry,
-                      final BundleEntityBuilder bundleEntityBuilder,
-                      final BundleCache cache) {
+                             final DocumentFileUtils documentFileUtils,
+                             final JsonFileUtils jsonFileUtils,
+                             final EntityLoaderRegistry entityLoaderRegistry,
+                             final BundleEntityBuilder bundleEntityBuilder,
+                             final BundleCache cache) {
         this.documentFileUtils = documentFileUtils;
         this.jsonFileUtils = jsonFileUtils;
         this.documentTools = documentTools;
@@ -66,7 +63,7 @@ public class BundleFileBuilder {
     }
 
     public void buildBundle(File rootDir, File outputDir, List<File> dependencies, String projectName,
-                     String projectGroupName, String projectVersion) {
+                            String projectGroupName, String projectVersion) {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
@@ -81,10 +78,22 @@ public class BundleFileBuilder {
             FolderLoaderUtils.createFolders(bundle, rootDir, bundle.getServices());
 
             //Load metadata Dependencies
-            final Set<BundleMetadata> metadataDependencyBundles = dependencies.stream().filter(file -> file.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX))
-                                                                                .map(cache::getBundleMetadataFromFile).collect(Collectors.toSet());
-
+            final Set<BundleMetadata> metadataDependencyBundles = new HashSet<>();
+            final Set<Bundle> dependencyBundles = new HashSet<>();
+            for (File dependencyFile : dependencies) {
+                if (dependencyFile.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)) {
+                    metadataDependencyBundles.add(cache.getBundleMetadataFromFile(dependencyFile));
+                } else {
+                    dependencyBundles.add(cache.getBundleFromFile(dependencyFile));
+                }
+            }
+            bundle.setDependencies(dependencyBundles);
             bundle.setMetadataDependencyBundles(metadataDependencyBundles);
+            // Log overridden entities
+            if (!dependencyBundles.isEmpty()) {
+                logOverriddenEntities(bundle, dependencyBundles, Service.class);
+                logOverriddenEntities(bundle, dependencyBundles, Policy.class);
+            }
         }
 
         //Zip
@@ -99,11 +108,11 @@ public class BundleFileBuilder {
 
     protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entityClass) {
         bundle.getEntities(entityClass).keySet().forEach(entityName ->
-            dependencyBundles.forEach(dependencyBundle -> {
-                if (dependencyBundle.getEntities(entityClass).containsKey(entityName)) {
-                    LOGGER.log(Level.INFO,"{0} policy will be overwritten by local version", entityName);
-                }
-            })
+                dependencyBundles.forEach(dependencyBundle -> {
+                    if (dependencyBundle.getEntities(entityClass).containsKey(entityName)) {
+                        LOGGER.log(Level.INFO, "{0} policy will be overwritten by local version", entityName);
+                    }
+                })
         );
     }
 }

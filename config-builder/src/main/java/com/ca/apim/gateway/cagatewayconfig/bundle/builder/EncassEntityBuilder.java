@@ -88,7 +88,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         String policyId = null;
         if (policy == null) {
             Set<BundleMetadata> bundleMetadataSet = bundle.getMetadataDependencyBundles();
-            if (bundleMetadataSet != null) {
+            if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
                 for (BundleMetadata bundleMetadata : bundleMetadataSet) {
                     Collection<Metadata> metadataCollection = bundleMetadata.getDefinedEntities();
                     if (metadataCollection != null) {
