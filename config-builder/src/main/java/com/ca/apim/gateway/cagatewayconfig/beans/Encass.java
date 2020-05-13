@@ -77,6 +77,7 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
         this.properties = properties;
     }
 
+    @Override
     public Set<Annotation> getAnnotations() {
         return annotations;
     }
@@ -143,6 +144,14 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
                 return Encass.this.getName();
             }
 
+            public String getId() {
+                return Encass.this.getId();
+            }
+
+            public String getGuid() {
+                return Encass.this.getGuid();
+            }
+
             public Set<EncassArgument> getArguments() {
                 return Encass.this.getArguments();
             }
@@ -162,13 +171,12 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     @Override
     public AnnotatedEntity getAnnotatedEntity() {
         if (annotatedEntity == null && annotations != null) {
-            annotatedEntity = createAnnotatedEntity(annotations);
+            annotatedEntity = createAnnotatedEntity();
             if (StringUtils.isBlank(annotatedEntity.getDescription())) {
-                Map<String, Object> properties = getProperties();
-                if (properties != null) {
-                    annotatedEntity.setDescription(properties.getOrDefault("description", "").toString());
+                Map<String, Object> props = getProperties();
+                if (props != null) {
+                    annotatedEntity.setDescription(props.getOrDefault("description", "").toString());
                 }
-
             }
             annotatedEntity.setPolicyName(getPolicy());
             annotatedEntity.setEntityName(getName());
