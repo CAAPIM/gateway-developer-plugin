@@ -173,7 +173,8 @@ class BundleEntityBuilderTest {
         assertNotNull(itemList);
         assertEquals(expectedElementCountBundle, itemList.size());
         final Element item1 = itemList.get(0);
-        assertEquals(TEST_ENCASS_POLICY, getSingleChildElementTextContent(item1, NAME));
+        assertEquals("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_ENCASS_POLICY + "-1.0",
+                getSingleChildElementTextContent(item1, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item1, TYPE));
         assertNotNull(getSingleChildElement(item1, RESOURCE));
         final Element item2 = itemList.get(1);
