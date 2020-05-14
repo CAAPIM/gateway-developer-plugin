@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayexport;
 
+import com.google.common.io.Files;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.io.FileUtils;
@@ -105,6 +106,50 @@ class CAGatewayExportTest {
         assertTrue(passwordProperties.containsKey("my-password"));
         assertFalse(passwordProperties.containsKey("another-password"));
         assertEquals(1, passwordProperties.size());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExplodeWithMissingEntities(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        String projectFolder = "example-project";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        File buildGradleFile = new File(testProjectDir, "build.gradle");
+        File bundleFile = new File(testProjectDir, "bundle.bundle");
+
+        String gradleBuild = "" +
+                "plugins {\n" +
+                "    id 'com.ca.apim.gateway.gateway-export-plugin-base'\n" +
+                "}\n" +
+                "group 'com.ca'\n" +
+                "version '1.2.3-SNAPSHOT'\n" +
+                "task('explode', type: com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundleTask) {\n" +
+                "    folderPath = '/environment-variable'\n" +
+                "    inputBundleFile = file('bundle.bundle')\n" +
+                "    exportDir = file('gateway')\n" +
+                "}";
+
+        FileUtils.writeStringToFile(buildGradleFile, gradleBuild, Charset.defaultCharset());
+
+        String bundle = FileUtils.readFileToString(new File(Objects.requireNonNull(getClass().getClassLoader().getResource("bundles/missing-entities-test.bundle")).toURI()), Charset.defaultCharset());
+        FileUtils.writeStringToFile(bundleFile, bundle, Charset.defaultCharset());
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("explode", "--stacktrace")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":explode")).getOutcome());
+
+        File exportDir = new File(testProjectDir, "gateway");
+        File configDir = new File(exportDir, "config");
+
+        File missingEntitiesFile = new File(configDir, "missing-entities.yml");
+        assertTrue(missingEntitiesFile.exists());
+        Files.readLines(missingEntitiesFile, Charset.forName("utf-8")).forEach(System.out::println);
     }
 
     @Test

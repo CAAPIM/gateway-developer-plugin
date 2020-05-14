@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
@@ -115,6 +116,17 @@ public class BundleBuilder {
             entityLoader.load(bundle, element);
         } else {
             LOGGER.log(Level.INFO, "No entity loader found for entity type: {0}", type);
+            loadUnsupportedEntity(element, bundle);
         }
+    }
+
+    private void loadUnsupportedEntity(final Element element, final Bundle bundle) {
+        final UnsupportedGatewayEntity entity = new UnsupportedGatewayEntity();
+        entity.setType(getSingleChildElement(element, TYPE).getTextContent());
+        entity.setId(getSingleChildElement(element, ID).getTextContent());
+        entity.setName(getSingleChildElement(element, NAME).getTextContent());
+        entity.setElement(element);
+
+        bundle.addEntity(entity);
     }
 }

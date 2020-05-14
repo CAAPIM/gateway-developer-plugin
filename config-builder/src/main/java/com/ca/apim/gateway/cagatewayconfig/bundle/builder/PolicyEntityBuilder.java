@@ -224,6 +224,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
         LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", name);
         final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(name));
         if (referenceEncass.get() == null) {
+            final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(name);
+            if (missingEntity != null && missingEntity.isExcluded()) {
+                LOGGER.log(Level.WARNING, "Resolving the referenced encass {0} as known excluded entity with guid: {1}",
+                        new Object[] {name, missingEntity.getGuid()});
+                referenceEncass.set(new Encass());
+                referenceEncass.get().setGuid(missingEntity.getGuid());
+            }
+        }
+
+        if (referenceEncass.get() == null) {
             bundle.getDependencies().forEach(b -> {
                 Encass encass = b.getEncasses().get(name);
                 if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
@@ -294,6 +304,14 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (includedPolicy.get() != null) {
             policy.getDependencies().add(includedPolicy.get());
         } else {
+            final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(policyPath);
+            if (missingEntity != null && missingEntity.isExcluded()) {
+                LOGGER.log(Level.WARNING, "Resolving the referenced policy {0} as known excluded entity with guid: {1}",
+                        new Object[] {policyPath, missingEntity.getGuid()});
+                includedPolicy.set(new Policy());
+                includedPolicy.get().setGuid(missingEntity.getGuid());
+            }
+
             bundle.getDependencies().forEach(b -> {
                 Policy policyForPath = b.getPolicies().get(policyPath);
                 if (policyForPath != null && !includedPolicy.compareAndSet(null, policyForPath)) {
@@ -301,6 +319,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 }
             });
         }
+
         if (includedPolicy.get() == null) {
             throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
         }

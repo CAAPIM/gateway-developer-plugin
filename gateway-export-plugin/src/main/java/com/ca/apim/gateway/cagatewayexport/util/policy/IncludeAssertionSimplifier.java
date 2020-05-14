@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.beans.MissingGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
@@ -34,15 +35,36 @@ public class IncludeAssertionSimplifier implements PolicyAssertionSimplifier {
     public void simplifyAssertionElement(PolicySimplifierContext context) throws DocumentParseException {
         Element assertionElement = context.getAssertionElement();
         Bundle bundle = context.getBundle();
+        Bundle resultantBundle = context.getResultantBundle();
 
         Element policyGuidElement = getSingleElement(assertionElement, POLICY_GUID);
         String includedPolicyGuid = policyGuidElement.getAttribute(STRING_VALUE);
-        Optional<Policy> policyEntity = bundle.getEntities(Policy.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
-        if (policyEntity.isPresent()) {
-            policyGuidElement.setAttribute("policyPath", getPolicyPath(bundle, policyEntity.get()));
+        Optional<Policy> resultantPolicyEntity = resultantBundle.getEntities(Policy.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
+        if (resultantPolicyEntity.isPresent()) {
+            policyGuidElement.setAttribute("policyPath", getPolicyPath(bundle, resultantPolicyEntity.get()));
             policyGuidElement.removeAttribute(STRING_VALUE);
         } else {
-            LOGGER.log(Level.WARNING, "Could not find referenced policy include with guid: {0}", includedPolicyGuid);
+            boolean excluded = true;
+            Optional<Policy> policyEntity = bundle.getEntities(Policy.class).values().stream().filter(p -> includedPolicyGuid.equals(p.getGuid())).findAny();
+            if (!policyEntity.isPresent()) {
+                LOGGER.log(Level.WARNING, "Could not find referenced policy include with guid: {0}", includedPolicyGuid);
+                excluded = false;
+            }
+
+            final MissingGatewayEntity missingEntity = new MissingGatewayEntity();
+            missingEntity.setType("POLICY");
+            missingEntity.setName("Policy#" + includedPolicyGuid);
+            missingEntity.setGuid(includedPolicyGuid);
+            missingEntity.setExcluded(excluded);
+            missingEntity.setId(missingEntity.getGuid().replace("-", ""));
+
+            context.getResultantBundle().addEntity(missingEntity);
+
+            LOGGER.log(Level.WARNING, "Recording the referenced policy include with guid: {0} as {1} entity",
+                    new Object[] {includedPolicyGuid, excluded ? "excluded" : "missing"});
+
+            policyGuidElement.setAttribute("policyPath", missingEntity.getName());
+            policyGuidElement.removeAttribute(STRING_VALUE);
         }
     }
 
