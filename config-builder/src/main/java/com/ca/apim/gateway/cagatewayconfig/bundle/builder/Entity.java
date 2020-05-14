@@ -18,12 +18,18 @@ public class Entity {
     private String id;
     private Element xml;
     private String name;
+    private String originalName;
     private String mappingAction;
     private Map<String, Object> mappingProperties = new HashMap<>();
 
-    public Entity(String type, String name, String id, Element xml) {
+    public Entity(String type, String entityBundleName, String id, Element xml) {
+        this(type, entityBundleName, entityBundleName, id, xml);
+    }
+
+    public Entity(String type, String originalName, String entityBundleName, String id, Element xml) {
         this.type = type;
-        this.name = name;
+        this.originalName = originalName;
+        this.name = entityBundleName;
         this.id = id;
         this.xml = xml;
     }
@@ -45,6 +51,10 @@ public class Entity {
 
     public String getName() {
         return name;
+    }
+
+    public String getOriginalName() {
+        return originalName;
     }
 
     public Map<String, Object> getMappingProperties() {

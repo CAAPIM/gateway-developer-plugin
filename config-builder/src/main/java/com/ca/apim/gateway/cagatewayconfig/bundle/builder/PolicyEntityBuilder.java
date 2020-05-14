@@ -421,7 +421,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
-        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE, policyNameWithPath, policy.getId(), policyElement);
+        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
+                policy.getPath(), policyNameWithPath, policy.getId(), policyElement);
         if (annotatedPolicyEntity != null && annotatedPolicyEntity.isReusable()) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         } else {

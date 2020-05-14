@@ -53,7 +53,7 @@ public class FolderEntityBuilder implements EntityBuilder {
             entity = new Entity(FOLDER_TYPE, filteredName, id, folderElement);
         } else {
             String filteredPathName = folder.getPath().replaceAll(folder.getName(), filteredName);
-            entity = EntityBuilderHelper.getEntityWithPathMapping(FOLDER_TYPE, filteredPathName, id, folderElement);
+            entity = EntityBuilderHelper.getEntityWithPathMapping(FOLDER_TYPE, filteredPathName, filteredPathName, id, folderElement);
 
         }
         entity.setMappingAction(NEW_OR_EXISTING);

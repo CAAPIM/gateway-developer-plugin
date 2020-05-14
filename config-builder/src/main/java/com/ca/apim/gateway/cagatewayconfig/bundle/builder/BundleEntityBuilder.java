@@ -128,7 +128,7 @@ public class BundleEntityBuilder {
                 final Entity entity = it.next();
                 final Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(entity.getType());
                 Map entityMap = annotatedBundle.getEntities(entityClass);
-                if (!entityMap.containsKey(entity.getName())) {
+                if (!entityMap.containsKey(entity.getOriginalName())) {
                     it.remove();
                 }
             }
@@ -192,10 +192,12 @@ public class BundleEntityBuilder {
             }
             // Remove policies of excluded Encasses
             excludedReusableEntities.forEach(ex -> {
+                Map<String, ? extends GatewayEntity> policyEntities =
+                        annotatedBundle.getEntities(entityTypeRegistry.getEntityClass(EntityTypes.POLICY_TYPE));
                 if (ex instanceof Encass) {
-                    Map<String, ? extends GatewayEntity> policyEntities =
-                            annotatedBundle.getEntities(entityTypeRegistry.getEntityClass(EntityTypes.POLICY_TYPE));
-                    policyEntities.remove(((Encass) ex).getPolicy());
+                    removeExcludedReusablePolicy((Policy) policyEntities.get(((Encass) ex).getPolicy()), annotatedBundle);
+                } else if (ex instanceof Policy) {
+                    removeExcludedReusablePolicy((Policy) ex, annotatedBundle);
                 }
             });
         }
@@ -217,6 +219,26 @@ public class BundleEntityBuilder {
             return; // Return without inserting as its reusable entity
         }
         entityMapToUpdate.put(key, gatewayEntity);
+    }
+
+    private void removeExcludedReusablePolicy(Policy policy, AnnotatedBundle annotatedBundle) {
+        if (policy != null) {
+            final Set<Dependency> dependencies = policy.getUsedEntities();
+            for (Dependency dependency : dependencies) {
+                Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
+                Map<String, ? extends GatewayEntity> allEntitiesOfType = annotatedBundle.getEntities(entityClass);
+                allEntitiesOfType.entrySet().stream()
+                        .filter(e -> {
+                            GatewayEntity gatewayEntity = e.getValue();
+                            if (gatewayEntity.getName() != null) {
+                                return dependency.getName().equals(gatewayEntity.getName());
+                            } else {
+                                return dependency.getName().equals(PathUtils.extractName(e.getKey()));
+                            }
+                        }).findFirst();
+                annotatedBundle.getEntities(entityClass).remove(dependency.getName());
+            }
+        }
     }
 
     private void populateDependentFolders(AnnotatedBundle annotatedBundle, GatewayEntity policyEntity) {
