@@ -6,8 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-
 import java.util.Collection;
 
 public class AnnotatedEntity<T> {
@@ -17,9 +15,8 @@ public class AnnotatedEntity<T> {
     private String bundleName;
     private String policyName;
     private String description;
-    private String uniquePrefix;
-    private String uniqueSuffix;
     private Collection<String> tags;
+
 
     public AnnotatedEntity(T entity) {
         this.entity = entity;

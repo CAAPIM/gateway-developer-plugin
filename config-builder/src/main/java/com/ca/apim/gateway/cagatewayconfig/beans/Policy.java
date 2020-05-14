@@ -216,8 +216,8 @@ public class Policy extends Folderable implements AnnotableEntity {
                                         policyType.getType(),
                                         key,
                                         String.join(", ", value.stream().map(Policy::getPath).collect(toList())
-                                )
-                        ));
+                                        )
+                                ));
                     }
                 });
         if (!errors.isEmpty()) {

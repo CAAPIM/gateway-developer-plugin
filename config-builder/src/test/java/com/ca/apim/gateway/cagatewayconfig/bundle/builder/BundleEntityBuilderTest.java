@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -134,7 +135,7 @@ class BundleEntityBuilderTest {
             assertEquals(EntityTypes.FOLDER_TYPE, getSingleChildElementTextContent(item1, TYPE));
             assertNotNull(getSingleChildElement(item1, RESOURCE));
             final Element item2 = itemList.get(1);
-            assertEquals(TEST_ENCASS_POLICY, getSingleChildElementTextContent(item2, NAME));
+            assertEquals("my-bundle-encass-TestEncass-" +TEST_ENCASS_POLICY + "-1.0", getSingleChildElementTextContent(item2, NAME));
             assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item2, TYPE));
             assertNotNull(getSingleChildElement(item2, RESOURCE));
             final Element item3 = itemList.get(2);
