@@ -40,7 +40,7 @@ public class JsonTools {
     public static final String YAML = "yaml";
     public static final String JSON_EXTENSION = "json";
     public static final String YML_EXTENSION = "yml";
-    private static final String YAML_EXTENSION = "yaml";
+    public static final String YAML_EXTENSION = "yaml";
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
     private final FileUtils fileUtils;
     private String outputType;

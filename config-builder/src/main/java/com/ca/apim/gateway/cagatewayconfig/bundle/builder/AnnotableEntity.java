@@ -10,7 +10,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstant
 public interface AnnotableEntity {
 
     Annotation BUNDLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_BUNDLE);
-    Annotation REUSABLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_REUSABLE);
+    Annotation REUSABLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_REUSABLE_ENTITY);
     Annotation REDEPLOYABLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_REDEPLOYABLE);
     Annotation EXCLUDE_ANNOTATION = new Annotation(ANNOTATION_TYPE_EXCLUDE);
 
