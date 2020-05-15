@@ -275,6 +275,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (referenceEncass.get() == null) {
             Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
             Encass encass = null;
+            //check the dependency in the metadata file
             if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
                 for (BundleDefinedEntities bundleMetadata : bundleMetadataSet) {
                     Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleMetadata.getDefinedEntities();
@@ -291,14 +292,15 @@ public class PolicyEntityBuilder implements EntityBuilder {
                         throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
                     }
                 }
-            } else {
-                bundle.getDependencies().forEach(b -> {
-                    Encass encassDependency = b.getEncasses().get(name);
-                    if (encassDependency != null && !referenceEncass.compareAndSet(null, encassDependency)) {
-                        throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
-                    }
-                });
             }
+
+            //check the dependency in the given dependent bundle
+            bundle.getDependencies().forEach(b -> {
+                Encass encassDependency = b.getEncasses().get(name);
+                if (encassDependency != null && !referenceEncass.compareAndSet(null, encassDependency)) {
+                    throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
+                }
+            });
         }
         return referenceEncass.get();
     }
@@ -398,6 +400,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
             policy.getDependencies().add(includedPolicy.get());
         } else {
             Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
+
+            //check policy dependency in dependent metadata file
             if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
                 Policy policyFromMetadata = null;
                 for (BundleDefinedEntities bundleMetadata : bundleMetadataSet) {
@@ -419,14 +423,15 @@ public class PolicyEntityBuilder implements EntityBuilder {
                         }
                     }
                 }
-            } else {
-                bundle.getDependencies().forEach(b -> {
-                    Policy policyFromDependencies = b.getPolicies().get(policyPath);
-                    if (policyFromDependencies != null && !includedPolicy.compareAndSet(null, policyFromDependencies)) {
-                        throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
-                    }
-                });
             }
+
+            //check policy dependency in bundle dependencies
+            bundle.getDependencies().forEach(b -> {
+                Policy policyFromDependencies = b.getPolicies().get(policyPath);
+                if (policyFromDependencies != null && !includedPolicy.compareAndSet(null, policyFromDependencies)) {
+                    throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
+                }
+            });
 
         }
         if (includedPolicy.get() == null) {
