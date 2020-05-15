@@ -376,7 +376,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String policyNameWithPath = policy.getPath();
         AnnotatedEntity annotatedPolicyEntity = null;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
-        final boolean isRedeployableBundle = annotatedEntity != null && annotatedEntity.isBundle() && annotatedEntity.isRedeployable();
+        final boolean isRedeployableBundle = annotatedEntity != null && annotatedEntity.isRedeployable();
         if (annotatedBundle != null) {
             annotatedPolicyEntity = policy.getAnnotatedEntity();
             if (annotatedPolicyEntity == null || !annotatedPolicyEntity.isReusable()) {

@@ -91,7 +91,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         String guid = encass.getGuid();
         String id = encass.getId();
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
-        final boolean isRedeployableBundle = annotatedEntity != null && annotatedEntity.isBundle() && annotatedEntity.isRedeployable();
+        final boolean isRedeployableBundle = annotatedEntity != null && annotatedEntity.isRedeployable();
         if (!encass.isReusable() && !isAnnotatedEntity(encass, annotatedEntity)) {
             if(annotatedBundle != null){
                 encassName = annotatedBundle.getUniquePrefix() + name + annotatedBundle.getUniqueSuffix();
