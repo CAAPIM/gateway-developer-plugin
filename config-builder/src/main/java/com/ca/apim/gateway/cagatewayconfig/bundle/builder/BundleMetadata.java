@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -19,7 +20,6 @@ public class BundleMetadata implements Metadata {
     private String type;
     private String name;
     private String id;
-    private String guid;
     private String version;
     private String groupName;
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -33,13 +33,12 @@ public class BundleMetadata implements Metadata {
     private boolean environmentIncluded;
     private Collection<Metadata> environmentEntities;
 
-    private BundleMetadata(String type, String id, String name, String groupName, String version, String guid) {
+    private BundleMetadata(String type, String id, String name, String groupName, String version) {
         this.id = id;
         this.type = type;
         this.name = name;
         this.groupName = groupName;
         this.version = version;
-        this.guid = guid;
     }
 
     @Override
@@ -56,8 +55,9 @@ public class BundleMetadata implements Metadata {
         return id;
     }
 
+    @JsonIgnore
     public String getGuid(){
-        return guid;
+        return null;
     }
     public String getVersion() {
         return version;
@@ -101,7 +101,6 @@ public class BundleMetadata implements Metadata {
 
     public static class Builder {
         private final String id;
-        private final String guid;
         private final String name;
         private final String type;
         private String groupName;
@@ -114,13 +113,12 @@ public class BundleMetadata implements Metadata {
         private Collection<Metadata> environmentEntities = new LinkedList<>();
         private Collection<Metadata> dependencies = new LinkedList<>();
 
-        public Builder(String type, String id, String name, String groupName, String version, String guid) {
+        public Builder(String type, String id, String name, String groupName, String version) {
             this.id = id;
             this.type = type;
             this.name = name;
             this.groupName = groupName;
             this.version = version;
-            this.guid = guid;
         }
 
         public Builder definedEntities(final Collection<Metadata> entities) {
@@ -152,7 +150,7 @@ public class BundleMetadata implements Metadata {
         }
 
         public BundleMetadata build() {
-            BundleMetadata bundleMetadata = new BundleMetadata(type, id, name, groupName, version, guid);
+            BundleMetadata bundleMetadata = new BundleMetadata(type, id, name, groupName, version);
             bundleMetadata.description = description;
             bundleMetadata.definedEntities = definedEntities;
             bundleMetadata.reusable = reusable;

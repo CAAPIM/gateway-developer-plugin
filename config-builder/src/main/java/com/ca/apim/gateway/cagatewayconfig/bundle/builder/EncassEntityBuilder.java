@@ -87,12 +87,12 @@ public class EncassEntityBuilder implements EntityBuilder {
         Policy policy = bundle.getPolicies().get(policyWithPath);
         String policyId = null;
         if (policy == null) {
-            Set<BundleMetadata> bundleMetadataSet = bundle.getMetadataDependencyBundles();
+            Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
             if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
-                for (BundleMetadata bundleMetadata : bundleMetadataSet) {
-                    Collection<Metadata> metadataCollection = bundleMetadata.getDefinedEntities();
+                for (BundleDefinedEntities bundleMetadata : bundleMetadataSet) {
+                    Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleMetadata.getDefinedEntities();
                     if (metadataCollection != null) {
-                        Optional<Metadata> optionalMetadata = metadataCollection.stream().
+                        Optional<BundleDefinedEntities.DefaultMetadata> optionalMetadata = metadataCollection.stream().
                                 filter(metadata -> metadata.getName().equals(PathUtils.extractName(policyWithPath))
                                         && metadata.getType().equals(EntityTypes.POLICY_TYPE)).findFirst();
                         if (optionalMetadata.isPresent()) {
@@ -124,7 +124,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         if (annotatedEntity != null) {
             annotatedEncassEntity = encass.getAnnotatedEntity();
             if (encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity)) {
-                //use the id and guid defined at reusable annotation or bundle annotatino (if its annotated bundle)
+                //use the id and guid defined at reusable annotation or bundle annotation (if its annotated bundle)
                 if (annotatedEncassEntity.getGuid() != null) {
                     guid = annotatedEncassEntity.getGuid();
                 }
@@ -152,7 +152,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         final Map<String, Object> properties = Optional.ofNullable(encass.getProperties()).orElse(new HashMap<>());
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
-        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, encassName, id, encassAssertionElement);
+        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, encassName, id, encassAssertionElement, guid);
 
         if (encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity)) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

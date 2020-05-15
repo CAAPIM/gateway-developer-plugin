@@ -273,13 +273,13 @@ public class PolicyEntityBuilder implements EntityBuilder {
         LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", name);
         final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(name));
         if (referenceEncass.get() == null) {
-            Set<BundleMetadata> bundleMetadataSet = bundle.getMetadataDependencyBundles();
+            Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
             Encass encass = null;
             if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
-                for (BundleMetadata bundleMetadata : bundleMetadataSet) {
-                    Collection<Metadata> metadataCollection = bundleMetadata.getDefinedEntities();
+                for (BundleDefinedEntities bundleMetadata : bundleMetadataSet) {
+                    Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleMetadata.getDefinedEntities();
                     if (metadataCollection != null) {
-                        Optional<Metadata> optionalMetadata = metadataCollection.stream().
+                        Optional<BundleDefinedEntities.DefaultMetadata> optionalMetadata = metadataCollection.stream().
                                 filter(metadata -> metadata.getName().equals(name)
                                         && metadata.getType().equals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE)).findFirst();
                         if (optionalMetadata.isPresent()) {
@@ -397,24 +397,26 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (includedPolicy.get() != null) {
             policy.getDependencies().add(includedPolicy.get());
         } else {
-            Set<BundleMetadata> bundleMetadataSet = bundle.getMetadataDependencyBundles();
+            Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
             if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
                 Policy policyFromMetadata = null;
-                for (BundleMetadata bundleMetadata : bundleMetadataSet) {
-                    Collection<Metadata> metadataCollection = bundleMetadata.getDefinedEntities();
-                    if (metadataCollection != null) {
-                        Optional<Metadata> optionalMetadata = metadataCollection.stream().
-                                filter(metadata -> metadata.getName().equals(PathUtils.extractName(policyPath))
-                                        && metadata.getType().equals(EntityTypes.POLICY_TYPE)).findFirst();
-                        if (optionalMetadata.isPresent()) {
-                            Metadata metadata = optionalMetadata.get();
-                            policyFromMetadata = getPolicyFromMetadata(metadata);
-                            policyFromMetadata.setPath(policyPath);
+                for (BundleDefinedEntities bundleMetadata : bundleMetadataSet) {
+                    if(bundleMetadata != null){
+                        Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleMetadata.getDefinedEntities();
+                        if (metadataCollection != null) {
+                            Optional<BundleDefinedEntities.DefaultMetadata> optionalMetadata = metadataCollection.stream().
+                                    filter(metadata -> metadata.getName().equals(PathUtils.extractName(policyPath))
+                                            && metadata.getType().equals(EntityTypes.POLICY_TYPE)).findFirst();
+                            if (optionalMetadata.isPresent()) {
+                                Metadata metadata = optionalMetadata.get();
+                                policyFromMetadata = getPolicyFromMetadata(metadata);
+                                policyFromMetadata.setPath(policyPath);
+                            }
                         }
-                    }
 
-                    if (policyFromMetadata != null && !includedPolicy.compareAndSet(null, policyFromMetadata)) {
-                        throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
+                        if (policyFromMetadata != null && !includedPolicy.compareAndSet(null, policyFromMetadata)) {
+                            throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
+                        }
                     }
                 }
             } else {

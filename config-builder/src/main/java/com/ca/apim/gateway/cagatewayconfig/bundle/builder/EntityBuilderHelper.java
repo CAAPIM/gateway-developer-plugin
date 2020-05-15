@@ -34,6 +34,13 @@ class EntityBuilderHelper {
         return entity;
     }
 
+    static Entity getEntityWithNameMapping(String type, String name, String id, Element element, String guid) {
+        Entity entity = new Entity(type, name, id, element, guid);
+        entity.setMappingProperty(MAP_BY, MappingProperties.NAME);
+        entity.setMappingProperty(MAP_TO, name);
+        return entity;
+    }
+
     static Entity getEntityWithPathMapping(String type, String path, String id, Element element) {
         Entity entity = new Entity(type, path, id, element);
         entity.setMappingProperty(MAP_BY, MappingProperties.PATH);

@@ -49,6 +49,10 @@ public class Entity {
         return xml;
     }
 
+    public String getGuid() {
+        return guid;
+    }
+
     public String getName() {
         return name;
     }

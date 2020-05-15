@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.file;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
@@ -21,7 +22,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.closeQuiet
 
 public class JsonFileUtils {
 
-    public static final String METADATA_FILE_NAME_SUFFIX = JsonTools.INSTANCE.getFileExtension();
+    public static final String METADATA_FILE_NAME_SUFFIX = ".metadata" + JsonTools.INSTANCE.getFileExtension();
     private static final String CONFIG_DIR = "config";
     private static final String POLICIES_CONFIG_FILE = "policies" + JsonTools.INSTANCE.getFileExtension();
 
@@ -67,9 +68,9 @@ public class JsonFileUtils {
         createFile(objectToWrite, new File(outputDir, fileName + METADATA_FILE_NAME_SUFFIX).toPath());
     }
 
-    public BundleMetadata readBundleMetadataFile(final File metaDataFile){
+    public BundleDefinedEntities readBundleMetadataFile(final File metaDataFile){
         return metaDataFile.exists() ? jsonTools.readDocumentFile(metaDataFile,
-                jsonTools.getObjectMapper().getTypeFactory().constructType(BundleMetadata.class)) :
+                jsonTools.getObjectMapper().getTypeFactory().constructType(BundleDefinedEntities.class)) :
                 null;
     }
 }

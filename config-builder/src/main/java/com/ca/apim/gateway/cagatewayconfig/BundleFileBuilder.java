@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
@@ -28,10 +29,12 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
 
@@ -78,13 +81,30 @@ public class BundleFileBuilder {
             FolderLoaderUtils.createFolders(bundle, rootDir, bundle.getServices());
 
             //Load metadata Dependencies
-            final Set<BundleMetadata> metadataDependencyBundles = new HashSet<>();
+            final Set<BundleDefinedEntities> metadataDependencyBundles = new HashSet<>();
             final Set<Bundle> dependencyBundles = new HashSet<>();
             for (File dependencyFile : dependencies) {
-                if (dependencyFile.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)) {
-                    metadataDependencyBundles.add(cache.getBundleMetadataFromFile(dependencyFile));
-                } else {
-                    dependencyBundles.add(cache.getBundleFromFile(dependencyFile));
+                if (dependencyFile.exists()) {
+                    List<File> metadataFiles = new ArrayList<>();
+                    if (dependencyFile.isDirectory()) {
+                        File[] files = dependencyFile.listFiles();
+                        metadataFiles = Stream.of(files).filter(file -> file.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)).collect(Collectors.toList());
+                    }
+                    if (!metadataFiles.isEmpty()) {
+                        metadataFiles.forEach(file -> {
+                            BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(file);
+                            if (bundleDefinedEntities != null) {
+                                metadataDependencyBundles.add(bundleDefinedEntities);
+                            }
+                        });
+                    } else if (dependencyFile.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)) {
+                        BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(dependencyFile);
+                        if (bundleDefinedEntities != null) {
+                            metadataDependencyBundles.add(bundleDefinedEntities);
+                        }
+                    } else if(dependencyFile.getName().endsWith(BUNDLE_EXTENSION)){
+                        dependencyBundles.add(cache.getBundleFromFile(dependencyFile));
+                    }
                 }
             }
             bundle.setDependencies(dependencyBundles);

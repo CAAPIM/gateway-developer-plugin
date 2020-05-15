@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
@@ -30,7 +31,7 @@ public class Bundle {
     private FolderTree folderTree;
     private Map<Dependency, List<Dependency>> dependencyMap;
     private BundleLoadingOperation loadingMode;
-    private Set<BundleMetadata> metadataDependencyBundles;
+    private Set<BundleDefinedEntities> metadataDependencyBundles;
 
     @SuppressWarnings("unchecked")
     public <E extends GatewayEntity> Map<String, E> getEntities(Class<E> entityType) {
@@ -247,11 +248,11 @@ public class Bundle {
         this.loadingMode = loadingMode;
     }
 
-    public Set<BundleMetadata> getMetadataDependencyBundles() {
+    public Set<BundleDefinedEntities> getMetadataDependencyBundles() {
         return metadataDependencyBundles;
     }
 
-    public void setMetadataDependencyBundles(Set<BundleMetadata> metadataDependencyBundles) {
+    public void setMetadataDependencyBundles(Set<BundleDefinedEntities> metadataDependencyBundles) {
         this.metadataDependencyBundles = metadataDependencyBundles;
     }
 }

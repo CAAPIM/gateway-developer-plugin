@@ -33,9 +33,8 @@ public class BundleMetadataBuilder {
         final Encass encass = (Encass) annotatedEntity.getEntity();
         final String bundleName = annotatedBundle.getBundleName();
         final String name = bundleName.substring(0, bundleName.indexOf(projectVersion) - 1);
-
         BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), encass.getGuid(), name,
-                projectGroupName, projectVersion, encass.getGuid());
+                projectGroupName, projectVersion);
         builder.description(annotatedEntity.getDescription());
         builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
         builder.tags(annotatedEntity.getTags());
@@ -49,6 +48,6 @@ public class BundleMetadataBuilder {
 
     private Collection<Metadata> getEnvironmentDependenciesMetadata(final List<Entity> dependentEntities) {
         return dependentEntities.stream().filter(e -> !NON_ENV_ENTITY_TYPES.contains(e.getType()))
-                        .map(Entity::getMetadata).collect(Collectors.toList());
+                .map(Entity::getMetadata).collect(Collectors.toList());
     }
 }

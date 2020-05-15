@@ -54,9 +54,7 @@ public interface AnnotableEntity {
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
                     annotatedEntity.setBundleName(annotation.getName());
                     annotatedEntity.setDescription(annotation.getDescription());
-                    annotatedEntity.setId(annotation.getId());
-                    annotatedEntity.setGuid(annotation.getGuid());
-                } else if(ANNOTATION_TYPE_REUSABLE.equalsIgnoreCase(annotation.getType())) {
+                } else if(ANNOTATION_TYPE_BUNDLE_ENTITY.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setId(annotation.getId());
                     annotatedEntity.setGuid(annotation.getGuid());
                 }

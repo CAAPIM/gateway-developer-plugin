@@ -314,16 +314,44 @@ class PolicyEntityBuilderTest {
         encass.setId("id1");
         encass.setPolicy(policyPath);
         encass.setName(TEST_ENCASS);
-        /*BundleMetadata.Builder bundleMetadataBuilder = new BundleMetadata.Builder(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, encass.getId(), encass.getName(), "group", "1.0.0", encass.getGuid());
-        Set<Metadata> metadataSet = new HashSet<>();
-        metadataSet.add(encass.getMetadata());
-        bundleMetadataBuilder.definedEntities(metadataSet);
-        Set<BundleMetadata> bundleMetadataSet = new HashSet<>();
-        bundleMetadataSet.add(bundleMetadataBuilder.build());
-        bundle.setMetadataDependencyBundles(bundleMetadataSet);*/
+
         Bundle dependencyBundle = new Bundle();
         dependencyBundle.getEncasses().put(TEST_ENCASS, encass);
         bundle.getDependencies().add(dependencyBundle);
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
+        document.appendChild(encapsulatedAssertionElement);
+
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
+
+        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
+        assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
+
+        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
+        assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
+    }
+
+    @Test
+    void testPrepareEncapsulatedAssertionEncassInDependencyBundleMetadata() throws DocumentParseException {
+        String policyPath = "my/policy/path.xml";
+        Encass encass = new Encass();
+        encass.setGuid("123");
+        encass.setId("id1");
+        encass.setPolicy(policyPath);
+        encass.setName(TEST_ENCASS);
+        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
+        BundleDefinedEntities.DefaultMetadata metadata =  new BundleDefinedEntities.DefaultMetadata();
+        metadata.setName(encass.getName());
+        metadata.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        metadata.setId(encass.getId());
+        metadata.setGuid(encass.getGuid());
+        metadataSet.add(metadata);
+        Set<BundleDefinedEntities> definedEntities = new HashSet<>();
+        BundleDefinedEntities bundleDefinedEntities = new BundleDefinedEntities();
+        bundleDefinedEntities.setDefinedEntities(metadataSet);
+        definedEntities.add(bundleDefinedEntities);
+        bundle.setMetadataDependencyBundles(definedEntities);
+
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
         document.appendChild(encapsulatedAssertionElement);
 
@@ -345,14 +373,45 @@ class PolicyEntityBuilderTest {
         encass.setId("id1");
         encass.setPolicy(policyPath);
         encass.setName(TEST_ENCASS);
-        BundleMetadata.Builder bundleMetadataBuilder = new BundleMetadata.Builder(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, encass.getId(), encass.getName(), "group", "1.0.0", encass.getGuid());
-        Set<Metadata> metadataSet = new HashSet<>();
-        metadataSet.add(encass.getMetadata());
-        bundleMetadataBuilder.definedEntities(metadataSet);
-        Set<BundleMetadata> bundleMetadataSet = new HashSet<>();
-        bundleMetadataSet.add(bundleMetadataBuilder.build());
-        bundleMetadataSet.add(bundleMetadataBuilder.build());
-        bundle.setMetadataDependencyBundles(bundleMetadataSet);
+        Bundle dependencyBundle = new Bundle();
+        dependencyBundle.getEncasses().put(TEST_ENCASS, encass);
+        bundle.getDependencies().add(dependencyBundle);
+
+        Bundle dependencyBundle2 = new Bundle();
+        dependencyBundle2.getEncasses().put(TEST_ENCASS, encass);
+        bundle.getDependencies().add(dependencyBundle2);
+
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
+        document.appendChild(encapsulatedAssertionElement);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null));
+        assertTrue(exception.getMessage().contains(TEST_ENCASS));
+    }
+
+    @Test
+    void testPrepareEncapsulatedAssertionEncassInMultipleDependencyMetadata() {
+        String policyPath = "my/policy/path.xml";
+        Encass encass = new Encass();
+        encass.setGuid("123");
+        encass.setId("id1");
+        encass.setPolicy(policyPath);
+        encass.setName(TEST_ENCASS);
+        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
+        BundleDefinedEntities.DefaultMetadata metadata =  new BundleDefinedEntities.DefaultMetadata();
+        metadata.setName(encass.getName());
+        metadata.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        metadata.setId(encass.getId());
+        metadata.setGuid(encass.getGuid());
+        metadataSet.add(metadata);
+        Set<BundleDefinedEntities> definedEntities = new HashSet<>();
+        BundleDefinedEntities bundleDefinedEntities = new BundleDefinedEntities();
+        bundleDefinedEntities.setDefinedEntities(metadataSet);
+
+        BundleDefinedEntities bundleDefinedEntities1 = new BundleDefinedEntities();
+        bundleDefinedEntities1.setDefinedEntities(metadataSet);
+        definedEntities.add(bundleDefinedEntities);
+        definedEntities.add(bundleDefinedEntities1);
+        bundle.setMetadataDependencyBundles(definedEntities);
 
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
         document.appendChild(encapsulatedAssertionElement);
@@ -495,14 +554,42 @@ class PolicyEntityBuilderTest {
         policy.setGuid("123-abc-567");
         policy.setId("id1");
         policy.setName("path.xml");
+        Bundle dependentBundle = new Bundle();
+        dependentBundle.getPolicies().put(policyPath, policy);
+        bundle.getDependencies().add(dependentBundle);
 
-        BundleMetadata.Builder bundleMetadataBuilder = new BundleMetadata.Builder(EntityTypes.POLICY_TYPE, policy.getId(), policy.getName(), "group", "1.0.0", policy.getGuid());
-        Set<Metadata> metadataSet = new HashSet<>();
-        metadataSet.add(policy.getMetadata());
-        bundleMetadataBuilder.definedEntities(metadataSet);
-        Set<BundleMetadata> bundleMetadataSet = new HashSet<>();
-        bundleMetadataSet.add(bundleMetadataBuilder.build());
-        bundle.setMetadataDependencyBundles(bundleMetadataSet);
+        bundle.getDependencies().add(new Bundle());
+
+        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
+        document.appendChild(includeAssertionElement);
+
+        PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement);
+
+        Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
+        assertEquals(policy.getGuid(), policyGuidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
+        assertFalse(policyGuidElement.hasAttribute(PolicyEntityBuilder.POLICY_PATH));
+    }
+
+    @Test
+    void testPrepareIncludeAssertionPolicyInDependentBundleMetadata() throws DocumentParseException {
+        String policyPath = "my/policy/path.xml";
+        Policy policy = new Policy();
+        policy.setGuid("123-abc-567");
+        policy.setId("id1");
+        policy.setName("path.xml");
+
+        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
+        BundleDefinedEntities.DefaultMetadata metadata =  new BundleDefinedEntities.DefaultMetadata();
+        metadata.setName(policy.getName());
+        metadata.setType(EntityTypes.POLICY_TYPE);
+        metadata.setId(policy.getId());
+        metadata.setGuid(policy.getGuid());
+        metadataSet.add(metadata);
+        Set<BundleDefinedEntities> definedEntities = new HashSet<>();
+        BundleDefinedEntities bundleDefinedEntities = new BundleDefinedEntities();
+        bundleDefinedEntities.setDefinedEntities(metadataSet);
+        definedEntities.add(bundleDefinedEntities);
+        bundle.setMetadataDependencyBundles(definedEntities);
 
         bundle.getDependencies().add(new Bundle());
 

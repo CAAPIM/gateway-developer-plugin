@@ -144,8 +144,8 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         project.afterEvaluate(p -> project.getTasks().getByPath("build").dependsOn(buildDeploymentBundleTask, packageGW7Task));
 
         // add the deployment bundle to the default artifacts
+        project.artifacts(artifactHandler -> addBundleArtifact(artifactHandler, new DefaultProvider<>(() -> pluginConfig.getBuiltBundleDir().get()), buildDeploymentBundleTask, project::getName, "deployment"));
         project.artifacts(artifactHandler -> addBundleArtifact(artifactHandler, packageGW7Task.getBundle(), buildDeploymentBundleTask, project::getName, "deployment"));
-
         // add the environment bundle to the artifacts only if the environment bundle task was triggered
         String artifactName = getBuiltArtifactName(project, "-environment", BUNDLE_FILE_EXTENSION);
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_ENVIRONMENT_BUNDLE)) {
@@ -176,7 +176,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 
     private static void addBundleArtifact(
             ArtifactHandler artifactHandler,
-            Provider<RegularFile> bundle,
+            Provider<?> bundle,
             Task generatedTask,
             Supplier<String> nameSupplier,
             String classifier) {
