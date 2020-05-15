@@ -22,10 +22,6 @@ public class Entity {
     private String mappingAction;
     private Map<String, Object> mappingProperties = new HashMap<>();
 
-    public Entity(String type, String entityBundleName, String id, Element xml) {
-        this(type, entityBundleName, entityBundleName, id, xml);
-    }
-
     public Entity(String type, String originalName, String entityBundleName, String id, Element xml) {
         this.type = type;
         this.originalName = originalName;
