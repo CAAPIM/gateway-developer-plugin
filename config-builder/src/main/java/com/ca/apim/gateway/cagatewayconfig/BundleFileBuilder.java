@@ -86,6 +86,7 @@ public class BundleFileBuilder {
             final Set<Bundle> dependencyBundles = new HashSet<>();
             for (File dependencyFile : dependencies) {
                 List<File> metadataFiles = new ArrayList<>();
+                //if the given file does not exists (in case of project dependency the dependency file is old artifact) read metadata file from parent folder
                 if (!dependencyFile.exists()) {
                     File bundleDirectory = dependencyFile.getParentFile();
                     if (bundleDirectory != null && bundleDirectory.isDirectory()) {
