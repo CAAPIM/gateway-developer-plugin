@@ -78,7 +78,7 @@ public class BundleEntityBuilder {
                                 annotatedBundle.setProjectVersion(projectVersion);
                                 Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
                                 bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-                                loadPolicyDependencies(annotatedEntity.getPolicyName(), annotatedBundle, bundle, false);
+                                loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, false);
                                 entityBuilders.forEach(builder -> entities.addAll(builder.build(annotatedBundle, bundleType, document)));
 
                                 // Create deployment bundle
@@ -121,7 +121,7 @@ public class BundleEntityBuilder {
             AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
             Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
             bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-            loadPolicyDependencies(annotatedEntity.getPolicyName(), annotatedBundle, bundle, true);
+            loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, true);
 
             Iterator<Entity> it = deleteBundleEntities.iterator();
             while (it.hasNext()) {
@@ -161,8 +161,8 @@ public class BundleEntityBuilder {
      * @param rawBundle Bundle containing all the entities of the gateway.
      * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
      */
-    private void loadPolicyDependencies(String policyNameWithPath, AnnotatedBundle annotatedBundle, Bundle rawBundle,
-                                        boolean excludeReusable) {
+    private void loadPolicyDependenciesByPolicyName(String policyNameWithPath, AnnotatedBundle annotatedBundle,
+                                                    Bundle rawBundle, boolean excludeReusable) {
         final Map<String, Policy> policyMap = rawBundle.getPolicies();
         final Policy policyEntity = policyMap.get(policyNameWithPath);
         if (policyEntity != null) {
@@ -179,7 +179,7 @@ public class BundleEntityBuilder {
      * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
      */
     private void loadPolicyDependencies(Policy policy, AnnotatedBundle annotatedBundle, Bundle rawBundle,
-                                        boolean excludeReusable) {
+                                                    boolean excludeReusable) {
         if (excludeGatewayEntity(Policy.class, policy, annotatedBundle, excludeReusable)) {
             return;
         }
@@ -220,7 +220,7 @@ public class BundleEntityBuilder {
                                         boolean excludeReusable) {
         if (!excludeGatewayEntity(Encass.class, encass, annotatedBundle, excludeReusable)) {
             annotatedBundle.getEncasses().put(encass.getName(), encass);
-            loadPolicyDependencies(encass.getPolicy(), annotatedBundle, rawBundle, excludeReusable);
+            loadPolicyDependenciesByPolicyName(encass.getPolicy(), annotatedBundle, rawBundle, excludeReusable);
         }
     }
 
