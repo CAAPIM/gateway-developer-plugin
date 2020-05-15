@@ -7,16 +7,15 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
+import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -29,6 +28,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BU
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
+import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YML_EXTENSION;
 import static org.apache.commons.collections4.ListUtils.union;
 
 /**
@@ -36,24 +36,21 @@ import static org.apache.commons.collections4.ListUtils.union;
  */
 public class BuildFullBundleTask extends DefaultTask {
 
-    private final Property<Map> environmentConfig;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
     private final ConfigurableFileCollection dependencyBundles;
-    private final RegularFileProperty outputBundle;
+    private final DirectoryProperty into;
     private final Property<Boolean> detemplatizeDeploymentBundles;
+    private final DirectoryProperty configFolder;
+    private final Property<String> configName;
 
     @Inject
     public BuildFullBundleTask() {
-        environmentConfig = getProject().getObjects().property(Map.class);
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
         dependencyBundles = getProject().files();
-        outputBundle = newOutputFile();
+        into = newOutputDirectory();
         detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
-    }
-
-    @Input
-    Property<Map> getEnvironmentConfig() {
-        return environmentConfig;
+        configFolder = newInputDirectory();
+        configName = getProject().getObjects().property(String.class);
     }
 
     @InputFiles
@@ -61,9 +58,9 @@ public class BuildFullBundleTask extends DefaultTask {
         return dependencyBundles;
     }
 
-    @OutputFile
-    RegularFileProperty getOutputBundle() {
-        return outputBundle;
+    @OutputDirectory
+    DirectoryProperty getInto() {
+        return into;
     }
 
     @Input
@@ -71,23 +68,42 @@ public class BuildFullBundleTask extends DefaultTask {
         return detemplatizeDeploymentBundles;
     }
 
+    @InputDirectory
+    DirectoryProperty getConfigFolder() {
+        return configFolder;
+    }
+
+    @Input
+    Property<String> getConfigName() {
+        return configName;
+    }
+
     @TaskAction
     public void perform() {
-        final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrNull());
-        final String bundleDirectory = outputBundle.getAsFile().get().getParentFile().getPath();
-        final List<File> bundleFiles = union(
-                collectBundleFiles(bundleDirectory),
-                filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
-        );
-
         final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
-        fullBundleCreator.createFullBundle(
-                environmentValues,
-                bundleFiles,
-                bundleDirectory,
-                outputBundle.getAsFile().get().getName(),
-                detemplatizeDeploymentBundles.get()
-        );
+        final String bundleDirectory = into.getAsFile().get().getPath();
+        final List<File> metaDataFiles = collectFiles(bundleDirectory, YML_EXTENSION);
+        if (metaDataFiles.isEmpty()) {
+            throw new MissingEnvironmentException("Metadata file does not exist.");
+        }
+        metaDataFiles.stream().forEach(metaDataFile-> {
+            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
+            if (null != bundleEnvironmentValues) {
+                final String bundleFileName = bundleEnvironmentValues.getLeft() + "." + configName.get() + ".full.bundle";
+                final List<File> bundleFiles = union(
+                        collectFiles(bundleDirectory, bundleEnvironmentValues.getLeft() + BUNDLE_EXTENSION),
+                        filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
+                );
+
+                fullBundleCreator.createFullBundle(
+                        bundleEnvironmentValues.getRight(),
+                        bundleFiles,
+                        bundleDirectory,
+                        bundleFileName,
+                        detemplatizeDeploymentBundles.get()
+                );
+            }
+        });
     }
 
     private List<File> collectBundleFiles(final String bundleDirectory) {

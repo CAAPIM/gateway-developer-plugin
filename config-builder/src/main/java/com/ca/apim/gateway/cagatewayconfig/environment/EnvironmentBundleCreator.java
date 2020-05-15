@@ -29,6 +29,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BU
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static java.util.stream.Collectors.toList;
+import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 
 @Singleton
 public class EnvironmentBundleCreator {
@@ -53,13 +54,15 @@ public class EnvironmentBundleCreator {
                                           String templatizedBundleFolderPath,
                                           String environmentConfigurationFolderPath,
                                           EnvironmentBundleCreationMode mode,
-                                          String bundleFileName) {
+                                          String bundleFileName,
+                                          String policyBundleName) {
         Bundle environmentBundle = new Bundle();
         environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, mode);
 
         setTemplatizedBundlesFolderPath(templatizedBundleFolderPath);
         processDeploymentBundles(
                 environmentBundle,
+                collectFiles(templatizedBundleFolderPath, mode != PLUGIN ? BUNDLE_EXTENSION : policyBundleName + BUNDLE_EXTENSION).stream().map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName()))).collect(toList()),
                 collectTemplatizedBundleFiles(templatizedBundleFolderPath, bundleFolderPath),
                 mode,
                 true);
@@ -68,7 +71,6 @@ public class EnvironmentBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        //ToDo : Need to handle bundle name, Project GroupName and version properly
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
                 EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null);
         for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
