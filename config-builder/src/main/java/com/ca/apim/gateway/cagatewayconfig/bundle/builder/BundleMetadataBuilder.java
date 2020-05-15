@@ -34,15 +34,13 @@ public class BundleMetadataBuilder {
         final Encass encass = (Encass) annotatedEntity.getEntity();
         final String bundleName = annotatedBundle.getBundleName();
         final String name = bundleName.substring(0, bundleName.indexOf(projectVersion) - 1);
-        final boolean isPolicyOrEncassReusable = annotatedBundle.getEntities(Policy.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable()) ||
-                annotatedBundle.getEntities(Encass.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable());
 
         BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), encass.getGuid(), name,
                 projectGroupName, projectVersion);
         builder.description(annotatedEntity.getDescription());
         builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
         builder.tags(annotatedEntity.getTags());
-        builder.reusableAndRedeployable(true, !isPolicyOrEncassReusable || annotatedEntity.isRedeployable());
+        builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
 
         final List<Metadata> desiredEntities = new ArrayList<>();
         desiredEntities.add(annotatedEntity.getEntity().getMetadata());
@@ -53,5 +51,11 @@ public class BundleMetadataBuilder {
     private Collection<Metadata> getEnvironmentDependenciesMetadata(final List<Entity> dependentEntities) {
         return dependentEntities.stream().filter(e -> !NON_ENV_ENTITY_TYPES.contains(e.getType()))
                         .map(Entity::getMetadata).collect(Collectors.toList());
+    }
+
+    private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
+        return annotatedBundle.getEntities(Policy.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable()) ||
+                annotatedBundle.getEntities(Encass.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable());
+
     }
 }
