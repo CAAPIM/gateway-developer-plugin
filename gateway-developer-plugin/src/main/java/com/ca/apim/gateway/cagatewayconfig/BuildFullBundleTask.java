@@ -10,7 +10,6 @@ import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
@@ -21,11 +20,9 @@ import javax.inject.Inject;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YML_EXTENSION;
@@ -83,7 +80,7 @@ public class BuildFullBundleTask extends DefaultTask {
         final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
         final String bundleDirectory = into.getAsFile().get().getPath();
         final List<File> metaDataFiles = collectFiles(bundleDirectory, YML_EXTENSION);
-        if (metaDataFiles.isEmpty()) {
+        if(metaDataFiles.isEmpty()) {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
         metaDataFiles.stream().forEach(metaDataFile-> {
@@ -104,10 +101,5 @@ public class BuildFullBundleTask extends DefaultTask {
                 );
             }
         });
-    }
-
-    private List<File> collectBundleFiles(final String bundleDirectory) {
-        return collectFiles(bundleDirectory, BUNDLE_EXTENSION).stream().filter(file -> !StringUtils.endsWithIgnoreCase(
-                file.getName(), DELETE_BUNDLE_EXTENSION)).collect(Collectors.toList());
     }
 }
