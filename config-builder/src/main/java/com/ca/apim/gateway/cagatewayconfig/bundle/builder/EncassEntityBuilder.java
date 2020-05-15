@@ -91,6 +91,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         String guid = encass.getGuid();
         String id = encass.getId();
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+        final boolean isRedeployableBundle = annotatedEntity != null && annotatedEntity.isRedeployable();
         if (!encass.isReusable() && !isAnnotatedEntity(encass, annotatedEntity)) {
             if(annotatedBundle != null){
                 encassName = annotatedBundle.getUniquePrefix() + name + annotatedBundle.getUniqueSuffix();
@@ -114,7 +115,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, encassName, id, encassAssertionElement);
-        if (!encass.isReusable() && !isAnnotatedEntity(encass, annotatedEntity)) {
+        if ((!encass.isReusable() && !isAnnotatedEntity(encass, annotatedEntity)) || isRedeployableBundle) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

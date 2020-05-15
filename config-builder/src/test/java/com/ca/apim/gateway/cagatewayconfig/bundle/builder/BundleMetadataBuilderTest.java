@@ -84,8 +84,8 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassBundleFileNames(final TemporaryFolder temporaryFolder) {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false);
-        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
+        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false, false);
+        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestBundleLoader(bundle)));
@@ -143,8 +143,8 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassMetadata() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true);
-        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, false);
+        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Map<String, Pair<Element, BundleMetadata>> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
@@ -157,7 +157,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(TEST_ENCASS_ANNOTATION_DESC, metadata.getDescription());
         assertEquals(TEST_ENCASS_ANNOTATION_TAGS, metadata.getTags());
 
-        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass);
+        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, false, false);
     }
 
     /**
@@ -168,8 +168,8 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassMetadata_ExcludingOptionalAnnotationFields() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true);
-        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true);
+        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, true);
         encass.getAnnotations().forEach(a -> {
             a.setName(null);
             a.setDescription(null);
@@ -187,11 +187,11 @@ public class BundleMetadataBuilderTest {
         assertEquals(encass.getProperties().get("description"), metadata.getDescription());
         assertEquals(0, metadata.getTags().size());
 
-        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass);
+        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, true, true);
     }
 
     private void verifyAnnotatedEncassBundleMetadata(Map<String, Pair<Element, BundleMetadata>> bundles,
-                                                     Bundle bundle, Encass encass) throws JsonProcessingException {
+                                                     Bundle bundle, Encass encass, boolean isRedeployableBundle, boolean isBundleContainReusableEntity) throws JsonProcessingException {
         Map<String, Metadata> expectedEnvMetadata = new HashMap<>();
         for (Dependency dependency : bundle.getDependencyMap().entrySet().iterator().next().getValue()) {
             expectedEnvMetadata.put(dependency.getType(), new Metadata() {
@@ -214,6 +214,9 @@ public class BundleMetadataBuilderTest {
         assertEquals("my-bundle-group", metadata.getGroupName());
         assertEquals("encass", metadata.getType());
         assertEquals("1.0", metadata.getVersion());
+        if(isRedeployableBundle || !isBundleContainReusableEntity) {
+            assertTrue(metadata.isRedeployable());
+        }
         assertEquals(1, metadata.getDefinedEntities().size());
         Optional<Metadata> definedEntities = metadata.getDefinedEntities().stream().findFirst();
         assertTrue(definedEntities.isPresent());
@@ -231,7 +234,7 @@ public class BundleMetadataBuilderTest {
         }
     }
 
-    private Bundle createBundle(String policyXmlString, boolean includeDependencies) {
+    private Bundle createBundle(String policyXmlString, boolean includeDependencies, boolean includeReusableEntities) {
         Bundle bundle = new Bundle();
         Folder root = createRoot();
         bundle.getFolders().put(EMPTY, root);
@@ -247,6 +250,12 @@ public class BundleMetadataBuilderTest {
         policy.setGuid(TEST_GUID);
         policy.setPolicyXML(policyXmlString);
         policy.setPath(TEST_ENCASS_POLICY);
+        if (includeReusableEntities) {
+            Set<Annotation> annotations = new HashSet<>();
+            Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+            annotations.add(annotation);
+            policy.setAnnotations(annotations);
+        }
         bundle.getPolicies().put(TEST_ENCASS_POLICY, policy);
         Dependency policyDependency = new Dependency(TEST_POLICY_ID, Policy.class, TEST_ENCASS_POLICY,
                 EntityTypes.POLICY_TYPE);
@@ -324,7 +333,7 @@ public class BundleMetadataBuilderTest {
         return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
     }
 
-    private static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath) {
+    private static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath, boolean isRedeployable) {
         Encass encass = new Encass();
         encass.setName(TEST_ENCASS);
         encass.setPolicy(policyPath);
@@ -339,6 +348,9 @@ public class BundleMetadataBuilderTest {
         annotation.setDescription(TEST_ENCASS_ANNOTATION_DESC);
         annotation.setTags(TEST_ENCASS_ANNOTATION_TAGS);
         annotations.add(annotation);
+        if(isRedeployable) {
+            annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REDEPLOYABLE));
+        }
         encass.setAnnotations(annotations);
         encass.setProperties(ImmutableMap.of(
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,

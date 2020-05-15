@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 
 import javax.inject.Singleton;
@@ -39,7 +40,7 @@ public class BundleMetadataBuilder {
         builder.description(annotatedEntity.getDescription());
         builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
         builder.tags(annotatedEntity.getTags());
-        builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable());
+        builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
 
         final List<Metadata> desiredEntities = new ArrayList<>();
         desiredEntities.add(annotatedEntity.getEntity().getMetadata());
@@ -50,5 +51,11 @@ public class BundleMetadataBuilder {
     private Collection<Metadata> getEnvironmentDependenciesMetadata(final List<Entity> dependentEntities) {
         return dependentEntities.stream().filter(e -> !NON_ENV_ENTITY_TYPES.contains(e.getType()))
                         .map(Entity::getMetadata).collect(Collectors.toList());
+    }
+
+    private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
+        return annotatedBundle.getEntities(Policy.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable()) ||
+                annotatedBundle.getEntities(Encass.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable());
+
     }
 }
