@@ -62,8 +62,7 @@ public class EnvironmentBundleCreator {
         setTemplatizedBundlesFolderPath(templatizedBundleFolderPath);
         processDeploymentBundles(
                 environmentBundle,
-                collectFiles(templatizedBundleFolderPath, mode != PLUGIN ? BUNDLE_EXTENSION : policyBundleName + BUNDLE_EXTENSION).stream().map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName()))).collect(toList()),
-                collectTemplatizedBundleFiles(templatizedBundleFolderPath, bundleFolderPath),
+                collectTemplatizedBundleFiles(templatizedBundleFolderPath, mode, policyBundleName, bundleFolderPath),
                 mode,
                 true);
 
@@ -80,8 +79,11 @@ public class EnvironmentBundleCreator {
         return environmentBundle;
     }
 
-    private List<TemplatizedBundle> collectTemplatizedBundleFiles(final String templatizedBundleFolderPath, final String bundleFolderPath) {
-        return collectFiles(templatizedBundleFolderPath, BUNDLE_EXTENSION).stream()
+    private List<TemplatizedBundle> collectTemplatizedBundleFiles(String templatizedBundleFolderPath,
+                                                                  EnvironmentBundleCreationMode mode,
+                                                                  String policyBundleName, String bundleFolderPath) {
+        final String extension = mode != PLUGIN ? BUNDLE_EXTENSION : policyBundleName + BUNDLE_EXTENSION;
+        return collectFiles(templatizedBundleFolderPath, extension).stream()
                 .filter(file -> !StringUtils.endsWithIgnoreCase(file.getName(), DELETE_BUNDLE_EXTENSION))
                 .map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName())))
                 .collect(toList());
