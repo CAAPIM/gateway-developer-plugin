@@ -19,6 +19,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang3.tuple.Pair;
@@ -84,27 +85,29 @@ public class BundleFileBuilder {
             final Set<BundleDefinedEntities> metadataDependencyBundles = new HashSet<>();
             final Set<Bundle> dependencyBundles = new HashSet<>();
             for (File dependencyFile : dependencies) {
-                if (dependencyFile.exists()) {
-                    List<File> metadataFiles = new ArrayList<>();
-                    if (dependencyFile.isDirectory()) {
-                        File[] files = dependencyFile.listFiles();
+                List<File> metadataFiles = new ArrayList<>();
+                if (!dependencyFile.exists()) {
+                    File bundleDirectory = dependencyFile.getParentFile();
+                    if (bundleDirectory != null && bundleDirectory.isDirectory()) {
+                        File[] files = bundleDirectory.listFiles();
                         metadataFiles = Stream.of(files).filter(file -> file.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)).collect(Collectors.toList());
                     }
-                    if (!metadataFiles.isEmpty()) {
-                        metadataFiles.forEach(file -> {
-                            BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(file);
-                            if (bundleDefinedEntities != null) {
-                                metadataDependencyBundles.add(bundleDefinedEntities);
-                            }
-                        });
-                    } else if (dependencyFile.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)) {
-                        BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(dependencyFile);
+                }
+
+                if (!metadataFiles.isEmpty()) {
+                    metadataFiles.forEach(file -> {
+                        BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(file);
                         if (bundleDefinedEntities != null) {
                             metadataDependencyBundles.add(bundleDefinedEntities);
                         }
-                    } else if(dependencyFile.getName().endsWith(BUNDLE_EXTENSION)){
-                        dependencyBundles.add(cache.getBundleFromFile(dependencyFile));
+                    });
+                } else if (dependencyFile.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)) {
+                    BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(dependencyFile);
+                    if (bundleDefinedEntities != null) {
+                        metadataDependencyBundles.add(bundleDefinedEntities);
                     }
+                } else if (dependencyFile.getName().endsWith(BUNDLE_EXTENSION)) {
+                    dependencyBundles.add(cache.getBundleFromFile(dependencyFile));
                 }
             }
             bundle.setDependencies(dependencyBundles);
