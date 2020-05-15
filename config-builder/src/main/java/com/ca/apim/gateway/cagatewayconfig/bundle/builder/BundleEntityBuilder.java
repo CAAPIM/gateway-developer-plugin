@@ -163,11 +163,8 @@ public class BundleEntityBuilder {
      */
     private void loadPolicyDependenciesByPolicyName(String policyNameWithPath, AnnotatedBundle annotatedBundle,
                                                     Bundle rawBundle, boolean excludeReusable) {
-        final Map<String, Policy> policyMap = rawBundle.getPolicies();
-        final Policy policyEntity = policyMap.get(policyNameWithPath);
-        if (policyEntity != null) {
-            loadPolicyDependencies(policyEntity, annotatedBundle, rawBundle, excludeReusable);
-        }
+        final Policy policy = findPolicyByNameOrPath(policyNameWithPath, rawBundle);
+        loadPolicyDependencies(policy, annotatedBundle, rawBundle, excludeReusable);
     }
 
     /**
@@ -180,7 +177,7 @@ public class BundleEntityBuilder {
      */
     private void loadPolicyDependencies(Policy policy, AnnotatedBundle annotatedBundle, Bundle rawBundle,
                                                     boolean excludeReusable) {
-        if (excludeGatewayEntity(Policy.class, policy, annotatedBundle, excludeReusable)) {
+        if (policy == null || excludeGatewayEntity(Policy.class, policy, annotatedBundle, excludeReusable)) {
             return;
         }
 
@@ -194,7 +191,7 @@ public class BundleEntityBuilder {
             for (Dependency dependency : dependencies) {
                 switch (dependency.getType()) {
                     case EntityTypes.POLICY_TYPE:
-                        Policy dependentPolicy = rawBundle.getPolicies().get(dependency.getName());
+                        Policy dependentPolicy = findPolicyByNameOrPath(dependency.getName(), rawBundle);
                         loadPolicyDependencies(dependentPolicy, annotatedBundle, rawBundle, excludeReusable);
                         break;
                     case EntityTypes.ENCAPSULATED_ASSERTION_TYPE:
@@ -218,7 +215,7 @@ public class BundleEntityBuilder {
      */
     private void loadEncassDependencies(Encass encass, AnnotatedBundle annotatedBundle, Bundle rawBundle,
                                         boolean excludeReusable) {
-        if (!excludeGatewayEntity(Encass.class, encass, annotatedBundle, excludeReusable)) {
+        if (encass != null && !excludeGatewayEntity(Encass.class, encass, annotatedBundle, excludeReusable)) {
             annotatedBundle.getEncasses().put(encass.getName(), encass);
             loadPolicyDependenciesByPolicyName(encass.getPolicy(), annotatedBundle, rawBundle, excludeReusable);
         }
@@ -276,18 +273,41 @@ public class BundleEntityBuilder {
      */
     private boolean excludeGatewayEntity(Class<? extends GatewayEntity> entityType, GatewayEntity gatewayEntity,
                                          AnnotatedBundle annotatedBundle, boolean excludeReusable) {
-        return annotatedBundle.getEntities(entityType).containsKey(gatewayEntity.getName())
-                || excludeReusableEntity(gatewayEntity, excludeReusable);
+        return excludeReusableEntity(gatewayEntity, excludeReusable)
+                || annotatedBundle.getEntities(entityType).containsKey(gatewayEntity.getName())
+                || excludePolicy(gatewayEntity, annotatedBundle); // Special case for policy because policies are
+        // stored by Path in the entities map and GatewayEntity.getName() only gives Policy name.
     }
 
     /**
      * Returns TRUE if the Gateway entity is annotated as @reusable and the reusable entity needs to excluded
+     *
      * @param gatewayEntity Gateway entity to be checked
      * @param excludeReusable Exclude loading Reusable entities as the dependency
      * @return TRUE if the Gateway entity is @reusable and needs to be excluded from being loaded
      */
     private boolean excludeReusableEntity(GatewayEntity gatewayEntity, boolean excludeReusable) {
         return gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable() && excludeReusable;
+    }
+
+    private boolean excludePolicy(GatewayEntity gatewayEntity, AnnotatedBundle annotatedBundle) {
+        return gatewayEntity instanceof Policy && findPolicyByNameOrPath(gatewayEntity.getName(), annotatedBundle) != null;
+    }
+
+    /**
+     * Finds policy in the Raw bundle by just Policy name or Policy path.
+     *
+     * @param policyNameOrPath Policy name or path
+     * @param rawBundle Bundle containing all the entities of the gateway.
+     * @return Found Policy is exists, returns NULL if not found
+     */
+    private Policy findPolicyByNameOrPath(String policyNameOrPath, Bundle rawBundle) {
+        for (String policyKey : rawBundle.getPolicies().keySet()) {
+            if (StringUtils.equalsAny(policyNameOrPath, PathUtils.extractName(policyKey), policyKey)) {
+                return rawBundle.getPolicies().get(policyKey);
+            }
+        }
+        return null;
     }
 
     @VisibleForTesting
