@@ -8,10 +8,12 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Named;
 import java.io.File;
@@ -198,5 +200,11 @@ public class TrustedCert extends GatewayEntity {
 
         // remove the certificate data so it dont get written to the file
         this.certificateData = null;
+    }
+
+    @Override
+    public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
+        super.postLoad(entityKey, bundle, rootFolder, idGenerator);
+        setName(entityKey);
     }
 }

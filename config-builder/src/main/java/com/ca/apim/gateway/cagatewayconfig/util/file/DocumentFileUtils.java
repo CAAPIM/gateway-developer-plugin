@@ -21,6 +21,7 @@ public class DocumentFileUtils {
     public static final DocumentFileUtils INSTANCE = new DocumentFileUtils(DocumentTools.INSTANCE);
     private final DocumentTools documentTools;
     public static final String BUNDLE_EXTENSION = ".bundle";
+    public static final String DELETE_BUNDLE_EXTENSION = ".delete" + BUNDLE_EXTENSION;
 
     private DocumentFileUtils(DocumentTools documentTools) {
         this.documentTools = documentTools;

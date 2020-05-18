@@ -10,8 +10,8 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleArtifacts;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
@@ -19,18 +19,14 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,6 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 
 @Singleton
 public class BundleFileBuilder {
@@ -121,13 +118,17 @@ public class BundleFileBuilder {
         }
 
         //Zip
-        final Map<String, Pair<Element, BundleMetadata>> bundleElementMap = bundleEntityBuilder.build(bundle,
+        final Map<String, BundleArtifacts> bundleElementMap = bundleEntityBuilder.build(bundle,
                 EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion);
-        for (Map.Entry<String, Pair<Element, BundleMetadata>> entry : bundleElementMap.entrySet()) {
-            documentFileUtils.createFile(entry.getValue().getLeft(), new File(outputDir,
-                    entry.getKey() + BUNDLE_EXTENSION).toPath());
-            jsonFileUtils.createBundleMetadataFile(entry.getValue().getRight(), entry.getKey(), outputDir);
-        }
+        bundleElementMap.forEach((k, v) -> writeBundleArtifacts(k, v, outputDir));
+    }
+
+    private void writeBundleArtifacts(final String key, final BundleArtifacts bundleArtifacts, File outputDir) {
+        documentFileUtils.createFile(bundleArtifacts.getBundle(), new File(outputDir,
+                key + BUNDLE_EXTENSION).toPath());
+        documentFileUtils.createFile(bundleArtifacts.getDeleteBundle(), new File(outputDir,
+                key + DELETE_BUNDLE_EXTENSION).toPath());
+        jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), key, outputDir);
     }
 
     protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entityClass) {

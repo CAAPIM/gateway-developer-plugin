@@ -1,0 +1,8 @@
+Tacoma MSAD:
+  type: "BIND_ONLY_LDAP"
+  identityProviderDetail:
+    serverUrls:
+      - ldaps://1.2.3.4:636
+    useSslClientAuthentication: true
+    bindPatternPrefix: "somePrefix"
+    bindPatternSuffix: "someSuffix"

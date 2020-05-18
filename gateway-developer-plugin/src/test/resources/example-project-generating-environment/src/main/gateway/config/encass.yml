@@ -1,0 +1,12 @@
+encass_env:
+  annotations:
+    - type: "@bundle"
+      name: "encass_bundle"
+  policy: "example project/db-service"
+  arguments: []
+  results: []
+  properties:
+    paletteFolder: "internalAssertions"
+    allowTracing: "true"
+    description: "Encass to validate."
+    passMetricsToParent: "false"

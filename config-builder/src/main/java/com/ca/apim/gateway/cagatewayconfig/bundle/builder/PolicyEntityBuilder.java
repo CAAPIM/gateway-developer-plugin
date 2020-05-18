@@ -467,6 +467,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String policyName = policy.getName();
         String policyNameWithPath = policy.getPath();
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+        final boolean isRedeployableBundle = annotatedEntity != null && annotatedEntity.isRedeployable();
         if (annotatedBundle != null) {
             if (!policy.isReusable() && !isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = annotatedBundle.getUniquePrefix() + policyName + annotatedBundle.getUniqueSuffix();
@@ -511,11 +512,12 @@ public class PolicyEntityBuilder implements EntityBuilder {
         resourceSetElement.appendChild(resourceElement);
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
-        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE, policyNameWithPath, policy.getId(), policyElement);
-        if (policy.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
-            entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
-        } else {
+        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
+                policy.getPath(), policyNameWithPath, policy.getId(), policyElement);
+        if (isRedeployableBundle || !(policy.isReusable() || isAnnotatedEntity(policy, annotatedEntity))) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
+        } else {
+            entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         }
         return entity;
     }
