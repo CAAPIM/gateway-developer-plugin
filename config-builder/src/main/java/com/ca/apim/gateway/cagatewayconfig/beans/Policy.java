@@ -8,9 +8,11 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,7 +24,6 @@ import javax.inject.Named;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,7 +58,8 @@ public class Policy extends Folderable implements AnnotableEntity {
     @JsonIgnore
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
-    public Policy() {}
+    public Policy() {
+    }
 
     public Policy(final Builder builder) {
         setName(builder.name);
@@ -246,4 +248,32 @@ public class Policy extends Folderable implements AnnotableEntity {
     public String getType(){
         return "policy";
     }
+
+    @JsonIgnore
+    @Override
+    public Metadata getMetadata() {
+        return new Metadata() {
+            @Override
+            public String getType() {
+                return EntityTypes.POLICY_TYPE;
+            }
+
+            @Override
+            public String getName() {
+                return Policy.this.getName();
+            }
+
+            @Override
+            public String getId() {
+                return Policy.this.getId();
+            }
+
+            @Override
+            public String getGuid() {
+                return Policy.this.getGuid();
+            }
+
+        };
+    }
+
 }

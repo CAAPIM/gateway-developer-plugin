@@ -16,7 +16,25 @@ public class AnnotatedEntity<T> {
     private String policyName;
     private String description;
     private Collection<String> tags;
+    private String id;
+    private String guid;
 
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
 
     public AnnotatedEntity(T entity) {
         this.entity = entity;
@@ -63,6 +81,7 @@ public class AnnotatedEntity<T> {
     }
 
     public boolean isBundle() {
+
         return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isBundle();
     }
 

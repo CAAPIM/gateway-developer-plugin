@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.file;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 
@@ -66,6 +68,12 @@ public class JsonFileUtils {
 
     public void createBundleMetadataFile(Object objectToWrite, String fileName, File outputDir) {
         createFile(objectToWrite, new File(outputDir, fileName + METADATA_FILE_NAME_SUFFIX).toPath());
+    }
+
+    public BundleDefinedEntities readBundleMetadataFile(final File metaDataFile) {
+        return metaDataFile.exists() ? jsonTools.readDocumentFile(metaDataFile,
+                jsonTools.getObjectMapper().getTypeFactory().constructType(BundleDefinedEntities.class)) :
+                null;
     }
 
     public <T> T readBundleMetadataFile(final File metaDataFile, Class<T> tClass) {

@@ -15,4 +15,6 @@ public interface Metadata {
 
     String getType();
     String getName();
+    String getId();
+    String getGuid();
 }

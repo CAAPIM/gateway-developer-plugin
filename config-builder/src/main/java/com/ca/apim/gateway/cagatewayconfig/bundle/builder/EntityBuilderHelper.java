@@ -21,18 +21,18 @@ class EntityBuilderHelper {
     }
 
     static Entity getEntityWithOnlyMapping(String entityType, String name, String id) {
-        Entity entity = getEntityWithNameMapping(entityType, name, name, id, null);
+        Entity entity = getEntityWithNameMapping(entityType, name, name, id, null, null);
         entity.setMappingAction(NEW_OR_EXISTING);
         entity.setMappingProperty(FAIL_ON_NEW, true);
         return entity;
     }
 
     static Entity getEntityWithNameMapping(String type, String name, String id, Element element) {
-        return getEntityWithNameMapping(type, name, name, id, element);
+        return getEntityWithNameMapping(type, name, name, id, element, null);
     }
 
-    static Entity getEntityWithNameMapping(String type, String originalName, String name, String id, Element element) {
-        Entity entity = new Entity(type, originalName, name, id, element);
+    static Entity getEntityWithNameMapping(String type, String originalName, String name, String id, Element element, String guid) {
+        Entity entity = new Entity(type, originalName, name, id, element, guid);
         entity.setMappingProperty(MAP_BY, MappingProperties.NAME);
         entity.setMappingProperty(MAP_TO, name);
         return entity;

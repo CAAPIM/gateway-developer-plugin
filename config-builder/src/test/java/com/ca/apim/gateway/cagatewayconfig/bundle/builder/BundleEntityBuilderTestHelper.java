@@ -218,6 +218,16 @@ public class BundleEntityBuilderTestHelper {
                 public String getName() {
                     return dependency.getName();
                 }
+
+                @Override
+                public String getId() {
+                    return null;
+                }
+
+                @Override
+                public String getGuid() {
+                    return null;
+                }
             });
         }
 

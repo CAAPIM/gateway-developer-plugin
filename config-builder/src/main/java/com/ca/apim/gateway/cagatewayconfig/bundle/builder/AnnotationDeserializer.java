@@ -59,6 +59,12 @@ public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
                     if (ele.hasNonNull("name")) {
                         annotation.setName(ele.get("name").asText());
                     }
+                    if (ele.hasNonNull("id")) {
+                        annotation.setId(ele.get("id").asText());
+                    }
+                    if (ele.hasNonNull("guid")) {
+                        annotation.setGuid(ele.get("guid").asText());
+                    }
                     if (ele.hasNonNull("description")) {
                         annotation.setDescription(ele.get("description").asText());
                     }

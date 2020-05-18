@@ -144,11 +144,21 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
                 return Encass.this.getName();
             }
 
+            @Override
             public String getId() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && annotatedEntity.getId() != null) {
+                    return annotatedEntity.getId();
+                }
                 return Encass.this.getId();
             }
 
+            @Override
             public String getGuid() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && annotatedEntity.getGuid() != null) {
+                    return annotatedEntity.getGuid();
+                }
                 return Encass.this.getGuid();
             }
 
@@ -185,11 +195,11 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     }
 
     @VisibleForTesting
-    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity){
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity) {
         this.annotatedEntity = annotatedEntity;
     }
 
-    public String getType(){
+    public String getType() {
         return "encass";
     }
 

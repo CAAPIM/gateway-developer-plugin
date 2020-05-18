@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+
 import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
@@ -29,11 +30,13 @@ public interface AnnotableEntity {
     String getType();
 
     /**
+
      * This method returns all the Annotation applied to the entity.
      *
      * @return Set of all the annotations
      */
     Set<Annotation> getAnnotations();
+
 
     /**
      * Creates AnnotatedEntity object by scanning all the annotations and gathering all the information required to
@@ -51,12 +54,16 @@ public interface AnnotableEntity {
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
                     annotatedEntity.setBundleName(annotation.getName());
                     annotatedEntity.setDescription(annotation.getDescription());
+                } else if(ANNOTATION_TYPE_BUNDLE_ENTITY.equalsIgnoreCase(annotation.getType())) {
+                    annotatedEntity.setId(annotation.getId());
+                    annotatedEntity.setGuid(annotation.getGuid());
                 }
             });
             return annotatedEntity;
         }
         return null;
     }
+
 
     /**
      * Returns TRUE if "@bundle" annotation is added to the entity
