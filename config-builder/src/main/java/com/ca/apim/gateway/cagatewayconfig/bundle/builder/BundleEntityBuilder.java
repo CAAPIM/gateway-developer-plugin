@@ -114,6 +114,8 @@ public class BundleEntityBuilder {
                                        final AnnotatedEntity<GatewayEntity> annotatedEntity) {
         List<Entity> deleteBundleEntities = new ArrayList<>(entities);
 
+        removeEntitiesForDeleteBundle(deleteBundleEntities); // Filter entities for delete bundle based on type
+
         // If @redeployable annotation is added, we can blindly include all the dependencies in the DELETE bundle.
         // Else, we have to include only non-reusable entities
         if (!annotatedEntity.isRedeployable()) {
@@ -134,7 +136,6 @@ public class BundleEntityBuilder {
             }
         }
 
-        removeEntitiesForDeleteBundle(deleteBundleEntities); // Filter entities for delete bundle based on type
         deleteBundleEntities.forEach(e -> e.setMappingAction(MappingActions.DELETE)); // Set Mapping Action to DELETE
         return bundleDocumentBuilder.build(document, deleteBundleEntities);
     }

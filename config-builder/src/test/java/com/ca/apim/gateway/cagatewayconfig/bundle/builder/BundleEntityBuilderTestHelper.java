@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -78,7 +79,7 @@ public class BundleEntityBuilderTestHelper {
         return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
     }
 
-    static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath) {
+    static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath, boolean isRedeployable) {
         Encass encass = new Encass();
         encass.setName(TEST_ENCASS);
         encass.setPolicy(policyPath);
@@ -93,6 +94,9 @@ public class BundleEntityBuilderTestHelper {
         annotation.setDescription(TEST_ENCASS_ANNOTATION_DESC);
         annotation.setTags(TEST_ENCASS_ANNOTATION_TAGS);
         annotations.add(annotation);
+        if (isRedeployable) {
+            annotations.add(AnnotableEntity.REDEPLOYABLE_ANNOTATION);
+        }
         encass.setAnnotations(annotations);
         encass.setProperties(ImmutableMap.of(
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
@@ -103,7 +107,24 @@ public class BundleEntityBuilderTestHelper {
         return encass;
     }
 
-    static Bundle createBundle(String policyXmlString, boolean includeDependencies) {
+    static Encass buildTestEncassWithAnnotation(String encassName, String encassId, String encassGuid,
+                                                String policyPath, Set<Annotation> annotations) {
+        Encass encass = new Encass();
+        encass.setName(encassName);
+        encass.setPolicy(policyPath);
+        encass.setId(encassId);
+        encass.setGuid(encassGuid);
+        encass.setAnnotations(annotations);
+        encass.setProperties(ImmutableMap.of(
+                PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
+                PALETTE_ICON_RESOURCE_NAME, "someImage",
+                ALLOW_TRACING, "false",
+                DESCRIPTION, "someDescription",
+                PASS_METRICS_TO_PARENT, "false"));
+        return encass;
+    }
+
+    static Bundle createBundle(String policyXmlString, boolean includeDependencies, boolean includeReusableEntities) {
         Bundle bundle = new Bundle();
         Folder root = createRoot();
         bundle.getFolders().put(EMPTY, root);
@@ -119,6 +140,12 @@ public class BundleEntityBuilderTestHelper {
         policy.setGuid(TEST_GUID);
         policy.setPolicyXML(policyXmlString);
         policy.setPath(TEST_ENCASS_POLICY);
+        if (includeReusableEntities) {
+            Set<Annotation> annotations = new HashSet<>();
+            Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+            annotations.add(annotation);
+            policy.setAnnotations(annotations);
+        }
         bundle.getPolicies().put(TEST_ENCASS_POLICY, policy);
         Dependency policyDependency = new Dependency(TEST_POLICY_ID, Policy.class, TEST_ENCASS_POLICY,
                 EntityTypes.POLICY_TYPE);
@@ -176,8 +203,9 @@ public class BundleEntityBuilderTestHelper {
         return bundle;
     }
 
-    static void verifyAnnotatedEncassBundleMetadata(Map<String, BundleArtifacts> bundles,
-                                             Bundle bundle, Encass encass) throws JsonProcessingException {
+    static void verifyAnnotatedEncassBundleMetadata(Map<String, BundleArtifacts> bundles, Bundle bundle,
+                                                    Encass encass, boolean isRedeployableBundle,
+                                                    boolean isBundleContainReusableEntity) throws JsonProcessingException {
         Map<String, Metadata> expectedEnvMetadata = new HashMap<>();
         for (Dependency dependency : bundle.getDependencyMap().entrySet().iterator().next().getValue()) {
             expectedEnvMetadata.put(dependency.getType(), new Metadata() {
@@ -200,6 +228,9 @@ public class BundleEntityBuilderTestHelper {
         assertEquals("my-bundle-group", metadata.getGroupName());
         assertEquals("encass", metadata.getType());
         assertEquals("1.0", metadata.getVersion());
+        if (isRedeployableBundle || !isBundleContainReusableEntity) {
+            assertTrue(metadata.isRedeployable());
+        }
         assertEquals(1, metadata.getDefinedEntities().size());
         Optional<Metadata> definedEntities = metadata.getDefinedEntities().stream().findFirst();
         assertTrue(definedEntities.isPresent());

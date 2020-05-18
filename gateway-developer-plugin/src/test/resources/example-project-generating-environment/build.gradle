@@ -26,9 +26,6 @@ dependencies {
 }
 
 GatewaySourceConfig {
-    environmentConfig = [
-            "PASSWORD.gateway": System.properties.get("passwordGateway"),
-            "IDENTITY_PROVIDER.Tacoma MSAD": System.properties.get("ldapConfig"),
-            "JDBC_CONNECTION.MySQL": file(System.properties.get("jdbcConfigPath"))
-    ]
+    configFolder = file(System.properties.get("configFolder"))
+    configName = System.properties.get("configName")
 }

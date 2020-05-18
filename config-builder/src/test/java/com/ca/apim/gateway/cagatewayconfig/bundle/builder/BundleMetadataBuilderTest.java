@@ -49,8 +49,8 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassBundleFileNames(final TemporaryFolder temporaryFolder) {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false);
-        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
+        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false, false);
+        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestBundleLoader(bundle)));
@@ -121,8 +121,8 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassMetadata() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true);
-        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, false);
+        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
@@ -135,7 +135,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(TEST_ENCASS_ANNOTATION_DESC, metadata.getDescription());
         assertEquals(TEST_ENCASS_ANNOTATION_TAGS, metadata.getTags());
 
-        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass);
+        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, false, false);
     }
 
     /**
@@ -146,8 +146,8 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassMetadata_ExcludingOptionalAnnotationFields() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true);
-        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true);
+        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, true);
         encass.getAnnotations().forEach(a -> {
             a.setName(null);
             a.setDescription(null);
@@ -165,7 +165,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(encass.getProperties().get("description"), metadata.getDescription());
         assertEquals(0, metadata.getTags().size());
 
-        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass);
+        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, true, true);
     }
 
     private void deleteDirectory(File directory) {
