@@ -105,8 +105,8 @@ public class PolicyWriter implements EntityWriter {
 
     /**
      * Writes policy metadata including their dependencies to policy.yml file
-     * @param policyMetadataMap
-     * @param rootDir
+     * @param policyMetadataMap Policy metadata to write
+     * @param rootDir Directory where to write
      */
     private void writePolicyMetadata(final Map<String, PolicyMetadata> policyMetadataMap, final File rootDir) {
         if (!policyMetadataMap.isEmpty()) {
@@ -115,27 +115,17 @@ public class PolicyWriter implements EntityWriter {
     }
 
     private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle){
-        final Set<Dependency> dependencyList = new HashSet<>();
         Map<Dependency, List<Dependency>> dependencyListMap = rawBundle.getDependencyMap();
         if (dependencyListMap != null) {
-            populateDependencies(dependencyListMap, id, id, dependencyList);
-        }
-        return dependencyList;
-    }
-
-    private void populateDependencies(Map<Dependency, List<Dependency>> dependencyListMap, String rootId, String id, Set<Dependency> dependencies) {
-        Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
-        for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
-            Dependency parent = entry.getKey();
-            if (parent.getId().equals(id)) {
-                List<Dependency> dependencyList = entry.getValue();
-                for (Dependency dependency : dependencyList) {
-                    if (!rootId.equals(dependency.getId()) && dependencies.add(dependency)) {
-                        populateDependencies(dependencyListMap, rootId, dependency.getId(), dependencies);
-                    }
+            Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
+            for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
+                Dependency parent = entry.getKey();
+                if (parent.getId().equals(id)) { // Search for "id" to get its dependencies
+                    return new HashSet<>(entry.getValue());
                 }
             }
         }
+        return Collections.emptySet();
     }
 
     private void writePolicy(Bundle bundle, File policyFolder, Folderable folderableEntity, Element policy) {
