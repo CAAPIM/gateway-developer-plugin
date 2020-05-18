@@ -274,24 +274,27 @@ public class BundleEntityBuilder {
      */
     private boolean excludeGatewayEntity(Class<? extends GatewayEntity> entityType, GatewayEntity gatewayEntity,
                                          AnnotatedBundle annotatedBundle, boolean excludeReusable) {
-        return excludeReusableEntity(gatewayEntity, excludeReusable)
-                || annotatedBundle.getEntities(entityType).containsKey(gatewayEntity.getName())
-                || excludePolicy(gatewayEntity, annotatedBundle); // Special case for policy because policies are
-        // stored by Path in the entities map and GatewayEntity.getName() only gives Policy name.
+        return annotatedBundle.getEntities(entityType).containsKey(gatewayEntity.getName())
+                || excludeEntity(gatewayEntity, annotatedBundle, excludeReusable);
     }
 
     /**
-     * Returns TRUE if the Gateway entity is annotated as @reusable and the reusable entity needs to excluded
+     * Returns TRUE if the Gateway entity is annotated as @reusable and the reusable entity needs to excluded or the
+     * gateway entity is a policy entity and the annotated bundle already contains that policy.
      *
      * @param gatewayEntity Gateway entity to be checked
+     * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param excludeReusable Exclude loading Reusable entities as the dependency
-     * @return TRUE if the Gateway entity is @reusable and needs to be excluded from being loaded
+     * @return TRUE if the Gateway entity is @reusable and needs to be excluded or entity is Policy and annotated
+     * bundle already contains the policy
      */
-    private boolean excludeReusableEntity(GatewayEntity gatewayEntity, boolean excludeReusable) {
-        return gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable() && excludeReusable;
-    }
-
-    private boolean excludePolicy(GatewayEntity gatewayEntity, AnnotatedBundle annotatedBundle) {
+    private boolean excludeEntity(GatewayEntity gatewayEntity, AnnotatedBundle annotatedBundle,
+                                  boolean excludeReusable) {
+        if (gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable() && excludeReusable) {
+            return true;
+        }
+        // Special case for policy because policies are stored by Path in the entities map and
+        // GatewayEntity.getName() only gives Policy name.
         return gatewayEntity instanceof Policy && findPolicyByNameOrPath(gatewayEntity.getName(), annotatedBundle) != null;
     }
 
