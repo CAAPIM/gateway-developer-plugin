@@ -275,7 +275,7 @@ public class BundleEntityBuilder {
     private boolean excludeGatewayEntity(Class<? extends GatewayEntity> entityType, GatewayEntity gatewayEntity,
                                          AnnotatedBundle annotatedBundle, boolean excludeReusable) {
         return annotatedBundle.getEntities(entityType).containsKey(gatewayEntity.getName())
-                || excludeEntity(gatewayEntity, annotatedBundle, excludeReusable);
+                || excludeReusableOrPolicyEntity(gatewayEntity, annotatedBundle, excludeReusable);
     }
 
     /**
@@ -288,8 +288,8 @@ public class BundleEntityBuilder {
      * @return TRUE if the Gateway entity is @reusable and needs to be excluded or entity is Policy and annotated
      * bundle already contains the policy
      */
-    private boolean excludeEntity(GatewayEntity gatewayEntity, AnnotatedBundle annotatedBundle,
-                                  boolean excludeReusable) {
+    private boolean excludeReusableOrPolicyEntity(GatewayEntity gatewayEntity, AnnotatedBundle annotatedBundle,
+                                                  boolean excludeReusable) {
         if (gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable() && excludeReusable) {
             return true;
         }
