@@ -223,9 +223,8 @@ public class BundleEntityBuilder {
     }
 
     private void removeExcludedReusablePolicy(Policy policy, AnnotatedBundle annotatedBundle) {
-        if (policy != null) {
-            final Set<Dependency> dependencies = policy.getUsedEntities();
-            for (Dependency dependency : dependencies) {
+        if (policy != null && policy.getUsedEntities() != null) {
+            for (Dependency dependency : policy.getUsedEntities()) {
                 Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
                 annotatedBundle.getEntities(entityClass).remove(dependency.getName());
             }

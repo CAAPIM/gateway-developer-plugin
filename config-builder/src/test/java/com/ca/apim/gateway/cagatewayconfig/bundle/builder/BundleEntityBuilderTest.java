@@ -16,6 +16,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -252,8 +253,8 @@ class BundleEntityBuilderTest {
     public void testAnnotatedEncassDeleteBundle() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true);
-        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, false);
+        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
