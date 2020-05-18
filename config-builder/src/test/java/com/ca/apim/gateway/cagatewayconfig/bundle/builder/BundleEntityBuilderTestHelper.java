@@ -38,6 +38,7 @@ public class BundleEntityBuilderTestHelper {
     static final IdGenerator ID_GENERATOR = new IdGenerator();
     static final String TEST_ENCASS = "TestEncass";
     static final String TEST_ENCASS_POLICY = "TestEncassPolicy";
+    static final String TEST_POLICY_FRAGMENT = "TestPolicyFragment";
     static final String TEST_ENCASS_ANNOTATION_NAME = "TestEncassAnnotationName";
     static final String TEST_ENCASS_ANNOTATION_DESC = "TestEncassAnnotationDesc";
     static final Collection<String> TEST_ENCASS_ANNOTATION_TAGS = new LinkedHashSet<>(Arrays.asList("someTag"
@@ -45,6 +46,7 @@ public class BundleEntityBuilderTestHelper {
     static final String TEST_ENCASS_ID = "EncassID";
     static final String TEST_GUID = UUID.randomUUID().toString();
     static final String TEST_POLICY_ID = "PolicyID";
+    static final String TEST_POLICY_FRAGMENT_ID = "PolicyFragmentID";
 
     static final EntityTypeRegistry entityTypeRegistry = new EntityTypeRegistry(new Reflections());
 
@@ -124,6 +126,63 @@ public class BundleEntityBuilderTestHelper {
         return encass;
     }
 
+    public static Bundle createBundleWithPolicyFragment(boolean makeFragmentReusable) {
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_FRAGMENT, false, false);
+
+        Policy encassPolicy = bundle.getPolicies().get(TEST_ENCASS_POLICY);
+
+        Policy policyFragment = new Policy();
+        policyFragment.setParentFolder(Folder.ROOT_FOLDER);
+        policyFragment.setName(TEST_POLICY_FRAGMENT);
+        policyFragment.setId(TEST_POLICY_FRAGMENT_ID);
+        policyFragment.setGuid(UUID.randomUUID().toString());
+        policyFragment.setPolicyXML(POLICY_FRAGMENT);
+        policyFragment.setPath(TEST_POLICY_FRAGMENT);
+        if (makeFragmentReusable) {
+            Set<Annotation> annotations = new HashSet<>();
+            Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+            annotations.add(annotation);
+            policyFragment.setAnnotations(annotations);
+        }
+        policyFragment.setUsedEntities(new HashSet<>());
+        bundle.getPolicies().put(TEST_POLICY_FRAGMENT, policyFragment);
+        Dependency fragmentDependency = new Dependency(TEST_POLICY_FRAGMENT_ID, Policy.class, TEST_POLICY_FRAGMENT,
+                EntityTypes.POLICY_TYPE);
+        encassPolicy.getUsedEntities().add(fragmentDependency);
+
+        TrustedCert trustedCert = new TrustedCert(Maps.newHashMap(ImmutableMap.of(
+                "revocationCheckingEnabled", "true",
+                "trustedForSigningServerCerts", "true",
+                "trustedForSsl", "true")));
+        trustedCert.setName("apim-hugh-new.lvn.broadcom.net");
+        TrustedCert.CertificateData certificateData = new TrustedCert.CertificateData("CN=apim-hugh-new.lvn" +
+                ".broadcom.net", new BigInteger("12718618715409400804"), "CN=apim-hugh-new.lvn.broadcom.net",
+                "MIIDAjCCAeqgAwIBAgIJALCBnFXlnMPkMA0GCSqGSIb3DQEBCwUAMCkxJzAlBgNVBAMTHmFwaW0taHVnaC1uZXcubHZuLmJyb2FkY29tLm5ldDAeFw0xOTAyMDUwNDQ4NTVaFw0yOTAyMDIwNDQ4NTVaMCkxJzAlBgNVBAMTHmFwaW0taHVnaC1uZXcubHZuLmJyb2FkY29tLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALb1txkLi40e0DUXl1MNzDPplB0IKdUDD1Hsx4VgBqAa5TbZZwwQKfGx+oEsDlZamTpu8h1yjuguLNbLbOZFbZ71RBCqKGAy1g2oi6mBiJoTGOzcUzLhUS1M4uC2HQIZzWcNeMbBJWn203IwfvYLpLlenVs6UKTGqJq+TUT6DzqYMypzSj7J4/z5Eml5SUjYq6L/OOkHKjX6dvKBu25mcbahaqV0yIoaF2bO7GR1jrCsIxTv/b/jV+hMbyOpkS+kmYtDecPQs3+rfKNf/N81cidjf/u7vTfXj+IdFQpsw0V3fyLG2WWN4bVgmqAjQFO3ImdwO9RuIGmDzojZ7madJ1UCAwEAAaMtMCswKQYDVR0RBCIwIIIeYXBpbS1odWdoLW5ldy5sdm4uYnJvYWRjb20ubmV0MA0GCSqGSIb3DQEBCwUAA4IBAQAx1YWgkJXt9esh7GHvpx9DDeBLQckEI7YmgVtY8f3OJubcaTbNWEHPpmqz/pelVEh2nTeu5XOPby2SiDipMDLEprGjw92R6Uye/yvvtmoi1Rrnkzmq9jaTb8aWOCU9KdirvaWGnLJPHsovLgfLOrUtmDfUZjjAX/zrPQXI4NGDAJ52gUCK3NNYNCKedduMuLrtSxx1PVqkJpW8IC2ozh0HijezcuwgmK1gu3vzyS8POTrqBLxOk0PD/NggZEDiR3AdxpnWWygGJIEbC4wd84WVg8ENcyrBSWSPQhU9Rtql3HXcCQn7XrS9Qu+sx0bAby8JebKfgV0wRCPUk/xC5MBd");
+        trustedCert.setCertificateData(certificateData);
+        bundle.getTrustedCerts().put(trustedCert.getName(), trustedCert);
+        Dependency trustedCertDependency = new Dependency(trustedCert.getName(), "TRUSTED_CERT");
+        policyFragment.getUsedEntities().add(trustedCertDependency);
+
+        bundle.getDependencyMap().put(fragmentDependency,
+                new ArrayList<>(Collections.singletonList(trustedCertDependency)));
+
+        JdbcConnection jdbcConnection = new JdbcConnection();
+        jdbcConnection.setDriverClass("com.l7tech.jdbc.mysql.MySQLDriver");
+        jdbcConnection.setJdbcUrl("jdbc:mysql://localhost:3306/ssg");
+        jdbcConnection.setUser("root");
+        jdbcConnection.setName("some-jdbc");
+        bundle.getJdbcConnections().put("some-jdbc", jdbcConnection);
+        Dependency jdbcDependency = new Dependency(jdbcConnection.getName(), "JDBC_CONNECTION");
+        encassPolicy.getUsedEntities().add(jdbcDependency);
+
+        Dependency policyDependency = new Dependency(TEST_POLICY_ID, Policy.class, TEST_ENCASS_POLICY,
+                EntityTypes.POLICY_TYPE);
+        bundle.getDependencyMap().get(policyDependency).add(fragmentDependency);
+        bundle.getDependencyMap().get(policyDependency).add(jdbcDependency);
+
+        return bundle;
+    }
+
     static Bundle createBundle(String policyXmlString, boolean includeDependencies, boolean includeReusableEntities) {
         Bundle bundle = new Bundle();
         Folder root = createRoot();
@@ -146,11 +205,13 @@ public class BundleEntityBuilderTestHelper {
             annotations.add(annotation);
             policy.setAnnotations(annotations);
         }
+        policy.setUsedEntities(new HashSet<>());
         bundle.getPolicies().put(TEST_ENCASS_POLICY, policy);
         Dependency policyDependency = new Dependency(TEST_POLICY_ID, Policy.class, TEST_ENCASS_POLICY,
                 EntityTypes.POLICY_TYPE);
         Dependency encassDependency = new Dependency(TEST_ENCASS_ID, Encass.class, TEST_ENCASS,
                 EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        policy.getUsedEntities().add(encassDependency);
         bundle.setDependencyMap(new HashMap<>());
         bundle.getDependencyMap().put(policyDependency, new ArrayList<>(Collections.singletonList(encassDependency)));
 
@@ -192,13 +253,11 @@ public class BundleEntityBuilderTestHelper {
             bundle.getDependencyMap().get(policyDependency).add(clusterDependency);
             bundle.getDependencyMap().get(policyDependency).add(passwordDependency);
             bundle.getDependencyMap().get(policyDependency).add(trustedCertDependency);
-            Set<Dependency> dependencies = new HashSet<>();
-            dependencies.add(jdbcDependency);
-            dependencies.add(clusterDependency);
-            dependencies.add(passwordDependency);
-            dependencies.add(trustedCertDependency);
-
-            policy.setUsedEntities(dependencies);
+            //Set<Dependency> dependencies = new HashSet<>();
+            policy.getUsedEntities().add(jdbcDependency);
+            policy.getUsedEntities().add(clusterDependency);
+            policy.getUsedEntities().add(passwordDependency);
+            policy.getUsedEntities().add(trustedCertDependency);
         }
         return bundle;
     }
@@ -322,6 +381,67 @@ public class BundleEntityBuilderTestHelper {
             "            <L7p:Http2ClientConfigName stringValue=\"default\"/>\n" +
             "            <L7p:ProtectedServiceUrl stringValue=\"http://apim-hugh-new.lvn.broadcom.net:90\"/>\n" +
             "        </L7p:Http2Routing>\n" +
+            "    </wsp:All>\n" +
+            "</wsp:Policy>\n";
+
+    public static final String ENCASS_POLICY_WITH_FRAGMENT = "<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap" +
+            ".org/ws/2002/12/policy\" xmlns:L7p=\"http://www.layer7tech.com/ws/policy\">\n" +
+            "    <wsp:All wsp:Usage=\"Required\">\n" +
+            "        <L7p:CommentAssertion>\n" +
+            "            <L7p:Comment stringValue=\"Policy Fragment: Policy1\"/>\n" +
+            "        </L7p:CommentAssertion>\n" +
+            "        <L7p:Include>\n" +
+            "            <L7p:PolicyGuid policyPath=\"TestPolicyFragment\"/>\n" +
+            "        </L7p:Include>\n" +
+            "        <L7p:JdbcQuery>\n" +
+            "            <L7p:ConnectionName stringValue=\"some-jdbc\"/>\n" +
+            "            <L7p:ConvertVariablesToStrings booleanValue=\"false\"/>\n" +
+            "            <L7p:SqlQuery stringValue=\"Select * from mysql.user;\"/>\n" +
+            "        </L7p:JdbcQuery>\n" +
+            "    </wsp:All>\n" +
+            "</wsp:Policy>\n";
+
+    public static final String POLICY_FRAGMENT = "<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap" +
+            ".org/ws/2002/12/policy\" xmlns:L7p=\"http://www.layer7tech.com/ws/policy\">\n" +
+            "    <wsp:All wsp:Usage=\"Required\">\n" +
+            "        <L7p:CommentAssertion>\n" +
+            "            <L7p:Comment stringValue=\"Policy Fragment: PolicyFragment1\"/>\n" +
+            "        </L7p:CommentAssertion>\n" +
+            "        <L7p:HttpRoutingAssertion>\n" +
+            "            <L7p:ProtectedServiceUrl stringValue=\"https://apim-hugh-new.lvn.broadcom.net:9443\"/>\n" +
+            "            <L7p:ProxyPassword stringValueNull=\"null\"/>\n" +
+            "            <L7p:ProxyUsername stringValueNull=\"null\"/>\n" +
+            "            <L7p:RequestHeaderRules httpPassthroughRuleSet=\"included\">\n" +
+            "                <L7p:ForwardAll booleanValue=\"true\"/>\n" +
+            "                <L7p:Rules httpPassthroughRules=\"included\">\n" +
+            "                    <L7p:item httpPassthroughRule=\"included\">\n" +
+            "                        <L7p:Name stringValue=\"Cookie\"/>\n" +
+            "                    </L7p:item>\n" +
+            "                    <L7p:item httpPassthroughRule=\"included\">\n" +
+            "                        <L7p:Name stringValue=\"SOAPAction\"/>\n" +
+            "                    </L7p:item>\n" +
+            "                </L7p:Rules>\n" +
+            "            </L7p:RequestHeaderRules>\n" +
+            "            <L7p:RequestParamRules httpPassthroughRuleSet=\"included\">\n" +
+            "                <L7p:ForwardAll booleanValue=\"true\"/>\n" +
+            "                <L7p:Rules httpPassthroughRules=\"included\"/>\n" +
+            "            </L7p:RequestParamRules>\n" +
+            "            <L7p:ResponseHeaderRules httpPassthroughRuleSet=\"included\">\n" +
+            "                <L7p:ForwardAll booleanValue=\"true\"/>\n" +
+            "                <L7p:Rules httpPassthroughRules=\"included\">\n" +
+            "                    <L7p:item httpPassthroughRule=\"included\">\n" +
+            "                        <L7p:Name stringValue=\"Set-Cookie\"/>\n" +
+            "                    </L7p:item>\n" +
+            "                </L7p:Rules>\n" +
+            "            </L7p:ResponseHeaderRules>\n" +
+            "            <L7p:SamlAssertionVersion intValue=\"2\"/>\n" +
+            "            <L7p:TlsTrustedCertGoids goidArrayValue=\"included\">\n" +
+            "                <L7p:item goidValue=\"6183c11a61d2a42729506f690aac7242\"/>\n" +
+            "            </L7p:TlsTrustedCertGoids>\n" +
+            "            <L7p:TlsTrustedCertNames stringArrayValue=\"included\">\n" +
+            "                <L7p:item stringValue=\"apim-hugh-new.lvn.broadcom.net\"/>\n" +
+            "            </L7p:TlsTrustedCertNames>\n" +
+            "        </L7p:HttpRoutingAssertion>\n" +
             "    </wsp:All>\n" +
             "</wsp:Policy>\n";
 }
