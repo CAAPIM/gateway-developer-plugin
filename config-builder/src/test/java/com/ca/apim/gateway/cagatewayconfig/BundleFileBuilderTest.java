@@ -82,14 +82,14 @@ class BundleFileBuilderTest {
                 eq(EntityBuilder.BundleType.DEPLOYMENT), any(), eq("my-bundle"), eq("my-bundle-group"), eq("1.0"));
     }
 
-    //@Test
+    @Test
     void buildBundleWithDependency() {
         Policy policy = new Policy();
         policy.setName("from-file");
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
         List<File> dummyList = new ArrayList<>();
-        dummyList.add(new File("test"));
+        dummyList.add(new File("test.bundle"));
         when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
 
         BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils,
