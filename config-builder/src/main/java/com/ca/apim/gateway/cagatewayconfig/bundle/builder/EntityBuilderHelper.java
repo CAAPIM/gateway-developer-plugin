@@ -21,29 +21,34 @@ class EntityBuilderHelper {
     }
 
     static Entity getEntityWithOnlyMapping(String entityType, String name, String id) {
-        Entity entity = getEntityWithNameMapping(entityType, name, id, null);
+        Entity entity = getEntityWithNameMapping(entityType, name, name, id, null);
         entity.setMappingAction(NEW_OR_EXISTING);
         entity.setMappingProperty(FAIL_ON_NEW, true);
         return entity;
     }
 
     static Entity getEntityWithNameMapping(String type, String name, String id, Element element) {
-        Entity entity = new Entity(type, name, id, element);
+        return getEntityWithNameMapping(type, name, name, id, element);
+    }
+
+    static Entity getEntityWithNameMapping(String type, String originalName, String name, String id, Element element) {
+        Entity entity = new Entity(type, originalName, name, id, element);
         entity.setMappingProperty(MAP_BY, MappingProperties.NAME);
         entity.setMappingProperty(MAP_TO, name);
         return entity;
     }
 
-    static Entity getEntityWithPathMapping(String type, String path, String id, Element element) {
-        Entity entity = new Entity(type, path, id, element);
+    static Entity getEntityWithPathMapping(String type, String originalPath, String pathInBundle, String id,
+                                           Element element) {
+        Entity entity = new Entity(type, originalPath, pathInBundle, id, element);
         entity.setMappingProperty(MAP_BY, MappingProperties.PATH);
-        entity.setMappingProperty(MAP_TO, path);
+        entity.setMappingProperty(MAP_TO, pathInBundle);
         return entity;
     }
 
     static Entity getEntityWithMappings(final String type, final String path, final String id, final Element element,
                                         final String mappingAction, final Map<String, Object> mappingProperties) {
-        Entity entity = new Entity(type, path, id, element);
+        Entity entity = new Entity(type, path, path, id, element);
         entity.setMappingAction(mappingAction);
 
         mappingProperties.forEach(entity::setMappingProperty);
