@@ -16,18 +16,28 @@ public class Entity {
 
     private String type;
     private String id;
+    private String guid;
     private Element xml;
     private String name;
     private String originalName;
     private String mappingAction;
     private Map<String, Object> mappingProperties = new HashMap<>();
 
+    public Entity(String type, String name, String id, Element xml) {
+        this(type, name, null, id, xml, null);
+    }
+
     public Entity(String type, String originalName, String entityBundleName, String id, Element xml) {
+        this(type, originalName, entityBundleName, id, xml, null);
+    }
+
+    public Entity(String type, String originalName, String entityBundleName, String id, Element xml, String guid) {
         this.type = type;
         this.originalName = originalName;
         this.name = entityBundleName;
         this.id = id;
         this.xml = xml;
+        this.guid = guid;
     }
 
     public String getType() {
@@ -43,6 +53,10 @@ public class Entity {
             return (Element) xml.cloneNode(true);
         }
         return xml;
+    }
+
+    public String getGuid() {
+        return guid;
     }
 
     public String getName() {
@@ -81,6 +95,18 @@ public class Entity {
             public String getName() {
                 return name;
             }
+
+            @Override
+            public String getId() {
+                return id;
+            }
+
+            @Override
+            public String getGuid() {
+                return guid;
+            }
+
+
         };
     }
 }

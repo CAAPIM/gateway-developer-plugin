@@ -57,7 +57,7 @@ public class BundleMetadataBuilderTest {
 
         List<File> dummyList = new ArrayList<>();
         dummyList.add(new File("test"));
-        when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
+        //when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
 
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(DocumentTools.INSTANCE, DocumentFileUtils.INSTANCE,
                 JsonFileUtils.INSTANCE, entityLoaderRegistry, builder, bundleCache);

@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -54,6 +55,10 @@ public class BundleMetadata implements Metadata {
         return id;
     }
 
+    @JsonIgnore
+    public String getGuid(){
+        return null;
+    }
     public String getVersion() {
         return version;
     }

@@ -16,6 +16,24 @@ public class Annotation {
     private String name;
     private String description;
     private Collection<String> tags;
+    private String id;
+    private String guid;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
 
     public Annotation(final String type) {
         this.type = type;
