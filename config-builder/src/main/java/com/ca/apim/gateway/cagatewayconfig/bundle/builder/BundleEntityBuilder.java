@@ -18,7 +18,6 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
@@ -112,9 +111,7 @@ public class BundleEntityBuilder {
      */
     private Element createDeleteBundle(final Document document, List<Entity> entities, final Bundle bundle,
                                        final AnnotatedEntity<GatewayEntity> annotatedEntity) {
-        List<Entity> deleteBundleEntities = new ArrayList<>(entities);
-
-        removeEntitiesForDeleteBundle(deleteBundleEntities); // Filter entities for delete bundle based on type
+        List<Entity> deleteBundleEntities = copyFilteredEntitiesForDeleteBundle(entities);
 
         // If @redeployable annotation is added, we can blindly include all the dependencies in the DELETE bundle.
         // Else, we have to include only non-reusable entities
@@ -141,17 +138,24 @@ public class BundleEntityBuilder {
     }
 
     /**
-     * Remove environment entities and folders from the entity list. Environment entities and Folders should not be
-     * part of DELETE bundle.
+     * Copies all the filtered entities in the reverse order to a new {@link List}. The entries in the DELETE bundle
+     * must be in the reverse order of deployment bundle.
      *
-     * @param entities list of entities to be included in the delete bundle
+     * All Environment entities and Folders are skipped from the DELETE bundle list.
+     *
+     * @param entities Entities in the deployment bundle
+     * @return Filtered list of entities in the reverse order
      */
-    private void removeEntitiesForDeleteBundle(final List<Entity> entities) {
-        // SKIP all environment entities from DELETE bundle
-        entities.removeAll(entities.stream().filter(FILTER_ENV_ENTITIES).collect(Collectors.toList()));
-
-        // SKIP all Folders from DELETE bundle
-        entities.removeAll(entities.stream().filter(e -> FOLDER_TYPE.equals(e.getType())).collect(Collectors.toList()));
+    private List<Entity> copyFilteredEntitiesForDeleteBundle(List<Entity> entities) {
+        List<Entity> deleteBundleEntities = new ArrayList<>();
+        for (int i = entities.size() - 1; i >= 0; i--) { // Copy in reverse order
+            final Entity entity = entities.get(i);
+            // SKIP all Environment entities and Folders from the DELETE bundle
+            if (!FILTER_ENV_ENTITIES.test(entity) && !FOLDER_TYPE.equals(entity.getType())) {
+                deleteBundleEntities.add(entity);
+            }
+        }
+        return deleteBundleEntities;
     }
 
     /**
