@@ -33,6 +33,9 @@ public class PolicyXMLElements {
     public static final String JMS_ROUTING_ASSERTION = "L7p:JmsRoutingAssertion";
     public static final String JMS_ENDPOINT_OID = "L7p:EndpointOid";
     public static final String JMS_ENDPOINT_NAME = "L7p:EndpointName";
+    public static final String HTTP_ROUTING_ASSERTION  = "L7p:HttpRoutingAssertion";
+    public static final String TLS_TRUSTED_CERT_ID = "L7p:TlsTrustedCertGoids";
+    public static final String TLS_TRUSTED_CERT_NAME = "L7p:TlsTrustedCertNames";
 
     private PolicyXMLElements() {
 

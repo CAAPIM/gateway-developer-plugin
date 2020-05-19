@@ -154,6 +154,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement, annotatedBundle));
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyName, policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
+        prepareAssertion(policyElement, HTTP_ROUTING_ASSERTION, assertionElement -> replaceRoutingAssertionCertificateIds(bundle, assertionElement));
 
         policy.setPolicyDocument(policyElement);
     }
@@ -206,6 +207,22 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
         assertionElement.insertBefore(createElementWithAttribute(policyDocument, base64ElementName, STRING_VALUE, encoded), element);
         assertionElement.removeChild(element);
+    }
+
+    static void replaceRoutingAssertionCertificateIds(Bundle bundle, Element assertionElement) {
+        final Element certIdsElement = getSingleChildElement(assertionElement, TLS_TRUSTED_CERT_ID, true);
+        final Element certNamesElement = getSingleChildElement(assertionElement, TLS_TRUSTED_CERT_NAME, true);
+        if (certIdsElement != null && certNamesElement != null) {
+            final NodeList certIdsList = certIdsElement.getChildNodes();
+            final NodeList certNamesList = certNamesElement.getChildNodes();
+            for (int i = 0; i < certNamesList.getLength(); i++) {
+                final String certName = certNamesList.item(i).getAttributes().getNamedItem("stringValue").getTextContent();
+                final TrustedCert trustedCert = bundle.getTrustedCerts().get(certName);
+                if (trustedCert != null && trustedCert.getAnnotatedEntity() != null && trustedCert.getAnnotatedEntity().getId() != null) {
+                    certIdsList.item(i).getAttributes().getNamedItem("goidValue").setTextContent(trustedCert.getAnnotatedEntity().getId());
+                }
+            }
+        }
     }
 
     private static String getCDataOrText(Element element) {
