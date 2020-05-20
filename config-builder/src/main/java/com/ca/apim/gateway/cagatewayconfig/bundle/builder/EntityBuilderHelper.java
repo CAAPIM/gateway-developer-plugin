@@ -39,16 +39,17 @@ class EntityBuilderHelper {
     }
 
     static Entity getEntityWithPathMapping(String type, String originalPath, String pathInBundle, String id,
-                                           Element element) {
-        Entity entity = new Entity(type, originalPath, pathInBundle, id, element);
+                                           Element element, boolean hasRouting) {
+        Entity entity = new Entity(type, originalPath, pathInBundle, id, element, hasRouting);
         entity.setMappingProperty(MAP_BY, MappingProperties.PATH);
         entity.setMappingProperty(MAP_TO, pathInBundle);
         return entity;
     }
 
     static Entity getEntityWithMappings(final String type, final String path, final String id, final Element element,
-                                        final String mappingAction, final Map<String, Object> mappingProperties) {
-        Entity entity = new Entity(type, path, path, id, element);
+                                        final String mappingAction, final Map<String, Object> mappingProperties,
+                                        boolean hasRouting) {
+        Entity entity = new Entity(type, path, path, id, element, hasRouting);
         entity.setMappingAction(mappingAction);
 
         mappingProperties.forEach(entity::setMappingProperty);

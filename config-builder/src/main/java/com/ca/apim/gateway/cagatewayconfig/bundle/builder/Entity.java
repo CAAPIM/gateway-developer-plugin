@@ -20,15 +20,17 @@ public class Entity {
     private Element xml;
     private String name;
     private String originalName;
+    private boolean hasRouting;
     private String mappingAction;
     private Map<String, Object> mappingProperties = new HashMap<>();
 
     public Entity(String type, String name, String id, Element xml) {
-        this(type, name, null, id, xml, null);
+        this(type, name, name, id, xml, false);
     }
 
-    public Entity(String type, String originalName, String entityBundleName, String id, Element xml) {
+    public Entity(String type, String originalName, String entityBundleName, String id, Element xml, boolean hasRouting) {
         this(type, originalName, entityBundleName, id, xml, null);
+        this.hasRouting = hasRouting;
     }
 
     public Entity(String type, String originalName, String entityBundleName, String id, Element xml, String guid) {
@@ -65,6 +67,10 @@ public class Entity {
 
     public String getOriginalName() {
         return originalName;
+    }
+
+    public boolean isHasRouting() {
+        return hasRouting;
     }
 
     public Map<String, Object> getMappingProperties() {

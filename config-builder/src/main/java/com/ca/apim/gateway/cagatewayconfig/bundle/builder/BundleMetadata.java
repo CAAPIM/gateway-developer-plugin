@@ -108,6 +108,7 @@ public class BundleMetadata implements Metadata {
         private String description;
         private boolean reusable;
         private boolean redeployable;
+        private boolean hasRouting;
         private Collection<String> tags;
         private Collection<Metadata> definedEntities = new LinkedList<>();
         private Collection<Metadata> environmentEntities = new LinkedList<>();
@@ -138,9 +139,10 @@ public class BundleMetadata implements Metadata {
             return this;
         }
 
-        public Builder reusableAndRedeployable(boolean reusable, boolean redeployable) {
+        public Builder reusableRedeployableAndHasRouting    (boolean reusable, boolean redeployable, boolean hasRouting) {
             this.reusable = reusable;
             this.redeployable = redeployable;
+            this.hasRouting = hasRouting;
             return this;
         }
 
@@ -155,6 +157,7 @@ public class BundleMetadata implements Metadata {
             bundleMetadata.definedEntities = definedEntities;
             bundleMetadata.reusable = reusable;
             bundleMetadata.redeployable = redeployable;
+            bundleMetadata.hasRouting = hasRouting;
             bundleMetadata.tags = tags;
             bundleMetadata.environmentEntities = environmentEntities;
             return bundleMetadata;

@@ -32,7 +32,10 @@ public class BundleMetadataBuilder {
         builder.description(annotatedEntity.getDescription());
         builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
         builder.tags(annotatedEntity.getTags());
-        builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
+
+        final boolean redeployable = annotatedEntity.isRedeployable() || !bundleContainsReusableEntity(annotatedBundle);
+        final boolean hasRouting = hasRoutingAssertion(dependentEntities);
+        builder.reusableRedeployableAndHasRouting(true, redeployable, hasRouting);
 
         final List<Metadata> desiredEntities = new ArrayList<>();
         desiredEntities.add(annotatedEntity.getEntity().getMetadata());
@@ -45,8 +48,12 @@ public class BundleMetadataBuilder {
                         .map(Entity::getMetadata).collect(Collectors.toList());
     }
 
-    private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
+    private boolean bundleContainsReusableEntity(final AnnotatedBundle annotatedBundle) {
         return annotatedBundle.getEntities(Policy.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable()) ||
                 annotatedBundle.getEntities(Encass.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable());
+    }
+
+    private boolean hasRoutingAssertion(final List<Entity> dependentEntities) {
+        return dependentEntities.stream().anyMatch(Entity::isHasRouting);
     }
 }

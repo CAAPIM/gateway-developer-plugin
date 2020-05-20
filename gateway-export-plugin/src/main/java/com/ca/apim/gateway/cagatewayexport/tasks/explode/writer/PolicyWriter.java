@@ -91,6 +91,7 @@ public class PolicyWriter implements EntityWriter {
             }
             policyMetadata.setTag(policyEntity.getTag());
             policyMetadata.setSubtag(policyEntity.getSubtag());
+            policyMetadata.setHasRouting(policyEntity.isHasRouting());
         }
         Set<Dependency> dependencies = getPolicyDependencies(folderableEntity.getId(), rawBundle);
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();

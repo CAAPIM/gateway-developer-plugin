@@ -58,6 +58,8 @@ public class Policy extends Folderable implements AnnotableEntity {
     @JsonIgnore
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
+    private boolean hasRouting;
+
     public Policy() {
     }
 
@@ -140,6 +142,14 @@ public class Policy extends Folderable implements AnnotableEntity {
         this.policyType = policyType;
     }
 
+    public boolean isHasRouting() {
+        return hasRouting;
+    }
+
+    public void setHasRouting(boolean hasRouting) {
+        this.hasRouting = hasRouting;
+    }
+
     Policy merge(Policy otherPolicy) {
         this.policyXML = firstNonNull(otherPolicy.policyXML, this.policyXML);
         this.setName(firstNonNull(otherPolicy.getName(), this.getName()));
@@ -150,7 +160,7 @@ public class Policy extends Folderable implements AnnotableEntity {
         this.setId(firstNonNull(otherPolicy.getId(), this.getId()));
         this.tag = firstNonNull(otherPolicy.tag, this.tag);
         this.policyType = firstNonNull(otherPolicy.policyType, this.policyType);
-
+        this.hasRouting = otherPolicy.hasRouting || this.hasRouting;
         return this;
     }
 
