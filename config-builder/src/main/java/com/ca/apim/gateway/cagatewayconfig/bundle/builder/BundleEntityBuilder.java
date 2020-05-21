@@ -18,8 +18,10 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_NON_ENV_ENTITIES;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static java.util.Collections.unmodifiableSet;
 
@@ -53,7 +55,7 @@ public class BundleEntityBuilder {
             entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
             final Element fullBundle = bundleDocumentBuilder.build(document, entities);
             artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
-                    new BundleArtifacts(fullBundle, null, null));
+                    new BundleArtifacts(fullBundle, null, null, null));
         }
         return artifacts;
     }
@@ -87,12 +89,16 @@ public class BundleEntityBuilder {
                                 final Element deleteBundleElement = createDeleteBundle(document, entities, bundle,
                                         annotatedEntity);
 
+                                // Create DELETE Environment bundle
+                                final Element deleteEnvBundleElement = createDeleteEnvBundle(document, entities, bundle,
+                                        annotatedEntity);
+
                                 // Create bundle metadata
                                 final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedBundle,
                                         annotatedEntity, entities, projectGroupName, projectVersion);
 
                                 annotatedElements.put(annotatedBundle.getBundleName(),
-                                        new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata));
+                                        new BundleArtifacts(bundleElement, deleteBundleElement, deleteEnvBundleElement, bundleMetadata));
                             }
                         })
         );
@@ -111,7 +117,7 @@ public class BundleEntityBuilder {
      */
     private Element createDeleteBundle(final Document document, List<Entity> entities, final Bundle bundle,
                                        final AnnotatedEntity<GatewayEntity> annotatedEntity) {
-        List<Entity> deleteBundleEntities = copyFilteredEntitiesForDeleteBundle(entities);
+        List<Entity> deleteBundleEntities = copyFilteredEntitiesForDeleteBundle(entities, FILTER_NON_ENV_ENTITIES);
 
         // If @redeployable annotation is added, we can blindly include all the dependencies in the DELETE bundle.
         // Else, we have to include only non-reusable entities
@@ -138,20 +144,38 @@ public class BundleEntityBuilder {
     }
 
     /**
+     * Creates the DELETE environment bundle element.
+     *
+     * @param document Document
+     * @param entities Entities packaged in the deployment bundle
+     * @param bundle Bundle containing all the Gateway entities
+     * @param annotatedEntity Annotated Entity for which bundle is being created.
+     * @return Delete bundle Element for the Annotated Bundle
+     */
+    private Element createDeleteEnvBundle(final Document document, List<Entity> entities, final Bundle bundle,
+                                          final AnnotatedEntity<GatewayEntity> annotatedEntity) {
+        List<Entity> deleteEnvBundleEntities = copyFilteredEntitiesForDeleteBundle(entities, FILTER_ENV_ENTITIES);
+
+        deleteEnvBundleEntities.forEach(e -> e.setMappingAction(MappingActions.DELETE)); // Set Mapping Action to DELETE
+        return bundleDocumentBuilder.build(document, deleteEnvBundleEntities);
+    }
+
+    /**
      * Copies all the filtered entities in the reverse order to a new {@link List}. The entries in the DELETE bundle
      * must be in the reverse order of deployment bundle.
      *
      * All Environment entities and Folders are skipped from the DELETE bundle list.
      *
      * @param entities Entities in the deployment bundle
+     * @param entityPredicate predicate for entity inclusion
      * @return Filtered list of entities in the reverse order
      */
-    private List<Entity> copyFilteredEntitiesForDeleteBundle(List<Entity> entities) {
+    private List<Entity> copyFilteredEntitiesForDeleteBundle(List<Entity> entities, Predicate<Entity> entityPredicate) {
         List<Entity> deleteBundleEntities = new ArrayList<>();
         for (int i = entities.size() - 1; i >= 0; i--) { // Copy in reverse order
             final Entity entity = entities.get(i);
             // SKIP all Environment entities and Folders from the DELETE bundle
-            if (!FILTER_ENV_ENTITIES.test(entity) && !FOLDER_TYPE.equals(entity.getType())) {
+            if (entityPredicate.test(entity) && !FOLDER_TYPE.equals(entity.getType())) {
                 deleteBundleEntities.add(entity);
             }
         }
