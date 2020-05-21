@@ -21,7 +21,6 @@ import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
 import java.io.File;
 import java.util.*;
@@ -31,6 +30,7 @@ import org.w3c.dom.Document;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(TemporaryFolderExtension.class)
 class PolicyWriterTest {
@@ -87,6 +87,55 @@ class PolicyWriterTest {
         assertTrue(configFolder.exists());
         File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
+
+        final Map<String, PolicyMetadata> policyMetadataMap =
+                JsonFileUtils.INSTANCE.readPoliciesConfigFile(temporaryFolder.getRoot(), PolicyMetadata.class);
+        assertEquals(1, policyMetadataMap.size());
+        assertFalse(policyMetadataMap.get("assertionPolicy").isHasRouting());
+    }
+
+    @Test
+    void testWriteRoutingAssertion(final TemporaryFolder temporaryFolder) throws DocumentParseException {
+        PolicyWriter writer = new PolicyWriter(policyConverterRegistry, DocumentFileUtils.INSTANCE, JsonFileUtils.INSTANCE, new EntityLinkerRegistry(new HashSet<>()));
+
+        Bundle bundle = new Bundle();
+        bundle.addEntity(ROOT_FOLDER);
+        bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
+        Policy policy = new Policy();
+        policy.setGuid("123");
+        policy.setPath("assertionPolicy");
+        policy.setParentFolder(ROOT_FOLDER);
+        policy.setName("assertionPolicy");
+        policy.setId("asd");
+        policy.setHasRouting(true);
+        policy.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<wsp:Policy xmlns:L7p=\"http://www.layer7tech.com/ws/policy\" \n" +
+                "    xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\">\n" +
+                "    <wsp:All wsp:Usage=\"Required\">\n" +
+                "        <L7p:Http2Routing>\n" +
+                "            <L7p:Http2ClientConfigName stringValue=\"&lt;Default Config>\"/>\n" +
+                "            <L7p:ProtectedServiceUrl stringValue=\"http://apim-hugh-new.lvn.broadcom.net:90\"/>\n" +
+                "        </L7p:Http2Routing>\n" +
+                "    </wsp:All>\n" +
+                "</wsp:Policy>");
+        policy.setPolicyDocument(DocumentTools.INSTANCE.parse(policy.getPolicyXML()).getDocumentElement());
+        bundle.getPolicies().put("assertionPolicy", policy);
+
+        writer.write(bundle, temporaryFolder.getRoot(), bundle);
+
+        File policyFolder = new File(temporaryFolder.getRoot(), "policy");
+        assertTrue(policyFolder.exists());
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+
+        File policyMetadataFile = new File(configFolder, "policies.yml");
+        assertTrue(policyMetadataFile.exists());
+
+        final Map<String, PolicyMetadata> policyMetadataMap =
+                JsonFileUtils.INSTANCE.readPoliciesConfigFile(temporaryFolder.getRoot(), PolicyMetadata.class);
+        assertEquals(1, policyMetadataMap.size());
+        assertTrue(policyMetadataMap.get("assertionPolicy").isHasRouting());
     }
 
     @Test

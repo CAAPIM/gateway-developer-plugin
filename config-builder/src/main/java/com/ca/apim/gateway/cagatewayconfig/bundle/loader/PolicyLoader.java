@@ -46,7 +46,7 @@ public class PolicyLoader implements BundleEntityLoader {
         final String policyType = getSingleChildElementTextContent(policyDetails, POLICY_TYPE);
         final Map<String, Object> policyDetailProperties = mapPropertiesElements(getSingleChildElement(policyDetails, PROPERTIES, true), PROPERTIES);
         final String policyTag = (String) policyDetailProperties.get(PROPERTY_TAG);
-        final boolean hasRouting = BooleanUtils.toBoolean((String) policyDetailProperties.get(PROPERTY_HAS_ROUTING));
+        final boolean hasRouting = (Boolean) policyDetailProperties.get(PROPERTY_HAS_ROUTING);
         if (!PolicyType.isValidType(policyType, policyTag)) {
             LOGGER.log(Level.WARNING, () -> {
                 if (policyTag != null) {

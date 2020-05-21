@@ -139,7 +139,7 @@ public class BundleMetadata implements Metadata {
             return this;
         }
 
-        public Builder reusableRedeployableAndHasRouting    (boolean reusable, boolean redeployable, boolean hasRouting) {
+        public Builder reusableRedeployableAndHasRouting(boolean reusable, boolean redeployable, boolean hasRouting) {
             this.reusable = reusable;
             this.redeployable = redeployable;
             this.hasRouting = hasRouting;
