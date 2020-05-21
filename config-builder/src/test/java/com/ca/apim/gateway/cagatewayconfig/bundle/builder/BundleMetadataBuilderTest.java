@@ -179,9 +179,9 @@ public class BundleMetadataBuilderTest {
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        BundleMetadata metadata = bundles.get("my-bundle-" + encass.getName() + "-1.0").getBundleMetadata();
+        BundleMetadata metadata = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
-        assertEquals("my-bundle-" + encass.getName(), metadata.getName());
+        assertEquals(TEST_ENCASS_ANNOTATION_NAME, metadata.getName());
         assertFalse(metadata.isHasRouting());
     }
 
