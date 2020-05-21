@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_NON_ENV_ENTITIES;
@@ -45,8 +46,8 @@ public class BundleEntityBuilder {
     }
 
     public Map<String, BundleArtifacts> build(Bundle bundle, EntityBuilder.BundleType bundleType,
-                                               Document document, String projectName,
-                                               String projectGroupName, String projectVersion) {
+                                              Document document, String projectName,
+                                              String projectGroupName, String projectVersion) {
 
         Map<String, BundleArtifacts> artifacts = buildAnnotatedEntities(bundleType, bundle, document, projectName,
                 projectGroupName, projectVersion);
@@ -54,16 +55,22 @@ public class BundleEntityBuilder {
             List<Entity> entities = new ArrayList<>();
             entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
             final Element fullBundle = bundleDocumentBuilder.build(document, entities);
+            // Create DELETE bundle - ALWAYS skip environment entities
+            final Element deleteBundleElement = createDeleteBundle(document, entities, bundle,
+                    null);
+
+            // Create DELETE Environment bundle
+            final Element deleteEnvBundleElement = createDeleteEnvBundle(document, entities);
             artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
-                    new BundleArtifacts(fullBundle, null, null, null));
+                    new BundleArtifacts(fullBundle, deleteBundleElement, deleteEnvBundleElement, null));
         }
         return artifacts;
     }
 
     private Map<String, BundleArtifacts> buildAnnotatedEntities(EntityBuilder.BundleType bundleType, Bundle bundle,
-                                                                              Document document, String projectName,
-                                                                              String projectGroupName,
-                                                                              String projectVersion) {
+                                                                Document document, String projectName,
+                                                                String projectGroupName,
+                                                                String projectVersion) {
         final Map<String, BundleArtifacts> annotatedElements = new LinkedHashMap<>();
         Map<String, EntityUtils.GatewayEntityInfo> entityTypeMap = entityTypeRegistry.getEntityTypeMap();
         // Filter the bundle to export only annotated entities
@@ -90,8 +97,7 @@ public class BundleEntityBuilder {
                                         annotatedEntity);
 
                                 // Create DELETE Environment bundle
-                                final Element deleteEnvBundleElement = createDeleteEnvBundle(document, entities, bundle,
-                                        annotatedEntity);
+                                final Element deleteEnvBundleElement = createDeleteEnvBundle(document, entities);
 
                                 // Create bundle metadata
                                 final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedBundle,
@@ -109,9 +115,9 @@ public class BundleEntityBuilder {
     /**
      * Creates the DELETE bundle element.
      *
-     * @param document Document
-     * @param entities Entities packaged in the deployment bundle
-     * @param bundle Bundle containing all the Gateway entities
+     * @param document        Document
+     * @param entities        Entities packaged in the deployment bundle
+     * @param bundle          Bundle containing all the Gateway entities
      * @param annotatedEntity Annotated Bundle for which bundle is being created.
      * @return Delete bundle Element for the Annotated Bundle
      */
@@ -121,7 +127,7 @@ public class BundleEntityBuilder {
 
         // If @redeployable annotation is added, we can blindly include all the dependencies in the DELETE bundle.
         // Else, we have to include only non-reusable entities
-        if (!annotatedEntity.isRedeployable()) {
+        if (annotatedEntity != null && !annotatedEntity.isRedeployable()) {
             // Include only non-reusable entities
             AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
             Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
@@ -148,25 +154,21 @@ public class BundleEntityBuilder {
      *
      * @param document Document
      * @param entities Entities packaged in the deployment bundle
-     * @param bundle Bundle containing all the Gateway entities
-     * @param annotatedEntity Annotated Entity for which bundle is being created.
      * @return Delete bundle Element for the Annotated Bundle
      */
-    private Element createDeleteEnvBundle(final Document document, List<Entity> entities, final Bundle bundle,
-                                          final AnnotatedEntity<GatewayEntity> annotatedEntity) {
-        List<Entity> deleteEnvBundleEntities = copyFilteredEntitiesForDeleteBundle(entities, FILTER_ENV_ENTITIES);
-
-        deleteEnvBundleEntities.forEach(e -> e.setMappingAction(MappingActions.DELETE)); // Set Mapping Action to DELETE
-        return bundleDocumentBuilder.build(document, deleteEnvBundleEntities);
+    private Element createDeleteEnvBundle(final Document document, List<Entity> entities) {
+        List<Entity> filteredEntities = copyFilteredEntitiesForDeleteBundle(entities, FILTER_ENV_ENTITIES);
+        filteredEntities.forEach(e -> e.setMappingAction(MappingActions.DELETE));
+        return bundleDocumentBuilder.build(document, filteredEntities);
     }
 
     /**
      * Copies all the filtered entities in the reverse order to a new {@link List}. The entries in the DELETE bundle
      * must be in the reverse order of deployment bundle.
-     *
+     * <p>
      * All Environment entities and Folders are skipped from the DELETE bundle list.
      *
-     * @param entities Entities in the deployment bundle
+     * @param entities        Entities in the deployment bundle
      * @param entityPredicate predicate for entity inclusion
      * @return Filtered list of entities in the reverse order
      */
@@ -186,9 +188,9 @@ public class BundleEntityBuilder {
      * Loads all the gateway entities used in the policy including the environment or global dependencies.
      *
      * @param policyNameWithPath Name of the policy for which gateway dependencies needs to be found.
-     * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param rawBundle Bundle containing all the entities of the gateway.
-     * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
+     * @param annotatedBundle    Annotated Bundle for which bundle is being created.
+     * @param rawBundle          Bundle containing all the entities of the gateway.
+     * @param excludeReusable    Exclude loading Reusable entities as the dependencies of the policy
      */
     private void loadPolicyDependenciesByPolicyName(String policyNameWithPath, AnnotatedBundle annotatedBundle,
                                                     Bundle rawBundle, boolean excludeReusable) {
@@ -199,13 +201,13 @@ public class BundleEntityBuilder {
     /**
      * Loads the Policy and its dependencies
      *
-     * @param policy Policy for which gateway dependencies needs to be loaded.
+     * @param policy          Policy for which gateway dependencies needs to be loaded.
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param rawBundle Bundle containing all the entities of the gateway.
+     * @param rawBundle       Bundle containing all the entities of the gateway.
      * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
      */
     private void loadPolicyDependencies(Policy policy, AnnotatedBundle annotatedBundle, Bundle rawBundle,
-                                                    boolean excludeReusable) {
+                                        boolean excludeReusable) {
         if (policy == null || excludeGatewayEntity(Policy.class, policy, annotatedBundle, excludeReusable)) {
             return;
         }
@@ -237,9 +239,9 @@ public class BundleEntityBuilder {
     /**
      * Loads the Encass and its dependencies
      *
-     * @param encass Encass policy for which gateway dependencies needs to be loaded.
+     * @param encass          Encass policy for which gateway dependencies needs to be loaded.
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param rawBundle Bundle containing all the entities of the gateway.
+     * @param rawBundle       Bundle containing all the entities of the gateway.
      * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
      */
     private void loadEncassDependencies(Encass encass, AnnotatedBundle annotatedBundle, Bundle rawBundle,
@@ -254,7 +256,7 @@ public class BundleEntityBuilder {
      * Loads the Folders.
      *
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param policyEntity Policy for which folder dependencies needs to be loaded.
+     * @param policyEntity    Policy for which folder dependencies needs to be loaded.
      */
     private void loadFolderDependencies(AnnotatedBundle annotatedBundle, GatewayEntity policyEntity) {
         if (policyEntity instanceof Folderable) {
@@ -270,9 +272,9 @@ public class BundleEntityBuilder {
     /**
      * Loads the Gateway entities other than Policy and Encass.
      *
-     * @param dependency Dependency to be loaded
+     * @param dependency      Dependency to be loaded
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param rawBundle Bundle containing all the entities of the gateway.
+     * @param rawBundle       Bundle containing all the entities of the gateway.
      */
     private void loadGatewayEntity(Dependency dependency, AnnotatedBundle annotatedBundle, Bundle rawBundle) {
         Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
@@ -294,8 +296,8 @@ public class BundleEntityBuilder {
     /**
      * Return TRUE is the Gateway entity needs to be excluded from being loaded.
      *
-     * @param entityType Type of entity class
-     * @param gatewayEntity Gateway entity to be checked
+     * @param entityType      Type of entity class
+     * @param gatewayEntity   Gateway entity to be checked
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param excludeReusable Exclude loading Reusable entities as the dependency
      * @return TRUE if the Gateway entity needs to be excluded
@@ -310,7 +312,7 @@ public class BundleEntityBuilder {
      * Returns TRUE if the Gateway entity is annotated as @reusable and the reusable entity needs to excluded or the
      * gateway entity is a policy entity and the annotated bundle already contains that policy.
      *
-     * @param gatewayEntity Gateway entity to be checked
+     * @param gatewayEntity   Gateway entity to be checked
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param excludeReusable Exclude loading Reusable entities as the dependency
      * @return TRUE if the Gateway entity is @reusable and needs to be excluded or entity is Policy and annotated
@@ -330,7 +332,7 @@ public class BundleEntityBuilder {
      * Finds policy in the Raw bundle by just Policy name or Policy path.
      *
      * @param policyNameOrPath Policy name or path
-     * @param rawBundle Bundle containing all the entities of the gateway.
+     * @param rawBundle        Bundle containing all the entities of the gateway.
      * @return Found Policy is exists, returns NULL if not found
      */
     private Policy findPolicyByNameOrPath(String policyNameOrPath, Bundle rawBundle) {
