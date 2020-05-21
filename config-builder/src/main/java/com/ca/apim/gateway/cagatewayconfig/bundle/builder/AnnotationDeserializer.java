@@ -19,6 +19,8 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 /**
  * AnnotationDeserializer deserializes the "annotations" tag in the entity elements. Annotation on entities are
  * supported in 2 ways:
@@ -61,18 +63,11 @@ public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
                 if (ele.isObject() && ele.hasNonNull("type")) {
                     final Annotation annotation = new Annotation(ele.get("type").asText());
                     if (AnnotationConstants.SUPPORTED_ANNOTATION_TYPES.contains(annotation.getType()) && !annotations.contains(annotation)) {
-                        if (ele.hasNonNull("name")) {
-                            annotation.setName(ele.get("name").asText());
-                        }
-                        if (ele.hasNonNull("id")) {
-                            annotation.setId(ele.get("id").asText());
-                        }
-                        if (ele.hasNonNull("guid")) {
-                            annotation.setGuid(ele.get("guid").asText());
-                        }
-                        if (ele.hasNonNull("description")) {
-                            annotation.setDescription(ele.get("description").asText());
-                        }
+                        annotation.setName(getNodeAttribute(ele, "name"));
+                        annotation.setId(getNodeAttribute(ele, "id"));
+                        annotation.setGuid(getNodeAttribute(ele, "guid"));
+                        annotation.setDescription(getNodeAttribute(ele, "description"));
+
                         if (ele.hasNonNull("tags")) {
                             final List<String> tags = new ArrayList<>();
                             ele.get("tags").elements().forEachRemaining(e -> tags.add(e.textValue()));
@@ -80,7 +75,7 @@ public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
                         }
                         annotations.add(annotation);
                     } else {
-                        LOGGER.log(Level.WARNING, "Annotations contain unsupported or duplicate annotation: {0}", annotation.getType());
+                        alertUser(annotation.getType());
                     }
 
                 } else if (ele.isTextual()) {
@@ -88,12 +83,33 @@ public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
                     if (AnnotationConstants.SUPPORTED_ANNOTATION_TYPES.contains(annotation.getType()) && !annotations.contains(annotation)) {
                         annotations.add(annotation);
                     } else {
-                        LOGGER.log(Level.WARNING, "Annotations contain unsupported or duplicate annotation: {0}", annotation.getType());
+                        alertUser(annotation.getType());
                     }
                 }
             });
             return annotations;
         }
         return Collections.emptySet();
+    }
+
+    /**
+     * Gets the JsonNode attribute value.
+     * @param node
+     * @param attribute
+     * @return
+     */
+    private String getNodeAttribute(final JsonNode node,  final String attribute) {
+        if (node.hasNonNull(attribute)) {
+            return node.get(attribute).asText();
+        }
+        return EMPTY;
+    }
+
+    /**
+     * Logs the warning for unsupported/duplicate annotation types.
+     * @param annotationType
+     */
+    private void alertUser (final String annotationType) {
+        LOGGER.log(Level.WARNING, "Annotations contain unsupported or duplicate annotation: {0}", annotationType);
     }
 }
