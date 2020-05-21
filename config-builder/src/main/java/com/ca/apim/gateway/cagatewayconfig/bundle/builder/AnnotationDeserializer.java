@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -15,6 +16,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * AnnotationDeserializer deserializes the "annotations" tag in the entity elements. Annotation on entities are
@@ -38,6 +41,7 @@ import java.util.*;
  * {@link java.util.Set} of {@link com.ca.apim.gateway.cagatewayconfig.beans.Annotation}
  */
 public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
+    private static final Logger LOGGER = Logger.getLogger(AnnotationDeserializer.class.getName());
 
     /**
      * Deserializes the input into set of annotations.
@@ -56,26 +60,36 @@ public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
             node.elements().forEachRemaining(ele -> {
                 if (ele.isObject() && ele.hasNonNull("type")) {
                     final Annotation annotation = new Annotation(ele.get("type").asText());
-                    if (ele.hasNonNull("name")) {
-                        annotation.setName(ele.get("name").asText());
+                    if (AnnotationConstants.SUPPORTED_ANNOTATION_TYPES.contains(annotation.getType()) && !annotations.contains(annotation)) {
+                        if (ele.hasNonNull("name")) {
+                            annotation.setName(ele.get("name").asText());
+                        }
+                        if (ele.hasNonNull("id")) {
+                            annotation.setId(ele.get("id").asText());
+                        }
+                        if (ele.hasNonNull("guid")) {
+                            annotation.setGuid(ele.get("guid").asText());
+                        }
+                        if (ele.hasNonNull("description")) {
+                            annotation.setDescription(ele.get("description").asText());
+                        }
+                        if (ele.hasNonNull("tags")) {
+                            final List<String> tags = new ArrayList<>();
+                            ele.get("tags").elements().forEachRemaining(e -> tags.add(e.textValue()));
+                            annotation.setTags(tags);
+                        }
+                        annotations.add(annotation);
+                    } else {
+                        LOGGER.log(Level.WARNING, "Annotations contain unsupported or duplicate annotation: {0}", annotation.getType());
                     }
-                    if (ele.hasNonNull("id")) {
-                        annotation.setId(ele.get("id").asText());
-                    }
-                    if (ele.hasNonNull("guid")) {
-                        annotation.setGuid(ele.get("guid").asText());
-                    }
-                    if (ele.hasNonNull("description")) {
-                        annotation.setDescription(ele.get("description").asText());
-                    }
-                    if (ele.hasNonNull("tags")) {
-                        final List<String> tags = new ArrayList<>();
-                        ele.get("tags").elements().forEachRemaining(e -> tags.add(e.textValue()));
-                        annotation.setTags(tags);
-                    }
-                    annotations.add(annotation);
+
                 } else if (ele.isTextual()) {
-                    annotations.add(new Annotation(ele.asText()));
+                    final Annotation annotation = new Annotation(ele.asText());
+                    if (AnnotationConstants.SUPPORTED_ANNOTATION_TYPES.contains(annotation.getType()) && !annotations.contains(annotation)) {
+                        annotations.add(annotation);
+                    } else {
+                        LOGGER.log(Level.WARNING, "Annotations contain unsupported or duplicate annotation: {0}", annotation.getType());
+                    }
                 }
             });
             return annotations;
