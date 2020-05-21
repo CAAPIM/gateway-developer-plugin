@@ -33,8 +33,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 
 @Singleton
 public class BundleFileBuilder {
@@ -128,6 +127,8 @@ public class BundleFileBuilder {
                 key + BUNDLE_EXTENSION).toPath());
         documentFileUtils.createFile(bundleArtifacts.getDeleteBundle(), new File(outputDir,
                 key + DELETE_BUNDLE_EXTENSION).toPath());
+        documentFileUtils.createFile(bundleArtifacts.getDeleteEnvBundle(), new File(outputDir,
+                key + DELETE_ENV_BUNDLE_EXTENSION).toPath());
         jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), key, outputDir);
     }
 

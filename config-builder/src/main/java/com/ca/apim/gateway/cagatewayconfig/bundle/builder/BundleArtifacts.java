@@ -12,11 +12,13 @@ public class BundleArtifacts {
 
     private final Element bundle;
     private final Element deleteBundle;
+    private final Element deleteEnvBundle;
     private final BundleMetadata bundleMetadata;
 
-    public BundleArtifacts(Element bundle, Element deleteBundle, BundleMetadata bundleMetadata) {
+    public BundleArtifacts(Element bundle, Element deleteBundle, Element deleteEnvBundle, BundleMetadata bundleMetadata) {
         this.bundle = bundle;
         this.deleteBundle = deleteBundle;
+        this.deleteEnvBundle = deleteEnvBundle;
         this.bundleMetadata = bundleMetadata;
     }
 
@@ -26,6 +28,10 @@ public class BundleArtifacts {
 
     public Element getDeleteBundle() {
         return deleteBundle;
+    }
+
+    public Element getDeleteEnvBundle() {
+        return deleteEnvBundle;
     }
 
     public BundleMetadata getBundleMetadata() {
