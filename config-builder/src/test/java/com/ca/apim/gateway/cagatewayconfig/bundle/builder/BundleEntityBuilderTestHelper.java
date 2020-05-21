@@ -303,11 +303,7 @@ public class BundleEntityBuilderTestHelper {
         if (isRedeployableBundle || !isBundleContainReusableEntity) {
             assertTrue(metadata.isRedeployable());
         }
-        if (hasRouting) {
-            assertTrue(metadata.isHasRouting());
-        } else {
-            assertFalse(metadata.isHasRouting());
-        }
+        assertEquals(hasRouting, metadata.isHasRouting());
         assertEquals(1, metadata.getDefinedEntities().size());
         Optional<Metadata> definedEntities = metadata.getDefinedEntities().stream().findFirst();
         assertTrue(definedEntities.isPresent());
