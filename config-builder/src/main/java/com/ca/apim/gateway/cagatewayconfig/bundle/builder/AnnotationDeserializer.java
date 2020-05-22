@@ -96,7 +96,7 @@ public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
      * Gets the JsonNode attribute value.
      * @param node
      * @param attribute
-     * @return
+     * @return value of attribute if present else empty string.
      */
     private String getNodeAttribute(final JsonNode node,  final String attribute) {
         if (node.hasNonNull(attribute)) {
@@ -110,6 +110,6 @@ public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
      * @param annotationType
      */
     private void alertUser (final String annotationType) {
-        LOGGER.log(Level.WARNING, "Annotations contain unsupported or duplicate annotation: {0}", annotationType);
+        LOGGER.log(Level.WARNING, "Found unsupported or duplicated annotation: {0}, ignoring it.", annotationType);
     }
 }
