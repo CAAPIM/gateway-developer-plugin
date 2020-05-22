@@ -165,19 +165,18 @@ public class BundleEntityBuilder {
     /**
      * Copies all the filtered entities in the reverse order to a new {@link List}. The entries in the DELETE bundle
      * must be in the reverse order of deployment bundle.
-     * <p>
-     * All Environment entities and Folders are skipped from the DELETE bundle list.
+     * All the Folders are skipped from the DELETE bundle list and added only matching entities.
      *
      * @param entities        Entities in the deployment bundle
-     * @param entityPredicate predicate for entity inclusion
+     * @param entityFilter predicate for entity inclusion
      * @return Filtered list of entities in the reverse order
      */
-    private List<Entity> copyFilteredEntitiesForDeleteBundle(List<Entity> entities, Predicate<Entity> entityPredicate) {
+    private List<Entity> copyFilteredEntitiesForDeleteBundle(List<Entity> entities, Predicate<Entity> entityFilter) {
         List<Entity> deleteBundleEntities = new ArrayList<>();
         for (int i = entities.size() - 1; i >= 0; i--) { // Copy in reverse order
             final Entity entity = entities.get(i);
-            // SKIP all Environment entities and Folders from the DELETE bundle
-            if (entityPredicate.test(entity) && !FOLDER_TYPE.equals(entity.getType())) {
+            // Add matching entities and skip Folders from the DELETE bundle
+            if (entityFilter.test(entity) && !FOLDER_TYPE.equals(entity.getType())) {
                 deleteBundleEntities.add(entity);
             }
         }
