@@ -67,13 +67,10 @@ public class BundleMetadataBuilderTest {
                     "my-bundle", "my-bundle-group", "1.0");
 
             assertTrue(bundleOutput.exists());
-            assertEquals(4, bundleOutput.listFiles().length);
+            assertEquals(3, bundleOutput.listFiles().length);
             for (File generatedFile : bundleOutput.listFiles()) {
-                if (StringUtils.endsWith(generatedFile.getName(), DELETE_ENV_BUNDLE_EXTENSION)) {
-                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + DELETE_ENV_BUNDLE_EXTENSION,
-                            generatedFile.getName());
-                }
-                else if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
+
+                if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
                     assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + DELETE_BUNDLE_EXTENSION,
                             generatedFile.getName());
                 } else if (StringUtils.endsWith(generatedFile.getName(), BUNDLE_EXTENSION)) {
@@ -103,12 +100,9 @@ public class BundleMetadataBuilderTest {
 
             bundleOutput = new File(temporaryFolder.getRoot(), "output");
             assertTrue(bundleOutput.exists());
-            assertEquals(4, bundleOutput.listFiles().length);
+            assertEquals(3, bundleOutput.listFiles().length);
             for (File generatedFile : bundleOutput.listFiles()) {
-                if (StringUtils.endsWith(generatedFile.getName(), DELETE_ENV_BUNDLE_EXTENSION)) {
-                    assertEquals("my-bundle-"+ encass.getName() + "-1.0" + DELETE_ENV_BUNDLE_EXTENSION,
-                            generatedFile.getName());
-                } else if (StringUtils.endsWith(generatedFile.getName(), ".delete.bundle")) {
+                if (StringUtils.endsWith(generatedFile.getName(), ".delete.bundle")) {
                     assertEquals("my-bundle-" + encass.getName() + "-1.0" + DELETE_BUNDLE_EXTENSION,
                             generatedFile.getName());
                 } else if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {

@@ -6,11 +6,14 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.DEFAULT_HTTPS_8443;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.DEFAULT_HTTP_8080;
 
 @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public final class BuilderConstants {
@@ -25,7 +28,8 @@ public final class BuilderConstants {
     public static final Predicate<Entity> FILTER_ENV_ENTITIES = new Predicate<Entity>() {
         @Override
         public boolean test(Entity entity) {
-            return !NON_ENV_ENTITY_TYPES.contains(entity.getType());
+            return !NON_ENV_ENTITY_TYPES.contains(entity.getType()) &&
+                    !(EntityTypes.LISTEN_PORT_TYPE.equals(entity.getType()) && (DEFAULT_HTTP_8080.equals(entity.getName()) || DEFAULT_HTTPS_8443.equals(entity.getName())));
         }
     };
 

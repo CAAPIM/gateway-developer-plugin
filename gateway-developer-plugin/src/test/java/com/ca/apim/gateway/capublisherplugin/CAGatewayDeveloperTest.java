@@ -73,8 +73,6 @@ class CAGatewayDeveloperTest {
         assertTrue(builtBundleFile.isFile());
         File builtDeleteBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + ".delete.bundle");
         assertTrue(builtDeleteBundleFile.isFile());
-        File builtDeleteEnvBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + ".delete.env.bundle");
-        assertTrue(builtDeleteEnvBundleFile.isFile());
     }
 
     @Test
@@ -277,7 +275,7 @@ class CAGatewayDeveloperTest {
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
                 .withArguments(
-                        "build-bundle",
+                        "build-environment-bundle",
                         "--stacktrace",
                         "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
                         "-DconfigFolder=src/main/gateway/config",
@@ -287,19 +285,14 @@ class CAGatewayDeveloperTest {
                 .build();
 
         LOGGER.log(Level.INFO, result.getOutput());
-        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
 
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".bundle");
-        assertTrue(builtBundleFile.isFile());
-
-        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".delete.env.bundle");
+        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config.environment.delete.bundle");
         assertTrue(builtDeleteEnvBundleFile.isFile());
 
-        File builtDeleteBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".delete.bundle");
-        assertTrue(builtDeleteBundleFile.isFile());
     }
 
     @Test
@@ -331,10 +324,10 @@ class CAGatewayDeveloperTest {
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config" + ".environment.bundle");
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config.environment.bundle");
         assertTrue(builtBundleFile.isFile());
 
-        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".delete.env.bundle");
+        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config.environment.delete.bundle");
         assertTrue(builtDeleteEnvBundleFile.isFile());
 
         File builtDeleteBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".delete.bundle");

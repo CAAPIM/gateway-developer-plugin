@@ -60,7 +60,10 @@ public class BundleEntityBuilder {
                     null);
 
             // Create DELETE Environment bundle
-            final Element deleteEnvBundleElement = createDeleteEnvBundle(document, entities);
+            Element deleteEnvBundleElement = null;
+            if (EntityBuilder.BundleType.ENVIRONMENT.equals(bundleType)) {
+                deleteEnvBundleElement = createDeleteEnvBundle(document, entities);
+            }
             artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
                     new BundleArtifacts(fullBundle, deleteBundleElement, deleteEnvBundleElement, null));
         }
@@ -97,7 +100,10 @@ public class BundleEntityBuilder {
                                         annotatedEntity);
 
                                 // Create DELETE Environment bundle
-                                final Element deleteEnvBundleElement = createDeleteEnvBundle(document, entities);
+                                Element deleteEnvBundleElement = null;
+                                if (EntityBuilder.BundleType.ENVIRONMENT.equals(bundleType)) {
+                                    deleteEnvBundleElement = createDeleteEnvBundle(document, entities);
+                                }
 
                                 // Create bundle metadata
                                 final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedBundle,
