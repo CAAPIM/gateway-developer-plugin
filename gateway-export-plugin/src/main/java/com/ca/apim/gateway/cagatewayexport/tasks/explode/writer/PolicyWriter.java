@@ -7,8 +7,10 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
@@ -16,6 +18,9 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
@@ -23,6 +28,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.ENCAPSULATED;
 import static java.util.stream.Collectors.toList;
 
 @Singleton
@@ -31,6 +37,7 @@ public class PolicyWriter implements EntityWriter {
     private final JsonFileUtils jsonFileUtils;
     private PolicyConverterRegistry policyConverterRegistry;
     private final EntityLinkerRegistry entityLinkerRegistry;
+    static final String ENCASS_NAME = "encassName";
 
     @Inject
     PolicyWriter(PolicyConverterRegistry policyConverterRegistry, DocumentFileUtils documentFileUtils,
@@ -59,7 +66,7 @@ public class PolicyWriter implements EntityWriter {
         Map<String, Service> services = bundle.getEntities(Service.class);
         services.values().parallelStream().forEach(serviceEntity -> {
             writePolicy(bundle, policyFolder, serviceEntity, serviceEntity.getPolicyXML());
-            final PolicyMetadata policyMetadata = createPolicyMetadata(bundle, rawBundle, null, serviceEntity);
+            final PolicyMetadata policyMetadata = createPolicyMetadata(bundle, rawBundle, null, serviceEntity, serviceEntity.getPolicyXML());
             policyMetadataMap.put(policyMetadata.getFullPath(), policyMetadata);
         });
 
@@ -70,13 +77,13 @@ public class PolicyWriter implements EntityWriter {
         ).flatMap(s -> s)
                 .forEach(policyEntity -> {
                     writePolicy(bundle, policyFolder, policyEntity, policyEntity.getPolicyDocument());
-                    final PolicyMetadata policyMetadata = createPolicyMetadata(bundle, rawBundle, policyEntity, policyEntity);
+                    final PolicyMetadata policyMetadata = createPolicyMetadata(bundle, rawBundle, policyEntity, policyEntity, policyEntity.getPolicyDocument());
                     policyMetadataMap.put(policyMetadata.getFullPath(), policyMetadata);
                 });
         writePolicyMetadata(policyMetadataMap, rootFolder);
     }
 
-    private PolicyMetadata createPolicyMetadata(final Bundle bundle, final Bundle rawBundle, final Policy policyEntity, final Folderable folderableEntity) {
+    private PolicyMetadata createPolicyMetadata(final Bundle bundle, final Bundle rawBundle, final Policy policyEntity, final Folderable folderableEntity, final Element policy) {
         final PolicyMetadata policyMetadata = new PolicyMetadata();
         final Folder folder = bundle.getFolderTree().getFolderById(folderableEntity.getParentFolderId());
         final Path policyPath = bundle.getFolderTree().getPath(folder);
@@ -92,7 +99,7 @@ public class PolicyWriter implements EntityWriter {
             policyMetadata.setTag(policyEntity.getTag());
             policyMetadata.setSubtag(policyEntity.getSubtag());
         }
-        Set<Dependency> dependencies = getPolicyDependencies(folderableEntity.getId(), rawBundle);
+        Set<Dependency> dependencies = getPolicyDependencies(folderableEntity.getId(), rawBundle, policy);
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
         entityLinkers.forEach(e -> {
             if (e != null) {
@@ -114,18 +121,45 @@ public class PolicyWriter implements EntityWriter {
         }
     }
 
-    private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle){
+    private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle, final Element policy) {
         Map<Dependency, List<Dependency>> dependencyListMap = rawBundle.getDependencyMap();
+        final Set<Dependency> dependencies = new HashSet<>();
         if (dependencyListMap != null) {
             Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
             for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
                 Dependency parent = entry.getKey();
                 if (parent.getId().equals(id)) { // Search for "id" to get its dependencies
-                    return new HashSet<>(entry.getValue());
+                    List<Dependency> policyDependencies = entry.getValue();
+                    if (policyDependencies != null) {
+                        Set<String> dependentEncassSet = getDependentEncapsulatedEntities(policy);
+                        for (Dependency dependency : policyDependencies) {
+                            if (!EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(dependency.getType())) {
+                                dependencies.add(dependency);
+                            } else if (dependentEncassSet.contains(dependency.getName())) {
+                                dependencies.add(dependency);
+                            }
+                        }
+                    }
                 }
             }
         }
-        return Collections.emptySet();
+        return dependencies;
+    }
+
+    private Set<String> getDependentEncapsulatedEntities(final Element policyElement) {
+        Set<String> encassEntities = new HashSet<>();
+        NodeList assertionReferences = policyElement.getElementsByTagName(ENCAPSULATED);
+
+        for (int index = 0; index < assertionReferences.getLength(); index++) {
+            Node assertionElement = assertionReferences.item(index);
+            if (assertionElement instanceof Element) {
+                Element encassElement = (Element) assertionElement;
+                if (encassElement.hasAttribute(ENCASS_NAME)) {
+                    encassEntities.add(encassElement.getAttribute(ENCASS_NAME));
+                }
+            }
+        }
+        return encassEntities;
     }
 
     private void writePolicy(Bundle bundle, File policyFolder, Folderable folderableEntity, Element policy) {
