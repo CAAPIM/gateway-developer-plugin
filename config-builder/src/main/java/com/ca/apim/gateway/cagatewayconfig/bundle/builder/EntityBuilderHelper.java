@@ -39,7 +39,8 @@ class EntityBuilderHelper {
         Map<String, Object> properties = new HashMap<>();
         properties.put(PROPERTY_BUNDLE_ENTITY_NAME, name);
         properties.put(PROPERTY_GUID, guid);
-        Entity entity = new Entity(type, originalName, id, element, properties);
+        Entity entity = new Entity(type, originalName, id, element);
+        entity.setProperties(properties);
         entity.setMappingProperty(MAP_BY, MappingProperties.NAME);
         entity.setMappingProperty(MAP_TO, name);
         return entity;
@@ -50,7 +51,8 @@ class EntityBuilderHelper {
         Map<String, Object> properties = new HashMap<>();
         properties.put(PROPERTY_BUNDLE_ENTITY_NAME, pathInBundle);
         properties.put(PROPERTY_HAS_ROUTING, hasRouting);
-        Entity entity = new Entity(type, originalPath, id, element, properties);
+        Entity entity = new Entity(type, originalPath, id, element);
+        entity.setProperties(properties);
         entity.setMappingProperty(MAP_BY, MappingProperties.PATH);
         entity.setMappingProperty(MAP_TO, pathInBundle);
         return entity;
@@ -59,7 +61,7 @@ class EntityBuilderHelper {
     @VisibleForTesting
     static Entity getEntityWithMappings(final String type, final String path, final String id, final Element element,
                                         final String mappingAction, final Map<String, Object> mappingProperties) {
-        Entity entity = new Entity(type, path, id, element, null);
+        Entity entity = new Entity(type, path, id, element);
         entity.setMappingAction(mappingAction);
 
         mappingProperties.forEach(entity::setMappingProperty);

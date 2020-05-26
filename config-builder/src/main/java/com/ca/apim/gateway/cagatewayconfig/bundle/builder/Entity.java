@@ -28,14 +28,11 @@ public class Entity {
     private String mappingAction;
     private final Map<String, Object> mappingProperties = new HashMap<>();
 
-    public Entity(String type, String originalName, String id, Element xml, Map<String, Object> properties) {
+    public Entity(String type, String originalName, String id, Element xml) {
         this.type = type;
         this.originalName = originalName;
         this.id = id;
         this.xml = xml;
-        if (properties != null) {
-            this.properties.putAll(properties);
-        }
     }
 
     public String getType() {
@@ -55,6 +52,13 @@ public class Entity {
 
     public Map<String, Object> getProperties() {
         return properties;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        if (properties != null) {
+            this.properties.clear();
+            this.properties.putAll(properties);
+        }
     }
 
     public String getGuid() {
