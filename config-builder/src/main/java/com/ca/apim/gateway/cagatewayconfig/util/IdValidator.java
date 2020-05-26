@@ -1,5 +1,6 @@
 package com.ca.apim.gateway.cagatewayconfig.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -68,6 +69,9 @@ public class IdValidator {
     }
 
     public static boolean isValidGoid(final String goid) {
+        if (StringUtils.isBlank(goid)) {
+            return false;
+        }
         try {
             final String goidHex;
             if (goid.length() == 32) {
@@ -94,6 +98,9 @@ public class IdValidator {
     }
 
     public static boolean isValidGuid(final String guid) {
+        if (StringUtils.isBlank(guid)) {
+            return false;
+        }
         try {
             UUID.fromString(guid);
         } catch (Exception e) {

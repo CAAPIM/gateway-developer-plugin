@@ -132,14 +132,14 @@ public class EncassEntityBuilder implements EntityBuilder {
             if (encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity)) {
                 //use the id and guid defined at reusable annotation or bundle annotation (if its annotated bundle)
                 if (annotatedEncassEntity.getGuid() != null) {
-                    if (annotatedEncassEntity.getGuid().length() > 0 && IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
+                    if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
                         guid = annotatedEncassEntity.getGuid();
                     } else {
                         LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
                     }
                 }
                 if (annotatedEncassEntity.getId() != null) {
-                    if (annotatedEncassEntity.getId().length() > 0 && IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
+                    if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
                         id = annotatedEncassEntity.getId();
                     } else {
                         LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
