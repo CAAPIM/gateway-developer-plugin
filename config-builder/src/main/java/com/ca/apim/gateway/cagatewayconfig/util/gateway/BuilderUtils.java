@@ -6,21 +6,25 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.annotation.Nullable;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElements;
 import static java.lang.Integer.parseInt;
@@ -154,6 +158,22 @@ public class BuilderUtils {
         } catch (ParseException e) {
             throw new EntityBuilderException("Unable to parse date property (" + key + ") value: " + dateAsString);
         }
+    }
+
+    public static String generateBundleName(boolean isFullBundle, ProjectInfo projectInfo, @Nullable String entityName,
+                                            @Nullable String nameInAnnotation) {
+        if (isFullBundle) {
+            return projectInfo.getName() + "-"  + projectInfo.getVersion();
+        }
+        if (StringUtils.isNotBlank(nameInAnnotation)) {
+            return nameInAnnotation + "-" + projectInfo.getVersion();
+        }
+        return projectInfo.getName() + "-" + entityName + "-" + projectInfo.getVersion();
+    }
+
+    public static String generatePolicyBundleFileName(String bundleName, boolean isDeleteBundle) {
+        return isDeleteBundle ? bundleName + POLICY_DELETE_BUNDLE_EXTENSION :
+                bundleName + POLICY_INSTALL_BUNDLE_EXTENSION;
     }
 
     private BuilderUtils() {

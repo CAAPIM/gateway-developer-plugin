@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
@@ -22,6 +23,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
@@ -33,6 +35,8 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  * The BuildEnvironmentBundle task will grab provided environment properties and build a bundle.
  */
 public class BuildEnvironmentBundleTask extends DefaultTask {
+
+    private static final Pattern REGEX_ALPHANUMERIC = Pattern.compile("[^A-Za-z0-9]");
 
     private final DirectoryProperty into;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
@@ -66,23 +70,41 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     public void perform() {
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
         final List<File> metaDataFiles = collectFiles(into.getAsFile().get().getPath(), YML_EXTENSION);
-        if(metaDataFiles.isEmpty()) {
+        if (metaDataFiles.isEmpty()) {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
+
         metaDataFiles.stream().forEach(metaDataFile-> {
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
             if (null != bundleEnvironmentValues) {
-                final String bundleFileName = bundleEnvironmentValues.getLeft() + "." + configName.get() + ".environment.bundle";
+                final String envBundleFilenameWithSuffix = getEnvBundleFileName(bundleEnvironmentValues.getLeft());
                 environmentBundleCreator.createEnvironmentBundle(
                         bundleEnvironmentValues.getRight(),
                         into.getAsFile().get().getPath(),
                         into.getAsFile().get().getPath(),
                         EMPTY,
                         PLUGIN,
-                        bundleFileName,
+                        envBundleFilenameWithSuffix, // Passing envBundleFilenameWithSuffix
                         bundleEnvironmentValues.getLeft()
                 );
             }
         });
+    }
+
+    private String getEnvBundleFileName(String deployBundleName) {
+        if (configName != null && StringUtils.isNotBlank(configName.get())) {
+            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + "env";
+        } else {
+            String configFolderName = configFolder != null ? configFolder.getAsFile().get().getName() : "";
+            if (StringUtils.equalsIgnoreCase(configFolderName, "config")) {
+                return deployBundleName + "-env";
+            } else {
+                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + "env";
+            }
+        }
+    }
+
+    private String removeAllSpecialChars(String str) {
+        return REGEX_ALPHANUMERIC.matcher(str).replaceAll("");
     }
 }

@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleArtifacts;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
@@ -30,6 +31,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DE
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static java.util.stream.Collectors.toList;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Singleton
 public class EnvironmentBundleCreator {
@@ -70,11 +72,12 @@ public class EnvironmentBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
+        // Passing Bundle name and version string with config env name (<name>-<version>-*env) as project name
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
-                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null);
+                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(bundleFileName, EMPTY, EMPTY));
         for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
             documentFileUtils.createFile(entry.getValue().getBundle(), new File(bundleFolderPath,
-                    entry.getKey()).toPath());
+                    entry.getValue().getBundleFileName()).toPath());
         }
         return environmentBundle;
     }

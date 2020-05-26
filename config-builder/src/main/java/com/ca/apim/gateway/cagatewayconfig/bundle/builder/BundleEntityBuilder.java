@@ -6,7 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -21,6 +23,8 @@ import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
 import static java.util.Collections.unmodifiableSet;
 
 @Singleton
@@ -42,26 +46,26 @@ public class BundleEntityBuilder {
         this.entityTypeRegistry = entityTypeRegistry;
     }
 
-    public Map<String, BundleArtifacts> build(Bundle bundle, EntityBuilder.BundleType bundleType,
-                                               Document document, String projectName,
-                                               String projectGroupName, String projectVersion) {
+    public Map<String, BundleArtifacts> build(Bundle bundle, BundleType bundleType,
+                                              Document document, ProjectInfo projectInfo) {
 
-        Map<String, BundleArtifacts> artifacts = buildAnnotatedEntities(bundleType, bundle, document, projectName,
-                projectGroupName, projectVersion);
+        Map<String, BundleArtifacts> artifacts = buildAnnotatedEntities(bundleType, bundle, document, projectInfo);
         if (artifacts.isEmpty()) {
             List<Entity> entities = new ArrayList<>();
             entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
             final Element fullBundle = bundleDocumentBuilder.build(document, entities);
-            artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
-                    new BundleArtifacts(fullBundle, null, null));
+            final String bundleName = StringUtils.isBlank(projectInfo.getVersion()) ? projectInfo.getName() :
+                    projectInfo.getName() + "-" + projectInfo.getVersion();
+            final String bundleFileName = generateBundleFileName(bundleType, true, false, bundleName);
+            final String deleteBundleFileName = generateBundleFileName(bundleType, true, true, bundleName);
+            artifacts.put(bundleName, new BundleArtifacts(fullBundle, null, null, bundleFileName,
+                    deleteBundleFileName));
         }
         return artifacts;
     }
 
-    private Map<String, BundleArtifacts> buildAnnotatedEntities(EntityBuilder.BundleType bundleType, Bundle bundle,
-                                                                              Document document, String projectName,
-                                                                              String projectGroupName,
-                                                                              String projectVersion) {
+    private Map<String, BundleArtifacts> buildAnnotatedEntities(BundleType bundleType, Bundle bundle,
+                                                                Document document, ProjectInfo projectInfo) {
         final Map<String, BundleArtifacts> annotatedElements = new LinkedHashMap<>();
         Map<String, EntityUtils.GatewayEntityInfo> entityTypeMap = entityTypeRegistry.getEntityTypeMap();
         // Filter the bundle to export only annotated entities
@@ -72,9 +76,7 @@ public class BundleEntityBuilder {
                         .forEach(annotatedEntity -> {
                             if (annotatedEntity != null && annotatedEntity.isBundle()) {
                                 List<Entity> entities = new ArrayList<>();
-                                AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
-                                annotatedBundle.setProjectName(projectName);
-                                annotatedBundle.setProjectVersion(projectVersion);
+                                AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
                                 Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
                                 bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
                                 loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, false);
@@ -85,14 +87,19 @@ public class BundleEntityBuilder {
 
                                 // Create DELETE bundle - ALWAYS skip environment entities
                                 final Element deleteBundleElement = createDeleteBundle(document, entities, bundle,
-                                        annotatedEntity);
+                                        annotatedEntity, projectInfo);
 
                                 // Create bundle metadata
                                 final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedBundle,
-                                        annotatedEntity, entities, projectGroupName, projectVersion);
+                                        annotatedEntity, entities, projectInfo);
 
+                                final String bundleFileName = generateBundleFileName(bundleType, false, false,
+                                        annotatedBundle.getBundleName());
+                                final String deleteBundleFileName = generateBundleFileName(bundleType, false, true,
+                                        annotatedBundle.getBundleName());
                                 annotatedElements.put(annotatedBundle.getBundleName(),
-                                        new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata));
+                                        new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata,
+                                                bundleFileName, deleteBundleFileName));
                             }
                         })
         );
@@ -110,14 +117,14 @@ public class BundleEntityBuilder {
      * @return Delete bundle Element for the Annotated Bundle
      */
     private Element createDeleteBundle(final Document document, List<Entity> entities, final Bundle bundle,
-                                       final AnnotatedEntity<GatewayEntity> annotatedEntity) {
+                                       final AnnotatedEntity<GatewayEntity> annotatedEntity, ProjectInfo projectInfo) {
         List<Entity> deleteBundleEntities = copyFilteredEntitiesForDeleteBundle(entities);
 
         // If @redeployable annotation is added, we can blindly include all the dependencies in the DELETE bundle.
         // Else, we have to include only non-reusable entities
         if (!annotatedEntity.isRedeployable()) {
             // Include only non-reusable entities
-            AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+            AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
             Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
             bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
             loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, true);
@@ -316,6 +323,19 @@ public class BundleEntityBuilder {
             }
         }
         return null;
+    }
+
+    private String generateBundleFileName(BundleType bundleType, boolean isFullBundle,
+                                          boolean isDeleteBundle, String bundleName) {
+        String filenameSuffix = isDeleteBundle ? DELETE_BUNDLE_EXTENSION : INSTALL_BUNDLE_EXTENSION;
+        if (bundleType == BundleType.ENVIRONMENT) {
+            return bundleName + filenameSuffix;
+        }
+        if (isFullBundle) {
+            return bundleName + "-full" + filenameSuffix;
+        } else {
+            return bundleName + "-policy" + filenameSuffix;
+        }
     }
 
     @VisibleForTesting
