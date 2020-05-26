@@ -19,6 +19,7 @@ public final class BuilderConstants {
     }
 
     public static final String STORED_PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
+    public static final String BUNDLE_TYPE_ALL = "ALL";
 
     protected static final Set<String> NON_ENV_ENTITY_TYPES;
 
@@ -26,6 +27,13 @@ public final class BuilderConstants {
         @Override
         public boolean test(Entity entity) {
             return !NON_ENV_ENTITY_TYPES.contains(entity.getType());
+        }
+    };
+
+    public static final Predicate<Entity> FILTER_METADATA_NON_ENV_ENTITIES = new Predicate<Entity>() {
+        @Override
+        public boolean test(Entity entity) {
+            return !EntityTypes.FOLDER_TYPE.equals(entity.getType()) && NON_ENV_ENTITY_TYPES.contains(entity.getType());
         }
     };
 

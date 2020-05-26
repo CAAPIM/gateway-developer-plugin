@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
@@ -26,7 +27,6 @@ import java.util.Map;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
-import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YML_EXTENSION;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
@@ -65,14 +65,14 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     @TaskAction
     public void perform() {
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
-        final List<File> metaDataFiles = collectFiles(into.getAsFile().get().getPath(), YML_EXTENSION);
+        final List<File> metaDataFiles = collectFiles(into.getAsFile().get().getPath(), JsonFileUtils.METADATA_FILE_NAME_SUFFIX);
         if(metaDataFiles.isEmpty()) {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
         metaDataFiles.stream().forEach(metaDataFile-> {
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
             if (null != bundleEnvironmentValues) {
-                final String bundleFileName = bundleEnvironmentValues.getLeft() + "." + configName.get() + ".environment.bundle";
+                final String bundleFileName = bundleEnvironmentValues.getLeft() + "." + configName.get() + ".env.install.bundle";
                 environmentBundleCreator.createEnvironmentBundle(
                         bundleEnvironmentValues.getRight(),
                         into.getAsFile().get().getPath(),

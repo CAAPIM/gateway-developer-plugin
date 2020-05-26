@@ -52,8 +52,15 @@ public class BundleEntityBuilder {
             List<Entity> entities = new ArrayList<>();
             entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
             final Element fullBundle = bundleDocumentBuilder.build(document, entities);
+            BundleMetadata fullBundleMetadata = null;
+            if (EntityBuilder.BundleType.DEPLOYMENT.equals(bundleType)) {
+                // Create full bundle metadata
+                fullBundleMetadata = bundleMetadataBuilder.build(null, null, entities,
+                        projectName, projectGroupName, projectVersion);
+            }
+
             artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
-                    new BundleArtifacts(fullBundle, null, null));
+                    new BundleArtifacts(fullBundle, null, fullBundleMetadata));
         }
         return artifacts;
     }
@@ -89,7 +96,7 @@ public class BundleEntityBuilder {
 
                                 // Create bundle metadata
                                 final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedBundle,
-                                        annotatedEntity, entities, projectGroupName, projectVersion);
+                                        annotatedEntity, entities, projectName, projectGroupName, projectVersion);
 
                                 annotatedElements.put(annotatedBundle.getBundleName(),
                                         new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata));

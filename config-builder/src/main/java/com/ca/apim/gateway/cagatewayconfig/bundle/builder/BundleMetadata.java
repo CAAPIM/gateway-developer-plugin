@@ -22,10 +22,8 @@ public class BundleMetadata implements Metadata {
     private String id;
     private String version;
     private String groupName;
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String description;
     private Collection<Metadata> definedEntities;
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Collection<String> tags;
     private boolean reusable;
     private boolean redeployable;
@@ -108,6 +106,7 @@ public class BundleMetadata implements Metadata {
         private String description;
         private boolean reusable;
         private boolean redeployable;
+        private boolean environmentIncluded;
         private Collection<String> tags;
         private Collection<Metadata> definedEntities = new LinkedList<>();
         private Collection<Metadata> environmentEntities = new LinkedList<>();
@@ -144,6 +143,11 @@ public class BundleMetadata implements Metadata {
             return this;
         }
 
+        public Builder environmentIncluded(boolean environmentIncluded) {
+            this.environmentIncluded = environmentIncluded;
+            return this;
+        }
+
         public Builder tags(final Collection<String> tags) {
             this.tags = tags;
             return this;
@@ -155,6 +159,7 @@ public class BundleMetadata implements Metadata {
             bundleMetadata.definedEntities = definedEntities;
             bundleMetadata.reusable = reusable;
             bundleMetadata.redeployable = redeployable;
+            bundleMetadata.environmentIncluded = environmentIncluded;
             bundleMetadata.tags = tags;
             bundleMetadata.environmentEntities = environmentEntities;
             return bundleMetadata;
