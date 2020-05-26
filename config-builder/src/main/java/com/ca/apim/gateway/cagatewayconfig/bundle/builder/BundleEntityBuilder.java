@@ -56,8 +56,11 @@ public class BundleEntityBuilder {
             entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
             final Element fullBundle = bundleDocumentBuilder.build(document, entities);
             // Create DELETE bundle - ALWAYS skip environment entities
-            final Element deleteBundleElement = createDeleteBundle(document, entities, bundle,
-                    null);
+            Element deleteBundleElement = null;
+            if (EntityBuilder.BundleType.DEPLOYMENT.equals(bundleType)) {
+                deleteBundleElement = createDeleteBundle(document, entities, bundle,
+                        null);
+            }
 
             // Create DELETE Environment bundle
             Element deleteEnvBundleElement = null;
@@ -96,8 +99,11 @@ public class BundleEntityBuilder {
                                 final Element bundleElement = bundleDocumentBuilder.build(document, entities);
 
                                 // Create DELETE bundle - ALWAYS skip environment entities
-                                final Element deleteBundleElement = createDeleteBundle(document, entities, bundle,
-                                        annotatedEntity);
+                                Element deleteBundleElement = null;
+                                if (EntityBuilder.BundleType.DEPLOYMENT.equals(bundleType)) {
+                                    deleteBundleElement = createDeleteBundle(document, entities, bundle,
+                                            annotatedEntity);
+                                }
 
                                 // Create DELETE Environment bundle
                                 Element deleteEnvBundleElement = null;
