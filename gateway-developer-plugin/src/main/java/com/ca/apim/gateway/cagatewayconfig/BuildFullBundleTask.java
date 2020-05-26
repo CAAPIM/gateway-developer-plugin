@@ -12,13 +12,12 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +47,7 @@ public class BuildFullBundleTask extends DefaultTask {
         detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
     }
 
+    @Optional
     @Input
     Property<Map> getEnvironmentConfig() {
         return environmentConfig;
@@ -70,7 +70,7 @@ public class BuildFullBundleTask extends DefaultTask {
 
     @TaskAction
     public void perform() {
-        final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrNull());
+        final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrElse(Collections.EMPTY_MAP));
         final String bundleDirectory = outputBundle.getAsFile().get().getParentFile().getPath();
         final List<File> bundleFiles = union(
                 collectFiles(bundleDirectory, BUNDLE_EXTENSION),
