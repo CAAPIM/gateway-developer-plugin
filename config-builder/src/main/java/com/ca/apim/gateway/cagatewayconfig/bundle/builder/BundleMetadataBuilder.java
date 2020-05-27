@@ -51,8 +51,8 @@ public class BundleMetadataBuilder {
             final String bundleName = annotatedBundle.getBundleName();
             final String name = bundleName.substring(0, bundleName.indexOf(projectVersion) - 1);
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), StringUtils.isNotEmpty(annotatedEntity.getId()) ? annotatedEntity.getId() : idGenerator.generate(),
-                    name, projectGroupName, projectVersion);
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), encass.getGuid(), name,
+                    projectGroupName, projectVersion);
             builder.description(annotatedEntity.getDescription());
             builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
             builder.tags(annotatedEntity.getTags());
