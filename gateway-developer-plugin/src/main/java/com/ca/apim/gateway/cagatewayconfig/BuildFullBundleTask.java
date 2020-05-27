@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.gradle.api.DefaultTask;
@@ -76,6 +77,7 @@ public class BuildFullBundleTask extends DefaultTask {
     }
 
     @InputDirectory
+    @Optional
     DirectoryProperty getConfigFolder() {
         return configFolder;
     }
@@ -89,35 +91,18 @@ public class BuildFullBundleTask extends DefaultTask {
     public void perform() {
         final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
         final String bundleDirectory = into.getAsFile().get().getPath();
-        final List<File> metaDataFiles = collectFiles(bundleDirectory, YML_EXTENSION);
+        final List<File> metaDataFiles = collectFiles(bundleDirectory, JsonFileUtils.METADATA_FILE_NAME_SUFFIX);
         if(metaDataFiles.isEmpty()) {
-            //read environment properties from environmentConfig
-            if (environmentConfig.get().isEmpty()) {
-                throw new MissingEnvironmentException("Metadata file does not exist and environment configuration is not specified in the gradle configuration file.");
-            }
-            final Map<String, String> environmentValuesFromConfig = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get());
-            final String bundleFileName = getProject().getName() + '-' + getProject().getVersion() + "-full.install.bundle";
-            final List<File> bundleFiles = union(
-                    collectFiles(bundleDirectory, EMPTY + BUNDLE_EXTENSION),
-                    filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
-            );
-
-            fullBundleCreator.createFullBundle(
-                    environmentValuesFromConfig,
-                    bundleFiles,
-                    bundleDirectory,
-                    bundleFileName,
-                    detemplatizeDeploymentBundles.get()
-            );
+            throw new MissingEnvironmentException("Metadata file does not exist.");
         }
+
         metaDataFiles.stream().forEach(metaDataFile-> {
-            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
+            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().getOrNull());
             if (null != bundleEnvironmentValues) {
                 final String bundleFileName = bundleEnvironmentValues.getLeft() + "-full.install.bundle";
-                //read environment properties from environmentConfig
-                final Map<String, String> environmentValuesFromConfig = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get());
                 Map<String, String> environmentValuesFromMetadata = bundleEnvironmentValues.getRight();
-                environmentValuesFromMetadata.putAll(environmentValuesFromConfig);
+                //read environment properties from environmentConfig and merge it with metadata properties
+                environmentValuesFromMetadata.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
                 final List<File> bundleFiles = union(
                         collectFiles(bundleDirectory, bundleEnvironmentValues.getLeft() + BUNDLE_EXTENSION),
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())

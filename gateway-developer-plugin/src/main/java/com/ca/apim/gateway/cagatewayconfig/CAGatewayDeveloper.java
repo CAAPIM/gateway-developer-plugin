@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.tasks.gw7.PackageTask;
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -102,7 +103,10 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create(BUILD_ENVIRONMENT_BUNDLE, BuildEnvironmentBundleTask.class, t -> {
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
             t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
-            t.getConfigFolder().set(pluginConfig.getConfigFolder());
+            t.getConfigFolder().set(new DefaultProvider<>(() -> {
+                Directory dir = pluginConfig.getConfigFolder().get();
+                return dir.getAsFile().exists() ? dir : null;
+            }));
             t.getConfigName().set(pluginConfig.getConfigName());
         });
         buildEnvironmentBundleTask.dependsOn(buildDeploymentBundleTask);
@@ -116,7 +120,10 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getDetemplatizeDeploymentBundles().set(pluginConfig.getDetemplatizeDeploymentBundles().getOrElse(true));
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
-            t.getConfigFolder().set(pluginConfig.getConfigFolder());
+            t.getConfigFolder().set(new DefaultProvider<>(() -> {
+                Directory dir = pluginConfig.getConfigFolder().get();
+                return dir.getAsFile().exists() ? dir : null;
+            }));
             t.getConfigName().set(pluginConfig.getConfigName());
         });
         buildFullBundleTask.dependsOn(buildDeploymentBundleTask);
@@ -230,7 +237,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             pluginConfig.getConfigFolder().set(new File(project.getProjectDir(),"src/main/gateway/config"));
         }
         if (!pluginConfig.getConfigName().isPresent()) {
-            pluginConfig.getConfigName().set("config");
+            pluginConfig.getConfigName().set(EMPTY);
         }
     }
 }

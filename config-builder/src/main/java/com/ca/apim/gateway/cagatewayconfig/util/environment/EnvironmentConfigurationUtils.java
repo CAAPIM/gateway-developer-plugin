@@ -94,39 +94,40 @@ public class EnvironmentConfigurationUtils {
             throw new MissingEnvironmentException("Metadata file " + metaDataFile.toString() + " does not exist.");
         }
         final EnvironmentBundleData environmentBundleData = jsonFileUtils.readBundleMetadataFile(metaDataFile, EnvironmentBundleData.class);
-        if (environmentBundleData != null && environmentBundleData.getEnvironmentEntities() != null && !environmentBundleData.getEnvironmentEntities().isEmpty()) {
+        if (environmentBundleData != null && environmentBundleData.getEnvironmentEntities() != null) {
             final String bundleName = environmentBundleData.getName();
             final String bundleVersion = environmentBundleData.getVersion();
             final Map<String, String> environmentValues = new LinkedHashMap<>();
-            final List<Map<String, String>> environmentEntities = environmentBundleData.getEnvironmentEntities();
-            environmentEntities.stream().forEach(environmentEntitiy -> {
-                String entityType = environmentEntitiy.get("type");
-                String entityName = environmentEntitiy.get("name");
-                if (EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entityType)) {
-                    entityName = PREFIX_GATEWAY + environmentEntitiy.get("name");
-                    entityType = "ENVIRONMENT_PROPERTY";
-                }
+            if (configFolder != null) {
+                final List<Map<String, String>> environmentEntities = environmentBundleData.getEnvironmentEntities();
+                environmentEntities.stream().forEach(environmentEntitiy -> {
+                    String entityType = environmentEntitiy.get("type");
+                    String entityName = environmentEntitiy.get("name");
+                    if (EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entityType)) {
+                        entityName = PREFIX_GATEWAY + environmentEntitiy.get("name");
+                        entityType = "ENVIRONMENT_PROPERTY";
+                    }
 
-                Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(entityType);
-                final Pair<String, ConfigurationFile.FileType> configFileInfo = EntityUtils.getEntityConfigFileInfo(entityClass);
-                final String environmentType = EntityUtils.getEntityEnvironmentType(entityClass);
-                if (configFileInfo == null || environmentType == null) {
-                    throw new MissingEnvironmentException("Unexpected entity type " + entityType);
-                }
+                    Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(entityType);
+                    final Pair<String, ConfigurationFile.FileType> configFileInfo = EntityUtils.getEntityConfigFileInfo(entityClass);
+                    final String environmentType = EntityUtils.getEntityEnvironmentType(entityClass);
+                    if (configFileInfo == null || environmentType == null) {
+                        throw new MissingEnvironmentException("Unexpected entity type " + entityType);
+                    }
 
-                final String configFileName = configFileInfo.getLeft() + "." + (configFileInfo.getRight().equals(ConfigurationFile.FileType.JSON_YAML)? YML_EXTENSION :
-                        configFileInfo.getRight().name().toLowerCase());
-                final File envConfigFile = new File(configFolder, configFileName);
-                environmentValues.put(PREFIX_ENV + environmentType + "." + entityName,
-                        loadConfigFromFile(envConfigFile, environmentType, entityName));
+                    final String configFileName = configFileInfo.getLeft() + "." + (configFileInfo.getRight().equals(ConfigurationFile.FileType.JSON_YAML) ? YML_EXTENSION :
+                            configFileInfo.getRight().name().toLowerCase());
+                    final File envConfigFile = new File(configFolder, configFileName);
+                    environmentValues.put(PREFIX_ENV + environmentType + "." + entityName,
+                            loadConfigFromFile(envConfigFile, environmentType, entityName));
 
-                if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
-                    final File certDataFile = new File(configFolder + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
-                    environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entityName + PEM_CERT_FILE_EXTENSION,
-                            loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entityName));
-                }
-
-            });
+                    if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
+                        final File certDataFile = new File(configFolder + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
+                        environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entityName + PEM_CERT_FILE_EXTENSION,
+                                loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entityName));
+                    }
+                });
+            }
             return ImmutablePair.of(bundleName + "-" + bundleVersion, environmentValues);
         }
 

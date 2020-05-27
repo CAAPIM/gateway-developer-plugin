@@ -109,7 +109,6 @@ class CAGatewayDeveloperTest {
         assertMultiProject(testProjectDir, result);
     }
 
-    @Disabled("Disabling this test for now, as it is expecting an env bundle where entities are not present or un-annotated")
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testMultiProjectBuildingEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
@@ -125,7 +124,7 @@ class CAGatewayDeveloperTest {
                 .build();
 
         assertMultiProject(testProjectDir, result);
-        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + ".environment.bundle");
+        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + "-env.install.bundle");
         assertTrue(projectC_EnvBundle.exists());
         assertFalse(readFileToString(projectC_EnvBundle, defaultCharset()).isEmpty());
     }
@@ -253,7 +252,7 @@ class CAGatewayDeveloperTest {
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config" + ".environment.bundle");
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-config" + "env.install.bundle");
         assertTrue(builtBundleFile.isFile());
     }
 
@@ -383,7 +382,7 @@ class CAGatewayDeveloperTest {
         bundleMappingsIds.addAll(getChildElements(getSingleChildElement(dependencyBundle, MAPPINGS), MAPPING).stream().map(EnvironmentBundleUtils::buildBundleMappingKey).collect(toSet()));
 
         //Full bundle name format : <bundleName>-<version>.(<configName>.)full.bundle
-        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config" + ".full.bundle");
+        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-full.install.bundle");
         assertTrue(builtFullBundleFile.isFile());
 
         final Element fullBundleElement = DocumentTools.INSTANCE.parse(builtFullBundleFile).getDocumentElement();

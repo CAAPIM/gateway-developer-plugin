@@ -14,10 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputDirectory;
-import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -60,6 +57,7 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     }
 
     @InputDirectory
+    @Optional
     DirectoryProperty getConfigFolder() {
         return configFolder;
     }
@@ -74,30 +72,16 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
         final List<File> metaDataFiles = collectFiles(into.getAsFile().get().getPath(), JsonFileUtils.METADATA_FILE_NAME_SUFFIX);
         if (metaDataFiles.isEmpty()) {
-            //read environment properties from environmentConfig
-            if (environmentConfig.get().isEmpty()) {
-                throw new MissingEnvironmentException("Metadata file does not exist and environment configuration is not specified in the gradle configuration file.");
-            }
-            final Map<String, String> environmentValuesFromConfig = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get());
-            final String bundleFileName = getProject().getName() + '-' + getProject().getVersion() + "-env.install.bundle";
-            environmentBundleCreator.createEnvironmentBundle(
-                    environmentValuesFromConfig,
-                    into.getAsFile().get().getPath(),
-                    into.getAsFile().get().getPath(),
-                    EMPTY,
-                    PLUGIN,
-                    bundleFileName,
-                    EMPTY
-            );
+            throw new MissingEnvironmentException("Metadata file does not exist.");
         }
-        metaDataFiles.stream().forEach(metaDataFile-> {
-            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
+
+        metaDataFiles.stream().forEach(metaDataFile -> {
+            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().getOrNull());
             if (null != bundleEnvironmentValues) {
                 final String bundleFileName = bundleEnvironmentValues.getLeft() + "-" + configName.get() + "env.install.bundle";
-                //read environment properties from environmentConfig
-                final Map<String, String> environmentValuesFromConfig = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get());
                 Map<String, String> environmentValuesFromMetadata = bundleEnvironmentValues.getRight();
-                environmentValuesFromMetadata.putAll(environmentValuesFromConfig);
+                //read environment properties from environmentConfig and merge it with metadata properties
+                environmentValuesFromMetadata.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
                 environmentBundleCreator.createEnvironmentBundle(
                         environmentValuesFromMetadata,
                         into.getAsFile().get().getPath(),
