@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.IdValidator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -22,6 +23,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
@@ -41,7 +44,7 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
  */
 @Singleton
 public class EncassEntityBuilder implements EntityBuilder {
-
+    private static final Logger LOGGER = Logger.getLogger(EncassEntityBuilder.class.getName());
     private static final int ORDER = 300;
 
     private final IdGenerator idGenerator;
@@ -129,10 +132,18 @@ public class EncassEntityBuilder implements EntityBuilder {
             if (encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity)) {
                 //use the id and guid defined at reusable annotation or bundle annotation (if its annotated bundle)
                 if (annotatedEncassEntity.getGuid() != null) {
-                    guid = annotatedEncassEntity.getGuid();
+                    if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
+                        guid = annotatedEncassEntity.getGuid();
+                    } else {
+                        LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
+                    }
                 }
                 if (annotatedEncassEntity.getId() != null) {
-                    id = annotatedEncassEntity.getId();
+                    if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
+                        id = annotatedEncassEntity.getId();
+                    } else {
+                        LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
+                    }
                 }
             } else {
                 encassName = annotatedBundle.getUniquePrefix() + name + annotatedBundle.getUniqueSuffix();

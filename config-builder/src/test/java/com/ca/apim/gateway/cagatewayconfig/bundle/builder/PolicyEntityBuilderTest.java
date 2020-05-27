@@ -121,6 +121,77 @@ class PolicyEntityBuilderTest {
     }
 
     @Test
+    void buildDeploymentBundleWithWrongGuidAndId() {
+        Element policyElement = createElementWithAttributesAndChildren(
+                document,
+                "wsp:Policy",
+                ImmutableMap.of("xmlns:L7p", "http://www.layer7tech.com/ws/policy", "xmlns:wsp", "http://schemas.xmlsoap.org/ws/2002/12/policy&quot"),
+                createSetVariableAssertion(document, "var", "value"),
+                createHardcodedAssertionElement(document, "response")
+        );
+        Element encassElement = createEncapsulatedAssertionElement(document, TEST_ENCASS, "encass");
+        encassElement.setAttribute(PolicyEntityBuilder.ENCASS_NAME, TEST_ENCASS);
+        policyElement.appendChild(encassElement);
+        document.appendChild(policyElement);
+
+        policy.setPolicyXML(DocumentTools.INSTANCE.elementToString(document.getDocumentElement()));
+        policy.setParentFolder(Folder.ROOT_FOLDER);
+        policy.setGuid("policyGuid");
+        policy.setId("policyID");
+        policy.setName(policy.getPath());
+
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        annotations.add(annotation);
+        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation.setGuid("");
+        annotation.setId("");
+        annotations.add(annotation);
+        policy.setAnnotations(annotations);
+
+        Encass encass = new Encass();
+        encass.setGuid("encassGuid");
+        encass.setName(TEST_ENCASS);
+        bundle.getEncasses().put(TEST_ENCASS, encass);
+        bundle.getPolicies().put("Policy", policy);
+
+        AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
+        annotatedEntity.setEntityName(encass.getName());
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
+        annotatedBundle.getPolicies().put("Policy", policy);
+
+        PolicyEntityBuilder builder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        List<Entity> entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        assertFalse(entities.isEmpty());
+        assertEquals(1, entities.size());
+        Entity e = entities.get(0);
+        assertEquals(EntityTypes.POLICY_TYPE, e.getType());
+        assertEquals(e.getId(), "policyID");
+
+        //wrong guid and id
+        annotations = new HashSet<>();
+        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        annotations.add(annotation);
+        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation.setGuid("wrongGuid");
+        annotation.setId("wrongId");
+        annotations.add(annotation);
+        policy.setAnnotations(annotations);
+        policy.setAnnotatedEntity(null);
+
+        builder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        assertFalse(entities.isEmpty());
+        assertEquals(1, entities.size());
+        e = entities.get(0);
+        assertEquals(EntityTypes.POLICY_TYPE, e.getType());
+        assertEquals(e.getId(), "policyID");
+    }
+
+    @Test
     void testPrepareSetVariableAssertionNoENV() throws DocumentParseException {
         Element setVariableAssertionElement = createSetVariableAssertion(document, "my-var", "base64Text");
         document.appendChild(setVariableAssertionElement);
@@ -283,6 +354,59 @@ class PolicyEntityBuilderTest {
         assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
 
         Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
+        assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
+    }
+
+    @Test
+    void testPrepareEncapsulatedAssertionWithWrongGuidAndGoid() throws DocumentParseException {
+        String policyPath = "my/policy/path.xml";
+        Encass encass = new Encass();
+        encass.setGuid("123");
+        encass.setName(TEST_ENCASS);
+        encass.setPolicy(policyPath);
+        Set<Annotation> annotations = new HashSet<>();
+        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
+        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation.setGuid("");
+        annotation.setId("");
+        annotations.add(annotation);
+        encass.setAnnotations(annotations);
+        bundle.getEncasses().put(TEST_ENCASS, encass);
+
+        //empty guid and goid
+        AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
+        annotatedBundle.getPolicies().put(policyPath, policy);
+        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
+        document.appendChild(encapsulatedAssertionElement);
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, annotatedBundle);
+
+        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
+        assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
+
+        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
+        assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
+
+        //wrong guid and goid
+        annotatedEntity = new AnnotatedEntity(encass);
+        annotations = new HashSet<>();
+        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
+        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation.setGuid("wrongGuid");
+        annotation.setId("wrongId");
+        annotations.add(annotation);
+        encass.setAnnotations(annotations);
+        encass.setAnnotatedEntity(null);
+        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
+        annotatedBundle.getPolicies().put(policyPath, policy);
+        encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
+        policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, annotatedBundle);
+
+        guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
     }
 
