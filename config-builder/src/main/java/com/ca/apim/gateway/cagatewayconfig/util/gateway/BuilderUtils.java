@@ -166,22 +166,6 @@ public class BuilderUtils {
         return REGEX_ALPHANUMERIC.matcher(str).replaceAll("");
     }
 
-    public static String generateBundleName(boolean isFullBundle, ProjectInfo projectInfo, @Nullable String entityName,
-                                            @Nullable String nameInAnnotation) {
-        if (isFullBundle) {
-            return projectInfo.getName() + "-"  + projectInfo.getVersion();
-        }
-        if (StringUtils.isNotBlank(nameInAnnotation)) {
-            return nameInAnnotation + "-" + projectInfo.getVersion();
-        }
-        return projectInfo.getName() + "-" + entityName + "-" + projectInfo.getVersion();
-    }
-
-    public static String generatePolicyBundleFileName(String bundleName, boolean isDeleteBundle) {
-        return isDeleteBundle ? bundleName + POLICY_DELETE_BUNDLE_EXTENSION :
-                bundleName + POLICY_INSTALL_BUNDLE_EXTENSION;
-    }
-
     private BuilderUtils() {
     }
 }

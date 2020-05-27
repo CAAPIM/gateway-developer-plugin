@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
@@ -87,7 +86,7 @@ public class BuildFullBundleTask extends DefaultTask {
         metaDataFiles.stream().forEach(metaDataFile-> {
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
             if (null != bundleEnvironmentValues) {
-                final String bundleFileName = bundleEnvironmentValues.getLeft() + "." + configName.get() + ".full.bundle";
+                final String bundleFileName = bundleEnvironmentValues.getLeft() + "-full" + INSTALL_BUNDLE_EXTENSION;
                 final List<File> bundleFiles = union(
                         collectFiles(bundleDirectory, INSTALL_BUNDLE_EXTENSION),
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
