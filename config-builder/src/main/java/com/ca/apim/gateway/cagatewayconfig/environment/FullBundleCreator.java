@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.bundle.DependencyBundlesProcessor;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
@@ -183,7 +184,8 @@ public class FullBundleCreator {
                     copyNodes(getSingleChildElement(element, REFERENCES), ITEM, document, referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
                     copyDeleteMappings(getSingleChildElement(element, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
                         final String key = buildBundleMappingKey(mapping);
-                        return addedItems.contains(key) && addedMappings.add(key);
+                        final String type = mapping.getAttribute(ATTRIBUTE_TYPE);
+                        return !EntityTypes.FOLDER_TYPE.equals(type) && addedItems.contains(key) && addedMappings.add(key);
                     });
                 } catch (DocumentParseException e) {
                     throw new EntityBuilderException("Unable to read bundle " + file.getName(), e);
