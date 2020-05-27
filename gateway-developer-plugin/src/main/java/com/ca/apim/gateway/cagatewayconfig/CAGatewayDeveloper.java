@@ -151,11 +151,11 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         final String artifactName = getBuiltArtifactName(project, "." + pluginConfig.getConfigName() + ".environment", BUNDLE_FILE_EXTENSION);
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_ENVIRONMENT_BUNDLE)) {
             project.artifacts(artifactHandler -> addBundleArtifact(
-                artifactHandler,
-                pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> artifactName)),
-                buildEnvironmentBundleTask,
-                project::getName,
-                "environment"));
+                    artifactHandler,
+                    pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> artifactName)),
+                    buildEnvironmentBundleTask,
+                    project::getName,
+                    "environment"));
         }
         // add the full bundle to the artifacts only if the full bundle task was triggered
         final String fullBundleArtifactName = getBuiltArtifactName(project, "." + pluginConfig.getConfigName() + ".full", BUNDLE_FILE_EXTENSION);
@@ -225,7 +225,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             pluginConfig.getConfigFolder().set(new File(project.getProjectDir(),"src/main/gateway/config"));
         }
         if (!pluginConfig.getConfigName().isPresent()) {
-            pluginConfig.getConfigName().set("");
+            pluginConfig.getConfigName().set("config");
         }
     }
 }

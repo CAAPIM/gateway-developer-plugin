@@ -294,8 +294,9 @@ public class BundleEntityBuilderTestHelper {
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.entrySet().iterator().next().getValue().getBundleMetadata();
         assertNotNull(metadata);
+        assertEquals("1.0", metadata.getMetaVersion());
         assertEquals("my-bundle-group", metadata.getGroupName());
-        assertEquals("encass", metadata.getType());
+        assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, metadata.getType());
         assertEquals("1.0", metadata.getVersion());
         if (isRedeployableBundle || !isBundleContainReusableEntity) {
             assertTrue(metadata.isRedeployable());

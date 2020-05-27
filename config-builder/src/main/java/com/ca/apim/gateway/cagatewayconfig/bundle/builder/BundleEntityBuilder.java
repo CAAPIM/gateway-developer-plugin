@@ -327,10 +327,10 @@ public class BundleEntityBuilder {
 
     private String generateBundleFileName(BundleType bundleType, boolean isFullBundle,
                                           boolean isDeleteBundle, String bundleName) {
-        String filenameSuffix = isDeleteBundle ? DELETE_BUNDLE_EXTENSION : INSTALL_BUNDLE_EXTENSION;
         if (bundleType == BundleType.ENVIRONMENT) {
-            return bundleName + filenameSuffix;
+            return bundleName;
         }
+        String filenameSuffix = isDeleteBundle ? DELETE_BUNDLE_EXTENSION : INSTALL_BUNDLE_EXTENSION;
         if (isFullBundle) {
             return bundleName + "-full" + filenameSuffix;
         } else {

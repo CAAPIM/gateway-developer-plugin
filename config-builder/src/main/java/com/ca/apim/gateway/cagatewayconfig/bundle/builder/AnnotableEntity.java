@@ -30,6 +30,14 @@ public interface AnnotableEntity {
     String getType();
 
     /**
+     * Returns short name of Entity Type. For example, for ENCAPSUPATED_ASSERTION it returns "encass", for POLICY
+     * it returns "policy", and for SERVICE it returns "service"
+     *
+     * @return Shortened type
+     */
+    String getShortenedType();
+
+    /**
 
      * This method returns all the Annotation applied to the entity.
      *

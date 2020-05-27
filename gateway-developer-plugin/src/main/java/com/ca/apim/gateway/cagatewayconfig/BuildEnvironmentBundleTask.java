@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.gradle.api.DefaultTask;
@@ -23,10 +24,10 @@ import javax.inject.Inject;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.removeAllSpecialChars;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YML_EXTENSION;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -36,7 +37,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  */
 public class BuildEnvironmentBundleTask extends DefaultTask {
 
-    private static final Pattern REGEX_ALPHANUMERIC = Pattern.compile("[^A-Za-z0-9]");
+
 
     private final DirectoryProperty into;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
@@ -92,19 +93,16 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     }
 
     private String getEnvBundleFileName(String deployBundleName) {
+        final String extension = "env" + DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
         if (configName != null && StringUtils.isNotBlank(configName.get())) {
-            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + "env";
+            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + extension;
         } else {
             String configFolderName = configFolder != null ? configFolder.getAsFile().get().getName() : "";
             if (StringUtils.equalsIgnoreCase(configFolderName, "config")) {
-                return deployBundleName + "-env";
+                return deployBundleName + "-" + extension;
             } else {
-                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + "env";
+                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + extension;
             }
         }
-    }
-
-    private String removeAllSpecialChars(String str) {
-        return REGEX_ALPHANUMERIC.matcher(str).replaceAll("");
     }
 }

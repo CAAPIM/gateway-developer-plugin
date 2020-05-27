@@ -42,6 +42,10 @@ public class BundleMetadata implements Metadata {
         this.version = version;
     }
 
+    public String getMetaVersion() {
+        return metaVersion;
+    }
+
     @Override
     public String getType() {
         return type;

@@ -44,7 +44,7 @@ public class AnnotatedBundle extends Bundle {
 
     public String getUniquePrefix() {
         AnnotableEntity annotableEntity = (AnnotableEntity) annotatedEntity.getEntity();
-        return projectInfo.getName() + "-" + annotableEntity.getType() + "-" + PathUtils.extractName(annotatedEntity.getEntityName()) + "-";
+        return projectInfo.getName() + "-" + annotableEntity.getShortenedType() + "-" + PathUtils.extractName(annotatedEntity.getEntityName()) + "-";
     }
 
     public String getUniqueSuffix() {
