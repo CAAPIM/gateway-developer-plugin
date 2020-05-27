@@ -130,7 +130,6 @@ public class PolicyWriter implements EntityWriter {
 
     private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle) {
         Map<Dependency, List<Dependency>> dependencyListMap = rawBundle.getDependencyMap();
-        final Set<Dependency> dependencies = new HashSet<>();
         if (dependencyListMap != null) {
             Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
             for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
@@ -140,7 +139,7 @@ public class PolicyWriter implements EntityWriter {
                 }
             }
         }
-        return dependencies;
+        return Collections.emptySet();
     }
 
     private void writePolicy(Bundle bundle, File policyFolder, Folderable folderableEntity, Element policy) {
