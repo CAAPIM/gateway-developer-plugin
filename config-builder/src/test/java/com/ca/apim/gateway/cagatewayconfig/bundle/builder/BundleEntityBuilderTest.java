@@ -57,7 +57,7 @@ class BundleEntityBuilderTest {
     @Test
     void build() {
         BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()),
-                new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
+                new BundleDocumentBuilder(), new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry);
 
         final Map<String, BundleArtifacts> element = builder.build(new Bundle(), BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
@@ -183,7 +183,8 @@ class BundleEntityBuilderTest {
     private static void buildAndValidateAnnotatedBundle(Bundle bundle, Set<EntityBuilder> entityBuilders,
                                                         String expEncassPolicyName, String expEncassPolicyAction, String expEncassName, String expEncassAction,
                                                         String expDepEncassPolicyName, String expDepEncassPolicyAction, String expDepEncassName, String expDepEncassAction) {
-        BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
+        BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(),
+                new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry);
         Map<String, BundleArtifacts> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);

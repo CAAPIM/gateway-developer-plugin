@@ -268,7 +268,7 @@ class CAGatewayDeveloperTest {
         File buildDir = new File(testProjectDir, "build");
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
-        //Environment bundle name format : <bundleName>-<version>.(<configName>)env.install.bundle
+        //Environment bundle name format : <bundleName>-<version>-[<configName>]env.install.bundle
         String envBundleFilename = bundleName + projectVersion + "-configenv" + INSTALL_BUNDLE_EXTENSION;
         File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
         assertTrue(builtBundleFile.isFile());

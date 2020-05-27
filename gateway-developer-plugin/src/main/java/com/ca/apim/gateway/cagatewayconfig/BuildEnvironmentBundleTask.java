@@ -78,14 +78,14 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         metaDataFiles.stream().forEach(metaDataFile-> {
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
             if (null != bundleEnvironmentValues) {
-                final String envBundleFilenameWithSuffix = getEnvBundleFileName(bundleEnvironmentValues.getLeft());
+                final String envBundleFilename = getEnvBundleFileName(bundleEnvironmentValues.getLeft());
                 environmentBundleCreator.createEnvironmentBundle(
                         bundleEnvironmentValues.getRight(),
                         into.getAsFile().get().getPath(),
                         into.getAsFile().get().getPath(),
                         EMPTY,
                         PLUGIN,
-                        envBundleFilenameWithSuffix, // Passing envBundleFilenameWithSuffix
+                        envBundleFilename, // Passing envBundleFilename
                         bundleEnvironmentValues.getLeft()
                 );
             }

@@ -6,12 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.file;
 
-import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -26,9 +23,6 @@ public class DocumentFileUtils {
     public static final String BUNDLE_EXTENSION = ".bundle";
     public static final String DELETE_BUNDLE_EXTENSION = ".delete" + BUNDLE_EXTENSION;
     public static final String INSTALL_BUNDLE_EXTENSION = ".install" + BUNDLE_EXTENSION;
-
-    public static final String POLICY_INSTALL_BUNDLE_EXTENSION = "-policy" + INSTALL_BUNDLE_EXTENSION;
-    public static final String POLICY_DELETE_BUNDLE_EXTENSION = "-policy" + DELETE_BUNDLE_EXTENSION;
 
     private DocumentFileUtils(DocumentTools documentTools) {
         this.documentTools = documentTools;

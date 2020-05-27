@@ -10,7 +10,10 @@ import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import org.apache.commons.lang3.StringUtils;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,24 +23,33 @@ import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstant
 @Singleton
 public class BundleMetadataBuilder {
 
+    private final IdGenerator idGenerator;
+
+    @Inject
+    public BundleMetadataBuilder(final IdGenerator idGenerator) {
+        this.idGenerator = idGenerator;
+    }
+
     public BundleMetadata build(final AnnotatedBundle annotatedBundle,
                                 final AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
                                 final List<Entity> dependentEntities, ProjectInfo projectInfo) {
         final Encass encass = (Encass) annotatedEntity.getEntity();
         final String bundleName = annotatedBundle.getBundleName();
         final String name = bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
+        final String metadataId = StringUtils.isBlank(annotatedEntity.getMetadataId()) ? idGenerator.generate() :
+                annotatedEntity.getMetadataId();
 
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), encass.getGuid(), name,
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), metadataId, name,
                 projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(annotatedEntity.getDescription());
         builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
         builder.tags(annotatedEntity.getTags());
         builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
 
-        final List<Metadata> desiredEntities = new ArrayList<>();
-        desiredEntities.add(annotatedEntity.getEntity().getMetadata());
+        final List<Metadata> definedEntities = new ArrayList<>();
+        definedEntities.add(annotatedEntity.getEntity().getMetadata());
 
-        return builder.definedEntities(desiredEntities).build();
+        return builder.definedEntities(definedEntities).build();
     }
 
     private Collection<Metadata> getEnvironmentDependenciesMetadata(final List<Entity> dependentEntities) {
