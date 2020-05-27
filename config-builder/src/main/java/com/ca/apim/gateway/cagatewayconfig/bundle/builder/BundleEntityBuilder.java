@@ -56,8 +56,8 @@ public class BundleEntityBuilder {
             final Element fullBundle = bundleDocumentBuilder.build(document, entities);
             final String bundleName = StringUtils.isBlank(projectInfo.getVersion()) ? projectInfo.getName() :
                     projectInfo.getName() + "-" + projectInfo.getVersion();
-            final String bundleFileName = generateBundleFileName(bundleType, true, false, bundleName);
-            final String deleteBundleFileName = generateBundleFileName(bundleType, true, true, bundleName);
+            final String bundleFileName = generateBundleFileName(bundleType, false, bundleName);
+            final String deleteBundleFileName = generateBundleFileName(bundleType, true, bundleName);
             artifacts.put(bundleName, new BundleArtifacts(fullBundle, null, null, bundleFileName,
                     deleteBundleFileName));
         }
@@ -93,9 +93,9 @@ public class BundleEntityBuilder {
                                 final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedBundle,
                                         annotatedEntity, entities, projectInfo);
 
-                                final String bundleFileName = generateBundleFileName(bundleType, false, false,
+                                final String bundleFileName = generateBundleFileName(bundleType, false,
                                         annotatedBundle.getBundleName());
-                                final String deleteBundleFileName = generateBundleFileName(bundleType, false, true,
+                                final String deleteBundleFileName = generateBundleFileName(bundleType, true,
                                         annotatedBundle.getBundleName());
                                 annotatedElements.put(annotatedBundle.getBundleName(),
                                         new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata,
@@ -325,17 +325,12 @@ public class BundleEntityBuilder {
         return null;
     }
 
-    private String generateBundleFileName(BundleType bundleType, boolean isFullBundle,
-                                          boolean isDeleteBundle, String bundleName) {
+    private String generateBundleFileName(BundleType bundleType, boolean isDeleteBundle, String bundleName) {
         if (bundleType == BundleType.ENVIRONMENT) {
             return bundleName;
         }
         String filenameSuffix = isDeleteBundle ? DELETE_BUNDLE_EXTENSION : INSTALL_BUNDLE_EXTENSION;
-        if (isFullBundle) {
-            return bundleName + "-full" + filenameSuffix;
-        } else {
-            return bundleName + "-policy" + filenameSuffix;
-        }
+        return bundleName + "-policy" + filenameSuffix;
     }
 
     @VisibleForTesting

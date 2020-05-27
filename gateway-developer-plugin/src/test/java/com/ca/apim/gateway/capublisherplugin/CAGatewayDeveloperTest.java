@@ -70,7 +70,7 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        String bundleFileName = projectFolder + projectVersion + "-full" + INSTALL_BUNDLE_EXTENSION;
+        String bundleFileName = projectFolder + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
         validateBuildDir(projectFolder, bundleFileName, buildDir);
     }
 
@@ -93,7 +93,7 @@ class CAGatewayDeveloperTest {
 
         File buildGatewayDir = new File(testProjectDir, "dist");
         assertTrue(buildGatewayDir.isDirectory());
-        String bundleFileName = projectFolder + projectVersion + "-full" + INSTALL_BUNDLE_EXTENSION;
+        String bundleFileName = projectFolder + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
         File builtBundleFile = new File(buildGatewayDir, bundleFileName);
         assertTrue(builtBundleFile.isFile());
     }
@@ -141,10 +141,14 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-a:build")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-b:build")).getOutcome());
 
-        validateBuildDir("project-a", "", new File(new File(testProjectDir, "project-a"), "build"));
-        validateBuildDir("project-b" , "", new File(new File(testProjectDir, "project-b"), "build"));
-        validateBuildDir("project-c" , "", new File(new File(testProjectDir, "project-c"), "build"));
-        validateBuildDir("project-d" , "", new File(new File(testProjectDir, "project-d"), "build"));
+        String projectAFilename = "project-a" + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
+        String projectBFilename = "project-b" + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
+        String projectCFilename = "project-c" + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
+        String projectDFilename = "project-d" + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
+        validateBuildDir("project-a", projectAFilename, new File(new File(testProjectDir, "project-a"), "build"));
+        validateBuildDir("project-b" , projectBFilename, new File(new File(testProjectDir, "project-b"), "build"));
+        validateBuildDir("project-c" , projectCFilename, new File(new File(testProjectDir, "project-c"), "build"));
+        validateBuildDir("project-d" , projectDFilename, new File(new File(testProjectDir, "project-d"), "build"));
 
         File projectC_GW7 = new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "project-c" + projectVersion + ".gw7");
 
@@ -154,10 +158,10 @@ class CAGatewayDeveloperTest {
         while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
             entries.add(entry.getName());
         }
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-b-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-d-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-a-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_4_project-c-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-b-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-d-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-a-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_4_project-c-1.2.3-SNAPSHOT-policy.install.req.bundle"));
         tarArchiveInputStream.close();
     }
 
@@ -179,7 +183,7 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        String bundleFileName = projectFolder + projectVersion + "-full" + INSTALL_BUNDLE_EXTENSION;
+        String bundleFileName = projectFolder + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
         File gw7 = validateBuildDir(projectFolder, bundleFileName, buildDir);
 
         TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(gw7)));
@@ -189,7 +193,8 @@ class CAGatewayDeveloperTest {
             entries.add(entry.getName());
         }
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_my-bundle-1.0.00.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions-dependencies-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions" +
+                "-dependencies-1.2.3-SNAPSHOT-policy.install.req.bundle"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/assertions/Test-2.0.0.aar"));
     }
@@ -212,9 +217,12 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-a:build")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-b:build")).getOutcome());
 
-        validateBuildDir("project-a" , "", new File(new File(testProjectDir, "project-a"), "build"));
-        validateBuildDir("project-b" , "", new File(new File(testProjectDir, "project-b"), "build"));
-        validateBuildDir("project-c" , "", new File(new File(testProjectDir, "project-c"), "build"));
+        String projectAFilename = "project-a" + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
+        String projectBFilename = "project-b" + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
+        String projectCFilename = "project-c" + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
+        validateBuildDir("project-a" , projectAFilename, new File(new File(testProjectDir, "project-a"), "build"));
+        validateBuildDir("project-b" , projectBFilename, new File(new File(testProjectDir, "project-b"), "build"));
+        validateBuildDir("project-c" , projectCFilename, new File(new File(testProjectDir, "project-c"), "build"));
 
         File projectC_GW7 = new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "project-c" + projectVersion + ".gw7");
 
@@ -224,9 +232,9 @@ class CAGatewayDeveloperTest {
         while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
             entries.add(entry.getName());
         }
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-a-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-b-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-c-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-a-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-b-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-c-1.2.3-SNAPSHOT-policy.install.req.bundle"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
         tarArchiveInputStream.close();
     }
