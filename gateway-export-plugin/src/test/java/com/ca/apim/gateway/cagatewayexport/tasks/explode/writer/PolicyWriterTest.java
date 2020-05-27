@@ -198,6 +198,21 @@ class PolicyWriterTest {
         policy.setPolicyDocument(DocumentTools.INSTANCE.parse(policy.getPolicyXML()).getDocumentElement());
         bundle.getPolicies().put("assertionPolicy", policy);
 
+        Encass encass = new Encass();
+        encass.setName("encassOne");
+        encass.setPolicy("assertionPolicy");
+        bundle.getEncasses().put("encassOne", encass);
+
+        encass = new Encass();
+        encass.setName("encassDep");
+        encass.setPolicy("anotherPolicy");
+        bundle.getEncasses().put("encassDep", encass);
+
+        encass = new Encass();
+        encass.setName("encassTwo");
+        encass.setPolicy("assertionPolicy");
+        bundle.getEncasses().put("encassTwo", encass);
+
         JdbcConnection.Builder builder = new JdbcConnection.Builder();
         builder.id("jdbcid");
         builder.name("testjdbc");
@@ -208,10 +223,12 @@ class PolicyWriterTest {
         Map<Dependency, List<Dependency>> dependencyListMap = new HashMap<>();
         List<Dependency> dependencies = new ArrayList<>();
         dependencies.add(new Dependency("jdbcid", JdbcConnection.class, "testjdbc", EntityTypes.JDBC_CONNECTION));
-        Dependency encassDependency = new Dependency(null, null, "encassName", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        Dependency encassDependency = new Dependency(null, null, "encassDep", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
         dependencies.add(encassDependency);
-        Dependency encassDep = new Dependency(null, null, "encassDep", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-        dependencies.add(encassDep);
+        Dependency encassOne = new Dependency(null, null, "encassOne", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        dependencies.add(encassOne);
+        Dependency encassTwo = new Dependency(null, null, "encassTwo", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        dependencies.add(encassTwo);
         dependencyListMap.put(new Dependency("asd", Policy.class, "assertionPolicy", EntityTypes.POLICY_TYPE), dependencies);
         bundle.setDependencyMap(dependencyListMap);
         writer.write(bundle, temporaryFolder.getRoot(), bundle);
@@ -227,8 +244,9 @@ class PolicyWriterTest {
         Map<String, PolicyMetadata> policyMetadataMap = getPolicyMetadata(policyMetadataFile);
         PolicyMetadata policyMetadata = policyMetadataMap.get("assertionPolicy");
         Set<Dependency> usedEntities = policyMetadata.getUsedEntities();
-        assertFalse(usedEntities.contains(encassDependency));
-        assertTrue(usedEntities.contains(encassDep));
+        assertTrue(usedEntities.contains(encassDependency));
+        assertFalse(usedEntities.contains(encassOne));
+        assertFalse(usedEntities.contains(encassTwo));
     }
 
     private Map<String, PolicyMetadata> getPolicyMetadata(File policyMetadataFile) {
