@@ -168,7 +168,6 @@ public class FullBundleCreator {
     private Element createDeleteBundleElement(final Map<String, BundleArtifacts> bundleElements, final List<File> deploymentDeleteBundles, final List<File> dependentBundles, final Document document) {
         Element bundleElement = null;
         for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
-            // generate the environment bundle
             bundleElement = entry.getValue().getDeleteEnvBundle();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
             Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
@@ -177,7 +176,7 @@ public class FullBundleCreator {
             Set<String> addedItems = new HashSet<>();
             Set<String> addedMappings = new HashSet<>();
 
-            // merge the deployment bundles into the environment one to get the full bundle
+            // merge the dependent bundle mappings into the environment delete bundle one to get the full delete bundle
             dependentBundles.forEach(file -> {
                 try {
                     final Element element = documentTools.parse(fileUtils.getFileAsString(file)).getDocumentElement();
@@ -192,6 +191,7 @@ public class FullBundleCreator {
                 }
             });
 
+            //merge deployment delete bundle mappings
             addDeleteBundleNodes(deploymentDeleteBundles, referencesElement, mappingsElement, document);
         }
         return bundleElement;
