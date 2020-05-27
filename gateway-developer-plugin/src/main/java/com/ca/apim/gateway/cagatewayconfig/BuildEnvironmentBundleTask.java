@@ -52,6 +52,7 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     }
 
     @Input
+    @Optional
     Property<Map> getEnvironmentConfig() {
         return environmentConfig;
     }
@@ -63,6 +64,7 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     }
 
     @Input
+    @Optional
     Property<String> getConfigName() {
         return configName;
     }

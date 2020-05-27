@@ -157,7 +157,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         project.artifacts(artifactHandler -> addBundleArtifact(artifactHandler, packageGW7Task.getBundle(), buildDeploymentBundleTask, project::getName, "deployment"));
 
         // add the environment bundle to the artifacts only if the environment bundle task was triggered
-        final String artifactName = getBuiltArtifactName(project, "." + pluginConfig.getConfigName() + ".environment", BUNDLE_FILE_EXTENSION);
+        final String artifactName = getBuiltArtifactName(project, "-env.install", BUNDLE_FILE_EXTENSION);
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_ENVIRONMENT_BUNDLE)) {
             project.artifacts(artifactHandler -> addBundleArtifact(
                 artifactHandler,
@@ -167,7 +167,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                 "environment"));
         }
         // add the full bundle to the artifacts only if the full bundle task was triggered
-        final String fullBundleArtifactName = getBuiltArtifactName(project, "." + pluginConfig.getConfigName() + ".full", BUNDLE_FILE_EXTENSION);
+        final String fullBundleArtifactName = getBuiltArtifactName(project,  "-full.install", BUNDLE_FILE_EXTENSION);
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_FULL_BUNDLE)) {
             project.artifacts(artifactHandler -> addBundleArtifact(
                     artifactHandler,
@@ -178,7 +178,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         }
 
         // set the deployment bundle path as a project property to be consumed by publishing projects
-        project.afterEvaluate(p -> project.getExtensions().add("deployment-bundle-file", new File(buildDeploymentBundleTask.getInto().getAsFile().get(), getBuiltArtifactName(project, EMPTY, BUNDLE_FILE_EXTENSION)).toString()));
+        project.afterEvaluate(p -> project.getExtensions().add("deployment-bundle-file", new File(buildDeploymentBundleTask.getInto().getAsFile().get(), getBuiltArtifactName(project, "-policy.install", BUNDLE_FILE_EXTENSION)).toString()));
         // set the env bundle as property as well
         project.afterEvaluate(p -> project.getExtensions().add("environment-bundle-file", new File(buildEnvironmentBundleTask.getInto().getAsFile().get(), artifactName).toString()));
         // and the full bundle as property too
