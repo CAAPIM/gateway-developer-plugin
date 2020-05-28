@@ -75,9 +75,9 @@ public class EnvironmentBundleCreator {
         // Passing Bundle name and version string with config env name (<name>-<version>-*env) as project name
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
                 EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(bundleFileName, EMPTY, EMPTY));
-        for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
-            documentFileUtils.createFile(entry.getValue().getBundle(), new File(bundleFolderPath,
-                    entry.getValue().getBundleFileName()).toPath());
+        for (BundleArtifacts bundleArtifacts : bundleElements.values()) {
+            documentFileUtils.createFile(bundleArtifacts.getBundle(), new File(bundleFolderPath,
+                    bundleArtifacts.getBundleFileName()).toPath());
         }
         return environmentBundle;
     }

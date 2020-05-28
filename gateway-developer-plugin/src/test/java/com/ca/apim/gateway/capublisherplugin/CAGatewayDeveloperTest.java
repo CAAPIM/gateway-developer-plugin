@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.capublisherplugin;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -39,13 +38,12 @@ import java.util.zip.GZIPInputStream;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleItemKey;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleMappingKey;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.io.FileUtils.readFileToString;
-import static org.gradle.internal.impldep.org.apache.maven.artifact.repository.metadata.RepositoryMetadata.SNAPSHOT;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CAGatewayDeveloperTest {
@@ -269,7 +267,7 @@ class CAGatewayDeveloperTest {
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>-[<configName>]env.install.bundle
-        String envBundleFilename = bundleName + projectVersion + "-configenv" + INSTALL_BUNDLE_EXTENSION;
+        String envBundleFilename = bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
         File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
         assertTrue(builtBundleFile.isFile());
     }
@@ -401,7 +399,7 @@ class CAGatewayDeveloperTest {
         bundleMappingsIds.addAll(getChildElements(getSingleChildElement(dependencyBundle, MAPPINGS), MAPPING).stream().map(EnvironmentBundleUtils::buildBundleMappingKey).collect(toSet()));
 
         //Full bundle name format : <bundleName>-<version>-full.install.bundle
-        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-full" + INSTALL_BUNDLE_EXTENSION);
+        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + FULL_INSTALL_BUNDLE_NAME_SUFFIX);
         assertTrue(builtFullBundleFile.isFile());
 
         final Element fullBundleElement = DocumentTools.INSTANCE.parse(builtFullBundleFile).getDocumentElement();

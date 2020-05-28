@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayconfig;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.gradle.api.DefaultTask;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.ENV_INSTALL_BUNDLE_NAME_SUFFIX;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.removeAllSpecialChars;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
@@ -93,15 +93,14 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     }
 
     private String getEnvBundleFileName(String deployBundleName) {
-        final String extension = "env" + DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
         if (configName != null && StringUtils.isNotBlank(configName.get())) {
-            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + extension;
+            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
         } else {
             String configFolderName = configFolder != null ? configFolder.getAsFile().get().getName() : "";
             if (StringUtils.equalsIgnoreCase(configFolderName, "config")) {
-                return deployBundleName + "-" + extension;
+                return deployBundleName + "-" + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
             } else {
-                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + extension;
+                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
             }
         }
     }
