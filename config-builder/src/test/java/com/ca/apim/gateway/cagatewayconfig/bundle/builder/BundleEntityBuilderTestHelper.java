@@ -78,7 +78,7 @@ public class BundleEntityBuilderTestHelper {
         entityBuilders.add(clusterPropertyEntityBuilder);
         entityBuilders.add(trustedCertEntityBuilder);
 
-        return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(), entityTypeRegistry);
+        return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(), new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry);
     }
 
     static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath, boolean isRedeployable) {

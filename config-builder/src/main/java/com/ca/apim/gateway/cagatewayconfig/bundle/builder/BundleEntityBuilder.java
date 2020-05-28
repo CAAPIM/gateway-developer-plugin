@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.*;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_NON_ENV_ENTITIES;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_OUT_DEFAULT_LISTEN_PORTS;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
@@ -55,19 +56,22 @@ public class BundleEntityBuilder {
             List<Entity> entities = new ArrayList<>();
             entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
             final Element fullBundle = bundleDocumentBuilder.build(document, entities);
-            // Create DELETE bundle - ALWAYS skip environment entities
+            BundleMetadata fullBundleMetadata = null;
             Element deleteBundleElement = null;
-            if (EntityBuilder.BundleType.DEPLOYMENT.equals(bundleType)) {
+            if (bundleType == DEPLOYMENT) {
+                // Create bundle metadata for un-annotated entities
+                fullBundleMetadata = bundleMetadataBuilder.build(null, entities, projectName, projectGroupName, projectVersion);
+                // Create DELETE bundle - ALWAYS skip environment entities
                 deleteBundleElement = createDeleteBundle(document, entities, bundle,
                         null);
             }
 
             // Create DELETE Environment bundle
-            if (EntityBuilder.BundleType.ENVIRONMENT.equals(bundleType)) {
+            if (bundleType == ENVIRONMENT) {
                 deleteBundleElement = createDeleteEnvBundle(document, entities);
             }
             artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
-                    new BundleArtifacts(fullBundle, deleteBundleElement, null));
+                    new BundleArtifacts(fullBundle, deleteBundleElement, fullBundleMetadata));
         }
         return artifacts;
     }
@@ -109,9 +113,11 @@ public class BundleEntityBuilder {
                                     deleteBundleElement = createDeleteEnvBundle(document, entities);
                                 }
 
-                                // Create bundle metadata
-                                final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedBundle,
-                                        annotatedEntity, entities, projectGroupName, projectVersion);
+                                BundleMetadata bundleMetadata = null;
+                                if (bundleType == DEPLOYMENT) {
+                                    // Create bundle metadata for annotated entities
+                                    bundleMetadata = bundleMetadataBuilder.build(annotatedBundle, entities, projectName, projectGroupName, projectVersion);
+                                }
 
                                 annotatedElements.put(annotatedBundle.getBundleName(),
                                         new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata));

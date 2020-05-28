@@ -96,17 +96,17 @@ public class Entity {
                 return name;
             }
 
+            @JsonIgnore
             @Override
             public String getId() {
                 return id;
             }
 
+            @JsonIgnore
             @Override
             public String getGuid() {
                 return guid;
             }
-
-
         };
     }
 }
