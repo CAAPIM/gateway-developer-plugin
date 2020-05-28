@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.MissingGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import org.w3c.dom.Element;
@@ -52,7 +53,7 @@ public class IncludeAssertionSimplifier implements PolicyAssertionSimplifier {
             }
 
             final MissingGatewayEntity missingEntity = new MissingGatewayEntity();
-            missingEntity.setType("POLICY");
+            missingEntity.setType(EntityTypes.POLICY_TYPE);
             missingEntity.setName("Policy#" + includedPolicyGuid);
             missingEntity.setGuid(includedPolicyGuid);
             missingEntity.setExcluded(excluded);

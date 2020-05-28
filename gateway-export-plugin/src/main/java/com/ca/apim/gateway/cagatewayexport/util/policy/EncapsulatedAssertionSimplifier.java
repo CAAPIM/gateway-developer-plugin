@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.MissingGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import org.w3c.dom.Element;
 
@@ -62,7 +63,7 @@ public class EncapsulatedAssertionSimplifier implements PolicyAssertionSimplifie
         final Element encassNameElement = getSingleChildElement(encassAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
 
         final MissingGatewayEntity missingEntity = new MissingGatewayEntity();
-        missingEntity.setType("ENCAPSULATED_ASSERTION");
+        missingEntity.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
         missingEntity.setGuid(encassGuidElement.getAttribute(STRING_VALUE));
         missingEntity.setName(encassNameElement != null ? encassNameElement.getAttribute(STRING_VALUE) : "Encass#" + missingEntity.getGuid());
         missingEntity.setId(missingEntity.getGuid().replace("-", ""));

@@ -6,6 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayexport;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.MissingGatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.PolicyMetadata;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.io.Files;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
@@ -23,13 +28,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -114,7 +120,7 @@ class CAGatewayExportTest {
         String projectFolder = "example-project";
         File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
         File buildGradleFile = new File(testProjectDir, "build.gradle");
-        File bundleFile = new File(testProjectDir, "bundle.bundle");
+        File bundleFile = new File(testProjectDir, "missing-entities-test.bundle");
 
         String gradleBuild = "" +
                 "plugins {\n" +
@@ -124,7 +130,7 @@ class CAGatewayExportTest {
                 "version '1.2.3-SNAPSHOT'\n" +
                 "task('explode', type: com.ca.apim.gateway.cagatewayexport.tasks.explode.ExplodeBundleTask) {\n" +
                 "    folderPath = '/environment-variable'\n" +
-                "    inputBundleFile = file('bundle.bundle')\n" +
+                "    inputBundleFile = file('missing-entities-test.bundle')\n" +
                 "    exportDir = file('gateway')\n" +
                 "}";
 
@@ -149,7 +155,24 @@ class CAGatewayExportTest {
 
         File missingEntitiesFile = new File(configDir, "missing-entities.yml");
         assertTrue(missingEntitiesFile.exists());
-        Files.readLines(missingEntitiesFile, Charset.forName("utf-8")).forEach(System.out::println);
+        Map<String, MissingGatewayEntity> missingGatewayEntityMap = getMissingEntities(missingEntitiesFile);
+        MissingGatewayEntity missingPolicyEntity = missingGatewayEntityMap.get("Policy#9d2c981d-8cb8-4c9b-a4dc-7e2879243fa9");
+        MissingGatewayEntity missingEncassEntity = missingGatewayEntityMap.get("Missing Encass");
+        assertNotNull(missingPolicyEntity);
+        assertNotNull(missingEncassEntity);
+    }
+
+    private Map<String, MissingGatewayEntity> getMissingEntities(File missingEntitiesFile) {
+        Map<String, MissingGatewayEntity> missingGatewayEntityMap = null;
+        JsonTools jsonTools = JsonTools.INSTANCE;
+        final ObjectMapper objectMapper = jsonTools.getObjectMapper();
+        final MapType type = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, MissingGatewayEntity.class);
+        try {
+            missingGatewayEntityMap = objectMapper.readValue(missingEntitiesFile, type);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return missingGatewayEntityMap;
     }
 
     @Test
