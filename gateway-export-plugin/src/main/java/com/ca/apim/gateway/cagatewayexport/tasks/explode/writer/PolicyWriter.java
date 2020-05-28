@@ -96,17 +96,8 @@ public class PolicyWriter implements EntityWriter {
             policyMetadata.setTag(policyEntity.getTag());
             policyMetadata.setSubtag(policyEntity.getSubtag());
         }
-        Set<Dependency> dependencies = getPolicyDependencies(folderableEntity.getId(), rawBundle);
-        Set<Dependency> filteredDependencies = dependencies.stream().filter(dependency -> {
-            if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(dependency.getType())) {
-                Map<String, Encass> encassMap = rawBundle.getEncasses();
-                Encass dependentEncass = encassMap.get(dependency.getName());
-                if (policyName.equals(dependentEncass.getPolicy())) {
-                    return false;
-                }
-            }
-            return true;
-        }).collect(Collectors.toSet());
+        Set<Dependency> filteredDependencies = getFilteredPolicyDependencies(policyName, getPolicyDependencies(folderableEntity.getId(), rawBundle), rawBundle.getEncasses());
+
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
         entityLinkers.forEach(e -> {
             if (e != null) {
@@ -128,6 +119,31 @@ public class PolicyWriter implements EntityWriter {
         }
     }
 
+    /**
+     * This method filters out encasses that refers the same policy (recursive dependency)
+     * @param policyName         String
+     * @param policyDependencies Set
+     * @param encassMap          Map
+     * @return Set
+     */
+    private Set<Dependency> getFilteredPolicyDependencies(final String policyName, final Set<Dependency> policyDependencies, final Map<String, Encass> encassMap) {
+        return policyDependencies.stream().filter(dependency -> {
+            if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(dependency.getType())) {
+                Encass dependentEncass = encassMap.get(dependency.getName());
+                if (policyName.equals(dependentEncass.getPolicy())) {
+                    return false;
+                }
+            }
+            return true;
+        }).collect(Collectors.toSet());
+    }
+
+    /**
+     * This method finds policy dependencies from the bundle dependency graphf for a given policy id
+     * @param id String
+     * @param rawBundle Bundle
+     * @return Set
+     */
     private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle) {
         Map<Dependency, List<Dependency>> dependencyListMap = rawBundle.getDependencyMap();
         if (dependencyListMap != null) {
