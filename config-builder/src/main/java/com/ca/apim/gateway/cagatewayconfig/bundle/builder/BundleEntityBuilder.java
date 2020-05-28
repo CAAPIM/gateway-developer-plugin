@@ -19,9 +19,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_NON_ENV_ENTITIES;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_OUT_DEFAULT_LISTEN_PORTS;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static java.util.Collections.unmodifiableSet;
 
