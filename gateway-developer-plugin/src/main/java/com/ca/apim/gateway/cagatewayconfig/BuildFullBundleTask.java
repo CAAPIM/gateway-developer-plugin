@@ -23,6 +23,7 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YML_EXTENSION;
@@ -87,14 +88,9 @@ public class BuildFullBundleTask extends DefaultTask {
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
             if (null != bundleEnvironmentValues) {
                 final String bundleFileName = bundleEnvironmentValues.getLeft() + "." + configName.get() + ".full.bundle";
-                final List<File> bundleFiles = union(
-                        collectFiles(bundleDirectory, bundleEnvironmentValues.getLeft() + BUNDLE_EXTENSION),
-                        filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
-                );
-
                 fullBundleCreator.createFullBundle(
-                        bundleEnvironmentValues.getRight(),
-                        bundleFiles,
+                        bundleEnvironmentValues,
+                        filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),
                         bundleDirectory,
                         bundleFileName,
                         detemplatizeDeploymentBundles.get()
