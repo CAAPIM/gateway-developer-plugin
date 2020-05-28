@@ -106,11 +106,13 @@ public class Entity {
                 return Entity.this.getName();
             }
 
+            @JsonIgnore
             @Override
             public String getId() {
                 return id;
             }
 
+            @JsonIgnore
             @Override
             public String getGuid() {
                 return Entity.this.getGuid();

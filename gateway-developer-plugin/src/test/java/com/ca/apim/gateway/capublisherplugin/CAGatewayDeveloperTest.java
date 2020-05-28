@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.capublisherplugin;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -20,7 +21,6 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Element;
@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
@@ -116,7 +117,6 @@ class CAGatewayDeveloperTest {
         assertMultiProject(testProjectDir, result);
     }
 
-    @Disabled("Disabling this test for now, as it is expecting an env bundle where entities are not present or un-annotated")
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testMultiProjectBuildingEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
@@ -132,9 +132,50 @@ class CAGatewayDeveloperTest {
                 .build();
 
         assertMultiProject(testProjectDir, result);
-        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + ".environment.bundle");
+        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + "-env.install.bundle");
         assertTrue(projectC_EnvBundle.exists());
         assertFalse(readFileToString(projectC_EnvBundle, defaultCharset()).isEmpty());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testMultiProjectOverrideEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException, DocumentParseException {
+        String projectFolder = "multi-project";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build", ":project-e:build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        assertMultiProject(testProjectDir, result);
+        File projectE_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-e"), "build"), "gateway"), "bundle"), "project-e" + projectVersion + "-env.install.bundle");
+        assertTrue(projectE_EnvBundle.exists());
+        assertFalse(readFileToString(projectE_EnvBundle, defaultCharset()).isEmpty());
+        final Element envBundleElement = DocumentTools.INSTANCE.parse(projectE_EnvBundle).getDocumentElement();
+        final List<Element> itemList = getChildElements(getSingleChildElement(envBundleElement, REFERENCES), ITEM);
+        for (Element item : itemList) {
+            final String type = getSingleChildElementTextContent(item, TYPE);
+            final String entityName = getSingleChildElementTextContent(item, NAME);
+
+            switch (type) {
+                case EntityTypes.STORED_PASSWORD_TYPE:
+                    assertEquals("gateway", entityName);
+                    final Element storedPasswordElement = getSingleElement(item, STORED_PASSWD);
+                    assertEquals("7layer", getSingleChildElementTextContent(storedPasswordElement, PASSWORD));
+                    break;
+                case EntityTypes.CLUSTER_PROPERTY_TYPE:
+                    assertEquals("log.levels", entityName);
+                    final Element clusterPropertyElement = getSingleElement(item, CLUSTER_PROPERTY);
+                    assertEquals("com.l7tech.level = FINE", getSingleChildElementTextContent(clusterPropertyElement, VALUE));
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     private void assertMultiProject(File testProjectDir, BuildResult result) throws IOException {
@@ -260,7 +301,7 @@ class CAGatewayDeveloperTest {
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config" + ".environment.bundle");
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-config" + "env.install.bundle");
         assertTrue(builtBundleFile.isFile());
     }
 
@@ -461,7 +502,7 @@ class CAGatewayDeveloperTest {
         bundleMappingsIds.addAll(getChildElements(getSingleChildElement(dependencyBundle, MAPPINGS), MAPPING).stream().map(EnvironmentBundleUtils::buildBundleMappingKey).collect(toSet()));
 
         //Full bundle name format : <bundleName>-<version>.(<configName>.)full.bundle
-        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config" + ".full.bundle");
+        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-full.install.bundle");
         assertTrue(builtFullBundleFile.isFile());
 
         final Element fullBundleElement = DocumentTools.INSTANCE.parse(builtFullBundleFile).getDocumentElement();
@@ -471,10 +512,17 @@ class CAGatewayDeveloperTest {
                 String type = getSingleChildElementTextContent(e, TYPE);
                 String entityName = getSingleChildElementTextContent(e, NAME);
                 switch (type) {
-                    case "SECURE_PASSWORD": assertEquals("gateway", entityName); break;
-                    case "ID_PROVIDER_CONFIG": assertEquals("Tacoma MSAD", entityName); break;
-                    case "JDBC_CONNECTION": assertEquals("MySQL", entityName); break;
-                    case "SSG_CONNECTOR": break;
+                    case "SECURE_PASSWORD":
+                        assertEquals("gateway", entityName);
+                        break;
+                    case "ID_PROVIDER_CONFIG":
+                        assertEquals("Tacoma MSAD", entityName);
+                        break;
+                    case "JDBC_CONNECTION":
+                        assertEquals("MySQL", entityName);
+                        break;
+                    case "SSG_CONNECTOR":
+                        break;
                     default:
                         fail("Unexpected environment value:\n" + DocumentTools.INSTANCE.elementToString(e));
                 }
@@ -490,7 +538,8 @@ class CAGatewayDeveloperTest {
                     case "SECURE_PASSWORD":
                     case "ID_PROVIDER_CONFIG":
                     case "JDBC_CONNECTION":
-                    case "SSG_CONNECTOR": break;
+                    case "SSG_CONNECTOR":
+                        break;
                     default:
                         fail("Unexpected environment mapping: " + DocumentTools.INSTANCE.elementToString(e));
                 }
