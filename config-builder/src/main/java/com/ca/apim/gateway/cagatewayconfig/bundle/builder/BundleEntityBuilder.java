@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static java.util.Collections.unmodifiableSet;
 
@@ -53,10 +54,9 @@ public class BundleEntityBuilder {
             entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
             final Element fullBundle = bundleDocumentBuilder.build(document, entities);
             BundleMetadata fullBundleMetadata = null;
-            if (EntityBuilder.BundleType.DEPLOYMENT.equals(bundleType)) {
-                // Create full bundle metadata
-                fullBundleMetadata = bundleMetadataBuilder.build(null, null, entities,
-                        projectName, projectGroupName, projectVersion);
+            if (bundleType == DEPLOYMENT) {
+                // Create bundle metadata for un-annotated entities
+                fullBundleMetadata = bundleMetadataBuilder.build(null, entities, projectName, projectGroupName, projectVersion);
             }
 
             artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
@@ -94,9 +94,11 @@ public class BundleEntityBuilder {
                                 final Element deleteBundleElement = createDeleteBundle(document, entities, bundle,
                                         annotatedEntity);
 
-                                // Create bundle metadata
-                                final BundleMetadata bundleMetadata = bundleMetadataBuilder.build(annotatedBundle,
-                                        annotatedEntity, entities, projectName, projectGroupName, projectVersion);
+                                BundleMetadata bundleMetadata = null;
+                                if (bundleType == DEPLOYMENT) {
+                                    // Create bundle metadata for annotated entities
+                                    bundleMetadata = bundleMetadataBuilder.build(annotatedBundle, entities, projectName, projectGroupName, projectVersion);
+                                }
 
                                 annotatedElements.put(annotatedBundle.getBundleName(),
                                         new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata));

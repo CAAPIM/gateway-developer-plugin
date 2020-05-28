@@ -35,7 +35,6 @@ public class BundleMetadataBuilder {
      * Builds bundle metadata for annotated entities.
      *
      * @param annotatedBundle
-     * @param annotatedEntity
      * @param dependentEntities
      * @param projectName
      * @param projectGroupName
@@ -43,23 +42,21 @@ public class BundleMetadataBuilder {
      * @return bundle metadata
      */
     public BundleMetadata build(final AnnotatedBundle annotatedBundle,
-                                final AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
                                 final List<Entity> dependentEntities, final String projectName,
                                 final String projectGroupName, final String projectVersion) {
-        if (annotatedBundle != null && annotatedEntity != null) {
-            final Encass encass = (Encass) annotatedEntity.getEntity();
+        if (annotatedBundle != null && annotatedBundle.getAnnotatedEntity() != null) {
+            final Encass encass = (Encass) annotatedBundle.getAnnotatedEntity().getEntity();
             final String bundleName = annotatedBundle.getBundleName();
             final String name = bundleName.substring(0, bundleName.indexOf(projectVersion) - 1);
 
             BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), encass.getGuid(), name,
                     projectGroupName, projectVersion);
-            builder.description(annotatedEntity.getDescription());
+            builder.description(annotatedBundle.getAnnotatedEntity().getDescription());
             builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
-            builder.tags(annotatedEntity.getTags());
-            builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
-
+            builder.tags(annotatedBundle.getAnnotatedEntity().getTags());
+            builder.reusableAndRedeployable(true, annotatedBundle.getAnnotatedEntity().isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
             final List<Metadata> desiredEntities = new ArrayList<>();
-            desiredEntities.add(annotatedEntity.getEntity().getMetadata());
+            desiredEntities.add(annotatedBundle.getAnnotatedEntity().getEntity().getMetadata());
 
             return builder.definedEntities(desiredEntities).build();
         } else {
@@ -76,14 +73,13 @@ public class BundleMetadataBuilder {
      * @param projectVersion
      * @return bundle metadata
      */
-    private BundleMetadata buildFullBundleMetadata (final List<Entity> entities, final String projectName,
-                                                    final String projectGroupName, final String projectVersion) {
+    private BundleMetadata buildFullBundleMetadata (final List<Entity> entities,
+                                                    final String projectName, final String projectGroupName, final String projectVersion) {
         BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, idGenerator.generate(), projectName,
                 projectGroupName, projectVersion);
         builder.description(StringUtils.EMPTY);
-        builder.tags(Collections.EMPTY_LIST);
+        builder.tags(Collections.emptyList());
         builder.reusableAndRedeployable(true, true);
-        builder.environmentIncluded(true);
         builder.environmentEntities(getEnvironmentDependenciesMetadata(entities));
         builder.definedEntities(getDefinedEntitiesMetadata(entities));
 
@@ -96,7 +92,7 @@ public class BundleMetadataBuilder {
     }
 
     private Collection<Metadata> getDefinedEntitiesMetadata(final List<Entity> definedEntities) {
-        return definedEntities.stream().filter(FILTER_METADATA_NON_ENV_ENTITIES)
+        return definedEntities.stream().filter(FILTER_NON_ENV_ENTITIES_EXCLUDING_FOLDER)
                 .map(Entity::getMetadata).collect(Collectors.toList());
     }
 
