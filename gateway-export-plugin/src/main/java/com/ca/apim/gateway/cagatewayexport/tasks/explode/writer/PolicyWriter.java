@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
@@ -16,11 +17,13 @@ import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntitiesLinker;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Element;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -31,6 +34,7 @@ public class PolicyWriter implements EntityWriter {
     private final JsonFileUtils jsonFileUtils;
     private PolicyConverterRegistry policyConverterRegistry;
     private final EntityLinkerRegistry entityLinkerRegistry;
+    static final String ENCASS_NAME = "encassName";
 
     @Inject
     PolicyWriter(PolicyConverterRegistry policyConverterRegistry, DocumentFileUtils documentFileUtils,
@@ -80,9 +84,9 @@ public class PolicyWriter implements EntityWriter {
         final PolicyMetadata policyMetadata = new PolicyMetadata();
         final Folder folder = bundle.getFolderTree().getFolderById(folderableEntity.getParentFolderId());
         final Path policyPath = bundle.getFolderTree().getPath(folder);
-
+        final String policyName = folderableEntity.getName();
         policyMetadata.setPath(PathUtils.unixPath(policyPath));
-        policyMetadata.setName(folderableEntity.getName());
+        policyMetadata.setName(policyName);
 
         if (policyEntity != null) {
             final PolicyType policyType = policyEntity.getPolicyType();
@@ -92,14 +96,15 @@ public class PolicyWriter implements EntityWriter {
             policyMetadata.setTag(policyEntity.getTag());
             policyMetadata.setSubtag(policyEntity.getSubtag());
         }
-        Set<Dependency> dependencies = getPolicyDependencies(folderableEntity.getId(), rawBundle);
+        Set<Dependency> filteredDependencies = getFilteredPolicyDependencies(policyName, getPolicyDependencies(folderableEntity.getId(), rawBundle), rawBundle.getEncasses());
+
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
         entityLinkers.forEach(e -> {
             if (e != null) {
-                e.link(dependencies);
+                e.link(filteredDependencies);
             }
         });
-        policyMetadata.setUsedEntities(dependencies);
+        policyMetadata.setUsedEntities(filteredDependencies);
         return policyMetadata;
     }
 
@@ -114,7 +119,32 @@ public class PolicyWriter implements EntityWriter {
         }
     }
 
-    private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle){
+    /**
+     * This method filters out encasses that refers the same policy (recursive dependency)
+     * @param policyName         String
+     * @param policyDependencies Set
+     * @param encassMap          Map
+     * @return Set
+     */
+    private Set<Dependency> getFilteredPolicyDependencies(final String policyName, final Set<Dependency> policyDependencies, final Map<String, Encass> encassMap) {
+        return policyDependencies.stream().filter(dependency -> {
+            if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(dependency.getType())) {
+                Encass dependentEncass = encassMap.get(dependency.getName());
+                if (policyName.equals(dependentEncass.getPolicy())) {
+                    return false;
+                }
+            }
+            return true;
+        }).collect(Collectors.toSet());
+    }
+
+    /**
+     * This method finds policy dependencies from the bundle dependency graphf for a given policy id
+     * @param id String
+     * @param rawBundle Bundle
+     * @return Set
+     */
+    private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle) {
         Map<Dependency, List<Dependency>> dependencyListMap = rawBundle.getDependencyMap();
         if (dependencyListMap != null) {
             Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();

@@ -16,6 +16,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.EntityLinkerRegistry;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.collect.ImmutableSet;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
@@ -24,13 +26,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import org.w3c.dom.Document;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(TemporaryFolderExtension.class)
 class PolicyWriterTest {
@@ -184,15 +186,32 @@ class PolicyWriterTest {
         policy.setParentFolder(ROOT_FOLDER);
         policy.setName("assertionPolicy");
         policy.setId("asd");
-        policy.setPolicyXML("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\" xmlns:L7p=\"http://www.layer7tech.com/ws/policy\">\n" +
-                "    <wsp:All wsp:Usage=\"Required\"><L7p:JavaScript>\n" +
-                "            <L7p:ExecutionTimeout stringValue=\"\"/>\n" +
-                "            <L7p:Name stringValue=\"assertionPolicy\"/>\n" +
-                "            <L7p:Script stringValueReference=\"inline\"><![CDATA[var js = {};]]></L7p:Script>\n" +
-                "        </L7p:JavaScript></wsp:All>\n" +
+        policy.setPolicyXML("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\" xmlns:L7p=\"http://www.layer7tech.com/ws/policy\">" +
+                "    <wsp:All wsp:Usage=\"Required\"><L7p:JavaScript>" +
+                "            <L7p:ExecutionTimeout stringValue=\"\"/>" +
+                "            <L7p:Name stringValue=\"assertionPolicy\"/>" +
+                "            <L7p:Script stringValueReference=\"inline\"><![CDATA[var js = {};]]></L7p:Script>" +
+                "        </L7p:JavaScript>" +
+                "        <L7p:Encapsulated encassName=\"encassDep\"/>" +
+                "</wsp:All>" +
                 "</wsp:Policy>");
         policy.setPolicyDocument(DocumentTools.INSTANCE.parse(policy.getPolicyXML()).getDocumentElement());
         bundle.getPolicies().put("assertionPolicy", policy);
+
+        Encass encass = new Encass();
+        encass.setName("encassOne");
+        encass.setPolicy("assertionPolicy");
+        bundle.getEncasses().put("encassOne", encass);
+
+        encass = new Encass();
+        encass.setName("encassDep");
+        encass.setPolicy("anotherPolicy");
+        bundle.getEncasses().put("encassDep", encass);
+
+        encass = new Encass();
+        encass.setName("encassTwo");
+        encass.setPolicy("assertionPolicy");
+        bundle.getEncasses().put("encassTwo", encass);
 
         JdbcConnection.Builder builder = new JdbcConnection.Builder();
         builder.id("jdbcid");
@@ -204,6 +223,12 @@ class PolicyWriterTest {
         Map<Dependency, List<Dependency>> dependencyListMap = new HashMap<>();
         List<Dependency> dependencies = new ArrayList<>();
         dependencies.add(new Dependency("jdbcid", JdbcConnection.class, "testjdbc", EntityTypes.JDBC_CONNECTION));
+        Dependency encassDependency = new Dependency(null, null, "encassDep", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        dependencies.add(encassDependency);
+        Dependency encassOne = new Dependency(null, null, "encassOne", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        dependencies.add(encassOne);
+        Dependency encassTwo = new Dependency(null, null, "encassTwo", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        dependencies.add(encassTwo);
         dependencyListMap.put(new Dependency("asd", Policy.class, "assertionPolicy", EntityTypes.POLICY_TYPE), dependencies);
         bundle.setDependencyMap(dependencyListMap);
         writer.write(bundle, temporaryFolder.getRoot(), bundle);
@@ -211,13 +236,29 @@ class PolicyWriterTest {
         File policyFolder = new File(temporaryFolder.getRoot(), "policy");
         assertTrue(policyFolder.exists());
 
-        File policyFile = new File(policyFolder, "assertionPolicy.assertion.js");
-        assertTrue(policyFile.exists());
-
         File configFolder = new File(temporaryFolder.getRoot(), "config");
         assertTrue(configFolder.exists());
 
         File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
+        Map<String, PolicyMetadata> policyMetadataMap = getPolicyMetadata(policyMetadataFile);
+        PolicyMetadata policyMetadata = policyMetadataMap.get("assertionPolicy");
+        Set<Dependency> usedEntities = policyMetadata.getUsedEntities();
+        assertTrue(usedEntities.contains(encassDependency));
+        assertFalse(usedEntities.contains(encassOne));
+        assertFalse(usedEntities.contains(encassTwo));
+    }
+
+    private Map<String, PolicyMetadata> getPolicyMetadata(File policyMetadataFile) {
+        Map<String, PolicyMetadata> policyMetadataMap = null;
+        JsonTools jsonTools = JsonTools.INSTANCE;
+        final ObjectMapper objectMapper = jsonTools.getObjectMapper();
+        final MapType type = objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, PolicyMetadata.class);
+        try {
+            policyMetadataMap = objectMapper.readValue(policyMetadataFile, type);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return policyMetadataMap;
     }
 }
