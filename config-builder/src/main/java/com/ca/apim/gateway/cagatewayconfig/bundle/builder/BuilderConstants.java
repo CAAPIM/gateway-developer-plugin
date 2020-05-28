@@ -28,8 +28,14 @@ public final class BuilderConstants {
     public static final Predicate<Entity> FILTER_ENV_ENTITIES = new Predicate<Entity>() {
         @Override
         public boolean test(Entity entity) {
-            return !NON_ENV_ENTITY_TYPES.contains(entity.getType()) &&
-                    !(EntityTypes.LISTEN_PORT_TYPE.equals(entity.getType()) && (DEFAULT_HTTP_8080.equals(entity.getName()) || DEFAULT_HTTPS_8443.equals(entity.getName())));
+            return !NON_ENV_ENTITY_TYPES.contains(entity.getType());
+        }
+    };
+
+    public static final Predicate<Entity> FILTER_OUT_DEFAULT_LISTEN_PORTS = new Predicate<Entity>() {
+        @Override
+        public boolean test(Entity entity) {
+            return !(EntityTypes.LISTEN_PORT_TYPE.equals(entity.getType()) && (DEFAULT_HTTP_8080.equals(entity.getName()) || DEFAULT_HTTPS_8443.equals(entity.getName())));
         }
     };
 
