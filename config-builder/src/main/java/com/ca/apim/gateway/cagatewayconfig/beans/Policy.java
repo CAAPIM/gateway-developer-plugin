@@ -16,6 +16,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
@@ -253,6 +254,11 @@ public class Policy extends Folderable implements AnnotableEntity {
             annotatedEntity.setEntityName(getName());
         }
         return annotatedEntity;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity annotatedEntity){
+        this.annotatedEntity = annotatedEntity;
     }
 
     public String getType(){

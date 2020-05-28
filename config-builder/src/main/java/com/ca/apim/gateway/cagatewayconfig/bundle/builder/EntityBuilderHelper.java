@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.annotations.VisibleForTesting;
@@ -73,5 +74,9 @@ class EntityBuilderHelper {
             entity.setMappingProperty(MappingProperties.MAP_TO, PathUtils.extractName(path));
         }
         return entity;
+    }
+
+    static Entity getEntityWithDeleteMappings(final Entity entity){
+        return getEntityWithMappings(entity.getType(), entity.getName(), entity.getId(), null, MappingActions.DELETE, entity.getMappingProperties());
     }
 }

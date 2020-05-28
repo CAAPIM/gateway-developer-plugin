@@ -25,8 +25,7 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.processDeploymentBundles;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.setTemplatizedBundlesFolderPath;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static java.util.stream.Collectors.toList;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
@@ -73,8 +72,12 @@ public class EnvironmentBundleCreator {
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
                 EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null);
         for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
+            String bundleName = entry.getKey();
+            int index = bundleName.lastIndexOf(BUNDLE_EXTENSION);
             documentFileUtils.createFile(entry.getValue().getBundle(), new File(bundleFolderPath,
-                    entry.getKey()).toPath());
+                    bundleName).toPath());
+            documentFileUtils.createFile(entry.getValue().getDeleteBundle(), new File(bundleFolderPath,
+                    bundleName.substring(0, index)+ DELETE_BUNDLE_EXTENSION).toPath());
         }
         return environmentBundle;
     }
