@@ -31,14 +31,14 @@ public class BundleMetadataBuilder {
     }
 
     /**
-     * Builds bundle metadata for annotated entities.
+     * Builds bundle metadata for Annotated bundle or Full bundle.
      *
-     * @param annotatedBundle
-     * @param dependentEntities
-     * @param projectName
-     * @param projectGroupName
-     * @param projectVersion
-     * @return bundle metadata
+     * @param annotatedBundle   Annotated Bundle for which bundle is being created.
+     * @param dependentEntities Dependent Entities of the annotated bundle or all the entities of full bundle
+     * @param projectName       Gradle Project name
+     * @param projectGroupName  Gradle Project Group name
+     * @param projectVersion    Gradle Project version
+     * @return Full bundle or Annotated bundle metadata
      */
     public BundleMetadata build(final AnnotatedBundle annotatedBundle,
                                 final List<Entity> dependentEntities, final String projectName,
@@ -68,11 +68,11 @@ public class BundleMetadataBuilder {
     /**
      * Builds bundle metadata for full bundle (all entities)
      *
-     * @param entities
-     * @param projectName
-     * @param projectGroupName
-     * @param projectVersion
-     * @return bundle metadata
+     * @param entities          All the entities of full bundle
+     * @param projectName       Gradle Project name
+     * @param projectGroupName  Gradle Project Group name
+     * @param projectVersion    Gradle Project version
+     * @return Full bundle metadata
      */
     private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final String projectName,
                                                    final String projectGroupName, final String projectVersion) {
