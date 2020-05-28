@@ -19,10 +19,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_NON_ENV_ENTITIES;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_OUT_DEFAULT_LISTEN_PORTS;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static java.util.Collections.unmodifiableSet;
 
@@ -63,12 +63,12 @@ public class BundleEntityBuilder {
             }
 
             // Create DELETE Environment bundle
-            Element deleteEnvBundleElement = null;
+
             if (EntityBuilder.BundleType.ENVIRONMENT.equals(bundleType)) {
-                deleteEnvBundleElement = createDeleteEnvBundle(document, entities);
+                deleteBundleElement = createDeleteEnvBundle(document, entities);
             }
             artifacts.put(StringUtils.isBlank(projectVersion) ? projectName : projectName + "-" + projectVersion,
-                    new BundleArtifacts(fullBundle, deleteBundleElement, deleteEnvBundleElement, null));
+                    new BundleArtifacts(fullBundle, deleteBundleElement, null));
         }
         return artifacts;
     }
@@ -106,9 +106,9 @@ public class BundleEntityBuilder {
                                 }
 
                                 // Create DELETE Environment bundle
-                                Element deleteEnvBundleElement = null;
+
                                 if (EntityBuilder.BundleType.ENVIRONMENT.equals(bundleType)) {
-                                    deleteEnvBundleElement = createDeleteEnvBundle(document, entities);
+                                    deleteBundleElement = createDeleteEnvBundle(document, entities);
                                 }
 
                                 // Create bundle metadata
@@ -116,7 +116,7 @@ public class BundleEntityBuilder {
                                         annotatedEntity, entities, projectGroupName, projectVersion);
 
                                 annotatedElements.put(annotatedBundle.getBundleName(),
-                                        new BundleArtifacts(bundleElement, deleteBundleElement, deleteEnvBundleElement, bundleMetadata));
+                                        new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata));
                             }
                         })
         );
@@ -169,7 +169,7 @@ public class BundleEntityBuilder {
      * @return Delete bundle Element for the Annotated Bundle
      */
     private Element createDeleteEnvBundle(final Document document, List<Entity> entities) {
-        List<Entity> filteredEntities = copyFilteredEntitiesForDeleteBundle(entities, FILTER_ENV_ENTITIES);
+        List<Entity> filteredEntities = copyFilteredEntitiesForDeleteBundle(entities, FILTER_ENV_ENTITIES.and(FILTER_OUT_DEFAULT_LISTEN_PORTS));
         filteredEntities.forEach(e -> e.setMappingAction(MappingActions.DELETE));
         return bundleDocumentBuilder.build(document, filteredEntities);
     }

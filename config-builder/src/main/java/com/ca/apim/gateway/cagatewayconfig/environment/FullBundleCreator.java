@@ -168,7 +168,7 @@ public class FullBundleCreator {
     private Element createDeleteBundleElement(final Map<String, BundleArtifacts> bundleElements, final List<File> deploymentDeleteBundles, final List<File> dependentBundles, final Document document) {
         Element bundleElement = null;
         for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
-            bundleElement = entry.getValue().getDeleteEnvBundle();
+            bundleElement = entry.getValue().getDeleteBundle();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
             Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
 

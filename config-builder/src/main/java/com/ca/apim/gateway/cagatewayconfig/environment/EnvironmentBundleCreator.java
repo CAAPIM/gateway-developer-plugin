@@ -76,7 +76,8 @@ public class EnvironmentBundleCreator {
             int index = bundleName.lastIndexOf(BUNDLE_EXTENSION);
             documentFileUtils.createFile(entry.getValue().getBundle(), new File(bundleFolderPath,
                     bundleName).toPath());
-            documentFileUtils.createFile(entry.getValue().getDeleteEnvBundle(), new File(bundleFolderPath,
+
+            documentFileUtils.createFile(entry.getValue().getDeleteBundle(), new File(bundleFolderPath,
                     bundleName.substring(0, index)+ DELETE_BUNDLE_EXTENSION).toPath());
         }
         return environmentBundle;

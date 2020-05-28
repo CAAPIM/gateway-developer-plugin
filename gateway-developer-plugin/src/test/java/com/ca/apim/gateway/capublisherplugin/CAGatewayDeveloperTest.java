@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.capublisherplugin;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -71,7 +72,8 @@ class CAGatewayDeveloperTest {
         File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
         File builtBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + ".bundle");
         assertTrue(builtBundleFile.isFile());
-        File builtDeleteBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + ".delete.bundle");
+
+        File builtDeleteBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + DocumentFileUtils.DELETE_BUNDLE_EXTENSION);
         assertTrue(builtDeleteBundleFile.isFile());
     }
 
