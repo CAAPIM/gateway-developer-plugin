@@ -63,7 +63,6 @@ public class BundleEntityBuilder {
             }
 
             // Create DELETE Environment bundle
-
             if (EntityBuilder.BundleType.ENVIRONMENT.equals(bundleType)) {
                 deleteBundleElement = createDeleteEnvBundle(document, entities);
             }
@@ -106,7 +105,6 @@ public class BundleEntityBuilder {
                                 }
 
                                 // Create DELETE Environment bundle
-
                                 if (EntityBuilder.BundleType.ENVIRONMENT.equals(bundleType)) {
                                     deleteBundleElement = createDeleteEnvBundle(document, entities);
                                 }

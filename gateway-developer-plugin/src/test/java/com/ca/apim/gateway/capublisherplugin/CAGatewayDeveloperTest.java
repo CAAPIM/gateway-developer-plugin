@@ -72,7 +72,6 @@ class CAGatewayDeveloperTest {
         File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
         File builtBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + ".bundle");
         assertTrue(builtBundleFile.isFile());
-
         File builtDeleteBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + DocumentFileUtils.DELETE_BUNDLE_EXTENSION);
         assertTrue(builtDeleteBundleFile.isFile());
     }
