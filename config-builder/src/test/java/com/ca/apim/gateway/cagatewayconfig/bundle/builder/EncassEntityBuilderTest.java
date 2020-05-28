@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ class EncassEntityBuilderTest {
     private static final String TEST_POLICY_PATH= "test/policy.xml";
     private static final String TEST_GUID = UUID.randomUUID().toString();
     private static final String TEST_POLICY_ID = "PolicyID";
+    private static final String TEST_GOID = ID_GENERATOR.generate();
 
     @Test
     void buildFromEmptyBundle_noEncass() {
@@ -54,6 +56,60 @@ class EncassEntityBuilderTest {
     }
 
     @Test
+    void buildEncassDeploymentWithWrongGuidAndId() {
+        final Bundle bundle = new Bundle();
+        EncassEntityBuilder builder = new EncassEntityBuilder(ID_GENERATOR);
+        Encass encass = buildTestEncass(TEST_GUID, TEST_GOID, TEST_POLICY_PATH);
+        encass.setName(TEST_ENCASS);
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation.setGuid("");
+        annotation.setId("");
+        annotations.add(annotation);
+        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
+        encass.setAnnotations(annotations);
+        bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+
+        Policy policy = new Policy();
+        policy.setName(TEST_POLICY_PATH);
+        policy.setId(TEST_POLICY_ID);
+        bundle.getPolicies().put(TEST_POLICY_PATH, policy);
+        AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        annotatedBundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+        annotatedBundle.getPolicies().put(TEST_POLICY_PATH, policy);
+        List<Entity> entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        assertFalse(entities.isEmpty());
+        assertEquals(1, entities.size());
+
+        Entity entity = entities.get(0);
+        assertEquals(TEST_ENCASS, entity.getName());
+        assertNotNull(entity.getId(), TEST_GOID);
+        assertEquals(entity.getGuid(), TEST_GUID);
+
+
+        annotations = new HashSet<>();
+        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation.setGuid("wrongGuid");
+        annotation.setId("wrongId");
+        annotations.add(annotation);
+        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
+        encass.setAnnotations(annotations);
+        encass.setAnnotatedEntity(null);
+        annotatedEntity = new AnnotatedEntity(encass);
+        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        annotatedBundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+        annotatedBundle.getPolicies().put(TEST_POLICY_PATH, policy);
+        entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+
+        entity = entities.get(0);
+        assertEquals(TEST_ENCASS, entity.getName());
+        assertNotNull(entity.getId(), TEST_GOID);
+        assertEquals(entity.getGuid(), TEST_GUID);
+    }
+
+    @Test
     void buildDeploymentWithEncassEncodedPolicyName() {
         final Bundle bundle = new Bundle();
         putPolicy(bundle, "example-_¯-¯_-slashed", TEST_POLICY_ID, "example/folder-_¯-¯_-slashed/example-_¯-¯_-slashed.xml");
@@ -66,7 +122,7 @@ class EncassEntityBuilderTest {
         putPolicy(bundle, TEST_POLICY_PATH, TEST_POLICY_ID, TEST_POLICY_PATH);
 
         EncassEntityBuilder builder = new EncassEntityBuilder(ID_GENERATOR);
-        Encass encass = buildTestEncass(TEST_GUID, TEST_POLICY_PATH);
+        Encass encass = buildTestEncass(TEST_GUID, "testGoid", TEST_POLICY_PATH);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         final List<Entity> entities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -82,7 +138,7 @@ class EncassEntityBuilderTest {
 
     private static void buildBundleWithEncass(Bundle bundle, BundleType deployment, String policyPath, String encassName) {
         EncassEntityBuilder builder = new EncassEntityBuilder(ID_GENERATOR);
-        Encass encass = buildTestEncass(EncassEntityBuilderTest.TEST_GUID, policyPath);
+        Encass encass = buildTestEncass(EncassEntityBuilderTest.TEST_GUID, "testGoid", policyPath);
         encass.setName(encassName);
         bundle.putAllEncasses(ImmutableMap.of(encassName, encass));
 
@@ -144,11 +200,11 @@ class EncassEntityBuilderTest {
         assertTrue(argumentElements.isEmpty());
     }
 
-    private static Encass buildTestEncass(String encassGuid, String policyPath) {
+    private static Encass buildTestEncass(String encassGuid, String encassId, String policyPath) {
         Encass encass = new Encass();
         encass.setPolicy(policyPath);
         encass.setGuid(encassGuid);
-        encass.setId("testId");
+        encass.setId(encassId);
         encass.setArguments(new HashSet<>());
         EncassArgument param1 = new EncassArgument();
         param1.setName("Param1");

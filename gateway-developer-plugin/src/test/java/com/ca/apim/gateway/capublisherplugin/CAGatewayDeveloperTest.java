@@ -8,6 +8,7 @@ package com.ca.apim.gateway.capublisherplugin;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -68,6 +69,12 @@ class CAGatewayDeveloperTest {
 
         File buildDir = new File(testProjectDir, "build");
         validateBuildDir(projectFolder, buildDir);
+        File buildGatewayDir = new File(buildDir, "gateway");
+        File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
+        File builtBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + ".bundle");
+        assertTrue(builtBundleFile.isFile());
+        File builtDeleteBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + DocumentFileUtils.DELETE_BUNDLE_EXTENSION);
+        assertTrue(builtDeleteBundleFile.isFile());
     }
 
     @Test
@@ -296,6 +303,77 @@ class CAGatewayDeveloperTest {
         //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
         File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-config" + "env.install.bundle");
         assertTrue(builtBundleFile.isFile());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingDeleteBundlesForDeploymentType(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        final String projectFolder = "example-project-generating-environment";
+        //bundle name given as part of enacass annotation
+        final String bundleName = "encass_bundle";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments(
+                        "build-environment-bundle",
+                        "--stacktrace",
+                        "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DconfigFolder=src/main/gateway/config",
+                        "-DconfigName=config")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
+
+        File buildDir = new File(testProjectDir, "build");
+        File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
+
+        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config.environment.delete.bundle");
+        assertTrue(builtDeleteEnvBundleFile.isFile());
+
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingDeleteBundles(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        final String projectFolder = "example-project-generating-environment";
+        //bundle name given as part of enacass annotation
+        final String bundleName = "encass_bundle";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments(
+                        "build-environment-bundle",
+                        "--stacktrace",
+                        "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DconfigFolder=src/main/gateway/config",
+                        "-DconfigName=config")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
+
+        File buildDir = new File(testProjectDir, "build");
+        File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
+
+        //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config.environment.bundle");
+        assertTrue(builtBundleFile.isFile());
+
+        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".config.environment.delete.bundle");
+        assertTrue(builtDeleteEnvBundleFile.isFile());
+
+        File builtDeleteBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".delete.bundle");
+        assertTrue(builtDeleteBundleFile.isFile());
     }
 
     @Test

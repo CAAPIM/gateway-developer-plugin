@@ -26,6 +26,7 @@ import java.util.Map;
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YML_EXTENSION;
@@ -102,17 +103,16 @@ public class BuildFullBundleTask extends DefaultTask {
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().getOrNull());
             if (null != bundleEnvironmentValues) {
                 final String bundleFileName = bundleEnvironmentValues.getLeft() + "-full.install.bundle";
-                Map<String, String> environmentValuesFromMetadata = bundleEnvironmentValues.getRight();
                 //read environment properties from environmentConfig and merge it with metadata properties
-                environmentValuesFromMetadata.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
+                bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
                 final List<File> bundleFiles = union(
                         collectFiles(bundleDirectory, bundleEnvironmentValues.getLeft() + BUNDLE_EXTENSION),
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
                 );
 
                 fullBundleCreator.createFullBundle(
-                        environmentValuesFromMetadata,
-                        bundleFiles,
+                        bundleEnvironmentValues,
+                        filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),
                         bundleDirectory,
                         bundleFileName,
                         detemplatizeDeploymentBundles.get()
