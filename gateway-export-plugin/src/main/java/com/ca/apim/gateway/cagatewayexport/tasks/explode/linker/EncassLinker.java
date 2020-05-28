@@ -27,6 +27,7 @@ public class EncassLinker implements EntityLinker<Encass> {
         if (policy == null) {
             throw new LinkerException("Could not find policy for Encapsulated Assertion: " + encass.getName() + ". Policy ID: " + encass.getPolicyId());
         }
+        encass.setPolicy(policy.getPath());
         encass.setPath(getPolicyPath(policy, bundle, encass));
     }
 

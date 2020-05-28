@@ -6,7 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.json;
 
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtilsException;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
@@ -17,6 +19,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +29,7 @@ import java.util.logging.Logger;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY;
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_DOC_START_MARKER;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public class JsonTools {
@@ -35,7 +40,7 @@ public class JsonTools {
     public static final String YAML = "yaml";
     public static final String JSON_EXTENSION = "json";
     public static final String YML_EXTENSION = "yml";
-    private static final String YAML_EXTENSION = "yaml";
+    public static final String YAML_EXTENSION = "yaml";
     private final Map<String, ObjectMapper> objectMapperMap = new HashMap<>();
     private final FileUtils fileUtils;
     private String outputType;
@@ -156,7 +161,6 @@ public class JsonTools {
         return fileExtension;
     }
 
-
     private static ObjectMapper buildObjectMapper(JsonFactory jf) {
         ObjectMapper objectMapper = new ObjectMapper(jf);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -175,5 +179,14 @@ public class JsonTools {
             });
         }
         return objectMapper;
+    }
+
+    public void writeObject(final Object object, OutputStream outputStream) {
+        ObjectWriter objectWriter = getObjectWriter();
+        try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, UTF_8)) {
+            objectWriter.writeValue(writer, object);
+        } catch (IOException e) {
+            throw new JsonFileUtilsException("Exception writing " + this.outputType + " to stream.", e);
+        }
     }
 }

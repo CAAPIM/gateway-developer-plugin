@@ -5,7 +5,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import org.jetbrains.annotations.NotNull;
-
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -32,7 +32,7 @@ public class DependencyUtils {
 
         return bundle.getEntities(dependentEntityType).values().stream()
                 //keep only entities the are dependencies of entities in the filtered bundle
-                .filter(entity -> dependentEntities.contains(new Dependency(entity.getId(), dependentEntityType)) || includeEntity.test(entity))
+                .filter(entity -> dependentEntities.contains(new Dependency(entity.getId(), dependentEntityType, entity.getName(), EntityUtils.getEntityType(dependentEntityType))) || includeEntity.test(entity))
                 .collect(Collectors.toList());
     }
 
@@ -48,11 +48,11 @@ public class DependencyUtils {
     private static <E extends GatewayEntity> Set<Dependency> filterDependencies(Class<E> dependentEntityType, Map<Dependency, List<Dependency>> dependencies, Bundle bundle) {
         return dependencies.entrySet().stream()
                 // filter out dependencies that are not in the bundle
-                .filter(e -> bundle.getEntities(e.getKey().getType()).get(e.getKey().getId()) != null)
+                .filter(e -> bundle.getEntities(e.getKey().getTypeClass()).get(e.getKey().getId()) != null)
                 // keep only the dependencies
                 .flatMap(e -> e.getValue().stream())
                 // keep only dependencies that are of the given type.
-                .filter(d -> d.getType() == dependentEntityType)
+                .filter(d -> d.getTypeClass() == dependentEntityType)
                 .collect(Collectors.toSet());
     }
 

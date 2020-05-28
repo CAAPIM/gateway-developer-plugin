@@ -10,6 +10,10 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.IdValidator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -17,11 +21,10 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
@@ -41,7 +44,7 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
  */
 @Singleton
 public class EncassEntityBuilder implements EntityBuilder {
-
+    private static final Logger LOGGER = Logger.getLogger(EncassEntityBuilder.class.getName());
     private static final int ORDER = 300;
 
     private final IdGenerator idGenerator;
@@ -52,13 +55,23 @@ public class EncassEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        if (bundle instanceof AnnotatedBundle) {
+            AnnotatedBundle annotatedBundle = ((AnnotatedBundle) bundle);
+            Map<String, Encass> map = Optional.ofNullable(bundle.getEncasses()).orElse(Collections.emptyMap());
+            return buildEntities(map, annotatedBundle, annotatedBundle.getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getEncasses(), null, bundle, bundleType, document);
+        }
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
         // no encass has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
-        return bundle.getEncasses().entrySet().stream().map(encassEntry ->
-                buildEncassEntity(bundle, encassEntry.getKey(), encassEntry.getValue(), document)
+        return entities.entrySet().stream().map(encassEntry ->
+                buildEncassEntity(annotatedBundle, bundle, encassEntry.getKey(), (Encass) encassEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
@@ -68,20 +81,84 @@ public class EncassEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildEncassEntity(Bundle bundle, String name, Encass encass, Document document) {
-        Policy policy = bundle.getPolicies().get(encass.getPolicy());
+    private boolean isAnnotatedEntity(Encass encass, AnnotatedEntity annotatedEntity) {
+        return annotatedEntity != null && annotatedEntity.getEntityName().equals(encass.getName()) &&
+                EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(annotatedEntity.getEntityType());
+    }
+
+    private String getPolicyId(String policyWithPath, Bundle bundle) {
+        Policy policy = bundle.getPolicies().get(policyWithPath);
+        String policyId = null;
         if (policy == null) {
-            throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + encass.getPolicy());
+            Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
+            if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
+                for (BundleDefinedEntities bundleMetadata : bundleMetadataSet) {
+                    Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleMetadata.getDefinedEntities();
+                    if (metadataCollection != null) {
+                        Optional<BundleDefinedEntities.DefaultMetadata> optionalMetadata = metadataCollection.stream().
+                                filter(metadata -> metadata.getName().equals(PathUtils.extractName(policyWithPath))
+                                        && metadata.getType().equals(EntityTypes.POLICY_TYPE)).findFirst();
+                        if (optionalMetadata.isPresent()) {
+                            if (policyId == null) {
+                                policyId = optionalMetadata.get().getId();
+                            } else {
+                                throw new EntityBuilderException("Found multiple policies in dependency bundles with name: " + policyWithPath);
+                            }
+                        }
+                    }
+                }
+            }
+            if (policyId == null) {
+                throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + policyWithPath);
+            }
+        } else {
+            policyId = policy.getId();
         }
-        final String id = idGenerator.generate();
+        return policyId;
+    }
+
+    private Entity buildEncassEntity(AnnotatedBundle annotatedBundle, Bundle bundle, String name, Encass encass, Document document) {
+        String policyId = getPolicyId(encass.getPolicy(), bundle);
+        String encassName = name;
+        String guid = encass.getGuid();
+        String id = encass.getId();
+        AnnotatedEntity annotatedEncassEntity = null;
+
+        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+        boolean isRedeployableBundle = false;
+        if (annotatedEntity != null) {
+            isRedeployableBundle = annotatedEntity.isRedeployable();
+            annotatedEncassEntity = encass.getAnnotatedEntity();
+            if (encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity)) {
+                //use the id and guid defined at reusable annotation or bundle annotation (if its annotated bundle)
+                if (annotatedEncassEntity.getGuid() != null) {
+                    if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
+                        guid = annotatedEncassEntity.getGuid();
+                    } else {
+                        LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
+                    }
+                }
+                if (annotatedEncassEntity.getId() != null) {
+                    if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
+                        id = annotatedEncassEntity.getId();
+                    } else {
+                        LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
+                    }
+                }
+            } else {
+                encassName = annotatedBundle.getUniquePrefix() + name + annotatedBundle.getUniqueSuffix();
+                //guid and id are regenerated in policy entity builder if this encass is referred by policy and it runs before this builder
+                //no need to regenerate id and guid
+            }
+        }
 
         Element encassAssertionElement = createElementWithAttributesAndChildren(
                 document,
                 ENCAPSULATED_ASSERTION,
                 ImmutableMap.of(ATTRIBUTE_ID, id),
-                createElementWithTextContent(document, NAME, name),
-                createElementWithTextContent(document, GUID, encass.getGuid()),
-                createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policy.getId()),
+                createElementWithTextContent(document, NAME, encassName),
+                createElementWithTextContent(document, GUID, guid),
+                createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policyId),
                 buildArguments(encass, document),
                 buildResults(encass, document)
         );
@@ -89,8 +166,15 @@ public class EncassEntityBuilder implements EntityBuilder {
         final Map<String, Object> properties = Optional.ofNullable(encass.getProperties()).orElse(new HashMap<>());
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
+        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, encassName, id, encassAssertionElement, guid);
 
-        return getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, id, encassAssertionElement);
+        if (isRedeployableBundle || !(encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity))) {
+            entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
+        } else {
+            entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
+        }
+        return entity;
+
     }
 
     private Element buildResults(Encass encass, Document document) {
@@ -118,6 +202,7 @@ public class EncassEntityBuilder implements EntityBuilder {
                             createElementWithTextContent(document, ORDINAL, String.valueOf(ordinal.getAndIncrement())),
                             createElementWithTextContent(document, ARGUMENT_NAME, param.getName()),
                             createElementWithTextContent(document, ARGUMENT_TYPE, param.getType()),
+                            createElementWithTextContent(document, GUI_LABEL, param.getLabel()),
                             createElementWithTextContent(document, GUI_PROMPT, firstNonNull(param.getRequireExplicit(), FALSE).toString())
                     )
             ));

@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
@@ -21,7 +23,10 @@ import java.math.BigInteger;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.PRIVATE_KEY_TYPE;
@@ -49,7 +54,12 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        return bundle.getPrivateKeys().entrySet().stream().map(e -> buildPrivateKeyEntity(e.getKey(), e.getValue(), document)).collect(toList());
+        Map<String, PrivateKey> privateKeyMap = Optional.ofNullable(bundle.getPrivateKeys()).orElse(Collections.emptyMap());
+        return buildEntities(privateKeyMap, document);
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Document document) {
+        return entities.entrySet().stream().map(e -> buildPrivateKeyEntity(e.getKey(), (PrivateKey)e.getValue(), document)).collect(toList());
     }
 
     private Entity buildPrivateKeyEntity(String alias, PrivateKey privateKey, Document document) {

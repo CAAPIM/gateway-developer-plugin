@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
@@ -55,7 +56,7 @@ public class EntityUtils {
      * @param <E> entity type
      * @return a pair containing the file name and type for the config file of this entity or an empty pair if not configured
      */
-    static <E extends GatewayEntity> Pair<String, FileType> getEntityConfigFileInfo(Class<E> entityClass) {
+    public static <E extends GatewayEntity> Pair<String, FileType> getEntityConfigFileInfo(Class<E> entityClass) {
         ConfigurationFile configurationFile = entityClass.getAnnotation(ConfigurationFile.class);
         return configurationFile != null ? ImmutablePair.of(configurationFile.name(), configurationFile.type()) : nullPair();
     }
@@ -65,7 +66,7 @@ public class EntityUtils {
      * @param <E> entity type
      * @return the environment type of the entity configured by {@link EnvironmentType} annotation, otherwise null if not configured
      */
-    static <E extends GatewayEntity> String getEntityEnvironmentType(Class<E> entityClass) {
+    public static <E extends GatewayEntity> String getEntityEnvironmentType(Class<E> entityClass) {
         EnvironmentType environmentType = entityClass.getAnnotation(EnvironmentType.class);
         return environmentType != null ? environmentType.value() : null;
     }
@@ -77,6 +78,8 @@ public class EntityUtils {
         private String fileName;
         private FileType fileType;
         private String environmentType;
+
+        private boolean bundleGenerationSupported;
 
         private GatewayEntityInfo() {
         }
@@ -109,5 +112,11 @@ public class EntityUtils {
         public String getEnvironmentType() {
             return environmentType;
         }
+
+        public boolean isBundleGenerationSupported() {
+            BundleGeneration bundleGeneration = entityClass.getAnnotation(BundleGeneration.class);
+            return bundleGeneration != null;
+        }
+
     }
 }

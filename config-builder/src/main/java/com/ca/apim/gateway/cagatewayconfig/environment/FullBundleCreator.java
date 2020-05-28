@@ -7,18 +7,13 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.bundle.DependencyBundlesProcessor;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import org.apache.commons.lang3.SystemUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -27,6 +22,7 @@ import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,7 +71,7 @@ public class FullBundleCreator {
                                  String bundleFolderPath,
                                  String bundleFileName,
                                  boolean detemplatizeDeploymentBundles) {
-        final String bundle = createFullBundleAsString(environmentProperties, deploymentBundles, detemplatizeDeploymentBundles);
+        final String bundle = createFullBundleAsString(environmentProperties, deploymentBundles, bundleFileName, detemplatizeDeploymentBundles);
         // write the full bundle to a temporary file first
         final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), bundleFileName);
         try {
@@ -94,7 +90,7 @@ public class FullBundleCreator {
     }
 
     private String createFullBundleAsString(Map<String, String> environmentProperties,
-                                            List<File> deploymentBundles,
+                                            List<File> deploymentBundles, String bundleFileName,
                                             boolean detemplatizeDeploymentBundles) {
         // load all deployment bundles to strings
         List<TemplatizedBundle> templatizedBundles = deploymentBundles.stream().map(f -> new StringTemplatizedBundle(f.getName(), fileUtils.getFileAsString(f))).collect(toList());
@@ -109,27 +105,33 @@ public class FullBundleCreator {
         // generate the environment bundle
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
-        Element bundleElement = bundleEntityBuilder.build(environmentBundle, EntityBuilder.BundleType.ENVIRONMENT, document);
-        Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
-        Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
+        Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
+                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", "");
+        Element bundleElement = null;
+        for(Map.Entry<String, BundleArtifacts> entry: bundleElements.entrySet()) {
+            // generate the environment bundle
+            bundleElement = entry.getValue().getBundle();
+            Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
+            Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
 
-        // store Set of elements previously added so avoiding repetition in the resulting bundle
-        Set<String> addedItems = new HashSet<>();
-        Set<String> addedMappings = new HashSet<>();
+            // store Set of elements previously added so avoiding repetition in the resulting bundle
+            Set<String> addedItems = new HashSet<>();
+            Set<String> addedMappings = new HashSet<>();
 
-        // merge the deployment bundles into the environment one to get the full bundle
-        templatizedBundles.forEach(tb -> {
-            try {
-                final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
-                copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
-                copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
-                    final String key = buildBundleMappingKey(mapping);
-                    return addedItems.contains(key) && addedMappings.add(key);
-                });
-            } catch (DocumentParseException e) {
-                throw new EntityBuilderException("Unable to read bundle " + tb.getName(), e);
-            }
-        });
+            // merge the deployment bundles into the environment one to get the full bundle
+            templatizedBundles.forEach(tb -> {
+                try {
+                    final Element detemplatizedBundleElement = documentTools.parse(tb.getContents()).getDocumentElement();
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, REFERENCES), ITEM, document, referencesElement, item -> addedItems.add(buildBundleItemKey(item)));
+                    copyNodes(getSingleChildElement(detemplatizedBundleElement, MAPPINGS), MAPPING, document, mappingsElement, mapping -> {
+                        final String key = buildBundleMappingKey(mapping);
+                        return addedItems.contains(key) && addedMappings.add(key);
+                    });
+                } catch (DocumentParseException e) {
+                    throw new EntityBuilderException("Unable to read bundle " + tb.getName(), e);
+                }
+            });
+        }
 
         return documentTools.elementToString(bundleElement);
     }

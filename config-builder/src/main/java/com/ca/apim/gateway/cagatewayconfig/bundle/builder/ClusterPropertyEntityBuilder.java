@@ -6,9 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.PropertiesEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -17,6 +17,7 @@ import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,28 +38,28 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         this.idGenerator = idGenerator;
     }
 
-    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> globalProperties, Map<String, ?> clusterProperties, BundleType bundleType, Document document){
         Stream.Builder<Entity> streamBuilder = Stream.builder();
         switch (bundleType) {
             case DEPLOYMENT:
-                bundle.getStaticProperties().entrySet().stream().map(propertyEntry -> {
-                    if (bundle.getGlobalEnvironmentProperties().containsKey(PREFIX_GATEWAY + propertyEntry.getKey())) {
-                        throw new EntityBuilderException("The Cluster property: '" + propertyEntry.getKey() + "' is defined in both static.properties and env.properties");
-                    }
-                    return buildClusterPropertyEntity(propertyEntry.getKey(), propertyEntry.getValue(), document);
+                clusterProperties.entrySet().stream().map(propertyEntry -> {
+                        if (globalProperties.containsKey(PREFIX_GATEWAY + propertyEntry.getKey())) {
+                            throw new EntityBuilderException("The Cluster property: '" + propertyEntry.getKey() + "' is defined in both static.properties and env.properties");
+                        }
+                        return buildClusterPropertyEntity(propertyEntry.getKey(), (ClusterProperty)propertyEntry.getValue(), document);
                 }).forEach(streamBuilder);
-                bundle.getGlobalEnvironmentProperties().entrySet().stream()
-                        .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
-                        .map(propertyEntry ->
-                                EntityBuilderHelper.getEntityWithOnlyMapping(CLUSTER_PROPERTY_TYPE, propertyEntry.getKey().substring(PREFIX_GATEWAY.length()), idGenerator.generate())
-                        ).forEach(streamBuilder);
+                globalProperties.keySet().stream()
+                        .filter(o -> o.startsWith(PREFIX_GATEWAY))
+                        .map(o -> EntityBuilderHelper.getEntityWithOnlyMapping(CLUSTER_PROPERTY_TYPE, o.substring(PREFIX_GATEWAY.length()), idGenerator.generate()))
+                        .forEach(streamBuilder);
                 break;
             case ENVIRONMENT:
-                bundle.getGlobalEnvironmentProperties().entrySet().stream()
+                globalProperties.entrySet().stream()
                         .filter(propertyEntry -> propertyEntry.getKey().startsWith(PREFIX_GATEWAY))
                         .map(propertyEntry ->
-                                buildClusterPropertyEntity(propertyEntry.getKey().substring(PREFIX_GATEWAY.length()), propertyEntry.getValue(), document)
-                        ).forEach(streamBuilder);
+                                buildClusterPropertyEntity(propertyEntry.getKey().substring(PREFIX_GATEWAY.length()),
+                                        (GlobalEnvironmentProperty) propertyEntry.getValue(), document))
+                        .forEach(streamBuilder);
                 break;
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
@@ -66,8 +67,14 @@ public class ClusterPropertyEntityBuilder implements EntityBuilder {
         return streamBuilder.build().collect(Collectors.toList());
     }
 
+    public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, GlobalEnvironmentProperty> globalEnvironmentProperties = Optional.ofNullable(bundle.getGlobalEnvironmentProperties()).orElse(Collections.emptyMap());
+        Map<String, ClusterProperty> clusterPropertyMap = Optional.ofNullable(bundle.getStaticProperties()).orElse(Collections.emptyMap());
+        return buildEntities(globalEnvironmentProperties, clusterPropertyMap, bundleType, document);
+    }
+
     @Override
-    public Integer getOrder() {
+    public @NotNull Integer getOrder() {
         return ORDER;
     }
 

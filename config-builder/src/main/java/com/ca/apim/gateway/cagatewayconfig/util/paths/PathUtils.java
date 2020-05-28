@@ -40,4 +40,14 @@ public class PathUtils {
     public static String unixPathEndingWithSeparator(@NotNull Path path) {
         return separatorsToUnix(path.toString()) + UNIX_PATH_SEPARATOR;
     }
+
+    public static String extractName(String nameWithPath) {
+        int index = nameWithPath.lastIndexOf(UNIX_PATH_SEPARATOR);
+        return index > -1 ? nameWithPath.substring(index + 1) : nameWithPath;
+    }
+
+    public static String extractPath(String nameWithPath) {
+        int index = nameWithPath.lastIndexOf(UNIX_PATH_SEPARATOR);
+        return index > -1 ? nameWithPath.substring(0, index + 1) : "";
+    }
 }
