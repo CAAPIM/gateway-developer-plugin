@@ -51,7 +51,7 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassBundleFileNames(final TemporaryFolder temporaryFolder) {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false, false);
+        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false, false, false);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
@@ -59,7 +59,6 @@ public class BundleMetadataBuilderTest {
 
         List<File> dummyList = new ArrayList<>();
         dummyList.add(new File("test"));
-        //when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
 
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(DocumentTools.INSTANCE, DocumentFileUtils.INSTANCE,
                 JsonFileUtils.INSTANCE, entityLoaderRegistry, builder, bundleCache);
@@ -71,6 +70,7 @@ public class BundleMetadataBuilderTest {
             assertTrue(bundleOutput.exists());
             assertEquals(3, bundleOutput.listFiles().length);
             for (File generatedFile : bundleOutput.listFiles()) {
+
                 if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
                     assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0-policy" + DELETE_BUNDLE_EXTENSION,
                             generatedFile.getName());
@@ -123,7 +123,7 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassMetadata() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, false);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         String metadataId = ID_GENERATOR.generate();
         encass.getAnnotations().stream()
@@ -142,7 +142,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(TEST_ENCASS_ANNOTATION_DESC, metadata.getDescription());
         assertEquals(TEST_ENCASS_ANNOTATION_TAGS, metadata.getTags());
 
-        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, false, false);
+        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, false, false, true);
     }
 
     /**
@@ -153,7 +153,7 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassMetadata_ExcludingOptionalAnnotationFields() throws JsonProcessingException {
                 BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, true);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, true);
         encass.getAnnotations().forEach(a -> {
             a.setId(null);
@@ -175,7 +175,25 @@ public class BundleMetadataBuilderTest {
         assertEquals(encass.getProperties().get("description"), metadata.getDescription());
         assertEquals(0, metadata.getTags().size());
 
-        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, true, true);
+        verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, true, true, true);
+    }
+
+    @Test
+    public void testHasRoutingInMetadata() {
+        BundleEntityBuilder builder = createBundleEntityBuilder();
+
+        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false, false, false);
+        Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, true);
+        bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        BundleMetadata metadata = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getBundleMetadata();
+        assertNotNull(metadata);
+        assertEquals(TEST_ENCASS_ANNOTATION_NAME, metadata.getName());
+        assertFalse(metadata.isHasRouting());
     }
 
     private void deleteDirectory(File directory) {

@@ -68,6 +68,7 @@ public class PolicyAndFolderLoader implements EntityLoader {
                 policy.setSubtag(policyMetadata.getSubtag());
                 policy.setPolicyType(PolicyType.fromType(policyMetadata.getType()));
                 policy.setUsedEntities(policyMetadata.getUsedEntities());
+                policy.setHasRouting(policyMetadata.isHasRouting());
             });
         }
         bundle.setDependencyMap(policyDependencyMap);

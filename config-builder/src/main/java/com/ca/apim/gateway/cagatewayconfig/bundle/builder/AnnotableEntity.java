@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Set;
 
@@ -79,6 +80,7 @@ public interface AnnotableEntity {
      *
      * @return TRUE if "@bundle" annotation is added
      */
+    @JsonIgnore
     default boolean isBundle() {
         return getAnnotations() != null && getAnnotations().contains(BUNDLE_ANNOTATION);
     }
@@ -88,6 +90,7 @@ public interface AnnotableEntity {
      *
      * @return TRUE if "@redeployable" annotation is added
      */
+    @JsonIgnore
     default boolean isRedeployable() {
         return getAnnotations() != null && getAnnotations().contains(REDEPLOYABLE_ANNOTATION);
     }
@@ -97,6 +100,7 @@ public interface AnnotableEntity {
      *
      * @return TRUE if "@reusable" annotation is added
      */
+    @JsonIgnore
     default boolean isReusable() {
         return getAnnotations() != null && getAnnotations().contains(REUSABLE_ANNOTATION);
     }
@@ -106,6 +110,7 @@ public interface AnnotableEntity {
      *
      * @return TRUE if "@exclude" annotation is added
      */
+    @JsonIgnore
     default boolean isExcluded() {
         return getAnnotations() != null && getAnnotations().contains(EXCLUDE_ANNOTATION);
     }

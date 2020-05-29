@@ -26,7 +26,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.FU
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
-import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YML_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
 import static org.apache.commons.collections4.ListUtils.union;
 
 /**
@@ -35,6 +35,7 @@ import static org.apache.commons.collections4.ListUtils.union;
 public class BuildFullBundleTask extends DefaultTask {
 
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
+    private final Property<Map> environmentConfig;
     private final ConfigurableFileCollection dependencyBundles;
     private final DirectoryProperty into;
     private final Property<Boolean> detemplatizeDeploymentBundles;
@@ -44,6 +45,7 @@ public class BuildFullBundleTask extends DefaultTask {
     @Inject
     public BuildFullBundleTask() {
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
+        environmentConfig = getProject().getObjects().property(Map.class);
         dependencyBundles = getProject().files();
         into = newOutputDirectory();
         detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
@@ -62,16 +64,24 @@ public class BuildFullBundleTask extends DefaultTask {
     }
 
     @Input
+    @Optional
+    Property<Map> getEnvironmentConfig() {
+        return environmentConfig;
+    }
+
+    @Input
     Property<Boolean> getDetemplatizeDeploymentBundles() {
         return detemplatizeDeploymentBundles;
     }
 
     @InputDirectory
+    @Optional
     DirectoryProperty getConfigFolder() {
         return configFolder;
     }
 
     @Input
+    @Optional
     Property<String> getConfigName() {
         return configName;
     }
@@ -80,22 +90,25 @@ public class BuildFullBundleTask extends DefaultTask {
     public void perform() {
         final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
         final String bundleDirectory = into.getAsFile().get().getPath();
-        final List<File> metaDataFiles = collectFiles(bundleDirectory, YML_EXTENSION);
+        final List<File> metaDataFiles = collectFiles(bundleDirectory, METADATA_FILE_NAME_SUFFIX);
         if(metaDataFiles.isEmpty()) {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
+
         metaDataFiles.stream().forEach(metaDataFile-> {
-            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().get());
+            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().getOrNull());
             if (null != bundleEnvironmentValues) {
                 final String bundleFileName = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
+                //read environment properties from environmentConfig and merge it with metadata properties
+                bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
                 final List<File> bundleFiles = union(
                         collectFiles(bundleDirectory, INSTALL_BUNDLE_EXTENSION),
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
                 );
 
                 fullBundleCreator.createFullBundle(
-                        bundleEnvironmentValues.getRight(),
-                        bundleFiles,
+                        bundleEnvironmentValues,
+                        filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),
                         bundleDirectory,
                         bundleFileName,
                         detemplatizeDeploymentBundles.get()

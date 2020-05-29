@@ -69,7 +69,7 @@ public class BuilderUtils {
     }
 
     @NotNull
-    private static Element createPropertyElement(Document document, String key, Object value) {
+    public static Element createPropertyElement(Document document, String key, Object value) {
         Element propertyElement = document.createElement(PROPERTY);
         propertyElement.setAttribute(ATTRIBUTE_KEY, key);
         String elementType;

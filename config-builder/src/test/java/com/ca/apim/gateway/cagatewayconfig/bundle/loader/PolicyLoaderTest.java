@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -38,6 +40,15 @@ class PolicyLoaderTest {
             "        &lt;/L7p:CommentAssertion&gt;\n" +
             "    &lt;/wsp:All&gt;\n" +
             "&lt;/wsp:Policy&gt;";
+    private static final String TEST_POLICY_XML_WITH_ROUTING = "&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;\n" +
+            "&lt;wsp:Policy xmlns:L7p=&quot;http://www.layer7tech.com/ws/policy&quot; xmlns:wsp=&quot;http://schemas.xmlsoap.org/ws/2002/12/policy&quot;&gt;\n" +
+            "    &lt;wsp:All wsp:Usage=&quot;Required&quot;&gt;\n" +
+            "        &lt;L7p:Http2Routing&gt;\n" +
+            "            &lt;L7p:Http2ClientConfigName stringValue=&quot;&amp;lt;Default Config&gt;&quot;/&gt;\n" +
+            "            &lt;L7p:ProtectedServiceUrl stringValue=&quot;http://apim-hugh-new.lvn.broadcom.net:90&quot;/&gt;\n" +
+            "        &lt;/L7p:Http2Routing&gt;\n" +
+            "    &lt;/wsp:All&gt;\n" +
+            "&lt;/wsp:Policy&gt;";
 
     @Test
     void test() {
@@ -49,7 +60,8 @@ class PolicyLoaderTest {
         f1.setPath(TEST_FOLDER_1);
         bundle.getFolders().put(TEST_FOLDER_1, f1);
 
-        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, null));
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME,
+                PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, TEST_POLICY_XML, null, false));
 
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
@@ -62,6 +74,8 @@ class PolicyLoaderTest {
         assertEquals(path, policy.getPath());
         assertEquals(TEST_GUID, policy.getGuid());
         assertEquals(f1, policy.getParentFolder());
+
+        assertFalse(policy.isHasRouting());
     }
 
     @Test
@@ -69,7 +83,8 @@ class PolicyLoaderTest {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();
 
-        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, "Unsupported", TEST_FOLDER_1, null));
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, "Unsupported", TEST_FOLDER_1
+                , TEST_POLICY_XML, null, false));
 
         assertTrue(bundle.getPolicies().isEmpty());
     }
@@ -79,7 +94,8 @@ class PolicyLoaderTest {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();
 
-        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, null)));
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID,
+                TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, TEST_POLICY_XML, null, false)));
     }
 
     @Test
@@ -93,7 +109,8 @@ class PolicyLoaderTest {
         bundle.getFolders().put(TEST_FOLDER_1, f1);
         bundle.getFolders().put(TEST_FOLDER_1 + "_1", f1);
 
-        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, null)));
+        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID,
+                TEST_POLICY_NAME, PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, TEST_POLICY_XML, null, false)));
     }
 
     @Test
@@ -106,7 +123,8 @@ class PolicyLoaderTest {
         f1.setPath(TEST_FOLDER_1);
         bundle.getFolders().put(TEST_FOLDER_1, f1);
 
-        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.GLOBAL.getType(), TEST_FOLDER_1, null));
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.GLOBAL.getType(),
+                TEST_FOLDER_1, TEST_POLICY_XML, null, false));
 
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
@@ -134,7 +152,8 @@ class PolicyLoaderTest {
         f1.setPath(TEST_FOLDER_1);
         bundle.getFolders().put(TEST_FOLDER_1, f1);
 
-        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.INTERNAL.getType(), TEST_FOLDER_1, "audit-lookup"));
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME,
+                PolicyType.INTERNAL.getType(), TEST_FOLDER_1, TEST_POLICY_XML, "audit-lookup", false));
 
         assertFalse(bundle.getPolicies().isEmpty());
         assertEquals(1, bundle.getPolicies().size());
@@ -161,13 +180,44 @@ class PolicyLoaderTest {
         f1.setPath(TEST_FOLDER_1);
         bundle.getFolders().put(TEST_FOLDER_1, f1);
 
-        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME, PolicyType.INTERNAL.getType(), TEST_FOLDER_1, "test"));
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME,
+                PolicyType.INTERNAL.getType(), TEST_FOLDER_1, TEST_POLICY_XML, "test", false));
 
         assertTrue(bundle.getPolicies().isEmpty());
         assertTrue(bundle.getEntities(AuditPolicy.class).isEmpty());
     }
 
-    private static Element createPolicyBundleXml(Document document, String policyID, String policyName, String policyType, String folderID, String tag) {
+    @Test
+    void testHasRoutingWithRoutingAssertion() {
+        Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Bundle bundle = new Bundle();
+        Folder f1 = new Folder();
+        f1.setId(TEST_FOLDER_1);
+        f1.setName(TEST_FOLDER_1);
+        f1.setPath(TEST_FOLDER_1);
+        bundle.getFolders().put(TEST_FOLDER_1, f1);
+
+        loader.load(bundle, createPolicyBundleXml(doc, TEST_POLICY_ID, TEST_POLICY_NAME,
+                PolicyType.SERVICE_OPERATION.getType(), TEST_FOLDER_1, TEST_POLICY_XML_WITH_ROUTING, null, true));
+
+        assertFalse(bundle.getPolicies().isEmpty());
+        assertEquals(1, bundle.getPolicies().size());
+
+        String path = PathUtils.unixPath(TEST_FOLDER_1, TEST_POLICY_NAME);
+        Policy policy = bundle.getPolicies().get(path);
+        assertNotNull(policy);
+        assertEquals(TEST_POLICY_ID, policy.getId());
+        assertEquals(TEST_POLICY_NAME, policy.getName());
+        assertEquals(path, policy.getPath());
+        assertEquals(TEST_GUID, policy.getGuid());
+        assertEquals(f1, policy.getParentFolder());
+
+        assertTrue(policy.isHasRouting());
+    }
+
+    private static Element createPolicyBundleXml(Document document, String policyID, String policyName,
+                                                 String policyType, String folderID, String policyXml, String tag,
+                                                 boolean hasRouting) {
         Element element = createElementWithAttributesAndChildren(
                 document,
                 POLICY,
@@ -180,9 +230,13 @@ class PolicyLoaderTest {
                 createElementWithTextContent(document, NAME, policyName),
                 createElementWithTextContent(document, POLICY_TYPE, policyType)
         );
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(PropertyConstants.PROPERTY_HAS_ROUTING, hasRouting);
         if (tag != null) {
-            BuilderUtils.buildAndAppendPropertiesElement(ImmutableMap.of(PropertyConstants.PROPERTY_TAG, tag), document, policyDetailElement);
+            properties.put(PropertyConstants.PROPERTY_TAG, tag);
         }
+        BuilderUtils.buildAndAppendPropertiesElement(properties, document, policyDetailElement);
+
         element.appendChild(policyDetailElement);
         element.appendChild(
                 createElementWithChildren(
@@ -194,7 +248,7 @@ class PolicyLoaderTest {
                                 createElementWithTextContent(
                                         document,
                                         RESOURCE,
-                                        TEST_POLICY_XML
+                                        policyXml
                                 )
                         )
                 )

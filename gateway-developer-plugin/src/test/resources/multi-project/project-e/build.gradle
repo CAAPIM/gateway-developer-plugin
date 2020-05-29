@@ -5,13 +5,13 @@
  */
 
 dependencies {
-    bundle project(':project-a')
-    bundle project(':project-d')
+    bundle project(':project-c')
 }
 
 GatewaySourceConfig {
     environmentConfig = [
-            "PASSWORD.gateway": "test",
-            "PROPERTY.gateway.log_levels":  "com.l7tech.server.policy.level = FINEST"
+            "PASSWORD.gateway"           : "7layer",
+            "PROPERTY.gateway.log.levels": "com.l7tech.level = FINE"
     ]
+    configFolder = file('src/main/gateway/config')
 }

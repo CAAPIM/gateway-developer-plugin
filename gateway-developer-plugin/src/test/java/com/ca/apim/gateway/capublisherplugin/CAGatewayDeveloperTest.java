@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.capublisherplugin;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -19,7 +21,6 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.w3c.dom.Element;
@@ -70,6 +71,12 @@ class CAGatewayDeveloperTest {
         File buildDir = new File(testProjectDir, "build");
         String bundleFileName = projectFolder + projectVersion + "-policy" + INSTALL_BUNDLE_EXTENSION;
         validateBuildDir(projectFolder, bundleFileName, buildDir);
+        File buildGatewayDir = new File(buildDir, "gateway");
+        File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
+        File builtBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + ".bundle");
+        assertTrue(builtBundleFile.isFile());
+        File builtDeleteBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + DocumentFileUtils.DELETE_BUNDLE_EXTENSION);
+        assertTrue(builtDeleteBundleFile.isFile());
     }
 
     @Test
@@ -113,7 +120,6 @@ class CAGatewayDeveloperTest {
         assertMultiProject(testProjectDir, result);
     }
 
-    @Disabled("Disabling this test for now, as it is expecting an env bundle where entities are not present or un-annotated")
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testMultiProjectBuildingEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
@@ -129,9 +135,50 @@ class CAGatewayDeveloperTest {
                 .build();
 
         assertMultiProject(testProjectDir, result);
-        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + ".environment.bundle");
+        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + "-env.install.bundle");
         assertTrue(projectC_EnvBundle.exists());
         assertFalse(readFileToString(projectC_EnvBundle, defaultCharset()).isEmpty());
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testMultiProjectOverrideEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException, DocumentParseException {
+        String projectFolder = "multi-project";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments("build", ":project-e:build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        assertMultiProject(testProjectDir, result);
+        File projectE_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-e"), "build"), "gateway"), "bundle"), "project-e" + projectVersion + "-env.install.bundle");
+        assertTrue(projectE_EnvBundle.exists());
+        assertFalse(readFileToString(projectE_EnvBundle, defaultCharset()).isEmpty());
+        final Element envBundleElement = DocumentTools.INSTANCE.parse(projectE_EnvBundle).getDocumentElement();
+        final List<Element> itemList = getChildElements(getSingleChildElement(envBundleElement, REFERENCES), ITEM);
+        for (Element item : itemList) {
+            final String type = getSingleChildElementTextContent(item, TYPE);
+            final String entityName = getSingleChildElementTextContent(item, NAME);
+
+            switch (type) {
+                case EntityTypes.STORED_PASSWORD_TYPE:
+                    assertEquals("gateway", entityName);
+                    final Element storedPasswordElement = getSingleElement(item, STORED_PASSWD);
+                    assertEquals("7layer", getSingleChildElementTextContent(storedPasswordElement, PASSWORD));
+                    break;
+                case EntityTypes.CLUSTER_PROPERTY_TYPE:
+                    assertEquals("log.levels", entityName);
+                    final Element clusterPropertyElement = getSingleElement(item, CLUSTER_PROPERTY);
+                    assertEquals("com.l7tech.level = FINE", getSingleChildElementTextContent(clusterPropertyElement, VALUE));
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     private void assertMultiProject(File testProjectDir, BuildResult result) throws IOException {
@@ -191,8 +238,7 @@ class CAGatewayDeveloperTest {
             entries.add(entry.getName());
         }
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_my-bundle-1.0.00.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions" +
-                "-dependencies-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions-dependencies-1.2.3-SNAPSHOT-policy.install.req.bundle"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/assertions/Test-2.0.0.aar"));
     }
@@ -269,7 +315,77 @@ class CAGatewayDeveloperTest {
         //Environment bundle name format : <bundleName>-<version>-[<configName>]env.install.bundle
         String envBundleFilename = bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
         File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingDeleteBundlesForDeploymentType(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        final String projectFolder = "example-project-generating-environment";
+        //bundle name given as part of enacass annotation
+        final String bundleName = "encass_bundle";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments(
+                        "build-environment-bundle",
+                        "--stacktrace",
+                        "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DconfigFolder=src/main/gateway/config",
+                        "-DconfigName=config")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
+
+        File buildDir = new File(testProjectDir, "build");
+        File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
+
+        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-configenv.install.delete.bundle");
+        assertTrue(builtDeleteEnvBundleFile.isFile());
+
+    }
+
+    @Test
+    @ExtendWith(TemporaryFolderExtension.class)
+    void testExampleProjectGeneratingDeleteBundles(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+        final String projectFolder = "example-project-generating-environment";
+        //bundle name given as part of enacass annotation
+        final String bundleName = "encass_bundle";
+        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
+        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
+
+        BuildResult result = GradleRunner.create()
+                .withProjectDir(testProjectDir)
+                .withArguments(
+                        "build-environment-bundle",
+                        "--stacktrace",
+                        "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                        "-DconfigFolder=src/main/gateway/config",
+                        "-DconfigName=config")
+                .withPluginClasspath()
+                .withDebug(true)
+                .build();
+
+        LOGGER.log(Level.INFO, result.getOutput());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
+        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
+
+        File buildDir = new File(testProjectDir, "build");
+        File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
+
+        //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_NAME_SUFFIX);
         assertTrue(builtBundleFile.isFile());
+
+        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-config" + ENV_DELETE_BUNDLE_NAME_SUFFIX);
+        assertTrue(builtDeleteEnvBundleFile.isFile());
+
+        File builtDeleteBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".delete.bundle");
+        assertTrue(builtDeleteBundleFile.isFile());
     }
 
     @Test
@@ -403,17 +519,23 @@ class CAGatewayDeveloperTest {
         assertTrue(builtFullBundleFile.isFile());
 
         final Element fullBundleElement = DocumentTools.INSTANCE.parse(builtFullBundleFile).getDocumentElement();
-        List<Element> childElements = getChildElements(getSingleChildElement(fullBundleElement, REFERENCES), ITEM);
-        childElements.forEach(e -> {
+        getChildElements(getSingleChildElement(fullBundleElement, REFERENCES), ITEM).forEach(e -> {
             boolean isFromDeployment = bundleItemsIds.remove(buildBundleItemKey(e));
             if (!isFromDeployment) {
                 String type = getSingleChildElementTextContent(e, TYPE);
                 String entityName = getSingleChildElementTextContent(e, NAME);
                 switch (type) {
-                    case "SECURE_PASSWORD": assertEquals("gateway", entityName); break;
-                    case "ID_PROVIDER_CONFIG": assertEquals("Tacoma MSAD", entityName); break;
-                    case "JDBC_CONNECTION": assertEquals("MySQL", entityName); break;
-                    case "SSG_CONNECTOR": break;
+                    case "SECURE_PASSWORD":
+                        assertEquals("gateway", entityName);
+                        break;
+                    case "ID_PROVIDER_CONFIG":
+                        assertEquals("Tacoma MSAD", entityName);
+                        break;
+                    case "JDBC_CONNECTION":
+                        assertEquals("MySQL", entityName);
+                        break;
+                    case "SSG_CONNECTOR":
+                        break;
                     default:
                         fail("Unexpected environment value:\n" + DocumentTools.INSTANCE.elementToString(e));
                 }
@@ -429,7 +551,8 @@ class CAGatewayDeveloperTest {
                     case "SECURE_PASSWORD":
                     case "ID_PROVIDER_CONFIG":
                     case "JDBC_CONNECTION":
-                    case "SSG_CONNECTOR": break;
+                    case "SSG_CONNECTOR":
+                        break;
                     default:
                         fail("Unexpected environment mapping: " + DocumentTools.INSTANCE.elementToString(e));
                 }

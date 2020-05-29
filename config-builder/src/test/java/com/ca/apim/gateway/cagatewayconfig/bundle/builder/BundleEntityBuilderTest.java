@@ -253,7 +253,7 @@ class BundleEntityBuilderTest {
     public void testAnnotatedEncassDeleteBundle() {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, false);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 

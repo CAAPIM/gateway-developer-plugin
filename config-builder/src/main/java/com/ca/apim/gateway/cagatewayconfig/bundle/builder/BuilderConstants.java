@@ -11,6 +11,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.DEFAULT_HTTPS_8443;
+import static com.ca.apim.gateway.cagatewayconfig.beans.ListenPort.DEFAULT_HTTP_8080;
 
 @SuppressWarnings("squid:S2068") // sonarcloud believes this is a hardcoded password
 public final class BuilderConstants {
@@ -19,6 +21,7 @@ public final class BuilderConstants {
     }
 
     public static final String STORED_PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
+    public static final String BUNDLE_TYPE_ALL = "ALL";
 
     protected static final Set<String> NON_ENV_ENTITY_TYPES;
 
@@ -26,6 +29,27 @@ public final class BuilderConstants {
         @Override
         public boolean test(Entity entity) {
             return !NON_ENV_ENTITY_TYPES.contains(entity.getType());
+        }
+    };
+
+    public static final Predicate<Entity> FILTER_NON_ENV_ENTITIES_EXCLUDING_FOLDER = new Predicate<Entity>() {
+        @Override
+        public boolean test(Entity entity) {
+            return !EntityTypes.FOLDER_TYPE.equals(entity.getType()) && NON_ENV_ENTITY_TYPES.contains(entity.getType());
+        }
+    };
+
+    public static final Predicate<Entity> FILTER_OUT_DEFAULT_LISTEN_PORTS = new Predicate<Entity>() {
+        @Override
+        public boolean test(Entity entity) {
+            return !(EntityTypes.LISTEN_PORT_TYPE.equals(entity.getType()) && (DEFAULT_HTTP_8080.equals(entity.getName()) || DEFAULT_HTTPS_8443.equals(entity.getName())));
+        }
+    };
+
+    public static final Predicate<Entity> FILTER_NON_ENV_ENTITIES = new Predicate<Entity>() {
+        @Override
+        public boolean test(Entity entity) {
+            return NON_ENV_ENTITY_TYPES.contains(entity.getType());
         }
     };
 
