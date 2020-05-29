@@ -18,6 +18,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -80,27 +81,28 @@ public class FullBundleCreator {
 
     public void createFullBundle(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
                                  String bundleFolderPath,
-                                 String bundleFileName,
+                                 String fullInstallBundleFilename,
                                  boolean detemplatizeDeploymentBundles) {
-        final Pair<Element, Element> elementPair = createFullAndDeleteBundles(bundleEnvironmentValues, dependentBundles, bundleFolderPath, bundleFileName, detemplatizeDeploymentBundles);
+        final Pair<Element, Element> elementPair = createFullAndDeleteBundles(bundleEnvironmentValues,
+                dependentBundles, bundleFolderPath, fullInstallBundleFilename, detemplatizeDeploymentBundles);
         final String bundle = documentTools.elementToString(elementPair.getLeft());
         // write the full bundle to a temporary file first
-        final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), bundleFileName);
+        final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), fullInstallBundleFilename);
         try {
             writeStringToFile(fullBundleFile, bundle, defaultCharset());
         } catch (IOException e) {
-            throw new DocumentFileUtilsException("Error writing to file '" + bundleFileName + "': " + e.getMessage(), e);
+            throw new DocumentFileUtilsException("Error writing to file '" + fullInstallBundleFilename + "': " + e.getMessage(), e);
         }
 
         // process for reattaching loose encasses and write to the final path
         dependencyBundlesProcessor.process(singletonList(fullBundleFile), bundleFolderPath);
-        int index = bundleFileName.indexOf(INSTALL_BUNDLE_EXTENSION);
-        documentFileUtils.createFile(elementPair.getRight(), new File(bundleFolderPath,
-                bundleFileName.substring(0, index) + DELETE_BUNDLE_EXTENSION).toPath());
+
+        final String fullDeleteBundleFilename = fullInstallBundleFilename.replace(INSTALL_BUNDLE_EXTENSION, DELETE_BUNDLE_EXTENSION);
+        documentFileUtils.createFile(elementPair.getRight(), new File(bundleFolderPath, fullDeleteBundleFilename).toPath());
         // delete the temp file
         boolean deleted = fullBundleFile.delete();
         if (!deleted) {
-            LOGGER.log(Level.WARNING, "Temporary bundle file was not deleted: " + fullBundleFile.toString());
+            LOGGER.log(Level.WARNING, () -> "Temporary bundle file was not deleted: " + fullBundleFile.toString());
         }
     }
 
@@ -109,8 +111,8 @@ public class FullBundleCreator {
                                                               String bundleFileName,
                                                               boolean detemplatizeDeploymentBundles) {
         final Map<String, String> environmentProperties = bundleEnvironmentValues.getRight();
-        final List<File> deploymentBundles = collectFiles(bundleFolderPath, bundleEnvironmentValues.getLeft() + BUNDLE_EXTENSION);
-        final List<File> deploymentDeleteBundle = collectFiles(bundleFolderPath, bundleEnvironmentValues.getLeft() + DELETE_BUNDLE_EXTENSION);
+        final List<File> deploymentBundles = collectFiles(bundleFolderPath, INSTALL_BUNDLE_EXTENSION);
+        final List<File> deploymentDeleteBundle = collectFiles(bundleFolderPath, DELETE_BUNDLE_EXTENSION);
         final List<File> bundleFiles = union(deploymentBundles, dependentBundles);
 
         // load all deployment bundles to strings

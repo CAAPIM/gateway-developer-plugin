@@ -55,7 +55,7 @@ public class EnvironmentBundleCreator {
                                           String templatizedBundleFolderPath,
                                           String environmentConfigurationFolderPath,
                                           EnvironmentBundleCreationMode mode,
-                                          String bundleFileName,
+                                          String envInstallBundleFilename,
                                           String policyBundleName) {
         Bundle environmentBundle = new Bundle();
         environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, mode);
@@ -71,12 +71,14 @@ public class EnvironmentBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        // Passing Bundle name and version string with config env name (<name>-<version>-*env) as project name
+        // Passing Bundle name and version string with config env name (<name>-<version>-*env.install.bundle) as project name
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
-                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(bundleFileName, EMPTY, EMPTY));
+                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(envInstallBundleFilename, EMPTY, EMPTY));
         for (BundleArtifacts bundleArtifacts : bundleElements.values()) {
             documentFileUtils.createFile(bundleArtifacts.getBundle(), new File(bundleFolderPath,
                     bundleArtifacts.getBundleFileName()).toPath());
+            documentFileUtils.createFile(bundleArtifacts.getDeleteBundle(), new File(bundleFolderPath,
+                    bundleArtifacts.getDeleteBundleFileName()).toPath());
         }
         return environmentBundle;
     }
@@ -84,7 +86,7 @@ public class EnvironmentBundleCreator {
     private List<TemplatizedBundle> collectTemplatizedBundleFiles(String templatizedBundleFolderPath,
                                                                   EnvironmentBundleCreationMode mode,
                                                                   String policyBundleName, String bundleFolderPath) {
-        final String extension = mode != PLUGIN ? BUNDLE_EXTENSION : policyBundleName + BUNDLE_EXTENSION;
+        final String extension = mode != PLUGIN ? ".bundle" : policyBundleName + INSTALL_BUNDLE_EXTENSION;
         return collectFiles(templatizedBundleFolderPath, extension).stream()
                 .filter(file -> !StringUtils.endsWithIgnoreCase(file.getName(), DELETE_BUNDLE_EXTENSION))
                 .map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName())))

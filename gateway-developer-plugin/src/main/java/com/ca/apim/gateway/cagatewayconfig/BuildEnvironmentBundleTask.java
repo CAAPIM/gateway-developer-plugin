@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.ENV_INSTALL_BUNDLE_NAME_SUFFIX;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.removeAllSpecialChars;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
@@ -83,7 +83,7 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         metaDataFiles.stream().forEach(metaDataFile -> {
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().getOrNull());
             if (null != bundleEnvironmentValues) {
-                final String envBundleFilename = getEnvBundleFileName(bundleEnvironmentValues.getLeft());
+                final String envBundleFileName = getEnvBundleFilename(bundleEnvironmentValues.getLeft());
                 Map<String, String> environmentValuesFromMetadata = bundleEnvironmentValues.getRight();
                 //read environment properties from environmentConfig and merge it with metadata properties
                 environmentValuesFromMetadata.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
@@ -93,22 +93,23 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
                         into.getAsFile().get().getPath(),
                         EMPTY,
                         PLUGIN,
-                        envBundleFilename, // Passing envBundleFilename
+                        envBundleFileName, // Passing envBundleFileName
                         bundleEnvironmentValues.getLeft()
                 );
             }
         });
     }
 
-    private String getEnvBundleFileName(String deployBundleName) {
+    private String getEnvBundleFilename(String deployBundleName) {
+        final String extension = "env" + INSTALL_BUNDLE_EXTENSION;
         if (configName != null && StringUtils.isNotBlank(configName.get())) {
-            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
+            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + extension;
         } else {
             String configFolderName = configFolder != null ? configFolder.getAsFile().get().getName() : "";
             if (StringUtils.equalsIgnoreCase(configFolderName, "config")) {
-                return deployBundleName + "-" + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
+                return deployBundleName + "-" + extension;
             } else {
-                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
+                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + extension;
             }
         }
     }

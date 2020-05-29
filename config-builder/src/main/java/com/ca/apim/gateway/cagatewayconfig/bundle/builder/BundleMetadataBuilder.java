@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +44,7 @@ public class BundleMetadataBuilder {
     public BundleMetadata build(final AnnotatedBundle annotatedBundle, final List<Entity> dependentEntities,
                                 ProjectInfo projectInfo) {
         if (annotatedBundle != null && annotatedBundle.getAnnotatedEntity() != null) {
-            AnnotatedEntity annotatedEntity = annotatedBundle.getAnnotatedEntity();
+            AnnotatedEntity<? extends GatewayEntity> annotatedEntity = annotatedBundle.getAnnotatedEntity();
             final Encass encass = (Encass) annotatedEntity.getEntity();
             final String bundleName = annotatedBundle.getBundleName();
             final String name = bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);

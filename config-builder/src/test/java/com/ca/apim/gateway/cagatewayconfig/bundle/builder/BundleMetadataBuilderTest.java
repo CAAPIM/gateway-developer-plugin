@@ -74,7 +74,7 @@ public class BundleMetadataBuilderTest {
                 if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
                     assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0-policy" + DELETE_BUNDLE_EXTENSION,
                             generatedFile.getName());
-                } else if (StringUtils.endsWith(generatedFile.getName(), BUNDLE_EXTENSION)) {
+                } else if (StringUtils.endsWith(generatedFile.getName(), INSTALL_BUNDLE_EXTENSION)) {
                     assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0-policy" + INSTALL_BUNDLE_EXTENSION,
                             generatedFile.getName());
                 } else {
@@ -187,7 +187,7 @@ public class BundleMetadataBuilderTest {
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new ProjectInfo("my-bundle", "my-bundle-group", "1.0"));
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getBundleMetadata();

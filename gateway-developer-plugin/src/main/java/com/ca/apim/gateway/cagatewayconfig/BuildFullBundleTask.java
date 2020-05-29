@@ -98,19 +98,14 @@ public class BuildFullBundleTask extends DefaultTask {
         metaDataFiles.stream().forEach(metaDataFile-> {
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().getOrNull());
             if (null != bundleEnvironmentValues) {
-                final String bundleFileName = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
+                final String fullInstallBundleFilename = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
                 //read environment properties from environmentConfig and merge it with metadata properties
                 bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
-                final List<File> bundleFiles = union(
-                        collectFiles(bundleDirectory, INSTALL_BUNDLE_EXTENSION),
-                        filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
-                );
-
                 fullBundleCreator.createFullBundle(
                         bundleEnvironmentValues,
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),
                         bundleDirectory,
-                        bundleFileName,
+                        fullInstallBundleFilename,
                         detemplatizeDeploymentBundles.get()
                 );
             }
