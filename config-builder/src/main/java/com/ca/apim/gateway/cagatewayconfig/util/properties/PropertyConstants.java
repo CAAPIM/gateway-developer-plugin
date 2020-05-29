@@ -48,6 +48,7 @@ public class PropertyConstants {
     public static final String PROPERTY_MAX_POOL_SIZE = "maximumPoolSize";
     public static final String PROPERTY_TAG = "tag";
     public static final String PROPERTY_SUBTAG = "subtag";
+    public static final String PROPERTY_HAS_ROUTING = "hasRouting";
 
     public static final String KEY_VALUE_SOAP = "soap";
     public static final String KEY_VALUE_SOAP_VERSION = "soapVersion";

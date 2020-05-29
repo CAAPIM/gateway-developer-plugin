@@ -23,14 +23,16 @@ public class EntityBuilderHelperTest {
         String path = "root/subpath/test";
         DocumentTools documentTools = DocumentTools.INSTANCE;
         Document document = documentTools.parse("<Policy></Policy>");
-        Entity entity = EntityBuilderHelper.getEntityWithMappings(EntityTypes.POLICY_TYPE, path, id, document.getDocumentElement(), MappingActions.NEW_OR_UPDATE, mappingProperties);
+        Entity entity = EntityBuilderHelper.getEntityWithMappings(EntityTypes.POLICY_TYPE, path, id,
+                document.getDocumentElement(), MappingActions.NEW_OR_UPDATE, mappingProperties);
         Assert.assertEquals(id, entity.getId());
         Assert.assertEquals(path, entity.getName());
         Assert.assertEquals(EntityTypes.POLICY_TYPE, entity.getType());
         Assert.assertEquals(MappingActions.NEW_OR_UPDATE, entity.getMappingAction());
         Assert.assertEquals(path, entity.getMappingProperties().get(MappingProperties.MAP_TO));
         mappingProperties.put(MappingProperties.MAP_BY, MappingProperties.NAME);
-        entity = EntityBuilderHelper.getEntityWithMappings(EntityTypes.POLICY_TYPE, path, id, document.getDocumentElement(), MappingActions.NEW_OR_UPDATE, mappingProperties);
+        entity = EntityBuilderHelper.getEntityWithMappings(EntityTypes.POLICY_TYPE, path, id,
+                document.getDocumentElement(), MappingActions.NEW_OR_UPDATE, mappingProperties);
         Assert.assertEquals(PathUtils.extractName(path), entity.getMappingProperties().get(MappingProperties.MAP_TO));
 
     }

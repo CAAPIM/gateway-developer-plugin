@@ -21,6 +21,7 @@ public class PolicyMetadata {
     private String type;
     private String tag;
     private String subtag;
+    private boolean hasRouting;
     private Set<Dependency> usedEntities;
     @JsonDeserialize(using = AnnotationDeserializer.class)
     private Set<Annotation> annotations;
@@ -76,6 +77,14 @@ public class PolicyMetadata {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isHasRouting() {
+        return hasRouting;
+    }
+
+    public void setHasRouting(boolean hasRouting) {
+        this.hasRouting = hasRouting;
     }
 
     @JsonIgnore
