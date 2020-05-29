@@ -398,40 +398,6 @@ class CAGatewayDeveloperTest {
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
-    void testExampleProjectGeneratingEnvironmentWithMissingValues(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
-        String projectFolder = "example-project-generating-environment";
-        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
-        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
-
-        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
-                .withProjectDir(testProjectDir)
-                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DconfigFolder=src/main/gateway/config_missing",
-                        "-DconfigName=config")
-                .withPluginClasspath()
-                .withDebug(true)
-                .build());
-    }
-
-    @Test
-    @ExtendWith(TemporaryFolderExtension.class)
-    void testExampleProjectGeneratingEnvironmentWithInvalidFilePath(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
-        String projectFolder = "example-project-generating-environment";
-        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
-        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
-
-        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
-                .withProjectDir(testProjectDir)
-                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DconfigFolder=src/main/gateway/config_invalid",
-                        "-DconfigName=config")
-                .withPluginClasspath()
-                .withDebug(true)
-                .build());
-    }
-
-    @Test
-    @ExtendWith(TemporaryFolderExtension.class)
     void testExampleProjectGeneratingEnvironmentJsonWithoutExpectedEntity(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
         String projectFolder = "example-project-generating-environment";
         File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);

@@ -101,6 +101,10 @@ public class BuildFullBundleTask extends DefaultTask {
                 final String fullInstallBundleFilename = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
                 //read environment properties from environmentConfig and merge it with metadata properties
                 bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
+                final List<File> bundleFiles = union(
+                        collectFiles(bundleDirectory, bundleEnvironmentValues.getLeft() + INSTALL_BUNDLE_EXTENSION),
+                        filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
+                );
                 fullBundleCreator.createFullBundle(
                         bundleEnvironmentValues,
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),

@@ -105,7 +105,8 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         if (configName != null && StringUtils.isNotBlank(configName.get())) {
             return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + extension;
         } else {
-            String configFolderName = configFolder != null ? configFolder.getAsFile().get().getName() : "";
+            String configFolderName = configFolder != null && configFolder.isPresent()?
+                    configFolder.getAsFile().get().getName() : "";
             if (StringUtils.equalsIgnoreCase(configFolderName, "config")) {
                 return deployBundleName + "-" + extension;
             } else {
