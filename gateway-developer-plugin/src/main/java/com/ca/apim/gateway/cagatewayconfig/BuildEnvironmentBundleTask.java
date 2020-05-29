@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.ENV_INSTALL_BUNDLE_NAME_SUFFIX;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.removeAllSpecialChars;
@@ -101,16 +102,15 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     }
 
     private String getEnvBundleFilename(String deployBundleName) {
-        final String extension = "env" + INSTALL_BUNDLE_EXTENSION;
         if (configName != null && StringUtils.isNotBlank(configName.get())) {
-            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + extension;
+            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
         } else {
             String configFolderName = configFolder != null && configFolder.isPresent()?
                     configFolder.getAsFile().get().getName() : "";
             if (StringUtils.equalsIgnoreCase(configFolderName, "config")) {
-                return deployBundleName + "-" + extension;
+                return deployBundleName + "-" + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
             } else {
-                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + extension;
+                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
             }
         }
     }
