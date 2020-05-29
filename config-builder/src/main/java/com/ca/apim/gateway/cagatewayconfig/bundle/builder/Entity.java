@@ -12,8 +12,8 @@ import org.w3c.dom.Element;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Entity {
-
+public class Entity<T> {
+    private final T entity;
     private String type;
     private String id;
     private String guid;
@@ -24,20 +24,25 @@ public class Entity {
     private Map<String, Object> mappingProperties = new HashMap<>();
 
     public Entity(String type, String name, String id, Element xml) {
-        this(type, name, null, id, xml, null);
+        this(type, name, null, id, xml, null, null);
     }
 
     public Entity(String type, String originalName, String entityBundleName, String id, Element xml) {
-        this(type, originalName, entityBundleName, id, xml, null);
+        this(type, originalName, entityBundleName, id, xml, null, null);
     }
 
-    public Entity(String type, String originalName, String entityBundleName, String id, Element xml, String guid) {
+    public Entity(String type, String originalName, String entityBundleName, String id, Element xml, T entity) {
+        this(type, originalName, entityBundleName, id, xml, null, entity);
+    }
+
+    public Entity(String type, String originalName, String entityBundleName, String id, Element xml, String guid, T entity) {
         this.type = type;
         this.originalName = originalName;
         this.name = entityBundleName;
         this.id = id;
         this.xml = xml;
         this.guid = guid;
+        this.entity = entity;
     }
 
     public String getType() {
@@ -81,6 +86,10 @@ public class Entity {
 
     void setMappingAction(String mappingAction) {
         this.mappingAction = mappingAction;
+    }
+
+    T getEntity() {
+        return entity;
     }
 
     @JsonIgnore

@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import org.jetbrains.annotations.NotNull;
@@ -49,10 +50,10 @@ public class FolderEntityBuilder implements EntityBuilder {
         final Entity entity;
         if (parentFolderId == null) {
             //No need to map root folder by name
-            entity = new Entity(FOLDER_TYPE, filteredName, filteredName, id, folderElement);
+            entity = new Entity(FOLDER_TYPE, filteredName, filteredName, id, folderElement, folder);
         } else {
             String filteredPathName = folder.getPath().replaceAll(folder.getName(), filteredName);
-            entity = EntityBuilderHelper.getEntityWithPathMapping(FOLDER_TYPE, filteredPathName, filteredPathName, id, folderElement);
+            entity = EntityBuilderHelper.getEntityWithPathMapping(FOLDER_TYPE, filteredPathName, filteredPathName, id, folderElement, folder);
 
         }
         entity.setMappingAction(NEW_OR_EXISTING);

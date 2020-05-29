@@ -199,6 +199,7 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
         this.annotatedEntity = annotatedEntity;
     }
 
+    @JsonIgnore
     public String getType() {
         return "encass";
     }

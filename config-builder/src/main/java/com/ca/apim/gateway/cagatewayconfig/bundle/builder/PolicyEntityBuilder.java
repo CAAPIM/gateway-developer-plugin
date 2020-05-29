@@ -530,7 +530,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         resourcesElement.appendChild(resourceSetElement);
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
-                policy.getPath(), policyNameWithPath, policy.getId(), policyElement);
+                policy.getPath(), policyNameWithPath, policy.getId(), policyElement, policy);
         if (isRedeployableBundle || !(policy.isReusable() || isAnnotatedEntity(policy, annotatedEntity))) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
