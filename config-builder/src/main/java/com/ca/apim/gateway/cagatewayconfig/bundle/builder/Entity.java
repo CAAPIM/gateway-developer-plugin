@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.w3c.dom.Element;
 
 import java.util.HashMap;
@@ -14,30 +16,23 @@ import java.util.Map;
 
 public class Entity {
 
-    private String type;
-    private String id;
-    private String guid;
-    private Element xml;
-    private String name;
-    private String originalName;
+    public static final String PROPERTY_BUNDLE_ENTITY_NAME = "bundleName";
+    public static final String PROPERTY_GUID = "guid";
+    public static final String PROPERTY_HAS_ROUTING = "hasRouting";
+
+    private final String type;
+    private final String id;
+    private final Element xml;
+    private final String originalName;
+    private final Map<String, Object> properties = new HashMap<>();
     private String mappingAction;
-    private Map<String, Object> mappingProperties = new HashMap<>();
+    private final Map<String, Object> mappingProperties = new HashMap<>();
 
-    public Entity(String type, String name, String id, Element xml) {
-        this(type, name, null, id, xml, null);
-    }
-
-    public Entity(String type, String originalName, String entityBundleName, String id, Element xml) {
-        this(type, originalName, entityBundleName, id, xml, null);
-    }
-
-    public Entity(String type, String originalName, String entityBundleName, String id, Element xml, String guid) {
+    public Entity(String type, String originalName, String id, Element xml) {
         this.type = type;
         this.originalName = originalName;
-        this.name = entityBundleName;
         this.id = id;
         this.xml = xml;
-        this.guid = guid;
     }
 
     public String getType() {
@@ -55,16 +50,31 @@ public class Entity {
         return xml;
     }
 
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        if (properties != null) {
+            this.properties.clear();
+            this.properties.putAll(properties);
+        }
+    }
+
     public String getGuid() {
-        return guid;
+        return (String) properties.get(PROPERTY_GUID);
     }
 
     public String getName() {
-        return name;
+        return ObjectUtils.firstNonNull((String) properties.get(PROPERTY_BUNDLE_ENTITY_NAME), originalName);
     }
 
     public String getOriginalName() {
         return originalName;
+    }
+
+    public boolean isHasRouting() {
+        return BooleanUtils.toBooleanDefaultIfNull((Boolean) properties.get(PROPERTY_HAS_ROUTING), false);
     }
 
     public Map<String, Object> getMappingProperties() {
@@ -93,7 +103,7 @@ public class Entity {
 
             @Override
             public String getName() {
-                return name;
+                return Entity.this.getName();
             }
 
             @JsonIgnore
@@ -105,7 +115,7 @@ public class Entity {
             @JsonIgnore
             @Override
             public String getGuid() {
-                return guid;
+                return Entity.this.getGuid();
             }
         };
     }

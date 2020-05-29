@@ -7,7 +7,6 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.apache.commons.lang3.StringUtils;
@@ -32,14 +31,14 @@ public class BundleMetadataBuilder {
     }
 
     /**
-     * Builds bundle metadata for annotated entities.
+     * Builds bundle metadata for Annotated bundle or Full bundle.
      *
-     * @param annotatedBundle
-     * @param dependentEntities
-     * @param projectName
-     * @param projectGroupName
-     * @param projectVersion
-     * @return bundle metadata
+     * @param annotatedBundle   Annotated Bundle for which bundle is being created.
+     * @param dependentEntities Dependent Entities of the annotated bundle or all the entities of full bundle
+     * @param projectName       Gradle Project name
+     * @param projectGroupName  Gradle Project Group name
+     * @param projectVersion    Gradle Project version
+     * @return Full bundle or Annotated bundle metadata
      */
     public BundleMetadata build(final AnnotatedBundle annotatedBundle,
                                 final List<Entity> dependentEntities, final String projectName,
@@ -55,6 +54,8 @@ public class BundleMetadataBuilder {
             builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
             builder.tags(annotatedBundle.getAnnotatedEntity().getTags());
             builder.reusableAndRedeployable(true, annotatedBundle.getAnnotatedEntity().isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
+            builder.hasRouting(hasRoutingAssertion(dependentEntities));
+
             final List<Metadata> desiredEntities = new ArrayList<>();
             desiredEntities.add(annotatedBundle.getAnnotatedEntity().getEntity().getMetadata());
 
@@ -67,19 +68,20 @@ public class BundleMetadataBuilder {
     /**
      * Builds bundle metadata for full bundle (all entities)
      *
-     * @param entities
-     * @param projectName
-     * @param projectGroupName
-     * @param projectVersion
-     * @return bundle metadata
+     * @param entities          All the entities of full bundle
+     * @param projectName       Gradle Project name
+     * @param projectGroupName  Gradle Project Group name
+     * @param projectVersion    Gradle Project version
+     * @return Full bundle metadata
      */
-    private BundleMetadata buildFullBundleMetadata (final List<Entity> entities,
-                                                    final String projectName, final String projectGroupName, final String projectVersion) {
+    private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final String projectName,
+                                                   final String projectGroupName, final String projectVersion) {
         BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, idGenerator.generate(), projectName,
                 projectGroupName, projectVersion);
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
         builder.reusableAndRedeployable(true, true);
+        builder.hasRouting(hasRoutingAssertion(entities));
         builder.environmentEntities(getEnvironmentDependenciesMetadata(entities));
         builder.definedEntities(getDefinedEntitiesMetadata(entities));
 
@@ -99,5 +101,9 @@ public class BundleMetadataBuilder {
     private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
         return annotatedBundle.getEntities(Policy.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable()) ||
                 annotatedBundle.getEntities(Encass.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable());
+    }
+
+    private boolean hasRoutingAssertion(final List<Entity> dependentEntities) {
+        return dependentEntities.stream().anyMatch(Entity::isHasRouting);
     }
 }

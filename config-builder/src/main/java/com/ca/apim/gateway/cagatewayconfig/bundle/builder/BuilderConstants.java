@@ -6,7 +6,6 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.ListenPort;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 
 import java.util.HashSet;
@@ -37,6 +36,8 @@ public final class BuilderConstants {
         @Override
         public boolean test(Entity entity) {
             return !EntityTypes.FOLDER_TYPE.equals(entity.getType()) && NON_ENV_ENTITY_TYPES.contains(entity.getType());
+        }
+    };
 
     public static final Predicate<Entity> FILTER_OUT_DEFAULT_LISTEN_PORTS = new Predicate<Entity>() {
         @Override
