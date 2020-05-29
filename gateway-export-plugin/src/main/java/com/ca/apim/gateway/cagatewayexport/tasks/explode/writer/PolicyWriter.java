@@ -130,7 +130,7 @@ public class PolicyWriter implements EntityWriter {
         return policyDependencies.stream().filter(dependency -> {
             if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(dependency.getType())) {
                 Encass dependentEncass = encassMap.get(dependency.getName());
-                if (policyName.equals(dependentEncass.getPolicy())) {
+                if (dependentEncass != null && policyName.equals(dependentEncass.getPolicy())) {
                     return false;
                 }
             }
