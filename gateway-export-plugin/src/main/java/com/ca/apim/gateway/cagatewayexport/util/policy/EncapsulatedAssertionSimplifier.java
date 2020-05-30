@@ -8,7 +8,9 @@ package com.ca.apim.gateway.cagatewayexport.util.policy;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.beans.MissingGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import org.w3c.dom.Element;
 
@@ -48,10 +50,33 @@ public class EncapsulatedAssertionSimplifier implements PolicyAssertionSimplifie
                 encapsulatedAssertionElement.removeChild(encassGuidElement);
             } else {
                 LOGGER.log(Level.WARNING, "Could not find referenced encass policy with id: {0}", encassEntity.get().getPolicyId());
+                simplifyAssertionElementForMissingEntity(context, encapsulatedAssertionElement);
             }
         } else {
             LOGGER.log(Level.WARNING, "Could not find referenced encass with guid: {0}", encassGuid);
+            simplifyAssertionElementForMissingEntity(context, encapsulatedAssertionElement);
         }
+    }
+
+    private void simplifyAssertionElementForMissingEntity(final PolicySimplifierContext context, final Element encassAssertionElement) {
+        final Element encassGuidElement = getSingleChildElement(encassAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
+        final Element encassNameElement = getSingleChildElement(encassAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
+
+        final MissingGatewayEntity missingEntity = new MissingGatewayEntity();
+        missingEntity.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        missingEntity.setGuid(encassGuidElement.getAttribute(STRING_VALUE));
+        missingEntity.setName(encassNameElement != null ? encassNameElement.getAttribute(STRING_VALUE) : "Encass#" + missingEntity.getGuid());
+        missingEntity.setId(missingEntity.getGuid().replace("-", ""));
+        context.getResultantBundle().addEntity(missingEntity);
+
+        encassAssertionElement.setAttribute("encassName", missingEntity.getName());
+        encassAssertionElement.removeChild(encassGuidElement);
+        if (encassNameElement != null) {
+            encassAssertionElement.removeChild(encassNameElement);
+        }
+
+        LOGGER.log(Level.WARNING, "Recording the referenced encass with guid: {0} as missing entity",
+                new Object[] {missingEntity.getGuid(), missingEntity.getName()});
     }
 
     @Override

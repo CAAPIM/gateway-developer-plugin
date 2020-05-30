@@ -39,6 +39,15 @@ public class Bundle {
     }
 
     @SuppressWarnings("unchecked")
+    public Map<String, MissingGatewayEntity> getMissingEntities() {
+        return getEntities(MissingGatewayEntity.class);
+    }
+
+    public Map<String, UnsupportedGatewayEntity> getUnsupportedEntities() {
+        return getEntities(UnsupportedGatewayEntity.class);
+    }
+
+    @SuppressWarnings("unchecked")
     public <E extends GatewayEntity> void addEntity(E entity) {
         getEntities((Class<GatewayEntity>) entity.getClass()).put(entity.getId(), entity);
     }
