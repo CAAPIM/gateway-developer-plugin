@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -75,7 +76,7 @@ class EncassEntityBuilderTest {
         policy.setId(TEST_POLICY_ID);
         bundle.getPolicies().put(TEST_POLICY_PATH, policy);
         AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
-        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
         annotatedBundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put(TEST_POLICY_PATH, policy);
         List<Entity> entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -98,7 +99,7 @@ class EncassEntityBuilderTest {
         encass.setAnnotations(annotations);
         encass.setAnnotatedEntity(null);
         annotatedEntity = new AnnotatedEntity(encass);
-        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
         annotatedBundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put(TEST_POLICY_PATH, policy);
         entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());

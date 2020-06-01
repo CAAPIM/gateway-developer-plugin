@@ -8,7 +8,6 @@ package com.ca.apim.gateway.capublisherplugin;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -39,6 +38,7 @@ import java.util.zip.GZIPInputStream;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleItemKey;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleMappingKey;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.nio.charset.Charset.defaultCharset;
@@ -49,6 +49,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class CAGatewayDeveloperTest {
     private static final Logger LOGGER = Logger.getLogger(CAGatewayDeveloperTest.class.getName());
     private final String projectVersion = "-1.2.3-SNAPSHOT";
+    private final String POLICY_INSTALL_BUNDLE_SUFFIX = "-policy" + INSTALL_BUNDLE_EXTENSION;
+    private final String ENV_INSTALL_BUNDLE_SUFFIX = "env" + INSTALL_BUNDLE_EXTENSION;
+    private final String ENV_DELETE_BUNDLE_SUFFIX = "env" + DELETE_BUNDLE_EXTENSION;
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
@@ -68,12 +71,14 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        validateBuildDir(projectFolder, buildDir);
+        String bundleFileName = projectFolder + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        validateBuildDir(projectFolder, bundleFileName, buildDir);
         File buildGatewayDir = new File(buildDir, "gateway");
         File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
-        File builtBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + ".bundle");
+        File builtBundleFile = new File(buildGatewayBundlesDir,  bundleFileName);
         assertTrue(builtBundleFile.isFile());
-        File builtDeleteBundleFile = new File(buildGatewayBundlesDir,  projectFolder + projectVersion + DocumentFileUtils.DELETE_BUNDLE_EXTENSION);
+        String deleteBundleFileName = projectFolder + projectVersion + "-policy" + DELETE_BUNDLE_EXTENSION;
+        File builtDeleteBundleFile = new File(buildGatewayBundlesDir,  deleteBundleFileName);
         assertTrue(builtDeleteBundleFile.isFile());
     }
 
@@ -96,7 +101,8 @@ class CAGatewayDeveloperTest {
 
         File buildGatewayDir = new File(testProjectDir, "dist");
         assertTrue(buildGatewayDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayDir, projectFolder + projectVersion + ".bundle");
+        String bundleFileName = projectFolder + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        File builtBundleFile = new File(buildGatewayDir, bundleFileName);
         assertTrue(builtBundleFile.isFile());
     }
 
@@ -132,7 +138,7 @@ class CAGatewayDeveloperTest {
                 .build();
 
         assertMultiProject(testProjectDir, result);
-        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + "-env.install.bundle");
+        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + "-" + ENV_INSTALL_BUNDLE_SUFFIX);
         assertTrue(projectC_EnvBundle.exists());
         assertFalse(readFileToString(projectC_EnvBundle, defaultCharset()).isEmpty());
     }
@@ -152,7 +158,7 @@ class CAGatewayDeveloperTest {
                 .build();
 
         assertMultiProject(testProjectDir, result);
-        File projectE_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-e"), "build"), "gateway"), "bundle"), "project-e" + projectVersion + "-env.install.bundle");
+        File projectE_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-e"), "build"), "gateway"), "bundle"), "project-e" + projectVersion + "-" + ENV_INSTALL_BUNDLE_SUFFIX);
         assertTrue(projectE_EnvBundle.exists());
         assertFalse(readFileToString(projectE_EnvBundle, defaultCharset()).isEmpty());
         final Element envBundleElement = DocumentTools.INSTANCE.parse(projectE_EnvBundle).getDocumentElement();
@@ -183,10 +189,14 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-a:build")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-b:build")).getOutcome());
 
-        validateBuildDir("project-a", new File(new File(testProjectDir, "project-a"), "build"));
-        validateBuildDir("project-b", new File(new File(testProjectDir, "project-b"), "build"));
-        validateBuildDir("project-c", new File(new File(testProjectDir, "project-c"), "build"));
-        validateBuildDir("project-d", new File(new File(testProjectDir, "project-d"), "build"));
+        String projectAFilename = "project-a" + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        String projectBFilename = "project-b" + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        String projectCFilename = "project-c" + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        String projectDFilename = "project-d" + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        validateBuildDir("project-a", projectAFilename, new File(new File(testProjectDir, "project-a"), "build"));
+        validateBuildDir("project-b" , projectBFilename, new File(new File(testProjectDir, "project-b"), "build"));
+        validateBuildDir("project-c" , projectCFilename, new File(new File(testProjectDir, "project-c"), "build"));
+        validateBuildDir("project-d" , projectDFilename, new File(new File(testProjectDir, "project-d"), "build"));
 
         File projectC_GW7 = new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "project-c" + projectVersion + ".gw7");
 
@@ -196,10 +206,10 @@ class CAGatewayDeveloperTest {
         while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
             entries.add(entry.getName());
         }
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-b-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-d-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-a-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_4_project-c-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-b-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-d-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-a-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_4_project-c-1.2.3-SNAPSHOT-policy.install.req.bundle"));
         tarArchiveInputStream.close();
     }
 
@@ -221,7 +231,8 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        File gw7 = validateBuildDir(projectFolder, buildDir);
+        String bundleFileName = projectFolder + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        File gw7 = validateBuildDir(projectFolder, bundleFileName, buildDir);
 
         TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(gw7)));
         TarArchiveEntry entry;
@@ -230,7 +241,7 @@ class CAGatewayDeveloperTest {
             entries.add(entry.getName());
         }
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_my-bundle-1.0.00.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions-dependencies-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions-dependencies-1.2.3-SNAPSHOT-policy.install.req.bundle"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/assertions/Test-2.0.0.aar"));
     }
@@ -253,9 +264,12 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-a:build")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":project-b:build")).getOutcome());
 
-        validateBuildDir("project-a", new File(new File(testProjectDir, "project-a"), "build"));
-        validateBuildDir("project-b", new File(new File(testProjectDir, "project-b"), "build"));
-        validateBuildDir("project-c", new File(new File(testProjectDir, "project-c"), "build"));
+        String projectAFilename = "project-a" + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        String projectBFilename = "project-b" + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        String projectCFilename = "project-c" + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        validateBuildDir("project-a" , projectAFilename, new File(new File(testProjectDir, "project-a"), "build"));
+        validateBuildDir("project-b" , projectBFilename, new File(new File(testProjectDir, "project-b"), "build"));
+        validateBuildDir("project-c" , projectCFilename, new File(new File(testProjectDir, "project-c"), "build"));
 
         File projectC_GW7 = new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "project-c" + projectVersion + ".gw7");
 
@@ -265,9 +279,9 @@ class CAGatewayDeveloperTest {
         while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
             entries.add(entry.getName());
         }
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-a-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-b-1.2.3-SNAPSHOT.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-c-1.2.3-SNAPSHOT.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-a-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-b-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-c-1.2.3-SNAPSHOT-policy.install.req.bundle"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
         tarArchiveInputStream.close();
     }
@@ -297,12 +311,13 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
+        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
         File buildDir = new File(testProjectDir, "build");
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
+        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
-        //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-config" + "env.install.bundle");
-        assertTrue(builtBundleFile.isFile());
+        //Environment bundle name format : <bundleName>-<version>-[<configName>]env.install.bundle
+        String envBundleFilename = bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
     }
 
     @Test
@@ -330,11 +345,12 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
+        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
-        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-configenv.install.delete.bundle");
+        String envDeleteBundleFilename = bundleName + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
+        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), envDeleteBundleFilename);
         assertTrue(builtDeleteEnvBundleFile.isFile());
-
     }
 
     @Test
@@ -362,52 +378,22 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
+        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        String deleteBundleFilename = bundleName + projectVersion + "-policy" + DELETE_BUNDLE_EXTENSION;
         File buildDir = new File(testProjectDir, "build");
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
+        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-configenv.install.bundle");
+        String envBundleFilename = bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
         assertTrue(builtBundleFile.isFile());
 
-        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-configenv.install.delete.bundle");
+        String envDeleteBundleFilename = bundleName + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
+        File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), envDeleteBundleFilename);
         assertTrue(builtDeleteEnvBundleFile.isFile());
 
-        File builtDeleteBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".delete.bundle");
+        File builtDeleteBundleFile = new File(new File(buildGatewayDir, "bundle"), deleteBundleFilename);
         assertTrue(builtDeleteBundleFile.isFile());
-    }
-
-    @Test
-    @ExtendWith(TemporaryFolderExtension.class)
-    void testExampleProjectGeneratingEnvironmentWithMissingValues(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
-        String projectFolder = "example-project-generating-environment";
-        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
-        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
-
-        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
-                .withProjectDir(testProjectDir)
-                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DconfigFolder=src/main/gateway/config_missing",
-                        "-DconfigName=config")
-                .withPluginClasspath()
-                .withDebug(true)
-                .build());
-    }
-
-    @Test
-    @ExtendWith(TemporaryFolderExtension.class)
-    void testExampleProjectGeneratingEnvironmentWithInvalidFilePath(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
-        String projectFolder = "example-project-generating-environment";
-        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
-        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
-
-        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
-                .withProjectDir(testProjectDir)
-                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DconfigFolder=src/main/gateway/config_invalid",
-                        "-DconfigName=config")
-                .withPluginClasspath()
-                .withDebug(true)
-                .build());
     }
 
     @Test
@@ -444,21 +430,21 @@ class CAGatewayDeveloperTest {
                 .build());
     }
 
-    private File validateBuildDir(String projectName, File buildDir) {
-        File buildGatewayDir = validateBuildDirExceptGW7File(projectName, buildDir);
+    private File validateBuildDir(String projectName, String bundleFilename, File buildDir) {
+        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
         File gw7PackageFile = new File(buildGatewayDir, projectName + projectVersion + ".gw7");
         assertTrue(gw7PackageFile.isFile());
         return gw7PackageFile;
     }
 
     @NotNull
-    private File validateBuildDirExceptGW7File(String bundleName, File buildDir) {
+    private File validateBuildDirExceptGW7File(String bundleFileName, File buildDir) {
         assertTrue(buildDir.isDirectory());
         File buildGatewayDir = new File(buildDir, "gateway");
         assertTrue(buildGatewayDir.isDirectory());
         File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
         assertTrue(buildGatewayBundlesDir.isDirectory());
-        File builtBundleFile = new File(buildGatewayBundlesDir, bundleName + projectVersion + ".bundle");
+        File builtBundleFile = new File(buildGatewayBundlesDir, bundleFileName);
         assertTrue(builtBundleFile.isFile());
         return buildGatewayDir;
     }
@@ -489,10 +475,11 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-full-bundle")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleName, buildDir);
+        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
         //Deployment bundle name format : <bundleName>-<version>.bundle
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + ".bundle");
+        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleFilename);
         assertTrue(builtBundleFile.isFile());
         final Element bundleElement = DocumentTools.INSTANCE.parse(builtBundleFile).getDocumentElement();
         final Set<String> bundleItemsIds = getChildElements(getSingleChildElement(bundleElement, REFERENCES), ITEM).stream().map(EnvironmentBundleUtils::buildBundleItemKey).collect(toSet());
@@ -501,8 +488,8 @@ class CAGatewayDeveloperTest {
         bundleItemsIds.addAll(getChildElements(getSingleChildElement(dependencyBundle, REFERENCES), ITEM).stream().map(EnvironmentBundleUtils::buildBundleItemKey).collect(toSet()));
         bundleMappingsIds.addAll(getChildElements(getSingleChildElement(dependencyBundle, MAPPINGS), MAPPING).stream().map(EnvironmentBundleUtils::buildBundleMappingKey).collect(toSet()));
 
-        //Full bundle name format : <bundleName>-<version>.(<configName>.)full.bundle
-        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + "-full.install.bundle");
+        //Full bundle name format : <bundleName>-<version>-full.install.bundle
+        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + FULL_INSTALL_BUNDLE_NAME_SUFFIX);
         assertTrue(builtFullBundleFile.isFile());
 
         final Element fullBundleElement = DocumentTools.INSTANCE.parse(builtFullBundleFile).getDocumentElement();

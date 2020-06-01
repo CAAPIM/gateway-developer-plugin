@@ -59,8 +59,9 @@ public class BuildDeploymentBundleTask extends DefaultTask {
     @TaskAction
     public void perform() {
         BundleFileBuilder bundleFileBuilder = InjectionRegistry.getInjector().getInstance(BundleFileBuilder.class);
+        final ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(),
+                getProject().getVersion().toString());
         bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(),
-                new ArrayList<>(dependencies.getFiles()) , getProject().getName(),
-                getProject().getGroup().toString(), getProject().getVersion().toString());
+                new ArrayList<>(dependencies.getFiles()), projectInfo);
     }
 }

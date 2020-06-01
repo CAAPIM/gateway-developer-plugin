@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElements;
@@ -36,6 +37,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 public class BuilderUtils {
 
     private static final String DATE_VALUE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+    private static final Pattern REGEX_ALPHANUMERIC = Pattern.compile("[^A-Za-z0-9]");
 
     public static void buildAndAppendPropertiesElement(final Map<String, Object> properties, final Document document, final Element elementToAppendInto) {
         if (MapUtils.isEmpty(properties)) {
@@ -154,6 +156,16 @@ public class BuilderUtils {
         } catch (ParseException e) {
             throw new EntityBuilderException("Unable to parse date property (" + key + ") value: " + dateAsString);
         }
+    }
+
+    /**
+     * Removes all special characters from the string.
+     *
+     * @param str string containing spacial characters
+     * @return string without special characters.
+     */
+    public static String removeAllSpecialChars(String str) {
+        return REGEX_ALPHANUMERIC.matcher(str).replaceAll("");
     }
 
     private BuilderUtils() {

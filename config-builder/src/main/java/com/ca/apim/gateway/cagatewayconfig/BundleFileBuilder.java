@@ -62,8 +62,7 @@ public class BundleFileBuilder {
         this.cache = cache;
     }
 
-    public void buildBundle(File rootDir, File outputDir, List<File> dependencies, String projectName,
-                            String projectGroupName, String projectVersion) {
+    public void buildBundle(File rootDir, File outputDir, List<File> dependencies, ProjectInfo projectInfo) {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
@@ -118,16 +117,16 @@ public class BundleFileBuilder {
 
         //Zip
         final Map<String, BundleArtifacts> bundleElementMap = bundleEntityBuilder.build(bundle,
-                EntityBuilder.BundleType.DEPLOYMENT, document, projectName, projectGroupName, projectVersion);
+                EntityBuilder.BundleType.DEPLOYMENT, document, projectInfo);
         bundleElementMap.forEach((k, v) -> writeBundleArtifacts(k, v, outputDir));
     }
 
-    private void writeBundleArtifacts(final String key, final BundleArtifacts bundleArtifacts, File outputDir) {
+    private void writeBundleArtifacts(final String bundleName, final BundleArtifacts bundleArtifacts, File outputDir) {
         documentFileUtils.createFile(bundleArtifacts.getBundle(), new File(outputDir,
-                key + BUNDLE_EXTENSION).toPath());
+                bundleArtifacts.getBundleFileName()).toPath());
         documentFileUtils.createFile(bundleArtifacts.getDeleteBundle(), new File(outputDir,
-                key + DELETE_BUNDLE_EXTENSION).toPath());
-        jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), key, outputDir);
+                bundleArtifacts.getDeleteBundleFileName()).toPath());
+        jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), bundleName, outputDir);
     }
 
     protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entityClass) {
