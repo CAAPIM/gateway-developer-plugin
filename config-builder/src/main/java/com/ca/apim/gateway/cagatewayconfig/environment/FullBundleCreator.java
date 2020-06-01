@@ -44,7 +44,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BU
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.YAML_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.Collections.singletonList;
@@ -70,14 +69,13 @@ public class FullBundleCreator {
     private final DependencyBundlesProcessor dependencyBundlesProcessor;
     private final DocumentFileUtils documentFileUtils;
     private final JsonFileUtils jsonFileUtils;
-    private final JsonTools jsonTools;
 
     @Inject
     FullBundleCreator(DocumentTools documentTools,
                       EnvironmentBundleBuilder environmentBundleBuilder,
                       BundleEntityBuilder bundleEntityBuilder,
                       FileUtils fileUtils, DependencyBundlesProcessor dependencyBundlesProcessor,
-                      DocumentFileUtils documentFileUtils, JsonFileUtils jsonFileUtils, JsonTools jsonTools) {
+                      DocumentFileUtils documentFileUtils, JsonFileUtils jsonFileUtils) {
         this.documentTools = documentTools;
         this.environmentBundleBuilder = environmentBundleBuilder;
         this.bundleEntityBuilder = bundleEntityBuilder;
@@ -85,7 +83,6 @@ public class FullBundleCreator {
         this.dependencyBundlesProcessor = dependencyBundlesProcessor;
         this.documentFileUtils = documentFileUtils;
         this.jsonFileUtils = jsonFileUtils;
-        this.jsonTools = jsonTools;
     }
 
     public void createFullBundle(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
@@ -113,14 +110,8 @@ public class FullBundleCreator {
             LOGGER.log(Level.WARNING, "Temporary bundle file was not deleted: " + fullBundleFile.toString());
         }
 
-        // read the bundle metadata file
-        final MapType type = jsonTools.getObjectMapper(YAML_EXTENSION).getTypeFactory().constructMapType(LinkedHashMap.class, String.class, Object.class);
-        Object bundleMetadata = jsonTools.readDocumentFile(new File(bundleFolderPath, bundleEnvironmentValues.getKey() + JsonFileUtils.METADATA_FILE_NAME_SUFFIX), type);
-        // update the environmentIncluded property to true for full bundle
-        if (((Map)bundleMetadata) != null) {
-            ((Map) bundleMetadata).put("environmentIncluded", true);
-            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleEnvironmentValues.getKey(), new File(bundleFolderPath));
-        }
+        // update metadata's environmentIncluded property to true for full bundle
+        jsonFileUtils.updateBundleMetadataFile(bundleFolderPath, bundleEnvironmentValues.getKey());
     }
 
     private Pair<Element, Element> createFullAndDeleteBundles(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
