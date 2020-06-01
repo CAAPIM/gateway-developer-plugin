@@ -85,18 +85,20 @@ public class PolicyEntityBuilder implements EntityBuilder {
             if (annotatedEntity != null) {
                 AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
                 if (annotatedEntity.isReusable() || isAnnotatedEntity(policyEntity, annotatedEntity)) {
-                    if (annotatedPolicyEntity.getId() != null) {
-                        if(IdValidator.isValidGoid(annotatedPolicyEntity.getId())){
-                            policyEntity.setId(annotatedPolicyEntity.getId());
-                        } else {
-                            LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedPolicyEntity.getId(), policyEntity.getName()});
+                    if (annotatedPolicyEntity != null) {
+                        if (annotatedPolicyEntity.getId() != null) {
+                            if (IdValidator.isValidGoid(annotatedPolicyEntity.getId())) {
+                                policyEntity.setId(annotatedPolicyEntity.getId());
+                            } else {
+                                LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedPolicyEntity.getId(), policyEntity.getName()});
+                            }
                         }
-                    }
-                    if (annotatedPolicyEntity.getGuid() != null) {
-                        if(IdValidator.isValidGuid(annotatedPolicyEntity.getGuid())){
-                            policyEntity.setGuid(annotatedPolicyEntity.getGuid());
-                        } else {
-                            LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedPolicyEntity.getId(), policyEntity.getName()});
+                        if (annotatedPolicyEntity.getGuid() != null) {
+                            if (IdValidator.isValidGuid(annotatedPolicyEntity.getGuid())) {
+                                policyEntity.setGuid(annotatedPolicyEntity.getGuid());
+                            } else {
+                                LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedPolicyEntity.getId(), policyEntity.getName()});
+                            }
                         }
                     }
                 } else {
@@ -366,21 +368,24 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (encass != null && !encass.isExcluded() && annotatedEntity != null) {
             AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
             if (annotatedEntity.isReusable()) {
-                if (annotatedEncassEntity.getGuid() != null) {
-                    if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
-                        encassGuid = annotatedEncassEntity.getGuid();
-                        encass.setGuid(encassGuid);
-                    } else {
-                        LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
+                if(annotatedEncassEntity != null){
+                    if (annotatedEncassEntity.getGuid() != null) {
+                        if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
+                            encassGuid = annotatedEncassEntity.getGuid();
+                            encass.setGuid(encassGuid);
+                        } else {
+                            LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
+                        }
+                    }
+                    if (annotatedEncassEntity.getId() != null) {
+                        if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
+                            encass.setId(annotatedEncassEntity.getId());
+                        } else {
+                            LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
+                        }
                     }
                 }
-                if (annotatedEncassEntity.getId() != null) {
-                    if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
-                        encass.setId(annotatedEncassEntity.getId());
-                    } else {
-                        LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
-                    }
-                }
+
             } else {
                 encassGuid = idGenerator.generateGuid();
                 encass.setGuid(encassGuid);
