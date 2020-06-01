@@ -12,6 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer
 import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -177,8 +178,13 @@ public class Service extends Folderable implements AnnotableEntity {
         return annotatedEntity;
     }
 
+    @Override
     public String getType(){
-        return "service";
+        return EntityTypes.SERVICE_TYPE;
     }
 
+    @Override
+    public String getShortenedType() {
+        return "service";
+    }
 }

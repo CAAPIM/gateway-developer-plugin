@@ -13,11 +13,16 @@ public class BundleArtifacts {
     private final Element bundle;
     private final Element deleteBundle;
     private final BundleMetadata bundleMetadata;
+    private final String bundleFileName;
+    private final String deleteBundleFileName;
 
-    public BundleArtifacts(Element bundle, Element deleteBundle, BundleMetadata bundleMetadata) {
+    public BundleArtifacts(Element bundle, Element deleteBundle, BundleMetadata bundleMetadata, String bundleFileName
+            , String deleteBundleFileName) {
         this.bundle = bundle;
         this.deleteBundle = deleteBundle;
         this.bundleMetadata = bundleMetadata;
+        this.bundleFileName = bundleFileName;
+        this.deleteBundleFileName = deleteBundleFileName;
     }
 
     public Element getBundle() {
@@ -30,5 +35,13 @@ public class BundleArtifacts {
 
     public BundleMetadata getBundleMetadata() {
         return bundleMetadata;
+    }
+
+    public String getBundleFileName() {
+        return bundleFileName;
+    }
+
+    public String getDeleteBundleFileName() {
+        return deleteBundleFileName;
     }
 }

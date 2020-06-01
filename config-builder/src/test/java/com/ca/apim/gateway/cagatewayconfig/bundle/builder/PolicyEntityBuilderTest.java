@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -157,7 +158,7 @@ class PolicyEntityBuilderTest {
 
         AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
         annotatedEntity.setEntityName(encass.getName());
-        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, new ProjectInfo("", "", ""));
         annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put("Policy", policy);
 
@@ -375,7 +376,7 @@ class PolicyEntityBuilderTest {
 
         //empty guid and goid
         AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
-        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
         annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put(policyPath, policy);
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
@@ -399,7 +400,7 @@ class PolicyEntityBuilderTest {
         annotations.add(annotation);
         encass.setAnnotations(annotations);
         encass.setAnnotatedEntity(null);
-        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity);
+        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
         annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put(policyPath, policy);
         encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);

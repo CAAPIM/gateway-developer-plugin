@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
@@ -50,7 +50,7 @@ public class EnvironmentBundleUtils {
             return cache.getBundle(templatizedBundlesFolderPath);
         } else {
             EntityBundleLoader loader = InjectionRegistry.getInjector().getInstance(EntityBundleLoader.class);
-            List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath, BUNDLE_EXTENSION);
+            List<File> deploymentBundleFiles = collectFiles(templatizedBundlesFolderPath, INSTALL_BUNDLE_EXTENSION);
             cache.putBundle(templatizedBundlesFolderPath, loader.load(deploymentBundleFiles, BundleLoadingOperation.EXPORT));
             return loader.load(deploymentBundleFiles, BundleLoadingOperation.EXPORT);
         }
