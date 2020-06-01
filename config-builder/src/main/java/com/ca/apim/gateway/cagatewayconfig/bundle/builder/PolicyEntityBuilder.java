@@ -365,7 +365,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (encass != null && !encass.isExcluded() && annotatedEntity != null) {
             AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (encass.isReusable()) {
+            if (annotatedEntity.isReusable()) {
                 if (annotatedEncassEntity.getGuid() != null) {
                     if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
                         encassGuid = annotatedEncassEntity.getGuid();
@@ -514,9 +514,14 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String policyName = policy.getName();
         String policyNameWithPath = policy.getPath();
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
-        final boolean isRedeployableBundle = annotatedEntity != null && annotatedEntity.isRedeployable();
+        boolean isRedeployableBundle = false;
+        boolean isReusable = false;
+        if(annotatedEntity != null){
+            isRedeployableBundle = annotatedEntity.isRedeployable();
+            isReusable = annotatedEntity.isReusable();
+        }
         if (annotatedBundle != null) {
-            if (!policy.isReusable() && !isAnnotatedEntity(policy, annotatedEntity)) {
+            if (!isReusable && !isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = annotatedBundle.getUniquePrefix() + policyName + annotatedBundle.getUniqueSuffix();
                 policyNameWithPath = PathUtils.extractPath(policy.getPath()) + policyName;
             }
@@ -561,7 +566,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
                 policy.getPath(), policyNameWithPath, policy.getId(), policyElement, policy.isHasRouting());
-        if (isRedeployableBundle || !(policy.isReusable() || isAnnotatedEntity(policy, annotatedEntity))) {
+        if (isRedeployableBundle || !(isReusable || isAnnotatedEntity(policy, annotatedEntity))) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
