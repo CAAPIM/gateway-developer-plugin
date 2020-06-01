@@ -111,7 +111,11 @@ public class FullBundleCreator {
         }
 
         // update metadata's environmentIncluded property to true for full bundle
-        jsonFileUtils.updateBundleMetadataFile(bundleFolderPath, bundleEnvironmentValues.getKey());
+        Object bundleMetadata = jsonFileUtils.readBundleMetadataFile(bundleFolderPath, bundleEnvironmentValues.getKey());
+        if (((Map) bundleMetadata) != null) {
+            ((Map) bundleMetadata).put("environmentIncluded", true);
+            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleEnvironmentValues.getKey(), new File(bundleFolderPath));
+        }
     }
 
     private Pair<Element, Element> createFullAndDeleteBundles(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,

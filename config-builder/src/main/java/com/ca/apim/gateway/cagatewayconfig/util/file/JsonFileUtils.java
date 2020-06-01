@@ -87,16 +87,12 @@ public class JsonFileUtils {
         }
     }
 
-    public void updateBundleMetadataFile(final String bundleFolderPath, final String fileName) {
+    public Object readBundleMetadataFile(final String bundleFolderPath, final String fileName) {
         final File metaDataFile = new File(bundleFolderPath, fileName + METADATA_FILE_NAME_SUFFIX);
         if (metaDataFile.exists()) {
             final MapType type = jsonTools.getObjectMapper(YAML_EXTENSION).getTypeFactory().constructMapType(LinkedHashMap.class, String.class, Object.class);
-            Object bundleMetadata = jsonTools.readDocumentFile(metaDataFile, type);
-
-            if (((Map) bundleMetadata) != null) {
-                ((Map) bundleMetadata).put("environmentIncluded", true);
-                createBundleMetadataFile(bundleMetadata, fileName, new File(bundleFolderPath));
-            }
+            return jsonTools.readDocumentFile(metaDataFile, type);
         }
+        return null;
     }
 }
