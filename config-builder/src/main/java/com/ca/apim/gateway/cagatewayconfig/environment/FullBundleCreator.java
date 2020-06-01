@@ -123,8 +123,10 @@ public class FullBundleCreator {
                                                               String bundleFileName,
                                                               boolean detemplatizeDeploymentBundles) {
         final Map<String, String> environmentProperties = bundleEnvironmentValues.getRight();
-        final List<File> deploymentBundles = collectFiles(bundleFolderPath, INSTALL_BUNDLE_EXTENSION);
-        final List<File> deploymentDeleteBundle = collectFiles(bundleFolderPath, DELETE_BUNDLE_EXTENSION);
+        final List<File> deploymentBundles = collectFiles(bundleFolderPath,
+                bundleEnvironmentValues.getLeft() + "-policy" + INSTALL_BUNDLE_EXTENSION);
+        final List<File> deploymentDeleteBundle = collectFiles(bundleFolderPath,
+                bundleEnvironmentValues.getLeft() + "-policy" + DELETE_BUNDLE_EXTENSION);
         final List<File> bundleFiles = union(deploymentBundles, dependentBundles);
 
         // load all deployment bundles to strings
