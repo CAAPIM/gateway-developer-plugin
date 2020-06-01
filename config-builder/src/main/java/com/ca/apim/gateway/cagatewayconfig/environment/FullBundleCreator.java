@@ -18,7 +18,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;

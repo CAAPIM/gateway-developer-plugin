@@ -6,18 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.gateway;
 
-import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.annotation.Nullable;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -25,7 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElements;
 import static java.lang.Integer.parseInt;
@@ -162,6 +158,12 @@ public class BuilderUtils {
         }
     }
 
+    /**
+     * Removes all special characters from the string.
+     *
+     * @param str string containing spacial characters
+     * @return string without special characters.
+     */
     public static String removeAllSpecialChars(String str) {
         return REGEX_ALPHANUMERIC.matcher(str).replaceAll("");
     }

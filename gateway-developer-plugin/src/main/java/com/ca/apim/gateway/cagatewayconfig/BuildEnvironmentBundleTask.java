@@ -23,7 +23,6 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.ENV_INSTALL_BUNDLE_NAME_SUFFIX;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.removeAllSpecialChars;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
@@ -101,11 +100,25 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         });
     }
 
+    /**
+     * Generates the Environment install bundle filename in the format <name>-<version>-*env.install.bundle.
+     *
+     * Here "-*env" is generated with the following preference:
+     * 1) If "configName" is provided in the GatewaySourceConfig {} in build.gradle, "configName" will be used after
+     * removing all the special characters. For eg. if "configName" is set "default", filename will have "-defaultenv"
+     * 2) If "configName" is not provided, check "configFolder" name (not path).
+     *    2.1) If "configFolder" is the default folder (i.e "src/main/gateway/config"), directly use "-env".
+     *    2.2) If configFolder is not the default folder, use folder name after removing all the special characters.
+     *    For eg. "configFolder" is set as "src/main/gateway/config-staging", filename will have "-configstagingenv"
+     *
+     * @param deployBundleName bundle name prefix obtained from project name and version or from annotations
+     * @return Environment install bundle filename
+     */
     private String getEnvBundleFilename(String deployBundleName) {
         if (configName != null && StringUtils.isNotBlank(configName.get())) {
             return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
         } else {
-            String configFolderName = configFolder != null && configFolder.isPresent()?
+            String configFolderName = configFolder != null && configFolder.isPresent() ?
                     configFolder.getAsFile().get().getName() : "";
             if (StringUtils.equalsIgnoreCase(configFolderName, "config")) {
                 return deployBundleName + "-" + ENV_INSTALL_BUNDLE_NAME_SUFFIX;

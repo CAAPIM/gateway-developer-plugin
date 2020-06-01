@@ -390,6 +390,13 @@ public class BundleEntityBuilder {
         return null;
     }
 
+    /**
+     * Generates the filename for the install bundle and delete bundle files/
+     *
+     * @param isDeleteBundle is delete bundle
+     * @param bundleName compiled prefix for filename from project details or from annotations
+     * @return filename for the bundle
+     */
     private String generateBundleFileName(boolean isDeleteBundle, String bundleName) {
         String filenameSuffix = isDeleteBundle ? DELETE_BUNDLE_EXTENSION : INSTALL_BUNDLE_EXTENSION;
         return bundleName + "-policy" + filenameSuffix;

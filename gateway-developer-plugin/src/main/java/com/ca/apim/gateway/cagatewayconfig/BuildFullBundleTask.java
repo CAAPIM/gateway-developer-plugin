@@ -23,11 +23,9 @@ import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.FULL_INSTALL_BUNDLE_NAME_SUFFIX;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
-import static org.apache.commons.collections4.ListUtils.union;
 
 /**
  * The BuildFullBundleTask task will grab provided environment properties and build a single bundle merged with the deployment bundles.
