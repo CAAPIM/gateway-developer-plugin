@@ -84,7 +84,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             Policy policyEntity = (Policy) policy;
             if (annotatedEntity != null) {
                 AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
-                if (policyEntity.isReusable() || isAnnotatedEntity(policyEntity, annotatedEntity)) {
+                if (annotatedEntity.isReusable() || isAnnotatedEntity(policyEntity, annotatedEntity)) {
                     if (annotatedPolicyEntity.getId() != null) {
                         if(IdValidator.isValidGoid(annotatedPolicyEntity.getId())){
                             policyEntity.setId(annotatedPolicyEntity.getId());
@@ -150,7 +150,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         final String policyName;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
-            if (policy.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
+            if (annotatedEntity.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = policy.getName();
             } else {
                 policyName = annotatedBundle.getUniquePrefix() + policy.getName() + annotatedBundle.getUniqueSuffix();
