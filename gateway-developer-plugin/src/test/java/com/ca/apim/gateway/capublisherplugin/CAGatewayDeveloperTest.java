@@ -9,8 +9,11 @@ package com.ca.apim.gateway.capublisherplugin;
 import com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapType;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -29,16 +32,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleItemKey;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.buildBundleMappingKey;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.nio.charset.Charset.defaultCharset;
@@ -546,5 +547,13 @@ class CAGatewayDeveloperTest {
             }
         });
         assertTrue(bundleItemsIds.isEmpty(), "Mappings on deployment bundle not found on full bundle: " + bundleMappingsIds.toString());
+
+        // validate the environmentIncluded flag in bundle metadata file
+        File bundleMetadataFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + METADATA_FILE_NAME_SUFFIX);
+        assertTrue(bundleMetadataFile.isFile());
+        final ObjectMapper objectMapper = JsonTools.INSTANCE.getObjectMapper();
+        final MapType type = objectMapper.getTypeFactory().constructMapType(LinkedHashMap.class, String.class, Object.class);
+        Map<String, Object> metadataProperties = objectMapper.readValue(bundleMetadataFile, type);
+        assertTrue((boolean) metadataProperties.get("environmentIncluded"));
     }
 }
