@@ -281,6 +281,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     private Encass getEncass(Bundle bundle, String name) {
         LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", name);
         final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(name));
+
         if (referenceEncass.get() == null) {
             Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
             Encass encass = null;
@@ -310,8 +311,27 @@ public class PolicyEntityBuilder implements EntityBuilder {
                     throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
                 }
             });
+
+            //if encass is not found in any of the bundles, check this entity in missing entities
+            if (referenceEncass.get() == null) {
+                final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(name);
+                if (missingEntity != null && missingEntity.isExcluded()) {
+                    LOGGER.log(Level.WARNING, "Resolving the referenced encass {0} as known excluded entity with guid: {1}",
+                            new Object[] {name, missingEntity.getGuid()});
+                    referenceEncass.set(getExcludedEncass(missingEntity.getGuid()));
+                }
+            }
         }
         return referenceEncass.get();
+    }
+
+    private Encass getExcludedEncass(final String guid){
+        Encass missingEncass = new Encass();
+        missingEncass.setGuid(guid);
+        Set<Annotation> annotations = new HashSet<>();
+        annotations.add(AnnotableEntity.EXCLUDE_ANNOTATION);
+        missingEncass.setAnnotations(annotations);
+        return missingEncass;
     }
 
     private Encass getEncassFromMetadata(final Metadata metadata) {
@@ -343,7 +363,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String encassName = name;
         String encassGuid = guid;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
-        if (encass != null && annotatedEntity != null) {
+        if (encass != null && !encass.isExcluded() && annotatedEntity != null) {
             AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
             if (encass.isReusable()) {
                 if (annotatedEncassEntity.getGuid() != null) {
@@ -450,7 +470,17 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 }
             });
 
+            //if policy is not found in any bundles then check if it missing and excluded
+            final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(policyPath);
+            if (missingEntity != null && missingEntity.isExcluded()) {
+                LOGGER.log(Level.WARNING, "Resolving the referenced policy {0} as known excluded entity with guid: {1}",
+                        new Object[] {policyPath, missingEntity.getGuid()});
+                includedPolicy.set(new Policy());
+                includedPolicy.get().setGuid(missingEntity.getGuid());
+            }
+
         }
+
         if (includedPolicy.get() == null) {
             throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
         }
