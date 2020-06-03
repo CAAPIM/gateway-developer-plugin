@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -33,14 +34,14 @@ class EntityBuilderHelper {
     }
 
     static Entity getEntityWithNameMapping(String type, String name, String id, Element element) {
-        return getEntityWithNameMapping(type, name, name, id, element, null);
+        return getEntityWithNameMapping(type, name, name, id, element, null, null);
     }
 
-    static Entity getEntityWithNameMapping(String type, String originalName, String name, String id, Element element, String guid) {
+    static Entity getEntityWithNameMapping(String type, String originalName, String name, String id, Element element, String guid, GatewayEntity gatewayEntity) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(PROPERTY_BUNDLE_ENTITY_NAME, name);
         properties.put(PROPERTY_GUID, guid);
-        Entity entity = new Entity(type, originalName, id, element);
+        Entity entity = new Entity(type, originalName, id, element, gatewayEntity);
         entity.setProperties(properties);
         entity.setMappingProperty(MAP_BY, MappingProperties.NAME);
         entity.setMappingProperty(MAP_TO, name);
@@ -48,11 +49,11 @@ class EntityBuilderHelper {
     }
 
     static Entity getEntityWithPathMapping(String type, String originalPath, String pathInBundle, String id,
-                                           Element element, boolean hasRouting) {
+                                           Element element, boolean hasRouting, GatewayEntity gatewayEntity) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(PROPERTY_BUNDLE_ENTITY_NAME, pathInBundle);
         properties.put(PROPERTY_HAS_ROUTING, hasRouting);
-        Entity entity = new Entity(type, originalPath, id, element);
+        Entity entity = new Entity(type, originalPath, id, element, gatewayEntity);
         entity.setProperties(properties);
         entity.setMappingProperty(MAP_BY, MappingProperties.PATH);
         entity.setMappingProperty(MAP_TO, pathInBundle);
@@ -62,7 +63,7 @@ class EntityBuilderHelper {
     @VisibleForTesting
     static Entity getEntityWithMappings(final String type, final String path, final String id, final Element element,
                                         final String mappingAction, final Map<String, Object> mappingProperties) {
-        Entity entity = new Entity(type, path, id, element);
+        Entity entity = new Entity(type, path, id, element, null);
         entity.setMappingAction(mappingAction);
 
         mappingProperties.forEach(entity::setMappingProperty);
