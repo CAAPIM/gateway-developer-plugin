@@ -28,6 +28,7 @@ public interface AnnotableEntity {
      *
      * @return String
      */
+    @JsonIgnore
     String getType();
 
     /**
@@ -36,6 +37,7 @@ public interface AnnotableEntity {
      *
      * @return Shortened type
      */
+    @JsonIgnore
     String getShortenedType();
 
     /**

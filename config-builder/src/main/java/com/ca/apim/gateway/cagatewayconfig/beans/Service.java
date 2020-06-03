@@ -221,13 +221,11 @@ public class Service extends Folderable implements AnnotableEntity {
         };
     }
 
-    @JsonIgnore
     @Override
     public String getType(){
         return EntityTypes.SERVICE_TYPE;
     }
 
-    @JsonIgnore
     @Override
     public String getShortenedType() {
         return "service";
