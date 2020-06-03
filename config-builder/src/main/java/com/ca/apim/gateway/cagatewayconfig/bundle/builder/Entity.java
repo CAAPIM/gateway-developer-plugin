@@ -14,7 +14,7 @@ import org.w3c.dom.Element;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Entity {
+public class Entity<T> {
 
     public static final String PROPERTY_BUNDLE_ENTITY_NAME = "bundleName";
     public static final String PROPERTY_GUID = "guid";
@@ -27,12 +27,14 @@ public class Entity {
     private final Map<String, Object> properties = new HashMap<>();
     private String mappingAction;
     private final Map<String, Object> mappingProperties = new HashMap<>();
+    private final T entity;
 
-    public Entity(String type, String originalName, String id, Element xml) {
+    public Entity(String type, String originalName, String id, Element xml, T entity) {
         this.type = type;
         this.originalName = originalName;
         this.id = id;
         this.xml = xml;
+        this.entity = entity;
     }
 
     public String getType() {
@@ -118,5 +120,9 @@ public class Entity {
                 return Entity.this.getGuid();
             }
         };
+    }
+
+    T getEntity() {
+        return entity;
     }
 }

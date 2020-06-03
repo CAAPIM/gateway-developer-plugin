@@ -9,12 +9,13 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -37,6 +38,7 @@ import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.
 @BundleGeneration
 public class Service extends Folderable implements AnnotableEntity {
 
+    private String guid;
     private String url;
     private String policy;
     private Set<String> httpMethods;
@@ -61,6 +63,14 @@ public class Service extends Folderable implements AnnotableEntity {
 
     public void setAnnotations(Set<Annotation> annotations) {
         this.annotations = annotations;
+    }
+
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
     }
 
     public String getUrl() {
@@ -178,13 +188,54 @@ public class Service extends Folderable implements AnnotableEntity {
         return annotatedEntity;
     }
 
+    @JsonIgnore
+    @Override
+    public Metadata getMetadata() {
+        return new Metadata() {
+            public String getType() {
+                return EntityTypes.SERVICE_TYPE;
+            }
+
+            @Override
+            public String getName() {
+                return Service.this.getName();
+            }
+
+            @Override
+            public String getId() {
+                return Service.this.getId();
+            }
+
+            @Override
+            public String getGuid() {
+                return Service.this.getGuid();
+            }
+
+            public String getUri() {
+                return Service.this.getUrl();
+            }
+
+            public boolean isSoap() {
+                return  Service.this.getSoapResources() != null && StringUtils.isNotBlank(Service.this.getWsdlRootUrl());
+            }
+        };
+    }
+
+    @JsonIgnore
     @Override
     public String getType(){
         return EntityTypes.SERVICE_TYPE;
     }
 
+    @JsonIgnore
     @Override
     public String getShortenedType() {
         return "service";
+    }
+
+    @Override
+    public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
+        setGuid(idGenerator.generateGuid());
+        setId(idGenerator.generate());
     }
 }

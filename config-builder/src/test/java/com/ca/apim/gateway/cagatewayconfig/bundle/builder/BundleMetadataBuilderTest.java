@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -29,6 +30,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.util.*;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.BUNDLE_TYPE_ALL;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilderTestHelper.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
@@ -194,6 +196,49 @@ public class BundleMetadataBuilderTest {
         assertNotNull(metadata);
         assertEquals(TEST_ENCASS_ANNOTATION_NAME, metadata.getName());
         assertFalse(metadata.isHasRouting());
+    }
+
+    @Test
+    public void testUnAnnotatedBundleMetadata() throws JsonProcessingException {
+        BundleEntityBuilder builder = createBundleEntityBuilder();
+        // create un-annotated bundle
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, false, false);
+        // create encass with the empty set of annotations and add it to the bundle
+        Encass encass = buildTestEncassWithAnnotation(TEST_ENCASS, TEST_ENCASS_ID, TEST_GUID, TEST_ENCASS_POLICY, Collections.emptySet());
+        bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        BundleMetadata metadata = bundles.get(projectInfo.getName() + "-1.0").getBundleMetadata();
+        assertNotNull(metadata);
+        assertEquals(projectInfo.getName(), metadata.getName());
+        assertEquals(projectInfo.getGroupName(), metadata.getGroupName());
+        assertEquals(BUNDLE_TYPE_ALL, metadata.getType());
+        assertEquals(StringUtils.EMPTY, metadata.getDescription());
+        assertEquals(Collections.emptyList(), metadata.getTags());
+        assertTrue(metadata.isReusable());
+        assertTrue(metadata.isRedeployable());
+
+        Collection<Metadata> definedEntities = metadata.getDefinedEntities();
+        assertEquals(2, definedEntities.size());
+        definedEntities.stream().forEach(definedEntityData -> {
+            switch (definedEntityData.getType()) {
+                case EntityTypes.ENCAPSULATED_ASSERTION_TYPE:
+                    assertEquals(TEST_ENCASS, definedEntityData.getName());
+                    assertEquals(TEST_ENCASS_ID, definedEntityData.getId());
+                    assertEquals(TEST_GUID, definedEntityData.getGuid());
+                    break;
+                case EntityTypes.POLICY_TYPE:
+                    assertEquals(TEST_ENCASS_POLICY, definedEntityData.getName());
+                    assertEquals(TEST_POLICY_ID, definedEntityData.getId());
+                    assertEquals(TEST_GUID, definedEntityData.getGuid());
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
     private void deleteDirectory(File directory) {
