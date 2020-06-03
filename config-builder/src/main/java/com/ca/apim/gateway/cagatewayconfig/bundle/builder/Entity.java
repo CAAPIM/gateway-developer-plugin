@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -14,7 +15,7 @@ import org.w3c.dom.Element;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Entity<T> {
+public class Entity {
 
     public static final String PROPERTY_BUNDLE_ENTITY_NAME = "bundleName";
     public static final String PROPERTY_GUID = "guid";
@@ -27,14 +28,14 @@ public class Entity<T> {
     private final Map<String, Object> properties = new HashMap<>();
     private String mappingAction;
     private final Map<String, Object> mappingProperties = new HashMap<>();
-    private final T entity;
+    private final GatewayEntity gatewayEntity;
 
-    public Entity(String type, String originalName, String id, Element xml, T entity) {
+    public Entity(String type, String originalName, String id, Element xml, GatewayEntity gatewayEntity) {
         this.type = type;
         this.originalName = originalName;
         this.id = id;
         this.xml = xml;
-        this.entity = entity;
+        this.gatewayEntity = gatewayEntity;
     }
 
     public String getType() {
@@ -122,7 +123,7 @@ public class Entity<T> {
         };
     }
 
-    T getEntity() {
-        return entity;
+    public GatewayEntity getGatewayEntity() {
+        return gatewayEntity;
     }
 }

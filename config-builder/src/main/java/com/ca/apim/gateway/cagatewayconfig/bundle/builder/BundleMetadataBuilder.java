@@ -95,7 +95,7 @@ public class BundleMetadataBuilder {
 
     private Collection<Metadata> getDefinedEntitiesMetadata(final List<Entity> definedEntities) {
         return definedEntities.stream().filter(FILTER_NON_ENV_ENTITIES_EXCLUDING_FOLDER)
-                .map(e -> ((GatewayEntity)e.getEntity()).getMetadata()).collect(Collectors.toList());
+                .map(e -> ((GatewayEntity)e.getGatewayEntity()).getMetadata()).collect(Collectors.toList());
     }
 
     private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {

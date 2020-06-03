@@ -35,7 +35,7 @@ public final class BuilderConstants {
     public static final Predicate<Entity> FILTER_NON_ENV_ENTITIES_EXCLUDING_FOLDER = new Predicate<Entity>() {
         @Override
         public boolean test(Entity entity) {
-            return entity.getEntity() != null && !EntityTypes.FOLDER_TYPE.equals(entity.getType()) && NON_ENV_ENTITY_TYPES.contains(entity.getType());
+            return entity.getGatewayEntity() != null && !EntityTypes.FOLDER_TYPE.equals(entity.getType()) && NON_ENV_ENTITY_TYPES.contains(entity.getType());
         }
     };
 
