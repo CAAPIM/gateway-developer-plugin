@@ -123,8 +123,8 @@ class BundleEntityBuilderTest {
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
 
-        buildAndValidateAnnotatedBundle(bundle, entityBuilders, "my-bundle-encass-TestEncass-" + TEST_ENCASS_POLICY + "-1.0", NEW_OR_UPDATE, TEST_ENCASS, NEW_OR_EXISTING,
-                TEST_DEP_ENCASS_POLICY, NEW_OR_EXISTING, "my-bundle-encass-TestEncass-" + TEST_DEP_ENCASS + "-1.0", NEW_OR_UPDATE);
+        buildAndValidateAnnotatedBundle(bundle, entityBuilders, "my-bundle#TestEncass#" + TEST_ENCASS_POLICY , NEW_OR_UPDATE, TEST_ENCASS, NEW_OR_EXISTING,
+                TEST_DEP_ENCASS_POLICY, NEW_OR_EXISTING, "my-bundle#TestEncass#" + TEST_DEP_ENCASS , NEW_OR_UPDATE);
     }
 
     @Test
@@ -175,7 +175,7 @@ class BundleEntityBuilderTest {
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
 
-        buildAndValidateAnnotatedBundle(bundle, entityBuilders, "my-bundle-encass-TestEncass-" + TEST_ENCASS_POLICY + "-1.0", NEW_OR_UPDATE, TEST_ENCASS, NEW_OR_UPDATE,
+        buildAndValidateAnnotatedBundle(bundle, entityBuilders, "my-bundle#TestEncass#" + TEST_ENCASS_POLICY , NEW_OR_UPDATE, TEST_ENCASS, NEW_OR_UPDATE,
                 TEST_DEP_ENCASS_POLICY, NEW_OR_UPDATE, TEST_DEP_ENCASS, NEW_OR_UPDATE);
 
     }
@@ -277,7 +277,7 @@ class BundleEntityBuilderTest {
         assertNotNull(itemList);
         assertEquals(expectedElementCountBundle, itemList.size());
         final Element item1 = itemList.get(1);
-        assertEquals("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_ENCASS_POLICY + "-1.0",
+        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ,
                 getSingleChildElementTextContent(item1, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item1, TYPE));
         assertNotNull(getSingleChildElement(item1, RESOURCE));
@@ -328,12 +328,12 @@ class BundleEntityBuilderTest {
         assertNotNull(itemList);
         assertEquals(expectedElementCountBundle, itemList.size());
         final Element item1 = itemList.get(2);
-        assertEquals("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_POLICY_FRAGMENT + "-1.0",
+        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_POLICY_FRAGMENT ,
                 getSingleChildElementTextContent(item1, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item1, TYPE));
         assertNotNull(getSingleChildElement(item1, RESOURCE));
         final Element item2 = itemList.get(1);
-        assertEquals("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_ENCASS_POLICY + "-1.0",
+        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ,
                 getSingleChildElementTextContent(item2, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item2, TYPE));
         assertNotNull(getSingleChildElement(item2, RESOURCE));
@@ -351,14 +351,14 @@ class BundleEntityBuilderTest {
         final Element mapping1 = mappingItemList.get(2);
         final Element mapping1Properties = getSingleChildElement(mapping1, PROPERTIES);
         Set<String> propertyValues = getChildElementsTextContents(mapping1Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_POLICY_FRAGMENT + "-1.0"));
+        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_POLICY_FRAGMENT ));
         assertEquals(MappingActions.DELETE, mapping1.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping1.getAttribute("type"));
 
         final Element mapping2 = mappingItemList.get(1);
         final Element mapping2Properties = getSingleChildElement(mapping2, PROPERTIES);
         propertyValues = getChildElementsTextContents(mapping2Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_ENCASS_POLICY + "-1.0"));
+        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ));
         assertEquals(MappingActions.DELETE, mapping2.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping2.getAttribute("type"));
 
@@ -398,12 +398,12 @@ class BundleEntityBuilderTest {
         assertNotNull(itemList);
         assertEquals(expectedElementCountBundle, itemList.size());
         final Element item1 = itemList.get(2);
-        assertEquals("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_POLICY_FRAGMENT + "-1.0",
+        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_POLICY_FRAGMENT,
                 getSingleChildElementTextContent(item1, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item1, TYPE));
         assertNotNull(getSingleChildElement(item1, RESOURCE));
         final Element item2 = itemList.get(1);
-        assertEquals("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_ENCASS_POLICY + "-1.0",
+        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY,
                 getSingleChildElementTextContent(item2, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item2, TYPE));
         assertNotNull(getSingleChildElement(item2, RESOURCE));
@@ -421,14 +421,14 @@ class BundleEntityBuilderTest {
         final Element mapping1 = mappingItemList.get(2);
         final Element mapping1Properties = getSingleChildElement(mapping1, PROPERTIES);
         Set<String> propertyValues = getChildElementsTextContents(mapping1Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_POLICY_FRAGMENT + "-1.0"));
+        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_POLICY_FRAGMENT ));
         assertEquals(MappingActions.DELETE, mapping1.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping1.getAttribute("type"));
 
         final Element mapping2 = mappingItemList.get(1);
         final Element mapping2Properties = getSingleChildElement(mapping2, PROPERTIES);
         propertyValues = getChildElementsTextContents(mapping2Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_ENCASS_POLICY + "-1.0"));
+        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ));
         assertEquals(MappingActions.DELETE, mapping2.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping2.getAttribute("type"));
 
@@ -469,7 +469,7 @@ class BundleEntityBuilderTest {
         assertEquals(expectedElementCountBundle, itemList.size());
 
         final Element item2 = itemList.get(1);
-        assertEquals("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_ENCASS_POLICY + "-1.0",
+        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ,
                 getSingleChildElementTextContent(item2, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item2, TYPE));
         assertNotNull(getSingleChildElement(item2, RESOURCE));
@@ -489,7 +489,7 @@ class BundleEntityBuilderTest {
         final Element mapping2 = mappingItemList.get(1);
         final Element mapping2Properties = getSingleChildElement(mapping2, PROPERTIES);
         propertyValues = getChildElementsTextContents(mapping2Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle-encass-" + TEST_ENCASS + "-" + TEST_ENCASS_POLICY + "-1.0"));
+        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ));
         assertEquals(MappingActions.DELETE, mapping2.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping2.getAttribute("type"));
 
