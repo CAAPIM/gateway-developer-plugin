@@ -50,7 +50,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
 
-    private static final String STRING_VALUE = "stringValue";
+    public static final String STRING_VALUE = "stringValue";
     private static final String GOID_VALUE = "goidValue";
     private static final String GOID_ARRAY_VALUE = "goidArrayValue";
     static final String BOOLEAN_VALUE = "booleanValue";
@@ -513,11 +513,11 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     private static void prepareRoutingAssertionCertificateIds(Document policyDocument, Bundle bundle, Element assertionElement) {
-        final Element trustedCertNameElement = getSingleChildElement(assertionElement, TLS_TRUSTED_CERT_NAME, true);
+        final Element trustedCertNameElement = getSingleChildElement(assertionElement, TLS_TRUSTED_CERT_NAMES, true);
         if (trustedCertNameElement != null && trustedCertNameElement.getChildNodes().getLength() > 0) {
             Element trustedCertGoidElement = createElementWithAttribute(
                     policyDocument,
-                    TLS_TRUSTED_CERT_ID,
+                    TLS_TRUSTED_CERT_IDS,
                     GOID_ARRAY_VALUE,
                     "included"
             );
