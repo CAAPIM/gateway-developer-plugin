@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.StringTemplatizedBundle;
@@ -14,9 +15,12 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import com.fasterxml.jackson.databind.type.MapType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +33,6 @@ import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -37,8 +40,7 @@ import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.BUNDLE_EXTENSION;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
@@ -65,43 +67,54 @@ public class FullBundleCreator {
     private final FileUtils fileUtils;
     private final DependencyBundlesProcessor dependencyBundlesProcessor;
     private final DocumentFileUtils documentFileUtils;
+    private final JsonFileUtils jsonFileUtils;
 
     @Inject
     FullBundleCreator(DocumentTools documentTools,
                       EnvironmentBundleBuilder environmentBundleBuilder,
                       BundleEntityBuilder bundleEntityBuilder,
-                      FileUtils fileUtils, DependencyBundlesProcessor dependencyBundlesProcessor, DocumentFileUtils documentFileUtils) {
+                      FileUtils fileUtils, DependencyBundlesProcessor dependencyBundlesProcessor,
+                      DocumentFileUtils documentFileUtils, JsonFileUtils jsonFileUtils) {
         this.documentTools = documentTools;
         this.environmentBundleBuilder = environmentBundleBuilder;
         this.bundleEntityBuilder = bundleEntityBuilder;
         this.fileUtils = fileUtils;
         this.dependencyBundlesProcessor = dependencyBundlesProcessor;
         this.documentFileUtils = documentFileUtils;
+        this.jsonFileUtils = jsonFileUtils;
     }
 
     public void createFullBundle(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
                                  String bundleFolderPath,
-                                 String bundleFileName,
+                                 String fullInstallBundleFilename,
                                  boolean detemplatizeDeploymentBundles) {
-        final Pair<Element, Element> elementPair = createFullAndDeleteBundles(bundleEnvironmentValues, dependentBundles, bundleFolderPath, bundleFileName, detemplatizeDeploymentBundles);
+        final Pair<Element, Element> elementPair = createFullAndDeleteBundles(bundleEnvironmentValues,
+                dependentBundles, bundleFolderPath, fullInstallBundleFilename, detemplatizeDeploymentBundles);
         final String bundle = documentTools.elementToString(elementPair.getLeft());
         // write the full bundle to a temporary file first
-        final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), bundleFileName);
+        final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), fullInstallBundleFilename);
         try {
             writeStringToFile(fullBundleFile, bundle, defaultCharset());
         } catch (IOException e) {
-            throw new DocumentFileUtilsException("Error writing to file '" + bundleFileName + "': " + e.getMessage(), e);
+            throw new DocumentFileUtilsException("Error writing to file '" + fullInstallBundleFilename + "': " + e.getMessage(), e);
         }
 
         // process for reattaching loose encasses and write to the final path
         dependencyBundlesProcessor.process(singletonList(fullBundleFile), bundleFolderPath);
-        int index = bundleFileName.indexOf(BUNDLE_EXTENSION);
-        documentFileUtils.createFile(elementPair.getRight(), new File(bundleFolderPath,
-                bundleFileName.substring(0, index) + DELETE_BUNDLE_EXTENSION).toPath());
+
+        final String fullDeleteBundleFilename = fullInstallBundleFilename.replace(INSTALL_BUNDLE_EXTENSION, DELETE_BUNDLE_EXTENSION);
+        documentFileUtils.createFile(elementPair.getRight(), new File(bundleFolderPath, fullDeleteBundleFilename).toPath());
         // delete the temp file
         boolean deleted = fullBundleFile.delete();
         if (!deleted) {
-            LOGGER.log(Level.WARNING, "Temporary bundle file was not deleted: " + fullBundleFile.toString());
+            LOGGER.log(Level.WARNING, () -> "Temporary bundle file was not deleted: " + fullBundleFile.toString());
+        }
+
+        // update metadata's environmentIncluded property to true for full bundle
+        Object bundleMetadata = jsonFileUtils.readBundleMetadataFile(bundleFolderPath, bundleEnvironmentValues.getLeft());
+        if (((Map) bundleMetadata) != null) {
+            ((Map) bundleMetadata).put("environmentIncluded", true);
+            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleEnvironmentValues.getLeft(), new File(bundleFolderPath));
         }
     }
 
@@ -110,8 +123,10 @@ public class FullBundleCreator {
                                                               String bundleFileName,
                                                               boolean detemplatizeDeploymentBundles) {
         final Map<String, String> environmentProperties = bundleEnvironmentValues.getRight();
-        final List<File> deploymentBundles = collectFiles(bundleFolderPath, bundleEnvironmentValues.getLeft() + BUNDLE_EXTENSION);
-        final List<File> deploymentDeleteBundle = collectFiles(bundleFolderPath, bundleEnvironmentValues.getLeft() + DELETE_BUNDLE_EXTENSION);
+        final List<File> deploymentBundles = collectFiles(bundleFolderPath,
+                bundleEnvironmentValues.getLeft() + "-policy" + INSTALL_BUNDLE_EXTENSION);
+        final List<File> deploymentDeleteBundle = collectFiles(bundleFolderPath,
+                bundleEnvironmentValues.getLeft() + "-policy" + DELETE_BUNDLE_EXTENSION);
         final List<File> bundleFiles = union(deploymentBundles, dependentBundles);
 
         // load all deployment bundles to strings
@@ -128,7 +143,7 @@ public class FullBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
-                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", "");
+                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(bundleFileName, EMPTY, EMPTY));
         Element bundleElement = createFullBundleElement(bundleElements, templatizedBundles, document);
         Element deleteBundleElement = createDeleteBundleElement(bundleElements, deploymentDeleteBundle, dependentBundles, document);
 

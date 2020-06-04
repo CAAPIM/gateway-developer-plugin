@@ -7,11 +7,13 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.BundleFileBuilder;
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -28,6 +30,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.util.*;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.BUNDLE_TYPE_ALL;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilderTestHelper.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
@@ -43,6 +46,8 @@ public class BundleMetadataBuilderTest {
     EntityLoaderRegistry entityLoaderRegistry;
     @Mock
     BundleCache bundleCache;
+
+    private static final ProjectInfo projectInfo = new ProjectInfo("my-bundle", "my-bundle-group", "1.0");
 
     @Test
     public void testAnnotatedEncassBundleFileNames(final TemporaryFolder temporaryFolder) {
@@ -62,18 +67,18 @@ public class BundleMetadataBuilderTest {
 
         File bundleOutput = temporaryFolder.createDirectory("output");
         try {
-            bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), bundleOutput, dummyList,
-                    "my-bundle", "my-bundle-group", "1.0");
+            bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), bundleOutput, dummyList, projectInfo);
 
             assertTrue(bundleOutput.exists());
             assertEquals(3, bundleOutput.listFiles().length);
             for (File generatedFile : bundleOutput.listFiles()) {
 
                 if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
-                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + DELETE_BUNDLE_EXTENSION,
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0-policy" + DELETE_BUNDLE_EXTENSION,
                             generatedFile.getName());
-                } else if (StringUtils.endsWith(generatedFile.getName(), BUNDLE_EXTENSION)) {
-                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + BUNDLE_EXTENSION, generatedFile.getName());
+                } else if (StringUtils.endsWith(generatedFile.getName(), INSTALL_BUNDLE_EXTENSION)) {
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0-policy" + INSTALL_BUNDLE_EXTENSION,
+                            generatedFile.getName());
                 } else {
                     assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + METADATA_FILE_NAME_SUFFIX,
                             generatedFile.getName());
@@ -94,18 +99,18 @@ public class BundleMetadataBuilderTest {
 
         bundleOutput = temporaryFolder.createDirectory("output");
         try {
-            bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), bundleOutput, dummyList, "my-bundle",
-                    "my-bundle-group", "1.0");
+            bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), bundleOutput, dummyList, projectInfo);
 
             bundleOutput = new File(temporaryFolder.getRoot(), "output");
             assertTrue(bundleOutput.exists());
             assertEquals(3, bundleOutput.listFiles().length);
             for (File generatedFile : bundleOutput.listFiles()) {
-                if (StringUtils.endsWith(generatedFile.getName(), ".delete.bundle")) {
-                    assertEquals("my-bundle-" + encass.getName() + "-1.0" + DELETE_BUNDLE_EXTENSION,
+                if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0-policy" + DELETE_BUNDLE_EXTENSION,
                             generatedFile.getName());
-                } else if (StringUtils.endsWith(generatedFile.getName(), ".bundle")) {
-                    assertEquals("my-bundle-" + encass.getName() + "-1.0" + BUNDLE_EXTENSION, generatedFile.getName());
+                } else if (StringUtils.endsWith(generatedFile.getName(), INSTALL_BUNDLE_EXTENSION)) {
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0-policy" + INSTALL_BUNDLE_EXTENSION,
+                            generatedFile.getName());
                 } else {
                     assertEquals("my-bundle-" + encass.getName() + "-1.0" + METADATA_FILE_NAME_SUFFIX,
                             generatedFile.getName());
@@ -122,14 +127,19 @@ public class BundleMetadataBuilderTest {
 
         Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
+        String metadataId = ID_GENERATOR.generate();
+        encass.getAnnotations().stream()
+                .filter(a -> AnnotationConstants.ANNOTATION_TYPE_BUNDLE.equals(a.getType()))
+                .findFirst().get().setId(metadataId);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
+        assertEquals(metadataId, metadata.getId());
         assertEquals(TEST_ENCASS_ANNOTATION_NAME, metadata.getName());
         assertEquals(TEST_ENCASS_ANNOTATION_DESC, metadata.getDescription());
         assertEquals(TEST_ENCASS_ANNOTATION_TAGS, metadata.getTags());
@@ -143,11 +153,12 @@ public class BundleMetadataBuilderTest {
      */
     @Test
     public void testAnnotatedEncassMetadata_ExcludingOptionalAnnotationFields() throws JsonProcessingException {
-        BundleEntityBuilder builder = createBundleEntityBuilder();
+                BundleEntityBuilder builder = createBundleEntityBuilder();
 
         Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, true);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, true);
         encass.getAnnotations().forEach(a -> {
+            a.setId(null);
             a.setName(null);
             a.setDescription(null);
             a.setTags(Collections.emptySet());
@@ -155,11 +166,13 @@ public class BundleMetadataBuilderTest {
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get("my-bundle-" + encass.getName() + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
+        assertNotNull(metadata.getId());
+        assertNotSame(metadata.getId(), metadata.getDefinedEntities().iterator().next().getId());
         assertEquals("my-bundle-" + encass.getName(), metadata.getName());
         assertEquals(encass.getProperties().get("description"), metadata.getDescription());
         assertEquals(0, metadata.getTags().size());
@@ -176,13 +189,56 @@ public class BundleMetadataBuilderTest {
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
-                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), "my-bundle", "my-bundle-group", "1.0");
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), new ProjectInfo("my-bundle", "my-bundle-group", "1.0"));
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
         assertEquals(TEST_ENCASS_ANNOTATION_NAME, metadata.getName());
         assertFalse(metadata.isHasRouting());
+    }
+
+    @Test
+    public void testUnAnnotatedBundleMetadata() throws JsonProcessingException {
+        BundleEntityBuilder builder = createBundleEntityBuilder();
+        // create un-annotated bundle
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, false, false);
+        // create encass with the empty set of annotations and add it to the bundle
+        Encass encass = buildTestEncassWithAnnotation(TEST_ENCASS, TEST_ENCASS_ID, TEST_GUID, TEST_ENCASS_POLICY, Collections.emptySet());
+        bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        BundleMetadata metadata = bundles.get(projectInfo.getName() + "-1.0").getBundleMetadata();
+        assertNotNull(metadata);
+        assertEquals(projectInfo.getName(), metadata.getName());
+        assertEquals(projectInfo.getGroupName(), metadata.getGroupName());
+        assertEquals(BUNDLE_TYPE_ALL, metadata.getType());
+        assertEquals(StringUtils.EMPTY, metadata.getDescription());
+        assertEquals(Collections.emptyList(), metadata.getTags());
+        assertTrue(metadata.isReusable());
+        assertTrue(metadata.isRedeployable());
+
+        Collection<Metadata> definedEntities = metadata.getDefinedEntities();
+        assertEquals(2, definedEntities.size());
+        definedEntities.stream().forEach(definedEntityData -> {
+            switch (definedEntityData.getType()) {
+                case EntityTypes.ENCAPSULATED_ASSERTION_TYPE:
+                    assertEquals(TEST_ENCASS, definedEntityData.getName());
+                    assertEquals(TEST_ENCASS_ID, definedEntityData.getId());
+                    assertEquals(TEST_GUID, definedEntityData.getGuid());
+                    break;
+                case EntityTypes.POLICY_TYPE:
+                    assertEquals(TEST_ENCASS_POLICY, definedEntityData.getName());
+                    assertEquals(TEST_POLICY_ID, definedEntityData.getId());
+                    assertEquals(TEST_GUID, definedEntityData.getGuid());
+                    break;
+                default:
+                    break;
+            }
+        });
     }
 
     private void deleteDirectory(File directory) {

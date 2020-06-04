@@ -142,7 +142,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
         serviceElement.appendChild(resourcesElement);
         return EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, servicePath, id,
-                serviceElement, false);
+                serviceElement, false, service);
     }
 
     private Element buildServiceMappings(Service service, Document document) {

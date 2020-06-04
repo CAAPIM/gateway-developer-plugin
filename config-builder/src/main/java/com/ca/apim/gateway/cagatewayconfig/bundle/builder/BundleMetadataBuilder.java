@@ -6,7 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.apache.commons.lang3.StringUtils;
@@ -23,10 +25,11 @@ import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstant
 
 @Singleton
 public class BundleMetadataBuilder {
+
     private final IdGenerator idGenerator;
 
     @Inject
-    BundleMetadataBuilder (IdGenerator idGenerator) {
+    public BundleMetadataBuilder(final IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
     }
 
@@ -35,49 +38,46 @@ public class BundleMetadataBuilder {
      *
      * @param annotatedBundle   Annotated Bundle for which bundle is being created.
      * @param dependentEntities Dependent Entities of the annotated bundle or all the entities of full bundle
-     * @param projectName       Gradle Project name
-     * @param projectGroupName  Gradle Project Group name
-     * @param projectVersion    Gradle Project version
+     * @param projectInfo       Gradle Project info containing Gradle project name, groupName and version
      * @return Full bundle or Annotated bundle metadata
      */
-    public BundleMetadata build(final AnnotatedBundle annotatedBundle,
-                                final List<Entity> dependentEntities, final String projectName,
-                                final String projectGroupName, final String projectVersion) {
+    public BundleMetadata build(final AnnotatedBundle annotatedBundle, final List<Entity> dependentEntities,
+                                ProjectInfo projectInfo) {
         if (annotatedBundle != null && annotatedBundle.getAnnotatedEntity() != null) {
-            final Encass encass = (Encass) annotatedBundle.getAnnotatedEntity().getEntity();
+            AnnotatedEntity<? extends GatewayEntity> annotatedEntity = annotatedBundle.getAnnotatedEntity();
+            final Encass encass = (Encass) annotatedEntity.getEntity();
             final String bundleName = annotatedBundle.getBundleName();
-            final String name = bundleName.substring(0, bundleName.indexOf(projectVersion) - 1);
+            final String name = bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
+            final String metadataId = StringUtils.isBlank(annotatedEntity.getMetadataId()) ? idGenerator.generate() :
+                    annotatedEntity.getMetadataId();
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), encass.getGuid(), name,
-                    projectGroupName, projectVersion);
-            builder.description(annotatedBundle.getAnnotatedEntity().getDescription());
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), metadataId, name,
+                    projectInfo.getGroupName(), projectInfo.getVersion());
+            builder.description(annotatedEntity.getDescription());
             builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
-            builder.tags(annotatedBundle.getAnnotatedEntity().getTags());
-            builder.reusableAndRedeployable(true, annotatedBundle.getAnnotatedEntity().isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
+            builder.tags(annotatedEntity.getTags());
+            builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
-            final List<Metadata> desiredEntities = new ArrayList<>();
-            desiredEntities.add(annotatedBundle.getAnnotatedEntity().getEntity().getMetadata());
+            final List<Metadata> definedEntities = new ArrayList<>();
+            definedEntities.add(annotatedEntity.getEntity().getMetadata());
 
-            return builder.definedEntities(desiredEntities).build();
+            return builder.definedEntities(definedEntities).build();
         } else {
-            return buildFullBundleMetadata(dependentEntities, projectName, projectGroupName, projectVersion);
+            return buildFullBundleMetadata(dependentEntities, projectInfo);
         }
     }
 
     /**
      * Builds bundle metadata for full bundle (all entities)
      *
-     * @param entities          All the entities of full bundle
-     * @param projectName       Gradle Project name
-     * @param projectGroupName  Gradle Project Group name
-     * @param projectVersion    Gradle Project version
+     * @param entities      All the entities of full bundle
+     * @param projectInfo   Gradle Project info containing Gradle project name, groupName and version
      * @return Full bundle metadata
      */
-    private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final String projectName,
-                                                   final String projectGroupName, final String projectVersion) {
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, idGenerator.generate(), projectName,
-                projectGroupName, projectVersion);
+    private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, ProjectInfo projectInfo) {
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, idGenerator.generate(),
+                projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
         builder.reusableAndRedeployable(true, true);
@@ -95,7 +95,7 @@ public class BundleMetadataBuilder {
 
     private Collection<Metadata> getDefinedEntitiesMetadata(final List<Entity> definedEntities) {
         return definedEntities.stream().filter(FILTER_NON_ENV_ENTITIES_EXCLUDING_FOLDER)
-                .map(Entity::getMetadata).collect(Collectors.toList());
+                .map(e -> ((GatewayEntity)e.getGatewayEntity()).getMetadata()).collect(Collectors.toList());
     }
 
     private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {

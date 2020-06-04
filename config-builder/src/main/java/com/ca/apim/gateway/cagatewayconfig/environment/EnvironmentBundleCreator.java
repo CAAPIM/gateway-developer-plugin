@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleArtifacts;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
@@ -29,6 +30,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static java.util.stream.Collectors.toList;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Singleton
 public class EnvironmentBundleCreator {
@@ -53,7 +55,7 @@ public class EnvironmentBundleCreator {
                                           String templatizedBundleFolderPath,
                                           String environmentConfigurationFolderPath,
                                           EnvironmentBundleCreationMode mode,
-                                          String bundleFileName,
+                                          String envInstallBundleFilename,
                                           String policyBundleName) {
         Bundle environmentBundle = new Bundle();
         environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, mode);
@@ -69,15 +71,14 @@ public class EnvironmentBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
+        // Passing Bundle name and version string with config env name (<name>-<version>-*env.install.bundle) as project name
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
-                EntityBuilder.BundleType.ENVIRONMENT, document, bundleFileName, "", null);
-        for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
-            String bundleName = entry.getKey();
-            int index = bundleName.lastIndexOf(BUNDLE_EXTENSION);
-            documentFileUtils.createFile(entry.getValue().getBundle(), new File(bundleFolderPath,
-                    bundleName).toPath());
-            documentFileUtils.createFile(entry.getValue().getDeleteBundle(), new File(bundleFolderPath,
-                    bundleName.substring(0, index)+ DELETE_BUNDLE_EXTENSION).toPath());
+                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(envInstallBundleFilename, EMPTY, EMPTY));
+        for (BundleArtifacts bundleArtifacts : bundleElements.values()) {
+            documentFileUtils.createFile(bundleArtifacts.getBundle(), new File(bundleFolderPath,
+                    bundleArtifacts.getBundleFileName()).toPath());
+            documentFileUtils.createFile(bundleArtifacts.getDeleteBundle(), new File(bundleFolderPath,
+                    bundleArtifacts.getDeleteBundleFileName()).toPath());
         }
         return environmentBundle;
     }
@@ -85,7 +86,7 @@ public class EnvironmentBundleCreator {
     private List<TemplatizedBundle> collectTemplatizedBundleFiles(String templatizedBundleFolderPath,
                                                                   EnvironmentBundleCreationMode mode,
                                                                   String policyBundleName, String bundleFolderPath) {
-        final String extension = mode != PLUGIN ? BUNDLE_EXTENSION : policyBundleName + BUNDLE_EXTENSION;
+        final String extension = mode != PLUGIN ? BUNDLE_EXTENSION : policyBundleName + "-policy" + INSTALL_BUNDLE_EXTENSION;
         return collectFiles(templatizedBundleFolderPath, extension).stream()
                 .filter(file -> !StringUtils.endsWithIgnoreCase(file.getName(), DELETE_BUNDLE_EXTENSION))
                 .map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName())))

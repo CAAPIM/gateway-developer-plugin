@@ -12,14 +12,16 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Collection;
 import java.util.LinkedList;
 
-@JsonPropertyOrder({"id", "name", "groupName", "version", "type", "tags", "description", "reusable", "redeployable",
-        "hasRouting", "environmentIncluded", "definedEntities", "environmentEntities", "dependencies"})
+@JsonPropertyOrder({"metaVersion", "id", "name", "groupName", "version", "type", "tags", "description", "reusable",
+        "redeployable", "hasRouting", "environmentIncluded", "definedEntities", "environmentEntities", "dependencies"})
 public class BundleMetadata implements Metadata {
-    private String type;
-    private String name;
-    private String id;
-    private String version;
-    private String groupName;
+    @SuppressWarnings({"unused", "java:S1170"}) // Suppress IntelliJ warnings for this field
+    private final String metaVersion = "1.0";
+    private final String type;
+    private final String name;
+    private final String id;
+    private final String version;
+    private final String groupName;
     private String description;
     private Collection<Metadata> definedEntities;
     private Collection<String> tags;
@@ -35,6 +37,10 @@ public class BundleMetadata implements Metadata {
         this.name = name;
         this.groupName = groupName;
         this.version = version;
+    }
+
+    public String getMetaVersion() {
+        return metaVersion;
     }
 
     @Override

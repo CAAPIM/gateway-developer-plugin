@@ -136,7 +136,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         return project.getTasks().create("package-gw7", PackageTask.class, t -> {
             t.dependsOn(buildDeploymentBundleTask);
             t.getInto().set(new DefaultProvider<RegularFile>(() -> () -> new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), getBuiltArtifactName(project, EMPTY,"gw7"))));
-            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, EMPTY, BUNDLE_FILE_EXTENSION))));
+            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, "-policy.install", BUNDLE_FILE_EXTENSION))));
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getContainerApplicationDependencies().setFrom(project.getConfigurations().getByName(ENV_APPLICATION_CONFIGURATION));
             t.getDependencyModularAssertions().setFrom(project.getConfigurations().getByName(MODULAR_ASSERTION_CONFIGURATION));
@@ -160,11 +160,11 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         final String artifactName = getBuiltArtifactName(project, "-env.install", BUNDLE_FILE_EXTENSION);
         if (project.getGradle().getStartParameter().getTaskNames().contains(BUILD_ENVIRONMENT_BUNDLE)) {
             project.artifacts(artifactHandler -> addBundleArtifact(
-                artifactHandler,
-                pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> artifactName)),
-                buildEnvironmentBundleTask,
-                project::getName,
-                "environment"));
+                    artifactHandler,
+                    pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> artifactName)),
+                    buildEnvironmentBundleTask,
+                    project::getName,
+                    "environment"));
         }
         // add the full bundle to the artifacts only if the full bundle task was triggered
         final String fullBundleArtifactName = getBuiltArtifactName(project,  "-full.install", BUNDLE_FILE_EXTENSION);

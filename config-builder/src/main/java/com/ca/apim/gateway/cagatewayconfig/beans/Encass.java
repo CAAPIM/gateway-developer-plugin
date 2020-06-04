@@ -13,7 +13,6 @@ import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -199,8 +198,13 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
         this.annotatedEntity = annotatedEntity;
     }
 
+    @Override
     public String getType() {
+        return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
+    }
+    
+    @Override
+    public String getShortenedType() {
         return "encass";
     }
-
 }

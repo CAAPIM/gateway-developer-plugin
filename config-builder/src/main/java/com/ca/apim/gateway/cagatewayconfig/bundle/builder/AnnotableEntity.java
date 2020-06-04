@@ -28,7 +28,17 @@ public interface AnnotableEntity {
      *
      * @return String
      */
+    @JsonIgnore
     String getType();
+
+    /**
+     * Returns short name of Entity Type. For example, for ENCAPSUPATED_ASSERTION it returns "encass", for POLICY
+     * it returns "policy", and for SERVICE it returns "service"
+     *
+     * @return Shortened type
+     */
+    @JsonIgnore
+    String getShortenedType();
 
     /**
 
@@ -51,6 +61,7 @@ public interface AnnotableEntity {
             AnnotatedEntity<GatewayEntity> annotatedEntity = new AnnotatedEntity(this);
             annotations.forEach(annotation -> {
                 if (ANNOTATION_TYPE_BUNDLE.equalsIgnoreCase(annotation.getType())) {
+                    annotatedEntity.setMetadataId(annotation.getId());
                     annotatedEntity.setTags(annotation.getTags());
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
                     annotatedEntity.setBundleName(annotation.getName());

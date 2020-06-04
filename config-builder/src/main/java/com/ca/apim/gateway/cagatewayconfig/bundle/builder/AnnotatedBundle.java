@@ -1,5 +1,6 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -8,12 +9,13 @@ import org.apache.commons.lang3.StringUtils;
 public class AnnotatedBundle extends Bundle {
     private Bundle fullBundle;
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
-    private String projectName;
-    private String projectVersion;
+    private ProjectInfo projectInfo;
 
-    public AnnotatedBundle(Bundle fullBundle, AnnotatedEntity<? extends GatewayEntity> annotatedEntity) {
+    public AnnotatedBundle(Bundle fullBundle, AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
+                           ProjectInfo projectInfo) {
         this.fullBundle = fullBundle;
         this.annotatedEntity = annotatedEntity;
+        this.projectInfo = projectInfo;
     }
 
     public AnnotatedEntity<? extends GatewayEntity> getAnnotatedEntity() {
@@ -32,37 +34,21 @@ public class AnnotatedBundle extends Bundle {
         this.fullBundle = fullBundle;
     }
 
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
-    public String getProjectVersion() {
-        return projectVersion;
-    }
-
-    public void setProjectVersion(String projectVersion) {
-        this.projectVersion = projectVersion;
-    }
-
     public String getBundleName() {
         if (StringUtils.isBlank(annotatedEntity.getBundleName())) {
-            return projectName + "-" + annotatedEntity.getEntityName() + "-" + projectVersion;
+            return projectInfo.getName() + "-" + annotatedEntity.getEntityName() + "-" + projectInfo.getVersion();
         } else {
-            return annotatedEntity.getBundleName() + "-" + projectVersion;
+            return annotatedEntity.getBundleName() + "-" + projectInfo.getVersion();
         }
     }
 
     public String getUniquePrefix() {
         AnnotableEntity annotableEntity = (AnnotableEntity) annotatedEntity.getEntity();
-        return projectName + "-" + annotableEntity.getType() + "-" + PathUtils.extractName(annotatedEntity.getEntityName()) + "-";
+        return projectInfo.getName() + "-" + annotableEntity.getShortenedType() + "-" + PathUtils.extractName(annotatedEntity.getEntityName()) + "-";
     }
 
     public String getUniqueSuffix() {
-        return "-" + projectVersion;
+        return "-" + projectInfo.getVersion();
     }
 
 }
