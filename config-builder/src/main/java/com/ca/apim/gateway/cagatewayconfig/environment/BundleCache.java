@@ -5,6 +5,7 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 
 import javax.inject.Inject;
@@ -16,9 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class BundleCache {
     private final Map<String, Bundle> cache = new ConcurrentHashMap<>();
-    private final Map<String, BundleDefinedEntities> metaDataCache = new ConcurrentHashMap<>();
     private final EntityBundleLoader entityBundleLoader;
-    private final JsonFileUtils jsonFileUtils = JsonFileUtils.INSTANCE;
 
     @Inject
     public BundleCache(final EntityBundleLoader entityBundleLoader) {
@@ -45,13 +44,13 @@ public class BundleCache {
         return cache.get(file.getPath());
     }
 
-    public BundleDefinedEntities getBundleMetadataFromFile(File file) {
-        if (!metaDataCache.containsValue(file.getPath())) {
-            BundleDefinedEntities bundleDefinedEntities = jsonFileUtils.readBundleMetadataFile(file);
-            if (bundleDefinedEntities != null) {
-                metaDataCache.put(file.getPath(), bundleDefinedEntities);
+    public Bundle getBundleFromMetadataFile(File file) {
+        if (!cache.containsValue(file.getPath())) {
+            Bundle bundle = entityBundleLoader.loadMetadata(file, BundleLoadingOperation.EXPORT);
+            if (bundle != null) {
+                cache.put(file.getPath(), bundle);
             }
         }
-        return metaDataCache.get(file.getPath());
+        return cache.get(file.getPath());
     }
 }

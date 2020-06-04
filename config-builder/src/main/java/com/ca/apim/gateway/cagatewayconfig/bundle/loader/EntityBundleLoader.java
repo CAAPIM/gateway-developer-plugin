@@ -6,7 +6,13 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
@@ -17,7 +23,7 @@ import org.w3c.dom.NodeList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +39,7 @@ public class EntityBundleLoader {
 
     private final DocumentTools documentTools;
     private final BundleEntityLoaderRegistry entityLoaderRegistry;
+    private final JsonFileUtils jsonFileUtils = JsonFileUtils.INSTANCE;
 
     @Inject
     EntityBundleLoader(final DocumentTools documentTools, final BundleEntityLoaderRegistry entityLoaderRegistry) {
@@ -52,6 +59,49 @@ public class EntityBundleLoader {
         loadBundleFile(dependencyBundlePath, bundle, loadingMode, entityTypes);
 
         return bundle;
+    }
+
+    public Bundle loadMetadata(File dependencyMetadataPath, BundleLoadingOperation loadingMode) {
+        final Bundle bundle = new Bundle();
+        bundle.setLoadingMode(loadingMode);
+        BundleDefinedEntities bundleDefinedEntities = jsonFileUtils.readBundleMetadataFile(dependencyMetadataPath);
+        Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleDefinedEntities.getDefinedEntities();
+        if (metadataCollection != null) {
+            metadataCollection.forEach(metadata -> {
+                if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(metadata.getType())) {
+                    Encass encass = getEncassFromMetadata(metadata);
+                    Map<String, Encass> encassMap = bundle.getEncasses();
+                    encassMap.put(encass.getName(), encass);
+                } else if (EntityTypes.POLICY_TYPE.equals(metadata.getType())) {
+                    Policy policy = getPolicyFromMetadata(metadata);
+                    Map<String, Policy> policyMap = bundle.getPolicies();
+                    policyMap.put(metadata.getName(), policy);
+                }
+            });
+        }
+        return bundle;
+    }
+
+    private static Policy getPolicyFromMetadata(final Metadata metadata) {
+        Policy policy = new Policy();
+        policy.setName(metadata.getName());
+        policy.setId(metadata.getId());
+        policy.setGuid(metadata.getGuid());
+        Set<Annotation> annotations = new HashSet<>();
+        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
+        policy.setAnnotations(annotations);
+        return policy;
+    }
+
+    private Encass getEncassFromMetadata(final Metadata metadata) {
+        Encass encass = new Encass();
+        encass.setName(metadata.getName());
+        encass.setId(metadata.getId());
+        encass.setGuid(metadata.getGuid());
+        Set<Annotation> annotations = new HashSet<>();
+        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
+        encass.setAnnotations(annotations);
+        return encass;
     }
 
     private void loadBundleFile(File dependencyBundlePath, Bundle bundle, BundleLoadingOperation loadingMode, String... entityTypes) {

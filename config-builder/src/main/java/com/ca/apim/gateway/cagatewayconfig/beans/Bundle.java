@@ -31,7 +31,15 @@ public class Bundle {
     private FolderTree folderTree;
     private Map<Dependency, List<Dependency>> dependencyMap;
     private BundleLoadingOperation loadingMode;
-    private Set<BundleDefinedEntities> metadataDependencyBundles;
+    private DependentBundle dependentBundle;
+
+    public DependentBundle getDependentBundle() {
+        return dependentBundle;
+    }
+
+    public void setDependentBundle(DependentBundle dependentBundle) {
+        this.dependentBundle = dependentBundle;
+    }
 
     @SuppressWarnings("unchecked")
     public <E extends GatewayEntity> Map<String, E> getEntities(Class<E> entityType) {
@@ -257,11 +265,4 @@ public class Bundle {
         this.loadingMode = loadingMode;
     }
 
-    public Set<BundleDefinedEntities> getMetadataDependencyBundles() {
-        return metadataDependencyBundles;
-    }
-
-    public void setMetadataDependencyBundles(Set<BundleDefinedEntities> metadataDependencyBundles) {
-        this.metadataDependencyBundles = metadataDependencyBundles;
-    }
 }

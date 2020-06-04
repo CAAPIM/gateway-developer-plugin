@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.DependentBundle;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -30,6 +31,7 @@ public class BundleMetadata implements Metadata {
     private boolean hasRouting;
     private boolean environmentIncluded;
     private Collection<Metadata> environmentEntities;
+    private Collection<DependentBundle> dependencies;
 
     private BundleMetadata(String type, String id, String name, String groupName, String version) {
         this.id = id;
@@ -101,6 +103,10 @@ public class BundleMetadata implements Metadata {
         return environmentEntities;
     }
 
+    public Collection<DependentBundle> getDependencies() {
+        return dependencies;
+    }
+
     public static class Builder {
         private final String id;
         private final String name;
@@ -115,7 +121,7 @@ public class BundleMetadata implements Metadata {
         private Collection<String> tags;
         private Collection<Metadata> definedEntities = new LinkedList<>();
         private Collection<Metadata> environmentEntities = new LinkedList<>();
-        private Collection<Metadata> dependencies = new LinkedList<>();
+        private Collection<DependentBundle> dependencies = new LinkedList<>();
 
         public Builder(String type, String id, String name, String groupName, String version) {
             this.id = id;
@@ -134,6 +140,12 @@ public class BundleMetadata implements Metadata {
         public Builder environmentEntities(final Collection<Metadata> environmentEntities) {
             this.environmentEntities.clear();
             this.environmentEntities.addAll(environmentEntities);
+            return this;
+        }
+
+        public Builder dependencies(final Collection<DependentBundle> dependencies) {
+            this.dependencies.clear();
+            this.dependencies.addAll(dependencies);
             return this;
         }
 
@@ -173,6 +185,7 @@ public class BundleMetadata implements Metadata {
             bundleMetadata.environmentIncluded = environmentIncluded;
             bundleMetadata.tags = tags;
             bundleMetadata.environmentEntities = environmentEntities;
+            bundleMetadata.dependencies = dependencies;
             return bundleMetadata;
         }
     }
