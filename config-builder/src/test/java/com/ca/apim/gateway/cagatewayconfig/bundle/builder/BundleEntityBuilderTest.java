@@ -123,8 +123,8 @@ class BundleEntityBuilderTest {
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
 
-        buildAndValidateAnnotatedBundle(bundle, entityBuilders, "my-bundle#TestEncass#" + TEST_ENCASS_POLICY , NEW_OR_UPDATE, TEST_ENCASS, NEW_OR_EXISTING,
-                TEST_DEP_ENCASS_POLICY, NEW_OR_EXISTING, "my-bundle#TestEncass#" + TEST_DEP_ENCASS , NEW_OR_UPDATE);
+        buildAndValidateAnnotatedBundle(bundle, entityBuilders, TEST_ENCASS_POLICY, NEW_OR_EXISTING, TEST_ENCASS, NEW_OR_EXISTING,
+                TEST_DEP_ENCASS_POLICY, NEW_OR_EXISTING, TEST_DEP_ENCASS, NEW_OR_EXISTING);
     }
 
     @Test
@@ -175,7 +175,7 @@ class BundleEntityBuilderTest {
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
 
-        buildAndValidateAnnotatedBundle(bundle, entityBuilders, "my-bundle#TestEncass#" + TEST_ENCASS_POLICY , NEW_OR_UPDATE, TEST_ENCASS, NEW_OR_UPDATE,
+        buildAndValidateAnnotatedBundle(bundle, entityBuilders, TEST_ENCASS_POLICY, NEW_OR_UPDATE, TEST_ENCASS, NEW_OR_UPDATE,
                 TEST_DEP_ENCASS_POLICY, NEW_OR_UPDATE, TEST_DEP_ENCASS, NEW_OR_UPDATE);
 
     }
