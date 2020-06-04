@@ -13,6 +13,7 @@ public class PolicyXMLElements {
 
     public static final String GOID_VALUE = "goidValue";
     public static final String STRING_VALUE = "stringValue";
+    public static final String GOID_ARRAY_VALUE = "goidArrayValue";
     public static final String INCLUDE = "L7p:Include";
     public static final String ENCAPSULATED = "L7p:Encapsulated";
     public static final String SET_VARIABLE = "L7p:SetVariable";

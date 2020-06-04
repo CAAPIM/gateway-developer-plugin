@@ -50,9 +50,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
 
-    public static final String STRING_VALUE = "stringValue";
-    private static final String GOID_VALUE = "goidValue";
-    private static final String GOID_ARRAY_VALUE = "goidArrayValue";
+    static final String STRING_VALUE = "stringValue";
     static final String BOOLEAN_VALUE = "booleanValue";
     static final String POLICY_PATH = "policyPath";
     static final String ENCASS_NAME = "encassName";
