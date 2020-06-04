@@ -7,7 +7,12 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +27,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.ITEM;
@@ -76,7 +84,7 @@ class EntityBundleLoaderTest {
 
         when(documentTools.parse(any(File.class))).thenReturn(mockDocument);
 
-        EntityBundleLoader loader = new EntityBundleLoader(documentTools, registry);
+        EntityBundleLoader loader = new EntityBundleLoader(documentTools, registry, JsonFileUtils.INSTANCE);
         final Bundle bundle = loader.load(mock(File.class), BundleLoadingOperation.EXPORT);
 
         assertNotNull(bundle);
@@ -87,9 +95,47 @@ class EntityBundleLoaderTest {
     }
 
     @Test
+    public void testLoadMetadataForEncass(){
+        JsonFileUtils jsonFileUtils = mock(JsonFileUtils.class);
+        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
+        BundleDefinedEntities.DefaultMetadata encassMetadata =  new BundleDefinedEntities.DefaultMetadata();
+        encassMetadata.setName("TestEncass");
+        encassMetadata.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        encassMetadata.setId("testId");
+        encassMetadata.setGuid("testGuid");
+        metadataSet.add(encassMetadata);
+        BundleDefinedEntities bundleDefinedEntities = new BundleDefinedEntities();
+        bundleDefinedEntities.setDefinedEntities(metadataSet);
+        when(jsonFileUtils.readBundleMetadataFile(any(File.class))).thenReturn(bundleDefinedEntities);
+        EntityBundleLoader loader = new EntityBundleLoader(documentTools, registry, jsonFileUtils);
+        Bundle bundle = loader.loadMetadata(mock(File.class), BundleLoadingOperation.EXPORT);
+        Map<String, Encass> encassMap = bundle.getEncasses();
+        assertNotNull(encassMap.get("TestEncass"));
+    }
+
+    @Test
+    public void testLoadMetadataForPolicy(){
+        JsonFileUtils jsonFileUtils = mock(JsonFileUtils.class);
+        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
+        BundleDefinedEntities.DefaultMetadata policyMetadata =  new BundleDefinedEntities.DefaultMetadata();
+        policyMetadata.setName("TestPolicy");
+        policyMetadata.setType(EntityTypes.POLICY_TYPE);
+        policyMetadata.setId("testId");
+        policyMetadata.setGuid("testGuid");
+        metadataSet.add(policyMetadata);
+        BundleDefinedEntities bundleDefinedEntities = new BundleDefinedEntities();
+        bundleDefinedEntities.setDefinedEntities(metadataSet);
+        when(jsonFileUtils.readBundleMetadataFile(any(File.class))).thenReturn(bundleDefinedEntities);
+        EntityBundleLoader loader = new EntityBundleLoader(documentTools, registry, jsonFileUtils);
+        Bundle bundle = loader.loadMetadata(mock(File.class), BundleLoadingOperation.EXPORT);
+        Map<String, Policy> policyMap = bundle.getPolicies();
+        assertNotNull(policyMap.get("TestPolicy"));
+    }
+
+    @Test
     void tryLoadParseException() throws DocumentParseException {
         when(documentTools.parse(any(File.class))).thenThrow(DocumentParseException.class);
-        assertThrows(BundleLoadException.class, () -> new EntityBundleLoader(documentTools, registry).load(mock(File.class), BundleLoadingOperation.EXPORT));
+        assertThrows(BundleLoadException.class, () -> new EntityBundleLoader(documentTools, registry, JsonFileUtils.INSTANCE).load(mock(File.class), BundleLoadingOperation.EXPORT));
     }
 
 }

@@ -17,6 +17,7 @@ import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,7 +92,24 @@ class BundleFileBuilderTest {
 
         List<DependentBundle> dummyList = new ArrayList<>();
         dummyList.add(new DependentBundle(new File("test.bundle")));
-        when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
+        Bundle dependencyBundle = new Bundle();
+        when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(dependencyBundle);
+
+        BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils,
+                jsonFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache));
+        bundleFileBuilder.buildBundle(new File("input"), new File("output"), dummyList, projectInfo);
+        Assert.assertNotNull(dependencyBundle.getDependentBundle());
+    }
+
+    @Test
+    void buildBundleWithDependencyFromMetadata() {
+        Policy policy = new Policy();
+        policy.setName("from-file");
+        when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
+
+        List<DependentBundle> dummyList = new ArrayList<>();
+        dummyList.add(new DependentBundle(new File("test.metadata.yml")));
+        when(bundleCache.getBundleFromMetadataFile(any(File.class))).thenReturn(new Bundle());
 
         BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils,
                 jsonFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache));

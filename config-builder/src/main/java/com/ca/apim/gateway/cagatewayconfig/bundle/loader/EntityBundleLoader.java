@@ -39,12 +39,13 @@ public class EntityBundleLoader {
 
     private final DocumentTools documentTools;
     private final BundleEntityLoaderRegistry entityLoaderRegistry;
-    private final JsonFileUtils jsonFileUtils = JsonFileUtils.INSTANCE;
+    private final JsonFileUtils jsonFileUtils;
 
     @Inject
-    EntityBundleLoader(final DocumentTools documentTools, final BundleEntityLoaderRegistry entityLoaderRegistry) {
+    EntityBundleLoader(final DocumentTools documentTools, final BundleEntityLoaderRegistry entityLoaderRegistry, final JsonFileUtils jsonFileUtils) {
         this.documentTools = documentTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
+        this.jsonFileUtils = jsonFileUtils;
     }
 
     public Bundle load(List<File> fileSet, BundleLoadingOperation loadingMode, String... entityTypes) {
