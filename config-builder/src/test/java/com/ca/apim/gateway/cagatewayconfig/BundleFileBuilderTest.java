@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.DependentBundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
@@ -88,8 +89,8 @@ class BundleFileBuilderTest {
         policy.setName("from-file");
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
-        List<File> dummyList = new ArrayList<>();
-        dummyList.add(new File("test.bundle"));
+        List<DependentBundle> dummyList = new ArrayList<>();
+        dummyList.add(new DependentBundle(new File("test.bundle")));
         when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
 
         BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils,

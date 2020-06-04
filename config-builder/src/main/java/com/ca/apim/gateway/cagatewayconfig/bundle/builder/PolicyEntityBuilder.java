@@ -292,7 +292,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                     }
                     //add dependent bundle if bundle type is not null
                     DependentBundle dependentBundle = b.getDependentBundle();
-                    if (dependentBundle != null && dependentBundle.getType() != null) {
+                    if (dependentBundle != null && dependentBundle.getType() != null && annotatedBundle != null) {
                         annotatedBundle.addDependentBundle(dependentBundle);
                     }
                 }
@@ -421,7 +421,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                     }
                     //add dependent bundle if bundle type is not null
                     DependentBundle dependentBundle = b.getDependentBundle();
-                    if (dependentBundle != null && dependentBundle.getType() != null) {
+                    if (dependentBundle != null && dependentBundle.getType() != null && annotatedBundle != null) {
                         annotatedBundle.addDependentBundle(dependentBundle);
                     }
                 }

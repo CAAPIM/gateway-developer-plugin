@@ -13,8 +13,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -91,19 +89,22 @@ public class EncassEntityBuilder implements EntityBuilder {
         final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyWithPath));
         if (includedPolicy.get() == null) {
             //check policy dependency in bundle dependencies
-            bundle.getDependencies().forEach(b -> {
-                Policy policyFromDependencies = Optional.ofNullable(b.getPolicies().get(policyWithPath)).orElse(b.getPolicies().get(PathUtils.extractName(policyWithPath)));
-                if (policyFromDependencies != null) {
-                    if (!includedPolicy.compareAndSet(null, policyFromDependencies)) {
-                        throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyWithPath);
+            Set<Bundle> dependencies = bundle.getDependencies();
+            if(dependencies != null){
+                dependencies.forEach(b -> {
+                    Policy policyFromDependencies = Optional.ofNullable(b.getPolicies().get(policyWithPath)).orElse(b.getPolicies().get(PathUtils.extractName(policyWithPath)));
+                    if (policyFromDependencies != null) {
+                        if (!includedPolicy.compareAndSet(null, policyFromDependencies)) {
+                            throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyWithPath);
+                        }
+                        //add dependent bundle if bundle type is not null
+                        DependentBundle dependentBundle = b.getDependentBundle();
+                        if (dependentBundle != null && dependentBundle.getType() != null && annotatedBundle != null) {
+                            annotatedBundle.addDependentBundle(dependentBundle);
+                        }
                     }
-                    //add dependent bundle if bundle type is not null
-                    DependentBundle dependentBundle = b.getDependentBundle();
-                    if (dependentBundle != null && dependentBundle.getType() != null) {
-                        annotatedBundle.addDependentBundle(dependentBundle);
-                    }
-                }
-            });
+                });
+            }
 
             //if policy is not found in any bundles then check if it missing and excluded
             final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(policyWithPath);

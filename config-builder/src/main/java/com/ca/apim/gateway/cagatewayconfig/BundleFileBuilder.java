@@ -97,11 +97,13 @@ public class BundleFileBuilder {
                 } else if (dependencyFile.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)) {
                     Bundle bundleDependency = cache.getBundleFromMetadataFile(dependencyFile);
                     if (bundleDependency != null) {
+                        //add dependent bundle only for bundle tag dependencies
                         bundleDependency.setDependentBundle(dependentBundle);
                         dependencyBundles.add(bundleDependency);
                     }
                 } else if (dependencyFile.getName().endsWith(BUNDLE_EXTENSION)) {
                     Bundle bundleDependency = cache.getBundleFromFile(dependencyFile);
+                    //add dependent bundle only for bundle tag dependencies
                     bundleDependency.setDependentBundle(dependentBundle);
                     dependencyBundles.add(bundleDependency);
                 }

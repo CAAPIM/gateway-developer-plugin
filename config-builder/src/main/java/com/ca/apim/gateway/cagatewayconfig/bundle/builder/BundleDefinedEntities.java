@@ -1,23 +1,10 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.DependentBundle;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.Collection;
 
 public class BundleDefinedEntities {
 
     private Collection<DefaultMetadata> definedEntities;
-    @JsonIgnore
-    private DependentBundle dependentBundle;
-
-    public DependentBundle getDependentBundle() {
-        return dependentBundle;
-    }
-
-    public void setDependentBundle(DependentBundle dependentBundle) {
-        this.dependentBundle = dependentBundle;
-    }
 
     public Collection<DefaultMetadata> getDefinedEntities() {
         return definedEntities;

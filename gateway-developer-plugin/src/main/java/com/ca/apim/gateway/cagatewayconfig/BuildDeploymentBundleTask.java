@@ -85,6 +85,7 @@ public class BuildDeploymentBundleTask extends DefaultTask {
             if (file.getName().endsWith(BUNDLE_EXTENSION) || file.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)) {
                 DependentBundle dependentBundle = new DependentBundle(file);
                 dependentBundles.add(dependentBundle);
+                //update bundle tag dependency configuration
                 dependencySet.forEach(dependency -> {
                     if (file.getName().startsWith(dependency.getName() + "-" + dependency.getVersion())) {
                         dependentBundle.setGroupName(dependency.getGroup());
