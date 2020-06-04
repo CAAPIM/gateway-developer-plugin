@@ -126,23 +126,27 @@ public class EncassEntityBuilder implements EntityBuilder {
 
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
+        boolean isReusable = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
+            isReusable = annotatedEntity.isReusable();
             annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity)) {
+            if (isReusable || isAnnotatedEntity(encass, annotatedEntity)) {
                 //use the id and guid defined at reusable annotation or bundle annotation (if its annotated bundle)
-                if (annotatedEncassEntity.getGuid() != null) {
-                    if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
-                        guid = annotatedEncassEntity.getGuid();
-                    } else {
-                        LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
+                if (annotatedEncassEntity != null) {
+                    if (annotatedEncassEntity.getGuid() != null) {
+                        if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
+                            guid = annotatedEncassEntity.getGuid();
+                        } else {
+                            LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
+                        }
                     }
-                }
-                if (annotatedEncassEntity.getId() != null) {
-                    if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
-                        id = annotatedEncassEntity.getId();
-                    } else {
-                        LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
+                    if (annotatedEncassEntity.getId() != null) {
+                        if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
+                            id = annotatedEncassEntity.getId();
+                        } else {
+                            LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
+                        }
                     }
                 }
             } else {
@@ -168,7 +172,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, encassName, id, encassAssertionElement, guid, encass);
 
-        if (isRedeployableBundle || !(encass.isReusable() || isAnnotatedEntity(encass, annotatedEntity))) {
+        if (isRedeployableBundle || !(isReusable || isAnnotatedEntity(encass, annotatedEntity))) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
