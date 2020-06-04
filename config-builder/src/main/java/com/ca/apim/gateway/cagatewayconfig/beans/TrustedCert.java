@@ -38,7 +38,7 @@ import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.emptyMap;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
-@JsonInclude
+@JsonInclude(Include.NON_NULL)
 @Named("TRUSTED_CERT")
 @ConfigurationFile(name = "trusted-certs", type = JSON_YAML)
 @EnvironmentType("CERTIFICATE")
@@ -99,7 +99,6 @@ public class TrustedCert extends GatewayEntity implements AnnotableEntity {
         this.certificateData = certificateData;
     }
 
-    @JsonIgnore
     public CertificateData getCertificateData() {
         return certificateData;
     }

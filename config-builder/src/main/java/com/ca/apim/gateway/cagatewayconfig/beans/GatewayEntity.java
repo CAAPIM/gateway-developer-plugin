@@ -67,7 +67,6 @@ public class GatewayEntity {
         //
     }
 
-    @JsonIgnore
     public Metadata getMetadata() {
         return null;
     }
