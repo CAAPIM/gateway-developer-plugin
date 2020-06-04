@@ -227,11 +227,6 @@ public class Service extends Folderable implements AnnotableEntity {
     }
 
     @Override
-    public String getShortenedType() {
-        return "service";
-    }
-
-    @Override
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
         setId(idGenerator.generate());

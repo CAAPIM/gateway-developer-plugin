@@ -10,6 +10,7 @@ public class AnnotatedBundle extends Bundle {
     private Bundle fullBundle;
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
     private ProjectInfo projectInfo;
+    private String uniqueNameSeparator = "#";   // This can be different for environment entities.
 
     public AnnotatedBundle(Bundle fullBundle, AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
                            ProjectInfo projectInfo) {
@@ -43,8 +44,7 @@ public class AnnotatedBundle extends Bundle {
     }
 
     public String getUniquePrefix() {
-        AnnotableEntity annotableEntity = (AnnotableEntity) annotatedEntity.getEntity();
-        return projectInfo.getName() + "-" + annotableEntity.getShortenedType() + "-" + PathUtils.extractName(annotatedEntity.getEntityName()) + "-";
+        return projectInfo.getName() + uniqueNameSeparator + PathUtils.extractName(annotatedEntity.getEntityName()) + uniqueNameSeparator;
     }
 
     public String getUniqueSuffix() {
