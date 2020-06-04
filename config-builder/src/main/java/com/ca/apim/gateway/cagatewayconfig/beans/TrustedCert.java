@@ -6,19 +6,30 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.Nullable;
+import sun.reflect.annotation.AnnotationType;
 
 import javax.inject.Named;
 import java.io.File;
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.writeCertificateData;
@@ -27,11 +38,11 @@ import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.emptyMap;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
-@JsonInclude(Include.NON_NULL)
+@JsonInclude
 @Named("TRUSTED_CERT")
 @ConfigurationFile(name = "trusted-certs", type = JSON_YAML)
 @EnvironmentType("CERTIFICATE")
-public class TrustedCert extends GatewayEntity {
+public class TrustedCert extends GatewayEntity implements AnnotableEntity {
 
     private boolean verifyHostname;
     private boolean trustedForSsl;
@@ -42,6 +53,10 @@ public class TrustedCert extends GatewayEntity {
     private boolean trustedForSigningServerCerts;
     private boolean trustedAsSamlIssuer;
     private CertificateData certificateData;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
     public TrustedCert() {}
 
@@ -84,6 +99,7 @@ public class TrustedCert extends GatewayEntity {
         this.certificateData = certificateData;
     }
 
+    @JsonIgnore
     public CertificateData getCertificateData() {
         return certificateData;
     }
@@ -160,6 +176,15 @@ public class TrustedCert extends GatewayEntity {
         return trustedAsSamlIssuer;
     }
 
+    @Override
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+
     public static class Builder {
         private String id;
         private String name;
@@ -200,6 +225,29 @@ public class TrustedCert extends GatewayEntity {
 
         // remove the certificate data so it dont get written to the file
         this.certificateData = null;
+    }
+
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+        }
+        return annotatedEntity;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity) {
+        this.annotatedEntity = annotatedEntity;
+    }
+
+    @Override
+    public String getType() {
+        return EntityTypes.TRUSTED_CERT_TYPE;
+    }
+
+    @Override
+    public String getShortenedType() {
+        return "trusted_cert";
     }
 
     @Override

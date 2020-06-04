@@ -72,7 +72,9 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
                         .map(
-                                trustedCertEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(TRUSTED_CERT_TYPE, trustedCertEntry.getKey(), idGenerator.generate())
+                                trustedCertEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(TRUSTED_CERT_TYPE, trustedCertEntry.getKey(),
+                                        ((TrustedCert)trustedCertEntry.getValue()).getAnnotatedEntity() != null && ((TrustedCert)trustedCertEntry.getValue()).getAnnotatedEntity().getId() != null ?
+                                                ((TrustedCert)trustedCertEntry.getValue()).getAnnotatedEntity().getId() : idGenerator.generate())
                         ).collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(trustedCertEntry ->
@@ -84,7 +86,8 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
-        final String id = idGenerator.generate();
+        final String id = trustedCert.getAnnotatedEntity() != null && trustedCert.getAnnotatedEntity().getId() != null ?
+                trustedCert.getAnnotatedEntity().getId(): idGenerator.generate();
         trustedCert.setId(id);
         final Element trustedCertElem = createElementWithAttributesAndChildren(
                 document,
