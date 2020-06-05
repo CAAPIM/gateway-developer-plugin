@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - oraclejdk11
+  - openjdk8
 addons:
   sonarcloud:
     organization: "ca-api-gateway"

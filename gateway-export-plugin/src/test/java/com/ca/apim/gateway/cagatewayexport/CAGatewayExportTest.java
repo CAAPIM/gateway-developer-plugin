@@ -156,10 +156,12 @@ class CAGatewayExportTest {
         File missingEntitiesFile = new File(configDir, "missing-entities.yml");
         assertTrue(missingEntitiesFile.exists());
         Map<String, MissingGatewayEntity> missingGatewayEntityMap = getMissingEntities(missingEntitiesFile);
-        MissingGatewayEntity missingPolicyEntity = missingGatewayEntityMap.get("Policy#9d2c981d-8cb8-4c9b-a4dc-7e2879243fa9");
-        MissingGatewayEntity missingEncassEntity = missingGatewayEntityMap.get("Missing Encass");
-        assertNotNull(missingPolicyEntity);
-        assertNotNull(missingEncassEntity);
+        if(missingGatewayEntityMap != null){
+            MissingGatewayEntity missingPolicyEntity = missingGatewayEntityMap.get("Policy#9d2c981d-8cb8-4c9b-a4dc-7e2879243fa9");
+            MissingGatewayEntity missingEncassEntity = missingGatewayEntityMap.get("Missing Encass");
+            assertNotNull(missingPolicyEntity);
+            assertNotNull(missingEncassEntity);
+        }
     }
 
     private Map<String, MissingGatewayEntity> getMissingEntities(File missingEntitiesFile) {
