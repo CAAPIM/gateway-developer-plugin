@@ -3,7 +3,7 @@ jdk:
   - openjdk8
 addons:
   sonarcloud:
-    organization: "CA API Management"
+    organization: "ca-api-gateway"
     token:
       secure: $SONAR_TOKEN
 script:
