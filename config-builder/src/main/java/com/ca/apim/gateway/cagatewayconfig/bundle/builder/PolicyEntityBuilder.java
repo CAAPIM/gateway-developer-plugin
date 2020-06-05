@@ -510,7 +510,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-    private static void prepareRoutingAssertionCertificateIds(Document policyDocument, Bundle bundle, Element assertionElement) {
+    @VisibleForTesting
+    void prepareRoutingAssertionCertificateIds(Document policyDocument, Bundle bundle, Element assertionElement) {
         final Element trustedCertNameElement = getSingleChildElement(assertionElement, TLS_TRUSTED_CERT_NAMES, true);
         if (trustedCertNameElement != null && trustedCertNameElement.getChildNodes().getLength() > 0) {
             Element trustedCertGoidElement = createElementWithAttribute(
