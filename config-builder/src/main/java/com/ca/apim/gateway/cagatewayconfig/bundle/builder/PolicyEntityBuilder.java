@@ -526,15 +526,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
             for (int i = 0; i < trustedCertNamesList.getLength(); i++) {
                 final String trustedCertName = trustedCertNamesList.item(i).getAttributes().getNamedItem(STRING_VALUE).getTextContent();
                 final TrustedCert trustedCert = bundle.getTrustedCerts().get(trustedCertName);
-                if (trustedCert != null && trustedCert.getAnnotatedEntity() != null && trustedCert.getAnnotatedEntity().getId() != null) {
-                    Element trustedCertGoidItem = createElementWithAttribute(
-                            policyDocument,
-                            PolicyXMLElements.ITEM,
-                            GOID_VALUE,
-                            trustedCert.getAnnotatedEntity().getId()
-                    );
-                    trustedCertGoidElement.appendChild(trustedCertGoidItem);
-                }
+                final String trustedCertId = trustedCert != null && trustedCert.getAnnotatedEntity() != null && trustedCert.getAnnotatedEntity().getId() != null ?
+                        trustedCert.getAnnotatedEntity().getId() : idGenerator.generate();
+
+                Element trustedCertGoidItem = createElementWithAttribute(
+                        policyDocument,
+                        PolicyXMLElements.ITEM,
+                        GOID_VALUE,
+                        trustedCertId
+                );
+                trustedCertGoidElement.appendChild(trustedCertGoidItem);
             }
         }
     }
