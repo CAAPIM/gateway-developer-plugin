@@ -161,7 +161,7 @@ class CAGatewayExportTest {
             MissingGatewayEntity missingEncassEntity = missingGatewayEntityMap.get("Missing Encass");
             assertNotNull(missingPolicyEntity);
             assertNotNull(missingEncassEntity);
-        } 
+        }
     }
 
     private Map<String, MissingGatewayEntity> getMissingEntities(File missingEntitiesFile) {
