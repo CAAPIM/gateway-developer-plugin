@@ -24,6 +24,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
@@ -50,6 +51,7 @@ public class ConfigBuilderInjectionProvider implements InjectionProvider {
         return ImmutableMap.<Class, Object>builder()
                 .put(DocumentTools.class, DocumentTools.INSTANCE)
                 .put(JsonTools.class, JsonTools.INSTANCE)
+                .put(JsonFileUtils.class, JsonFileUtils.INSTANCE)
                 .put(DocumentFileUtils.class, DocumentFileUtils.INSTANCE)
                 .put(FileUtils.class, FileUtils.INSTANCE)
                 .put(IdGenerator.class, new IdGenerator())

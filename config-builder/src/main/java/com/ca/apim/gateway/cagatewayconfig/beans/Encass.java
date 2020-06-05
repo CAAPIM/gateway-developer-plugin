@@ -6,13 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Named;
 import java.io.File;
@@ -29,18 +34,23 @@ import static java.util.stream.Collectors.toCollection;
 @Named("ENCAPSULATED_ASSERTION")
 @ConfigurationFile(name = "encass", type = JSON_YAML)
 @EnvironmentType("ENCAPSULATED_ASSERTION")
-public class Encass extends GatewayEntity {
+@BundleGeneration
+public class Encass extends GatewayEntity implements AnnotableEntity {
 
     private String policy;
     private Set<EncassArgument> arguments;
     private Set<EncassResult> results;
     private Map<String, Object> properties;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
     @JsonIgnore
     private String guid;
     @JsonIgnore
     private String policyId;
     @JsonIgnore
     private String path;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
     public Set<EncassArgument> getArguments() {
         return arguments;
@@ -64,6 +74,15 @@ public class Encass extends GatewayEntity {
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    @Override
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
     }
 
     public String getGuid() {
@@ -101,6 +120,8 @@ public class Encass extends GatewayEntity {
     @Override
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
+        setId(idGenerator.generate());
+        setName(entityKey);
     }
 
     @Override
@@ -108,9 +129,77 @@ public class Encass extends GatewayEntity {
         sortArgumentsAndResults();
     }
 
+    @JsonIgnore
+    @Override
+    public Metadata getMetadata() {
+        return new Metadata() {
+            @Override
+            public String getType() {
+                return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
+            }
+
+            @Override
+            public String getName() {
+                return Encass.this.getName();
+            }
+
+            @Override
+            public String getId() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && annotatedEntity.getId() != null) {
+                    return annotatedEntity.getId();
+                }
+                return Encass.this.getId();
+            }
+
+            @Override
+            public String getGuid() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && annotatedEntity.getGuid() != null) {
+                    return annotatedEntity.getGuid();
+                }
+                return Encass.this.getGuid();
+            }
+
+            public Set<EncassArgument> getArguments() {
+                return Encass.this.getArguments();
+            }
+
+            public Set<EncassResult> getResults() {
+                return Encass.this.getResults();
+            }
+        };
+    }
+
     @VisibleForTesting
     public void sortArgumentsAndResults() {
         setArguments(getArguments().stream().collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassArgument::getName)))));
         setResults(getResults().stream().collect(toCollection(() -> new TreeSet<>(Comparator.comparing(EncassResult::getName)))));
+    }
+
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                Map<String, Object> props = getProperties();
+                if (props != null) {
+                    annotatedEntity.setDescription(props.getOrDefault("description", "").toString());
+                }
+            }
+            annotatedEntity.setPolicyName(getPolicy());
+            annotatedEntity.setEntityName(getName());
+        }
+        return annotatedEntity;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity) {
+        this.annotatedEntity = annotatedEntity;
+    }
+
+    @Override
+    public String getType() {
+        return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
     }
 }

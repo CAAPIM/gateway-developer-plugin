@@ -7,15 +7,17 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * An implementation of entity builder is responsible for collecting the entity information stored in yaml/json/properties files or environment properties
  * and convert this data to a Gateway restman bundle format.
- *
+ * <p>
  * ex: (input) some-entity-file.json -- SomeEntityBuilder -- Bundle XML element (output)
  */
 public interface EntityBuilder extends Comparable<EntityBuilder> {
@@ -26,9 +28,13 @@ public interface EntityBuilder extends Comparable<EntityBuilder> {
      * Types of bundles.
      */
     enum BundleType {
-        /** this is the bundle created with the entities that require changes related on where the GW is deployed */
+        /**
+         * this is the bundle created with the entities that require changes related on where the GW is deployed
+         */
         ENVIRONMENT,
-        /** this is the bundle that contains gateway behaviour like policies/services/encasses and its dependencies to environment variables */
+        /**
+         * this is the bundle that contains gateway behaviour like policies/services/encasses and its dependencies to environment variables
+         */
         DEPLOYMENT
     }
 

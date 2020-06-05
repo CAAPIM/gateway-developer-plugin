@@ -14,6 +14,10 @@ import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
 
 /**
@@ -55,6 +59,9 @@ public class BuildDeploymentBundleTask extends DefaultTask {
     @TaskAction
     public void perform() {
         BundleFileBuilder bundleFileBuilder = InjectionRegistry.getInjector().getInstance(BundleFileBuilder.class);
-        bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(), filterBundleFiles(dependencies.getFiles()), getProject().getName() + '-' + getProject().getVersion());
+        final ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(),
+                getProject().getVersion().toString());
+        bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(),
+                new ArrayList<>(dependencies.getFiles()), projectInfo);
     }
 }

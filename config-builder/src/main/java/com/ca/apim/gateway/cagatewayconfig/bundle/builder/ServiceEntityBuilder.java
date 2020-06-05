@@ -6,10 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.beans.Service;
-import com.ca.apim.gateway.cagatewayconfig.beans.SoapResource;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -20,10 +17,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
@@ -50,13 +44,22 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        if (bundle instanceof AnnotatedBundle) {
+            Map<String, Service> serviceMap = Optional.ofNullable(bundle.getServices()).orElse(Collections.emptyMap());
+            return buildEntities(serviceMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
+        } else {
+            return buildEntities(bundle.getServices(), bundle, bundleType, document);
+        }
+    }
+
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         // no service has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
-        return bundle.getServices().entrySet().stream().map(serviceEntry ->
-                buildServiceEntity(bundle, serviceEntry.getKey(), serviceEntry.getValue(), document)
+        return entities.entrySet().stream().map(serviceEntry ->
+                buildServiceEntity(bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
@@ -100,16 +103,16 @@ public class ServiceEntityBuilder implements EntityBuilder {
                     .entrySet()
                     .stream()
                     .collect(Collectors
-                            .toMap(p -> "property." + p.getKey(), 
-                                p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + insertPrefixToEnvironmentVariable(p.getKey(), service.getName()) : p.getValue()));
+                            .toMap(p -> "property." + p.getKey(),
+                                    p -> p.getKey().startsWith(PREFIX_ENV) ? "SERVICE_PROPERTY_" + insertPrefixToEnvironmentVariable(p.getKey(), service.getName()) : p.getValue()));
         }
 
-        if(properties == null) {
+        if (properties == null) {
             properties = new HashMap<>();
         }
 
         properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, false);
-        if(isSoapService) {
+        if (isSoapService) {
             properties.put(KEY_VALUE_SOAP, true);
             properties.put(KEY_VALUE_SOAP_VERSION, service.getSoapVersion());
             properties.put(KEY_VALUE_WSS_PROCESSING_ENABLED, service.isWssProcessingEnabled());
@@ -138,7 +141,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         serviceElement.appendChild(resourcesElement);
-        return EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, id, serviceElement);
+        return EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, servicePath, id,
+                serviceElement, false, service);
     }
 
     private Element buildServiceMappings(Service service, Document document) {
@@ -146,7 +150,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         Element httpMappingElement = document.createElement(HTTP_MAPPING);
         serviceMappingsElement.appendChild(httpMappingElement);
 
-        if(service.getUrl() != null) {
+        if (service.getUrl() != null) {
             httpMappingElement.appendChild(createElementWithTextContent(document, URL_PATTERN, service.getUrl()));
         }
         Element verbsElement = document.createElement(VERBS);

@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import org.jetbrains.annotations.NotNull;
@@ -29,10 +31,20 @@ public class Bundle {
     private FolderTree folderTree;
     private Map<Dependency, List<Dependency>> dependencyMap;
     private BundleLoadingOperation loadingMode;
+    private Set<BundleDefinedEntities> metadataDependencyBundles;
 
     @SuppressWarnings("unchecked")
     public <E extends GatewayEntity> Map<String, E> getEntities(Class<E> entityType) {
         return (Map<String, E>) entities.computeIfAbsent(entityType, (Function<Class, Map<String, E>>) aClass -> new HashMap<>());
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, MissingGatewayEntity> getMissingEntities() {
+        return getEntities(MissingGatewayEntity.class);
+    }
+
+    public Map<String, UnsupportedGatewayEntity> getUnsupportedEntities() {
+        return getEntities(UnsupportedGatewayEntity.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -243,5 +255,13 @@ public class Bundle {
 
     public void setLoadingMode(BundleLoadingOperation loadingMode) {
         this.loadingMode = loadingMode;
+    }
+
+    public Set<BundleDefinedEntities> getMetadataDependencyBundles() {
+        return metadataDependencyBundles;
+    }
+
+    public void setMetadataDependencyBundles(Set<BundleDefinedEntities> metadataDependencyBundles) {
+        this.metadataDependencyBundles = metadataDependencyBundles;
     }
 }

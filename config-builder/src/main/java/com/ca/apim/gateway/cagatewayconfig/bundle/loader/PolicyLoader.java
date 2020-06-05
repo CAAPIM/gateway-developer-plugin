@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import com.google.common.base.Joiner;
+import org.apache.commons.lang3.BooleanUtils;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
@@ -25,7 +26,7 @@ import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOpe
 import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PROPERTY_TAG;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
@@ -45,6 +46,10 @@ public class PolicyLoader implements BundleEntityLoader {
         final String policyType = getSingleChildElementTextContent(policyDetails, POLICY_TYPE);
         final Map<String, Object> policyDetailProperties = mapPropertiesElements(getSingleChildElement(policyDetails, PROPERTIES, true), PROPERTIES);
         final String policyTag = (String) policyDetailProperties.get(PROPERTY_TAG);
+        boolean hasRouting = false;
+        if (policyDetailProperties.get(PROPERTY_HAS_ROUTING) != null) {
+            hasRouting = BooleanUtils.toBoolean(policyDetailProperties.get(PROPERTY_HAS_ROUTING).toString());
+        }
         if (!PolicyType.isValidType(policyType, policyTag)) {
             LOGGER.log(Level.WARNING, () -> {
                 if (policyTag != null) {
@@ -65,6 +70,7 @@ public class PolicyLoader implements BundleEntityLoader {
         final Element resource = getSingleChildElement(resourceSet, RESOURCE);
         final String policyString = resource.getTextContent();
         final PolicyType type = PolicyType.fromType(policyType);
+        final String policySubtag = (String) policyDetailProperties.get(PROPERTY_SUBTAG);
 
         Folder parentFolder = getFolder(bundle, folderId);
 
@@ -75,9 +81,11 @@ public class PolicyLoader implements BundleEntityLoader {
         policy.setGuid(guid);
         policy.setId(id);
         policy.setTag(policyTag);
+        policy.setSubtag(policySubtag);
         policy.setPolicyType(type);
         policy.setPolicyDocument(policyElement);
         policy.setPolicyXML(policyString);
+        policy.setHasRouting(hasRouting);
 
         Map<String, Policy> bundlePolicies = bundle.getPolicies();
 

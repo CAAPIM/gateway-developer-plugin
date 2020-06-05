@@ -6,4 +6,4 @@
 
 rootProject.name = 'multi-project'
 
-include 'project-a', 'project-b', 'project-c', 'project-d'
+include 'project-a', 'project-b', 'project-c', 'project-d', 'project-e'

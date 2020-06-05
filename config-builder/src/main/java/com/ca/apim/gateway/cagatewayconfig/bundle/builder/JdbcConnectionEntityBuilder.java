@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
@@ -18,10 +19,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.STORED_PASSWORD_REF_FORMAT;
@@ -45,14 +43,18 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
+        Map<String, JdbcConnection> jdbcConnectionMap = Optional.ofNullable(bundle.getJdbcConnections()).orElse(Collections.emptyMap());
+       return buildEntities(jdbcConnectionMap, bundleType, document);
+    }
+    private List<Entity> buildEntities(Map<String, ?> entities, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                return bundle.getJdbcConnections().entrySet().stream()
+                return entities.entrySet().stream()
                         .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, e.getKey(), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
-                return bundle.getJdbcConnections().entrySet().stream().map(e ->
-                        buildEntity(e.getKey(), e.getValue(), document)
+                return entities.entrySet().stream().map(e ->
+                        buildEntity(e.getKey(), (JdbcConnection)e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

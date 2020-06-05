@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,8 @@ class BundleFileBuilderTest {
     @Mock
     DocumentFileUtils documentFileUtils;
     @Mock
+    JsonFileUtils jsonFileUtils;
+    @Mock
     EntityLoaderRegistry entityLoaderRegistry;
     @Mock
     BundleEntityBuilder bundleEntityBuilder;
@@ -48,6 +51,8 @@ class BundleFileBuilderTest {
     @Mock
     BundleCache bundleCache;
 
+    private static final ProjectInfo projectInfo = new ProjectInfo("my-bundle", "my-bundle-group", "1.0");
+
     @BeforeEach
     void beforeEach() {
         when(documentTools.getDocumentBuilder()).thenReturn(documentBuilder);
@@ -55,10 +60,12 @@ class BundleFileBuilderTest {
 
     @Test
     void buildBundleNoSource() {
-        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
-        bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptyList(), "my-bundle");
+        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils,
+                jsonFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
+        bundleFileBuilder.buildBundle(null, new File("output"), Collections.emptyList(), projectInfo);
 
-        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
+        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().isEmpty()),
+                eq(EntityBuilder.BundleType.DEPLOYMENT), any(), eq(projectInfo));
     }
 
     @Test
@@ -67,10 +74,12 @@ class BundleFileBuilderTest {
         policy.setName("from-file");
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
-        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
-        bundleFileBuilder.buildBundle(new File("input"), new File("output"), Collections.emptyList(), "my-bundle");
+        BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(documentTools, documentFileUtils,
+                jsonFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache);
+        bundleFileBuilder.buildBundle(new File("input"), new File("output"),Collections.emptyList(), projectInfo);
 
-        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)), eq(EntityBuilder.BundleType.DEPLOYMENT), any());
+        verify(bundleEntityBuilder).build(argThat(bundle -> bundle.getPolicies().containsKey(policy.getName()) && bundle.getPolicies().containsValue(policy)),
+                eq(EntityBuilder.BundleType.DEPLOYMENT), any(), eq(projectInfo));
     }
 
     @Test
@@ -80,11 +89,12 @@ class BundleFileBuilderTest {
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestPolicyLoader(policy)));
 
         List<File> dummyList = new ArrayList<>();
-        dummyList.add(new File("test"));
+        dummyList.add(new File("test.bundle"));
         when(bundleCache.getBundleFromFile(any(File.class))).thenReturn(new Bundle());
 
-        BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache));
-        bundleFileBuilder.buildBundle(new File("input"), new File("output"), dummyList, "my-bundle");
+        BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils,
+                jsonFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache));
+        bundleFileBuilder.buildBundle(new File("input"), new File("output"), dummyList, projectInfo);
 
         verify(bundleFileBuilder, Mockito.times(2)).logOverriddenEntities(any(Bundle.class), any(), any());
     }

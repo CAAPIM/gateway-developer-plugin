@@ -7,10 +7,12 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
+import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.*;
 
@@ -22,35 +24,33 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.FULL_INSTALL_BUNDLE_NAME_SUFFIX;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
-import static org.apache.commons.collections4.ListUtils.union;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
 
 /**
  * The BuildFullBundleTask task will grab provided environment properties and build a single bundle merged with the deployment bundles.
  */
 public class BuildFullBundleTask extends DefaultTask {
 
-    private final Property<Map> environmentConfig;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
+    private final Property<Map> environmentConfig;
     private final ConfigurableFileCollection dependencyBundles;
-    private final RegularFileProperty outputBundle;
+    private final DirectoryProperty into;
     private final Property<Boolean> detemplatizeDeploymentBundles;
+    private final DirectoryProperty configFolder;
+    private final Property<String> configName;
 
     @Inject
     public BuildFullBundleTask() {
-        environmentConfig = getProject().getObjects().property(Map.class);
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
+        environmentConfig = getProject().getObjects().property(Map.class);
         dependencyBundles = getProject().files();
-        outputBundle = newOutputFile();
+        into = newOutputDirectory();
         detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
-    }
-
-    @Optional
-    @Input
-    Property<Map> getEnvironmentConfig() {
-        return environmentConfig;
+        configFolder = newInputDirectory();
+        configName = getProject().getObjects().property(String.class);
     }
 
     @InputFiles
@@ -58,9 +58,15 @@ public class BuildFullBundleTask extends DefaultTask {
         return dependencyBundles;
     }
 
-    @OutputFile
-    RegularFileProperty getOutputBundle() {
-        return outputBundle;
+    @OutputDirectory
+    DirectoryProperty getInto() {
+        return into;
+    }
+
+    @Input
+    @Optional
+    Property<Map> getEnvironmentConfig() {
+        return environmentConfig;
     }
 
     @Input
@@ -68,22 +74,41 @@ public class BuildFullBundleTask extends DefaultTask {
         return detemplatizeDeploymentBundles;
     }
 
+    @InputDirectory
+    @Optional
+    DirectoryProperty getConfigFolder() {
+        return configFolder;
+    }
+
+    @Input
+    @Optional
+    Property<String> getConfigName() {
+        return configName;
+    }
+
     @TaskAction
     public void perform() {
-        final Map<String, String> environmentValues = environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.getOrElse(Collections.EMPTY_MAP));
-        final String bundleDirectory = outputBundle.getAsFile().get().getParentFile().getPath();
-        final List<File> bundleFiles = union(
-                collectFiles(bundleDirectory, BUNDLE_EXTENSION),
-                filterBundleFiles(dependencyBundles.getAsFileTree().getFiles())
-        );
-
         final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
-        fullBundleCreator.createFullBundle(
-                environmentValues,
-                bundleFiles,
-                bundleDirectory,
-                outputBundle.getAsFile().get().getName(),
-                detemplatizeDeploymentBundles.get()
-        );
+        final String bundleDirectory = into.getAsFile().get().getPath();
+        final List<File> metaDataFiles = collectFiles(bundleDirectory, METADATA_FILE_NAME_SUFFIX);
+        if(metaDataFiles.isEmpty()) {
+            throw new MissingEnvironmentException("Metadata file does not exist.");
+        }
+
+        metaDataFiles.stream().forEach(metaDataFile-> {
+            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().getOrNull());
+            if (null != bundleEnvironmentValues) {
+                final String fullInstallBundleFilename = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
+                //read environment properties from environmentConfig and merge it with metadata properties
+                bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
+                fullBundleCreator.createFullBundle(
+                        bundleEnvironmentValues,
+                        filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),
+                        bundleDirectory,
+                        fullInstallBundleFilename,
+                        detemplatizeDeploymentBundles.get()
+                );
+            }
+        });
     }
 }

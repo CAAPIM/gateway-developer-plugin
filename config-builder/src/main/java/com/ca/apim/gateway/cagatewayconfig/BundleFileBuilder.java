@@ -10,6 +10,8 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleArtifacts;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
@@ -17,25 +19,27 @@ import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.FolderLoaderUtils;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 
 @Singleton
-class BundleFileBuilder {
+public class BundleFileBuilder {
 
     private final DocumentFileUtils documentFileUtils;
+    private final JsonFileUtils jsonFileUtils;
     private final EntityLoaderRegistry entityLoaderRegistry;
     private final BundleEntityBuilder bundleEntityBuilder;
     private final BundleCache cache;
@@ -44,19 +48,21 @@ class BundleFileBuilder {
     private static final Logger LOGGER = Logger.getLogger(BundleFileBuilder.class.getName());
 
     @Inject
-    BundleFileBuilder(final DocumentTools documentTools,
-                      final DocumentFileUtils documentFileUtils,
-                      final EntityLoaderRegistry entityLoaderRegistry,
-                      final BundleEntityBuilder bundleEntityBuilder,
-                      final BundleCache cache) {
+    public BundleFileBuilder(final DocumentTools documentTools,
+                             final DocumentFileUtils documentFileUtils,
+                             final JsonFileUtils jsonFileUtils,
+                             final EntityLoaderRegistry entityLoaderRegistry,
+                             final BundleEntityBuilder bundleEntityBuilder,
+                             final BundleCache cache) {
         this.documentFileUtils = documentFileUtils;
+        this.jsonFileUtils = jsonFileUtils;
         this.documentTools = documentTools;
         this.entityLoaderRegistry = entityLoaderRegistry;
         this.bundleEntityBuilder = bundleEntityBuilder;
         this.cache = cache;
     }
 
-    void buildBundle(File rootDir, File outputDir, List<File> dependencies, String name) {
+    public void buildBundle(File rootDir, File outputDir, List<File> dependencies, ProjectInfo projectInfo) {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
@@ -70,32 +76,66 @@ class BundleFileBuilder {
             // create the folder tree
             FolderLoaderUtils.createFolders(bundle, rootDir, bundle.getServices());
 
-            //Load Dependencies
-            final Set<Bundle> dependencyBundles = dependencies.stream().map(cache::getBundleFromFile).collect(Collectors.toSet());
+            //Load metadata Dependencies
+            final Set<BundleDefinedEntities> metadataDependencyBundles = new HashSet<>();
+            final Set<Bundle> dependencyBundles = new HashSet<>();
+            for (File dependencyFile : dependencies) {
+                List<File> metadataFiles = new ArrayList<>();
+                //if the given file does not exists (in case of project dependency the dependency file is old artifact) read metadata file from parent folder
+                if (!dependencyFile.exists()) {
+                    File bundleDirectory = dependencyFile.getParentFile();
+                    if (bundleDirectory != null && bundleDirectory.isDirectory()) {
+                        File[] files = bundleDirectory.listFiles();
+                        metadataFiles = Stream.of(files).filter(file -> file.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)).collect(Collectors.toList());
+                    }
+                }
 
+                if (!metadataFiles.isEmpty()) {
+                    metadataFiles.forEach(file -> {
+                        BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(file);
+                        if (bundleDefinedEntities != null) {
+                            metadataDependencyBundles.add(bundleDefinedEntities);
+                        }
+                    });
+                } else if (dependencyFile.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)) {
+                    BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(dependencyFile);
+                    if (bundleDefinedEntities != null) {
+                        metadataDependencyBundles.add(bundleDefinedEntities);
+                    }
+                } else if (dependencyFile.getName().endsWith(BUNDLE_EXTENSION)) {
+                    dependencyBundles.add(cache.getBundleFromFile(dependencyFile));
+                }
+            }
+            bundle.setDependencies(dependencyBundles);
+            bundle.setMetadataDependencyBundles(metadataDependencyBundles);
             // Log overridden entities
             if (!dependencyBundles.isEmpty()) {
                 logOverriddenEntities(bundle, dependencyBundles, Service.class);
                 logOverriddenEntities(bundle, dependencyBundles, Policy.class);
             }
-
-            bundle.setDependencies(dependencyBundles);
         }
 
         //Zip
-        Element bundleElement = bundleEntityBuilder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, document);
-        documentFileUtils.createFile(bundleElement, new File(outputDir, name + ".bundle").toPath());
+        final Map<String, BundleArtifacts> bundleElementMap = bundleEntityBuilder.build(bundle,
+                EntityBuilder.BundleType.DEPLOYMENT, document, projectInfo);
+        bundleElementMap.forEach((k, v) -> writeBundleArtifacts(k, v, outputDir));
+    }
+
+    private void writeBundleArtifacts(final String bundleName, final BundleArtifacts bundleArtifacts, File outputDir) {
+        documentFileUtils.createFile(bundleArtifacts.getBundle(), new File(outputDir,
+                bundleArtifacts.getBundleFileName()).toPath());
+        documentFileUtils.createFile(bundleArtifacts.getDeleteBundle(), new File(outputDir,
+                bundleArtifacts.getDeleteBundleFileName()).toPath());
+        jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), bundleName, outputDir);
     }
 
     protected <E extends GatewayEntity> void logOverriddenEntities(Bundle bundle, Set<Bundle> dependencyBundles, Class<E> entityClass) {
         bundle.getEntities(entityClass).keySet().forEach(entityName ->
-            dependencyBundles.forEach(dependencyBundle -> {
-                if (dependencyBundle.getEntities(entityClass).containsKey(entityName)) {
-                    LOGGER.log(Level.INFO,"{0} policy will be overwritten by local version", entityName);
-                }
-            })
+                dependencyBundles.forEach(dependencyBundle -> {
+                    if (dependencyBundle.getEntities(entityClass).containsKey(entityName)) {
+                        LOGGER.log(Level.INFO, "{0} policy will be overwritten by local version", entityName);
+                    }
+                })
         );
     }
-
-
 }

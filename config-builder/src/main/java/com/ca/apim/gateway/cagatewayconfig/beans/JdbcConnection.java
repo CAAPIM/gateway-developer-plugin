@@ -188,6 +188,7 @@ public class JdbcConnection extends GatewayEntity {
 
     @Override
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
+        setName(entityKey);
         if (getPasswordRef() != null && getPassword() != null) {
             throw new ConfigLoadException("Cannot specify both a password reference and a password for jdbc connection: " + entityKey);
         }

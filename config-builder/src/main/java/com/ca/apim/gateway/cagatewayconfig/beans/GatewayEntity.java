@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -65,4 +66,9 @@ public class GatewayEntity {
     public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
         //
     }
+
+    public Metadata getMetadata() {
+        return null;
+    }
+
 }

@@ -6,11 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Element;
 
@@ -29,7 +36,8 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @JsonInclude(NON_EMPTY)
 @Named("POLICY")
-public class Policy extends Folderable {
+@BundleGeneration
+public class Policy extends Folderable implements AnnotableEntity {
 
     @JsonIgnore
     private String policyXML;
@@ -38,12 +46,23 @@ public class Policy extends Folderable {
     @JsonIgnore
     private Element policyDocument;
     @JsonIgnore
+    private Set<Annotation> annotations;
+    @JsonIgnore
     private final Set<Policy> dependencies = new HashSet<>();
     private String tag;
     @JsonIgnore
+    private String subtag;
+    @JsonIgnore
     private PolicyType policyType;
+    @JsonIgnore
+    private Set<Dependency> usedEntities;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
-    public Policy() {}
+    private boolean hasRouting;
+
+    public Policy() {
+    }
 
     public Policy(final Builder builder) {
         setName(builder.name);
@@ -51,7 +70,16 @@ public class Policy extends Folderable {
         this.guid = builder.guid;
         this.policyXML = builder.policy;
         this.tag = builder.tag;
+        this.subtag = builder.subtag;
         setParentFolder(builder.parentFolderId != null ? new Folder(builder.parentFolderId, null) : null);
+    }
+
+    public Set<Dependency> getUsedEntities() {
+        return usedEntities;
+    }
+
+    public void setUsedEntities(Set<Dependency> usedEntities) {
+        this.usedEntities = usedEntities;
     }
 
     public String getPolicyXML() {
@@ -90,12 +118,37 @@ public class Policy extends Folderable {
         this.tag = tag;
     }
 
+    public String getSubtag() {
+        return subtag;
+    }
+
+    public void setSubtag(String subtag) {
+        this.subtag = subtag;
+    }
+
     public PolicyType getPolicyType() {
         return policyType;
     }
 
+    @Override
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+
     public void setPolicyType(PolicyType policyType) {
         this.policyType = policyType;
+    }
+
+    public boolean isHasRouting() {
+        return hasRouting;
+    }
+
+    public void setHasRouting(boolean hasRouting) {
+        this.hasRouting = hasRouting;
     }
 
     Policy merge(Policy otherPolicy) {
@@ -108,7 +161,7 @@ public class Policy extends Folderable {
         this.setId(firstNonNull(otherPolicy.getId(), this.getId()));
         this.tag = firstNonNull(otherPolicy.tag, this.tag);
         this.policyType = firstNonNull(otherPolicy.policyType, this.policyType);
-
+        this.hasRouting = otherPolicy.hasRouting || this.hasRouting;
         return this;
     }
 
@@ -119,6 +172,7 @@ public class Policy extends Folderable {
         private String guid;
         private String policy;
         private String tag;
+        private String subtag;
         private String parentFolderId;
 
         public Builder setName(String name) {
@@ -146,6 +200,11 @@ public class Policy extends Folderable {
             return this;
         }
 
+        public Builder setSubtag(String subtag) {
+            this.subtag = subtag;
+            return this;
+        }
+
         public Builder setParentFolderId(String parentFolderId) {
             this.parentFolderId = parentFolderId;
             return this;
@@ -170,8 +229,8 @@ public class Policy extends Folderable {
                                         policyType.getType(),
                                         key,
                                         String.join(", ", value.stream().map(Policy::getPath).collect(toList())
-                                )
-                        ));
+                                        )
+                                ));
                     }
                 });
         if (!errors.isEmpty()) {
@@ -183,4 +242,54 @@ public class Policy extends Folderable {
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         setPath(PathUtils.unixPath(getPath()));
     }
+
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                annotatedEntity.setDescription("");
+            }
+            annotatedEntity.setPolicyName(getName());
+            annotatedEntity.setEntityName(getName());
+        }
+        return annotatedEntity;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity annotatedEntity){
+        this.annotatedEntity = annotatedEntity;
+    }
+
+    public String getType(){
+        return EntityTypes.POLICY_TYPE;
+    }
+
+    @JsonIgnore
+    @Override
+    public Metadata getMetadata() {
+        return new Metadata() {
+            @Override
+            public String getType() {
+                return EntityTypes.POLICY_TYPE;
+            }
+
+            @Override
+            public String getName() {
+                return Policy.this.getName();
+            }
+
+            @Override
+            public String getId() {
+                return Policy.this.getId();
+            }
+
+            @Override
+            public String getGuid() {
+                return Policy.this.getGuid();
+            }
+
+        };
+    }
+
 }
