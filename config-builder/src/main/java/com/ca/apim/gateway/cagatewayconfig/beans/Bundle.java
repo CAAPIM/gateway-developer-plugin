@@ -13,10 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -32,6 +29,15 @@ public class Bundle {
     private Map<Dependency, List<Dependency>> dependencyMap;
     private BundleLoadingOperation loadingMode;
     private DependentBundle dependentBundle;
+    private List<DependentBundle> dependentBundles = new ArrayList<>();
+
+    public void addDependentBundle(DependentBundle dependentBundle){
+        dependentBundles.add(dependentBundle);
+    }
+
+    public List<DependentBundle> getDependentBundles() {
+        return dependentBundles;
+    }
 
     public DependentBundle getDependentBundle() {
         return dependentBundle;

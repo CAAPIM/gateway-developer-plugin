@@ -99,8 +99,12 @@ public class EncassEntityBuilder implements EntityBuilder {
                         }
                         //add dependent bundle if bundle type is not null
                         DependentBundle dependentBundle = b.getDependentBundle();
-                        if (dependentBundle != null && dependentBundle.getType() != null && annotatedBundle != null) {
-                            annotatedBundle.addDependentBundle(dependentBundle);
+                        if (dependentBundle != null && dependentBundle.getType() != null){
+                            if(annotatedBundle != null) {
+                                annotatedBundle.addDependentBundle(dependentBundle);
+                            } else {
+                                bundle.addDependentBundle(dependentBundle);
+                            }
                         }
                     }
                 });
