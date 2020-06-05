@@ -202,9 +202,4 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     public String getType() {
         return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
     }
-    
-    @Override
-    public String getShortenedType() {
-        return "encass";
-    }
 }
