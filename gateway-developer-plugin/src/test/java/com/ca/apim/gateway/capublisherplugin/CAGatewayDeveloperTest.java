@@ -290,7 +290,7 @@ class CAGatewayDeveloperTest {
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
-    void testExampleProjectGeneratingEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
+    void testExampleProjectGeneratingEnvironment(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException, DocumentParseException {
         final String projectFolder = "example-project-generating-environment";
         //bundle name given as part of enacass annotation
         final String bundleName = "encass_bundle";
@@ -319,7 +319,31 @@ class CAGatewayDeveloperTest {
 
         //Environment bundle name format : <bundleName>-<version>-[<configName>]env.install.bundle
         String envBundleFilename = bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
-        File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
+        File envBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
+        assertTrue(envBundleFile.isFile());
+
+        final Element envBundleElement = DocumentTools.INSTANCE.parse(envBundleFile).getDocumentElement();
+        final List<Element> envEntities = getChildElements(getSingleChildElement(envBundleElement, REFERENCES), ITEM);
+        assertEquals(5, envEntities.size());
+        envEntities.forEach(e -> {
+            String type = getSingleChildElementTextContent(e, TYPE);
+            String entityName = getSingleChildElementTextContent(e, NAME);
+            switch (type) {
+                case "SECURE_PASSWORD":
+                    assertEquals("gateway", entityName);
+                    break;
+                case "ID_PROVIDER_CONFIG":
+                    assertEquals("Tacoma MSAD", entityName);
+                    break;
+                case "JDBC_CONNECTION":
+                    assertEquals("MySQL", entityName);
+                    break;
+                case "SSG_CONNECTOR":
+                    break;
+                default:
+                    fail("Unexpected environment value:\n" + DocumentTools.INSTANCE.elementToString(e));
+            }
+        });
     }
 
     @Test

@@ -142,9 +142,7 @@ class PolicyEntityBuilderTest {
         policy.setName(policy.getPath());
 
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
-        annotations.add(annotation);
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
         annotation.setGuid("");
         annotation.setId("");
         annotations.add(annotation);
@@ -153,8 +151,13 @@ class PolicyEntityBuilderTest {
         Encass encass = new Encass();
         encass.setGuid("encassGuid");
         encass.setName(TEST_ENCASS);
+        Annotation encassAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        annotations = new HashSet<>();
+        annotations.add(encassAnnotation);
+        encass.setAnnotations(annotations);
         bundle.getEncasses().put(TEST_ENCASS, encass);
         bundle.getPolicies().put("Policy", policy);
+
 
         AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
         annotatedEntity.setEntityName(encass.getName());
