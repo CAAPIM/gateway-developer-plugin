@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.DefaultMetadata;
 import com.ca.apim.gateway.cagatewayconfig.util.TestUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
@@ -97,8 +98,8 @@ class EntityBundleLoaderTest {
     @Test
     public void testLoadMetadataForEncass(){
         JsonFileUtils jsonFileUtils = mock(JsonFileUtils.class);
-        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
-        BundleDefinedEntities.DefaultMetadata encassMetadata =  new BundleDefinedEntities.DefaultMetadata();
+        Set<DefaultMetadata> metadataSet = new HashSet<>();
+        DefaultMetadata encassMetadata =  new DefaultMetadata();
         encassMetadata.setName("TestEncass");
         encassMetadata.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
         encassMetadata.setId("testId");
@@ -116,8 +117,8 @@ class EntityBundleLoaderTest {
     @Test
     public void testLoadMetadataForPolicy(){
         JsonFileUtils jsonFileUtils = mock(JsonFileUtils.class);
-        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
-        BundleDefinedEntities.DefaultMetadata policyMetadata =  new BundleDefinedEntities.DefaultMetadata();
+        Set<DefaultMetadata> metadataSet = new HashSet<>();
+        DefaultMetadata policyMetadata =  new DefaultMetadata();
         policyMetadata.setName("TestPolicy");
         policyMetadata.setType(EntityTypes.POLICY_TYPE);
         policyMetadata.setId("testId");

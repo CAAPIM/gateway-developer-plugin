@@ -1,12 +1,13 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.io.File;
 @JsonPropertyOrder({"type", "name", "groupName", "version"})
-public class DependentBundle {
+public class DependentBundle implements Metadata {
     private String type;
     private String name;
     private String groupName;
@@ -29,6 +30,18 @@ public class DependentBundle {
 
     public String getName() {
         return name;
+    }
+
+    @JsonIgnore
+    @Override
+    public String getId() {
+        return null;
+    }
+
+    @JsonIgnore
+    @Override
+    public String getGuid() {
+        return null;
     }
 
     public void setName(String name) {

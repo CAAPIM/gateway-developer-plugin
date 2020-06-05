@@ -7,10 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderException;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
@@ -66,7 +63,7 @@ public class EntityBundleLoader {
         final Bundle bundle = new Bundle();
         bundle.setLoadingMode(loadingMode);
         BundleDefinedEntities bundleDefinedEntities = jsonFileUtils.readBundleMetadataFile(dependencyMetadataPath);
-        Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleDefinedEntities.getDefinedEntities();
+        Collection<DefaultMetadata> metadataCollection = bundleDefinedEntities.getDefinedEntities();
         if (metadataCollection != null) {
             metadataCollection.forEach(metadata -> {
                 if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(metadata.getType())) {
