@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
@@ -140,23 +141,41 @@ public class PolicyWriter implements EntityWriter {
     }
 
     /**
-     * This method finds policy dependencies from the bundle dependency graphf for a given policy id
+     * This method finds the policy dependencies from the bundle dependency graph for a given policy id
      * @param id String
      * @param rawBundle Bundle
      * @return Set
      */
-    private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle) {
+    private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle){
+        final Set<Dependency> dependencyList = new HashSet<>();
         Map<Dependency, List<Dependency>> dependencyListMap = rawBundle.getDependencyMap();
         if (dependencyListMap != null) {
-            Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
-            for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
-                Dependency parent = entry.getKey();
-                if (parent.getId().equals(id)) { // Search for "id" to get its dependencies
-                    return new HashSet<>(entry.getValue());
+            populateDependencies(dependencyListMap, id, id, dependencyList);
+        }
+        return dependencyList;
+    }
+
+    /**
+     * This method recursively loads the entity dependencies from the given entity id
+     *
+     * @param dependencyListMap List
+     * @param rootId String
+     * @param id String
+     * @param dependencies Set
+     */
+    private void populateDependencies(Map<Dependency, List<Dependency>> dependencyListMap, String rootId, String id, Set<Dependency> dependencies) {
+        Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
+        for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
+            Dependency parent = entry.getKey();
+            if (parent.getId().equals(id)) {
+                List<Dependency> dependencyList = entry.getValue();
+                for (Dependency dependency : dependencyList) {
+                    if (!rootId.equals(dependency.getId()) && dependencies.add(dependency) && !BuilderConstants.NON_ENV_ENTITY_TYPES.contains(dependency.getType())) {
+                        populateDependencies(dependencyListMap, rootId, dependency.getId(), dependencies);
+                    }
                 }
             }
         }
-        return Collections.emptySet();
     }
 
     private void writePolicy(Bundle bundle, File policyFolder, Folderable folderableEntity, Element policy) {
