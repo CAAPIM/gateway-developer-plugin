@@ -150,7 +150,7 @@ public class PolicyWriter implements EntityWriter {
         final Set<Dependency> dependencyList = new HashSet<>();
         Map<Dependency, List<Dependency>> dependencyListMap = rawBundle.getDependencyMap();
         if (dependencyListMap != null) {
-            populateDependencies(dependencyListMap, id, id, dependencyList);
+            populateDependencies(dependencyListMap, id, dependencyList);
         }
         return dependencyList;
     }
@@ -159,19 +159,19 @@ public class PolicyWriter implements EntityWriter {
      * This method recursively loads the entity dependencies from the given entity id
      *
      * @param dependencyListMap List
-     * @param rootId String
      * @param id String
      * @param dependencies Set
      */
-    private void populateDependencies(Map<Dependency, List<Dependency>> dependencyListMap, String rootId, String id, Set<Dependency> dependencies) {
+    private void populateDependencies(Map<Dependency, List<Dependency>> dependencyListMap, String id, Set<Dependency> dependencies) {
         Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
         for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
             Dependency parent = entry.getKey();
             if (parent.getId().equals(id)) {
                 List<Dependency> dependencyList = entry.getValue();
                 for (Dependency dependency : dependencyList) {
-                    if (!rootId.equals(dependency.getId()) && dependencies.add(dependency) && !BuilderConstants.NON_ENV_ENTITY_TYPES.contains(dependency.getType())) {
-                        populateDependencies(dependencyListMap, rootId, dependency.getId(), dependencies);
+                    // add the dependency and populate the transitive dependencies for only environmental entities
+                    if (dependencies.add(dependency) && !BuilderConstants.NON_ENV_ENTITY_TYPES.contains(dependency.getType())) {
+                        populateDependencies(dependencyListMap, dependency.getId(), dependencies);
                     }
                 }
             }
