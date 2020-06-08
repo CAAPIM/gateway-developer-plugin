@@ -17,11 +17,19 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @EnvironmentType("UNSUPPORTED")
 public class UnsupportedGatewayEntity extends GatewayEntity {
     private String type;
+    private String id;
     @JsonIgnore
     private Element element;
 
     public String getType() {
         return type;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setType(String type) {
