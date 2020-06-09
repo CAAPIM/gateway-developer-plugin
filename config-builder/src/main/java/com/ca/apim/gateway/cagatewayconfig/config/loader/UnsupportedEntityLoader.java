@@ -15,6 +15,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import java.util.Map;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 
+@Singleton
 public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGatewayEntity> implements EntityLoader {
 
     private final EntityUtils.GatewayEntityInfo gatewayEntityInfo;
@@ -47,30 +49,32 @@ public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGateway
 
     private void updateItemXml(Bundle bundle, File configFolder) {
         final File unsupportedEntityXml = new File(configFolder, "unsupported-entities.xml");
-        final Map<String, UnsupportedGatewayEntity> unsupportedGatewayEntityMap = bundle.getUnsupportedEntities();
-        try {
-            final Document document = DocumentTools.INSTANCE.parse(unsupportedEntityXml);
-            final List<Element> items = getChildElements(document.getDocumentElement(), ITEM);
-            items.forEach(item -> {
-                final String itemName = getSingleChildElementTextContent(item, NAME);
-                final Element resource = getSingleChildElement(item, RESOURCE);
-                NodeList nodeList = resource.getChildNodes();
-                Element resourceXml = null;
-                for (int index = 0; index < nodeList.getLength(); index++) {
-                    Node node = nodeList.item(index);
-                    if (node instanceof Element) {
-                        resourceXml = (Element) node;
+        if (unsupportedEntityXml.exists()) {
+            final Map<String, UnsupportedGatewayEntity> unsupportedGatewayEntityMap = bundle.getUnsupportedEntities();
+            try {
+                final Document document = DocumentTools.INSTANCE.parse(unsupportedEntityXml);
+                final List<Element> items = getChildElements(document.getDocumentElement(), ITEM);
+                items.forEach(item -> {
+                    final String itemName = getSingleChildElementTextContent(item, NAME);
+                    final Element resource = getSingleChildElement(item, RESOURCE);
+                    NodeList nodeList = resource.getChildNodes();
+                    Element resourceXml = null;
+                    for (int index = 0; index < nodeList.getLength(); index++) {
+                        Node node = nodeList.item(index);
+                        if (node instanceof Element) {
+                            resourceXml = (Element) node;
+                        }
                     }
-                }
-                if (itemName != null) {
-                    final UnsupportedGatewayEntity unsupportedGatewayEntity = unsupportedGatewayEntityMap.get(itemName);
-                    if (unsupportedGatewayEntity != null) {
-                        unsupportedGatewayEntity.setElement(resourceXml);
+                    if (itemName != null) {
+                        final UnsupportedGatewayEntity unsupportedGatewayEntity = unsupportedGatewayEntityMap.get(itemName);
+                        if (unsupportedGatewayEntity != null) {
+                            unsupportedGatewayEntity.setElement(resourceXml);
+                        }
                     }
-                }
-            });
-        } catch (DocumentParseException e) {
-            throw new ConfigLoadException("Cannot load unsupported entities", e);
+                });
+            } catch (DocumentParseException e) {
+                throw new ConfigLoadException("Cannot load unsupported entities", e);
+            }
         }
     }
 

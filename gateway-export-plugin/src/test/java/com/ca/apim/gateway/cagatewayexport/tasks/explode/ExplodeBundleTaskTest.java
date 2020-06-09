@@ -136,7 +136,7 @@ class ExplodeBundleTaskTest {
         if (files != null) {
             Arrays.stream(files)
                     //Every config file except properties files should be the outputType specified
-                    .filter(file -> !file.getName().endsWith(".properties") && !file.isDirectory())
+                    .filter(file -> !file.getName().endsWith(".properties") && !file.isDirectory() && !file.getName().equals("unsupported-entities.xml"))
                     .collect(Collectors.toList())
                     .forEach(file -> assertEquals(FilenameUtils.getExtension(file.getPath()), fileExtension));
         }
