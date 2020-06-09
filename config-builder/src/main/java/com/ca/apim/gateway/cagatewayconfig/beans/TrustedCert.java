@@ -245,11 +245,6 @@ public class TrustedCert extends GatewayEntity implements AnnotableEntity {
     }
 
     @Override
-    public String getShortenedType() {
-        return "trusted_cert";
-    }
-
-    @Override
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         super.postLoad(entityKey, bundle, rootFolder, idGenerator);
         setName(entityKey);
