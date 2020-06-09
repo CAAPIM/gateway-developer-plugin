@@ -141,7 +141,7 @@ public class PolicyWriter implements EntityWriter {
     }
 
     /**
-     * This method finds the policy dependencies from the bundle dependency graph for a given policy id
+     * This method finds the policy dependencies from the bundle dependency graph for a given policy id.
      * @param id String
      * @param rawBundle Bundle
      * @return Set
@@ -156,7 +156,7 @@ public class PolicyWriter implements EntityWriter {
     }
 
     /**
-     * This method recursively loads the entity dependencies from the given entity id
+     * This method adds the direct dependencies of a given policy and recursively adds the transitive dependencies of environmental entities.
      *
      * @param dependencyListMap List
      * @param id String
@@ -169,7 +169,7 @@ public class PolicyWriter implements EntityWriter {
             if (parent.getId().equals(id)) {
                 List<Dependency> dependencyList = entry.getValue();
                 for (Dependency dependency : dependencyList) {
-                    // add the dependency and populate the transitive dependencies for only environmental entities
+                    // add the dependency and populate the transitive dependencies for environmental entities
                     if (dependencies.add(dependency) && !BuilderConstants.NON_ENV_ENTITY_TYPES.contains(dependency.getType())) {
                         populateDependencies(dependencyListMap, dependency.getId(), dependencies);
                     }
