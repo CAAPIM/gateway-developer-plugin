@@ -265,11 +265,6 @@ public class Policy extends Folderable implements AnnotableEntity {
         return EntityTypes.POLICY_TYPE;
     }
 
-    @Override
-    public String getShortenedType() {
-        return "policy";
-    }
-
     @JsonIgnore
     @Override
     public Metadata getMetadata() {

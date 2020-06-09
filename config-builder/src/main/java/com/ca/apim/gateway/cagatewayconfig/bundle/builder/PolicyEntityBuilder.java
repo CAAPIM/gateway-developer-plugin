@@ -84,19 +84,21 @@ public class PolicyEntityBuilder implements EntityBuilder {
             Policy policyEntity = (Policy) policy;
             if (annotatedEntity != null) {
                 AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
-                if (policyEntity.isReusable() || isAnnotatedEntity(policyEntity, annotatedEntity)) {
-                    if (annotatedPolicyEntity.getId() != null) {
-                        if(IdValidator.isValidGoid(annotatedPolicyEntity.getId())){
-                            policyEntity.setId(annotatedPolicyEntity.getId());
-                        } else {
-                            LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedPolicyEntity.getId(), policyEntity.getName()});
+                if (annotatedEntity.isReusable() || isAnnotatedEntity(policyEntity, annotatedEntity)) {
+                    if (annotatedPolicyEntity != null) {
+                        if (annotatedPolicyEntity.getId() != null) {
+                            if (IdValidator.isValidGoid(annotatedPolicyEntity.getId())) {
+                                policyEntity.setId(annotatedPolicyEntity.getId());
+                            } else {
+                                LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedPolicyEntity.getId(), policyEntity.getName()});
+                            }
                         }
-                    }
-                    if (annotatedPolicyEntity.getGuid() != null) {
-                        if(IdValidator.isValidGuid(annotatedPolicyEntity.getGuid())){
-                            policyEntity.setGuid(annotatedPolicyEntity.getGuid());
-                        } else {
-                            LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedPolicyEntity.getId(), policyEntity.getName()});
+                        if (annotatedPolicyEntity.getGuid() != null) {
+                            if (IdValidator.isValidGuid(annotatedPolicyEntity.getGuid())) {
+                                policyEntity.setGuid(annotatedPolicyEntity.getGuid());
+                            } else {
+                                LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedPolicyEntity.getId(), policyEntity.getName()});
+                            }
                         }
                     }
                 } else {
@@ -150,10 +152,10 @@ public class PolicyEntityBuilder implements EntityBuilder {
         final String policyName;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
-            if (policy.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
+            if (annotatedEntity.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = policy.getName();
             } else {
-                policyName = annotatedBundle.getUniquePrefix() + policy.getName() + annotatedBundle.getUniqueSuffix();
+                policyName = annotatedBundle.getUniquePrefix() + policy.getName();
             }
         } else {
             policyName = policy.getName();
@@ -366,27 +368,29 @@ public class PolicyEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (encass != null && !encass.isExcluded() && annotatedEntity != null) {
             AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (encass.isReusable()) {
-                if (annotatedEncassEntity.getGuid() != null) {
-                    if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
-                        encassGuid = annotatedEncassEntity.getGuid();
-                        encass.setGuid(encassGuid);
-                    } else {
-                        LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
+            if (annotatedEntity.isReusable()) {
+                if(annotatedEncassEntity != null){
+                    if (annotatedEncassEntity.getGuid() != null) {
+                        if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
+                            encassGuid = annotatedEncassEntity.getGuid();
+                            encass.setGuid(encassGuid);
+                        } else {
+                            LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
+                        }
                     }
-                }
-                if (annotatedEncassEntity.getId() != null) {
-                    if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
-                        encass.setId(annotatedEncassEntity.getId());
-                    } else {
-                        LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
+                    if (annotatedEncassEntity.getId() != null) {
+                        if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
+                            encass.setId(annotatedEncassEntity.getId());
+                        } else {
+                            LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
+                        }
                     }
                 }
             } else {
                 encassGuid = idGenerator.generateGuid();
                 encass.setGuid(encassGuid);
                 encass.setId(idGenerator.generate());
-                encassName = annotatedBundle.getUniquePrefix() + encassName + annotatedBundle.getUniqueSuffix();
+                encassName = annotatedBundle.getUniquePrefix() + encassName;
             }
         }
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
@@ -545,10 +549,15 @@ public class PolicyEntityBuilder implements EntityBuilder {
         String policyName = policy.getName();
         String policyNameWithPath = policy.getPath();
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
-        final boolean isRedeployableBundle = annotatedEntity != null && annotatedEntity.isRedeployable();
+        boolean isRedeployableBundle = false;
+        boolean isReusable = false;
+        if(annotatedEntity != null){
+            isRedeployableBundle = annotatedEntity.isRedeployable();
+            isReusable = annotatedEntity.isReusable();
+        }
         if (annotatedBundle != null) {
-            if (!policy.isReusable() && !isAnnotatedEntity(policy, annotatedEntity)) {
-                policyName = annotatedBundle.getUniquePrefix() + policyName + annotatedBundle.getUniqueSuffix();
+            if (!isReusable && !isAnnotatedEntity(policy, annotatedEntity)) {
+                policyName = annotatedBundle.getUniquePrefix() + policyName;
                 policyNameWithPath = PathUtils.extractPath(policy.getPath()) + policyName;
             }
         }
@@ -592,7 +601,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
                 policy.getPath(), policyNameWithPath, policy.getId(), policyElement, policy.isHasRouting(), policy);
-        if (isRedeployableBundle || !(policy.isReusable() || isAnnotatedEntity(policy, annotatedEntity))) {
+        if (isRedeployableBundle || !(isReusable || isAnnotatedEntity(policy, annotatedEntity))) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

@@ -5,7 +5,6 @@ Link Type   | Link
 ------      | ------
 Rally Issue | 
 Func Spec   | 
-
 ## Checklist
 - [x] Pull Request Created
 - [ ] Code Review Completed
