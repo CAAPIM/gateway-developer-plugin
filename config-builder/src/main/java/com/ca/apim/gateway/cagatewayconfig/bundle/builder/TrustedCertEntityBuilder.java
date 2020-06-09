@@ -72,9 +72,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
                         .map(
-                                trustedCertEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(TRUSTED_CERT_TYPE, trustedCertEntry.getKey(),
-                                        ((TrustedCert)trustedCertEntry.getValue()).getAnnotatedEntity() != null && ((TrustedCert)trustedCertEntry.getValue()).getAnnotatedEntity().getId() != null ?
-                                                ((TrustedCert)trustedCertEntry.getValue()).getAnnotatedEntity().getId() : idGenerator.generate())
+                                trustedCertEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(TRUSTED_CERT_TYPE, trustedCertEntry.getKey(), generateCertificateId((TrustedCert)trustedCertEntry.getValue()))
                         ).collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(trustedCertEntry ->
@@ -86,8 +84,7 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildTrustedCertEntity(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
-        final String id = trustedCert.getAnnotatedEntity() != null && trustedCert.getAnnotatedEntity().getId() != null ?
-                trustedCert.getAnnotatedEntity().getId(): idGenerator.generate();
+        final String id = generateCertificateId(trustedCert);
         trustedCert.setId(id);
         final Element trustedCertElem = createElementWithAttributesAndChildren(
                 document,
@@ -99,6 +96,13 @@ public class TrustedCertEntityBuilder implements EntityBuilder {
         buildAndAppendPropertiesElement(trustedCert.createProperties(), document, trustedCertElem);
 
         return EntityBuilderHelper.getEntityWithNameMapping(TRUSTED_CERT_TYPE, name, id, trustedCertElem);
+    }
+
+    private String generateCertificateId(TrustedCert trustedCert) {
+        if (trustedCert != null && trustedCert.getAnnotatedEntity() != null && trustedCert.getAnnotatedEntity().getId() != null) {
+            return trustedCert.getAnnotatedEntity().getId();
+        }
+        return idGenerator.generate();
     }
 
     private Element buildCertData(String name, TrustedCert trustedCert, Map<String, SupplierWithIO<InputStream>> certificateFiles, Document document) {
