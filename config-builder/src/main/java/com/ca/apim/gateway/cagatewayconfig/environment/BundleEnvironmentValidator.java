@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
@@ -73,7 +74,7 @@ class BundleEnvironmentValidator {
     }
 
     private void findInBundle(Bundle bundle, String type, String name) {
-        Object entity;
+        Object entity = null;
         switch (type) {
             case EntityTypes.CLUSTER_PROPERTY_TYPE:
                 entity = bundle.getGlobalEnvironmentProperties().get(PREFIX_GATEWAY + name);
@@ -103,7 +104,11 @@ class BundleEnvironmentValidator {
                 entity = bundle.getJmsDestinations().get(name);
                 break;
             default:
-                throw new MissingEnvironmentException("Unexpected entity type " + type);
+                UnsupportedGatewayEntity unsupportedGatewayEntity = bundle.getUnsupportedEntities().get(name);
+                if(unsupportedGatewayEntity != null && type.equals(unsupportedGatewayEntity.getType())){
+                    entity = unsupportedGatewayEntity;
+                }
+
         }
 
         if (entity == null) {

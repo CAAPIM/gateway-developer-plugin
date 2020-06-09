@@ -35,8 +35,18 @@ public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGateway
     @Override
     public void load(final Bundle bundle, final File rootDir) {
         super.load(bundle, rootDir);
+        updateItemXml(bundle, new File(rootDir, "config"));
+    }
 
-        final File unsupportedEntityXml = new File(new File(rootDir, "config"), "unsupported-entities.xml");
+    @Override
+    public void load(Bundle bundle, String name, String value, String environmentConfigurationFolderPath) {
+        super.load(bundle, name, value);
+        File configFolder = new File(environmentConfigurationFolderPath);
+        updateItemXml(bundle, configFolder);
+    }
+
+    private void updateItemXml(Bundle bundle, File configFolder) {
+        final File unsupportedEntityXml = new File(configFolder, "unsupported-entities.xml");
         final Map<String, UnsupportedGatewayEntity> unsupportedGatewayEntityMap = bundle.getUnsupportedEntities();
         try {
             final Document document = DocumentTools.INSTANCE.parse(unsupportedEntityXml);
@@ -60,18 +70,8 @@ public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGateway
                 }
             });
         } catch (DocumentParseException e) {
-            throw new ConfigLoadException("cannot load unsupported entities", e);
+            throw new ConfigLoadException("Cannot load unsupported entities", e);
         }
-    }
-
-    @Override
-    public void load(Bundle bundle, String name, String value) {
-        throw new ConfigLoadException("Cannot load an individual unsupported entity");
-    }
-
-    @Override
-    public Object loadSingle(String name, File entitiesFile) {
-        throw new ConfigLoadException("Cannot load an individual unsupported entity");
     }
 
     @Override

@@ -44,6 +44,18 @@ public interface EntityLoader {
     void load(Bundle bundle, String name, String value);
 
     /**
+     * Load a single entity into a bundle from a String representation of json/yaml or properties value.
+     * default implementation does not consider configFolder path
+     * @param bundle the bundle to load the entity into
+     * @param name name of the entity
+     * @param value value to be loaded, either json or property value
+     * @param environmentConfigurationFolderPath folder from which value is taken
+     */
+    default void load(Bundle bundle, String name, String value, String environmentConfigurationFolderPath){
+        load(bundle, name, value);
+    }
+
+    /**
      * @return the type of the entity managed by this loader
      */
     String getEntityType();

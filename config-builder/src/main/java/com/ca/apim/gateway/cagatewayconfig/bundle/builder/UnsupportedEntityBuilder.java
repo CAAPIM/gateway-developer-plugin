@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
 import java.util.*;
@@ -30,8 +31,9 @@ public class UnsupportedEntityBuilder implements EntityBuilder {
         if (bundleType == ENVIRONMENT) {
             unsupportedGatewayEntityMap.entrySet().forEach(entry -> {
                 UnsupportedGatewayEntity unsupportedGatewayEntity = entry.getValue();
+                Element resourceElement = (Element) document.adoptNode(unsupportedGatewayEntity.getElement());
                 unsupportedEntities.add(EntityBuilderHelper.getEntityWithNameMapping(unsupportedGatewayEntity.getType(),
-                        entry.getKey(), unsupportedGatewayEntity.getId(), unsupportedGatewayEntity.getElement()));
+                        entry.getKey(), unsupportedGatewayEntity.getId(), resourceElement));
             });
         } else {
             unsupportedGatewayEntityMap.entrySet().forEach(entry -> {
