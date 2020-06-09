@@ -1,13 +1,8 @@
 language: java
 jdk:
   - openjdk8
-addons:
-  sonarcloud:
-    organization: "ca-api-gateway"
-    token:
-      secure: $SONAR_TOKEN
 script:
-  - ./gradlew sonarqube
+  - ./gradlew clean build
 branches:
   only:
   - master
