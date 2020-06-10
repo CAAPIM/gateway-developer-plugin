@@ -13,6 +13,7 @@ public class PolicyXMLElements {
 
     public static final String GOID_VALUE = "goidValue";
     public static final String STRING_VALUE = "stringValue";
+    public static final String GOID_ARRAY_VALUE = "goidArrayValue";
     public static final String INCLUDE = "L7p:Include";
     public static final String ENCAPSULATED = "L7p:Encapsulated";
     public static final String SET_VARIABLE = "L7p:SetVariable";
@@ -33,6 +34,10 @@ public class PolicyXMLElements {
     public static final String JMS_ROUTING_ASSERTION = "L7p:JmsRoutingAssertion";
     public static final String JMS_ENDPOINT_OID = "L7p:EndpointOid";
     public static final String JMS_ENDPOINT_NAME = "L7p:EndpointName";
+    public static final String HTTP_ROUTING_ASSERTION  = "L7p:HttpRoutingAssertion";
+    public static final String TLS_TRUSTED_CERT_IDS = "L7p:TlsTrustedCertGoids";
+    public static final String TLS_TRUSTED_CERT_NAMES = "L7p:TlsTrustedCertNames";
+    public static final String ITEM = "L7p:item";
 
     private PolicyXMLElements() {
 

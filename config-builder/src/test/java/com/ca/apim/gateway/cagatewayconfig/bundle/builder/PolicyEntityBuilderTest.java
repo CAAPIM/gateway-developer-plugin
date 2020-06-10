@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
+import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
 import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -32,7 +33,9 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_BY;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_TO;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.STRING_VALUE;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.VERIFY_HOSTNAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -874,6 +877,50 @@ class PolicyEntityBuilderTest {
         assertFalse(properties.isEmpty());
         assertEquals("internal-policy", properties.get(PropertyConstants.PROPERTY_TAG));
         assertNull(properties.get(PropertyConstants.PROPERTY_SUBTAG));
+    }
+
+    @Test
+    void testPrepareRoutingAssertionCertificateIds() {
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert-1", createTrustedCertWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "2cd473fe16d98cd6b9348ffb404517bc")));
+        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert-2", createTrustedCertWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "28be78b936aa61bc75bd0df2089789cd")));
+
+        Element httpRoutingAssertionElement = createHttpRoutingAssertionWithCertNames(document);
+        policyEntityBuilder.prepareRoutingAssertionCertificateIds(document, bundle, httpRoutingAssertionElement);
+
+        final Element trustedCertIDElement = getSingleChildElement(httpRoutingAssertionElement, TLS_TRUSTED_CERT_IDS, true);
+        assertNotNull(trustedCertIDElement);
+        assertEquals(2, trustedCertIDElement.getChildNodes().getLength());
+        assertEquals("2cd473fe16d98cd6b9348ffb404517bc", trustedCertIDElement.getChildNodes().item(0).getAttributes().getNamedItem(GOID_VALUE).getTextContent());
+        assertEquals("28be78b936aa61bc75bd0df2089789cd", trustedCertIDElement.getChildNodes().item(1).getAttributes().getNamedItem(GOID_VALUE).getTextContent());
+    }
+
+    @NotNull
+    private Element createHttpRoutingAssertionWithCertNames(Document document) {
+        Element trustedCertNamesElement = createElementWithAttributesAndChildren(
+                document,
+                TLS_TRUSTED_CERT_NAMES,
+                org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of("stringArrayValue", "included"),
+                createElementWithAttribute(document, PolicyXMLElements.ITEM, STRING_VALUE, "fake-cert-1"),
+                createElementWithAttribute(document, PolicyXMLElements.ITEM, STRING_VALUE, "fake-cert-2")
+        );
+
+        return createElementWithChildren(
+                document,
+                HTTP_ROUTING_ASSERTION,
+                trustedCertNamesElement
+        );
+    }
+
+    @NotNull
+    private TrustedCert createTrustedCertWithAnnotation(final String type, final String id) {
+        TrustedCert cert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation annotation = new Annotation(type);
+        annotation.setId(id);
+        annotations.add(annotation);
+        cert.setAnnotations(annotations);
+        return cert;
     }
 
     private Element createIncludeAssertionElement(Document document, String policyPath) {
