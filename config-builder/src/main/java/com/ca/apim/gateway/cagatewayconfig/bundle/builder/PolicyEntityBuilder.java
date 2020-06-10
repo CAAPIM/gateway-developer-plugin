@@ -457,16 +457,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyGuidElement.removeAttribute(POLICY_PATH);
     }
 
-    private static Policy getPolicyFromMetadata(final Metadata metadata) {
-        Policy policy = new Policy();
-        policy.setId(metadata.getId());
-        policy.setGuid(metadata.getGuid());
-        Set<Annotation> annotations = new HashSet<>();
-        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
-        policy.setAnnotations(annotations);
-        return policy;
-    }
-
     private void prepareAssertion(Element policyElement, String assertionTag, Consumer<Element> prepareAssertionMethod) {
         NodeList assertionReferences = policyElement.getElementsByTagName(assertionTag);
         for (int i = 0; i < assertionReferences.getLength(); i++) {

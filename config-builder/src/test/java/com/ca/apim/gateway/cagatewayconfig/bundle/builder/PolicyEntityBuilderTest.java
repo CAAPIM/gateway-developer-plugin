@@ -233,13 +233,13 @@ class PolicyEntityBuilderTest {
         assertEquals(expectedB64, b64);
 
         String value = new String(decodeBase64(b64));
-    assertEquals(
-        "<usersession>\n"
-            + " <user><![CDATA[${current.username}]]></user>\n"
-            + " <role><![CDATA[${current.user.role}]]></role>\n"
-            + " <lookupUser><![CDATA[${lookupUser}]]></lookupUser>\n"
-            + " <synchToken><![CDATA[${xpathSynchToken.result}]]></synchToken>\n"
-            + "</usersession>", value);
+        assertEquals(
+                "<usersession>\n"
+                        + " <user><![CDATA[${current.username}]]></user>\n"
+                        + " <role><![CDATA[${current.user.role}]]></role>\n"
+                        + " <lookupUser><![CDATA[${lookupUser}]]></lookupUser>\n"
+                        + " <synchToken><![CDATA[${xpathSynchToken.result}]]></synchToken>\n"
+                        + "</usersession>", value);
     }
 
     @Test

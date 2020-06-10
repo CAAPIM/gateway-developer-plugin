@@ -1,9 +1,13 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class DefaultMetadata implements Metadata {
     private String name;
     private String type;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String id;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String guid;
 
     @Override

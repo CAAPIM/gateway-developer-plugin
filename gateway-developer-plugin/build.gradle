@@ -4,7 +4,7 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 plugins {
-    id 'com.gradle.plugin-publish' version "0.10.0"
+    id 'com.gradle.plugin-publish' version "0.11.0"
     id 'java-gradle-plugin'
     id 'maven-publish'
     id 'maven'

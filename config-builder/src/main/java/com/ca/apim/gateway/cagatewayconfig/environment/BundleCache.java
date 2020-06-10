@@ -17,7 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class BundleCache {
     private final Map<String, Bundle> cache = new ConcurrentHashMap<>();
+    private final Map<String, BundleDefinedEntities> metaDataCache = new ConcurrentHashMap<>();
     private final EntityBundleLoader entityBundleLoader;
+    private final JsonFileUtils jsonFileUtils = JsonFileUtils.INSTANCE;
 
     @Inject
     public BundleCache(final EntityBundleLoader entityBundleLoader) {

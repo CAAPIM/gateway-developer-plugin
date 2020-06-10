@@ -13,4 +13,5 @@ public class BundleDefinedEntities {
     public void setDefinedEntities(Collection<DefaultMetadata> definedEntities) {
         this.definedEntities = definedEntities;
     }
+
 }

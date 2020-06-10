@@ -7,6 +7,10 @@
 package com.ca.apim.gateway.cagatewayconfig;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleArtifacts;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
@@ -109,6 +113,7 @@ public class BundleFileBuilder {
                 }
             }
             bundle.setDependencies(dependencyBundles);
+
             // Log overridden entities
             if (!dependencyBundles.isEmpty()) {
                 logOverriddenEntities(bundle, dependencyBundles, Service.class);
