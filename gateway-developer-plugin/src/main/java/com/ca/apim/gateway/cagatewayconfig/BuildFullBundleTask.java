@@ -18,6 +18,8 @@ import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

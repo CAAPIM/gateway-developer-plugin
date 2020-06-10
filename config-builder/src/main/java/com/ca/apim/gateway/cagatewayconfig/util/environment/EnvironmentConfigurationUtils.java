@@ -7,6 +7,10 @@
 package com.ca.apim.gateway.cagatewayconfig.util.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
+import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentBundleData;
+import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;

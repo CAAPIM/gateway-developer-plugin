@@ -28,6 +28,7 @@ public class UnsupportedGatewayEntity extends GatewayEntity {
     public String getId() {
         return this.id;
     }
+
     public void setId(String id) {
         this.id = id;
     }

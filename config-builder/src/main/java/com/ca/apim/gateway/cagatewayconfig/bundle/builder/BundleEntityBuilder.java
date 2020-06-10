@@ -350,7 +350,6 @@ public class BundleEntityBuilder {
             Map entityMap = annotatedBundle.getUnsupportedEntities();
             optionalGatewayEntity.ifPresent(e -> entityMap.put(e.getKey(), e.getValue()));
         }
-
     }
 
     /**
