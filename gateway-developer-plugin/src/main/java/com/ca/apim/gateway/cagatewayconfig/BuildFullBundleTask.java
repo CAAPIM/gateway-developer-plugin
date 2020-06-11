@@ -28,6 +28,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.FU
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * The BuildFullBundleTask task will grab provided environment properties and build a single bundle merged with the deployment bundles.
@@ -94,9 +95,9 @@ public class BuildFullBundleTask extends DefaultTask {
         if(metaDataFiles.isEmpty()) {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
-
+        File configuredFolder = configFolder.getAsFile().getOrNull();
         metaDataFiles.stream().forEach(metaDataFile-> {
-            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().getOrNull());
+            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configuredFolder);
             if (null != bundleEnvironmentValues) {
                 final String fullInstallBundleFilename = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
                 //read environment properties from environmentConfig and merge it with metadata properties
@@ -106,6 +107,7 @@ public class BuildFullBundleTask extends DefaultTask {
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),
                         bundleDirectory,
                         fullInstallBundleFilename,
+                        configuredFolder != null ? configuredFolder.getPath() : EMPTY,
                         detemplatizeDeploymentBundles.get()
                 );
             }
