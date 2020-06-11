@@ -17,17 +17,8 @@ public class UnsupportedEntityBuilder implements EntityBuilder {
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        if (bundle instanceof AnnotatedBundle) {
-            AnnotatedBundle annotatedBundle = (AnnotatedBundle) bundle;
-            Map<String, UnsupportedGatewayEntity> map = Optional.ofNullable(bundle.getUnsupportedEntities()).orElse(Collections.emptyMap());
-            return buildEntities(map, annotatedBundle, annotatedBundle.getFullBundle(), bundleType, document);
-        } else {
-            return buildEntities(bundle.getUnsupportedEntities(), null, bundle, bundleType, document);
-        }
-    }
-
-    public List<Entity> buildEntities(Map<String, UnsupportedGatewayEntity> unsupportedGatewayEntityMap, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
         List<Entity> unsupportedEntities = new ArrayList<>();
+        Map<String, UnsupportedGatewayEntity> unsupportedGatewayEntityMap = bundle.getUnsupportedEntities();
         if (bundleType == ENVIRONMENT) {
             unsupportedGatewayEntityMap.entrySet().forEach(entry -> {
                 UnsupportedGatewayEntity unsupportedGatewayEntity = entry.getValue();
