@@ -23,7 +23,7 @@ public final class BuilderConstants {
     public static final String STORED_PASSWORD_REF_FORMAT = "${secpass.%s.plaintext}";
     public static final String BUNDLE_TYPE_ALL = "ALL";
 
-    protected static final Set<String> NON_ENV_ENTITY_TYPES;
+    public static final Set<String> NON_ENV_ENTITY_TYPES;
 
     public static final Predicate<Entity> FILTER_ENV_ENTITIES = new Predicate<Entity>() {
         @Override
