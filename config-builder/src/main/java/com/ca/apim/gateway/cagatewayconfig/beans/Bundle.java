@@ -13,10 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -31,7 +28,24 @@ public class Bundle {
     private FolderTree folderTree;
     private Map<Dependency, List<Dependency>> dependencyMap;
     private BundleLoadingOperation loadingMode;
-    private Set<BundleDefinedEntities> metadataDependencyBundles;
+    private DependentBundle dependentBundleFrom;
+    private List<DependentBundle> dependentBundles = new ArrayList<>();
+
+    public void addDependentBundle(DependentBundle dependentBundle){
+        dependentBundles.add(dependentBundle);
+    }
+
+    public List<DependentBundle> getDependentBundles() {
+        return dependentBundles;
+    }
+
+    public DependentBundle getDependentBundleFrom() {
+        return dependentBundleFrom;
+    }
+
+    public void setDependentBundleFrom(DependentBundle dependentBundleFrom) {
+        this.dependentBundleFrom = dependentBundleFrom;
+    }
 
     @SuppressWarnings("unchecked")
     public <E extends GatewayEntity> Map<String, E> getEntities(Class<E> entityType) {
@@ -257,11 +271,4 @@ public class Bundle {
         this.loadingMode = loadingMode;
     }
 
-    public Set<BundleDefinedEntities> getMetadataDependencyBundles() {
-        return metadataDependencyBundles;
-    }
-
-    public void setMetadataDependencyBundles(Set<BundleDefinedEntities> metadataDependencyBundles) {
-        this.metadataDependencyBundles = metadataDependencyBundles;
-    }
 }

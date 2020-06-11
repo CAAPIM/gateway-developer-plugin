@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
@@ -41,7 +42,7 @@ public class BundleMetadataBuilder {
      * @param projectInfo       Gradle Project info containing Gradle project name, groupName and version
      * @return Full bundle or Annotated bundle metadata
      */
-    public BundleMetadata build(final AnnotatedBundle annotatedBundle, final List<Entity> dependentEntities,
+    public BundleMetadata build(final AnnotatedBundle annotatedBundle, final Bundle bundle, final List<Entity> dependentEntities,
                                 ProjectInfo projectInfo) {
         if (annotatedBundle != null && annotatedBundle.getAnnotatedEntity() != null) {
             AnnotatedEntity<? extends GatewayEntity> annotatedEntity = annotatedBundle.getAnnotatedEntity();
@@ -58,6 +59,7 @@ public class BundleMetadataBuilder {
                     projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
             builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
+            builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
             builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
@@ -67,7 +69,7 @@ public class BundleMetadataBuilder {
 
             return builder.definedEntities(definedEntities).build();
         } else {
-            return buildFullBundleMetadata(dependentEntities, projectInfo);
+            return buildFullBundleMetadata(dependentEntities, bundle, projectInfo);
         }
     }
 
@@ -78,7 +80,7 @@ public class BundleMetadataBuilder {
      * @param projectInfo   Gradle Project info containing Gradle project name, groupName and version
      * @return Full bundle metadata
      */
-    private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, ProjectInfo projectInfo) {
+    private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final Bundle bundle, ProjectInfo projectInfo) {
         BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, idGenerator.generate(),
                 projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
@@ -86,6 +88,7 @@ public class BundleMetadataBuilder {
         builder.reusableAndRedeployable(true, true);
         builder.hasRouting(hasRoutingAssertion(entities));
         builder.environmentEntities(getEnvironmentDependenciesMetadata(entities));
+        builder.dependencies(bundle.getDependentBundles());
         builder.definedEntities(getDefinedEntitiesMetadata(entities));
 
         return builder.build();

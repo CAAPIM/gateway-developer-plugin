@@ -59,8 +59,8 @@ public class BundleMetadataBuilderTest {
 
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestBundleLoader(bundle)));
 
-        List<File> dummyList = new ArrayList<>();
-        dummyList.add(new File("test"));
+        List<DependentBundle> dummyList = new ArrayList<>();
+        dummyList.add(new DependentBundle(new File("test")));
 
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(DocumentTools.INSTANCE, DocumentFileUtils.INSTANCE,
                 JsonFileUtils.INSTANCE, entityLoaderRegistry, builder, bundleCache);
