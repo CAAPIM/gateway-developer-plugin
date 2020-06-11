@@ -3,7 +3,6 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
@@ -25,14 +24,11 @@ import static org.apache.commons.io.IOUtils.toInputStream;
 @Singleton
 public class UnsupportedEntityWriter implements EntityWriter {
     private final DocumentFileUtils documentFileUtils;
-    private final JsonFileUtils jsonFileUtils;
     private final DocumentTools documentTools;
 
     @Inject
-    public UnsupportedEntityWriter(DocumentFileUtils documentFileUtils,
-                                   JsonFileUtils jsonFileUtils, DocumentTools documentTools) {
+    public UnsupportedEntityWriter(DocumentFileUtils documentFileUtils, DocumentTools documentTools) {
         this.documentFileUtils = documentFileUtils;
-        this.jsonFileUtils = jsonFileUtils;
         this.documentTools = documentTools;
     }
 
@@ -54,9 +50,9 @@ public class UnsupportedEntityWriter implements EntityWriter {
         writeElement(configFolder, items);
     }
 
-    private void writeElement(File configFolder, Element item) {
+    private void writeElement(File configFolder, Element items) {
         Path unsupportedEntitiesFilePath = configFolder.toPath().resolve("unsupported-entities.xml");
-        try (InputStream itemStream = toInputStream(documentTools.elementToString(item), UTF_8)) {
+        try (InputStream itemStream = toInputStream(documentTools.elementToString(items), UTF_8)) {
             FileUtils.copyInputStreamToFile(itemStream, unsupportedEntitiesFilePath.toFile());
         } catch (IOException e) {
             throw new WriteException("Unable to write unsupported entities to xml file", e);

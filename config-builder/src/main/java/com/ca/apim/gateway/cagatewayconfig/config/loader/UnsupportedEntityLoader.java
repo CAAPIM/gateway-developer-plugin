@@ -27,11 +27,13 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGatewayEntity> implements EntityLoader {
 
     private final EntityUtils.GatewayEntityInfo gatewayEntityInfo;
+    private final DocumentTools documentTools;
 
     @Inject
-    public UnsupportedEntityLoader(final JsonTools jsonTools, final IdGenerator idGenerator) {
+    public UnsupportedEntityLoader(final JsonTools jsonTools, final IdGenerator idGenerator, final DocumentTools documentTools) {
         super(jsonTools, idGenerator);
         this.gatewayEntityInfo = EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class);
+        this.documentTools = documentTools;
     }
 
     @Override
@@ -43,8 +45,10 @@ public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGateway
     @Override
     public void load(Bundle bundle, String name, String value, String environmentConfigurationFolderPath) {
         super.load(bundle, name, value);
-        File configFolder = new File(environmentConfigurationFolderPath);
-        updateItemXml(bundle, configFolder);
+        if (environmentConfigurationFolderPath != null) {
+            File configFolder = new File(environmentConfigurationFolderPath);
+            updateItemXml(bundle, configFolder);
+        }
     }
 
     private void updateItemXml(Bundle bundle, File configFolder) {
@@ -52,7 +56,7 @@ public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGateway
         if (unsupportedEntityXml.exists()) {
             final Map<String, UnsupportedGatewayEntity> unsupportedGatewayEntityMap = bundle.getUnsupportedEntities();
             try {
-                final Document document = DocumentTools.INSTANCE.parse(unsupportedEntityXml);
+                final Document document = documentTools.parse(unsupportedEntityXml);
                 final List<Element> items = getChildElements(document.getDocumentElement(), ITEM);
                 items.forEach(item -> {
                     final String itemName = getSingleChildElementTextContent(item, NAME);
