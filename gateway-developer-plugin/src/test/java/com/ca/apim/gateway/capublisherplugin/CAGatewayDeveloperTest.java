@@ -215,7 +215,7 @@ class CAGatewayDeveloperTest {
         tarArchiveInputStream.close();
     }
 
-   // @Test
+    @Test
     @ExtendWith(TemporaryFolderExtension.class)
     void testExampleProjectWithAssertionsDependencies(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
         String projectFolder = "example-project-with-assertions-dependencies";
