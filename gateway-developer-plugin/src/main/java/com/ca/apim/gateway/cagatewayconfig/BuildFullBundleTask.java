@@ -91,7 +91,7 @@ public class BuildFullBundleTask extends DefaultTask {
         final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
         final String bundleDirectory = into.getAsFile().get().getPath();
         final List<File> metaDataFiles = collectFiles(bundleDirectory, METADATA_FILE_NAME_SUFFIX);
-        if(metaDataFiles.isEmpty()) {
+        if (metaDataFiles.isEmpty()) {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
 

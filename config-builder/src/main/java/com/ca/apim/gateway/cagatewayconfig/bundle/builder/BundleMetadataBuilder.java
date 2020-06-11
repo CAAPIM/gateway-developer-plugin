@@ -47,7 +47,10 @@ public class BundleMetadataBuilder {
             AnnotatedEntity<? extends GatewayEntity> annotatedEntity = annotatedBundle.getAnnotatedEntity();
             final Encass encass = (Encass) annotatedEntity.getEntity();
             final String bundleName = annotatedBundle.getBundleName();
-            final String name = bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
+            String name = bundleName;
+            if (StringUtils.isNotBlank(projectInfo.getVersion())) {
+                name =  bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
+            }
             final String metadataId = StringUtils.isBlank(annotatedEntity.getMetadataId()) ? idGenerator.generate() :
                     annotatedEntity.getMetadataId();
 

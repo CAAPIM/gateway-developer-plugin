@@ -6,6 +6,8 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class ProjectInfo {
     private final String name;
     private final String groupName;
@@ -14,7 +16,7 @@ public class ProjectInfo {
     public ProjectInfo(String name, String groupName, String version) {
         this.name = name;
         this.groupName = groupName;
-        this.version = version;
+        this.version = StringUtils.equalsIgnoreCase(version, "unspecified") ? "" : version;
     }
 
     public String getName() {

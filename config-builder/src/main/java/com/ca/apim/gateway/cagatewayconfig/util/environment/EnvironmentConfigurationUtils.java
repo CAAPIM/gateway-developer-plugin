@@ -18,6 +18,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -95,7 +96,7 @@ public class EnvironmentConfigurationUtils {
         }
         final EnvironmentBundleData environmentBundleData = jsonFileUtils.readBundleMetadataFile(metaDataFile, EnvironmentBundleData.class);
         if (environmentBundleData != null && environmentBundleData.getEnvironmentEntities() != null) {
-            final String bundleName = environmentBundleData.getName();
+            String bundleName = environmentBundleData.getName();
             final String bundleVersion = environmentBundleData.getVersion();
             final Map<String, String> environmentValues = new LinkedHashMap<>();
             if (configFolder != null) {
@@ -128,7 +129,8 @@ public class EnvironmentConfigurationUtils {
                     }
                 });
             }
-            return ImmutablePair.of(bundleName + "-" + bundleVersion, environmentValues);
+            bundleName = StringUtils.isBlank(bundleVersion) ? bundleName : bundleName + "-" + bundleVersion;
+            return ImmutablePair.of(bundleName, environmentValues);
         }
 
         return null;

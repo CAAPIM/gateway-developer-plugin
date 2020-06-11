@@ -36,11 +36,13 @@ public class AnnotatedBundle extends Bundle {
     }
 
     public String getBundleName() {
+        String name;
         if (StringUtils.isBlank(annotatedEntity.getBundleName())) {
-            return projectInfo.getName() + "-" + annotatedEntity.getEntityName() + "-" + projectInfo.getVersion();
+            name = projectInfo.getName() + "-" + annotatedEntity.getEntityName();
         } else {
-            return annotatedEntity.getBundleName() + "-" + projectInfo.getVersion();
+            name = annotatedEntity.getBundleName();
         }
+        return StringUtils.isBlank(projectInfo.getVersion()) ? name : name + "-" + projectInfo.getVersion();
     }
 
     public String getUniquePrefix() {
