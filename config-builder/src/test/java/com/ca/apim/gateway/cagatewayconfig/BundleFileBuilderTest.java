@@ -98,7 +98,7 @@ class BundleFileBuilderTest {
         BundleFileBuilder bundleFileBuilder = Mockito.spy(new BundleFileBuilder(documentTools, documentFileUtils,
                 jsonFileUtils, entityLoaderRegistry, bundleEntityBuilder, bundleCache));
         bundleFileBuilder.buildBundle(new File("input"), new File("output"), dummyList, projectInfo);
-        Assert.assertNotNull(dependencyBundle.getDependentBundle());
+        Assert.assertNotNull(dependencyBundle.getDependentBundleFrom());
     }
 
     @Test

@@ -98,7 +98,7 @@ public class EncassEntityBuilder implements EntityBuilder {
                             throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyWithPath);
                         }
                         //add dependent bundle if bundle type is not null
-                        DependentBundle dependentBundle = b.getDependentBundle();
+                        DependentBundle dependentBundle = b.getDependentBundleFrom();
                         if (dependentBundle != null && dependentBundle.getType() != null){
                             if(annotatedBundle != null) {
                                 annotatedBundle.addDependentBundle(dependentBundle);

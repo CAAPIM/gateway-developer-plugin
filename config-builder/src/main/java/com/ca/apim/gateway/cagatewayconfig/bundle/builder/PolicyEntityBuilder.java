@@ -293,7 +293,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                         throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
                     }
                     //add dependent bundle if bundle type is not null
-                    DependentBundle dependentBundle = b.getDependentBundle();
+                    DependentBundle dependentBundle = b.getDependentBundleFrom();
                     if (dependentBundle != null && dependentBundle.getType() != null){
                         if(annotatedBundle != null) {
                             annotatedBundle.addDependentBundle(dependentBundle);
@@ -428,7 +428,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                         throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
                     }
                     //add dependent bundle if bundle type is not null
-                    DependentBundle dependentBundle = b.getDependentBundle();
+                    DependentBundle dependentBundle = b.getDependentBundleFrom();
                     if (dependentBundle != null && dependentBundle.getType() != null){
                         if(annotatedBundle != null) {
                             annotatedBundle.addDependentBundle(dependentBundle);

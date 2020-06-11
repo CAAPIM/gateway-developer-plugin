@@ -28,7 +28,7 @@ public class Bundle {
     private FolderTree folderTree;
     private Map<Dependency, List<Dependency>> dependencyMap;
     private BundleLoadingOperation loadingMode;
-    private DependentBundle dependentBundle;
+    private DependentBundle dependentBundleFrom;
     private List<DependentBundle> dependentBundles = new ArrayList<>();
 
     public void addDependentBundle(DependentBundle dependentBundle){
@@ -39,12 +39,12 @@ public class Bundle {
         return dependentBundles;
     }
 
-    public DependentBundle getDependentBundle() {
-        return dependentBundle;
+    public DependentBundle getDependentBundleFrom() {
+        return dependentBundleFrom;
     }
 
-    public void setDependentBundle(DependentBundle dependentBundle) {
-        this.dependentBundle = dependentBundle;
+    public void setDependentBundleFrom(DependentBundle dependentBundleFrom) {
+        this.dependentBundleFrom = dependentBundleFrom;
     }
 
     @SuppressWarnings("unchecked")
