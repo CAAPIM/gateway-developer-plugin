@@ -165,6 +165,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement, annotatedBundle));
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyName, policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
+        prepareAssertion(policyElement, HTTP_ROUTING_ASSERTION, assertionElement -> prepareRoutingAssertionCertificateIds(policyDocument, bundle, assertionElement));
 
         policy.setPolicyDocument(policyElement);
     }
@@ -510,6 +511,36 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
             }
             prepareAssertionMethod.accept((Element) assertionElement);
+        }
+    }
+
+    @VisibleForTesting
+    void prepareRoutingAssertionCertificateIds(Document policyDocument, Bundle bundle, Element assertionElement) {
+        final Element trustedCertNameElement = getSingleChildElement(assertionElement, TLS_TRUSTED_CERT_NAMES, true);
+        if (trustedCertNameElement != null && trustedCertNameElement.getChildNodes().getLength() > 0) {
+            Element trustedCertGoidElement = createElementWithAttribute(
+                    policyDocument,
+                    TLS_TRUSTED_CERT_IDS,
+                    GOID_ARRAY_VALUE,
+                    "included"
+            );
+            assertionElement.insertBefore(trustedCertGoidElement, trustedCertNameElement);
+
+            final NodeList trustedCertNamesList = trustedCertNameElement.getChildNodes();
+            for (int i = 0; i < trustedCertNamesList.getLength(); i++) {
+                final String trustedCertName = trustedCertNamesList.item(i).getAttributes().getNamedItem(STRING_VALUE).getTextContent();
+                final TrustedCert trustedCert = bundle.getTrustedCerts().get(trustedCertName);
+                final String trustedCertId = trustedCert != null && trustedCert.getAnnotatedEntity() != null && trustedCert.getAnnotatedEntity().getId() != null ?
+                        trustedCert.getAnnotatedEntity().getId() : idGenerator.generate();
+
+                Element trustedCertGoidItem = createElementWithAttribute(
+                        policyDocument,
+                        PolicyXMLElements.ITEM,
+                        GOID_VALUE,
+                        trustedCertId
+                );
+                trustedCertGoidElement.appendChild(trustedCertGoidItem);
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.ca.apim.gateway.cagatewayexport.util.policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
+import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
@@ -10,6 +11,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -414,6 +416,54 @@ class PolicyXMLSimplifierTest {
         assertEquals("Test Name", encapsulatedAssertion.getAttribute("encassName"));
         assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME, true));
         assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_GUID, true));
+    }
+
+    @Test
+    void simplifyHttpRoutingAssertionForTrustedCert() throws DocumentParseException {
+        final IdGenerator idGenerator = new IdGenerator();
+        Element httpRoutingAssertionElement = createHttpRoutingAssertionWithCerts(idGenerator);
+        new HttpRoutingAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                null,
+                                null)
+                                .withAssertionElement(httpRoutingAssertionElement)
+                );
+
+        final Element trustedCertNameElement = getSingleChildElement(httpRoutingAssertionElement, TLS_TRUSTED_CERT_NAMES, true);
+        assertNotNull(trustedCertNameElement);
+        assertEquals(2, trustedCertNameElement.getChildNodes().getLength());
+        assertEquals("fake-cert-1", trustedCertNameElement.getChildNodes().item(0).getAttributes().getNamedItem(STRING_VALUE).getTextContent());
+        assertEquals("fake-cert-2", trustedCertNameElement.getChildNodes().item(1).getAttributes().getNamedItem(STRING_VALUE).getTextContent());
+        assertNull(getSingleChildElement(httpRoutingAssertionElement, TLS_TRUSTED_CERT_IDS, true));
+    }
+
+    @NotNull
+    private Element createHttpRoutingAssertionWithCerts(final IdGenerator idGenerator) {
+        Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Element trustedCertGoidsElement = createElementWithAttributesAndChildren(
+                document,
+                TLS_TRUSTED_CERT_IDS,
+                ImmutableMap.of(GOID_ARRAY_VALUE, "included"),
+                createElementWithAttribute(document, PolicyXMLElements.ITEM, GOID_VALUE, idGenerator.generate()),
+                createElementWithAttribute(document, PolicyXMLElements.ITEM, GOID_VALUE, idGenerator.generate())
+        );
+
+        Element trustedCertNamesElement = createElementWithAttributesAndChildren(
+                document,
+                TLS_TRUSTED_CERT_NAMES,
+                ImmutableMap.of("stringArrayValue", "included"),
+                createElementWithAttribute(document, PolicyXMLElements.ITEM, STRING_VALUE, "fake-cert-1"),
+                createElementWithAttribute(document, PolicyXMLElements.ITEM, STRING_VALUE, "fake-cert-2")
+        );
+
+        return createElementWithChildren(
+                document,
+                HTTP_ROUTING_ASSERTION,
+                trustedCertGoidsElement,
+                trustedCertNamesElement
+        );
     }
 
     @NotNull
