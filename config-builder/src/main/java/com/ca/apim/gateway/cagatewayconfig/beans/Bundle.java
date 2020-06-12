@@ -169,6 +169,10 @@ public class Bundle {
         return getEntities(JdbcConnection.class);
     }
 
+    public Map<String, SsgActiveConnector> getSsgActiveConnectors() {
+        return getEntities(SsgActiveConnector.class);
+    }
+
     public void putAllJdbcConnections(@NotNull Map<String, JdbcConnection> jdbcConnections) {
         this.getJdbcConnections().putAll(jdbcConnections);
     }

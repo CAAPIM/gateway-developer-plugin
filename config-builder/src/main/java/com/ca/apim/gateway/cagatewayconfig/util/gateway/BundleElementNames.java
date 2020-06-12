@@ -120,6 +120,10 @@ public class BundleElementNames {
     public static final String JDBC_URL = "l7:JdbcUrl";
     public static final String CONNECTION_PROPERTIES = "l7:ConnectionProperties";
 
+    // SSG Active Connectors
+    public static final String ACTIVE_CONNECTOR = "l7:ActiveConnector";
+    public static final String HARDWIRED = "l7:HardwiredId";
+
     //Trusted Cert Elements
     public static final String TRUSTED_CERT = "l7:TrustedCertificate";
     public static final String CERT_DATA = "l7:CertificateData";
