@@ -2,14 +2,19 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.DependentBundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AnnotatedBundle extends Bundle {
     private Bundle fullBundle;
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
     private ProjectInfo projectInfo;
+    private List<DependentBundle> dependentBundles = new ArrayList<>();
     private String uniqueNameSeparator = "#";   // This can be different for environment entities.
 
     public AnnotatedBundle(Bundle fullBundle, AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
@@ -36,11 +41,21 @@ public class AnnotatedBundle extends Bundle {
     }
 
     public String getBundleName() {
+        String name;
         if (StringUtils.isBlank(annotatedEntity.getBundleName())) {
-            return projectInfo.getName() + "-" + annotatedEntity.getEntityName() + "-" + projectInfo.getVersion();
+            name = projectInfo.getName() + "-" + annotatedEntity.getEntityName();
         } else {
-            return annotatedEntity.getBundleName() + "-" + projectInfo.getVersion();
+            name = annotatedEntity.getBundleName();
         }
+        return StringUtils.isBlank(projectInfo.getVersion()) ? name : name + "-" + projectInfo.getVersion();
+    }
+
+    public void addDependentBundle(DependentBundle dependentBundle){
+        dependentBundles.add(dependentBundle);
+    }
+
+    public List<DependentBundle> getDependentBundles() {
+        return dependentBundles;
     }
 
     public String getUniquePrefix() {

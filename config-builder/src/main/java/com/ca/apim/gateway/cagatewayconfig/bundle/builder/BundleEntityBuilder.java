@@ -67,7 +67,7 @@ public class BundleEntityBuilder {
             String deleteBundleFileName = "";
             if (bundleType == DEPLOYMENT) {
                 // Create bundle metadata for un-annotated entities
-                fullBundleMetadata = bundleMetadataBuilder.build(null, entities, projectInfo);
+                fullBundleMetadata = bundleMetadataBuilder.build(null, bundle, entities, projectInfo);
 
                 // Create DELETE bundle - ALWAYS skip environment entities
                 deleteBundleElement = createDeleteBundle(document, entities, bundle, null, projectInfo);
@@ -145,7 +145,7 @@ public class BundleEntityBuilder {
                                 // Create bundle metadata
                                 BundleMetadata bundleMetadata = null;
                                 if (bundleType == DEPLOYMENT) {
-                                    bundleMetadata = bundleMetadataBuilder.build(annotatedBundle, entities,
+                                    bundleMetadata = bundleMetadataBuilder.build(annotatedBundle, bundle, entities,
                                             projectInfo);
                                 }
 

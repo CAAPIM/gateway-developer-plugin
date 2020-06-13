@@ -6,9 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.IdValidator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
@@ -23,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -86,39 +85,50 @@ public class EncassEntityBuilder implements EntityBuilder {
                 EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(annotatedEntity.getEntityType());
     }
 
-    private String getPolicyId(String policyWithPath, Bundle bundle) {
-        Policy policy = bundle.getPolicies().get(policyWithPath);
-        String policyId = null;
-        if (policy == null) {
-            Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
-            if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
-                for (BundleDefinedEntities bundleMetadata : bundleMetadataSet) {
-                    Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleMetadata.getDefinedEntities();
-                    if (metadataCollection != null) {
-                        Optional<BundleDefinedEntities.DefaultMetadata> optionalMetadata = metadataCollection.stream().
-                                filter(metadata -> metadata.getName().equals(PathUtils.extractName(policyWithPath))
-                                        && metadata.getType().equals(EntityTypes.POLICY_TYPE)).findFirst();
-                        if (optionalMetadata.isPresent()) {
-                            if (policyId == null) {
-                                policyId = optionalMetadata.get().getId();
+    private String getPolicyId(String policyWithPath, Bundle bundle, AnnotatedBundle annotatedBundle) {
+        final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyWithPath));
+        if (includedPolicy.get() == null) {
+            //check policy dependency in bundle dependencies
+            Set<Bundle> dependencies = bundle.getDependencies();
+            if(dependencies != null){
+                dependencies.forEach(b -> {
+                    Policy policyFromDependencies = Optional.ofNullable(b.getPolicies().get(policyWithPath)).orElse(b.getPolicies().get(PathUtils.extractName(policyWithPath)));
+                    if (policyFromDependencies != null) {
+                        if (!includedPolicy.compareAndSet(null, policyFromDependencies)) {
+                            throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyWithPath);
+                        }
+                        //add dependent bundle if bundle type is not null
+                        DependentBundle dependentBundle = b.getDependentBundleFrom();
+                        if (dependentBundle != null && dependentBundle.getType() != null){
+                            if(annotatedBundle != null) {
+                                annotatedBundle.addDependentBundle(dependentBundle);
                             } else {
-                                throw new EntityBuilderException("Found multiple policies in dependency bundles with name: " + policyWithPath);
+                                bundle.addDependentBundle(dependentBundle);
                             }
                         }
                     }
-                }
+                });
             }
-            if (policyId == null) {
+
+            //if policy is not found in any bundles then check if it missing and excluded
+            final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(policyWithPath);
+            if (missingEntity != null && missingEntity.isExcluded()) {
+                LOGGER.log(Level.WARNING, "Resolving the referenced policy {0} as known excluded entity with guid: {1}",
+                        new Object[]{policyWithPath, missingEntity.getGuid()});
+                includedPolicy.set(new Policy());
+                includedPolicy.get().setGuid(missingEntity.getGuid());
+            }
+
+            if (includedPolicy.get() == null) {
                 throw new EntityBuilderException("Could not find policy for encass. Policy Path: " + policyWithPath);
             }
-        } else {
-            policyId = policy.getId();
         }
-        return policyId;
+
+        return includedPolicy.get().getId();
     }
 
     private Entity buildEncassEntity(AnnotatedBundle annotatedBundle, Bundle bundle, String name, Encass encass, Document document) {
-        String policyId = getPolicyId(encass.getPolicy(), bundle);
+        String policyId = getPolicyId(encass.getPolicy(), bundle, annotatedBundle);
         String encassName = name;
         String guid = encass.getGuid();
         String id = encass.getId();

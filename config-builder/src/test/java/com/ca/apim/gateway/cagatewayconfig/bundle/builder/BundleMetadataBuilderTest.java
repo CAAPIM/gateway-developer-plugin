@@ -59,8 +59,8 @@ public class BundleMetadataBuilderTest {
 
         when(entityLoaderRegistry.getEntityLoaders()).thenReturn(Collections.singleton(new TestBundleLoader(bundle)));
 
-        List<File> dummyList = new ArrayList<>();
-        dummyList.add(new File("test"));
+        List<DependentBundle> dummyList = new ArrayList<>();
+        dummyList.add(new DependentBundle(new File("test")));
 
         BundleFileBuilder bundleFileBuilder = new BundleFileBuilder(DocumentTools.INSTANCE, DocumentFileUtils.INSTANCE,
                 JsonFileUtils.INSTANCE, entityLoaderRegistry, builder, bundleCache);
@@ -113,6 +113,32 @@ public class BundleMetadataBuilderTest {
                             generatedFile.getName());
                 } else {
                     assertEquals("my-bundle-" + encass.getName() + "-1.0" + METADATA_FILE_NAME_SUFFIX,
+                            generatedFile.getName());
+                }
+            }
+        } finally {
+            deleteDirectory(bundleOutput);
+        }
+
+
+        // Check filenames if projectVersion is not provided
+        bundleOutput = temporaryFolder.createDirectory("output");
+        try {
+            ProjectInfo projectInfoBlankVersion = new ProjectInfo("my-bundle", "my-group", null);
+            bundleFileBuilder.buildBundle(temporaryFolder.getRoot(), bundleOutput, dummyList, projectInfoBlankVersion);
+
+            bundleOutput = new File(temporaryFolder.getRoot(), "output");
+            assertTrue(bundleOutput.exists());
+            assertEquals(3, bundleOutput.listFiles().length);
+            for (File generatedFile : bundleOutput.listFiles()) {
+                if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
+                    assertEquals("my-bundle-" + encass.getName() + "-policy" + DELETE_BUNDLE_EXTENSION,
+                            generatedFile.getName());
+                } else if (StringUtils.endsWith(generatedFile.getName(), INSTALL_BUNDLE_EXTENSION)) {
+                    assertEquals("my-bundle-" + encass.getName() + "-policy" + INSTALL_BUNDLE_EXTENSION,
+                            generatedFile.getName());
+                } else {
+                    assertEquals("my-bundle-" + encass.getName() + METADATA_FILE_NAME_SUFFIX,
                             generatedFile.getName());
                 }
             }

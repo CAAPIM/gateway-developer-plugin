@@ -216,6 +216,9 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 
     @NotNull
     private static String getBuiltArtifactName(@NotNull Project project, String classifier, String bundleRequiredFileExtension) {
+        if (StringUtils.equalsAnyIgnoreCase(project.getVersion().toString().trim(), "", "unspecified")) {
+            return project.getName() + classifier + "." + bundleRequiredFileExtension;
+        }
         return project.getName() + '-' + project.getVersion() + classifier + "." + bundleRequiredFileExtension;
     }
 
