@@ -1,13 +1,17 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.SsgActiveConnector;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Element;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -38,6 +42,11 @@ public class SsgActiveConnectorLoader implements BundleEntityLoader {
         ssgActiveConnector.setProperties(properties);
         ssgActiveConnector.setTargetServiceReference(targetServiceReference);
         ssgActiveConnector.setId(activeConnectorElement.getAttribute(ATTRIBUTE_ID));
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation bundleEntity = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        bundleEntity.setId(activeConnectorElement.getAttribute(ATTRIBUTE_ID));
+        annotations.add(bundleEntity);
+        ssgActiveConnector.setAnnotations(annotations);
         //remove keystore ID
         Optional<Map.Entry<String, Object>> entryOptional = properties.entrySet().stream().filter(entry -> entry.getKey().endsWith("SslKeystoreId")).findFirst();
         entryOptional.ifPresent(entry -> {

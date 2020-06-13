@@ -1,12 +1,19 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Named;
 
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -15,11 +22,24 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Named("SSG_ACTIVE_CONNECTOR")
 @ConfigurationFile(name = "active-connectors", type = JSON_YAML)
 @EnvironmentType("SSG_ACTIVE_CONNECTOR")
-public class SsgActiveConnector extends GatewayEntity {
+public class SsgActiveConnector extends GatewayEntity implements AnnotableEntity {
     private String enabled;
     private String type;
     private Map<String, Object> properties;
     private String targetServiceReference;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
+
+    @Override
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
+    }
 
     public String getType() {
         return type;
@@ -51,5 +71,18 @@ public class SsgActiveConnector extends GatewayEntity {
 
     public void setTargetServiceReference(String targetServiceReference) {
         this.targetServiceReference = targetServiceReference;
+    }
+
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+        }
+        return annotatedEntity;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity) {
+        this.annotatedEntity = annotatedEntity;
     }
 }

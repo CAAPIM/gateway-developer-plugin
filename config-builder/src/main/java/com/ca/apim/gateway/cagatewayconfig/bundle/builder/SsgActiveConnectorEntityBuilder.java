@@ -49,7 +49,7 @@ public class SsgActiveConnectorEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 final Stream<Entity> activeConnectorOnlyMappings = entities.entrySet().stream().map(ssgActiveConnectorEntry ->
-                        EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.SSG_ACTIVE_CONNECTOR, ssgActiveConnectorEntry.getKey(), idGenerator.generate()));
+                        EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.SSG_ACTIVE_CONNECTOR, ssgActiveConnectorEntry.getKey(), generateId(ssgActiveConnectorEntry.getValue())));
                 return activeConnectorOnlyMappings.collect(toList());
             case ENVIRONMENT:
                 final Stream<Entity> activeConnectors = entities.entrySet().stream().map(ssgActiveConnectorEntry ->
@@ -64,7 +64,7 @@ public class SsgActiveConnectorEntityBuilder implements EntityBuilder {
     Entity buildActiveConnectorEntity(Bundle bundle, String name, SsgActiveConnector ssgActiveConnector, Document document) {
         Element activeConnectorElement = document.createElement(ACTIVE_CONNECTOR);
 
-        String id = idGenerator.generate();
+        String id = generateId(ssgActiveConnector);
         activeConnectorElement.setAttribute(ATTRIBUTE_ID, id);
         activeConnectorElement.appendChild(createElementWithTextContent(document, NAME, name));
         activeConnectorElement.appendChild(createElementWithTextContent(document, ENABLED, ssgActiveConnector.getEnabled()));
@@ -79,6 +79,13 @@ public class SsgActiveConnectorEntityBuilder implements EntityBuilder {
         buildAndAppendPropertiesElement(ssgActiveConnector.getProperties(), document, activeConnectorElement);
 
         return EntityBuilderHelper.getEntityWithNameMapping(SSG_ACTIVE_CONNECTOR, name, id, activeConnectorElement);
+    }
+
+    private String generateId(SsgActiveConnector ssgActiveConnector) {
+        if (ssgActiveConnector != null && ssgActiveConnector.getAnnotatedEntity() != null && ssgActiveConnector.getAnnotatedEntity().getId() != null) {
+            return ssgActiveConnector.getAnnotatedEntity().getId();
+        }
+        return idGenerator.generate();
     }
 
     private void updatePasswordRef(Bundle bundle, SsgActiveConnector entity) {
