@@ -16,6 +16,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -24,7 +26,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 class BundleEnvironmentValidator {
-
+    private static final Logger LOGGER = Logger.getLogger(BundleEnvironmentValidator.class.getName());
     private final Bundle environmentBundle;
     private DocumentTools documentTools = DocumentTools.INSTANCE;
 
@@ -104,8 +106,9 @@ class BundleEnvironmentValidator {
                 entity = bundle.getJmsDestinations().get(name);
                 break;
             default:
+                LOGGER.log(Level.WARNING, "Unsupported gateway entity " + type);
                 UnsupportedGatewayEntity unsupportedGatewayEntity = bundle.getUnsupportedEntities().get(name);
-                if(unsupportedGatewayEntity != null && type.equals(unsupportedGatewayEntity.getType())){
+                if (unsupportedGatewayEntity != null && type.equals(unsupportedGatewayEntity.getType())) {
                     entity = unsupportedGatewayEntity;
                 }
 
