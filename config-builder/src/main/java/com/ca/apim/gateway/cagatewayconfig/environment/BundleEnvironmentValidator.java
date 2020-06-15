@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
@@ -15,6 +16,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -23,7 +26,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 class BundleEnvironmentValidator {
-
+    private static final Logger LOGGER = Logger.getLogger(BundleEnvironmentValidator.class.getName());
     private final Bundle environmentBundle;
     private DocumentTools documentTools = DocumentTools.INSTANCE;
 
@@ -73,7 +76,7 @@ class BundleEnvironmentValidator {
     }
 
     private void findInBundle(Bundle bundle, String type, String name) {
-        Object entity;
+        Object entity = null;
         switch (type) {
             case EntityTypes.CLUSTER_PROPERTY_TYPE:
                 entity = bundle.getGlobalEnvironmentProperties().get(PREFIX_GATEWAY + name);
@@ -106,7 +109,12 @@ class BundleEnvironmentValidator {
                 entity = bundle.getSsgActiveConnectors().get(name);
                 break;
             default:
-                throw new MissingEnvironmentException("Unexpected entity type " + type);
+                LOGGER.log(Level.WARNING, "Unsupported gateway entity " + type);
+                UnsupportedGatewayEntity unsupportedGatewayEntity = bundle.getUnsupportedEntities().get(name);
+                if (unsupportedGatewayEntity != null && type.equals(unsupportedGatewayEntity.getType())) {
+                    entity = unsupportedGatewayEntity;
+                }
+
         }
 
         if (entity == null) {
