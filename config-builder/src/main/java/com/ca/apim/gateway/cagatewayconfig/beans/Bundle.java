@@ -215,6 +215,10 @@ public class Bundle {
         this.getPrivateKeys().putAll(privateKeys);
     }
 
+    public void putAllSsgActiveConnectors(@NotNull Map<String, SsgActiveConnector> ssgActiveConnectors) {
+        this.getSsgActiveConnectors().putAll(ssgActiveConnectors);
+    }
+
     public Map<String, CassandraConnection> getCassandraConnections() {
         return getEntities(CassandraConnection.class);
     }
