@@ -32,7 +32,6 @@ public interface AnnotableEntity {
     String getType();
 
     /**
-
      * This method returns all the Annotation applied to the entity.
      *
      * @return Set of all the annotations

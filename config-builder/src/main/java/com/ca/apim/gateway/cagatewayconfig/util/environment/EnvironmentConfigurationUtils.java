@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.environment;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
 import com.ca.apim.gateway.cagatewayconfig.beans.EnvironmentBundleData;
@@ -110,12 +111,12 @@ public class EnvironmentConfigurationUtils {
                     }
 
                     Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(entityType);
+                    entityClass = entityClass == null ? UnsupportedGatewayEntity.class : entityClass;
                     final Pair<String, ConfigurationFile.FileType> configFileInfo = EntityUtils.getEntityConfigFileInfo(entityClass);
                     final String environmentType = EntityUtils.getEntityEnvironmentType(entityClass);
                     if (configFileInfo == null || environmentType == null) {
                         throw new MissingEnvironmentException("Unexpected entity type " + entityType);
                     }
-
                     final String configFileName = configFileInfo.getLeft() + "." + (configFileInfo.getRight().equals(ConfigurationFile.FileType.JSON_YAML) ? YML_EXTENSION :
                             configFileInfo.getRight().name().toLowerCase());
                     final File envConfigFile = new File(configFolder, configFileName);

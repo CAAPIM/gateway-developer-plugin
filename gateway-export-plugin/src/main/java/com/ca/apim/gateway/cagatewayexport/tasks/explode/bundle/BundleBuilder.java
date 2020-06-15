@@ -102,9 +102,9 @@ public class BundleBuilder {
         Class<? extends GatewayEntity> typeClass = entityTypeRegistry.getEntityClass(type);
         if (typeClass != null) {
             return new Dependency(id, typeClass, name, type);
+        } else {
+            return new Dependency(id, UnsupportedGatewayEntity.class, name, type);
         }
-
-        return null;
     }
 
     private void handleItem(final Element element, final Bundle bundle) {

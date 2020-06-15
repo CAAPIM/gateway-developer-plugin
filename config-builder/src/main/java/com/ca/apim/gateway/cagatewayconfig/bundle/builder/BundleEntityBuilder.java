@@ -324,19 +324,32 @@ public class BundleEntityBuilder {
      */
     private void loadGatewayEntity(Dependency dependency, AnnotatedBundle annotatedBundle, Bundle rawBundle) {
         Class<? extends GatewayEntity> entityClass = entityTypeRegistry.getEntityClass(dependency.getType());
-        Map<String, ? extends GatewayEntity> allEntitiesOfType = rawBundle.getEntities(entityClass);
-        Optional<? extends Map.Entry<String, ? extends GatewayEntity>> optionalGatewayEntity =
-                allEntitiesOfType.entrySet().stream()
-                        .filter(e -> {
-                            GatewayEntity gatewayEntity = e.getValue();
-                            if (gatewayEntity.getName() != null) {
-                                return dependency.getName().equals(gatewayEntity.getName());
-                            } else {
-                                return dependency.getName().equals(PathUtils.extractName(e.getKey()));
-                            }
-                        }).findFirst();
-        Map entityMap = annotatedBundle.getEntities(entityClass);
-        optionalGatewayEntity.ifPresent(e -> entityMap.put(e.getKey(), e.getValue()));
+        if(entityClass != null){
+            Map<String, ? extends GatewayEntity> allEntitiesOfType = rawBundle.getEntities(entityClass);
+            Optional<? extends Map.Entry<String, ? extends GatewayEntity>> optionalGatewayEntity =
+                    allEntitiesOfType.entrySet().stream()
+                            .filter(e -> {
+                                GatewayEntity gatewayEntity = e.getValue();
+                                if (gatewayEntity.getName() != null) {
+                                    return dependency.getName().equals(gatewayEntity.getName());
+                                } else {
+                                    return dependency.getName().equals(PathUtils.extractName(e.getKey()));
+                                }
+                            }).findFirst();
+            Map entityMap = annotatedBundle.getEntities(entityClass);
+            optionalGatewayEntity.ifPresent(e -> entityMap.put(e.getKey(), e.getValue()));
+        } else {
+            //if entity type is not present, add corresponding unsupported entity
+            Map<String, UnsupportedGatewayEntity> unsupportedEntities = rawBundle.getUnsupportedEntities();
+            Optional<? extends Map.Entry<String, UnsupportedGatewayEntity>> optionalGatewayEntity =
+                    unsupportedEntities.entrySet().stream()
+                            .filter(e -> {
+                                UnsupportedGatewayEntity gatewayEntity = e.getValue();
+                                return dependency.getName().equals(PathUtils.extractName(e.getKey())) && dependency.getType().equals(gatewayEntity.getType());
+                            }).findFirst();
+            Map entityMap = annotatedBundle.getUnsupportedEntities();
+            optionalGatewayEntity.ifPresent(e -> entityMap.put(e.getKey(), e.getValue()));
+        }
     }
 
     /**

@@ -86,10 +86,10 @@ public class FullBundleCreator {
 
     public void createFullBundle(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
                                  String bundleFolderPath,
-                                 String fullInstallBundleFilename,
+                                 String fullInstallBundleFilename, String environmentConfigurationFolderPath,
                                  boolean detemplatizeDeploymentBundles) {
         final Pair<Element, Element> elementPair = createFullAndDeleteBundles(bundleEnvironmentValues,
-                dependentBundles, bundleFolderPath, fullInstallBundleFilename, detemplatizeDeploymentBundles);
+                dependentBundles, bundleFolderPath, fullInstallBundleFilename, environmentConfigurationFolderPath, detemplatizeDeploymentBundles);
         final String bundle = documentTools.elementToString(elementPair.getLeft());
         // write the full bundle to a temporary file first
         final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), fullInstallBundleFilename);
@@ -120,7 +120,7 @@ public class FullBundleCreator {
 
     private Pair<Element, Element> createFullAndDeleteBundles(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
                                                               String bundleFolderPath,
-                                                              String bundleFileName,
+                                                              String bundleFileName, String environmentConfigurationFolderPath,
                                                               boolean detemplatizeDeploymentBundles) {
         final Map<String, String> environmentProperties = bundleEnvironmentValues.getRight();
         final List<File> deploymentBundles = collectFiles(bundleFolderPath,
@@ -134,7 +134,7 @@ public class FullBundleCreator {
 
         // generate the environment one
         Bundle environmentBundle = new Bundle();
-        environmentBundleBuilder.build(environmentBundle, environmentProperties, EMPTY, PLUGIN);
+        environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, PLUGIN);
 
         // validate and detemplatize
         processDeploymentBundles(environmentBundle, templatizedBundles, PLUGIN, detemplatizeDeploymentBundles);

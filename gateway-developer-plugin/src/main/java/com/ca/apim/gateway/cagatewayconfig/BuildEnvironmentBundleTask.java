@@ -79,9 +79,9 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         if (metaDataFiles.isEmpty()) {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
-
+        File configuredFolder = configFolder.getAsFile().getOrNull();
         metaDataFiles.stream().forEach(metaDataFile -> {
-            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configFolder.getAsFile().getOrNull());
+            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configuredFolder);
             if (null != bundleEnvironmentValues) {
                 final String envBundleFileName = getEnvBundleFilename(bundleEnvironmentValues.getLeft());
                 Map<String, String> environmentValuesFromMetadata = bundleEnvironmentValues.getRight();
@@ -91,7 +91,7 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
                         environmentValuesFromMetadata,
                         into.getAsFile().get().getPath(),
                         into.getAsFile().get().getPath(),
-                        EMPTY,
+                        configuredFolder != null ? configuredFolder.getPath() : EMPTY,
                         PLUGIN,
                         envBundleFileName, // Passing envBundleFileName
                         bundleEnvironmentValues.getLeft()

@@ -40,7 +40,7 @@ public class EnvironmentBundleBuilder {
     }
 
     void build(Bundle bundle, Map<String, String> environmentProperties, String environmentConfigurationFolderPath, EnvironmentBundleCreationMode mode) {
-        environmentProperties.entrySet().stream().filter(e -> e.getKey().startsWith(PREFIX_ENV)).forEach(e -> addEnvToBundle(bundle, e.getKey(), e.getValue()));
+        environmentProperties.entrySet().stream().filter(e -> e.getKey().startsWith(PREFIX_ENV)).forEach(e -> addEnvToBundle(bundle, e.getKey(), e.getValue(), environmentConfigurationFolderPath));
         // only when running from environment creator application we try to load from directory.
         if (mode != APPLICATION) {
             return;
@@ -54,7 +54,7 @@ public class EnvironmentBundleBuilder {
         }
     }
 
-    private void addEnvToBundle(Bundle bundle, String key, String value) {
+    private void addEnvToBundle(Bundle bundle, String key, String value, String environmentConfigurationFolderPath) {
         if (!key.startsWith(PREFIX_ENV)) {
             return;
         }
@@ -85,7 +85,7 @@ public class EnvironmentBundleBuilder {
         }
 
         // then load it
-        loader.load(bundle, name, value);
+        loader.load(bundle, name, value, environmentConfigurationFolderPath);
     }
 
 }
