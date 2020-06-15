@@ -8,6 +8,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Element;
 
+import javax.inject.Singleton;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +19,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElementTextContent;
 
+@Singleton
 public class SsgActiveConnectorLoader implements BundleEntityLoader {
 
     @VisibleForTesting

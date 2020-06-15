@@ -5,8 +5,11 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.beans.SsgActiveConnector;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
 
+import javax.inject.Singleton;
+
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.ServiceLinker.getServicePath;
 
+@Singleton
 public class SsgActiveConnectorLinker implements EntityLinker<SsgActiveConnector> {
 
     @Override
