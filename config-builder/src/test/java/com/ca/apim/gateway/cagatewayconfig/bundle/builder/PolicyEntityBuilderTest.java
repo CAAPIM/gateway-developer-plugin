@@ -112,7 +112,7 @@ class PolicyEntityBuilderTest {
 
         assertFalse(entities.isEmpty());
         assertEquals(2, entities.size());
-        entities.stream().collect(toMap(Entity::getId, identity())).forEach((i,e) -> {
+        entities.stream().collect(toMap(Entity::getId, identity())).forEach((i, e) -> {
             assertEquals(EntityTypes.POLICY_TYPE, e.getType());
             assertNotNull(e.getXml());
             assertTrue(e.getMappingProperties().containsKey(MAP_BY));
@@ -773,6 +773,22 @@ class PolicyEntityBuilderTest {
         assertEquals("28be78b936aa61bc75bd0df2089789cd", trustedCertIDElement.getChildNodes().item(1).getAttributes().getNamedItem(GOID_VALUE).getTextContent());
     }
 
+    @Test
+    void testPrepareMqRoutingAssertionIds() {
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        bundle.putAllSsgActiveConnectors(ImmutableMap.of("activeConnector1", createActiveConnectorWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "2cd473fe16d98cd6b9348ffb404517bc")));
+
+        Element mqRoutingAssertionElement = createMqRoutingAssertion(document);
+        policyEntityBuilder.prepareMQRoutingAssertion(bundle, mqRoutingAssertionElement);
+
+        final Element connectorGoid = getSingleChildElement(mqRoutingAssertionElement, ACTIVE_CONNECTOR_GOID, true);
+        final Element connectorid = getSingleChildElement(mqRoutingAssertionElement, ACTIVE_CONNECTOR_ID, true);
+        assertNotNull(connectorGoid);
+        assertNotNull(connectorid);
+        assertEquals("2cd473fe16d98cd6b9348ffb404517bc", connectorGoid.getAttributes().getNamedItem(GOID_VALUE).getTextContent());
+        assertEquals("2cd473fe16d98cd6b9348ffb404517bc", connectorid.getAttributes().getNamedItem(GOID_VALUE).getTextContent());
+    }
+
     @NotNull
     private Element createHttpRoutingAssertionWithCertNames(Document document) {
         Element trustedCertNamesElement = createElementWithAttributesAndChildren(
@@ -791,6 +807,19 @@ class PolicyEntityBuilderTest {
     }
 
     @NotNull
+    private Element createMqRoutingAssertion(Document document) {
+        return createElementWithAttributesAndChildren(
+                document,
+                MQ_ROUTING_ASSERTION,
+                org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of("stringArrayValue", "included"),
+                createElementWithAttribute(document, PolicyXMLElements.ACTIVE_CONNECTOR_NAME, STRING_VALUE, "activeConnector1"),
+                createElementWithAttribute(document, PolicyXMLElements.ACTIVE_CONNECTOR_GOID, GOID_VALUE, "testId"),
+                createElementWithAttribute(document, PolicyXMLElements.ACTIVE_CONNECTOR_ID, GOID_VALUE, "testId")
+        );
+
+    }
+
+    @NotNull
     private TrustedCert createTrustedCertWithAnnotation(final String type, final String id) {
         TrustedCert cert = new TrustedCert(ImmutableMap.of(VERIFY_HOSTNAME, true), null);
         Set<Annotation> annotations = new HashSet<>();
@@ -799,6 +828,17 @@ class PolicyEntityBuilderTest {
         annotations.add(annotation);
         cert.setAnnotations(annotations);
         return cert;
+    }
+
+    @NotNull
+    private SsgActiveConnector createActiveConnectorWithAnnotation(final String type, final String id) {
+        SsgActiveConnector activeConnector = new SsgActiveConnector();
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation annotation = new Annotation(type);
+        annotation.setId(id);
+        annotations.add(annotation);
+        activeConnector.setAnnotations(annotations);
+        return activeConnector;
     }
 
     private Element createIncludeAssertionElement(Document document, String policyPath) {
