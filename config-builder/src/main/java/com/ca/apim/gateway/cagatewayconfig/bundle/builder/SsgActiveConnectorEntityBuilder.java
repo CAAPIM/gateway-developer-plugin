@@ -68,7 +68,7 @@ public class SsgActiveConnectorEntityBuilder implements EntityBuilder {
         activeConnectorElement.setAttribute(ATTRIBUTE_ID, id);
         activeConnectorElement.appendChild(createElementWithTextContent(document, NAME, name));
         activeConnectorElement.appendChild(createElementWithTextContent(document, ENABLED, ssgActiveConnector.getEnabled()));
-        activeConnectorElement.appendChild(createElementWithTextContent(document, TYPE, ssgActiveConnector.getType()));
+        activeConnectorElement.appendChild(createElementWithTextContent(document, TYPE, ssgActiveConnector.getConnectorType()));
 
 
         if (ssgActiveConnector.getTargetServiceReference() != null) {

@@ -5,6 +5,7 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -24,7 +25,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @EnvironmentType("SSG_ACTIVE_CONNECTOR")
 public class SsgActiveConnector extends GatewayEntity implements AnnotableEntity {
     private String enabled;
-    private String type;
+    private String connectorType;
     private Map<String, Object> properties;
     private String targetServiceReference;
     @JsonDeserialize(using = AnnotationDeserializer.class)
@@ -41,12 +42,12 @@ public class SsgActiveConnector extends GatewayEntity implements AnnotableEntity
         this.annotations = annotations;
     }
 
-    public String getType() {
-        return type;
+    public String getConnectorType() {
+        return connectorType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setConnectorType(String connectorType) {
+        this.connectorType = connectorType;
     }
 
     public String getEnabled() {
@@ -79,6 +80,11 @@ public class SsgActiveConnector extends GatewayEntity implements AnnotableEntity
             annotatedEntity = createAnnotatedEntity();
         }
         return annotatedEntity;
+    }
+
+    @Override
+    public String getType() {
+        return EntityTypes.SSG_ACTIVE_CONNECTOR;
     }
 
     @VisibleForTesting

@@ -96,7 +96,7 @@ public class SsgActiveConnectorLoaderTest {
         Document document = DocumentTools.INSTANCE.parse(ACTIVE_CONNECTOR);
         ssgActiveConnectorLoader.load(bundle, document.getDocumentElement());
         SsgActiveConnector ssgActiveConnector = bundle.getSsgActiveConnectors().get("MQNativeTest");
-        Assert.assertEquals("MqNative", ssgActiveConnector.getType());
+        Assert.assertEquals("MqNative", ssgActiveConnector.getConnectorType());
         Assert.assertNull(ssgActiveConnector.getTargetServiceReference());
         Assert.assertTrue(ssgActiveConnector.getAnnotations().contains(new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY)));
     }

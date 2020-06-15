@@ -64,7 +64,7 @@ public class SsgActiveConnectorEntityBuilderTest {
         Map<String, Service> serviceMap = bundle.getServices();
         serviceMap.put(serviceRef, service);
         ssgActiveConnector.setName(name);
-        ssgActiveConnector.setType(type);
+        ssgActiveConnector.setConnectorType(type);
         ssgActiveConnector.setEnabled(enabled);
         ssgActiveConnector.setTargetServiceReference(serviceRef);
         Map<String, Object> properties = new HashMap<>();
