@@ -166,7 +166,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyName, policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
         prepareAssertion(policyElement, HTTP_ROUTING_ASSERTION, assertionElement -> prepareRoutingAssertionCertificateIds(policyDocument, bundle, assertionElement));
-        prepareAssertion(policyElement, MQ_ROUTING_ASSERTION, assertionElement -> prepareMQRoutingAssertion(bundle, assertionElement));
+        prepareAssertion(policyElement, MQ_ROUTING_ASSERTION, assertionElement -> prepareMQRoutingAssertion(policyDocument, bundle, assertionElement));
 
         policy.setPolicyDocument(policyElement);
     }
@@ -471,20 +471,28 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    void prepareMQRoutingAssertion(Bundle bundle, Element assertionElement) {
+    void prepareMQRoutingAssertion(Document policyDocument, Bundle bundle, Element assertionElement) {
         final Element activeConnectorNameElement = getSingleChildElement(assertionElement, ACTIVE_CONNECTOR_NAME, true);
         if (activeConnectorNameElement != null) {
             final String activeConnectorName = activeConnectorNameElement.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
             final SsgActiveConnector ssgActiveConnector = bundle.getSsgActiveConnectors().get(activeConnectorName);
             final String id = ssgActiveConnector != null && ssgActiveConnector.getAnnotatedEntity() != null && ssgActiveConnector.getAnnotatedEntity().getId() != null ?
                     ssgActiveConnector.getAnnotatedEntity().getId() : idGenerator.generate();
-            Element activeConnectorGoidElement = getSingleChildElement(assertionElement, ACTIVE_CONNECTOR_GOID, true);
-            Node activeConnectorGoidNode = activeConnectorGoidElement.getAttributes().getNamedItem(GOID_VALUE);
-            activeConnectorGoidNode.setTextContent(id);
-            Element activeConnectorIdElement = getSingleChildElement(assertionElement, ACTIVE_CONNECTOR_ID, true);
-            Node activeConnectorIdNode = activeConnectorIdElement.getAttributes().getNamedItem(GOID_VALUE);
-            activeConnectorIdNode.setTextContent(id);
+            Element activeConnectorGoidElement = createElementWithAttribute(
+                    policyDocument,
+                    ACTIVE_CONNECTOR_GOID,
+                    GOID_VALUE,
+                    id
+            );
+            assertionElement.insertBefore(activeConnectorGoidElement, activeConnectorNameElement);
 
+            Element activeConnectorIdElement = createElementWithAttribute(
+                    policyDocument,
+                    ACTIVE_CONNECTOR_ID,
+                    GOID_VALUE,
+                    id
+            );
+            assertionElement.insertBefore(activeConnectorIdElement, activeConnectorNameElement);
         }
     }
 

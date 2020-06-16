@@ -779,7 +779,7 @@ class PolicyEntityBuilderTest {
         bundle.putAllSsgActiveConnectors(ImmutableMap.of("activeConnector1", createActiveConnectorWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "2cd473fe16d98cd6b9348ffb404517bc")));
 
         Element mqRoutingAssertionElement = createMqRoutingAssertion(document);
-        policyEntityBuilder.prepareMQRoutingAssertion(bundle, mqRoutingAssertionElement);
+        policyEntityBuilder.prepareMQRoutingAssertion(document, bundle, mqRoutingAssertionElement);
 
         final Element connectorGoid = getSingleChildElement(mqRoutingAssertionElement, ACTIVE_CONNECTOR_GOID, true);
         final Element connectorid = getSingleChildElement(mqRoutingAssertionElement, ACTIVE_CONNECTOR_ID, true);
@@ -812,9 +812,7 @@ class PolicyEntityBuilderTest {
                 document,
                 MQ_ROUTING_ASSERTION,
                 org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of("stringArrayValue", "included"),
-                createElementWithAttribute(document, PolicyXMLElements.ACTIVE_CONNECTOR_NAME, STRING_VALUE, "activeConnector1"),
-                createElementWithAttribute(document, PolicyXMLElements.ACTIVE_CONNECTOR_GOID, GOID_VALUE, "testId"),
-                createElementWithAttribute(document, PolicyXMLElements.ACTIVE_CONNECTOR_ID, GOID_VALUE, "testId")
+                createElementWithAttribute(document, PolicyXMLElements.ACTIVE_CONNECTOR_NAME, STRING_VALUE, "activeConnector1")
         );
 
     }
