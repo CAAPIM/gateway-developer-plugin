@@ -65,7 +65,6 @@ public class SsgActiveConnectorEntityBuilderTest {
         serviceMap.put(serviceRef, service);
         ssgActiveConnector.setName(name);
         ssgActiveConnector.setConnectorType(type);
-        ssgActiveConnector.setEnabled(enabled);
         ssgActiveConnector.setTargetServiceReference(serviceRef);
         Map<String, Object> properties = new HashMap<>();
         String passwordName = "testPassword";

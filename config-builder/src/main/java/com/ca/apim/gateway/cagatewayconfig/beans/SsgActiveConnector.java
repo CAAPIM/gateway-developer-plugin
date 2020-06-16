@@ -24,7 +24,6 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @ConfigurationFile(name = "active-connectors", type = JSON_YAML)
 @EnvironmentType("SSG_ACTIVE_CONNECTOR")
 public class SsgActiveConnector extends GatewayEntity implements AnnotableEntity {
-    private String enabled;
     private String connectorType;
     private Map<String, Object> properties;
     private String targetServiceReference;
@@ -48,14 +47,6 @@ public class SsgActiveConnector extends GatewayEntity implements AnnotableEntity
 
     public void setConnectorType(String connectorType) {
         this.connectorType = connectorType;
-    }
-
-    public String getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(String enabled) {
-        this.enabled = enabled;
     }
 
     public Map<String, Object> getProperties() {

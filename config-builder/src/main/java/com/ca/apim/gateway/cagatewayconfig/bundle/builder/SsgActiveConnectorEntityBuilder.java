@@ -26,7 +26,7 @@ import static java.lang.Boolean.TRUE;
 import static java.util.stream.Collectors.toList;
 
 public class SsgActiveConnectorEntityBuilder implements EntityBuilder {
-    private static final Integer ORDER = 1201;
+    private static final Integer ORDER = 1600;
     private final IdGenerator idGenerator;
 
     @Inject
@@ -67,7 +67,7 @@ public class SsgActiveConnectorEntityBuilder implements EntityBuilder {
         String id = generateId(ssgActiveConnector);
         activeConnectorElement.setAttribute(ATTRIBUTE_ID, id);
         activeConnectorElement.appendChild(createElementWithTextContent(document, NAME, name));
-        activeConnectorElement.appendChild(createElementWithTextContent(document, ENABLED, ssgActiveConnector.getEnabled()));
+        activeConnectorElement.appendChild(createElementWithTextContent(document, ENABLED, TRUE.toString()));
         activeConnectorElement.appendChild(createElementWithTextContent(document, TYPE, ssgActiveConnector.getConnectorType()));
 
 

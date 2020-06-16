@@ -40,7 +40,6 @@ public class SsgActiveConnectorLoader implements BundleEntityLoader {
         SsgActiveConnector ssgActiveConnector = new SsgActiveConnector();
         ssgActiveConnector.setName(name);
         ssgActiveConnector.setConnectorType(type);
-        ssgActiveConnector.setEnabled(enabled);
         ssgActiveConnector.setProperties(properties);
         ssgActiveConnector.setTargetServiceReference(targetServiceReference);
         ssgActiveConnector.setId(activeConnectorElement.getAttribute(ATTRIBUTE_ID));

@@ -28,7 +28,6 @@ public class SsgActiveConnectorLinkerTest {
         serviceMap.put(serviceRef, service);
         ssgActiveConnector.setName(name);
         ssgActiveConnector.setConnectorType(type);
-        ssgActiveConnector.setEnabled(enabled);
         ssgActiveConnector.setTargetServiceReference(serviceId);
         Map<String, Object> properties = new HashMap<>();
         String passwordName = "testPassword";
