@@ -37,6 +37,10 @@ public class PolicyXMLElements {
     public static final String HTTP_ROUTING_ASSERTION  = "L7p:HttpRoutingAssertion";
     public static final String TLS_TRUSTED_CERT_IDS = "L7p:TlsTrustedCertGoids";
     public static final String TLS_TRUSTED_CERT_NAMES = "L7p:TlsTrustedCertNames";
+    public static final String MQ_ROUTING_ASSERTION = "L7p:MqNativeRouting";
+    public static final String ACTIVE_CONNECTOR_ID = "L7p:SsgActiveConnectorId";
+    public static final String ACTIVE_CONNECTOR_GOID = "L7p:SsgActiveConnectorGoid";
+    public static final String ACTIVE_CONNECTOR_NAME = "L7p:SsgActiveConnectorName";
     public static final String ITEM = "L7p:item";
 
     private PolicyXMLElements() {

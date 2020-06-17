@@ -166,6 +166,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyName, policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
         prepareAssertion(policyElement, HTTP_ROUTING_ASSERTION, assertionElement -> prepareRoutingAssertionCertificateIds(policyDocument, bundle, assertionElement));
+        prepareAssertion(policyElement, MQ_ROUTING_ASSERTION, assertionElement -> prepareMQRoutingAssertion(policyDocument, bundle, assertionElement));
 
         policy.setPolicyDocument(policyElement);
     }
@@ -295,8 +296,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
                     }
                     //add dependent bundle if bundle type is not null
                     DependentBundle dependentBundle = b.getDependentBundleFrom();
-                    if (dependentBundle != null && dependentBundle.getType() != null){
-                        if(annotatedBundle != null) {
+                    if (dependentBundle != null && dependentBundle.getType() != null) {
+                        if (annotatedBundle != null) {
                             annotatedBundle.addDependentBundle(dependentBundle);
                         } else {
                             bundle.addDependentBundle(dependentBundle);
@@ -310,7 +311,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(name);
                 if (missingEntity != null && missingEntity.isExcluded()) {
                     LOGGER.log(Level.WARNING, "Resolving the referenced encass {0} as known excluded entity with guid: {1}",
-                            new Object[] {name, missingEntity.getGuid()});
+                            new Object[]{name, missingEntity.getGuid()});
                     referenceEncass.set(getExcludedEncass(missingEntity.getGuid()));
                 }
             }
@@ -318,7 +319,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         return referenceEncass.get();
     }
 
-    private Encass getExcludedEncass(final String guid){
+    private Encass getExcludedEncass(final String guid) {
         Encass missingEncass = new Encass();
         missingEncass.setGuid(guid);
         Set<Annotation> annotations = new HashSet<>();
@@ -349,7 +350,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (encass != null && !encass.isExcluded() && annotatedEntity != null) {
             AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
             if (annotatedEntity.isReusable()) {
-                if(annotatedEncassEntity != null){
+                if (annotatedEncassEntity != null) {
                     if (annotatedEncassEntity.getGuid() != null) {
                         if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
                             encassGuid = annotatedEncassEntity.getGuid();
@@ -430,8 +431,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
                     }
                     //add dependent bundle if bundle type is not null
                     DependentBundle dependentBundle = b.getDependentBundleFrom();
-                    if (dependentBundle != null && dependentBundle.getType() != null){
-                        if(annotatedBundle != null) {
+                    if (dependentBundle != null && dependentBundle.getType() != null) {
+                        if (annotatedBundle != null) {
                             annotatedBundle.addDependentBundle(dependentBundle);
                         } else {
                             bundle.addDependentBundle(dependentBundle);
@@ -444,7 +445,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(policyPath);
             if (missingEntity != null && missingEntity.isExcluded()) {
                 LOGGER.log(Level.WARNING, "Resolving the referenced policy {0} as known excluded entity with guid: {1}",
-                        new Object[] {policyPath, missingEntity.getGuid()});
+                        new Object[]{policyPath, missingEntity.getGuid()});
                 includedPolicy.set(new Policy());
                 includedPolicy.get().setGuid(missingEntity.getGuid());
             }
@@ -466,6 +467,32 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
             }
             prepareAssertionMethod.accept((Element) assertionElement);
+        }
+    }
+
+    @VisibleForTesting
+    void prepareMQRoutingAssertion(Document policyDocument, Bundle bundle, Element assertionElement) {
+        final Element activeConnectorNameElement = getSingleChildElement(assertionElement, ACTIVE_CONNECTOR_NAME, true);
+        if (activeConnectorNameElement != null) {
+            final String activeConnectorName = activeConnectorNameElement.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
+            final SsgActiveConnector ssgActiveConnector = bundle.getSsgActiveConnectors().get(activeConnectorName);
+            final String id = ssgActiveConnector != null && ssgActiveConnector.getAnnotatedEntity() != null && ssgActiveConnector.getAnnotatedEntity().getId() != null ?
+                    ssgActiveConnector.getAnnotatedEntity().getId() : idGenerator.generate();
+            Element activeConnectorGoidElement = createElementWithAttribute(
+                    policyDocument,
+                    ACTIVE_CONNECTOR_GOID,
+                    GOID_VALUE,
+                    id
+            );
+            assertionElement.insertBefore(activeConnectorGoidElement, activeConnectorNameElement);
+
+            Element activeConnectorIdElement = createElementWithAttribute(
+                    policyDocument,
+                    ACTIVE_CONNECTOR_ID,
+                    GOID_VALUE,
+                    id
+            );
+            assertionElement.insertBefore(activeConnectorIdElement, activeConnectorNameElement);
         }
     }
 
@@ -506,7 +533,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
         boolean isReusable = false;
-        if(annotatedEntity != null){
+        if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
             isReusable = annotatedEntity.isReusable();
         }

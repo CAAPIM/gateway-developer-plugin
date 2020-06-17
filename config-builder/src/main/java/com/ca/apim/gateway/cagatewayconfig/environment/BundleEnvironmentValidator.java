@@ -105,6 +105,9 @@ class BundleEnvironmentValidator {
             case EntityTypes.JMS_DESTINATION_TYPE:
                 entity = bundle.getJmsDestinations().get(name);
                 break;
+            case EntityTypes.SSG_ACTIVE_CONNECTOR:
+                entity = bundle.getSsgActiveConnectors().get(name);
+                break;
             default:
                 LOGGER.log(Level.WARNING, "Unsupported gateway entity " + type);
                 UnsupportedGatewayEntity unsupportedGatewayEntity = bundle.getUnsupportedEntities().get(name);

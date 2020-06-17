@@ -183,6 +183,10 @@ public class Bundle {
         return getEntities(JdbcConnection.class);
     }
 
+    public Map<String, SsgActiveConnector> getSsgActiveConnectors() {
+        return getEntities(SsgActiveConnector.class);
+    }
+
     public void putAllJdbcConnections(@NotNull Map<String, JdbcConnection> jdbcConnections) {
         this.getJdbcConnections().putAll(jdbcConnections);
     }
@@ -209,6 +213,10 @@ public class Bundle {
 
     public void putAllPrivateKeys(@NotNull Map<String, PrivateKey> privateKeys) {
         this.getPrivateKeys().putAll(privateKeys);
+    }
+
+    public void putAllSsgActiveConnectors(@NotNull Map<String, SsgActiveConnector> ssgActiveConnectors) {
+        this.getSsgActiveConnectors().putAll(ssgActiveConnectors);
     }
 
     public Map<String, CassandraConnection> getCassandraConnections() {

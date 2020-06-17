@@ -439,6 +439,46 @@ class PolicyXMLSimplifierTest {
         assertNull(getSingleChildElement(httpRoutingAssertionElement, TLS_TRUSTED_CERT_IDS, true));
     }
 
+    @Test
+    void simplifyMqRoutingAssertion() throws DocumentParseException {
+        final IdGenerator idGenerator = new IdGenerator();
+        Element mqRoutingAssertionElement = createMqRoutingAssertion(idGenerator);
+        new MQRoutingAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                null,
+                                null)
+                                .withAssertionElement(mqRoutingAssertionElement)
+                );
+
+        assertNull(getSingleChildElement(mqRoutingAssertionElement, ACTIVE_CONNECTOR_GOID, true));
+        assertNull(getSingleChildElement(mqRoutingAssertionElement, ACTIVE_CONNECTOR_ID, true));
+    }
+
+    @NotNull
+    private Element createMqRoutingAssertion(final IdGenerator idGenerator) {
+        Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Element activeConnectorGoidElement = createElementWithAttributes(
+                document,
+                ACTIVE_CONNECTOR_GOID,
+                ImmutableMap.of(GOID_VALUE, idGenerator.generate())
+        );
+
+        Element activeConnectorIdElement = createElementWithAttributes(
+                document,
+                ACTIVE_CONNECTOR_ID,
+                ImmutableMap.of(GOID_VALUE, idGenerator.generate())
+        );
+
+        return createElementWithChildren(
+                document,
+                MQ_ROUTING_ASSERTION,
+                activeConnectorGoidElement,
+                activeConnectorIdElement
+        );
+    }
+
     @NotNull
     private Element createHttpRoutingAssertionWithCerts(final IdGenerator idGenerator) {
         Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
