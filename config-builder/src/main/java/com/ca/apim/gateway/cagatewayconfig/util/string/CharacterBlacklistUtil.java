@@ -95,11 +95,12 @@ public class CharacterBlacklistUtil {
         }
         final String[] folderNames = path.split("/");
         StringBuilder pathBuilder = new StringBuilder();
-        for (int index = 0; index < folderNames.length; index++) {
-            pathBuilder.append(encodeName(folderNames[index]));
-            if (index < folderNames.length - 1) {
-                pathBuilder.append("/");
-            }
+        for (String folderName : folderNames) {
+            pathBuilder.append(encodeName(folderName));
+            pathBuilder.append("/");
+        }
+        if (!path.endsWith("/")) {
+            pathBuilder.deleteCharAt(pathBuilder.length()-1);
         }
         return pathBuilder.toString();
     }
@@ -113,11 +114,12 @@ public class CharacterBlacklistUtil {
         }
         final String[] folderNames = path.split("/");
         StringBuilder pathBuilder = new StringBuilder();
-        for (int index = 0; index < folderNames.length; index++) {
-            pathBuilder.append(decodeName(folderNames[index]));
-            if (index < folderNames.length - 1) {
-                pathBuilder.append("/");
-            }
+        for (String folderName : folderNames) {
+            pathBuilder.append(decodeName(folderName));
+            pathBuilder.append("/");
+        }
+        if (!path.endsWith("/")) {
+            pathBuilder.deleteCharAt(pathBuilder.length()-1);
         }
         return pathBuilder.toString();
     }
