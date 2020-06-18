@@ -6,7 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.string;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.environment.CharacterBlacklist.getCharBlacklist;
 
@@ -71,6 +76,57 @@ public class CharacterBlacklistUtil {
         }
 
         return false;
+    }
+
+    /**
+     * Returns URL encoded name (even asterisk is encoded)
+     */
+    public static String encodeName(String name) throws UnsupportedEncodingException {
+        String encodedName = URLEncoder.encode(name, "UTF-8");
+        return encodedName.replaceAll("\\*", "%2A");
+    }
+
+    /**
+     * Returns URL encoded path (even asterisk is encoded)
+     */
+    public static String encodePath(String path) throws UnsupportedEncodingException {
+        if (path.equals("/")) {
+            return path;
+        }
+        final String[] folderNames = path.split("/");
+        StringBuilder pathBuilder = new StringBuilder();
+        for (int index = 0; index < folderNames.length; index++) {
+            pathBuilder.append(encodeName(folderNames[index]));
+            if (index < folderNames.length - 1) {
+                pathBuilder.append("/");
+            }
+        }
+        return pathBuilder.toString();
+    }
+
+    /**
+     * Returns URL decoded path
+     */
+    public static String decodePath(String path) throws UnsupportedEncodingException {
+        if (path.equals("/")) {
+            return path;
+        }
+        final String[] folderNames = path.split("/");
+        StringBuilder pathBuilder = new StringBuilder();
+        for (int index = 0; index < folderNames.length; index++) {
+            pathBuilder.append(decodeName(folderNames[index]));
+            if (index < folderNames.length - 1) {
+                pathBuilder.append("/");
+            }
+        }
+        return pathBuilder.toString();
+    }
+
+    /**
+     * Returns URL decoded name
+     */
+    public static String decodeName(String name) throws UnsupportedEncodingException {
+        return URLDecoder.decode(name, "UTF-8");
     }
 
     private CharacterBlacklistUtil() {}

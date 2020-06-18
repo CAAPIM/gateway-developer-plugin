@@ -13,10 +13,11 @@ import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_ID;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -25,11 +26,12 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 
 @Singleton
 public class FolderLoader implements BundleEntityLoader {
+    private static final Logger LOGGER = Logger.getLogger(FolderLoader.class.getName());
 
     @Override
     public void load(Bundle bundle, Element element) {
         final Element folderElement = getSingleChildElement(getSingleChildElement(element, RESOURCE), FOLDER);
-        final String name = getSingleChildElementTextContent(folderElement, NAME);
+        String name = getSingleChildElementTextContent(folderElement, NAME);
         final String id = folderElement.getAttribute(ATTRIBUTE_ID);
         final String parentFolderID = folderElement.getAttribute(ATTRIBUTE_FOLDER_ID);
 
@@ -40,8 +42,10 @@ public class FolderLoader implements BundleEntityLoader {
             parentFolder = ServiceAndPolicyLoaderUtil.getFolder(bundle, parentFolderID);
         }
 
-        if (CharacterBlacklistUtil.containsInvalidCharacter(name)) {
-            throw new BundleLoadException("Folder name contains invalid characters: " + name);
+        try {
+            name = CharacterBlacklistUtil.encodeName(name);
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "unable to encode folder name " + name);
         }
 
         Folder folder = new Folder();
