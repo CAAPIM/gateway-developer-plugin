@@ -6,12 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -168,7 +168,7 @@ class EncassEntityBuilderTest {
         assertEquals(DEFAULT_PALETTE_FOLDER_LOCATION, props.get(PALETTE_FOLDER));
         assertEquals("someImage", props.get(PALETTE_ICON_RESOURCE_NAME));
         assertEquals("false", props.get(ALLOW_TRACING));
-        assertEquals("someDescription", props.get(DESCRIPTION));
+        assertEquals("someDescription", props.get(PropertyConstants.DESCRIPTION));
         assertEquals("false", props.get(PASS_METRICS_TO_PARENT));
 
         Element arguments = getSingleChildElement(xml, ENCAPSULATED_ARGUMENTS);
@@ -228,7 +228,7 @@ class EncassEntityBuilderTest {
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
                 PALETTE_ICON_RESOURCE_NAME, "someImage",
                 ALLOW_TRACING, "false",
-                DESCRIPTION, "someDescription",
+                PropertyConstants.DESCRIPTION, "someDescription",
                 PASS_METRICS_TO_PARENT, "false"));
         return encass;
     }
