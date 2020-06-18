@@ -11,8 +11,10 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtilsException;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +51,9 @@ public class JsonTools {
     public JsonTools(FileUtils fileUtils) {
         this.fileUtils = fileUtils;
         objectMapperMap.put(JSON, buildObjectMapper(new JsonFactory()));
-        objectMapperMap.put(YAML, buildObjectMapper(new YAMLFactory().disable(WRITE_DOC_START_MARKER)));
+        objectMapperMap.put(YAML,
+                buildObjectMapper(new YAMLFactory().disable(WRITE_DOC_START_MARKER)
+                        .configure(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE, true)));
         outputType = YAML;
         fileExtension = "." + YML_EXTENSION;
     }

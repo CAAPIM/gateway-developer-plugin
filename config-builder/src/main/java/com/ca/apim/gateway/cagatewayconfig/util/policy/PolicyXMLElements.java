@@ -37,6 +37,11 @@ public class PolicyXMLElements {
     public static final String HTTP_ROUTING_ASSERTION  = "L7p:HttpRoutingAssertion";
     public static final String TLS_TRUSTED_CERT_IDS = "L7p:TlsTrustedCertGoids";
     public static final String TLS_TRUSTED_CERT_NAMES = "L7p:TlsTrustedCertNames";
+
+    public static final String HTTP2_ROUTING_ASSERTION  = "L7p:Http2Routing";
+    public static final String HTTP2_CLIENT_CONFIG_ID = "L7p:Http2ClientConfigGoid";
+    public static final String HTTP2_CLIENT_CONFIG_NAME = "L7p:Http2ClientConfigName";
+
     public static final String ITEM = "L7p:item";
 
     private PolicyXMLElements() {

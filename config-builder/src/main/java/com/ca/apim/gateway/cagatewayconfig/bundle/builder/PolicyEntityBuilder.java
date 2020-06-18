@@ -166,6 +166,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyName, policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
         prepareAssertion(policyElement, HTTP_ROUTING_ASSERTION, assertionElement -> prepareRoutingAssertionCertificateIds(policyDocument, bundle, assertionElement));
+        prepareAssertion(policyElement, HTTP2_ROUTING_ASSERTION, assertionElement -> prepareHttp2RoutingAssertion(policyDocument, bundle, assertionElement));
 
         policy.setPolicyDocument(policyElement);
     }
@@ -485,8 +486,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             for (int i = 0; i < trustedCertNamesList.getLength(); i++) {
                 final String trustedCertName = trustedCertNamesList.item(i).getAttributes().getNamedItem(STRING_VALUE).getTextContent();
                 final TrustedCert trustedCert = bundle.getTrustedCerts().get(trustedCertName);
-                final String trustedCertId = trustedCert != null && trustedCert.getAnnotatedEntity() != null && trustedCert.getAnnotatedEntity().getId() != null ?
-                        trustedCert.getAnnotatedEntity().getId() : idGenerator.generate();
+                final String trustedCertId = getIdFromAnnotableEntity(trustedCert);
 
                 Element trustedCertGoidItem = createElementWithAttribute(
                         policyDocument,
@@ -497,6 +497,34 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 trustedCertGoidElement.appendChild(trustedCertGoidItem);
             }
         }
+    }
+
+
+    private void prepareHttp2RoutingAssertion(Document policyDocument, Bundle bundle, Element assertionElement) {
+        final Element http2ClientNameEle = getSingleChildElement(assertionElement, HTTP2_CLIENT_CONFIG_NAME, true);
+        if (http2ClientNameEle != null) {
+            final String http2ClientName =
+                    http2ClientNameEle.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
+            final GenericEntity http2Client = bundle.getGenericEntities().get(http2ClientName);
+            final String id = getIdFromAnnotableEntity(http2Client);
+            Element http2ClientGoidElement = createElementWithAttribute(
+                    policyDocument,
+                    HTTP2_CLIENT_CONFIG_ID,
+                    GOID_VALUE,
+                    id
+            );
+            assertionElement.insertBefore(http2ClientGoidElement, http2ClientNameEle);
+        }
+    }
+
+    private String getIdFromAnnotableEntity(GatewayEntity gatewayEntity) {
+        if (gatewayEntity instanceof AnnotableEntity) {
+            AnnotatedEntity annotatedEntity = ((AnnotableEntity) gatewayEntity).getAnnotatedEntity();
+            if (annotatedEntity != null && annotatedEntity.getId() != null) {
+                return annotatedEntity.getId();
+            }
+        }
+        return idGenerator.generate();
     }
 
     @VisibleForTesting
