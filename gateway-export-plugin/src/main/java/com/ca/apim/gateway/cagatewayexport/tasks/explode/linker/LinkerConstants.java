@@ -13,6 +13,7 @@ final class LinkerConstants {
     
     static final Pattern STORED_PASSWORD_PATTERN = Pattern.compile("secpass.(.+?).plaintext");
     static final String ENCRYPTED_PASSWORD_PREFIX = "$L7C2$";
+    static final String PORTAL_TEMPLATE = "portalTemplate";
     
     private LinkerConstants() {
     }
