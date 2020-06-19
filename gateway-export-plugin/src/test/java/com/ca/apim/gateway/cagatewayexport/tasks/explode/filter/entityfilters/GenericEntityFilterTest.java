@@ -4,7 +4,6 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilterException;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
 import com.google.common.collect.ImmutableSet;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;

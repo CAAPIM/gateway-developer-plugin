@@ -31,6 +31,8 @@ public class GenericEntity extends GatewayEntity implements AnnotableEntity {
     private String valueXml;
     @JsonDeserialize(using = AnnotationDeserializer.class)
     private Set<Annotation> annotations;
+    @JsonIgnore
+    private AnnotatedEntity<GatewayEntity> annotatedEntity;
 
     public String getDescription() {
         return description;
@@ -59,7 +61,10 @@ public class GenericEntity extends GatewayEntity implements AnnotableEntity {
     @JsonIgnore
     @Override
     public AnnotatedEntity<GatewayEntity> getAnnotatedEntity() {
-        return createAnnotatedEntity();
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+        }
+        return annotatedEntity;
     }
 
     @Override

@@ -4,9 +4,6 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GenericEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -26,23 +23,21 @@ public class GenericEntityBuilder implements EntityBuilder {
 
     private static final Integer ORDER = 1700;
     private final IdGenerator idGenerator;
-    private final DocumentTools documentTools;
 
     @Inject
-    public GenericEntityBuilder(IdGenerator idGenerator, DocumentTools documentTools) {
+    public GenericEntityBuilder(IdGenerator idGenerator) {
         this.idGenerator = idGenerator;
-        this.documentTools = documentTools;
     }
 
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         Map<String, GenericEntity> genericEntities =
                 Optional.ofNullable(bundle.getGenericEntities()).orElse(Collections.emptyMap());
-        return buildEntities(genericEntities, bundle, bundleType, document);
+        return buildEntities(genericEntities, bundleType, document);
     }
 
-    private List<Entity> buildEntities(Map<String, GenericEntity> genericEntities, Bundle bundle,
-                                       BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, GenericEntity> genericEntities, BundleType bundleType,
+                                       Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
                 return genericEntities.entrySet().stream()
@@ -76,7 +71,8 @@ public class GenericEntityBuilder implements EntityBuilder {
     }
 
     private String generateId(GenericEntity genericEntity) {
-        if (genericEntity != null && genericEntity.getAnnotatedEntity() != null && StringUtils.isNotBlank(genericEntity.getAnnotatedEntity().getId())) {
+        if (genericEntity != null && genericEntity.getAnnotatedEntity() != null
+                && StringUtils.isNotBlank(genericEntity.getAnnotatedEntity().getId())) {
             return genericEntity.getAnnotatedEntity().getId();
         }
         return idGenerator.generate();
