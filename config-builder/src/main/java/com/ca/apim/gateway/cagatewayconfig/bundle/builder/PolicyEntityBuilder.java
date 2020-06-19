@@ -526,8 +526,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
     }
 
-
-    private void prepareHttp2RoutingAssertion(Document policyDocument, Bundle bundle, Element assertionElement) {
+    @VisibleForTesting
+    void prepareHttp2RoutingAssertion(Document policyDocument, Bundle bundle, Element assertionElement) {
         final Element http2ClientNameEle = getSingleChildElement(assertionElement, HTTP2_CLIENT_CONFIG_NAME, true);
         if (http2ClientNameEle != null) {
             final String http2ClientName =
@@ -536,7 +536,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             final String id = getIdFromAnnotableEntity(http2Client);
             Element http2ClientGoidElement = createElementWithAttribute(
                     policyDocument,
-                    HTTP2_CLIENT_CONFIG_ID,
+                    HTTP2_CLIENT_CONFIG_GOID,
                     GOID_VALUE,
                     id
             );

@@ -774,6 +774,20 @@ class PolicyEntityBuilderTest {
     }
 
     @Test
+    void testPrepareHttp2AssertionClientConfigIds() {
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        bundle.getGenericEntities().put("http2client",
+                createHttp2ClientConfigWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "a2097d7f50280e9411c277aafedc180d"));
+
+        Element http2RoutingAssertionElement = createHttp2Assertion(document);
+        policyEntityBuilder.prepareHttp2RoutingAssertion(document, bundle, http2RoutingAssertionElement);
+
+        final Element clientConfigId = getSingleChildElement(http2RoutingAssertionElement, HTTP2_CLIENT_CONFIG_GOID, true);
+        assertNotNull(clientConfigId);
+        assertEquals("a2097d7f50280e9411c277aafedc180d", clientConfigId.getAttributes().getNamedItem(GOID_VALUE).getTextContent());
+    }
+
+    @Test
     void testPrepareMqRoutingAssertionIds() {
         PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
         bundle.putAllSsgActiveConnectors(ImmutableMap.of("activeConnector1", createActiveConnectorWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "2cd473fe16d98cd6b9348ffb404517bc")));
@@ -803,6 +817,16 @@ class PolicyEntityBuilderTest {
                 document,
                 HTTP_ROUTING_ASSERTION,
                 trustedCertNamesElement
+        );
+    }
+
+    @NotNull
+    private Element createHttp2Assertion(Document document) {
+        return createElementWithChildren(
+                document,
+                HTTP2_ROUTING_ASSERTION,
+                createElementWithAttribute(document, "L7p:ProtectedServiceUrl", STRING_VALUE, "http://apim-hugh-new.lvn.broadcom.net:90"),
+                createElementWithAttribute(document, HTTP2_CLIENT_CONFIG_NAME, STRING_VALUE, "http2client")
         );
     }
 
@@ -837,6 +861,18 @@ class PolicyEntityBuilderTest {
         annotations.add(annotation);
         activeConnector.setAnnotations(annotations);
         return activeConnector;
+    }
+
+    @NotNull
+    private GenericEntity createHttp2ClientConfigWithAnnotation(final String type, final String id) {
+        GenericEntity genericEntity = new GenericEntity();
+        genericEntity.setName("http2client");
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation annotation = new Annotation(type);
+        annotation.setId(id);
+        annotations.add(annotation);
+        genericEntity.setAnnotations(annotations);
+        return genericEntity;
     }
 
     private Element createIncludeAssertionElement(Document document, String policyPath) {
