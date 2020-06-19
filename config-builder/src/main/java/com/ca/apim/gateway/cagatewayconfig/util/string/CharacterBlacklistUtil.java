@@ -12,6 +12,7 @@ import java.net.URLEncoder;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.environment.CharacterBlacklist.getCharBlacklist;
 
@@ -19,6 +20,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.environment.CharacterBlac
  * Utility class for Character Blacklist. Purpose is to apply functions to the constants found in CharacterBlacklist
  */
 public class CharacterBlacklistUtil {
+    private static final Logger LOGGER = Logger.getLogger(CharacterBlacklistUtil.class.getName());
     private static final char REPLACEMENT_CHAR = '-';
 
     /**
@@ -81,15 +83,20 @@ public class CharacterBlacklistUtil {
     /**
      * Returns URL encoded name (even asterisk is encoded)
      */
-    public static String encodeName(String name) throws UnsupportedEncodingException {
-        String encodedName = URLEncoder.encode(name, "UTF-8");
-        return encodedName.replaceAll("\\*", "%2A");
+    public static String encodeName(String name) {
+        try {
+            String encodedName = URLEncoder.encode(name, "UTF-8");
+            return encodedName.replaceAll("\\*", "%2A");
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "unable to encode folder name " + name);
+            throw new RuntimeException("Unable to encode name " + name, e);
+        }
     }
 
     /**
      * Returns URL encoded path (even asterisk is encoded)
      */
-    public static String encodePath(String path) throws UnsupportedEncodingException {
+    public static String encodePath(String path) {
         if (path.equals("/")) {
             return path;
         }
@@ -100,7 +107,7 @@ public class CharacterBlacklistUtil {
             pathBuilder.append("/");
         }
         if (!path.endsWith("/")) {
-            pathBuilder.deleteCharAt(pathBuilder.length()-1);
+            pathBuilder.deleteCharAt(pathBuilder.length() - 1);
         }
         return pathBuilder.toString();
     }
@@ -108,7 +115,7 @@ public class CharacterBlacklistUtil {
     /**
      * Returns URL decoded path
      */
-    public static String decodePath(String path) throws UnsupportedEncodingException {
+    public static String decodePath(String path) {
         if (path.equals("/")) {
             return path;
         }
@@ -119,7 +126,7 @@ public class CharacterBlacklistUtil {
             pathBuilder.append("/");
         }
         if (!path.endsWith("/")) {
-            pathBuilder.deleteCharAt(pathBuilder.length()-1);
+            pathBuilder.deleteCharAt(pathBuilder.length() - 1);
         }
         return pathBuilder.toString();
     }
@@ -127,8 +134,14 @@ public class CharacterBlacklistUtil {
     /**
      * Returns URL decoded name
      */
-    public static String decodeName(String name) throws UnsupportedEncodingException {
-        return URLDecoder.decode(name, "UTF-8");
+    public static String decodeName(String name) {
+        try {
+            return URLDecoder.decode(name, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.WARNING, "unable to decode folder name " + name);
+            throw new RuntimeException("Unable to decode name " + name, e);
+        }
+
     }
 
     private CharacterBlacklistUtil() {}

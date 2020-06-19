@@ -42,11 +42,7 @@ public class FolderLoader implements BundleEntityLoader {
             parentFolder = ServiceAndPolicyLoaderUtil.getFolder(bundle, parentFolderID);
         }
 
-        try {
-            name = CharacterBlacklistUtil.encodeName(name);
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.log(Level.WARNING, "unable to encode folder name " + name);
-        }
+        name = CharacterBlacklistUtil.encodeName(name);
 
         Folder folder = new Folder();
         folder.setId(id);

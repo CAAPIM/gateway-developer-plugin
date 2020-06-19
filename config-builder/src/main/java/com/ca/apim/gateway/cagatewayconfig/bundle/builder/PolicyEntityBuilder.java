@@ -532,11 +532,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     Entity buildPolicyEntity(Policy policy, AnnotatedBundle annotatedBundle, Bundle bundle, Document document) {
         String policyName = policy.getName();
         String policyNameWithPath = policy.getPath();
-        try {
-            policyNameWithPath = CharacterBlacklistUtil.decodePath(policyNameWithPath);
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.log(Level.WARNING, "unable to decode policy path " + policyNameWithPath);
-        }
+        policyNameWithPath = CharacterBlacklistUtil.decodePath(policyNameWithPath);
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
         boolean isReusable = false;

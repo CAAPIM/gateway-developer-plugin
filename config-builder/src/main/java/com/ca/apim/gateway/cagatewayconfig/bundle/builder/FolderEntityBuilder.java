@@ -16,9 +16,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,11 +46,7 @@ public class FolderEntityBuilder implements EntityBuilder {
             folderElement.setAttribute(ATTRIBUTE_FOLDER_ID, parentFolderId);
         }
         String folderName = folder.getName();
-        try {
-            folderName = CharacterBlacklistUtil.decodeName(folderName);
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.log(Level.WARNING, "unable to decode folder name " + folderName);
-        }
+        folderName = CharacterBlacklistUtil.decodeName(folderName);
         folderElement.appendChild(createElementWithTextContent(document, NAME, folderName));
         final Entity entity;
         if (parentFolderId == null) {
@@ -60,11 +54,7 @@ public class FolderEntityBuilder implements EntityBuilder {
             entity = new Entity(FOLDER_TYPE, folderName, id, folderElement, folder);
         } else {
             String filteredPathName = folder.getPath();
-            try {
-                filteredPathName = CharacterBlacklistUtil.decodePath(filteredPathName);
-            } catch (UnsupportedEncodingException e) {
-                LOGGER.log(Level.WARNING, "unable to decode folder path " + filteredPathName);
-            }
+            filteredPathName = CharacterBlacklistUtil.decodePath(filteredPathName);
             entity = EntityBuilderHelper.getEntityWithPathMapping(FOLDER_TYPE, filteredPathName, filteredPathName, id
                     , folderElement, false, folder);
 

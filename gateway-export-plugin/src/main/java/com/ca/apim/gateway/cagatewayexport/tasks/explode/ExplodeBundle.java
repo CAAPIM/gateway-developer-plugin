@@ -60,11 +60,7 @@ public class ExplodeBundle {
         Bundle bundle = bundleBuilder.buildBundle(bundleDocument.getDocumentElement());
 
         String encodedFolderPath = folderPath;
-        try {
-            encodedFolderPath = CharacterBlacklistUtil.encodePath(folderPath);
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.log(Level.WARNING, "unable to encode folder path " + folderPath);
-        }
+        encodedFolderPath = CharacterBlacklistUtil.encodePath(folderPath);
         //checks if bundle has specified folderpath
         if (!bundleContainsFolderPath(bundle, encodedFolderPath)) {
             throw new BundleLoadException("Specified folder " + folderPath + " does not exist in the target gateway.");
