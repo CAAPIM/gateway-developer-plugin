@@ -15,8 +15,8 @@ import org.w3c.dom.Element;
 import javax.inject.Singleton;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.API_PORTAL_ENCASS_INTEGRATION;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PORTAL_TEMPLATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
-import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerConstants.PORTAL_TEMPLATE;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.PolicyLinker.getPolicyPath;
 
 @Singleton

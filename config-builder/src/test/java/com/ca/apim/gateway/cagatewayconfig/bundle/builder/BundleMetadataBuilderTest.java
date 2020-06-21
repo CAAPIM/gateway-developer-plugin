@@ -169,6 +169,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(TEST_ENCASS_ANNOTATION_NAME, metadata.getName());
         assertEquals(TEST_ENCASS_ANNOTATION_DESC, metadata.getDescription());
         assertEquals(TEST_ENCASS_ANNOTATION_TAGS, metadata.getTags());
+        assertTrue(metadata.isPortalTemplate());
 
         verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, false, false, true);
     }
@@ -246,6 +247,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(Collections.emptyList(), metadata.getTags());
         assertTrue(metadata.isReusable());
         assertTrue(metadata.isRedeployable());
+        assertFalse(metadata.isPortalTemplate());
 
         Collection<Metadata> definedEntities = metadata.getDefinedEntities();
         assertEquals(2, definedEntities.size());

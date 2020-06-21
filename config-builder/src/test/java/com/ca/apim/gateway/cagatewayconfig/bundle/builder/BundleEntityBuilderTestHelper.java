@@ -101,12 +101,14 @@ public class BundleEntityBuilderTestHelper {
             annotations.add(AnnotableEntity.REDEPLOYABLE_ANNOTATION);
         }
         encass.setAnnotations(annotations);
-        encass.setProperties(ImmutableMap.of(
-                PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
-                PALETTE_ICON_RESOURCE_NAME, "someImage",
-                ALLOW_TRACING, "false",
-                DESCRIPTION, "someDescription",
-                PASS_METRICS_TO_PARENT, "false"));
+        encass.setProperties(new HashMap<String, Object>() {{
+            put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
+            put(PALETTE_ICON_RESOURCE_NAME, "someImage");
+            put(ALLOW_TRACING, "false");
+            put(DESCRIPTION, "someDescription");
+            put(PASS_METRICS_TO_PARENT, "false");
+            put(PORTAL_TEMPLATE, "true");
+        }});
         return encass;
     }
 
@@ -118,12 +120,14 @@ public class BundleEntityBuilderTestHelper {
         encass.setId(encassId);
         encass.setGuid(encassGuid);
         encass.setAnnotations(annotations);
-        encass.setProperties(ImmutableMap.of(
-                PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
-                PALETTE_ICON_RESOURCE_NAME, "someImage",
-                ALLOW_TRACING, "false",
-                DESCRIPTION, "someDescription",
-                PASS_METRICS_TO_PARENT, "false"));
+        encass.setProperties(new HashMap<String, Object>() {{
+            put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
+            put(PALETTE_ICON_RESOURCE_NAME, "someImage");
+            put(ALLOW_TRACING, "false");
+            put(DESCRIPTION, "someDescription");
+            put(PASS_METRICS_TO_PARENT, "false");
+            put(PORTAL_TEMPLATE, "false");
+        }});
         return encass;
     }
 

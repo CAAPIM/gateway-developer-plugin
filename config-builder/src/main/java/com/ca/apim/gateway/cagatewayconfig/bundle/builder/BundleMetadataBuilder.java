@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PORTAL_TEMPLATE;
 
 @Singleton
 public class BundleMetadataBuilder {
@@ -61,7 +62,7 @@ public class BundleMetadataBuilder {
             builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
-            builder.portalTemplate(Boolean.valueOf(encass.getProperties().get("portalTemplate").toString()));
+            builder.portalTemplate(Boolean.valueOf(encass.getProperties().get(PORTAL_TEMPLATE).toString()));
             builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 

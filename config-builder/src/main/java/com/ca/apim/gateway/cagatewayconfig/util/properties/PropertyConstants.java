@@ -39,6 +39,7 @@ public class PropertyConstants {
     public static final String PASS_METRICS_TO_PARENT = "passMetricsToParent";
     public static final String DESCRIPTION = "description";
     public static final String DEFAULT_PALETTE_FOLDER_LOCATION = "internalAssertions";
+    public static final String PORTAL_TEMPLATE = "portalTemplate";
 
     // Property names
     public static final String PROPERTY_USER = "user";
