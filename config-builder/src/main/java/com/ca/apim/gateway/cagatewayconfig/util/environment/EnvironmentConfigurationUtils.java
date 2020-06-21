@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.PEM_CERT_FILE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.*;
@@ -65,7 +66,16 @@ public class EnvironmentConfigurationUtils {
     @SuppressWarnings("unchecked")
     public Map<String, String> parseEnvironmentValues(Map providedEnvironmentValues) {
         final Map<String, String> environmentValues = new HashMap<>();
-        providedEnvironmentValues.entrySet().forEach((Consumer<Entry>) e -> environmentValues.put(PREFIX_ENV + e.getKey().toString(), getEnvValue(e.getKey().toString(), e.getValue())));
+        providedEnvironmentValues.entrySet().forEach((Consumer<Entry>) e -> {
+            int index = e.getKey().toString().indexOf('.');
+            if (index != -1) {
+                environmentValues.put(PREFIX_ENV + e.getKey().toString(), getEnvValue(e.getKey().toString(), e.getValue()));
+            } else {
+                final String entityType = (String) e.getKey();
+                Map<String, String> entities = loadConfigFromFile((File) e.getValue(), entityType);
+                entities.entrySet().forEach(entry -> environmentValues.put(PREFIX_ENV + entityType + "." + entry.getKey(), entry.getValue()));
+            }
+        });
 
         return unmodifiableMap(environmentValues);
     }
@@ -79,6 +89,7 @@ public class EnvironmentConfigurationUtils {
             String entityType = key.substring(0, key.indexOf('.'));
             String entityName = key.substring(key.indexOf('.') + 1);
             return loadConfigFromFile((File) o, entityType, entityName);
+
         }
 
         throw new MissingEnvironmentException("Unable to load environment from specified property '" + o.toString() + "' due to unsupported value, it has to be a text content or a file");
@@ -163,6 +174,34 @@ public class EnvironmentConfigurationUtils {
         } catch (JsonProcessingException e) {
             throw new MissingEnvironmentException("Unable to read environment for specified configuration " + entityName, e);
         }
+    }
+
+    @NotNull
+    public Map<String, String> loadConfigFromFile(File configFile, String entityType) {
+        if (!configFile.exists()) {
+            throw new MissingEnvironmentException("Environment config file " + configFile.toString() + " does not exist.");
+        }
+
+        // read a single file to the map of entities (or strings, if is a properties or certificate)
+        EntityLoader loader = entityLoaderRegistry.getLoader(entityType);
+
+        // find the entity value
+        Map<String, Object> entityMap = loader.load(configFile);
+        Map<String, String> entities = new HashMap<>();
+        entityMap.entrySet().forEach(e -> {
+            // in case of properties or certificates will be the string value
+            if (e.getValue() instanceof String) {
+                entities.put(e.getKey(), (String) e.getValue());
+            }
+
+            // otherwise is a real entity so we jsonify it
+            try {
+                entities.put(e.getKey(), jsonTools.getObjectWriter(JSON).writeValueAsString(e.getValue()));
+            } catch (JsonProcessingException ex) {
+                throw new MissingEnvironmentException("Unable to read environment for specified configuration " + e.getKey(), ex);
+            }
+        });
+        return entities;
     }
 
     public static String tryInferContentTypeFromValue(final String value) {

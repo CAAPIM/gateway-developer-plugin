@@ -74,6 +74,11 @@ public class CertificatesLoader implements EntityLoader {
         return fileUtils.getFileAsString(entitiesFile);
     }
 
+    @Override
+    public Map<String, Object> load(File entitiesFile) {
+        throw new ConfigLoadException("Cannot load certificates from config file");
+    }
+
     private boolean checkCertFormat(String certFileName) {
         final String lowerCaseName = certFileName.toLowerCase();
         return lowerCaseName.endsWith(".der") || lowerCaseName.endsWith(".pem") || lowerCaseName.endsWith(".crt") || lowerCaseName.endsWith(".cer");

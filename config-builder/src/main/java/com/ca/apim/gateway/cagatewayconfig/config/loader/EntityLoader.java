@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * An Entity Loader is responsible for reading configuration files (either json/yaml or properties) and loading contents into their
@@ -25,6 +26,14 @@ public interface EntityLoader {
      * @return the entity bean loaded
      */
     Object loadSingle(String name, File entitiesFile);
+
+    /**
+     * Load a entities from the given config file.
+     *
+     * @param entitiesFile file that contains the entity
+     * @return the entity map
+     */
+    Map<String, Object> load(File entitiesFile);
 
     /**
      * Load all entities from a configuration file into a Bundle object.

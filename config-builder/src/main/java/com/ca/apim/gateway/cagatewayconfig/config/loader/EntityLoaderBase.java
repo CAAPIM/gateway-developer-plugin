@@ -44,6 +44,10 @@ public abstract class EntityLoaderBase<B extends GatewayEntity> implements Entit
         return loadEntitiesFromFile(jsonTools, this.getBeanClass(), entitiesFile).get(name);
     }
 
+    public Map<String, Object> load(File entitiesFile) {
+        return loadEntitiesFromFile(jsonTools, this.getBeanClass(), entitiesFile);
+    }
+
     @Override
     public void load(final Bundle bundle, final File rootDir) {
         final File entitiesFile = jsonTools.getDocumentFile(rootDir, getFileName());
