@@ -36,6 +36,18 @@ class EncassLinkerTest {
             "    </wsp:All>\n" +
             "</wsp:Policy>";
 
+    private static final String ENCASS_POLICY_WITH_PORTAL_INTEGRATION_DISABLED = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<wsp:Policy xmlns:L7p=\"http://www.layer7tech.com/ws/policy\" xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\">\n" +
+            "    <wsp:All wsp:Usage=\"Required\">\n" +
+            "        <L7p:ApiPortalEncassIntegration>\n" +
+            "            <L7p:Enabled booleanValue=\"false\"/>\n" +
+            "        </L7p:ApiPortalEncassIntegration>\n" +
+            "        <L7p:CommentAssertion>\n" +
+            "            <L7p:Comment stringValue=\"Policy Fragment: includedPolicy\"/>\n" +
+            "        </L7p:CommentAssertion>\n" +
+            "    </wsp:All>\n" +
+            "</wsp:Policy>";
+
     @BeforeEach
     void setUp() {
         encassLinker = new EncassLinker();
@@ -101,6 +113,28 @@ class EncassLinkerTest {
         assertEquals("myEncassPolicy", linkedEncass.getPath());
         assertEquals(2, linkedEncass.getProperties().size());
         assertTrue(Boolean.valueOf(linkedEncass.getProperties().get(PORTAL_TEMPLATE).toString()));
+
+        Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
+        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
+    }
+
+    @Test
+    void linkPortalTemplateDisabledFlag() throws DocumentParseException {
+        Bundle fullBundle = new Bundle();
+        myEncass.setProperties(new HashMap<String, Object>() {{
+            put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
+        }});
+        fullBundle.addEntity(myEncass);
+        fullBundle.addEntity(createPolicy("myEncassPolicy", "1","1", "1", DocumentUtils.stringToXML(DocumentTools.INSTANCE, ENCASS_POLICY_WITH_PORTAL_INTEGRATION_DISABLED), EMPTY));
+        fullBundle.addEntity(createFolder("myFolder", "1", null));
+
+        FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
+        fullBundle.setFolderTree(folderTree);
+        encassLinker.link(bundle, fullBundle);
+        Encass linkedEncass = bundle.getEntities(Encass.class).get("1");
+        assertEquals("myEncassPolicy", linkedEncass.getPath());
+        assertEquals(2, linkedEncass.getProperties().size());
+        assertFalse(Boolean.valueOf(linkedEncass.getProperties().get(PORTAL_TEMPLATE).toString()));
 
         Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
         assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));

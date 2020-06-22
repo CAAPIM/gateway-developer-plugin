@@ -14,8 +14,9 @@ import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.API_PORTAL_ENCASS_INTEGRATION;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PORTAL_TEMPLATE;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.PolicyLinker.getPolicyPath;
 
@@ -33,15 +34,17 @@ public class EncassLinker implements EntityLinker<Encass> {
             throw new LinkerException("Could not find policy for Encapsulated Assertion: " + encass.getName() + ". Policy ID: " + encass.getPolicyId());
         }
         Element encassPortalIntegrationElement = null;
+        Element encassPortalIntegrationEnabledElement = null;
         try {
             encassPortalIntegrationElement = getSingleElement(policy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION);
         } catch (DocumentParseException ex) {
             // do nothing
         }
         if (encassPortalIntegrationElement != null) {
+            encassPortalIntegrationEnabledElement = getSingleChildElement(encassPortalIntegrationElement, ENABLED, true);
             policy.getPolicyDocument().getFirstChild().removeChild(encassPortalIntegrationElement);
         }
-        encass.getProperties().put(PORTAL_TEMPLATE, encassPortalIntegrationElement != null ? "true" : "false");
+        encass.getProperties().put(PORTAL_TEMPLATE, encassPortalIntegrationElement != null && encassPortalIntegrationEnabledElement == null ? "true" : "false");
         encass.setPolicy(policy.getPath());
         encass.setPath(getPolicyPath(policy, bundle, encass));
     }

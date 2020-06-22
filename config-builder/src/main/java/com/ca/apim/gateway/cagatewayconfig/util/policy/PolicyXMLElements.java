@@ -43,6 +43,7 @@ public class PolicyXMLElements {
     public static final String ACTIVE_CONNECTOR_GOID = "L7p:SsgActiveConnectorGoid";
     public static final String ACTIVE_CONNECTOR_NAME = "L7p:SsgActiveConnectorName";
     public static final String ITEM = "L7p:item";
+    public static final String ENABLED = "L7p:Enabled";
 
     private PolicyXMLElements() {
 
