@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.PEM_CERT_FILE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.*;
@@ -41,7 +40,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_GATEWAY;
 import static java.util.Collections.unmodifiableMap;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static java.util.Optional.ofNullable;
 
 /**
  * Utility class to handle tasks related to environment properties
@@ -146,6 +144,41 @@ public class EnvironmentConfigurationUtils {
         }
 
         return null;
+    }
+
+    public Map<String, String> loadConfigFolder(final File configFolder) {
+        final Map<String, String> environmentValues = new LinkedHashMap<>();
+        final Map<String, EntityUtils.GatewayEntityInfo> entityInfoMap = entityTypeRegistry.getEnvironmentEntityTypes();
+        entityInfoMap.entrySet().forEach(entityInfoEntry -> {
+            final String entityType;
+            if (EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entityInfoEntry.getKey())) {
+                entityType = "ENVIRONMENT_PROPERTY";
+            } else {
+                entityType = entityInfoEntry.getKey();
+            }
+
+            Class<? extends GatewayEntity> entityClass = entityInfoEntry.getValue().getEntityClass();
+            final Pair<String, ConfigurationFile.FileType> configFileInfo = EntityUtils.getEntityConfigFileInfo(entityClass);
+            final String environmentType = EntityUtils.getEntityEnvironmentType(entityClass);
+            if (configFileInfo != null && environmentType != null) {
+                final String configFileName = configFileInfo.getLeft() + "." + (configFileInfo.getRight().equals(ConfigurationFile.FileType.JSON_YAML) ? YML_EXTENSION :
+                        configFileInfo.getRight().name().toLowerCase());
+                final File envConfigFile = new File(configFolder, configFileName);
+                if (envConfigFile.exists()) {
+                    Map<String, String> entities = loadConfigFromFile(envConfigFile, environmentType);
+                    entities.entrySet().forEach(entry -> {
+                        if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
+                            final File certDataFile = new File(configFolder + "/certificates", entry.getKey() + PEM_CERT_FILE_EXTENSION);
+                            environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entry.getKey() + PEM_CERT_FILE_EXTENSION,
+                                    loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entry.getKey()));
+                        } else {
+                            environmentValues.put(PREFIX_ENV + environmentType + "." + entry.getKey(), entry.getValue());
+                        }
+                    });
+                }
+            }
+        });
+        return environmentValues;
     }
 
     @NotNull

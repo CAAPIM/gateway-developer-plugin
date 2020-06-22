@@ -7,13 +7,20 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.GatewayEntityInfo;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.reflections.Reflections;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.NO_INFO;
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
@@ -29,6 +36,15 @@ import static java.util.Optional.ofNullable;
 @Singleton
 public class EntityTypeRegistry {
 
+    public static final Set<String> NON_ENV_ENTITY_TYPES;
+
+    static {
+        NON_ENV_ENTITY_TYPES = new HashSet<>();
+        NON_ENV_ENTITY_TYPES.add(EntityTypes.FOLDER_TYPE);
+        NON_ENV_ENTITY_TYPES.add(EntityTypes.POLICY_TYPE);
+        NON_ENV_ENTITY_TYPES.add(EntityTypes.SERVICE_TYPE);
+        NON_ENV_ENTITY_TYPES.add(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+    }
     private final Map<String, GatewayEntityInfo> entityTypeMap;
 
     @Inject
@@ -56,6 +72,11 @@ public class EntityTypeRegistry {
 
     public Map<String, GatewayEntityInfo> getEntityTypeMap() {
         return entityTypeMap;
+    }
+
+    public Map<String, GatewayEntityInfo> getEnvironmentEntityTypes() {
+        return entityTypeMap.entrySet().stream().filter(entry -> !NON_ENV_ENTITY_TYPES.contains(entry.getValue().getType()))
+                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
     }
 
 }

@@ -318,7 +318,7 @@ class CAGatewayDeveloperTest {
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>-[<configName>]env.install.bundle
-        String envBundleFilename = bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
+        String envBundleFilename = projectFolder + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
         File envBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
         assertTrue(envBundleFile.isFile());
 
@@ -374,7 +374,7 @@ class CAGatewayDeveloperTest {
         String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
-        String envDeleteBundleFilename = bundleName + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
+        String envDeleteBundleFilename = projectFolder + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
         File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), envDeleteBundleFilename);
         assertTrue(builtDeleteEnvBundleFile.isFile());
     }
@@ -410,11 +410,11 @@ class CAGatewayDeveloperTest {
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
-        String envBundleFilename = bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
+        String envBundleFilename = projectFolder + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
         File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
         assertTrue(builtBundleFile.isFile());
 
-        String envDeleteBundleFilename = bundleName + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
+        String envDeleteBundleFilename = projectFolder + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
         File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), envDeleteBundleFilename);
         assertTrue(builtDeleteEnvBundleFile.isFile());
 

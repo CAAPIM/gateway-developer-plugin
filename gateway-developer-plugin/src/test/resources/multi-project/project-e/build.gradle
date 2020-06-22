@@ -9,7 +9,7 @@ dependencies {
 }
 
 GatewaySourceConfig {
-    environmentConfig = [
+    overrideEnvironmentConfig = [
             "PASSWORD.gateway"           : "7layer",
             "PROPERTY.gateway.log.levels": "com.l7tech.level = FINE"
     ]

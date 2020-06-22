@@ -10,7 +10,7 @@ dependencies {
 }
 
 GatewaySourceConfig {
-    environmentConfig = [
+    overrideEnvironmentConfig = [
             "PASSWORD.gateway": "test",
             "PROPERTY.gateway.log_levels":  "com.l7tech.server.policy.level = FINEST"
     ]
