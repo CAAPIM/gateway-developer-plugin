@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
+import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
@@ -530,6 +531,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     Entity buildPolicyEntity(Policy policy, AnnotatedBundle annotatedBundle, Bundle bundle, Document document) {
         String policyName = policy.getName();
         String policyNameWithPath = policy.getPath();
+        policyNameWithPath = CharacterBlacklistUtil.decodePath(policyNameWithPath);
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
         boolean isReusable = false;
@@ -540,7 +542,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         if (annotatedBundle != null) {
             if (!isReusable && !isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = annotatedBundle.getUniquePrefix() + policyName;
-                policyNameWithPath = PathUtils.extractPath(policy.getPath()) + policyName;
+                policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
             }
         }
 
