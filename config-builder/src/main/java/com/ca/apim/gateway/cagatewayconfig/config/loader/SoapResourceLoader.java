@@ -62,7 +62,7 @@ public class SoapResourceLoader implements EntityLoader {
 
     @Override
     public Map<String, Object> load(File entitiesFile) {
-        throw new ConfigLoadException("Cannot load policies from config file");
+        throw new ConfigLoadException("Cannot load soapResource from config file");
     }
 
     /**

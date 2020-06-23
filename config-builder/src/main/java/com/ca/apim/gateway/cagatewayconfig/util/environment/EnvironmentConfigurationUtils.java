@@ -71,7 +71,7 @@ public class EnvironmentConfigurationUtils {
             } else {
                 final String entityType = (String) e.getKey();
                 final Object object = e.getValue();
-                if(!(object instanceof File)){
+                if (!(object instanceof File)) {
                     throw new MissingEnvironmentException("Unable to load environment from specified property '" + e.getKey().toString() + "' due to unsupported value, it has to be a file");
                 }
                 Map<String, String> entities = loadConfigFromFile((File) object, entityType);
