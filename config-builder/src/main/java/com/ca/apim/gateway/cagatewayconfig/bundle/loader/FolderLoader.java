@@ -13,10 +13,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_ID;

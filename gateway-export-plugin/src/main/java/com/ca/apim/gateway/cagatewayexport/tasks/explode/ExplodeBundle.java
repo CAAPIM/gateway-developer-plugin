@@ -23,13 +23,10 @@ import org.w3c.dom.Document;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.Collection;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ExplodeBundle {
-    private static final Logger LOGGER = Logger.getLogger(ExplodeBundle.class.getName());
     private final DocumentTools documentTools;
     private final EntityWriterRegistry entityWriterRegistry;
     private final EntityLinkerRegistry entityLinkerRegistry;
