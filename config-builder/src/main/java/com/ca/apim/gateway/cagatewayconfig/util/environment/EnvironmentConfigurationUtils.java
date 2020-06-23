@@ -96,12 +96,12 @@ public class EnvironmentConfigurationUtils {
             throw new MissingEnvironmentException("Metadata file " + metaDataFile.toString() + " does not exist.");
         }
         final EnvironmentBundleData environmentBundleData = jsonFileUtils.readBundleMetadataFile(metaDataFile, EnvironmentBundleData.class);
-        if (environmentBundleData != null && environmentBundleData.getEnvironmentEntities() != null) {
+        if (environmentBundleData != null && environmentBundleData.getReferencedEntities() != null) {
             String bundleName = environmentBundleData.getName();
             final String bundleVersion = environmentBundleData.getVersion();
             final Map<String, String> environmentValues = new LinkedHashMap<>();
             if (configFolder != null) {
-                final List<Map<String, String>> environmentEntities = environmentBundleData.getEnvironmentEntities();
+                final List<Map<String, String>> environmentEntities = environmentBundleData.getReferencedEntities();
                 environmentEntities.stream().forEach(environmentEntitiy -> {
                     String entityType = environmentEntitiy.get("type");
                     String entityName = environmentEntitiy.get("name");

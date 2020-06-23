@@ -7,8 +7,7 @@ public class EnvironmentBundleData {
     private String type;
     private String name;
     private String version;
-    private Boolean environmentIncluded;
-    private List<Map<String, String>> environmentEntities;
+    private List<Map<String, String>> referencedEntities;
 
     public String getType() {
         return type;
@@ -34,19 +33,11 @@ public class EnvironmentBundleData {
         this.version = version;
     }
 
-    public boolean isEnvironmentIncluded() {
-        return environmentIncluded;
+    public List<Map<String, String>> getReferencedEntities() {
+        return referencedEntities;
     }
 
-    public void setEnvironmentIncluded(Boolean environmentIncluded) {
-        this.environmentIncluded = environmentIncluded;
-    }
-
-    public List<Map<String, String>> getEnvironmentEntities() {
-        return environmentEntities;
-    }
-
-    public void setEnvironmentEntities(List<Map<String, String>> environmentEntities) {
-        this.environmentEntities = environmentEntities;
+    public void setReferencedEntities(List<Map<String, String>> referencedEntities) {
+        this.referencedEntities = referencedEntities;
     }
 }

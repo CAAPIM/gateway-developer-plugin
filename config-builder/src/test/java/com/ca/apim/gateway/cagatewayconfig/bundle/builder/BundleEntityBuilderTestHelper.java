@@ -315,9 +315,9 @@ public class BundleEntityBuilderTestHelper {
         String json = objectMapper.writeValueAsString(definedEntities.get());
         Assert.assertThat(json, CoreMatchers.containsString("\"arguments\":[{\"type\":\"message\",\"name\":\"source\",\"requireExplicit\":true,\"label\":\"Some label\"}]"));
         Assert.assertThat(json, CoreMatchers.containsString("\"results\":[{\"name\":\"result.msg\",\"type\":\"message\"}]"));
-        assertEquals(4, metadata.getEnvironmentEntities().size());
+        assertEquals(4, metadata.getReferencedEntities().size());
 
-        for (Metadata envMeta : metadata.getEnvironmentEntities()) {
+        for (Metadata envMeta : metadata.getReferencedEntities()) {
             assertTrue(expectedEnvMetadata.containsKey(envMeta.getType()));
             assertEquals(expectedEnvMetadata.get(envMeta.getType()).getName(), envMeta.getName());
         }

@@ -53,9 +53,9 @@ public class BundleMetadataBuilder {
                 name =  bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
             }
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getGroupName(), projectInfo.getVersion());
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
-            builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
+            builder.referencedEntities(getEnvironmentDependenciesMetadata(dependentEntities));
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
             builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
@@ -78,12 +78,12 @@ public class BundleMetadataBuilder {
      * @return Full bundle metadata
      */
     private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final Bundle bundle, ProjectInfo projectInfo) {
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(), projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
         builder.redeployable(true);
         builder.hasRouting(hasRoutingAssertion(entities));
-        builder.environmentEntities(getEnvironmentDependenciesMetadata(entities));
+        builder.referencedEntities(getEnvironmentDependenciesMetadata(entities));
         builder.dependencies(bundle.getDependentBundles());
         builder.definedEntities(getDefinedEntitiesMetadata(entities));
 
