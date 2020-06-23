@@ -171,12 +171,11 @@ public class EnvironmentConfigurationUtils {
                 if (envConfigFile.exists()) {
                     Map<String, String> entities = loadConfigFromFile(envConfigFile, environmentType);
                     entities.entrySet().forEach(entry -> {
+                        environmentValues.put(PREFIX_ENV + environmentType + "." + entry.getKey(), entry.getValue());
                         if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
                             final File certDataFile = new File(configFolder + "/certificates", entry.getKey() + PEM_CERT_FILE_EXTENSION);
                             environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entry.getKey() + PEM_CERT_FILE_EXTENSION,
                                     loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entry.getKey()));
-                        } else {
-                            environmentValues.put(PREFIX_ENV + environmentType + "." + entry.getKey(), entry.getValue());
                         }
                     });
                 }

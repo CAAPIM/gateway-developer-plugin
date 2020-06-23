@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 public class BuildFullBundleTask extends DefaultTask {
 
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
-    private final Property<Map> environmentConfig;
+    private final Property<Map> overrideEnvironmentConfig;
     private final ConfigurableFileCollection dependencyBundles;
     private final DirectoryProperty into;
     private final Property<Boolean> detemplatizeDeploymentBundles;
@@ -46,7 +46,7 @@ public class BuildFullBundleTask extends DefaultTask {
     @Inject
     public BuildFullBundleTask() {
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
-        environmentConfig = getProject().getObjects().property(Map.class);
+        overrideEnvironmentConfig = getProject().getObjects().property(Map.class);
         dependencyBundles = getProject().files();
         into = newOutputDirectory();
         detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
@@ -66,8 +66,8 @@ public class BuildFullBundleTask extends DefaultTask {
 
     @Input
     @Optional
-    Property<Map> getEnvironmentConfig() {
-        return environmentConfig;
+    Property<Map> getOverrideEnvironmentConfig() {
+        return overrideEnvironmentConfig;
     }
 
     @Input
@@ -101,7 +101,7 @@ public class BuildFullBundleTask extends DefaultTask {
             if (null != bundleEnvironmentValues) {
                 final String fullInstallBundleFilename = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
                 //read environment properties from environmentConfig and merge it with metadata properties
-                bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
+                bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(overrideEnvironmentConfig.get()));
                 fullBundleCreator.createFullBundle(
                         bundleEnvironmentValues,
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),

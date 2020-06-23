@@ -116,7 +116,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     private static BuildFullBundleTask createBuildFullBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
         // Create build-full-bundle task
         final BuildFullBundleTask buildFullBundleTask = project.getTasks().create(BUILD_FULL_BUNDLE, BuildFullBundleTask.class, t -> {
-            t.getEnvironmentConfig().set(pluginConfig.getOverrideEnvironmentConfig());
+            t.getOverrideEnvironmentConfig().set(pluginConfig.getOverrideEnvironmentConfig());
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getDetemplatizeDeploymentBundles().set(pluginConfig.getDetemplatizeDeploymentBundles().getOrElse(true));
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
