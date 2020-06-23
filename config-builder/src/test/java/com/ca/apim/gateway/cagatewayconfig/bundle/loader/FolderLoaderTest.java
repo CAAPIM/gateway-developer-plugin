@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.file.Paths;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -48,20 +50,21 @@ class FolderLoaderTest {
     }
 
     @Test
-    void loadWithInvalidCharName() {
+    void loadWithInvalidCharName() throws UnsupportedEncodingException {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();
-        bundle.getFolders().put(Folder.ROOT_FOLDER_NAME, Folder.ROOT_FOLDER);
-        Folder f1 = new Folder();
-        f1.setName(TEST_FOLDER_1 + "/1");
-        f1.setId(TEST_FOLDER_1);
-        bundle.getFolders().put(f1.getName(), f1);
-
-        assertThrows(BundleLoadException.class, () -> loader.load(bundle, createFolderXml(doc, f1.getName(), TEST_FOLDER_1, Folder.ROOT_FOLDER_ID)));
+        final String encodedRoot = URLEncoder.encode(Folder.ROOT_FOLDER_NAME, "UTF-8");
+        final String encodedTestFolder =  URLEncoder.encode(TEST_FOLDER_1 + "/1", "UTF-8");
+        loader.load(bundle, createFolderXml(doc, Folder.ROOT_FOLDER_NAME, Folder.ROOT_FOLDER_ID, null));
+        loader.load(bundle, createFolderXml(doc, TEST_FOLDER_1 + "/1", TEST_FOLDER_1, Folder.ROOT_FOLDER_ID));
+        assertNotNull(bundle.getFolders().get(encodedRoot));
+        assertEquals(encodedRoot, bundle.getFolders().get(encodedRoot).getName());
+        assertNotNull(bundle.getFolders().get(encodedTestFolder));
+        assertEquals(encodedTestFolder, bundle.getFolders().get(encodedTestFolder).getName());
     }
 
     @Test
-    void load() {
+    void load() throws UnsupportedEncodingException {
         Document doc = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         Bundle bundle = new Bundle();
         loader.load(bundle, createFolderXml(doc, Folder.ROOT_FOLDER_NAME, Folder.ROOT_FOLDER_ID, null));
@@ -71,12 +74,13 @@ class FolderLoaderTest {
         assertFalse(bundle.getFolders().isEmpty());
         assertEquals(3, bundle.getFolders().size());
 
-        Folder root = bundle.getFolders().get(Folder.ROOT_FOLDER_NAME);
+        final String encodedRoot = URLEncoder.encode(Folder.ROOT_FOLDER_NAME, "UTF-8");
+        Folder root = bundle.getFolders().get(encodedRoot);
         assertNotNull(root);
         Assertions.assertEquals(Folder.ROOT_FOLDER_ID, root.getId());
-        Assertions.assertEquals(Folder.ROOT_FOLDER_NAME, root.getName());
+        Assertions.assertEquals(encodedRoot, root.getName());
         assertNull(root.getParentFolder());
-        Assertions.assertEquals(Folder.ROOT_FOLDER_NAME, root.getPath());
+        Assertions.assertEquals(encodedRoot, root.getPath());
 
         Folder folder1 = bundle.getFolders().get(TEST_FOLDER_1);
         assertNotNull(folder1);

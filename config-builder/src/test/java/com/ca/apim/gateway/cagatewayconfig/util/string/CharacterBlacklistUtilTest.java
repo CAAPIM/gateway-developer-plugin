@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.util.string;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.CharacterBlacklist;
 import org.junit.jupiter.api.Test;
 
+import java.io.UnsupportedEncodingException;
 import java.util.stream.Stream;
 
 import static junit.framework.TestCase.assertTrue;
@@ -42,4 +43,51 @@ class CharacterBlacklistUtilTest {
     void containsNoInvalidCharacter() {
         assertFalse(CharacterBlacklistUtil.containsInvalidCharacter("example with no invalid characters"));
     }
+
+    @Test
+    void testEncodeAndDecodeName() throws UnsupportedEncodingException {
+        String name = "abc*:?|";
+        String encodeName = CharacterBlacklistUtil.encodeName(name);
+        String decodedName = CharacterBlacklistUtil.decodeName(encodeName);
+        assertEquals(decodedName, name);
+    }
+
+    @Test
+    void testEncodeAndDecodePath() throws UnsupportedEncodingException {
+        String path = "abc*:?|";
+        String encodedPath = CharacterBlacklistUtil.encodePath(path);
+        String decodedPath = CharacterBlacklistUtil.decodePath(encodedPath);
+        assertEquals(path, decodedPath);
+
+        path = "/abc*:?|";
+        encodedPath = CharacterBlacklistUtil.encodePath(path);
+        decodedPath = CharacterBlacklistUtil.decodePath(encodedPath);
+        assertEquals(path, decodedPath);
+
+        path = "/";
+        encodedPath = CharacterBlacklistUtil.encodePath(path);
+        decodedPath = CharacterBlacklistUtil.decodePath(encodedPath);
+        assertEquals(path, decodedPath);
+
+        path = "abc*:?|/test";
+        encodedPath = CharacterBlacklistUtil.encodePath(path);
+        decodedPath = CharacterBlacklistUtil.decodePath(encodedPath);
+        assertEquals(path, decodedPath);
+
+        path = "abc*:?|/test/";
+        encodedPath = CharacterBlacklistUtil.encodePath(path);
+        decodedPath = CharacterBlacklistUtil.decodePath(encodedPath);
+        assertEquals(path, decodedPath);
+
+        path = "/abc*:?|/test";
+        encodedPath = CharacterBlacklistUtil.encodePath(path);
+        decodedPath = CharacterBlacklistUtil.decodePath(encodedPath);
+        assertEquals(path, decodedPath);
+
+        path = "/abc*:?<>|/abc*:?<>/";
+        encodedPath = CharacterBlacklistUtil.encodePath(path);
+        decodedPath = CharacterBlacklistUtil.decodePath(encodedPath);
+        assertEquals(path, decodedPath);
+    }
+
 }

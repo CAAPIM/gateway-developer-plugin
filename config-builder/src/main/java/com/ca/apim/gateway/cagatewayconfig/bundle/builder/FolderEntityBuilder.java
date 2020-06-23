@@ -17,6 +17,7 @@ import org.w3c.dom.Element;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,7 +30,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 
 @Singleton
 public class FolderEntityBuilder implements EntityBuilder {
-
+    private static final Logger LOGGER = Logger.getLogger(FolderEntityBuilder.class.getName());
     private static final Integer ORDER = 100;
     private final IdGenerator idGenerator;
 
@@ -44,14 +45,16 @@ public class FolderEntityBuilder implements EntityBuilder {
         if (parentFolderId != null) {
             folderElement.setAttribute(ATTRIBUTE_FOLDER_ID, parentFolderId);
         }
-        String filteredName = CharacterBlacklistUtil.filterAndReplace(folder.getName());
-        folderElement.appendChild(createElementWithTextContent(document, NAME, filteredName));
+        String folderName = folder.getName();
+        folderName = CharacterBlacklistUtil.decodeName(folderName);
+        folderElement.appendChild(createElementWithTextContent(document, NAME, folderName));
         final Entity entity;
         if (parentFolderId == null) {
             //No need to map root folder by name
-            entity = new Entity(FOLDER_TYPE, filteredName, id, folderElement, folder);
+            entity = new Entity(FOLDER_TYPE, folderName, id, folderElement, folder);
         } else {
-            String filteredPathName = folder.getPath().replaceAll(folder.getName(), filteredName);
+            String filteredPathName = folder.getPath();
+            filteredPathName = CharacterBlacklistUtil.decodePath(filteredPathName);
             entity = EntityBuilderHelper.getEntityWithPathMapping(FOLDER_TYPE, filteredPathName, filteredPathName, id
                     , folderElement, false, folder);
 
