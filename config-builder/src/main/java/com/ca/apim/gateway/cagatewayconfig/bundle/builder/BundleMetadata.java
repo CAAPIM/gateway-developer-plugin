@@ -13,27 +13,24 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Collection;
 import java.util.LinkedList;
 
-@JsonPropertyOrder({"metaVersion", "id", "name", "groupName", "version", "type", "tags", "description", "reusable",
-        "redeployable", "hasRouting", "environmentIncluded", "definedEntities", "environmentEntities", "dependencies"})
+@JsonPropertyOrder({"metaVersion", "name", "groupName", "version", "type", "tags", "description",
+        "redeployable", "hasRouting", "definedEntities", "environmentEntities", "dependencies"})
 public class BundleMetadata implements Metadata {
     @SuppressWarnings({"unused", "java:S1170"}) // Suppress IntelliJ warnings for this field
     private final String metaVersion = "1.0";
     private final String type;
     private final String name;
-    private final String id;
     private final String version;
     private final String groupName;
     private String description;
     private Collection<Metadata> definedEntities;
     private Collection<String> tags;
-    private boolean reusable;
     private boolean redeployable;
     private boolean hasRouting;
     private Collection<Metadata> environmentEntities;
     private Collection<DependentBundle> dependencies;
 
-    private BundleMetadata(String type, String id, String name, String groupName, String version) {
-        this.id = id;
+    private BundleMetadata(String type, String name, String groupName, String version) {
         this.type = type;
         this.name = name;
         this.groupName = groupName;
@@ -54,14 +51,16 @@ public class BundleMetadata implements Metadata {
         return name;
     }
 
+    @JsonIgnore
     public String getId() {
-        return id;
+        return null;
     }
 
     @JsonIgnore
     public String getGuid(){
         return null;
     }
+
     public String getVersion() {
         return version;
     }
@@ -82,10 +81,6 @@ public class BundleMetadata implements Metadata {
         return tags;
     }
 
-    public boolean isReusable() {
-        return reusable;
-    }
-
     public boolean isRedeployable() {
         return redeployable;
     }
@@ -103,13 +98,11 @@ public class BundleMetadata implements Metadata {
     }
 
     public static class Builder {
-        private final String id;
         private final String name;
         private final String type;
         private String groupName;
         private final String version;
         private String description;
-        private boolean reusable;
         private boolean redeployable;
         private boolean hasRouting;
         private Collection<String> tags;
@@ -117,8 +110,7 @@ public class BundleMetadata implements Metadata {
         private Collection<Metadata> environmentEntities = new LinkedList<>();
         private Collection<DependentBundle> dependencies = new LinkedList<>();
 
-        public Builder(String type, String id, String name, String groupName, String version) {
-            this.id = id;
+        public Builder(String type, String name, String groupName, String version) {
             this.type = type;
             this.name = name;
             this.groupName = groupName;
@@ -148,8 +140,7 @@ public class BundleMetadata implements Metadata {
             return this;
         }
 
-        public Builder reusableAndRedeployable(boolean reusable, boolean redeployable) {
-            this.reusable = reusable;
+        public Builder redeployable(boolean redeployable) {
             this.redeployable = redeployable;
             return this;
         }
@@ -165,10 +156,9 @@ public class BundleMetadata implements Metadata {
         }
 
         public BundleMetadata build() {
-            BundleMetadata bundleMetadata = new BundleMetadata(type, id, name, groupName, version);
+            BundleMetadata bundleMetadata = new BundleMetadata(type, name, groupName, version);
             bundleMetadata.description = description;
             bundleMetadata.definedEntities = definedEntities;
-            bundleMetadata.reusable = reusable;
             bundleMetadata.redeployable = redeployable;
             bundleMetadata.hasRouting = hasRouting;
             bundleMetadata.tags = tags;

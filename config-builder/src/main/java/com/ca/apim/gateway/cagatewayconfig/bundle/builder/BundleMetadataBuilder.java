@@ -52,16 +52,13 @@ public class BundleMetadataBuilder {
             if (StringUtils.isNotBlank(projectInfo.getVersion())) {
                 name =  bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
             }
-            final String metadataId = StringUtils.isBlank(annotatedEntity.getMetadataId()) ? idGenerator.generate() :
-                    annotatedEntity.getMetadataId();
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), metadataId, name,
-                    projectInfo.getGroupName(), projectInfo.getVersion());
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
             builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
-            builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
+            builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
             final List<Metadata> definedEntities = new ArrayList<>();
@@ -81,11 +78,10 @@ public class BundleMetadataBuilder {
      * @return Full bundle metadata
      */
     private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final Bundle bundle, ProjectInfo projectInfo) {
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, idGenerator.generate(),
-                projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
-        builder.reusableAndRedeployable(true, true);
+        builder.redeployable(true);
         builder.hasRouting(hasRoutingAssertion(entities));
         builder.environmentEntities(getEnvironmentDependenciesMetadata(entities));
         builder.dependencies(bundle.getDependentBundles());
