@@ -29,7 +29,6 @@ public class BundleMetadata implements Metadata {
     private boolean reusable;
     private boolean redeployable;
     private boolean hasRouting;
-    private boolean environmentIncluded;
     private Collection<Metadata> environmentEntities;
     private Collection<DependentBundle> dependencies;
 
@@ -95,10 +94,6 @@ public class BundleMetadata implements Metadata {
         return hasRouting;
     }
 
-    public boolean isEnvironmentIncluded() {
-        return environmentIncluded;
-    }
-
     public Collection<Metadata> getEnvironmentEntities() {
         return environmentEntities;
     }
@@ -117,7 +112,6 @@ public class BundleMetadata implements Metadata {
         private boolean reusable;
         private boolean redeployable;
         private boolean hasRouting;
-        private boolean environmentIncluded;
         private Collection<String> tags;
         private Collection<Metadata> definedEntities = new LinkedList<>();
         private Collection<Metadata> environmentEntities = new LinkedList<>();
@@ -165,11 +159,6 @@ public class BundleMetadata implements Metadata {
             return this;
         }
 
-        public Builder environmentIncluded(boolean environmentIncluded) {
-            this.environmentIncluded = environmentIncluded;
-            return this;
-        }
-
         public Builder tags(final Collection<String> tags) {
             this.tags = tags;
             return this;
@@ -182,7 +171,6 @@ public class BundleMetadata implements Metadata {
             bundleMetadata.reusable = reusable;
             bundleMetadata.redeployable = redeployable;
             bundleMetadata.hasRouting = hasRouting;
-            bundleMetadata.environmentIncluded = environmentIncluded;
             bundleMetadata.tags = tags;
             bundleMetadata.environmentEntities = environmentEntities;
             bundleMetadata.dependencies = dependencies;

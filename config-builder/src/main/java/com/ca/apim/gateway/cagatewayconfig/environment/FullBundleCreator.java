@@ -109,13 +109,6 @@ public class FullBundleCreator {
         if (!deleted) {
             LOGGER.log(Level.WARNING, () -> "Temporary bundle file was not deleted: " + fullBundleFile.toString());
         }
-
-        // update metadata's environmentIncluded property to true for full bundle
-        Object bundleMetadata = jsonFileUtils.readBundleMetadataFile(bundleFolderPath, bundleEnvironmentValues.getLeft());
-        if (((Map) bundleMetadata) != null) {
-            ((Map) bundleMetadata).put("environmentIncluded", true);
-            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleEnvironmentValues.getLeft(), new File(bundleFolderPath));
-        }
     }
 
     private Pair<Element, Element> createFullAndDeleteBundles(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,

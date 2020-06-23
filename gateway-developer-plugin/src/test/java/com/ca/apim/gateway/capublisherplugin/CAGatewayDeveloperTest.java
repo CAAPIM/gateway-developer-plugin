@@ -559,13 +559,5 @@ class CAGatewayDeveloperTest {
             }
         });
         assertTrue(bundleItemsIds.isEmpty(), "Mappings on deployment bundle not found on full bundle: " + bundleMappingsIds.toString());
-
-        // validate the environmentIncluded flag in bundle metadata file
-        File bundleMetadataFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + METADATA_FILE_NAME_SUFFIX);
-        assertTrue(bundleMetadataFile.isFile());
-        final ObjectMapper objectMapper = JsonTools.INSTANCE.getObjectMapper();
-        final MapType type = objectMapper.getTypeFactory().constructMapType(LinkedHashMap.class, String.class, Object.class);
-        Map<String, Object> metadataProperties = objectMapper.readValue(bundleMetadataFile, type);
-        assertTrue((boolean) metadataProperties.get("environmentIncluded"));
     }
 }

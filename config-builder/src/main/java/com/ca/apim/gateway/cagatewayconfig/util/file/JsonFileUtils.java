@@ -86,13 +86,4 @@ public class JsonFileUtils {
             throw new JsonFileUtilsException("Error reading the bundle metadata file " + metaDataFile.toString(), e);
         }
     }
-
-    public Object readBundleMetadataFile(final String bundleFolderPath, final String fileName) {
-        final File metaDataFile = new File(bundleFolderPath, fileName + METADATA_FILE_NAME_SUFFIX);
-        if (metaDataFile.exists()) {
-            final MapType type = jsonTools.getObjectMapper(YAML_EXTENSION).getTypeFactory().constructMapType(LinkedHashMap.class, String.class, Object.class);
-            return jsonTools.readDocumentFile(metaDataFile, type);
-        }
-        return null;
-    }
 }
