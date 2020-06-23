@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.fasterxml.jackson.databind.JavaType;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +36,8 @@ public abstract class EntityLoaderBase<B extends GatewayEntity> implements Entit
     private final JsonTools jsonTools;
     private IdGenerator idGenerator;
 
-    EntityLoaderBase(final JsonTools jsonTools, final IdGenerator idGenerator) {
+    @VisibleForTesting
+    protected EntityLoaderBase(final JsonTools jsonTools, final IdGenerator idGenerator) {
         this.jsonTools = jsonTools;
         this.idGenerator = idGenerator;
     }

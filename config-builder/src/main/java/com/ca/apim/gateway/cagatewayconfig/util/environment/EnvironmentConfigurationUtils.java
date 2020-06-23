@@ -70,7 +70,11 @@ public class EnvironmentConfigurationUtils {
                 environmentValues.put(PREFIX_ENV + e.getKey().toString(), getEnvValue(e.getKey().toString(), e.getValue()));
             } else {
                 final String entityType = (String) e.getKey();
-                Map<String, String> entities = loadConfigFromFile((File) e.getValue(), entityType);
+                final Object object = e.getValue();
+                if(!(object instanceof File)){
+                    throw new MissingEnvironmentException("Unable to load environment from specified property '" + e.getKey().toString() + "' due to unsupported value, it has to be a file");
+                }
+                Map<String, String> entities = loadConfigFromFile((File) object, entityType);
                 entities.entrySet().forEach(entry -> environmentValues.put(PREFIX_ENV + entityType + "." + entry.getKey(), entry.getValue()));
             }
         });
