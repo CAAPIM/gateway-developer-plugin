@@ -310,15 +310,14 @@ class CAGatewayDeveloperTest {
                 .build();
 
         LOGGER.log(Level.INFO, result.getOutput());
-        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
-        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        String envBundleFilename = projectFolder + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
         File buildDir = new File(testProjectDir, "build");
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
+        File buildGatewayDir = validateBuildDirExceptGW7File(envBundleFilename, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>-[<configName>]env.install.bundle
-        String envBundleFilename = projectFolder + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
+
         File envBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
         assertTrue(envBundleFile.isFile());
 
@@ -371,10 +370,10 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
-
         String envDeleteBundleFilename = projectFolder + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
+        File buildGatewayDir = validateBuildDirExceptGW7File(envDeleteBundleFilename, buildDir);
+
+
         File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), envDeleteBundleFilename);
         assertTrue(builtDeleteEnvBundleFile.isFile());
     }
@@ -401,16 +400,13 @@ class CAGatewayDeveloperTest {
                 .build();
 
         LOGGER.log(Level.INFO, result.getOutput());
-        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
-        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
-        String deleteBundleFilename = bundleName + projectVersion + "-policy" + DELETE_BUNDLE_EXTENSION;
-        File buildDir = new File(testProjectDir, "build");
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
         String envBundleFilename = projectFolder + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
+        File buildDir = new File(testProjectDir, "build");
+        File buildGatewayDir = validateBuildDirExceptGW7File(envBundleFilename, buildDir);
         File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
         assertTrue(builtBundleFile.isFile());
 
@@ -418,8 +414,6 @@ class CAGatewayDeveloperTest {
         File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), envDeleteBundleFilename);
         assertTrue(builtDeleteEnvBundleFile.isFile());
 
-        File builtDeleteBundleFile = new File(new File(buildGatewayDir, "bundle"), deleteBundleFilename);
-        assertTrue(builtDeleteBundleFile.isFile());
     }
 
     @Test
@@ -431,7 +425,7 @@ class CAGatewayDeveloperTest {
 
         assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
                 .withProjectDir(testProjectDir)
-                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
+                .withArguments("build-full-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
                         "-DconfigFolder=src/main/gateway/config/jdbc_wrong",
                         "-DconfigName=jdbc_wrong")
                 .withPluginClasspath()

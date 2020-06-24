@@ -59,7 +59,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         configureEnvironmentApplication(project);
 
         final BuildDeploymentBundleTask buildDeploymentBundleTask = createBuildDeploymentBundleTask(project, pluginConfig);
-        final BuildEnvironmentBundleTask buildEnvironmentBundleTask = createBuildEnvironmentBundleTask(project, pluginConfig, buildDeploymentBundleTask);
+        final BuildEnvironmentBundleTask buildEnvironmentBundleTask = createBuildEnvironmentBundleTask(project, pluginConfig);
         final BuildFullBundleTask buildFullBundleTask = createBuildFullBundleTask(project, pluginConfig, buildDeploymentBundleTask);
         final PackageTask packageGW7Task = createPackageTask(project, pluginConfig, buildDeploymentBundleTask);
 
@@ -98,7 +98,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
     }
 
     @NotNull
-    private static BuildEnvironmentBundleTask createBuildEnvironmentBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
+    private static BuildEnvironmentBundleTask createBuildEnvironmentBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig) {
         // Create build-environment-bundle task
         final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create(BUILD_ENVIRONMENT_BUNDLE, BuildEnvironmentBundleTask.class, t -> {
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
@@ -109,7 +109,6 @@ public class CAGatewayDeveloper implements Plugin<Project> {
             }));
             t.getConfigName().set(pluginConfig.getConfigName());
         });
-        buildEnvironmentBundleTask.dependsOn(buildDeploymentBundleTask);
         return buildEnvironmentBundleTask;
     }
 
