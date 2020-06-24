@@ -156,7 +156,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             if (annotatedEntity.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = policy.getName();
             } else {
-                policyName = annotatedBundle.getUniquePrefix() + policy.getName();
+                policyName = annotatedBundle.applyUniqueName(policy.getName());
             }
         } else {
             policyName = policy.getName();
@@ -372,7 +372,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 encassGuid = idGenerator.generateGuid();
                 encass.setGuid(encassGuid);
                 encass.setId(idGenerator.generate());
-                encassName = annotatedBundle.getUniquePrefix() + encassName;
+                encassName = annotatedBundle.applyUniqueName(encassName);
             }
         }
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
@@ -541,7 +541,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
         if (annotatedBundle != null) {
             if (!isReusable && !isAnnotatedEntity(policy, annotatedEntity)) {
-                policyName = annotatedBundle.getUniquePrefix() + policyName;
+                policyName = annotatedBundle.applyUniqueName(policyName);
                 policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
             }
         }
