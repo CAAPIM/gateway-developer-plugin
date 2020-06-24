@@ -250,7 +250,11 @@ public class Bundle {
     public void putAllJmsDestinations(@NotNull Map<String, JmsDestination> jmsDestinations) {
         this.getJmsDestinations().putAll(jmsDestinations);
     }
-    
+
+    public Map<String, GenericEntity> getGenericEntities() {
+        return getEntities(GenericEntity.class);
+    }
+
     public FolderTree getFolderTree() {
         return folderTree;
     }
