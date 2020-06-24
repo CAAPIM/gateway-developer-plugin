@@ -10,18 +10,27 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
-import org.w3c.dom.Element;
+import com.ca.apim.gateway.cagatewayexport.util.policy.EncassPolicyXMLSimplifier;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PORTAL_TEMPLATE;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.PolicyLinker.getPolicyPath;
 
 @Singleton
 public class EncassLinker implements EntityLinker<Encass> {
+    private static final Logger LOGGER = Logger.getLogger(EncassLinker.class.getName());
+    private final EncassPolicyXMLSimplifier encassPolicyXMLSimplifier;
+
+    @Inject
+    EncassLinker(EncassPolicyXMLSimplifier encassPolicyXMLSimplifier) {
+        this.encassPolicyXMLSimplifier = encassPolicyXMLSimplifier;
+    }
+
     @Override
     public Class<Encass> getEntityClass() {
         return Encass.class;
@@ -33,18 +42,14 @@ public class EncassLinker implements EntityLinker<Encass> {
         if (policy == null) {
             throw new LinkerException("Could not find policy for Encapsulated Assertion: " + encass.getName() + ". Policy ID: " + encass.getPolicyId());
         }
-        Element encassPortalIntegrationElement = null;
-        Element encassPortalIntegrationEnabledElement = null;
+
+        String portalTemplate = "false";
         try {
-            encassPortalIntegrationElement = getSingleElement(policy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION);
-        } catch (DocumentParseException ex) {
-            // do nothing
+            portalTemplate = encassPolicyXMLSimplifier.simplifyEncassPolicyXML(policy.getPolicyDocument());
+        } catch (DocumentParseException e) {
+            LOGGER.log(Level.INFO, "ApiPortalEncassIntegration assertion is not found in encass policy : {0}, setting portalTemplate as false : ", policy.getName());
         }
-        if (encassPortalIntegrationElement != null) {
-            encassPortalIntegrationEnabledElement = getSingleChildElement(encassPortalIntegrationElement, ENABLED, true);
-            policy.getPolicyDocument().getFirstChild().removeChild(encassPortalIntegrationElement);
-        }
-        encass.getProperties().put(PORTAL_TEMPLATE, encassPortalIntegrationElement != null && encassPortalIntegrationEnabledElement == null ? "true" : "false");
+        encass.getProperties().put(PORTAL_TEMPLATE, portalTemplate);
         encass.setPolicy(policy.getPath());
         encass.setPath(getPolicyPath(policy, bundle, encass));
     }

@@ -62,7 +62,7 @@ public class BundleMetadataBuilder {
             builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
-            builder.portalTemplate(Boolean.valueOf(encass.getProperties().get(PORTAL_TEMPLATE).toString()));
+            builder.portalTemplate(Boolean.valueOf(String.valueOf(encass.getProperties().get(PORTAL_TEMPLATE))));
             builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
