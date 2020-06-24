@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Collection;
 import java.util.LinkedList;
 
-@JsonPropertyOrder({"metaVersion", "id", "name", "groupName", "version", "type", "tags", "description", "portalTemplate", "reusable",
+@JsonPropertyOrder({"metaVersion", "id", "name", "groupName", "version", "type", "tags", "description", "l7Template", "reusable",
         "redeployable", "hasRouting", "environmentIncluded", "definedEntities", "environmentEntities", "dependencies"})
 public class BundleMetadata implements Metadata {
     @SuppressWarnings({"unused", "java:S1170"}) // Suppress IntelliJ warnings for this field
@@ -26,7 +26,7 @@ public class BundleMetadata implements Metadata {
     private String description;
     private Collection<Metadata> definedEntities;
     private Collection<String> tags;
-    private boolean portalTemplate;
+    private boolean l7Template;
     private boolean reusable;
     private boolean redeployable;
     private boolean hasRouting;
@@ -84,8 +84,8 @@ public class BundleMetadata implements Metadata {
         return tags;
     }
 
-    public boolean isPortalTemplate() {
-        return portalTemplate;
+    public boolean isL7Template() {
+        return l7Template;
     }
 
     public boolean isReusable() {
@@ -119,7 +119,7 @@ public class BundleMetadata implements Metadata {
         private String groupName;
         private final String version;
         private String description;
-        private boolean portalTemplate;
+        private boolean l7Template;
         private boolean reusable;
         private boolean redeployable;
         private boolean hasRouting;
@@ -160,8 +160,8 @@ public class BundleMetadata implements Metadata {
             return this;
         }
 
-        public Builder portalTemplate(boolean portalTemplate) {
-            this.portalTemplate = portalTemplate;
+        public Builder l7Template(boolean l7Template) {
+            this.l7Template = l7Template;
             return this;
         }
 
@@ -190,7 +190,7 @@ public class BundleMetadata implements Metadata {
             BundleMetadata bundleMetadata = new BundleMetadata(type, id, name, groupName, version);
             bundleMetadata.description = description;
             bundleMetadata.definedEntities = definedEntities;
-            bundleMetadata.portalTemplate = portalTemplate;
+            bundleMetadata.l7Template = l7Template;
             bundleMetadata.reusable = reusable;
             bundleMetadata.redeployable = redeployable;
             bundleMetadata.hasRouting = hasRouting;

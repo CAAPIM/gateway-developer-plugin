@@ -107,7 +107,7 @@ public class BundleEntityBuilderTestHelper {
             put(ALLOW_TRACING, "false");
             put(DESCRIPTION, "someDescription");
             put(PASS_METRICS_TO_PARENT, "false");
-            put(PORTAL_TEMPLATE, "true");
+            put(L7_TEMPLATE, "true");
         }});
         return encass;
     }
@@ -126,7 +126,7 @@ public class BundleEntityBuilderTestHelper {
             put(ALLOW_TRACING, "false");
             put(DESCRIPTION, "someDescription");
             put(PASS_METRICS_TO_PARENT, "false");
-            put(PORTAL_TEMPLATE, "false");
+            put(L7_TEMPLATE, "false");
         }});
         return encass;
     }

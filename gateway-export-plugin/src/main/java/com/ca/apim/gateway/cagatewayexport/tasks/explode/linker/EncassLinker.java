@@ -9,21 +9,16 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayexport.util.policy.EncassPolicyXMLSimplifier;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PORTAL_TEMPLATE;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 import static com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.PolicyLinker.getPolicyPath;
 
 @Singleton
 public class EncassLinker implements EntityLinker<Encass> {
-    private static final Logger LOGGER = Logger.getLogger(EncassLinker.class.getName());
     private final EncassPolicyXMLSimplifier encassPolicyXMLSimplifier;
 
     @Inject
@@ -43,13 +38,7 @@ public class EncassLinker implements EntityLinker<Encass> {
             throw new LinkerException("Could not find policy for Encapsulated Assertion: " + encass.getName() + ". Policy ID: " + encass.getPolicyId());
         }
 
-        String portalTemplate = "false";
-        try {
-            portalTemplate = encassPolicyXMLSimplifier.simplifyEncassPolicyXML(policy.getPolicyDocument());
-        } catch (DocumentParseException e) {
-            LOGGER.log(Level.INFO, "ApiPortalEncassIntegration assertion is not found in encass policy : {0}, setting portalTemplate as false : ", policy.getName());
-        }
-        encass.getProperties().put(PORTAL_TEMPLATE, portalTemplate);
+        encass.getProperties().put(L7_TEMPLATE, encassPolicyXMLSimplifier.simplifyEncassPolicyXML(policy));
         encass.setPolicy(policy.getPath());
         encass.setPath(getPolicyPath(policy, bundle, encass));
     }
