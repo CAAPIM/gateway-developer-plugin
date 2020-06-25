@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.PEM_CERT_FILE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.*;
@@ -47,6 +49,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Singleton
 public class EnvironmentConfigurationUtils {
 
+    private static final Logger LOGGER = Logger.getLogger(EnvironmentConfigurationUtils.class.getName());
     private final JsonTools jsonTools;
     private final EntityLoaderRegistry entityLoaderRegistry;
     private final JsonFileUtils jsonFileUtils;
@@ -134,13 +137,17 @@ public class EnvironmentConfigurationUtils {
                             configFileInfo.getRight().name().toLowerCase());
                     final File envConfigFile = new File(configFolder, configFileName);
                     if(envConfigFile.exists()) {
-                        environmentValues.put(PREFIX_ENV + environmentType + "." + entityName,
-                                loadConfigFromFile(envConfigFile, environmentType, entityName));
+                        try {
+                            environmentValues.put(PREFIX_ENV + environmentType + "." + entityName,
+                                    loadConfigFromFile(envConfigFile, environmentType, entityName));
 
-                        if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
-                            final File certDataFile = new File(configFolder + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
-                            environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entityName + PEM_CERT_FILE_EXTENSION,
-                                    loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entityName));
+                            if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
+                                final File certDataFile = new File(configFolder + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
+                                environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entityName + PEM_CERT_FILE_EXTENSION,
+                                        loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entityName));
+                            }
+                        } catch (MissingEnvironmentException ex) {
+                            LOGGER.log(Level.INFO, "could not find dependent environment entity in the configured folder " + entityName);
                         }
                     }
                 });
