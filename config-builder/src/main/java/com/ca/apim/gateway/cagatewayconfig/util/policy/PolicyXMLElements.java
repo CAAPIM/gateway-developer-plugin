@@ -41,6 +41,11 @@ public class PolicyXMLElements {
     public static final String ACTIVE_CONNECTOR_ID = "L7p:SsgActiveConnectorId";
     public static final String ACTIVE_CONNECTOR_GOID = "L7p:SsgActiveConnectorGoid";
     public static final String ACTIVE_CONNECTOR_NAME = "L7p:SsgActiveConnectorName";
+
+    public static final String HTTP2_ROUTING_ASSERTION  = "L7p:Http2Routing";
+    public static final String HTTP2_CLIENT_CONFIG_GOID = "L7p:Http2ClientConfigGoid";
+    public static final String HTTP2_CLIENT_CONFIG_NAME = "L7p:Http2ClientConfigName";
+
     public static final String ITEM = "L7p:item";
 
     private PolicyXMLElements() {
