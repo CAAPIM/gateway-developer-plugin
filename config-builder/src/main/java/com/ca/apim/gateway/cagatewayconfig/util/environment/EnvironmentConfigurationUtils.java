@@ -136,7 +136,7 @@ public class EnvironmentConfigurationUtils {
                     final String configFileName = configFileInfo.getLeft() + "." + (configFileInfo.getRight().equals(ConfigurationFile.FileType.JSON_YAML) ? YML_EXTENSION :
                             configFileInfo.getRight().name().toLowerCase());
                     final File envConfigFile = new File(configFolder, configFileName);
-                    if(envConfigFile.exists()) {
+                    if (envConfigFile.exists()) {
                         try {
                             environmentValues.put(PREFIX_ENV + environmentType + "." + entityName,
                                     loadConfigFromFile(envConfigFile, environmentType, entityName));
@@ -221,6 +221,12 @@ public class EnvironmentConfigurationUtils {
         }
     }
 
+    /**
+     *  This method reads all the entities of a given Environment entity type from the config file
+     * @param configFile File
+     * @param entityType String
+     * @return Map
+     */
     @NotNull
     public Map<String, String> loadConfigFromFile(File configFile, String entityType) {
         if (!configFile.exists()) {

@@ -43,7 +43,7 @@ public abstract class EntityLoaderBase<B extends GatewayEntity> implements Entit
     }
 
     public Object loadSingle(String name, File entitiesFile) {
-        return loadEntitiesFromFile(jsonTools, this.getBeanClass(), entitiesFile).get(name);
+        return load(entitiesFile).get(name);
     }
 
     public Map<String, Object> load(File entitiesFile) {

@@ -28,7 +28,7 @@ public interface EntityLoader {
     Object loadSingle(String name, File entitiesFile);
 
     /**
-     * Load a entities from the given config file.
+     * Load environment entities from the given config file. This method has to be implemented by environment entity loader
      *
      * @param entitiesFile file that contains the entity
      * @return the entity map
