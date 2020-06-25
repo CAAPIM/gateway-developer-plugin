@@ -36,17 +36,19 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 public class BuildFullBundleTask extends DefaultTask {
 
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
-    private final Property<Map> overrideEnvironmentConfig;
+    private final Property<Map> environmentConfig;
     private final ConfigurableFileCollection dependencyBundles;
     private final DirectoryProperty into;
     private final Property<Boolean> detemplatizeDeploymentBundles;
     private final DirectoryProperty configFolder;
     private final Property<String> configName;
+    private final Property<Map> envConfig;
 
     @Inject
     public BuildFullBundleTask() {
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
-        overrideEnvironmentConfig = getProject().getObjects().property(Map.class);
+        environmentConfig = getProject().getObjects().property(Map.class);
+        envConfig = getProject().getObjects().property(Map.class);
         dependencyBundles = getProject().files();
         into = newOutputDirectory();
         detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
@@ -66,8 +68,14 @@ public class BuildFullBundleTask extends DefaultTask {
 
     @Input
     @Optional
-    Property<Map> getOverrideEnvironmentConfig() {
-        return overrideEnvironmentConfig;
+    Property<Map> getEnvironmentConfig() {
+        return environmentConfig;
+    }
+
+    @Input
+    @Optional
+    Property<Map> getEnvConfig() {
+        return envConfig;
     }
 
     @Input
@@ -96,12 +104,19 @@ public class BuildFullBundleTask extends DefaultTask {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
         File configuredFolder = configFolder.getAsFile().getOrNull();
+        Map environmentEntities = java.util.Optional.ofNullable(envConfig.getOrNull()).orElse(environmentConfig.getOrNull());
+        if (configuredFolder == null && environmentEntities == null) {
+            throw new MissingEnvironmentException("EnvironmentConfig is not configured");
+        }
         metaDataFiles.stream().forEach(metaDataFile-> {
+
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configuredFolder);
             if (null != bundleEnvironmentValues) {
                 final String fullInstallBundleFilename = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
-                //read environment properties from environmentConfig and merge it with metadata properties
-                bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(overrideEnvironmentConfig.get()));
+                //read environment properties from environmentConfig and merge it with config folder entities
+                if(environmentEntities != null){
+                    bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));
+                }
                 fullBundleCreator.createFullBundle(
                         bundleEnvironmentValues,
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),

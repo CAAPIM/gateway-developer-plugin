@@ -18,6 +18,7 @@ import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,15 +36,17 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 public class BuildEnvironmentBundleTask extends DefaultTask {
 
     private final DirectoryProperty into;
-    private final Property<Map> overrideEnvironmentConfig;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
     private final DirectoryProperty configFolder;
     private final Property<String> configName;
+    private final Property<Map> environmentConfig;
+    private final Property<Map> envConfig;
 
     @Inject
     public BuildEnvironmentBundleTask() {
         into = newOutputDirectory();
-        overrideEnvironmentConfig = getProject().getObjects().property(Map.class);
+        environmentConfig = getProject().getObjects().property(Map.class);
+        envConfig = getProject().getObjects().property(Map.class);
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
         configFolder = newInputDirectory();
         configName = getProject().getObjects().property(String.class);
@@ -56,8 +59,14 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
 
     @Input
     @Optional
-    Property<Map> getOverrideEnvironmentConfig() {
-        return overrideEnvironmentConfig;
+    Property<Map> getEnvironmentConfig() {
+        return environmentConfig;
+    }
+
+    @Input
+    @Optional
+    Property<Map> getEnvConfig() {
+        return envConfig;
     }
 
     @InputDirectory
@@ -76,20 +85,29 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     public void perform() {
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
         File configuredFolder = configFolder.getAsFile().getOrNull();
-        Map<String, String> bundleEnvironmentValues = environmentConfigurationUtils.loadConfigFolder(configuredFolder);
-        if (null != bundleEnvironmentValues) {
-            final String envBundleFileName = getEnvBundleFilename(getProject().getName(), getProject().getVersion().toString());
-            //read environment properties from overrideEnvironmentConfig and merge it with metadata properties
-            bundleEnvironmentValues.putAll(environmentConfigurationUtils.parseEnvironmentValues(overrideEnvironmentConfig.get()));
-            environmentBundleCreator.createEnvironmentBundle(
-                    bundleEnvironmentValues,
-                    into.getAsFile().get().getPath(),
-                    into.getAsFile().get().getPath(),
-                    configuredFolder != null ? configuredFolder.getPath() : EMPTY,
-                    PLUGIN,
-                    envBundleFileName // Passing envBundleFileName
-            );
+        Map environmentEntities = java.util.Optional.ofNullable(envConfig.getOrNull()).orElse(environmentConfig.getOrNull());
+        if (configuredFolder == null && environmentEntities == null) {
+            throw new MissingEnvironmentException("EnvironmentConfig is not configured");
         }
+        Map<String, String> bundleEnvironmentValues = new HashMap<>();
+        if(configuredFolder != null){
+            bundleEnvironmentValues = environmentConfigurationUtils.loadConfigFolder(configuredFolder);
+        }
+        final String envBundleFileName = getEnvBundleFilename(getProject().getName(), getProject().getVersion().toString());
+
+        //read environment properties from environmentConfig and merge it with config folder entities
+        if(environmentEntities != null) {
+            bundleEnvironmentValues.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));
+        }
+
+        environmentBundleCreator.createEnvironmentBundle(
+                bundleEnvironmentValues,
+                into.getAsFile().get().getPath(),
+                into.getAsFile().get().getPath(),
+                configuredFolder != null ? configuredFolder.getPath() : EMPTY,
+                PLUGIN,
+                envBundleFileName // Passing envBundleFileName
+        );
     }
 
     /**

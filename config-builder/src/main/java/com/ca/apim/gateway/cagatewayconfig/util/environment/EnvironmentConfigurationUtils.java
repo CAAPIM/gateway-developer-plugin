@@ -133,13 +133,15 @@ public class EnvironmentConfigurationUtils {
                     final String configFileName = configFileInfo.getLeft() + "." + (configFileInfo.getRight().equals(ConfigurationFile.FileType.JSON_YAML) ? YML_EXTENSION :
                             configFileInfo.getRight().name().toLowerCase());
                     final File envConfigFile = new File(configFolder, configFileName);
-                    environmentValues.put(PREFIX_ENV + environmentType + "." + entityName,
-                            loadConfigFromFile(envConfigFile, environmentType, entityName));
+                    if(envConfigFile.exists()) {
+                        environmentValues.put(PREFIX_ENV + environmentType + "." + entityName,
+                                loadConfigFromFile(envConfigFile, environmentType, entityName));
 
-                    if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
-                        final File certDataFile = new File(configFolder + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
-                        environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entityName + PEM_CERT_FILE_EXTENSION,
-                                loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entityName));
+                        if (EntityTypes.TRUSTED_CERT_TYPE.equals(entityType)) {
+                            final File certDataFile = new File(configFolder + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
+                            environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entityName + PEM_CERT_FILE_EXTENSION,
+                                    loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entityName));
+                        }
                     }
                 });
             }
