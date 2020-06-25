@@ -105,9 +105,7 @@ public class BuildFullBundleTask extends DefaultTask {
         }
         File configuredFolder = configFolder.getAsFile().getOrNull();
         Map environmentEntities = java.util.Optional.ofNullable(envConfig.getOrNull()).orElse(environmentConfig.getOrNull());
-        if (configuredFolder == null && environmentEntities == null) {
-            throw new MissingEnvironmentException("EnvironmentConfig is not configured");
-        }
+
         metaDataFiles.stream().forEach(metaDataFile-> {
 
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configuredFolder);
