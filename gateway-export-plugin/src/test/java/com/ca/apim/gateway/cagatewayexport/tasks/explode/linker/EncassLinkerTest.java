@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
+import com.ca.apim.gateway.cagatewayexport.util.policy.EncassPolicyXMLSimplifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,17 +51,20 @@ class EncassLinkerTest {
 
     @BeforeEach
     void setUp() {
-        encassLinker = new EncassLinker();
+        encassLinker = new EncassLinker(new EncassPolicyXMLSimplifier());
         myEncass = createEncass("myEncass", "1", "1", "1");
         bundle = new Bundle();
         bundle.addEntity(myEncass);
     }
 
     @Test
-    void link() {
+    void link() throws DocumentParseException {
         Bundle fullBundle = new Bundle();
+        myEncass.setProperties(new HashMap<String, Object>() {{
+            put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
+        }});
         fullBundle.addEntity(myEncass);
-        fullBundle.addEntity(createPolicy("myEncassPolicy", "1", "1", "1", null, EMPTY));
+        fullBundle.addEntity(createPolicy("myEncassPolicy", "1", "1", "1", DocumentUtils.stringToXML(DocumentTools.INSTANCE, ENCASS_POLICY_WITH_PORTAL_INTEGRATION), EMPTY));
         fullBundle.addEntity(createFolder("myFolder", "1", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
@@ -84,10 +88,13 @@ class EncassLinkerTest {
     }
 
     @Test
-    void linkFolderIsMissing() {
+    void linkFolderIsMissing() throws DocumentParseException {
         Bundle fullBundle = new Bundle();
+        myEncass.setProperties(new HashMap<String, Object>() {{
+            put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
+        }});
         fullBundle.addEntity(myEncass);
-        fullBundle.addEntity(createPolicy("myEncassPolicy", "1","1", "1", null, ""));
+        fullBundle.addEntity(createPolicy("myEncassPolicy", "1","1", "1", DocumentUtils.stringToXML(DocumentTools.INSTANCE, ENCASS_POLICY_WITH_PORTAL_INTEGRATION), ""));
         fullBundle.addEntity(createFolder("myFolder", "2", null));
 
         FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
@@ -112,7 +119,7 @@ class EncassLinkerTest {
         Encass linkedEncass = bundle.getEntities(Encass.class).get("1");
         assertEquals("myEncassPolicy", linkedEncass.getPath());
         assertEquals(2, linkedEncass.getProperties().size());
-        assertTrue(Boolean.valueOf(linkedEncass.getProperties().get(PORTAL_TEMPLATE).toString()));
+        assertTrue(Boolean.valueOf(linkedEncass.getProperties().get(L7_TEMPLATE).toString()));
 
         Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
         assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
@@ -134,7 +141,7 @@ class EncassLinkerTest {
         Encass linkedEncass = bundle.getEntities(Encass.class).get("1");
         assertEquals("myEncassPolicy", linkedEncass.getPath());
         assertEquals(2, linkedEncass.getProperties().size());
-        assertFalse(Boolean.valueOf(linkedEncass.getProperties().get(PORTAL_TEMPLATE).toString()));
+        assertFalse(Boolean.valueOf(linkedEncass.getProperties().get(L7_TEMPLATE).toString()));
 
         Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
         assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
