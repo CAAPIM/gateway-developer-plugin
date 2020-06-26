@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -141,6 +142,11 @@ class BundleFileBuilderTest {
 
         @Override
         public Object loadSingle(String name, File entitiesFile) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Object> load(File entitiesFile) {
             return null;
         }
 

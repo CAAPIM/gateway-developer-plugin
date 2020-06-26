@@ -42,11 +42,13 @@ public class BuildFullBundleTask extends DefaultTask {
     private final Property<Boolean> detemplatizeDeploymentBundles;
     private final DirectoryProperty configFolder;
     private final Property<String> configName;
+    private final Property<Map> envConfig;
 
     @Inject
     public BuildFullBundleTask() {
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
         environmentConfig = getProject().getObjects().property(Map.class);
+        envConfig = getProject().getObjects().property(Map.class);
         dependencyBundles = getProject().files();
         into = newOutputDirectory();
         detemplatizeDeploymentBundles = getProject().getObjects().property(Boolean.class);
@@ -68,6 +70,12 @@ public class BuildFullBundleTask extends DefaultTask {
     @Optional
     Property<Map> getEnvironmentConfig() {
         return environmentConfig;
+    }
+
+    @Input
+    @Optional
+    Property<Map> getEnvConfig() {
+        return envConfig;
     }
 
     @Input
@@ -96,12 +104,17 @@ public class BuildFullBundleTask extends DefaultTask {
             throw new MissingEnvironmentException("Metadata file does not exist.");
         }
         File configuredFolder = configFolder.getAsFile().getOrNull();
+        Map environmentEntities = java.util.Optional.ofNullable(envConfig.getOrNull()).orElse(environmentConfig.getOrNull());
+
         metaDataFiles.stream().forEach(metaDataFile-> {
+
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configuredFolder);
             if (null != bundleEnvironmentValues) {
                 final String fullInstallBundleFilename = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
-                //read environment properties from environmentConfig and merge it with metadata properties
-                bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
+                //read environment properties from environmentConfig and merge it with config folder entities
+                if(environmentEntities != null){
+                    bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));
+                }
                 fullBundleCreator.createFullBundle(
                         bundleEnvironmentValues,
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),

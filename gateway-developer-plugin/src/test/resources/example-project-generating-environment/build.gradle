@@ -26,6 +26,9 @@ dependencies {
 }
 
 GatewaySourceConfig {
-    configFolder = file(System.properties.get("configFolder"))
-    configName = System.properties.get("configName")
+    EnvironmentConfig {
+        name = System.properties.get("configName")
+        includeFolder = file(System.properties.get("configFolder"))
+    }
+
 }

@@ -55,15 +55,14 @@ public class EnvironmentBundleCreator {
                                           String templatizedBundleFolderPath,
                                           String environmentConfigurationFolderPath,
                                           EnvironmentBundleCreationMode mode,
-                                          String envInstallBundleFilename,
-                                          String policyBundleName) {
+                                          String envInstallBundleFilename) {
         Bundle environmentBundle = new Bundle();
         environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, mode);
 
         setTemplatizedBundlesFolderPath(templatizedBundleFolderPath);
         processDeploymentBundles(
                 environmentBundle,
-                collectTemplatizedBundleFiles(templatizedBundleFolderPath, mode, policyBundleName, bundleFolderPath),
+                collectTemplatizedBundleFiles(templatizedBundleFolderPath, mode, bundleFolderPath),
                 mode,
                 true);
 
@@ -84,9 +83,8 @@ public class EnvironmentBundleCreator {
     }
 
     private List<TemplatizedBundle> collectTemplatizedBundleFiles(String templatizedBundleFolderPath,
-                                                                  EnvironmentBundleCreationMode mode,
-                                                                  String policyBundleName, String bundleFolderPath) {
-        final String extension = mode != PLUGIN ? BUNDLE_EXTENSION : policyBundleName + "-policy" + INSTALL_BUNDLE_EXTENSION;
+                                                                  EnvironmentBundleCreationMode mode, String bundleFolderPath) {
+        final String extension = mode != PLUGIN ? BUNDLE_EXTENSION : "-policy" + INSTALL_BUNDLE_EXTENSION;
         return collectFiles(templatizedBundleFolderPath, extension).stream()
                 .filter(file -> !StringUtils.endsWithIgnoreCase(file.getName(), DELETE_BUNDLE_EXTENSION))
                 .map(f -> new FileTemplatizedBundle(f, new File(bundleFolderPath, f.getName())))

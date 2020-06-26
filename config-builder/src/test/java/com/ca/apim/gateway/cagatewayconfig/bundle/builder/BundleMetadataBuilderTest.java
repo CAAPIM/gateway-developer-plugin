@@ -306,6 +306,11 @@ public class BundleMetadataBuilderTest {
         }
 
         @Override
+        public Map<String, Object> load(File entitiesFile) {
+            return null;
+        }
+
+        @Override
         public String getEntityType() {
             return null;
         }

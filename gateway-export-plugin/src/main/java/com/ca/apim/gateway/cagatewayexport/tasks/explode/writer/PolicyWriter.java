@@ -170,7 +170,7 @@ public class PolicyWriter implements EntityWriter {
                 List<Dependency> dependencyList = entry.getValue();
                 for (Dependency dependency : dependencyList) {
                     // add the dependency and populate the transitive dependencies for environmental entities
-                    if (dependencies.add(dependency) && !BuilderConstants.NON_ENV_ENTITY_TYPES.contains(dependency.getType())) {
+                    if (dependencies.add(dependency) && !EntityTypeRegistry.NON_ENV_ENTITY_TYPES.contains(dependency.getType())) {
                         populateDependencies(dependencyListMap, dependency.getId(), dependencies);
                     }
                 }
