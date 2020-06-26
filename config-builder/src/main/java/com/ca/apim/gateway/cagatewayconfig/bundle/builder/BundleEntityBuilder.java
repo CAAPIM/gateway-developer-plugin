@@ -52,13 +52,18 @@ public class BundleEntityBuilder {
 
     public Map<String, BundleArtifacts> build(Bundle bundle, BundleType bundleType,
                                               Document document, ProjectInfo projectInfo) {
+        return build(bundle, bundleType, document, projectInfo, false);
+    }
+
+    public Map<String, BundleArtifacts> build(Bundle bundle, BundleType bundleType,
+                                              Document document, ProjectInfo projectInfo, boolean generateMetadata) {
 
         Map<String, BundleArtifacts> artifacts = buildAnnotatedEntities(bundleType, bundle, document, projectInfo);
         if (artifacts.isEmpty()) {
             List<Entity> entities = new ArrayList<>();
             entityBuilders.forEach(builder -> entities.addAll(builder.build(bundle, bundleType, document)));
             final Element fullBundle = bundleDocumentBuilder.build(document, entities);
-            BundleMetadata fullBundleMetadata = null;
+            BundleMetadata bundleMetadata = null;
             Element deleteBundleElement = null;
 
             final String bundleNamePrefix = StringUtils.isBlank(projectInfo.getVersion()) ? projectInfo.getName() :
@@ -67,7 +72,7 @@ public class BundleEntityBuilder {
             String deleteBundleFileName = "";
             if (bundleType == DEPLOYMENT) {
                 // Create bundle metadata for un-annotated entities
-                fullBundleMetadata = bundleMetadataBuilder.build(null, bundle, entities, projectInfo);
+                bundleMetadata = bundleMetadataBuilder.build(null, bundle, entities, projectInfo);
 
                 // Create DELETE bundle - ALWAYS skip environment entities
                 deleteBundleElement = createDeleteBundle(document, entities, bundle, null, projectInfo);
@@ -77,19 +82,16 @@ public class BundleEntityBuilder {
                 bundleFileName = generateBundleFileName(false, bundleNamePrefix);
                 deleteBundleFileName = generateBundleFileName(true, bundleNamePrefix);
             } else if (bundleType == ENVIRONMENT) {
+                // Create bundle metadata for environment entities
+                if (generateMetadata) {
+                    bundleMetadata = bundleMetadataBuilder.buildEnvironmentMetadata(entities, projectInfo);
+                }
+
                 // Create DELETE Environment bundle
                 deleteBundleElement = createDeleteEnvBundle(document, entities);
-
-                // Generate bundle filenames. ProjectInfo.getName() is the complete install bundle filename
-                bundleFileName = projectInfo.getName();
-                if (StringUtils.contains(bundleFileName, INSTALL_BUNDLE_EXTENSION)) {
-                    deleteBundleFileName = bundleFileName.replace(INSTALL_BUNDLE_EXTENSION, DELETE_BUNDLE_EXTENSION);
-                } else {
-                    deleteBundleFileName = bundleFileName.replace(".bundle", DELETE_BUNDLE_EXTENSION);
-                }
             }
 
-            artifacts.put(bundleNamePrefix, new BundleArtifacts(fullBundle, deleteBundleElement, fullBundleMetadata,
+            artifacts.put(bundleNamePrefix, new BundleArtifacts(fullBundle, deleteBundleElement, bundleMetadata,
                     bundleFileName, deleteBundleFileName));
         }
         return artifacts;

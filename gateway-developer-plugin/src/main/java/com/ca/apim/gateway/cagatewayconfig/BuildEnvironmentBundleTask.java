@@ -99,14 +99,15 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         if(environmentEntities != null) {
             bundleEnvironmentValues.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));
         }
-
+        ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(), getProject().getVersion().toString());
         environmentBundleCreator.createEnvironmentBundle(
                 bundleEnvironmentValues,
                 into.getAsFile().get().getPath(),
                 into.getAsFile().get().getPath(),
                 configuredFolder != null ? configuredFolder.getPath() : EMPTY,
                 PLUGIN,
-                envBundleFileName // Passing envBundleFileName
+                envBundleFileName, // Passing envBundleFileName
+                projectInfo
         );
     }
 
