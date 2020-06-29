@@ -17,10 +17,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtilsException;
 import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
-import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.fasterxml.jackson.databind.type.MapType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -85,7 +83,7 @@ public class FullBundleCreator {
     }
 
     public void createFullBundle(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
-                                 String bundleFolderPath,
+                                 String bundleFolderPath, ProjectInfo projectInfo,
                                  String fullInstallBundleFilename, String environmentConfigurationFolderPath,
                                  boolean detemplatizeDeploymentBundles) {
         final Pair<Element, Element> elementPair = createFullAndDeleteBundles(bundleEnvironmentValues,
@@ -108,6 +106,21 @@ public class FullBundleCreator {
         boolean deleted = fullBundleFile.delete();
         if (!deleted) {
             LOGGER.log(Level.WARNING, () -> "Temporary bundle file was not deleted: " + fullBundleFile.toString());
+        }
+
+        // remove environment bundle from metadata's dependencies section
+        Map<String, Object> bundleMetadata = jsonFileUtils.readBundleMetadataFile(bundleFolderPath, bundleEnvironmentValues.getLeft());
+        if (bundleMetadata != null) {
+            List<Map<String, String>> dependencies = ((List) bundleMetadata.get("dependencies"));
+            dependencies.removeIf(new Predicate<Map<String, String>>() {
+                @Override
+                public boolean test(Map<String, String> dependentBundleMap) {
+                    return dependentBundleMap.get("name").equals(projectInfo.getName()) && dependentBundleMap.get("groupName").equals(projectInfo.getGroupName()) &&
+                            dependentBundleMap.get("version").equals(projectInfo.getVersion());
+                }
+            });
+
+            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleEnvironmentValues.getLeft(), new File(bundleFolderPath));
         }
     }
 

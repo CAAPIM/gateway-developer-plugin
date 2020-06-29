@@ -559,5 +559,14 @@ class CAGatewayDeveloperTest {
             }
         });
         assertTrue(bundleItemsIds.isEmpty(), "Mappings on deployment bundle not found on full bundle: " + bundleMappingsIds.toString());
+
+        // validate the full bundle metadata - dependencies list should be empty
+        File bundleMetadataFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + METADATA_FILE_NAME_SUFFIX);
+        assertTrue(bundleMetadataFile.isFile());
+        final ObjectMapper objectMapper = JsonTools.INSTANCE.getObjectMapper();
+        final MapType type = objectMapper.getTypeFactory().constructMapType(LinkedHashMap.class, String.class, Object.class);
+        Map<String, Object> metadataProperties = objectMapper.readValue(bundleMetadataFile, type);
+        List<Map<String, String>> dependencies = ((List) metadataProperties.get("dependencies"));
+        assertTrue(dependencies.isEmpty());
     }
 }

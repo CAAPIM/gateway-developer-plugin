@@ -7,10 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.apache.commons.lang3.StringUtils;
 
@@ -56,6 +53,14 @@ public class BundleMetadataBuilder {
             BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
             builder.referencedEntities(getEnvironmentDependenciesMetadata(dependentEntities));
+            if (!getEnvironmentDependenciesMetadata(dependentEntities).isEmpty()) {
+                DependentBundle envBundle = new DependentBundle();
+                envBundle.setGroupName(projectInfo.getGroupName());
+                envBundle.setName(projectInfo.getName());
+                envBundle.setVersion(projectInfo.getVersion());
+                envBundle.setType("bundle");
+                annotatedBundle.getDependentBundles().add(envBundle);
+            }
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
             builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
@@ -84,6 +89,14 @@ public class BundleMetadataBuilder {
         builder.redeployable(true);
         builder.hasRouting(hasRoutingAssertion(entities));
         builder.referencedEntities(getEnvironmentDependenciesMetadata(entities));
+        if (!getEnvironmentDependenciesMetadata(entities).isEmpty()) {
+            DependentBundle envBundle = new DependentBundle();
+            envBundle.setGroupName(projectInfo.getGroupName());
+            envBundle.setName(projectInfo.getName());
+            envBundle.setVersion(projectInfo.getVersion());
+            envBundle.setType("bundle");
+            bundle.getDependentBundles().add(envBundle);
+        }
         builder.dependencies(bundle.getDependentBundles());
         builder.definedEntities(getDefinedEntitiesMetadata(entities));
 
