@@ -52,8 +52,9 @@ public class BundleMetadataBuilder {
 
             BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
-            builder.referencedEntities(getEnvironmentDependenciesMetadata(dependentEntities));
-            if (!getEnvironmentDependenciesMetadata(dependentEntities).isEmpty()) {
+            Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(dependentEntities);
+            builder.referencedEntities(referencedEntities);
+            if (!referencedEntities.isEmpty()) {
                 DependentBundle envBundle = new DependentBundle();
                 envBundle.setGroupName(projectInfo.getGroupName());
                 envBundle.setName(projectInfo.getName());
@@ -88,8 +89,9 @@ public class BundleMetadataBuilder {
         builder.tags(Collections.emptyList());
         builder.redeployable(true);
         builder.hasRouting(hasRoutingAssertion(entities));
-        builder.referencedEntities(getEnvironmentDependenciesMetadata(entities));
-        if (!getEnvironmentDependenciesMetadata(entities).isEmpty()) {
+        Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(entities);
+        builder.referencedEntities(referencedEntities);
+        if (!referencedEntities.isEmpty()) {
             DependentBundle envBundle = new DependentBundle();
             envBundle.setGroupName(projectInfo.getGroupName());
             envBundle.setName(projectInfo.getName());
