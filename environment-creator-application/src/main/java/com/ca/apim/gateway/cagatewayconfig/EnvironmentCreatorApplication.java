@@ -88,8 +88,8 @@ public class EnvironmentCreatorApplication {
                 templatizedBundleFolderPath,
                 environmentConfigurationFolderPath,
                 APPLICATION,
-                "_0_env.req.bundle",
-                new ProjectInfo("", "", "")
+                "_0_env.req.install.bundle",
+                new ProjectInfo("environment", "", "")
 
         );
 
