@@ -155,6 +155,10 @@ public class BundleMetadata implements Metadata {
         }
 
         public Builder redeployable(boolean redeployable) {
+            this.redeployable = redeployable;
+            return this;
+        }
+
         public Builder l7Template(boolean l7Template) {
             this.l7Template = l7Template;
             return this;
