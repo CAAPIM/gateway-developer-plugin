@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Collection;
 import java.util.LinkedList;
 
-@JsonPropertyOrder({"metaVersion", "name", "groupName", "moduleName", "version", "type", "tags", "description",
+@JsonPropertyOrder({"metaVersion", "name", "groupName", "moduleName", "version", "type", "tags", "description", "l7Template",
         "redeployable", "hasRouting", "definedEntities", "referencedEntities", "dependencies"})
 public class BundleMetadata implements Metadata {
     @SuppressWarnings({"unused", "java:S1170"}) // Suppress IntelliJ warnings for this field
@@ -26,6 +26,7 @@ public class BundleMetadata implements Metadata {
     private String description;
     private Collection<Metadata> definedEntities;
     private Collection<String> tags;
+    private boolean l7Template;
     private boolean redeployable;
     private boolean hasRouting;
     private Collection<Metadata> referencedEntities;
@@ -87,6 +88,10 @@ public class BundleMetadata implements Metadata {
         return tags;
     }
 
+    public boolean isL7Template() {
+        return l7Template;
+    }
+
     public boolean isRedeployable() {
         return redeployable;
     }
@@ -110,6 +115,7 @@ public class BundleMetadata implements Metadata {
         private String groupName;
         private final String version;
         private String description;
+        private boolean l7Template;
         private boolean redeployable;
         private boolean hasRouting;
         private Collection<String> tags;
@@ -149,7 +155,8 @@ public class BundleMetadata implements Metadata {
         }
 
         public Builder redeployable(boolean redeployable) {
-            this.redeployable = redeployable;
+        public Builder l7Template(boolean l7Template) {
+            this.l7Template = l7Template;
             return this;
         }
 
@@ -167,6 +174,7 @@ public class BundleMetadata implements Metadata {
             BundleMetadata bundleMetadata = new BundleMetadata(type, name, moduleName, groupName, version);
             bundleMetadata.description = description;
             bundleMetadata.definedEntities = definedEntities;
+            bundleMetadata.l7Template = l7Template;
             bundleMetadata.redeployable = redeployable;
             bundleMetadata.hasRouting = hasRouting;
             bundleMetadata.tags = tags;

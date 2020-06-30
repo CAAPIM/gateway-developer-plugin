@@ -34,7 +34,8 @@ public abstract class PropertiesLoaderBase<P extends PropertiesEntity> implement
         this.idGenerator = idGenerator;
     }
 
-    private Map<String, Object> load(final File propertiesFile) {
+    @Override
+    public Map<String, Object> load(final File propertiesFile) {
         Map<String, Object> propertiesMap = new LinkedHashMap<>();
         if (propertiesFile != null && propertiesFile.exists()) {
             Properties properties = new Properties();

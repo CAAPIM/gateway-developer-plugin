@@ -18,6 +18,7 @@ import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,15 +36,17 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 public class BuildEnvironmentBundleTask extends DefaultTask {
 
     private final DirectoryProperty into;
-    private final Property<Map> environmentConfig;
     private final EnvironmentConfigurationUtils environmentConfigurationUtils;
     private final DirectoryProperty configFolder;
     private final Property<String> configName;
+    private final Property<Map> environmentConfig;
+    private final Property<Map> envConfig;
 
     @Inject
     public BuildEnvironmentBundleTask() {
         into = newOutputDirectory();
         environmentConfig = getProject().getObjects().property(Map.class);
+        envConfig = getProject().getObjects().property(Map.class);
         environmentConfigurationUtils = getInstance(EnvironmentConfigurationUtils.class);
         configFolder = newInputDirectory();
         configName = getProject().getObjects().property(String.class);
@@ -58,6 +61,12 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     @Optional
     Property<Map> getEnvironmentConfig() {
         return environmentConfig;
+    }
+
+    @Input
+    @Optional
+    Property<Map> getEnvConfig() {
+        return envConfig;
     }
 
     @InputDirectory
@@ -75,33 +84,34 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     @TaskAction
     public void perform() {
         final EnvironmentBundleCreator environmentBundleCreator = getInstance(EnvironmentBundleCreator.class);
-        final List<File> metaDataFiles = collectFiles(into.getAsFile().get().getPath(), METADATA_FILE_NAME_SUFFIX);
-        if (metaDataFiles.isEmpty()) {
-            throw new MissingEnvironmentException("Metadata file does not exist.");
-        }
         File configuredFolder = configFolder.getAsFile().getOrNull();
-        metaDataFiles.stream().forEach(metaDataFile -> {
-            final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configuredFolder);
-            if (null != bundleEnvironmentValues) {
-                final String envBundleFileName = getEnvBundleFilename(bundleEnvironmentValues.getLeft());
-                Map<String, String> environmentValuesFromMetadata = bundleEnvironmentValues.getRight();
-                //read environment properties from environmentConfig and merge it with metadata properties
-                environmentValuesFromMetadata.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentConfig.get()));
-                environmentBundleCreator.createEnvironmentBundle(
-                        environmentValuesFromMetadata,
-                        into.getAsFile().get().getPath(),
-                        into.getAsFile().get().getPath(),
-                        configuredFolder != null ? configuredFolder.getPath() : EMPTY,
-                        PLUGIN,
-                        envBundleFileName, // Passing envBundleFileName
-                        bundleEnvironmentValues.getLeft()
-                );
-            }
-        });
+        Map environmentEntities = java.util.Optional.ofNullable(envConfig.getOrNull()).orElse(environmentConfig.getOrNull());
+        if (configuredFolder == null && environmentEntities == null) {
+            throw new MissingEnvironmentException("EnvironmentConfig is not configured");
+        }
+        Map<String, String> bundleEnvironmentValues = new HashMap<>();
+        if(configuredFolder != null){
+            bundleEnvironmentValues = environmentConfigurationUtils.loadConfigFolder(configuredFolder);
+        }
+        final String envBundleFileName = getEnvBundleFilename(getProject().getName(), getProject().getVersion().toString());
+
+        //read environment properties from environmentConfig and merge it with config folder entities
+        if(environmentEntities != null) {
+            bundleEnvironmentValues.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));
+        }
+
+        environmentBundleCreator.createEnvironmentBundle(
+                bundleEnvironmentValues,
+                into.getAsFile().get().getPath(),
+                into.getAsFile().get().getPath(),
+                configuredFolder != null ? configuredFolder.getPath() : EMPTY,
+                PLUGIN,
+                envBundleFileName // Passing envBundleFileName
+        );
     }
 
     /**
-     * Generates the Environment install bundle filename in the format <name>-<version>-*env.install.bundle.
+     * Generates the Environment install bundle filename in the format <module name>-<version>-*env.install.bundle.
      *
      * Here "-*env" is generated with the following preference:
      * 1) If "configName" is provided in the GatewaySourceConfig {} in build.gradle, "configName" will be used after
@@ -111,19 +121,20 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
      *    2.2) If configFolder is not the default folder, use folder name after removing all the special characters.
      *    For eg. "configFolder" is set as "src/main/gateway/config-staging", filename will have "-configstagingenv"
      *
-     * @param deployBundleName bundle name prefix obtained from project name and version or from annotations
+     * @param moduleName project module name
+     * @param version project module version
      * @return Environment install bundle filename
      */
-    private String getEnvBundleFilename(String deployBundleName) {
+    private String getEnvBundleFilename(String moduleName, String version) {
         if (configName != null && StringUtils.isNotBlank(configName.get())) {
-            return deployBundleName + "-" + removeAllSpecialChars(configName.get()) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
+            return moduleName + "-" + version + "-" + removeAllSpecialChars(configName.get()) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
         } else {
             String configFolderName = configFolder != null && configFolder.isPresent() ?
                     configFolder.getAsFile().get().getName() : "";
             if (StringUtils.equalsIgnoreCase(configFolderName, "config")) {
-                return deployBundleName + "-" + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
+                return moduleName + "-" + version + "-" + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
             } else {
-                return deployBundleName + "-" + removeAllSpecialChars(configFolderName) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
+                return moduleName + "-" + version + "-" + removeAllSpecialChars(configFolderName) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
             }
         }
     }

@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
+import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
@@ -155,7 +156,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             if (annotatedEntity.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = policy.getName();
             } else {
-                policyName = annotatedBundle.getUniquePrefix() + policy.getName();
+                policyName = annotatedBundle.applyUniqueName(policy.getName());
             }
         } else {
             policyName = policy.getName();
@@ -166,6 +167,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyName, policyDocument, assertionElement));
         prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
         prepareAssertion(policyElement, HTTP_ROUTING_ASSERTION, assertionElement -> prepareRoutingAssertionCertificateIds(policyDocument, bundle, assertionElement));
+        prepareAssertion(policyElement, HTTP2_ROUTING_ASSERTION, assertionElement -> prepareHttp2RoutingAssertion(policyDocument, bundle, assertionElement));
         prepareAssertion(policyElement, MQ_ROUTING_ASSERTION, assertionElement -> prepareMQRoutingAssertion(policyDocument, bundle, assertionElement));
 
         policy.setPolicyDocument(policyElement);
@@ -371,7 +373,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 encassGuid = idGenerator.generateGuid();
                 encass.setGuid(encassGuid);
                 encass.setId(idGenerator.generate());
-                encassName = annotatedBundle.getUniquePrefix() + encassName;
+                encassName = annotatedBundle.applyUniqueName(encassName);
             }
         }
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
@@ -512,8 +514,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             for (int i = 0; i < trustedCertNamesList.getLength(); i++) {
                 final String trustedCertName = trustedCertNamesList.item(i).getAttributes().getNamedItem(STRING_VALUE).getTextContent();
                 final TrustedCert trustedCert = bundle.getTrustedCerts().get(trustedCertName);
-                final String trustedCertId = trustedCert != null && trustedCert.getAnnotatedEntity() != null && trustedCert.getAnnotatedEntity().getId() != null ?
-                        trustedCert.getAnnotatedEntity().getId() : idGenerator.generate();
+                final String trustedCertId = getIdFromAnnotableEntity(trustedCert);
 
                 Element trustedCertGoidItem = createElementWithAttribute(
                         policyDocument,
@@ -527,9 +528,38 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
+    void prepareHttp2RoutingAssertion(Document policyDocument, Bundle bundle, Element assertionElement) {
+        final Element http2ClientNameEle = getSingleChildElement(assertionElement, HTTP2_CLIENT_CONFIG_NAME, true);
+        if (http2ClientNameEle != null) {
+            final String http2ClientName =
+                    http2ClientNameEle.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
+            final GenericEntity http2Client = bundle.getGenericEntities().get(http2ClientName);
+            final String id = getIdFromAnnotableEntity(http2Client);
+            Element http2ClientGoidElement = createElementWithAttribute(
+                    policyDocument,
+                    HTTP2_CLIENT_CONFIG_GOID,
+                    GOID_VALUE,
+                    id
+            );
+            assertionElement.insertBefore(http2ClientGoidElement, http2ClientNameEle);
+        }
+    }
+
+    private String getIdFromAnnotableEntity(GatewayEntity gatewayEntity) {
+        if (gatewayEntity instanceof AnnotableEntity) {
+            AnnotatedEntity annotatedEntity = ((AnnotableEntity) gatewayEntity).getAnnotatedEntity();
+            if (annotatedEntity != null && annotatedEntity.getId() != null) {
+                return annotatedEntity.getId();
+            }
+        }
+        return idGenerator.generate();
+    }
+
+    @VisibleForTesting
     Entity buildPolicyEntity(Policy policy, AnnotatedBundle annotatedBundle, Bundle bundle, Document document) {
         String policyName = policy.getName();
         String policyNameWithPath = policy.getPath();
+        policyNameWithPath = CharacterBlacklistUtil.decodePath(policyNameWithPath);
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
         boolean isReusable = false;
@@ -539,8 +569,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
         if (annotatedBundle != null) {
             if (!isReusable && !isAnnotatedEntity(policy, annotatedEntity)) {
-                policyName = annotatedBundle.getUniquePrefix() + policyName;
-                policyNameWithPath = PathUtils.extractPath(policy.getPath()) + policyName;
+                policyName = annotatedBundle.applyUniqueName(policyName);
+                policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
             }
         }
 

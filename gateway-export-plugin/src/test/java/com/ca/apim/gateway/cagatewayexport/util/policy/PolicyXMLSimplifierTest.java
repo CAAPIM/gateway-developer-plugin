@@ -8,7 +8,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.linker.LinkerException;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -440,6 +439,27 @@ class PolicyXMLSimplifierTest {
     }
 
     @Test
+    void simplifyHttp2RoutingAssertionForClientConfig() throws DocumentParseException {
+        final IdGenerator idGenerator = new IdGenerator();
+        Element http2RoutingAssertionElement = createHttp2RoutingAssertionWithClientConfig(idGenerator);
+        new Http2AssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                null,
+                                null)
+                                .withAssertionElement(http2RoutingAssertionElement)
+                );
+
+        final Element http2ClientConfigNameElement = getSingleChildElement(http2RoutingAssertionElement,
+                HTTP2_CLIENT_CONFIG_NAME, true);
+        assertNotNull(http2ClientConfigNameElement);
+        assertEquals("http2client",
+                http2ClientConfigNameElement.getAttributes().getNamedItem(STRING_VALUE).getTextContent());
+        assertNull(getSingleChildElement(http2RoutingAssertionElement, HTTP2_CLIENT_CONFIG_GOID, true));
+    }
+
+    @Test
     void simplifyMqRoutingAssertion() throws DocumentParseException {
         final IdGenerator idGenerator = new IdGenerator();
         Element mqRoutingAssertionElement = createMqRoutingAssertion(idGenerator);
@@ -503,6 +523,19 @@ class PolicyXMLSimplifierTest {
                 HTTP_ROUTING_ASSERTION,
                 trustedCertGoidsElement,
                 trustedCertNamesElement
+        );
+    }
+
+    @NotNull
+    private Element createHttp2RoutingAssertionWithClientConfig(final IdGenerator idGenerator) {
+        Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+
+        return createElementWithChildren(
+                document,
+                HTTP2_ROUTING_ASSERTION,
+                createElementWithAttribute(document, "L7p:ProtectedServiceUrl", STRING_VALUE, "http://apim-hugh-new.lvn.broadcom.net:90"),
+                createElementWithAttribute(document, HTTP2_CLIENT_CONFIG_NAME, STRING_VALUE, "http2client"),
+                createElementWithAttribute(document, HTTP2_CLIENT_CONFIG_GOID, STRING_VALUE, idGenerator.generate())
         );
     }
 

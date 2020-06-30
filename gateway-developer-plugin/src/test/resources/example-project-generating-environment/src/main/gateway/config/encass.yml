@@ -10,3 +10,4 @@ encass_env:
     allowTracing: "true"
     description: "Encass to validate."
     passMetricsToParent: "false"
+    l7Template: "false"

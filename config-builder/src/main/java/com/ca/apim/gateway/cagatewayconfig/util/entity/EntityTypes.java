@@ -29,6 +29,7 @@ public class EntityTypes {
     public static final String SCHEDULED_TASK_TYPE = "SCHEDULED_TASK";
     public static final String JMS_DESTINATION_TYPE = "JMS_ENDPOINT";
     public static final String SOAP_RESOURCE_TYPE = "SOAP_RESOURCE";
+    public static final String GENERIC_TYPE = "GENERIC";
 
     private EntityTypes() { }
 }

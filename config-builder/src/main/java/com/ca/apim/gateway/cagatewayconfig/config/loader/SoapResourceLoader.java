@@ -60,6 +60,11 @@ public class SoapResourceLoader implements EntityLoader {
         throw new ConfigLoadException("Cannot load an individual soapResource");
     }
 
+    @Override
+    public Map<String, Object> load(File entitiesFile) {
+        throw new ConfigLoadException("Cannot load soapResource from config file");
+    }
+
     /**
      * Throws an exception when attempting to load SoapResource individually
      *

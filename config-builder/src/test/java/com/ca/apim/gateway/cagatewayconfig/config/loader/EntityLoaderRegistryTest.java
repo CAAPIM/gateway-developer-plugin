@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.*;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,6 +53,11 @@ class EntityLoaderRegistryTest {
     public static class TestEntityLoader implements EntityLoader {
         @Override
         public Object loadSingle(String name, File entitiesFile) {
+            return null;
+        }
+
+        @Override
+        public Map<String, Object> load(File entitiesFile) {
             return null;
         }
 
