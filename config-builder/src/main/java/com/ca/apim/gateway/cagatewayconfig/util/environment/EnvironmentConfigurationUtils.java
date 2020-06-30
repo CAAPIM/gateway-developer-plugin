@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.environment;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
@@ -178,5 +179,19 @@ public class EnvironmentConfigurationUtils {
             case '<': throw new MissingEnvironmentException("XML Environment Values are not yet supported.");
             default: return YAML;
         }
+    }
+
+    /**
+     * create dependent environment bundle from project info.
+     * @param projectInfo
+     * @return DependentBundle
+     */
+    public static DependentBundle generateDependentEnvBundleFromProject(final ProjectInfo projectInfo) {
+        DependentBundle envBundle = new DependentBundle();
+        envBundle.setGroupName(projectInfo.getGroupName());
+        envBundle.setName(projectInfo.getName());
+        envBundle.setVersion(projectInfo.getVersion());
+        envBundle.setType("bundle");
+        return envBundle;
     }
 }

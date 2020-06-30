@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils.generateDependentEnvBundleFromProject;
 
 @Singleton
 public class BundleMetadataBuilder {
@@ -52,15 +53,10 @@ public class BundleMetadataBuilder {
 
             BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
-            Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(dependentEntities);
+            final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(dependentEntities);
             builder.referencedEntities(referencedEntities);
             if (!referencedEntities.isEmpty()) {
-                DependentBundle envBundle = new DependentBundle();
-                envBundle.setGroupName(projectInfo.getGroupName());
-                envBundle.setName(projectInfo.getName());
-                envBundle.setVersion(projectInfo.getVersion());
-                envBundle.setType("bundle");
-                annotatedBundle.getDependentBundles().add(envBundle);
+                annotatedBundle.getDependentBundles().add(generateDependentEnvBundleFromProject(projectInfo));
             }
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
@@ -89,15 +85,10 @@ public class BundleMetadataBuilder {
         builder.tags(Collections.emptyList());
         builder.redeployable(true);
         builder.hasRouting(hasRoutingAssertion(entities));
-        Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(entities);
+        final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(entities);
         builder.referencedEntities(referencedEntities);
         if (!referencedEntities.isEmpty()) {
-            DependentBundle envBundle = new DependentBundle();
-            envBundle.setGroupName(projectInfo.getGroupName());
-            envBundle.setName(projectInfo.getName());
-            envBundle.setVersion(projectInfo.getVersion());
-            envBundle.setType("bundle");
-            bundle.getDependentBundles().add(envBundle);
+            bundle.getDependentBundles().add(generateDependentEnvBundleFromProject(projectInfo));
         }
         builder.dependencies(bundle.getDependentBundles());
         builder.definedEntities(getDefinedEntitiesMetadata(entities));
@@ -116,8 +107,7 @@ public class BundleMetadataBuilder {
     }
 
     private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
-        return annotatedBundle.getEntities(Policy.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable()) ||
-                annotatedBundle.getEntities(Encass.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable());
+        return annotatedBundle.getAnnotatedEntity().isReusable();
     }
 
     private boolean hasRoutingAssertion(final List<Entity> dependentEntities) {
