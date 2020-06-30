@@ -14,7 +14,7 @@ public class AnnotatedBundle extends Bundle {
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
     private ProjectInfo projectInfo;
     private List<DependentBundle> dependentBundles = new ArrayList<>();
-    private String uniqueNameSeparator = "::";   // This can be different for environment entities.
+    private static final String UNIQUE_NAME_SEPARATOR = "::";   // This can be different for environment entities.
 
     public AnnotatedBundle(Bundle fullBundle, AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
                            ProjectInfo projectInfo) {
@@ -68,18 +68,18 @@ public class AnnotatedBundle extends Bundle {
      * @return String
      */
     public String applyUniqueName(final String entityName) {
-        StringBuilder uniqueName = new StringBuilder(uniqueNameSeparator);
+        StringBuilder uniqueName = new StringBuilder(UNIQUE_NAME_SEPARATOR);
         if (StringUtils.isNotBlank(projectInfo.getGroupName())) {
             uniqueName.append(projectInfo.getGroupName());
             uniqueName.append(".");
         }
         uniqueName.append(getAnnotatedBundleName());
-        uniqueName.append(uniqueNameSeparator);
+        uniqueName.append(UNIQUE_NAME_SEPARATOR);
         uniqueName.append(entityName);
 
         String version = projectInfo.getVersion();
         if (StringUtils.isNotBlank(version)) {
-            uniqueName.append(uniqueNameSeparator);
+            uniqueName.append(UNIQUE_NAME_SEPARATOR);
             String[] subVersions = version.split("\\.");
             uniqueName.append(subVersions.length > 0 ? subVersions[0] : version);
             uniqueName.append(".");
