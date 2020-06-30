@@ -10,7 +10,6 @@ import java.util.Collection;
 
 public class AnnotatedEntity<T> {
     private final T entity;
-    private String metadataId;
     private String entityName;
     private String entityType;
     private String bundleName;
@@ -19,14 +18,6 @@ public class AnnotatedEntity<T> {
     private Collection<String> tags;
     private String id;
     private String guid;
-
-    public String getMetadataId() {
-        return metadataId;
-    }
-
-    public void setMetadataId(String metadataId) {
-        this.metadataId = metadataId;
-    }
 
     public String getId() {
         return id;
