@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Collection;
 import java.util.LinkedList;
 
-@JsonPropertyOrder({"metaVersion", "name", "moduleName", "groupName", "version", "type", "tags", "description",
+@JsonPropertyOrder({"metaVersion", "name", "groupName", "moduleName", "version", "type", "tags", "description",
         "redeployable", "hasRouting", "definedEntities", "referencedEntities", "dependencies"})
 public class BundleMetadata implements Metadata {
     @SuppressWarnings({"unused", "java:S1170"}) // Suppress IntelliJ warnings for this field
