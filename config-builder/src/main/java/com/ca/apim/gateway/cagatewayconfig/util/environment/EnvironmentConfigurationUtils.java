@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.environment;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
@@ -112,12 +113,12 @@ public class EnvironmentConfigurationUtils {
             throw new MissingEnvironmentException("Metadata file " + metaDataFile.toString() + " does not exist.");
         }
         final EnvironmentBundleData environmentBundleData = jsonFileUtils.readBundleMetadataFile(metaDataFile, EnvironmentBundleData.class);
-        if (environmentBundleData != null && environmentBundleData.getEnvironmentEntities() != null) {
+        if (environmentBundleData != null && environmentBundleData.getReferencedEntities() != null) {
             String bundleName = environmentBundleData.getName();
             final String bundleVersion = environmentBundleData.getVersion();
             final Map<String, String> environmentValues = new LinkedHashMap<>();
             if (configFolder != null) {
-                final List<Map<String, String>> environmentEntities = environmentBundleData.getEnvironmentEntities();
+                final List<Map<String, String>> environmentEntities = environmentBundleData.getReferencedEntities();
                 environmentEntities.stream().forEach(environmentEntitiy -> {
                     String entityType = environmentEntitiy.get("type");
                     String entityName = environmentEntitiy.get("name");
@@ -268,5 +269,19 @@ public class EnvironmentConfigurationUtils {
             case '<': throw new MissingEnvironmentException("XML Environment Values are not yet supported.");
             default: return YAML;
         }
+    }
+
+    /**
+     * create dependent environment bundle from project info.
+     * @param projectInfo
+     * @return DependentBundle
+     */
+    public static DependentBundle generateDependentEnvBundleFromProject(final ProjectInfo projectInfo) {
+        DependentBundle envBundle = new DependentBundle();
+        envBundle.setGroupName(projectInfo.getGroupName());
+        envBundle.setName(projectInfo.getName());
+        envBundle.setVersion(projectInfo.getVersion());
+        envBundle.setType("bundle");
+        return envBundle;
     }
 }

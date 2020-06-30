@@ -16,6 +16,9 @@ public class DependentBundle implements Metadata {
     @JsonIgnore
     private File dependencyFile;
 
+    public DependentBundle() {
+    }
+
     public DependentBundle(File dependencyFile) {
         this.dependencyFile = dependencyFile;
     }

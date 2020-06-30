@@ -99,6 +99,8 @@ public class BuildFullBundleTask extends DefaultTask {
     public void perform() {
         final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
         final String bundleDirectory = into.getAsFile().get().getPath();
+        final ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(),
+                getProject().getVersion().toString());
         final List<File> metaDataFiles = collectFiles(bundleDirectory, METADATA_FILE_NAME_SUFFIX);
         if (metaDataFiles.isEmpty()) {
             throw new MissingEnvironmentException("Metadata file does not exist.");
@@ -119,6 +121,7 @@ public class BuildFullBundleTask extends DefaultTask {
                         bundleEnvironmentValues,
                         filterBundleFiles(dependencyBundles.getAsFileTree().getFiles()),
                         bundleDirectory,
+                        projectInfo,
                         fullInstallBundleFilename,
                         configuredFolder != null ? configuredFolder.getPath() : EMPTY,
                         detemplatizeDeploymentBundles.get()

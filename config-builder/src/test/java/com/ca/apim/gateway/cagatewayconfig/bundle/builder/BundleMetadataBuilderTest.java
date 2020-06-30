@@ -153,10 +153,6 @@ public class BundleMetadataBuilderTest {
 
         Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
-        String metadataId = ID_GENERATOR.generate();
-        encass.getAnnotations().stream()
-                .filter(a -> AnnotationConstants.ANNOTATION_TYPE_BUNDLE.equals(a.getType()))
-                .findFirst().get().setId(metadataId);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
@@ -165,7 +161,6 @@ public class BundleMetadataBuilderTest {
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
-        assertEquals(metadataId, metadata.getId());
         assertEquals(TEST_ENCASS_ANNOTATION_NAME, metadata.getName());
         assertEquals(TEST_ENCASS_ANNOTATION_DESC, metadata.getDescription());
         assertEquals(TEST_ENCASS_ANNOTATION_TAGS, metadata.getTags());
@@ -198,8 +193,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get("my-bundle-" + encass.getName() + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
-        assertNotNull(metadata.getId());
-        assertNotSame(metadata.getId(), metadata.getDefinedEntities().iterator().next().getId());
+        assertNotNull(metadata.getDefinedEntities().iterator().next().getId());
         assertEquals("my-bundle-" + encass.getName(), metadata.getName());
         assertEquals(encass.getProperties().get("description"), metadata.getDescription());
         assertEquals(0, metadata.getTags().size());
@@ -226,6 +220,51 @@ public class BundleMetadataBuilderTest {
     }
 
     @Test
+    public void testEnvironmentBundleMetadata() throws JsonProcessingException {
+        BundleEntityBuilder builder = createBundleEntityBuilder();
+        // create un-annotated bundle
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false);
+        // create encass with the empty set of annotations and add it to the bundle
+        Encass encass = buildTestEncassWithAnnotation(TEST_ENCASS, TEST_ENCASS_ID, TEST_GUID, TEST_ENCASS_POLICY, Collections.emptySet());
+        bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
+
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo, true);
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        BundleMetadata metadata = bundles.get(projectInfo.getName() + "-" + projectInfo.getVersion()).getBundleMetadata();
+        assertNotNull(metadata);
+        assertEquals(projectInfo.getName(), metadata.getName());
+        assertEquals(projectInfo.getGroupName(), metadata.getGroupName());
+        assertEquals(projectInfo.getVersion(), metadata.getVersion());
+        assertEquals(EntityBuilder.BundleType.ENVIRONMENT.name(), metadata.getType());
+        assertEquals(StringUtils.EMPTY, metadata.getDescription());
+        assertEquals(Collections.emptyList(), metadata.getTags());
+        assertTrue(metadata.isReusable());
+        assertTrue(metadata.isRedeployable());
+        assertFalse(metadata.isL7Template());
+
+        Collection<Metadata> definedEntities = metadata.getDefinedEntities();
+        assertEquals(3, definedEntities.size());
+        definedEntities.stream().forEach(definedEntityData -> {
+            switch (definedEntityData.getType()) {
+                case EntityTypes.JDBC_CONNECTION:
+                    assertEquals("some-jdbc", definedEntityData.getName());
+                    break;
+                case EntityTypes.TRUSTED_CERT_TYPE:
+                    assertEquals("apim-hugh-new.lvn.broadcom.net", definedEntityData.getName());
+                    break;
+                case EntityTypes.STORED_PASSWORD_TYPE:
+                    assertEquals("secure-pass", definedEntityData.getName());
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
+
+    @Test
     public void testUnAnnotatedBundleMetadata() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
         // create un-annotated bundle
@@ -245,7 +284,6 @@ public class BundleMetadataBuilderTest {
         assertEquals(BUNDLE_TYPE_ALL, metadata.getType());
         assertEquals(StringUtils.EMPTY, metadata.getDescription());
         assertEquals(Collections.emptyList(), metadata.getTags());
-        assertTrue(metadata.isReusable());
         assertTrue(metadata.isRedeployable());
         assertFalse(metadata.isL7Template());
 
