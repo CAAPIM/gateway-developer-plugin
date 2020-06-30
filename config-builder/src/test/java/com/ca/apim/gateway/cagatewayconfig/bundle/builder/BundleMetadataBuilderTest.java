@@ -240,7 +240,6 @@ public class BundleMetadataBuilderTest {
         assertEquals(EntityBuilder.BundleType.ENVIRONMENT.name(), metadata.getType());
         assertEquals(StringUtils.EMPTY, metadata.getDescription());
         assertEquals(Collections.emptyList(), metadata.getTags());
-        assertTrue(metadata.isReusable());
         assertTrue(metadata.isRedeployable());
         assertFalse(metadata.isL7Template());
 
