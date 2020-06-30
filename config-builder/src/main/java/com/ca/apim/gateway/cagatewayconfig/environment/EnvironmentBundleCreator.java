@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.environment.TemplatizedBundle.FileTemplatizedBundle;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -38,16 +39,19 @@ public class EnvironmentBundleCreator {
     private final DocumentFileUtils documentFileUtils;
     private final EnvironmentBundleBuilder environmentBundleBuilder;
     private final BundleEntityBuilder bundleEntityBuilder;
+    private final JsonFileUtils jsonFileUtils;
 
     @Inject
     EnvironmentBundleCreator(DocumentTools documentTools,
                              DocumentFileUtils documentFileUtils,
                              EnvironmentBundleBuilder environmentBundleBuilder,
-                             BundleEntityBuilder bundleEntityBuilder) {
+                             BundleEntityBuilder bundleEntityBuilder,
+                             final JsonFileUtils jsonFileUtils) {
         this.documentTools = documentTools;
         this.documentFileUtils = documentFileUtils;
         this.environmentBundleBuilder = environmentBundleBuilder;
         this.bundleEntityBuilder = bundleEntityBuilder;
+        this.jsonFileUtils = jsonFileUtils;
     }
 
     public Bundle createEnvironmentBundle(Map<String, String> environmentProperties,
@@ -55,7 +59,7 @@ public class EnvironmentBundleCreator {
                                           String templatizedBundleFolderPath,
                                           String environmentConfigurationFolderPath,
                                           EnvironmentBundleCreationMode mode,
-                                          String envInstallBundleFilename) {
+                                          String envInstallBundleFilename, ProjectInfo projectInfo) {
         Bundle environmentBundle = new Bundle();
         environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, mode);
 
@@ -72,12 +76,13 @@ public class EnvironmentBundleCreator {
 
         // Passing Bundle name and version string with config env name (<name>-<version>-*env.install.bundle) as project name
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
-                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(envInstallBundleFilename, EMPTY, EMPTY));
+                EntityBuilder.BundleType.ENVIRONMENT, document, projectInfo, true);
         for (BundleArtifacts bundleArtifacts : bundleElements.values()) {
             documentFileUtils.createFile(bundleArtifacts.getBundle(), new File(bundleFolderPath,
-                    bundleArtifacts.getBundleFileName()).toPath());
+                    envInstallBundleFilename).toPath());
             documentFileUtils.createFile(bundleArtifacts.getDeleteBundle(), new File(bundleFolderPath,
-                    bundleArtifacts.getDeleteBundleFileName()).toPath());
+                    envInstallBundleFilename.replace(INSTALL_BUNDLE_EXTENSION, DELETE_BUNDLE_EXTENSION)).toPath());
+            jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), envInstallBundleFilename.replace(INSTALL_BUNDLE_EXTENSION, ""), new File(bundleFolderPath));
         }
         return environmentBundle;
     }

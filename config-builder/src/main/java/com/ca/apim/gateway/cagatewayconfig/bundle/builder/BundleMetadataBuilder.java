@@ -74,6 +74,18 @@ public class BundleMetadataBuilder {
         }
     }
 
+    public BundleMetadata buildEnvironmentMetadata(final List<Entity> entities, ProjectInfo projectInfo){
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(EntityBuilder.BundleType.ENVIRONMENT.name(), idGenerator.generate(),
+                projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+        builder.description(StringUtils.EMPTY);
+        builder.tags(Collections.emptyList());
+        builder.reusableAndRedeployable(true, true);
+        builder.hasRouting(false);
+        builder.definedEntities(getEnvironmentDependenciesMetadata(entities));
+
+        return builder.build();
+    }
+
     /**
      * Builds bundle metadata for full bundle (all entities)
      *

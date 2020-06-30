@@ -88,7 +88,9 @@ public class EnvironmentCreatorApplication {
                 templatizedBundleFolderPath,
                 environmentConfigurationFolderPath,
                 APPLICATION,
-                "_0_env.req.bundle"
+                "_0_env.req.install.bundle",
+                new ProjectInfo("environment", "", "")
+
         );
 
         // Create the KeyStore

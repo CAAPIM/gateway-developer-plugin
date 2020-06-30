@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.ENV_INSTALL_BUNDLE_NAME_SUFFIX;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.removeAllSpecialChars;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
@@ -99,14 +99,15 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         if(environmentEntities != null) {
             bundleEnvironmentValues.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));
         }
-
+        ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(), getProject().getVersion().toString());
         environmentBundleCreator.createEnvironmentBundle(
                 bundleEnvironmentValues,
                 into.getAsFile().get().getPath(),
                 into.getAsFile().get().getPath(),
                 configuredFolder != null ? configuredFolder.getPath() : EMPTY,
                 PLUGIN,
-                envBundleFileName // Passing envBundleFileName
+                envBundleFileName, // Passing envBundleFileName
+                projectInfo
         );
     }
 

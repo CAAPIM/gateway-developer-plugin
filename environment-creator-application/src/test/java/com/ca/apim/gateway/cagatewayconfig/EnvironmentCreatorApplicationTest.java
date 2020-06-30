@@ -47,7 +47,7 @@ class EnvironmentCreatorApplicationTest {
 
         new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath(), envFolder.getPath()).run();
 
-        File environmentBundle = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
+        File environmentBundle = new File(testDetemplatizedBundlesFolder, "_0_env.req.install.bundle");
 
         assertTrue(environmentBundle.exists());
     }
@@ -285,7 +285,7 @@ class EnvironmentCreatorApplicationTest {
     }
 
     private static void assertEnvironment(File testDetemplatizedBundlesFolder) {
-        File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
+        File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.install.bundle");
         assertTrue(environmentBundleFile.exists());
 
         EntityBundleLoader bundleLoader = InjectionRegistry.getInjector().getInstance(EntityBundleLoader.class);
