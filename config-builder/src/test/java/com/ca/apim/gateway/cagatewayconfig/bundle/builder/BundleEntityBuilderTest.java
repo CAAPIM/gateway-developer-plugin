@@ -277,7 +277,7 @@ class BundleEntityBuilderTest {
         assertNotNull(itemList);
         assertEquals(expectedElementCountBundle, itemList.size());
         final Element item1 = itemList.get(1);
-        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ,
+        assertEquals("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_ENCASS_POLICY + "::" + projectInfo.getVersion() ,
                 getSingleChildElementTextContent(item1, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item1, TYPE));
         assertNotNull(getSingleChildElement(item1, RESOURCE));
@@ -328,12 +328,12 @@ class BundleEntityBuilderTest {
         assertNotNull(itemList);
         assertEquals(expectedElementCountBundle, itemList.size());
         final Element item1 = itemList.get(2);
-        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_POLICY_FRAGMENT ,
+        assertEquals("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_POLICY_FRAGMENT + "::" + projectInfo.getVersion()  ,
                 getSingleChildElementTextContent(item1, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item1, TYPE));
         assertNotNull(getSingleChildElement(item1, RESOURCE));
         final Element item2 = itemList.get(1);
-        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ,
+        assertEquals("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_ENCASS_POLICY + "::" + projectInfo.getVersion()   ,
                 getSingleChildElementTextContent(item2, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item2, TYPE));
         assertNotNull(getSingleChildElement(item2, RESOURCE));
@@ -351,14 +351,14 @@ class BundleEntityBuilderTest {
         final Element mapping1 = mappingItemList.get(2);
         final Element mapping1Properties = getSingleChildElement(mapping1, PROPERTIES);
         Set<String> propertyValues = getChildElementsTextContents(mapping1Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_POLICY_FRAGMENT ));
+        assertTrue(propertyValues.contains("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_POLICY_FRAGMENT + "::" + projectInfo.getVersion()));
         assertEquals(MappingActions.DELETE, mapping1.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping1.getAttribute("type"));
 
         final Element mapping2 = mappingItemList.get(1);
         final Element mapping2Properties = getSingleChildElement(mapping2, PROPERTIES);
         propertyValues = getChildElementsTextContents(mapping2Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ));
+        assertTrue(propertyValues.contains("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_ENCASS_POLICY + "::" + projectInfo.getVersion()));
         assertEquals(MappingActions.DELETE, mapping2.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping2.getAttribute("type"));
 
@@ -398,12 +398,12 @@ class BundleEntityBuilderTest {
         assertNotNull(itemList);
         assertEquals(expectedElementCountBundle, itemList.size());
         final Element item1 = itemList.get(2);
-        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_POLICY_FRAGMENT,
+        assertEquals("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_POLICY_FRAGMENT + "::" + projectInfo.getVersion(),
                 getSingleChildElementTextContent(item1, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item1, TYPE));
         assertNotNull(getSingleChildElement(item1, RESOURCE));
         final Element item2 = itemList.get(1);
-        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY,
+        assertEquals("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_ENCASS_POLICY + "::" + projectInfo.getVersion(),
                 getSingleChildElementTextContent(item2, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item2, TYPE));
         assertNotNull(getSingleChildElement(item2, RESOURCE));
@@ -421,14 +421,14 @@ class BundleEntityBuilderTest {
         final Element mapping1 = mappingItemList.get(2);
         final Element mapping1Properties = getSingleChildElement(mapping1, PROPERTIES);
         Set<String> propertyValues = getChildElementsTextContents(mapping1Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_POLICY_FRAGMENT ));
+        assertTrue(propertyValues.contains("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_POLICY_FRAGMENT + "::" + projectInfo.getVersion()));
         assertEquals(MappingActions.DELETE, mapping1.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping1.getAttribute("type"));
 
         final Element mapping2 = mappingItemList.get(1);
         final Element mapping2Properties = getSingleChildElement(mapping2, PROPERTIES);
         propertyValues = getChildElementsTextContents(mapping2Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ));
+        assertTrue(propertyValues.contains("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_ENCASS_POLICY + "::" + projectInfo.getVersion()));
         assertEquals(MappingActions.DELETE, mapping2.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping2.getAttribute("type"));
 
@@ -469,7 +469,7 @@ class BundleEntityBuilderTest {
         assertEquals(expectedElementCountBundle, itemList.size());
 
         final Element item2 = itemList.get(1);
-        assertEquals("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ,
+        assertEquals("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_ENCASS_POLICY + "::" + projectInfo.getVersion() ,
                 getSingleChildElementTextContent(item2, NAME));
         assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(item2, TYPE));
         assertNotNull(getSingleChildElement(item2, RESOURCE));
@@ -489,7 +489,7 @@ class BundleEntityBuilderTest {
         final Element mapping2 = mappingItemList.get(1);
         final Element mapping2Properties = getSingleChildElement(mapping2, PROPERTIES);
         propertyValues = getChildElementsTextContents(mapping2Properties, PROPERTY);
-        assertTrue(propertyValues.contains("my-bundle#" + TEST_ENCASS + "#" + TEST_ENCASS_POLICY ));
+        assertTrue(propertyValues.contains("::" + projectInfo.getGroupName() + "." + TEST_ENCASS_ANNOTATION_NAME + "::" + TEST_ENCASS_POLICY + "::" + projectInfo.getVersion()));
         assertEquals(MappingActions.DELETE, mapping2.getAttribute("action"));
         assertEquals(EntityTypes.POLICY_TYPE, mapping2.getAttribute("type"));
 

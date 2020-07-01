@@ -51,7 +51,6 @@ public interface AnnotableEntity {
             AnnotatedEntity<GatewayEntity> annotatedEntity = new AnnotatedEntity(this);
             annotations.forEach(annotation -> {
                 if (ANNOTATION_TYPE_BUNDLE.equalsIgnoreCase(annotation.getType())) {
-                    annotatedEntity.setMetadataId(annotation.getId());
                     annotatedEntity.setTags(annotation.getTags());
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
                     annotatedEntity.setBundleName(annotation.getName());

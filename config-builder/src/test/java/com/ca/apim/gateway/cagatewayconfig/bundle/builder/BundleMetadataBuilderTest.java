@@ -153,10 +153,6 @@ public class BundleMetadataBuilderTest {
 
         Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
-        String metadataId = ID_GENERATOR.generate();
-        encass.getAnnotations().stream()
-                .filter(a -> AnnotationConstants.ANNOTATION_TYPE_BUNDLE.equals(a.getType()))
-                .findFirst().get().setId(metadataId);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
@@ -165,7 +161,6 @@ public class BundleMetadataBuilderTest {
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
-        assertEquals(metadataId, metadata.getId());
         assertEquals(TEST_ENCASS_ANNOTATION_NAME, metadata.getName());
         assertEquals(TEST_ENCASS_ANNOTATION_DESC, metadata.getDescription());
         assertEquals(TEST_ENCASS_ANNOTATION_TAGS, metadata.getTags());
@@ -198,8 +193,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get("my-bundle-" + encass.getName() + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
-        assertNotNull(metadata.getId());
-        assertNotSame(metadata.getId(), metadata.getDefinedEntities().iterator().next().getId());
+        assertNotNull(metadata.getDefinedEntities().iterator().next().getId());
         assertEquals("my-bundle-" + encass.getName(), metadata.getName());
         assertEquals(encass.getProperties().get("description"), metadata.getDescription());
         assertEquals(0, metadata.getTags().size());
@@ -246,7 +240,6 @@ public class BundleMetadataBuilderTest {
         assertEquals(EntityBuilder.BundleType.ENVIRONMENT.name(), metadata.getType());
         assertEquals(StringUtils.EMPTY, metadata.getDescription());
         assertEquals(Collections.emptyList(), metadata.getTags());
-        assertTrue(metadata.isReusable());
         assertTrue(metadata.isRedeployable());
         assertFalse(metadata.isL7Template());
 
@@ -290,7 +283,6 @@ public class BundleMetadataBuilderTest {
         assertEquals(BUNDLE_TYPE_ALL, metadata.getType());
         assertEquals(StringUtils.EMPTY, metadata.getDescription());
         assertEquals(Collections.emptyList(), metadata.getTags());
-        assertTrue(metadata.isReusable());
         assertTrue(metadata.isRedeployable());
         assertFalse(metadata.isL7Template());
 

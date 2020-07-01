@@ -7,10 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils.generateDependentEnvBundleFromProject;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 
 @Singleton
@@ -53,17 +51,18 @@ public class BundleMetadataBuilder {
             if (StringUtils.isNotBlank(projectInfo.getVersion())) {
                 name =  bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
             }
-            final String metadataId = StringUtils.isBlank(annotatedEntity.getMetadataId()) ? idGenerator.generate() :
-                    annotatedEntity.getMetadataId();
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), metadataId, name,
-                    projectInfo.getGroupName(), projectInfo.getVersion());
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
-            builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
+            final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(dependentEntities);
+            builder.referencedEntities(referencedEntities);
+            if (!referencedEntities.isEmpty()) {
+                annotatedBundle.getDependentBundles().add(generateDependentEnvBundleFromProject(projectInfo));
+            }
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
+            builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
             builder.l7Template(Boolean.valueOf(String.valueOf(encass.getProperties().get(L7_TEMPLATE))));
-            builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
             final List<Metadata> definedEntities = new ArrayList<>();
@@ -76,11 +75,11 @@ public class BundleMetadataBuilder {
     }
 
     public BundleMetadata buildEnvironmentMetadata(final List<Entity> entities, ProjectInfo projectInfo){
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(EntityBuilder.BundleType.ENVIRONMENT.name(), idGenerator.generate(),
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(EntityBuilder.BundleType.ENVIRONMENT.name(), projectInfo.getName(),
                 projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
-        builder.reusableAndRedeployable(true, true);
+        builder.redeployable(true);
         builder.hasRouting(false);
         builder.definedEntities(getEnvironmentDependenciesMetadata(entities));
 
@@ -95,13 +94,16 @@ public class BundleMetadataBuilder {
      * @return Full bundle metadata
      */
     private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final Bundle bundle, ProjectInfo projectInfo) {
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, idGenerator.generate(),
-                projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(), projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
-        builder.reusableAndRedeployable(true, true);
+        builder.redeployable(true);
         builder.hasRouting(hasRoutingAssertion(entities));
-        builder.environmentEntities(getEnvironmentDependenciesMetadata(entities));
+        final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(entities);
+        builder.referencedEntities(referencedEntities);
+        if (!referencedEntities.isEmpty()) {
+            bundle.getDependentBundles().add(generateDependentEnvBundleFromProject(projectInfo));
+        }
         builder.dependencies(bundle.getDependentBundles());
         builder.definedEntities(getDefinedEntitiesMetadata(entities));
 
@@ -119,8 +121,7 @@ public class BundleMetadataBuilder {
     }
 
     private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
-        return annotatedBundle.getEntities(Policy.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable()) ||
-                annotatedBundle.getEntities(Encass.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable());
+        return annotatedBundle.getAnnotatedEntity().isReusable();
     }
 
     private boolean hasRoutingAssertion(final List<Entity> dependentEntities) {
