@@ -98,7 +98,7 @@ public class PolicyWriter implements EntityWriter {
             policyMetadata.setSubtag(policyEntity.getSubtag());
             policyMetadata.setHasRouting(policyEntity.isHasRouting());
         }
-        Set<Dependency> filteredDependencies = getFilteredPolicyDependencies(policyName, getPolicyDependencies(folderableEntity.getId(), rawBundle), rawBundle.getEncasses());
+        Set<Dependency> filteredDependencies = getFilteredPolicyDependencies(policyMetadata.getFullPath(), getPolicyDependencies(folderableEntity.getId(), rawBundle), rawBundle.getEncasses());
 
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
         entityLinkers.forEach(e -> {
@@ -123,16 +123,16 @@ public class PolicyWriter implements EntityWriter {
 
     /**
      * This method filters out encasses that refers the same policy (recursive dependency)
-     * @param policyName         String
+     * @param policyWithPath         String
      * @param policyDependencies Set
      * @param encassMap          Map
      * @return Set
      */
-    private Set<Dependency> getFilteredPolicyDependencies(final String policyName, final Set<Dependency> policyDependencies, final Map<String, Encass> encassMap) {
+    private Set<Dependency> getFilteredPolicyDependencies(final String policyWithPath, final Set<Dependency> policyDependencies, final Map<String, Encass> encassMap) {
         return policyDependencies.stream().filter(dependency -> {
             if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(dependency.getType())) {
                 Encass dependentEncass = encassMap.get(dependency.getName());
-                if (dependentEncass != null && policyName.equals(dependentEncass.getPolicy())) {
+                if (dependentEncass != null && policyWithPath.equals(dependentEncass.getPolicy())) {
                     return false;
                 }
             }
