@@ -1,12 +1,10 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.entityfilters;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
 import com.ca.apim.gateway.cagatewayconfig.beans.Dependency;
 import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.EntityFilter;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.filter.FilterConfiguration;
-import com.ca.apim.gateway.cagatewayexport.util.gateway.DependencyUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
