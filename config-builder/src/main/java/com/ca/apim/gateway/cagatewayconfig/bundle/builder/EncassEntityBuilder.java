@@ -136,13 +136,13 @@ public class EncassEntityBuilder implements EntityBuilder {
 
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
-        boolean isShared = false;
+        boolean isReusable = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
-            isShared = annotatedEntity.isShared();
+            isReusable = annotatedEntity.isReusable();
             annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (isShared || isAnnotatedEntity(encass, annotatedEntity)) {
-                //use the id and guid defined at shared annotation or bundle annotation (if its annotated bundle)
+            if (isReusable || isAnnotatedEntity(encass, annotatedEntity)) {
+                //use the id and guid defined at reusable annotation or bundle annotation (if its annotated bundle)
                 if (annotatedEncassEntity != null) {
                     if (annotatedEncassEntity.getGuid() != null) {
                         if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
@@ -182,7 +182,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, encassName, id, encassAssertionElement, guid, encass);
 
-        if (isRedeployableBundle || !(isShared || isAnnotatedEntity(encass, annotatedEntity))) {
+        if (isRedeployableBundle || !(isReusable || isAnnotatedEntity(encass, annotatedEntity))) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

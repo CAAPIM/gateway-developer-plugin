@@ -82,7 +82,7 @@ class PolicyEntityBuilderTest {
         encass.setGuid("encass");
         encass.setName(TEST_ENCASS);
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationType.SHARED);
+        Annotation annotation = new Annotation(AnnotationType.REUSABLE);
         annotations.add(annotation);
         policy.setAnnotations(annotations);
         bundle.getEncasses().put(TEST_ENCASS, encass);
@@ -94,7 +94,7 @@ class PolicyEntityBuilderTest {
         include.setId("includeID");
         include.setGuid("includeGuid");
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationType.SHARED);
+        annotation = new Annotation(AnnotationType.REUSABLE);
         annotations.add(annotation);
         include.setAnnotations(annotations);
         include.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -154,7 +154,7 @@ class PolicyEntityBuilderTest {
         Encass encass = new Encass();
         encass.setGuid("encassGuid");
         encass.setName(TEST_ENCASS);
-        Annotation encassAnnotation = new Annotation(AnnotationType.SHARED);
+        Annotation encassAnnotation = new Annotation(AnnotationType.REUSABLE);
         annotations = new HashSet<>();
         annotations.add(encassAnnotation);
         encass.setAnnotations(annotations);
@@ -179,7 +179,7 @@ class PolicyEntityBuilderTest {
 
         //wrong guid and id
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationType.SHARED);
+        annotation = new Annotation(AnnotationType.REUSABLE);
         annotations.add(annotation);
         annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
@@ -372,7 +372,7 @@ class PolicyEntityBuilderTest {
         encass.setName(TEST_ENCASS);
         encass.setPolicy(policyPath);
         Set<Annotation> annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationType.SHARED));
+        annotations.add(new Annotation(AnnotationType.REUSABLE));
         Annotation annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("");
         annotation.setId("");
@@ -399,7 +399,7 @@ class PolicyEntityBuilderTest {
         //wrong guid and goid
         annotatedEntity = new AnnotatedEntity(encass);
         annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationType.SHARED));
+        annotations.add(new Annotation(AnnotationType.REUSABLE));
         annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
         annotation.setId("wrongId");

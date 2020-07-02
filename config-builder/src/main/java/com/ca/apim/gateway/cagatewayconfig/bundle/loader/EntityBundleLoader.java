@@ -86,7 +86,7 @@ public class EntityBundleLoader {
         policy.setId(metadata.getId());
         policy.setGuid(metadata.getGuid());
         Set<Annotation> annotations = new HashSet<>();
-        annotations.add(AnnotableEntity.SHARED_ANNOTATION);
+        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
         policy.setAnnotations(annotations);
         return policy;
     }
@@ -97,7 +97,7 @@ public class EntityBundleLoader {
         encass.setId(metadata.getId());
         encass.setGuid(metadata.getGuid());
         Set<Annotation> annotations = new HashSet<>();
-        annotations.add(AnnotableEntity.SHARED_ANNOTATION);
+        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
         encass.setAnnotations(annotations);
         return encass;
     }

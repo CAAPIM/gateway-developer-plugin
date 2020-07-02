@@ -9,7 +9,7 @@ public class AnnotationType {
      * Constants for Gateway entity annotation types supported by the plugin.
      */
     public static final String BUNDLE = "@bundle";
-    public static final String SHARED = "@shared";
+    public static final String REUSABLE = "@reusable";
     public static final String REDEPLOYABLE = "@redeployable";
     public static final String EXCLUDE = "@exclude";
     public static final String BUNDLE_HINTS = "@bundle-hints";
@@ -19,7 +19,7 @@ public class AnnotationType {
     static {
         SUPPORTED_ANNOTATION_TYPES = new HashSet<>();
         SUPPORTED_ANNOTATION_TYPES.add(BUNDLE);
-        SUPPORTED_ANNOTATION_TYPES.add(SHARED);
+        SUPPORTED_ANNOTATION_TYPES.add(REUSABLE);
         SUPPORTED_ANNOTATION_TYPES.add(REDEPLOYABLE);
         SUPPORTED_ANNOTATION_TYPES.add(EXCLUDE);
         SUPPORTED_ANNOTATION_TYPES.add(BUNDLE_HINTS);

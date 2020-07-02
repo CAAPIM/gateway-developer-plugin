@@ -61,8 +61,8 @@ public class BundleMetadataBuilder {
             }
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
-            builder.redeployable(annotatedEntity.isRedeployable() || !isSharedEntity(annotatedBundle));
-            builder.l7Template(Boolean.parseBoolean(String.valueOf(encass.getProperties().get(L7_TEMPLATE))));
+            builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
+            builder.l7Template(Boolean.valueOf(String.valueOf(encass.getProperties().get(L7_TEMPLATE))));
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
             final List<Metadata> definedEntities = new ArrayList<>();
@@ -94,8 +94,7 @@ public class BundleMetadataBuilder {
      * @return Full bundle metadata
      */
     private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final Bundle bundle, ProjectInfo projectInfo) {
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(),
-                projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(), projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
         builder.redeployable(true);
@@ -118,11 +117,11 @@ public class BundleMetadataBuilder {
 
     private Collection<Metadata> getDefinedEntitiesMetadata(final List<Entity> definedEntities) {
         return definedEntities.stream().filter(FILTER_NON_ENV_ENTITIES_EXCLUDING_FOLDER)
-                .map(e -> (e.getGatewayEntity()).getMetadata()).collect(Collectors.toList());
+                .map(e -> ((GatewayEntity)e.getGatewayEntity()).getMetadata()).collect(Collectors.toList());
     }
 
-    private boolean isSharedEntity(final AnnotatedBundle annotatedBundle) {
-        return annotatedBundle.getAnnotatedEntity().isShared();
+    private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
+        return annotatedBundle.getAnnotatedEntity().isReusable();
     }
 
     private boolean hasRoutingAssertion(final List<Entity> dependentEntities) {

@@ -175,9 +175,9 @@ public class BundleEntityBuilder {
         List<Entity> deleteBundleEntities = copyFilteredEntitiesForDeleteBundle(entities, FILTER_NON_ENV_ENTITIES);
 
         // If @redeployable annotation is added, we can blindly include all the dependencies in the DELETE bundle.
-        // Else, we have to include only non-shared entities
+        // Else, we have to include only non-reusable entities
         if (annotatedEntity != null && !annotatedEntity.isRedeployable()) {
-            // Include only non-shared entities
+            // Include only non-reusable entities
             AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
             Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
             bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
@@ -238,12 +238,12 @@ public class BundleEntityBuilder {
      * @param policyNameWithPath Name of the policy for which gateway dependencies needs to be found.
      * @param annotatedBundle    Annotated Bundle for which bundle is being created.
      * @param rawBundle          Bundle containing all the entities of the gateway.
-     * @param excludeShared      Exclude loading Shared entities as the dependencies of the policy
+     * @param excludeReusable    Exclude loading Reusable entities as the dependencies of the policy
      */
     private void loadPolicyDependenciesByPolicyName(String policyNameWithPath, AnnotatedBundle annotatedBundle,
-                                                    Bundle rawBundle, boolean excludeShared) {
+                                                    Bundle rawBundle, boolean excludeReusable) {
         final Policy policy = findPolicyByNameOrPath(policyNameWithPath, rawBundle);
-        loadPolicyDependencies(policy, annotatedBundle, rawBundle, excludeShared);
+        loadPolicyDependencies(policy, annotatedBundle, rawBundle, excludeReusable);
     }
 
     /**
@@ -252,11 +252,11 @@ public class BundleEntityBuilder {
      * @param policy          Policy for which gateway dependencies needs to be loaded.
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param rawBundle       Bundle containing all the entities of the gateway.
-     * @param excludeShared   Exclude loading Shared entities as the dependencies of the policy
+     * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
      */
     private void loadPolicyDependencies(Policy policy, AnnotatedBundle annotatedBundle, Bundle rawBundle,
-                                        boolean excludeShared) {
-        if (policy == null || excludeGatewayEntity(Policy.class, policy, annotatedBundle, excludeShared)) {
+                                        boolean excludeReusable) {
+        if (policy == null || excludeGatewayEntity(Policy.class, policy, annotatedBundle, excludeReusable)) {
             return;
         }
 
@@ -271,11 +271,11 @@ public class BundleEntityBuilder {
                 switch (dependency.getType()) {
                     case EntityTypes.POLICY_TYPE:
                         Policy dependentPolicy = findPolicyByNameOrPath(dependency.getName(), rawBundle);
-                        loadPolicyDependencies(dependentPolicy, annotatedBundle, rawBundle, excludeShared);
+                        loadPolicyDependencies(dependentPolicy, annotatedBundle, rawBundle, excludeReusable);
                         break;
                     case EntityTypes.ENCAPSULATED_ASSERTION_TYPE:
                         Encass encass = rawBundle.getEncasses().get(dependency.getName());
-                        loadEncassDependencies(encass, annotatedBundle, rawBundle, excludeShared);
+                        loadEncassDependencies(encass, annotatedBundle, rawBundle, excludeReusable);
                         break;
                     default:
                         loadGatewayEntity(dependency, annotatedBundle, rawBundle);
@@ -290,13 +290,13 @@ public class BundleEntityBuilder {
      * @param encass          Encass policy for which gateway dependencies needs to be loaded.
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param rawBundle       Bundle containing all the entities of the gateway.
-     * @param excludeShared   Exclude loading Shared entities as the dependencies of the policy
+     * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
      */
     private void loadEncassDependencies(Encass encass, AnnotatedBundle annotatedBundle, Bundle rawBundle,
-                                        boolean excludeShared) {
-        if (encass != null && !excludeGatewayEntity(Encass.class, encass, annotatedBundle, excludeShared)) {
+                                        boolean excludeReusable) {
+        if (encass != null && !excludeGatewayEntity(Encass.class, encass, annotatedBundle, excludeReusable)) {
             annotatedBundle.getEncasses().put(encass.getName(), encass);
-            loadPolicyDependenciesByPolicyName(encass.getPolicy(), annotatedBundle, rawBundle, excludeShared);
+            loadPolicyDependenciesByPolicyName(encass.getPolicy(), annotatedBundle, rawBundle, excludeReusable);
         }
     }
 
@@ -360,28 +360,28 @@ public class BundleEntityBuilder {
      * @param entityType      Type of entity class
      * @param gatewayEntity   Gateway entity to be checked
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param excludeShared   Exclude loading Shared entities as the dependency
+     * @param excludeReusable Exclude loading Reusable entities as the dependency
      * @return TRUE if the Gateway entity needs to be excluded
      */
     private boolean excludeGatewayEntity(Class<? extends GatewayEntity> entityType, GatewayEntity gatewayEntity,
-                                         AnnotatedBundle annotatedBundle, boolean excludeShared) {
+                                         AnnotatedBundle annotatedBundle, boolean excludeReusable) {
         return annotatedBundle.getEntities(entityType).containsKey(gatewayEntity.getName())
-                || excludeSharedOrPolicyEntity(gatewayEntity, annotatedBundle, excludeShared);
+                || excludeReusableOrPolicyEntity(gatewayEntity, annotatedBundle, excludeReusable);
     }
 
     /**
-     * Returns TRUE if the Gateway entity is annotated as @shared and the shared entity needs to excluded or the
+     * Returns TRUE if the Gateway entity is annotated as @reusable and the reusable entity needs to excluded or the
      * gateway entity is a policy entity and the annotated bundle already contains that policy.
      *
      * @param gatewayEntity   Gateway entity to be checked
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param excludeShared   Exclude loading Shared entities as the dependency
-     * @return TRUE if the Gateway entity is @shared and needs to be excluded or entity is Policy and annotated
+     * @param excludeReusable Exclude loading Reusable entities as the dependency
+     * @return TRUE if the Gateway entity is @reusable and needs to be excluded or entity is Policy and annotated
      * bundle already contains the policy
      */
-    private boolean excludeSharedOrPolicyEntity(GatewayEntity gatewayEntity, AnnotatedBundle annotatedBundle,
-                                                boolean excludeShared) {
-        if (gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isShared() && excludeShared) {
+    private boolean excludeReusableOrPolicyEntity(GatewayEntity gatewayEntity, AnnotatedBundle annotatedBundle,
+                                                  boolean excludeReusable) {
+        if (gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable() && excludeReusable) {
             return true;
         }
         // Special case for policy because policies are stored by Path in the entities map and
