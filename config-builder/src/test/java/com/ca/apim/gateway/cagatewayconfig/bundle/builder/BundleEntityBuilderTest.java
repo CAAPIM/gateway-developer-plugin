@@ -10,7 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -91,14 +91,16 @@ class BundleEntityBuilderTest {
         bundle.getFolders().put(dummyFolder.getPath(), dummyFolder);
 
         Set<Annotation> encassAnnotations = new HashSet<>();
-        Annotation bundleAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE);
-        bundleAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
-        Annotation reusableAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        Annotation bundleAnnotation = new Annotation(AnnotationType.BUNDLE);
+        Annotation bundleHintsAnnotation = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleHintsAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
+        Annotation sharedAnnotation = new Annotation(AnnotationType.SHARED);
         encassAnnotations.add(bundleAnnotation);
-        encassAnnotations.add(reusableAnnotation);
+        encassAnnotations.add(bundleHintsAnnotation);
+        encassAnnotations.add(sharedAnnotation);
 
         Set<Annotation> depPolicyAnnotations = new HashSet<>();
-        depPolicyAnnotations.add(reusableAnnotation);
+        depPolicyAnnotations.add(sharedAnnotation);
 
         Policy depPolicy = buildTestPolicyWithAnnotation(TEST_DEP_ENCASS_POLICY, TEST_DEP_POLICY_ID, TEST_GUID, depPolicyAnnotations);
         bundle.getPolicies().put(TEST_DEP_ENCASS_POLICY, depPolicy);
@@ -138,22 +140,24 @@ class BundleEntityBuilderTest {
         bundle.getFolders().put(EMPTY, root);
 
         Set<Annotation> encassAnnotations = new HashSet<>();
-        Annotation bundleAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE);
-        bundleAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
-        Annotation reusableAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
-        Annotation redeployableAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REDEPLOYABLE);
+        Annotation bundleAnnotation = new Annotation(AnnotationType.BUNDLE);
+        Annotation bundleHintsAnnotation = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleHintsAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
+        Annotation sharedAnnotation = new Annotation(AnnotationType.SHARED);
+        Annotation redeployableAnnotation = new Annotation(AnnotationType.REDEPLOYABLE);
         encassAnnotations.add(bundleAnnotation);
-        encassAnnotations.add(reusableAnnotation);
+        encassAnnotations.add(bundleHintsAnnotation);
+        encassAnnotations.add(sharedAnnotation);
         encassAnnotations.add(redeployableAnnotation);
 
         Set<Annotation> depPolicyAnnotations = new HashSet<>();
-        depPolicyAnnotations.add(reusableAnnotation);
+        depPolicyAnnotations.add(sharedAnnotation);
 
         Policy depPolicy = buildTestPolicyWithAnnotation(TEST_DEP_ENCASS_POLICY, TEST_DEP_POLICY_ID, TEST_GUID, depPolicyAnnotations);
         bundle.getPolicies().put(TEST_DEP_ENCASS_POLICY, depPolicy);
 
         Set<Annotation> depEncassAnnotations = new HashSet<>();
-        depEncassAnnotations.add(reusableAnnotation);
+        depEncassAnnotations.add(sharedAnnotation);
 
         Encass depEncass = buildTestEncassWithAnnotation(TEST_DEP_ENCASS, TEST_DEP_ENCASS_ID, TEST_GUID, TEST_DEP_ENCASS_POLICY, depEncassAnnotations);
         bundle.getEncasses().put(TEST_DEP_ENCASS, depEncass);
@@ -371,7 +375,7 @@ class BundleEntityBuilderTest {
     }
 
     @Test
-    public void testAnnotatedEncassDeleteBundle_WithReusablePolicyFragment_RedeployableBundle() {
+    public void testAnnotatedEncassDeleteBundle_WithSharedPolicyFragment_RedeployableBundle() {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
         Bundle bundle = createBundleWithPolicyFragment(false);
@@ -441,7 +445,7 @@ class BundleEntityBuilderTest {
     }
 
     @Test
-    public void testAnnotatedEncassDeleteBundle_WithReusablePolicyFragment() {
+    public void testAnnotatedEncassDeleteBundle_WithSharedPolicyFragment() {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
         Bundle bundle = createBundleWithPolicyFragment(true);

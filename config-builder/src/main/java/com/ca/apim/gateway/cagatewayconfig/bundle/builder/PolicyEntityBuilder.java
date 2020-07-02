@@ -85,7 +85,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             Policy policyEntity = (Policy) policy;
             if (annotatedEntity != null) {
                 AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
-                if (annotatedEntity.isReusable() || isAnnotatedEntity(policyEntity, annotatedEntity)) {
+                if (annotatedEntity.isShared() || isAnnotatedEntity(policyEntity, annotatedEntity)) {
                     if (annotatedPolicyEntity != null) {
                         if (annotatedPolicyEntity.getId() != null) {
                             if (IdValidator.isValidGoid(annotatedPolicyEntity.getId())) {
@@ -153,7 +153,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         final String policyName;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
-            if (annotatedEntity.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
+            if (annotatedEntity.isShared() || isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = policy.getName();
             } else {
                 policyName = annotatedBundle.applyUniqueName(policy.getName());
@@ -351,7 +351,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (encass != null && !encass.isExcluded() && annotatedEntity != null) {
             AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (annotatedEntity.isReusable()) {
+            if (annotatedEntity.isShared()) {
                 if (annotatedEncassEntity != null) {
                     if (annotatedEncassEntity.getGuid() != null) {
                         if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
@@ -562,13 +562,13 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyNameWithPath = CharacterBlacklistUtil.decodePath(policyNameWithPath);
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
-        boolean isReusable = false;
+        boolean isShared = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
-            isReusable = annotatedEntity.isReusable();
+            isShared = annotatedEntity.isShared();
         }
         if (annotatedBundle != null) {
-            if (!isReusable && !isAnnotatedEntity(policy, annotatedEntity)) {
+            if (!isShared && !isAnnotatedEntity(policy, annotatedEntity)) {
                 policyName = annotatedBundle.applyUniqueName(policyName);
                 policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
             }
@@ -613,7 +613,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
                 policy.getPath(), policyNameWithPath, policy.getId(), policyElement, policy.isHasRouting(), policy);
-        if (isRedeployableBundle || !(isReusable || isAnnotatedEntity(policy, annotatedEntity))) {
+        if (isRedeployableBundle || !(isShared || isAnnotatedEntity(policy, annotatedEntity))) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

@@ -3,14 +3,12 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.SsgActiveConnector;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 public class SsgActiveConnectorLoaderTest {
     private static final String ACTIVE_CONNECTOR = "<l7:Item>\n" +
@@ -98,6 +96,6 @@ public class SsgActiveConnectorLoaderTest {
         SsgActiveConnector ssgActiveConnector = bundle.getSsgActiveConnectors().get("MQNativeTest");
         Assert.assertEquals("MqNative", ssgActiveConnector.getConnectorType());
         Assert.assertNull(ssgActiveConnector.getTargetServiceReference());
-        Assert.assertTrue(ssgActiveConnector.getAnnotations().contains(new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY)));
+        Assert.assertTrue(ssgActiveConnector.getAnnotations().contains(new Annotation(AnnotationType.BUNDLE_HINTS)));
     }
 }

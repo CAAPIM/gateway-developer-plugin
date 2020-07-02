@@ -9,7 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -63,11 +63,11 @@ class EncassEntityBuilderTest {
         Encass encass = buildTestEncass(TEST_GUID, TEST_GOID, TEST_POLICY_PATH);
         encass.setName(TEST_ENCASS);
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        Annotation annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("");
         annotation.setId("");
         annotations.add(annotation);
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         encass.setAnnotations(annotations);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
@@ -91,11 +91,11 @@ class EncassEntityBuilderTest {
 
 
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
         annotation.setId("wrongId");
         annotations.add(annotation);
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         encass.setAnnotations(annotations);
         encass.setAnnotatedEntity(null);
         annotatedEntity = new AnnotatedEntity(encass);
