@@ -38,16 +38,18 @@ public class UnsupportedEntityWriter implements EntityWriter {
         documentFileUtils.createFolder(configFolder.toPath());
 
         Map<String, UnsupportedGatewayEntity> unsupportedGatewayEntityMap = bundle.getUnsupportedEntities();
-        DocumentBuilder builder = documentTools.getDocumentBuilder();
-        Document document = builder.newDocument();
-        Element items = document.createElement("l7:Items");
-        unsupportedGatewayEntityMap.values().parallelStream().forEach(unsupportedGatewayEntity -> {
-            Node item = unsupportedGatewayEntity.getElement().cloneNode(true);
-            document.adoptNode(item);
-            items.appendChild(item);
-        });
-        items.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
-        writeElement(configFolder, items);
+        if(!unsupportedGatewayEntityMap.isEmpty()){
+            DocumentBuilder builder = documentTools.getDocumentBuilder();
+            Document document = builder.newDocument();
+            Element items = document.createElement("l7:Items");
+            unsupportedGatewayEntityMap.values().parallelStream().forEach(unsupportedGatewayEntity -> {
+                Node item = unsupportedGatewayEntity.getElement().cloneNode(true);
+                document.adoptNode(item);
+                items.appendChild(item);
+            });
+            items.setAttribute("xmlns:l7", "http://ns.l7tech.com/2010/04/gateway-management");
+            writeElement(configFolder, items);
+        }
     }
 
     private void writeElement(File configFolder, Element items) {

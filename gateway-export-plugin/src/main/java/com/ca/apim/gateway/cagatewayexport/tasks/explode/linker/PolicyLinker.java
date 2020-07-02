@@ -42,7 +42,7 @@ public class PolicyLinker implements EntityLinker<Policy> {
     @Override
     public void link(Bundle filteredBundle, Bundle bundle) {
         Stream.of(
-                bundle.getEntities(Policy.class).values().stream(),
+                filteredBundle.getEntities(Policy.class).values().stream(),
                 bundle.getEntities(GlobalPolicy.class).values().stream().map(Policy.class::cast).collect(toList()).stream(),
                 bundle.getEntities(AuditPolicy.class).values().stream().map(Policy.class::cast).collect(toList()).stream()
         ).flatMap(s -> s)
