@@ -119,10 +119,6 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
      * Here <configName> is generated with the following preference:
      * 1) If "name" is provided in the EnvironmentConfig {} in build.gradle, "name" will be used after
      * removing all the special characters. For eg. if "name" is set "default", filename will have "-default"
-     * 2) If "name" is not provided, check "includeFolder" name (not path).
-     *    2.1) If "includeFolder" is the default folder (i.e "src/main/gateway/config"), directly use "-env".
-     *    2.2) If includeFolder is not the default folder, use folder name after removing all the special characters.
-     *    For eg. "includeFolder" is set as "src/main/gateway/config-staging", filename will have "-configstagingenv"
      *
      * @param moduleName project module name
      * @param version project module version
