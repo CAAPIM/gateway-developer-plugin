@@ -130,18 +130,6 @@ public class BundleEntityBuilder {
                                     // Generate bundle filenames
                                     bundleFilename = generateBundleFileName(false, annotatedBundle.getBundleName());
                                     deleteBundleFilename = generateBundleFileName(true, annotatedBundle.getBundleName());
-                                } else if (EntityBuilder.BundleType.ENVIRONMENT.equals(bundleType)) {
-                                    // Create DELETE Environment bundle
-                                    deleteBundleElement = createDeleteEnvBundle(document, entities);
-
-                                    // Generate bundle filenames. ProjectInfo.getName() is the complete install bundle filename
-                                    bundleFilename = projectInfo.getName();
-                                    if (StringUtils.contains(bundleFilename, INSTALL_BUNDLE_EXTENSION)) {
-                                        deleteBundleFilename = bundleFilename.replace(INSTALL_BUNDLE_EXTENSION,
-                                                DELETE_BUNDLE_EXTENSION);
-                                    } else {
-                                        deleteBundleFilename = bundleFilename.replace(".bundle", DELETE_BUNDLE_EXTENSION);
-                                    }
                                 }
 
                                 // Create bundle metadata
@@ -414,7 +402,7 @@ public class BundleEntityBuilder {
      */
     private String generateBundleFileName(boolean isDeleteBundle, String bundleName) {
         String filenameSuffix = isDeleteBundle ? DELETE_BUNDLE_EXTENSION : INSTALL_BUNDLE_EXTENSION;
-        return bundleName + "-policy" + filenameSuffix;
+        return bundleName + filenameSuffix;
     }
 
     @VisibleForTesting

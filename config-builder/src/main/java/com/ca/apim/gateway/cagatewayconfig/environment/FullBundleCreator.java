@@ -119,8 +119,15 @@ public class FullBundleCreator {
                             dependentBundleMap.get("version").equals(projectInfo.getVersion());
                 }
             });
+            bundleMetadata.put("version", projectInfo.getVersion() + PREFIX_FULL);
 
-            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleEnvironmentValues.getLeft(), new File(bundleFolderPath));
+            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleEnvironmentValues.getLeft() + PREFIX_FULL, new File(bundleFolderPath));
+            //clean up intermediate files
+            final File metaDataFile = new File(bundleFolderPath, bundleEnvironmentValues.getLeft() + JsonFileUtils.METADATA_FILE_NAME_SUFFIX);
+            deleted = metaDataFile.delete();
+            if (!deleted) {
+                LOGGER.log(Level.WARNING, () -> "Policy metadata file was not deleted: " + metaDataFile.toString());
+            }
         }
     }
 
@@ -130,9 +137,9 @@ public class FullBundleCreator {
                                                               boolean detemplatizeDeploymentBundles) {
         final Map<String, String> environmentProperties = bundleEnvironmentValues.getRight();
         final List<File> deploymentBundles = collectFiles(bundleFolderPath,
-                bundleEnvironmentValues.getLeft() + "-policy" + INSTALL_BUNDLE_EXTENSION);
+                bundleEnvironmentValues.getLeft() + INSTALL_BUNDLE_EXTENSION);
         final List<File> deploymentDeleteBundle = collectFiles(bundleFolderPath,
-                bundleEnvironmentValues.getLeft() + "-policy" + DELETE_BUNDLE_EXTENSION);
+                bundleEnvironmentValues.getLeft() + DELETE_BUNDLE_EXTENSION);
         final List<File> bundleFiles = union(deploymentBundles, dependentBundles);
 
         // load all deployment bundles to strings
@@ -149,7 +156,7 @@ public class FullBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
-                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(bundleFileName, EMPTY, EMPTY));
+                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(bundleFileName, EMPTY, EMPTY, EMPTY));
         Element bundleElement = createFullBundleElement(bundleElements, templatizedBundles, document);
         Element deleteBundleElement = createDeleteBundleElement(bundleElements, deploymentDeleteBundle, dependentBundles, document);
 

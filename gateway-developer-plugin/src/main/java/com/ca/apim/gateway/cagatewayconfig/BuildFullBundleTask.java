@@ -26,6 +26,7 @@ import java.util.Map;
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.FULL_INSTALL_BUNDLE_NAME_SUFFIX;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.removeAllSpecialChars;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -99,8 +100,9 @@ public class BuildFullBundleTask extends DefaultTask {
     public void perform() {
         final FullBundleCreator fullBundleCreator = getInstance(FullBundleCreator.class);
         final String bundleDirectory = into.getAsFile().get().getPath();
+        final String configurationName = configName != null ? removeAllSpecialChars(configName.get()) : EMPTY;
         final ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(),
-                getProject().getVersion().toString());
+                getProject().getVersion().toString(), configurationName);
         final List<File> metaDataFiles = collectFiles(bundleDirectory, METADATA_FILE_NAME_SUFFIX);
         if (metaDataFiles.isEmpty()) {
             throw new MissingEnvironmentException("Metadata file does not exist.");

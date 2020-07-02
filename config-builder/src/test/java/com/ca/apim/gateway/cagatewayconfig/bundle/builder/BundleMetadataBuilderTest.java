@@ -47,7 +47,7 @@ public class BundleMetadataBuilderTest {
     @Mock
     BundleCache bundleCache;
 
-    private static final ProjectInfo projectInfo = new ProjectInfo("my-bundle", "my-bundle-group", "1.0");
+    private static final ProjectInfo projectInfo = new ProjectInfo("my-bundle", "my-bundle-group", "1.0", "qa");
 
     @Test
     public void testAnnotatedEncassBundleFileNames(final TemporaryFolder temporaryFolder) {
@@ -74,10 +74,10 @@ public class BundleMetadataBuilderTest {
             for (File generatedFile : bundleOutput.listFiles()) {
 
                 if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
-                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0-policy" + DELETE_BUNDLE_EXTENSION,
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + DELETE_BUNDLE_EXTENSION,
                             generatedFile.getName());
                 } else if (StringUtils.endsWith(generatedFile.getName(), INSTALL_BUNDLE_EXTENSION)) {
-                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0-policy" + INSTALL_BUNDLE_EXTENSION,
+                    assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + INSTALL_BUNDLE_EXTENSION,
                             generatedFile.getName());
                 } else {
                     assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-1.0" + METADATA_FILE_NAME_SUFFIX,
@@ -106,10 +106,10 @@ public class BundleMetadataBuilderTest {
             assertEquals(3, bundleOutput.listFiles().length);
             for (File generatedFile : bundleOutput.listFiles()) {
                 if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
-                    assertEquals("my-bundle-" + encass.getName() + "-1.0-policy" + DELETE_BUNDLE_EXTENSION,
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0" + DELETE_BUNDLE_EXTENSION,
                             generatedFile.getName());
                 } else if (StringUtils.endsWith(generatedFile.getName(), INSTALL_BUNDLE_EXTENSION)) {
-                    assertEquals("my-bundle-" + encass.getName() + "-1.0-policy" + INSTALL_BUNDLE_EXTENSION,
+                    assertEquals("my-bundle-" + encass.getName() + "-1.0" + INSTALL_BUNDLE_EXTENSION,
                             generatedFile.getName());
                 } else {
                     assertEquals("my-bundle-" + encass.getName() + "-1.0" + METADATA_FILE_NAME_SUFFIX,
@@ -132,10 +132,10 @@ public class BundleMetadataBuilderTest {
             assertEquals(3, bundleOutput.listFiles().length);
             for (File generatedFile : bundleOutput.listFiles()) {
                 if (StringUtils.endsWith(generatedFile.getName(), DELETE_BUNDLE_EXTENSION)) {
-                    assertEquals("my-bundle-" + encass.getName() + "-policy" + DELETE_BUNDLE_EXTENSION,
+                    assertEquals("my-bundle-" + encass.getName() + DELETE_BUNDLE_EXTENSION,
                             generatedFile.getName());
                 } else if (StringUtils.endsWith(generatedFile.getName(), INSTALL_BUNDLE_EXTENSION)) {
-                    assertEquals("my-bundle-" + encass.getName() + "-policy" + INSTALL_BUNDLE_EXTENSION,
+                    assertEquals("my-bundle-" + encass.getName() + INSTALL_BUNDLE_EXTENSION,
                             generatedFile.getName());
                 } else {
                     assertEquals("my-bundle-" + encass.getName() + METADATA_FILE_NAME_SUFFIX,
@@ -234,12 +234,14 @@ public class BundleMetadataBuilderTest {
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get(projectInfo.getName() + "-" + projectInfo.getVersion()).getBundleMetadata();
         assertNotNull(metadata);
-        assertEquals(projectInfo.getName(), metadata.getName());
+        assertEquals(projectInfo.getName() + "-environment", metadata.getName());
         assertEquals(projectInfo.getGroupName(), metadata.getGroupName());
-        assertEquals(projectInfo.getVersion(), metadata.getVersion());
+        assertEquals(projectInfo.getVersion() + "-qa", metadata.getVersion());
         assertEquals(EntityBuilder.BundleType.ENVIRONMENT.name(), metadata.getType());
         assertEquals(StringUtils.EMPTY, metadata.getDescription());
-        assertEquals(Collections.emptyList(), metadata.getTags());
+        List<String> tags = new ArrayList<>();
+        tags.add("qa");
+        assertEquals(tags, metadata.getTags());
         assertTrue(metadata.isRedeployable());
         assertFalse(metadata.isL7Template());
 
