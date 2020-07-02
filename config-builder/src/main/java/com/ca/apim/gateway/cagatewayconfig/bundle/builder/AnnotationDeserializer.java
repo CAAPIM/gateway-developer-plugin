@@ -25,9 +25,9 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  * AnnotationDeserializer deserializes the "annotations" tag in the entity elements. Annotation on entities are
  * supported in 2 ways:
  * 1) Array of objects containing "type" and the other optional fields like "name", "description" and "tags"
- * field. For example,
+ * fields. For example,
  * annotations:
- * - type: "@bundle"
+ * - type: "@bundle-hints"
  *   name: "encass-example"
  *   description: "description for encass-example"
  *   tags:

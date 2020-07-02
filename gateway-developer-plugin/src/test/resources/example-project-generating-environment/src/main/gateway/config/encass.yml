@@ -1,6 +1,6 @@
 encass_env:
   annotations:
-    - type: "@bundle"
+    - "@bundle"
     - type: "@bundle-hints"
       name: "encass_bundle"
   policy: "example project/db-service"
