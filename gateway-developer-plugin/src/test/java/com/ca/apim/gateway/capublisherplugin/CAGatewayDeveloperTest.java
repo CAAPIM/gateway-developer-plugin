@@ -244,7 +244,7 @@ class CAGatewayDeveloperTest {
             entries.add(entry.getName());
         }
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_my-bundle-1.0.00.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions-dependencies-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions-dependencies-1.2.3-SNAPSHOT.install.req.bundle"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/assertions/Test-2.0.0.aar"));
     }
