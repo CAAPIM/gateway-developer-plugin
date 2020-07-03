@@ -135,6 +135,11 @@ public class FullBundleCreator {
         }
     }
 
+    /**
+     * Removes intermediate file generated during deployment bundle task
+     * @param bundleFolderPath build folder
+     * @param fileName file name
+     */
     private void cleanIntermediateFile(final String bundleFolderPath, final String fileName) {
         final File intermediateFile = new File(bundleFolderPath, fileName);
         boolean deleted = intermediateFile.delete();
