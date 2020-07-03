@@ -7,14 +7,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Set;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType.*;
 
 public interface AnnotableEntity {
 
-    Annotation BUNDLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_BUNDLE);
-    Annotation REUSABLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_REUSABLE);
-    Annotation REDEPLOYABLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_REDEPLOYABLE);
-    Annotation EXCLUDE_ANNOTATION = new Annotation(ANNOTATION_TYPE_EXCLUDE);
+    Annotation BUNDLE_ANNOTATION = new Annotation(BUNDLE);
+    Annotation REUSABLE_ANNOTATION = new Annotation(REUSABLE);
+    Annotation REDEPLOYABLE_ANNOTATION = new Annotation(REDEPLOYABLE);
+    Annotation EXCLUDE_ANNOTATION = new Annotation(EXCLUDE);
 
     /**
      * This method creates annotated entity from annotations defined and then returns AnnotatedEntity
@@ -50,14 +50,14 @@ public interface AnnotableEntity {
         if (annotations != null) {
             AnnotatedEntity<GatewayEntity> annotatedEntity = new AnnotatedEntity(this);
             annotations.forEach(annotation -> {
-                if (ANNOTATION_TYPE_BUNDLE.equalsIgnoreCase(annotation.getType())) {
-                    annotatedEntity.setTags(annotation.getTags());
+                if (BUNDLE.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                    annotatedEntity.setBundleName(annotation.getName());
-                    annotatedEntity.setDescription(annotation.getDescription());
-                } else if(ANNOTATION_TYPE_BUNDLE_ENTITY.equalsIgnoreCase(annotation.getType())) {
+                } else if(BUNDLE_HINTS.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setId(annotation.getId());
                     annotatedEntity.setGuid(annotation.getGuid());
+                    annotatedEntity.setTags(annotation.getTags());
+                    annotatedEntity.setBundleName(annotation.getName());
+                    annotatedEntity.setDescription(annotation.getDescription());
                 }
             });
             return annotatedEntity;

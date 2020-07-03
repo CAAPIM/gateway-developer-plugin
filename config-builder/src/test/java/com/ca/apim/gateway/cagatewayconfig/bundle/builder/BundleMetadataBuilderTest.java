@@ -12,7 +12,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
@@ -91,7 +91,7 @@ public class BundleMetadataBuilderTest {
         bundle.getEncasses().clear();
         // Remove "name" attribute from the @bundle annotation.
         encass.getAnnotations().parallelStream()
-                .filter(ann -> AnnotationConstants.ANNOTATION_TYPE_BUNDLE.equals(ann.getType()))
+                .filter(ann -> AnnotationType.BUNDLE_HINTS.equals(ann.getType()))
                 .findFirst().get().setName(null);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
         encass.setAnnotatedEntity(null);

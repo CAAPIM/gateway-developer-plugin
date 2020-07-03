@@ -110,7 +110,7 @@ public class TrustedCertLoaderTest {
                 "    trustedForSigningServerCerts: true\n" +
                 "    trustedAsSamlIssuer: false\n" +
                 "    annotations:\n" +
-                "    - type: \"@bundle-entity\"\n" +
+                "    - type: \"@bundle-hints\"\n" +
                 "      id: \"28be78b936aa61bc75bd0df2089789cd\"";
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "trusted-certs.yml");

@@ -3,7 +3,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GenericEntity;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ public class GenericEntityLoaderTest {
         assertNotNull(genericEntity.getValueXml());
         assertThat(genericEntity.getValueXml(), containsString("<void property=\"tlsVersion\">"));
         assertThat(genericEntity.getValueXml(), containsString("<void property=\"readTimeout\">"));
-        assertTrue(genericEntity.getAnnotations().contains(new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY)));
+        assertTrue(genericEntity.getAnnotations().contains(new Annotation(AnnotationType.BUNDLE_HINTS)));
     }
 
     private static final String HTTP2_CLIENT_CONFIG = "<l7:Item>\n" +

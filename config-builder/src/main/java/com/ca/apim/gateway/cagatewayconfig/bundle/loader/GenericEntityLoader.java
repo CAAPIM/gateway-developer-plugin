@@ -3,7 +3,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GenericEntity;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
@@ -37,7 +37,7 @@ public class GenericEntityLoader implements BundleEntityLoader {
         genericEntity.setValueXml(valueXml);
 
         Set<Annotation> annotations = new HashSet<>();
-        Annotation bundleEntity = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        Annotation bundleEntity = new Annotation(AnnotationType.BUNDLE_HINTS);
         bundleEntity.setId(genericEntityEle.getAttribute(ATTRIBUTE_ID));
         annotations.add(bundleEntity);
         genericEntity.setAnnotations(annotations);
