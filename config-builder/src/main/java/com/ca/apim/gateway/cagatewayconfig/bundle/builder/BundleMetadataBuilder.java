@@ -84,10 +84,8 @@ public class BundleMetadataBuilder {
     public BundleMetadata buildEnvironmentMetadata(final List<Entity> entities, ProjectInfo projectInfo) {
         final boolean isConfigNamePresent = StringUtils.isNotBlank(projectInfo.getConfigName());
         String version = projectInfo.getVersion();
-        if (StringUtils.isNotBlank(version)) {
-            if (isConfigNamePresent) {
-                version = version + "-" + projectInfo.getConfigName();
-            }
+        if (StringUtils.isNotBlank(version) && isConfigNamePresent) {
+            version = version + "-" + projectInfo.getConfigName();
         }
 
         final String name = projectInfo.getName() + "-" + PREFIX_ENVIRONMENT;
