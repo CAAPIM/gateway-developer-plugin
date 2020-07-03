@@ -83,13 +83,18 @@ public class BundleMetadataBuilder {
      */
     public BundleMetadata buildEnvironmentMetadata(final List<Entity> entities, ProjectInfo projectInfo) {
         final boolean isConfigNamePresent = StringUtils.isNotBlank(projectInfo.getConfigName());
-        final String version = isConfigNamePresent ?
-                projectInfo.getVersion() + "-" + projectInfo.getConfigName() : projectInfo.getVersion();
+        String version = projectInfo.getVersion();
+        if (StringUtils.isNotBlank(version)) {
+            if (isConfigNamePresent) {
+                version = version + "-" + projectInfo.getConfigName();
+            }
+        }
+
         final String name = projectInfo.getName() + "-" + PREFIX_ENVIRONMENT;
         BundleMetadata.Builder builder = new BundleMetadata.Builder(EntityBuilder.BundleType.ENVIRONMENT.name(), name,
                 projectInfo.getName(), projectInfo.getGroupName(), version);
         builder.description(StringUtils.EMPTY);
-        List<String> tags = new ArrayList<>();
+        final List<String> tags = new ArrayList<>();
         if (isConfigNamePresent) {
             tags.add(projectInfo.getConfigName());
         }

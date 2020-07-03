@@ -94,14 +94,15 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
             bundleEnvironmentValues = environmentConfigurationUtils.loadConfigFolder(configuredFolder);
         }
         final String configurationName = configName != null ? removeAllSpecialChars(configName.get()) : EMPTY;
-        final String envBundleFileName = getEnvBundleFilename(getProject().getName(), getProject().getVersion().toString(), configurationName);
+        ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(), getProject().getVersion().toString(), configurationName);
+        final String envBundleFileName = getEnvBundleFilename(projectInfo);
 
         //read environment properties from environmentConfig and merge it with config folder entities
         if(environmentEntities != null) {
             bundleEnvironmentValues.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));
         }
 
-        ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(), getProject().getVersion().toString(), configurationName);
+
         environmentBundleCreator.createEnvironmentBundle(
                 bundleEnvironmentValues,
                 into.getAsFile().get().getPath(),
@@ -115,21 +116,23 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
 
     /**
      * Generates the Environment install bundle filename in the format <module name>-environment-<version>-<configName>.install.bundle.
-     *
+     * <p>
      * Here <configName> is generated with the following preference:
      * 1) If "name" is provided in the EnvironmentConfig {} in build.gradle, "name" will be used after
      * removing all the special characters. For eg. if "name" is set "default", filename will have "-default"
      *
-     * @param moduleName project module name
-     * @param version project module version
-     * @param configurationName name in EnvironmentConfig
+     * @param projectInfo ProjectInfo
      * @return Environment install bundle filename
      */
-    private String getEnvBundleFilename(String moduleName, String version, String configurationName) {
-        if (StringUtils.isNotBlank(configurationName)) {
-            return moduleName + "-" + PREFIX_ENVIRONMENT + "-" + version + "-" + removeAllSpecialChars(configurationName) + INSTALL_BUNDLE_EXTENSION;
-        } else {
-            return moduleName + "-" + PREFIX_ENVIRONMENT + "-" + version + INSTALL_BUNDLE_EXTENSION;
+    private String getEnvBundleFilename(final ProjectInfo projectInfo) {
+        StringBuilder bundleNameBuilder = new StringBuilder(projectInfo.getName());
+        bundleNameBuilder.append("-").append(PREFIX_ENVIRONMENT);
+        if (StringUtils.isNotBlank(projectInfo.getVersion())) {
+            bundleNameBuilder.append("-").append(projectInfo.getVersion());
+            if (StringUtils.isNotBlank(projectInfo.getConfigName())) {
+                bundleNameBuilder.append("-").append(projectInfo.getConfigName());
+            }
         }
+        return bundleNameBuilder.append(INSTALL_BUNDLE_EXTENSION).toString();
     }
 }

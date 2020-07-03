@@ -493,7 +493,7 @@ class CAGatewayDeveloperTest {
         bundleMappingsIds.addAll(getChildElements(getSingleChildElement(dependencyBundle, MAPPINGS), MAPPING).stream().map(EnvironmentBundleUtils::buildBundleMappingKey).collect(toSet()));
 
         //Full bundle name format : <bundleName>-<version>-full.install.bundle
-        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + FULL_INSTALL_BUNDLE_NAME_SUFFIX);
+        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + PREFIX_FULL + INSTALL_BUNDLE_EXTENSION);
         assertTrue(builtFullBundleFile.isFile());
 
         final Element fullBundleElement = DocumentTools.INSTANCE.parse(builtFullBundleFile).getDocumentElement();

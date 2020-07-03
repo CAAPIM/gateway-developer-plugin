@@ -25,7 +25,6 @@ public class DocumentFileUtils {
     public static final String INSTALL_BUNDLE_EXTENSION = ".install.bundle";
     public static final String PREFIX_ENVIRONMENT = "environment";
     public static final String PREFIX_FULL = "-full";
-    public static final String FULL_INSTALL_BUNDLE_NAME_SUFFIX = PREFIX_FULL + INSTALL_BUNDLE_EXTENSION;
 
     private DocumentFileUtils(DocumentTools documentTools) {
         this.documentTools = documentTools;

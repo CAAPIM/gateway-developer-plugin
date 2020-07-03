@@ -19,6 +19,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -119,15 +120,26 @@ public class FullBundleCreator {
                             dependentBundleMap.get("version").equals(projectInfo.getVersion());
                 }
             });
-            bundleMetadata.put("version", projectInfo.getVersion() + PREFIX_FULL);
 
-            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleEnvironmentValues.getLeft() + PREFIX_FULL, new File(bundleFolderPath));
-            //clean up intermediate files
-            final File metaDataFile = new File(bundleFolderPath, bundleEnvironmentValues.getLeft() + JsonFileUtils.METADATA_FILE_NAME_SUFFIX);
-            deleted = metaDataFile.delete();
-            if (!deleted) {
-                LOGGER.log(Level.WARNING, () -> "Policy metadata file was not deleted: " + metaDataFile.toString());
+            //clean up intermediate file
+            cleanIntermediateFile(bundleFolderPath, bundleEnvironmentValues.getLeft() + JsonFileUtils.METADATA_FILE_NAME_SUFFIX);
+
+            String bundleMetaFileName = bundleEnvironmentValues.getLeft();
+            if (StringUtils.isNotBlank(projectInfo.getVersion())) {
+                bundleMetadata.put("version", projectInfo.getVersion() + PREFIX_FULL);
+                bundleMetaFileName = bundleMetaFileName + PREFIX_FULL;
             }
+            //generated metadata file
+            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleMetaFileName, new File(bundleFolderPath));
+
+        }
+    }
+
+    private void cleanIntermediateFile(final String bundleFolderPath, final String fileName) {
+        final File intermediateFile = new File(bundleFolderPath, fileName);
+        boolean deleted = intermediateFile.delete();
+        if (!deleted) {
+            LOGGER.log(Level.WARNING, () -> "intermediate file was not deleted: " + intermediateFile.toString());
         }
     }
 

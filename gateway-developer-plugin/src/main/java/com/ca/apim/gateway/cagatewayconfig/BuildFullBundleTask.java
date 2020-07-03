@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig;
 import com.ca.apim.gateway.cagatewayconfig.environment.FullBundleCreator;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -24,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.ca.apim.gateway.cagatewayconfig.ProjectDependencyUtils.filterBundleFiles;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.FULL_INSTALL_BUNDLE_NAME_SUFFIX;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.removeAllSpecialChars;
 import static com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry.getInstance;
@@ -114,7 +115,11 @@ public class BuildFullBundleTask extends DefaultTask {
 
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configuredFolder);
             if (null != bundleEnvironmentValues) {
-                final String fullInstallBundleFilename = bundleEnvironmentValues.getLeft() + FULL_INSTALL_BUNDLE_NAME_SUFFIX;
+                String fullInstallBundleFilename = bundleEnvironmentValues.getLeft();
+                if (StringUtils.isNotBlank(projectInfo.getVersion())) {
+                    fullInstallBundleFilename = fullInstallBundleFilename + PREFIX_FULL;
+                }
+                fullInstallBundleFilename = fullInstallBundleFilename + INSTALL_BUNDLE_EXTENSION;
                 //read environment properties from environmentConfig and merge it with config folder entities
                 if(environmentEntities != null){
                     bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));
