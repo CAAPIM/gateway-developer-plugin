@@ -60,7 +60,7 @@ public class EnvironmentBundleCreator {
                                           String environmentConfigurationFolderPath,
                                           EnvironmentBundleCreationMode mode,
                                           String envInstallBundleFilename, ProjectInfo projectInfo) {
-        Bundle environmentBundle = new Bundle();
+        Bundle environmentBundle = new Bundle(projectInfo);
         environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, mode);
 
         setTemplatizedBundlesFolderPath(templatizedBundleFolderPath);

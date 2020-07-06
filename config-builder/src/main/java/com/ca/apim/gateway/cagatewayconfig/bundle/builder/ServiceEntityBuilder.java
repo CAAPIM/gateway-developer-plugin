@@ -70,8 +70,11 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
-        String baseName = servicePath.substring(servicePath.lastIndexOf('/') + 1);
-        service.setName(baseName);
+        String baseName = PathUtils.extractName(servicePath);
+        String uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT, false);
+        String uniqueServicePath = PathUtils.unixPath(service.getParentFolder().getPath(), uniqueName);
+        service.setName(uniqueName);
+
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());
         final Set<SoapResource> soapResourceBeans = service.getSoapResources();
@@ -92,7 +95,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         service.setId(id);
 
         Element serviceDetailElement = createElementWithAttributes(document, SERVICE_DETAIL, ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_FOLDER_ID, service.getParentFolder().getId()));
-        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, baseName));
+        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, uniqueName));
         serviceDetailElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));
         serviceDetailElement.appendChild(buildServiceMappings(service, document));
 
@@ -141,7 +144,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         serviceElement.appendChild(resourcesElement);
-        return EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, servicePath, id,
+        return EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, uniqueServicePath, uniqueServicePath, id,
                 serviceElement, false, service);
     }
 

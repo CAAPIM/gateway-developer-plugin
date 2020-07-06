@@ -80,11 +80,6 @@ public class EncassEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private boolean isAnnotatedEntity(Encass encass, AnnotatedEntity annotatedEntity) {
-        return annotatedEntity != null && annotatedEntity.getEntityName().equals(encass.getName()) &&
-                EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(annotatedEntity.getEntityType());
-    }
-
     private String getPolicyId(String policyWithPath, Bundle bundle, AnnotatedBundle annotatedBundle) {
         final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyWithPath));
         if (includedPolicy.get() == null) {
@@ -141,8 +136,8 @@ public class EncassEntityBuilder implements EntityBuilder {
             isRedeployableBundle = annotatedEntity.isRedeployable();
             isReusable = annotatedEntity.isReusable();
             annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (isReusable || isAnnotatedEntity(encass, annotatedEntity)) {
-                //use the id and guid defined at reusable annotation or bundle annotation (if its annotated bundle)
+            if (isReusable) {
+                //use the id and guid defined at bundle-hints annotation (if its annotated bundle)
                 if (annotatedEncassEntity != null) {
                     if (annotatedEncassEntity.getGuid() != null) {
                         if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
@@ -160,7 +155,7 @@ public class EncassEntityBuilder implements EntityBuilder {
                     }
                 }
             } else {
-                encassName = annotatedBundle.applyUniqueName(name);
+                encassName = annotatedBundle.applyUniqueName(name, BundleType.DEPLOYMENT, false);
                 //guid and id are regenerated in policy entity builder if this encass is referred by policy and it runs before this builder
                 //no need to regenerate id and guid
             }
@@ -182,7 +177,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, encassName, id, encassAssertionElement, guid, encass);
 
-        if (isRedeployableBundle || !(isReusable || isAnnotatedEntity(encass, annotatedEntity))) {
+        if (isRedeployableBundle || !isReusable) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

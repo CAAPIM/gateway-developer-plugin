@@ -48,11 +48,11 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.keySet().stream()
-                        .map(key -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, key, idGenerator.generate()))
+                        .map(key -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, bundle.applyUniqueName(key, BundleType.ENVIRONMENT, false), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
-                        buildEntity(bundle, e.getKey(), (CassandraConnection) e.getValue(), document)
+                        buildEntity(bundle, bundle.applyUniqueName(e.getKey(), bundleType, false), (CassandraConnection) e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

@@ -54,10 +54,10 @@ public class StoredPasswordEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.keySet().stream()
-                        .map(o -> EntityBuilderHelper.getEntityWithOnlyMapping(STORED_PASSWORD_TYPE, o, idGenerator.generate()))
+                        .map(o -> EntityBuilderHelper.getEntityWithOnlyMapping(STORED_PASSWORD_TYPE, bundle.applyUniqueName(o, BundleType.ENVIRONMENT, true), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
-                return entities.entrySet().stream().map(e -> buildStoredPasswordEntity(e.getKey(), (StoredPassword) e.getValue(), document)).collect(toList());
+                return entities.entrySet().stream().map(e -> buildStoredPasswordEntity(bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT, true), (StoredPassword) e.getValue(), document)).collect(toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
         }

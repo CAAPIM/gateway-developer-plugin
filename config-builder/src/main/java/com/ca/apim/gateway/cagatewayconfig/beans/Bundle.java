@@ -9,14 +9,18 @@ package com.ca.apim.gateway.cagatewayconfig.beans;
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Bundle {
 
@@ -32,6 +36,8 @@ public class Bundle {
     private DependentBundle dependentBundleFrom;
     private List<DependentBundle> dependentBundles = new ArrayList<>();
     private ProjectInfo projectInfo;
+    private static final String UNIQUE_NAME_SEPARATOR = "::";
+    private static final Pattern VARIABLE_NAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9._\\-]*$");
 
     public Bundle(ProjectInfo projectInfo) {
         this.projectInfo = projectInfo;
@@ -297,6 +303,39 @@ public class Bundle {
 
     public void setLoadingMode(BundleLoadingOperation loadingMode) {
         this.loadingMode = loadingMode;
+    }
+
+    /**
+     * Applies unique name space and version to the given entity name
+     * ::namespace::entityName::majorVersion.minorVersion
+     *
+     * @param entityName String
+     * @return String
+     */
+    public String applyUniqueName(final String entityName, final EntityBuilder.BundleType bundleType, final boolean isContextVariable) {
+        StringBuilder uniqueName = new StringBuilder(UNIQUE_NAME_SEPARATOR);
+        uniqueName.append(getNamespace(bundleType, isContextVariable));
+        uniqueName.append(UNIQUE_NAME_SEPARATOR);
+        uniqueName.append(entityName);
+
+        String version = getProjectInfo().getVersion();
+        if (StringUtils.isNotBlank(version)) {
+            uniqueName.append(UNIQUE_NAME_SEPARATOR);
+            String[] subVersions = version.split("\\.");
+            uniqueName.append(subVersions.length > 0 ? subVersions[0] : version);
+            uniqueName.append(".");
+            uniqueName.append(subVersions.length > 1 ? subVersions[1] : "0");
+        }
+
+        return uniqueName.toString();
+    }
+
+    public String getNamespace(final EntityBuilder.BundleType bundleType, final boolean isContextVariable) {
+        String namespace = getProjectInfo().getGroupName();
+        if(StringUtils.isNotBlank(namespace)) {
+            namespace = namespace.replaceAll("[^a-zA-Z_0-9._\\-]", "-");
+        }
+        return namespace;
     }
 
 }

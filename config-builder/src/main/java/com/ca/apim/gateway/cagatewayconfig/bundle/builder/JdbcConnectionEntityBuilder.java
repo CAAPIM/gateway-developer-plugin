@@ -44,17 +44,17 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         Map<String, JdbcConnection> jdbcConnectionMap = Optional.ofNullable(bundle.getJdbcConnections()).orElse(Collections.emptyMap());
-       return buildEntities(jdbcConnectionMap, bundleType, document);
+       return buildEntities(jdbcConnectionMap, bundle, bundleType, document);
     }
-    private List<Entity> buildEntities(Map<String, ?> entities, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, e.getKey(), idGenerator.generate()))
+                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT, false), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
-                        buildEntity(e.getKey(), (JdbcConnection)e.getValue(), document)
+                        buildEntity(bundle.applyUniqueName(e.getKey(), bundleType, false), (JdbcConnection)e.getValue(), document, bundle)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
@@ -62,7 +62,7 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    Entity buildEntity(String name, JdbcConnection jdbc, Document document) {
+    Entity buildEntity(String name, JdbcConnection jdbc, Document document, Bundle bundle) {
         String id = idGenerator.generate();
         Element jdbcElement = createElementWithAttributesAndChildren(
                 document,
@@ -80,7 +80,7 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
         Map<String, Object> connectionProperties = Optional.ofNullable(jdbc.getProperties()).orElseGet(HashMap::new);
         connectionProperties.put(PROPERTY_USER, jdbc.getUser());
         if (jdbc.getPasswordRef() != null) {
-            connectionProperties.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jdbc.getPasswordRef()));
+            connectionProperties.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, bundle.applyUniqueName(jdbc.getPasswordRef(), BundleType.ENVIRONMENT, true)));
         } else {
             connectionProperties.put(PROPERTY_PASSWORD, jdbc.getPassword());
         }
