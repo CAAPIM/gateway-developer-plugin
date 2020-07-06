@@ -70,6 +70,10 @@ class BundleEnvironmentValidator {
 
             String type = mapping.getAttribute(ATTRIBUTE_TYPE);
             if (mode.isRequired(type)) {
+                final String[] originalNameArray = mapToName.split("::");
+                if(originalNameArray.length > 1){
+                    mapToName = originalNameArray[1];
+                }
                 findInBundle(environmentBundle, type, mapToName);
             }
         }

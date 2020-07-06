@@ -9,6 +9,8 @@ package com.ca.apim.gateway.cagatewayconfig.util.injection;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityTypeRegistry;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.PolicyAssertionBuilder;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.PolicyXMLBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleEntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.EntityBundleLoader;
@@ -73,7 +75,8 @@ public class ConfigBuilderInjectionProvider implements InjectionProvider {
                 EnvironmentBundleCreator.class,
                 EnvironmentConfigurationUtils.class,
                 EntityBundleLoader.class,
-                FullBundleCreator.class
+                FullBundleCreator.class,
+                PolicyXMLBuilder.class
         );
     }
 
@@ -84,6 +87,7 @@ public class ConfigBuilderInjectionProvider implements InjectionProvider {
                 .put(BundleEntityLoader.class, copyOf(context.getDefaultReflections().getSubTypesOf(BundleEntityLoader.class)))
                 .put(EntityLoader.class, copyOf(context.getDefaultReflections().getSubTypesOf(EntityLoader.class)))
                 .put(PolicyConverter.class, copyOf(context.getDefaultReflections().getSubTypesOf(PolicyConverter.class)))
+                .put(PolicyAssertionBuilder.class, copyOf(context.getDefaultReflections().getSubTypesOf(PolicyAssertionBuilder.class)))
                 .build();
     }
 }
