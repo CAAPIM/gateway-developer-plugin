@@ -10,7 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
@@ -82,7 +82,7 @@ class PolicyEntityBuilderTest {
         encass.setGuid("encass");
         encass.setName(TEST_ENCASS);
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        Annotation annotation = new Annotation(AnnotationType.REUSABLE);
         annotations.add(annotation);
         policy.setAnnotations(annotations);
         bundle.getEncasses().put(TEST_ENCASS, encass);
@@ -94,7 +94,7 @@ class PolicyEntityBuilderTest {
         include.setId("includeID");
         include.setGuid("includeGuid");
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        annotation = new Annotation(AnnotationType.REUSABLE);
         annotations.add(annotation);
         include.setAnnotations(annotations);
         include.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -145,7 +145,7 @@ class PolicyEntityBuilderTest {
         policy.setName(policy.getPath());
 
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        Annotation annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("");
         annotation.setId("");
         annotations.add(annotation);
@@ -154,7 +154,7 @@ class PolicyEntityBuilderTest {
         Encass encass = new Encass();
         encass.setGuid("encassGuid");
         encass.setName(TEST_ENCASS);
-        Annotation encassAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        Annotation encassAnnotation = new Annotation(AnnotationType.REUSABLE);
         annotations = new HashSet<>();
         annotations.add(encassAnnotation);
         encass.setAnnotations(annotations);
@@ -179,9 +179,9 @@ class PolicyEntityBuilderTest {
 
         //wrong guid and id
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        annotation = new Annotation(AnnotationType.REUSABLE);
         annotations.add(annotation);
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
         annotation.setId("wrongId");
         annotations.add(annotation);
@@ -372,8 +372,8 @@ class PolicyEntityBuilderTest {
         encass.setName(TEST_ENCASS);
         encass.setPolicy(policyPath);
         Set<Annotation> annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotations.add(new Annotation(AnnotationType.REUSABLE));
+        Annotation annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("");
         annotation.setId("");
         annotations.add(annotation);
@@ -399,8 +399,8 @@ class PolicyEntityBuilderTest {
         //wrong guid and goid
         annotatedEntity = new AnnotatedEntity(encass);
         annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotations.add(new Annotation(AnnotationType.REUSABLE));
+        annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
         annotation.setId("wrongId");
         annotations.add(annotation);
@@ -760,8 +760,8 @@ class PolicyEntityBuilderTest {
     @Test
     void testPrepareRoutingAssertionCertificateIds() {
         PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert-1", createTrustedCertWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "2cd473fe16d98cd6b9348ffb404517bc")));
-        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert-2", createTrustedCertWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "28be78b936aa61bc75bd0df2089789cd")));
+        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert-1", createTrustedCertWithAnnotation(AnnotationType.BUNDLE_HINTS, "2cd473fe16d98cd6b9348ffb404517bc")));
+        bundle.putAllTrustedCerts(ImmutableMap.of("fake-cert-2", createTrustedCertWithAnnotation(AnnotationType.BUNDLE_HINTS, "28be78b936aa61bc75bd0df2089789cd")));
 
         Element httpRoutingAssertionElement = createHttpRoutingAssertionWithCertNames(document);
         policyEntityBuilder.prepareRoutingAssertionCertificateIds(document, bundle, httpRoutingAssertionElement);
@@ -777,7 +777,7 @@ class PolicyEntityBuilderTest {
     void testPrepareHttp2AssertionClientConfigIds() {
         PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
         bundle.getGenericEntities().put("http2client",
-                createHttp2ClientConfigWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "a2097d7f50280e9411c277aafedc180d"));
+                createHttp2ClientConfigWithAnnotation(AnnotationType.BUNDLE_HINTS, "a2097d7f50280e9411c277aafedc180d"));
 
         Element http2RoutingAssertionElement = createHttp2Assertion(document);
         policyEntityBuilder.prepareHttp2RoutingAssertion(document, bundle, http2RoutingAssertionElement);
@@ -790,7 +790,7 @@ class PolicyEntityBuilderTest {
     @Test
     void testPrepareMqRoutingAssertionIds() {
         PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        bundle.putAllSsgActiveConnectors(ImmutableMap.of("activeConnector1", createActiveConnectorWithAnnotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY, "2cd473fe16d98cd6b9348ffb404517bc")));
+        bundle.putAllSsgActiveConnectors(ImmutableMap.of("activeConnector1", createActiveConnectorWithAnnotation(AnnotationType.BUNDLE_HINTS, "2cd473fe16d98cd6b9348ffb404517bc")));
 
         Element mqRoutingAssertionElement = createMqRoutingAssertion(document);
         policyEntityBuilder.prepareMQRoutingAssertion(document, bundle, mqRoutingAssertionElement);

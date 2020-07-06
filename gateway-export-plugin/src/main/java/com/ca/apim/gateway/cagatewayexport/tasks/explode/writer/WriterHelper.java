@@ -98,7 +98,7 @@ class WriterHelper {
             properties
                     .entrySet()
                     .stream()
-                    .filter(e -> isNotEmpty((String) e.getValue()))
+                    .filter(e -> e.getValue() != null)
                     .forEach(e -> currentProperties.put(e.getKey(), e.getValue()));
             properties = currentProperties;
         }

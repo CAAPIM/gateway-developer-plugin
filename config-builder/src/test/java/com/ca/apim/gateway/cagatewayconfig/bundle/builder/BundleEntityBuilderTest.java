@@ -10,7 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -91,10 +91,12 @@ class BundleEntityBuilderTest {
         bundle.getFolders().put(dummyFolder.getPath(), dummyFolder);
 
         Set<Annotation> encassAnnotations = new HashSet<>();
-        Annotation bundleAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE);
-        bundleAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
-        Annotation reusableAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        Annotation bundleAnnotation = new Annotation(AnnotationType.BUNDLE);
+        Annotation bundleHintsAnnotation = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleHintsAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
+        Annotation reusableAnnotation = new Annotation(AnnotationType.REUSABLE);
         encassAnnotations.add(bundleAnnotation);
+        encassAnnotations.add(bundleHintsAnnotation);
         encassAnnotations.add(reusableAnnotation);
 
         Set<Annotation> depPolicyAnnotations = new HashSet<>();
@@ -138,11 +140,13 @@ class BundleEntityBuilderTest {
         bundle.getFolders().put(EMPTY, root);
 
         Set<Annotation> encassAnnotations = new HashSet<>();
-        Annotation bundleAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE);
-        bundleAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
-        Annotation reusableAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
-        Annotation redeployableAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REDEPLOYABLE);
+        Annotation bundleAnnotation = new Annotation(AnnotationType.BUNDLE);
+        Annotation bundleHintsAnnotation = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleHintsAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
+        Annotation reusableAnnotation = new Annotation(AnnotationType.REUSABLE);
+        Annotation redeployableAnnotation = new Annotation(AnnotationType.REDEPLOYABLE);
         encassAnnotations.add(bundleAnnotation);
+        encassAnnotations.add(bundleHintsAnnotation);
         encassAnnotations.add(reusableAnnotation);
         encassAnnotations.add(redeployableAnnotation);
 
