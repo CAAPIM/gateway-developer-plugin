@@ -12,7 +12,6 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,12 +21,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.Nullable;
-import sun.reflect.annotation.AnnotationType;
 
 import javax.inject.Named;
 import java.io.File;
 import java.math.BigInteger;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 

@@ -19,6 +19,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -120,7 +121,30 @@ public class FullBundleCreator {
                 }
             });
 
-            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleEnvironmentValues.getLeft(), new File(bundleFolderPath));
+            //clean up intermediate file
+            cleanIntermediateFile(bundleFolderPath, bundleEnvironmentValues.getLeft() + JsonFileUtils.METADATA_FILE_NAME_SUFFIX);
+
+            String bundleMetaFileName = bundleEnvironmentValues.getLeft();
+            if (StringUtils.isNotBlank(projectInfo.getVersion())) {
+                bundleMetadata.put("version", projectInfo.getVersion() + PREFIX_FULL);
+                bundleMetaFileName = bundleMetaFileName + PREFIX_FULL;
+            }
+            //generated metadata file
+            jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleMetaFileName, new File(bundleFolderPath));
+
+        }
+    }
+
+    /**
+     * Removes intermediate file generated during deployment bundle task
+     * @param bundleFolderPath build folder
+     * @param fileName file name
+     */
+    private void cleanIntermediateFile(final String bundleFolderPath, final String fileName) {
+        final File intermediateFile = new File(bundleFolderPath, fileName);
+        boolean deleted = intermediateFile.delete();
+        if (!deleted) {
+            LOGGER.log(Level.WARNING, () -> "intermediate file was not deleted: " + intermediateFile.toString());
         }
     }
 
@@ -130,9 +154,9 @@ public class FullBundleCreator {
                                                               boolean detemplatizeDeploymentBundles) {
         final Map<String, String> environmentProperties = bundleEnvironmentValues.getRight();
         final List<File> deploymentBundles = collectFiles(bundleFolderPath,
-                bundleEnvironmentValues.getLeft() + "-policy" + INSTALL_BUNDLE_EXTENSION);
+                bundleEnvironmentValues.getLeft() + INSTALL_BUNDLE_EXTENSION);
         final List<File> deploymentDeleteBundle = collectFiles(bundleFolderPath,
-                bundleEnvironmentValues.getLeft() + "-policy" + DELETE_BUNDLE_EXTENSION);
+                bundleEnvironmentValues.getLeft() + DELETE_BUNDLE_EXTENSION);
         final List<File> bundleFiles = union(deploymentBundles, dependentBundles);
 
         // load all deployment bundles to strings
@@ -149,7 +173,7 @@ public class FullBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
-                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(bundleFileName, EMPTY, EMPTY));
+                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(bundleFileName, EMPTY, EMPTY, EMPTY));
         Element bundleElement = createFullBundleElement(bundleElements, templatizedBundles, document);
         Element deleteBundleElement = createDeleteBundleElement(bundleElements, deploymentDeleteBundle, dependentBundles, document);
 

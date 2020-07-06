@@ -10,7 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert.CertificateData;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
@@ -38,7 +38,7 @@ public class TrustedCertLoader implements BundleEntityLoader {
         cert.setId(trustedCertElem.getAttribute(ATTRIBUTE_ID));
         cert.setName(getSingleChildElementTextContent(trustedCertElem, NAME));
         Set<Annotation> annotations = new HashSet<>();
-        Annotation bundleEntity = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        Annotation bundleEntity = new Annotation(AnnotationType.BUNDLE_HINTS);
         bundleEntity.setId(trustedCertElem.getAttribute(ATTRIBUTE_ID));
         annotations.add(bundleEntity);
         cert.setAnnotations(annotations);

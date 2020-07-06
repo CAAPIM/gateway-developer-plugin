@@ -12,11 +12,17 @@ public class ProjectInfo {
     private final String name;
     private final String groupName;
     private final String version;
+    private final String configName;
 
     public ProjectInfo(String name, String groupName, String version) {
+       this(name, groupName, version, null);
+    }
+
+    public ProjectInfo(String name, String groupName, String version, String configName) {
         this.name = name;
         this.groupName = groupName;
         this.version = StringUtils.equalsIgnoreCase(version, "unspecified") ? "" : version;
+        this.configName = configName;
     }
 
     public String getName() {
@@ -29,5 +35,9 @@ public class ProjectInfo {
 
     public String getVersion() {
         return version;
+    }
+
+    public String getConfigName() {
+        return configName;
     }
 }

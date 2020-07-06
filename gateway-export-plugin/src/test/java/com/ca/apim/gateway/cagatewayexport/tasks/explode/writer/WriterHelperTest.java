@@ -98,7 +98,7 @@ class WriterHelperTest {
     }
 
     @Test
-    void writePropertiesFile_merging_skippingEmptyValues() throws IOException, URISyntaxException {
+    void writePropertiesFile_merging_emptyValues() throws IOException, URISyntaxException {
         // set up a temp file with the current contents
         setupCurrentFile(TEST_PROPERTIES, PROPERTIES);
 
@@ -111,9 +111,9 @@ class WriterHelperTest {
         assertPropertiesContents(
                 new HashMap<>(
                         ImmutableMap.<String, String>builder()
-                                .put("key1", "value11")
+                                .put("key1", "")
                                 .put("key3", "value3")
-                                .put("key4", "value4")
+                                .put("key4", "")
                                 .build()
                 )
         );

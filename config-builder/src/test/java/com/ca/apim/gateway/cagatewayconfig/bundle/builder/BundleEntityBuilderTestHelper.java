@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -92,11 +92,13 @@ public class BundleEntityBuilderTestHelper {
         encass.setResults(new LinkedHashSet<>(Collections.singletonList(new EncassResult("result.msg", "message"))));
         encass.setGuid(encassGuid);
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation("@bundle");
-        annotation.setName(TEST_ENCASS_ANNOTATION_NAME);
-        annotation.setDescription(TEST_ENCASS_ANNOTATION_DESC);
-        annotation.setTags(TEST_ENCASS_ANNOTATION_TAGS);
-        annotations.add(annotation);
+        Annotation bundleAnnotation = new Annotation(AnnotationType.BUNDLE);
+        Annotation bundleHintsAnnotation = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleHintsAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
+        bundleHintsAnnotation.setDescription(TEST_ENCASS_ANNOTATION_DESC);
+        bundleHintsAnnotation.setTags(TEST_ENCASS_ANNOTATION_TAGS);
+        annotations.add(bundleAnnotation);
+        annotations.add(bundleHintsAnnotation);
         if (isRedeployable) {
             annotations.add(AnnotableEntity.REDEPLOYABLE_ANNOTATION);
         }
@@ -146,7 +148,7 @@ public class BundleEntityBuilderTestHelper {
         policyFragment.setHasRouting(true);
         if (makeFragmentReusable) {
             Set<Annotation> annotations = new HashSet<>();
-            Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+            Annotation annotation = new Annotation(AnnotationType.REUSABLE);
             annotations.add(annotation);
             policyFragment.setAnnotations(annotations);
         }
@@ -209,7 +211,7 @@ public class BundleEntityBuilderTestHelper {
         policy.setHasRouting(policyHasRouting);
         if (includeReusableEntities) {
             Set<Annotation> annotations = new HashSet<>();
-            Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+            Annotation annotation = new Annotation(AnnotationType.REUSABLE);
             annotations.add(annotation);
             policy.setAnnotations(annotations);
         }
