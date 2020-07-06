@@ -12,15 +12,14 @@ import java.util.List;
 public class AnnotatedBundle extends Bundle {
     private Bundle fullBundle;
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
-    private ProjectInfo projectInfo;
     private List<DependentBundle> dependentBundles = new ArrayList<>();
     private static final String UNIQUE_NAME_SEPARATOR = "::";   // This can be different for environment entities.
 
     public AnnotatedBundle(Bundle fullBundle, AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
                            ProjectInfo projectInfo) {
+        super(projectInfo);
         this.fullBundle = fullBundle;
         this.annotatedEntity = annotatedEntity;
-        this.projectInfo = projectInfo;
     }
 
     public AnnotatedEntity<? extends GatewayEntity> getAnnotatedEntity() {
@@ -41,12 +40,12 @@ public class AnnotatedBundle extends Bundle {
 
     public String getBundleName() {
         String name = getAnnotatedBundleName();
-        return StringUtils.isBlank(projectInfo.getVersion()) ? name : name + "-" + projectInfo.getVersion();
+        return StringUtils.isBlank(getProjectInfo().getVersion()) ? name : name + "-" + getProjectInfo().getVersion();
     }
 
     private String getAnnotatedBundleName() {
         if (StringUtils.isBlank(annotatedEntity.getBundleName())) {
-            return projectInfo.getName() + "-" + annotatedEntity.getEntityName();
+            return getProjectInfo().getName() + "-" + annotatedEntity.getEntityName();
         } else {
             return annotatedEntity.getBundleName();
         }
@@ -69,15 +68,15 @@ public class AnnotatedBundle extends Bundle {
      */
     public String applyUniqueName(final String entityName) {
         StringBuilder uniqueName = new StringBuilder(UNIQUE_NAME_SEPARATOR);
-        if (StringUtils.isNotBlank(projectInfo.getGroupName())) {
-            uniqueName.append(projectInfo.getGroupName());
+        if (StringUtils.isNotBlank(getProjectInfo().getGroupName())) {
+            uniqueName.append(getProjectInfo().getGroupName());
             uniqueName.append(".");
         }
         uniqueName.append(getAnnotatedBundleName());
         uniqueName.append(UNIQUE_NAME_SEPARATOR);
         uniqueName.append(entityName);
 
-        String version = projectInfo.getVersion();
+        String version = getProjectInfo().getVersion();
         if (StringUtils.isNotBlank(version)) {
             uniqueName.append(UNIQUE_NAME_SEPARATOR);
             String[] subVersions = version.split("\\.");

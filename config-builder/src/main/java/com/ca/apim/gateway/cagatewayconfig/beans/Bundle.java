@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation;
@@ -30,6 +31,21 @@ public class Bundle {
     private BundleLoadingOperation loadingMode;
     private DependentBundle dependentBundleFrom;
     private List<DependentBundle> dependentBundles = new ArrayList<>();
+    private ProjectInfo projectInfo;
+
+    public Bundle(ProjectInfo projectInfo) {
+        this.projectInfo = projectInfo;
+    }
+
+    public Bundle(){}
+
+    public ProjectInfo getProjectInfo() {
+        return projectInfo;
+    }
+
+    public void setProjectInfo(ProjectInfo projectInfo) {
+        this.projectInfo = projectInfo;
+    }
 
     public void addDependentBundle(DependentBundle dependentBundle){
         dependentBundles.add(dependentBundle);
