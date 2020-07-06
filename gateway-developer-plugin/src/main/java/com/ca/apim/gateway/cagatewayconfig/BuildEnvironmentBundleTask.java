@@ -93,13 +93,16 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
         if(configuredFolder != null){
             bundleEnvironmentValues = environmentConfigurationUtils.loadConfigFolder(configuredFolder);
         }
-        final String envBundleFileName = getEnvBundleFilename(getProject().getName(), getProject().getVersion().toString());
+        final String configurationName = configName != null ? removeAllSpecialChars(configName.get()) : EMPTY;
+        ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(), getProject().getVersion().toString(), configurationName);
+        final String envBundleFileName = getEnvBundleFilename(projectInfo);
 
         //read environment properties from environmentConfig and merge it with config folder entities
         if(environmentEntities != null) {
             bundleEnvironmentValues.putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));
         }
-        ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(), getProject().getVersion().toString());
+
+
         environmentBundleCreator.createEnvironmentBundle(
                 bundleEnvironmentValues,
                 into.getAsFile().get().getPath(),
@@ -112,31 +115,24 @@ public class BuildEnvironmentBundleTask extends DefaultTask {
     }
 
     /**
-     * Generates the Environment install bundle filename in the format <module name>-<version>-*env.install.bundle.
+     * Generates the Environment install bundle filename in the format <module name>-environment-<version>-<configName>.install.bundle.
+     * <p>
+     * Here <configName> is generated with the following preference:
+     * 1) If "name" is provided in the EnvironmentConfig {} in build.gradle, "name" will be used after
+     * removing all the special characters. For eg. if "name" is set "default", filename will have "-default"
      *
-     * Here "-*env" is generated with the following preference:
-     * 1) If "configName" is provided in the GatewaySourceConfig {} in build.gradle, "configName" will be used after
-     * removing all the special characters. For eg. if "configName" is set "default", filename will have "-defaultenv"
-     * 2) If "configName" is not provided, check "configFolder" name (not path).
-     *    2.1) If "configFolder" is the default folder (i.e "src/main/gateway/config"), directly use "-env".
-     *    2.2) If configFolder is not the default folder, use folder name after removing all the special characters.
-     *    For eg. "configFolder" is set as "src/main/gateway/config-staging", filename will have "-configstagingenv"
-     *
-     * @param moduleName project module name
-     * @param version project module version
+     * @param projectInfo ProjectInfo
      * @return Environment install bundle filename
      */
-    private String getEnvBundleFilename(String moduleName, String version) {
-        if (configName != null && StringUtils.isNotBlank(configName.get())) {
-            return moduleName + "-" + version + "-" + removeAllSpecialChars(configName.get()) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
-        } else {
-            String configFolderName = configFolder != null && configFolder.isPresent() ?
-                    configFolder.getAsFile().get().getName() : "";
-            if (StringUtils.equalsIgnoreCase(configFolderName, "config")) {
-                return moduleName + "-" + version + "-" + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
-            } else {
-                return moduleName + "-" + version + "-" + removeAllSpecialChars(configFolderName) + ENV_INSTALL_BUNDLE_NAME_SUFFIX;
+    private String getEnvBundleFilename(final ProjectInfo projectInfo) {
+        StringBuilder bundleNameBuilder = new StringBuilder(projectInfo.getName());
+        bundleNameBuilder.append("-").append(PREFIX_ENVIRONMENT);
+        if (StringUtils.isNotBlank(projectInfo.getVersion())) {
+            bundleNameBuilder.append("-").append(projectInfo.getVersion());
+            if (StringUtils.isNotBlank(projectInfo.getConfigName())) {
+                bundleNameBuilder.append("-").append(projectInfo.getConfigName());
             }
         }
+        return bundleNameBuilder.append(INSTALL_BUNDLE_EXTENSION).toString();
     }
 }

@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils.generateDependentEnvBundleFromProject;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.PREFIX_ENVIRONMENT;
 
 @Singleton
 public class BundleMetadataBuilder {
@@ -74,11 +75,28 @@ public class BundleMetadataBuilder {
         }
     }
 
-    public BundleMetadata buildEnvironmentMetadata(final List<Entity> entities, ProjectInfo projectInfo){
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(EntityBuilder.BundleType.ENVIRONMENT.name(), projectInfo.getName(),
-                projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+    /**
+     * Generates metadata for environment bundle
+     * @param entities List of environment entities
+     * @param projectInfo project information configured in build.gradle
+     * @return BundleMetaData
+     */
+    public BundleMetadata buildEnvironmentMetadata(final List<Entity> entities, ProjectInfo projectInfo) {
+        final boolean isConfigNamePresent = StringUtils.isNotBlank(projectInfo.getConfigName());
+        String version = projectInfo.getVersion();
+        if (StringUtils.isNotBlank(version) && isConfigNamePresent) {
+            version = version + "-" + projectInfo.getConfigName();
+        }
+
+        final String name = projectInfo.getName() + "-" + PREFIX_ENVIRONMENT;
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(EntityBuilder.BundleType.ENVIRONMENT.name(), name,
+                projectInfo.getName(), projectInfo.getGroupName(), version);
         builder.description(StringUtils.EMPTY);
-        builder.tags(Collections.emptyList());
+        final List<String> tags = new ArrayList<>();
+        if (isConfigNamePresent) {
+            tags.add(projectInfo.getConfigName());
+        }
+        builder.tags(tags);
         builder.redeployable(true);
         builder.hasRouting(false);
         builder.definedEntities(getEnvironmentDependenciesMetadata(entities));

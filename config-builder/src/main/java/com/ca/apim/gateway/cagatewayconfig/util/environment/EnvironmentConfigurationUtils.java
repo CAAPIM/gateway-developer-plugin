@@ -153,6 +153,7 @@ public class EnvironmentConfigurationUtils {
                     }
                 });
             }
+
             bundleName = StringUtils.isBlank(bundleVersion) ? bundleName : bundleName + "-" + bundleVersion;
             return ImmutablePair.of(bundleName, environmentValues);
         }
