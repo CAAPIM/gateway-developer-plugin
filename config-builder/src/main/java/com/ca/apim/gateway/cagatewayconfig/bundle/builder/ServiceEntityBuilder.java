@@ -46,20 +46,20 @@ public class ServiceEntityBuilder implements EntityBuilder {
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         if (bundle instanceof AnnotatedBundle) {
             Map<String, Service> serviceMap = Optional.ofNullable(bundle.getServices()).orElse(Collections.emptyMap());
-            return buildEntities(serviceMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
+            return buildEntities(serviceMap, (AnnotatedBundle)bundle, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
         } else {
-            return buildEntities(bundle.getServices(), bundle, bundleType, document);
+            return buildEntities(bundle.getServices(), null,  bundle, bundleType, document);
         }
     }
 
-    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> entities, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
         // no service has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
         return entities.entrySet().stream().map(serviceEntry ->
-                buildServiceEntity(bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
+                buildServiceEntity(bundle, annotatedBundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
@@ -69,11 +69,15 @@ public class ServiceEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
+    private Entity buildServiceEntity(Bundle bundle, AnnotatedBundle annotatedBundle, String servicePath, Service service, Document document) {
         String baseName = PathUtils.extractName(servicePath);
         String basePath = PathUtils.extractPath(servicePath);
-        String uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT);
-        String uniqueServicePath = basePath + uniqueName;
+        String uniqueName = baseName;
+        String uniqueServicePath = servicePath;
+        if(annotatedBundle != null){
+            uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT);
+            uniqueServicePath = basePath + uniqueName;
+        }
         service.setName(uniqueName);
 
 
