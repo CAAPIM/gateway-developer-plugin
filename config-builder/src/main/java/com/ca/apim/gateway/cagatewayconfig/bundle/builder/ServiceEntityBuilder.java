@@ -71,8 +71,9 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
     private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
         String baseName = PathUtils.extractName(servicePath);
+        String basePath = PathUtils.extractPath(servicePath);
         String uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT, false);
-        String uniqueServicePath = PathUtils.unixPath(service.getParentFolder().getPath(), uniqueName);
+        String uniqueServicePath = basePath + uniqueName;
         service.setName(uniqueName);
 
 
@@ -81,7 +82,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
         if (isNotEmpty(soapResourceBeans)) {
             soapResourceBeans.forEach(soapResourceBean -> {
-                String path = PathUtils.unixPath(service.getParentFolder().getPath(), service.getName(), soapResourceBean.getFileName());
+                String path = PathUtils.unixPath(service.getParentFolder().getPath(), baseName, soapResourceBean.getFileName());
                 String content = bundle.getSoapResources().get(path).getContent();
                 soapResourceBean.setContent(content);
             });

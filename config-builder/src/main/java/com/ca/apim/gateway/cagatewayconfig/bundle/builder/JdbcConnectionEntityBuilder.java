@@ -80,7 +80,7 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
         Map<String, Object> connectionProperties = Optional.ofNullable(jdbc.getProperties()).orElseGet(HashMap::new);
         connectionProperties.put(PROPERTY_USER, jdbc.getUser());
         if (jdbc.getPasswordRef() != null) {
-            connectionProperties.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, bundle.applyUniqueName(jdbc.getPasswordRef(), BundleType.ENVIRONMENT, true)));
+            connectionProperties.put(PROPERTY_PASSWORD, String.format(STORED_PASSWORD_REF_FORMAT, jdbc.getPasswordRef()));
         } else {
             connectionProperties.put(PROPERTY_PASSWORD, jdbc.getPassword());
         }

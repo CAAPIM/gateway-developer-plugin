@@ -197,17 +197,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
         guidElement.setAttribute(STRING_VALUE, encass.getGuid());
     }
 
-    private void prepareAssertion(Element policyElement, String assertionTag, Consumer<Element> prepareAssertionMethod) {
-        NodeList assertionReferences = policyElement.getElementsByTagName(assertionTag);
-        for (int i = 0; i < assertionReferences.getLength(); i++) {
-            Node assertionElement = assertionReferences.item(i);
-            if (!(assertionElement instanceof Element)) {
-                throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
-            }
-            prepareAssertionMethod.accept((Element) assertionElement);
-        }
-    }
-
     @VisibleForTesting
     Entity buildPolicyEntity(Policy policy, AnnotatedBundle annotatedBundle, Bundle bundle, Document document) {
         String policyName = policy.getName();

@@ -88,7 +88,7 @@ public class FullBundleCreator {
                                  String fullInstallBundleFilename, String environmentConfigurationFolderPath,
                                  boolean detemplatizeDeploymentBundles) {
         final Pair<Element, Element> elementPair = createFullAndDeleteBundles(bundleEnvironmentValues,
-                dependentBundles, bundleFolderPath, fullInstallBundleFilename, environmentConfigurationFolderPath, detemplatizeDeploymentBundles, projectInfo);
+                dependentBundles, bundleFolderPath, environmentConfigurationFolderPath, detemplatizeDeploymentBundles, projectInfo);
         final String bundle = documentTools.elementToString(elementPair.getLeft());
         // write the full bundle to a temporary file first
         final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), fullInstallBundleFilename);
@@ -150,7 +150,7 @@ public class FullBundleCreator {
 
     private Pair<Element, Element> createFullAndDeleteBundles(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
                                                               String bundleFolderPath,
-                                                              String bundleFileName, String environmentConfigurationFolderPath,
+                                                              String environmentConfigurationFolderPath,
                                                               boolean detemplatizeDeploymentBundles, ProjectInfo projectInfo) {
         final Map<String, String> environmentProperties = bundleEnvironmentValues.getRight();
         final List<File> deploymentBundles = collectFiles(bundleFolderPath,

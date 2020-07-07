@@ -70,10 +70,6 @@ class BundleEnvironmentValidator {
 
             String type = mapping.getAttribute(ATTRIBUTE_TYPE);
             if (mode.isRequired(type)) {
-                final String[] originalNameArray = mapToName.split("::");
-                if(originalNameArray.length > 1){
-                    mapToName = originalNameArray[1];
-                }
                 findInBundle(environmentBundle, type, mapToName);
             }
         }
@@ -89,10 +85,10 @@ class BundleEnvironmentValidator {
                 }
                 break;
             case EntityTypes.ID_PROVIDER_CONFIG_TYPE:
-                entity = bundle.getIdentityProviders().get(name);
+                entity = bundle.getIdentityProviders().get(extractEntityName(name));
                 break;
             case EntityTypes.JDBC_CONNECTION:
-                entity = bundle.getJdbcConnections().get(name);
+                entity = bundle.getJdbcConnections().get(extractEntityName(name));
                 break;
             case EntityTypes.STORED_PASSWORD_TYPE:
                 entity = bundle.getStoredPasswords().get(name);
@@ -104,16 +100,16 @@ class BundleEnvironmentValidator {
                 entity = bundle.getPrivateKeys().get(name);
                 break;
             case EntityTypes.CASSANDRA_CONNECTION_TYPE:
-                entity = bundle.getCassandraConnections().get(name);
+                entity = bundle.getCassandraConnections().get(extractEntityName(name));
                 break;
             case EntityTypes.JMS_DESTINATION_TYPE:
-                entity = bundle.getJmsDestinations().get(name);
+                entity = bundle.getJmsDestinations().get(extractEntityName(name));
                 break;
             case EntityTypes.SSG_ACTIVE_CONNECTOR:
-                entity = bundle.getSsgActiveConnectors().get(name);
+                entity = bundle.getSsgActiveConnectors().get(extractEntityName(name));
                 break;
             case EntityTypes.GENERIC_TYPE:
-                entity = bundle.getGenericEntities().get(name);
+                entity = bundle.getGenericEntities().get(extractEntityName(name));
                 break;
             default:
                 LOGGER.log(Level.WARNING, "Unsupported gateway entity " + type);
@@ -127,5 +123,14 @@ class BundleEnvironmentValidator {
         if (entity == null) {
             throw new MissingEnvironmentException("Missing environment value for " + type + ": " + name);
         }
+    }
+
+    private String extractEntityName(final String name) {
+        String originalName = name;
+        final String[] originalNameArray = name.split("::");
+        if (originalNameArray.length > 2) {
+            originalName = originalNameArray[2];
+        }
+        return originalName;
     }
 }
