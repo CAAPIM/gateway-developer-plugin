@@ -71,11 +71,11 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(JMS_DESTINATION_TYPE, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT, false), idGenerator.generate()))
+                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(JMS_DESTINATION_TYPE, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
-                        buildEntity(bundle, bundle.applyUniqueName(e.getKey(), bundleType, false), (JmsDestination) e.getValue(), document)
+                        buildEntity(bundle, bundle.applyUniqueName(e.getKey(), bundleType), (JmsDestination) e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

@@ -18,7 +18,7 @@ public class JdbcAssertionBuilder implements PolicyAssertionBuilder {
         if (connectionNameElement != null) {
             final String connectionName =
                     connectionNameElement.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
-            connectionNameElement.setAttribute(STRING_VALUE, bundle.applyUniqueName(connectionName, ENVIRONMENT, false));
+            connectionNameElement.setAttribute(STRING_VALUE, bundle.applyUniqueName(connectionName, ENVIRONMENT));
         }
     }
 

@@ -312,9 +312,9 @@ public class Bundle {
      * @param entityName String
      * @return String
      */
-    public String applyUniqueName(final String entityName, final EntityBuilder.BundleType bundleType, final boolean isContextVariable) {
+    public String applyUniqueName(final String entityName, final EntityBuilder.BundleType bundleType) {
         StringBuilder uniqueName = new StringBuilder(UNIQUE_NAME_SEPARATOR);
-        uniqueName.append(getNamespace(bundleType, isContextVariable));
+        uniqueName.append(getNamespace(bundleType));
         uniqueName.append(UNIQUE_NAME_SEPARATOR);
         uniqueName.append(entityName);
 
@@ -330,12 +330,8 @@ public class Bundle {
         return uniqueName.toString();
     }
 
-    public String getNamespace(final EntityBuilder.BundleType bundleType, final boolean isContextVariable) {
-        String namespace = getProjectInfo().getGroupName();
-        if(StringUtils.isNotBlank(namespace)) {
-            namespace = namespace.replaceAll("[^a-zA-Z_0-9._\\-]", "-");
-        }
-        return namespace;
+    public String getNamespace(final EntityBuilder.BundleType bundleType) {
+        return getProjectInfo().getGroupName();
     }
 
 }

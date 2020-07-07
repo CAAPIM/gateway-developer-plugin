@@ -34,7 +34,11 @@ public class SetVariableAssertionBuilder implements PolicyAssertionBuilder {
                     assertionElement.getFirstChild()
             );
         } else {
-            PolicyAssertionBuilder.prepareBase64Element(policyDocument, assertionElement, EXPRESSION, BASE_64_EXPRESSION);
+            try{
+                PolicyAssertionBuilder.prepareBase64Element(policyDocument, assertionElement, EXPRESSION, BASE_64_EXPRESSION);
+            } catch (EntityBuilderException e){
+                LOGGER.log(Level.WARNING, "Exception " + e.getMessage());
+            }
         }
     }
 

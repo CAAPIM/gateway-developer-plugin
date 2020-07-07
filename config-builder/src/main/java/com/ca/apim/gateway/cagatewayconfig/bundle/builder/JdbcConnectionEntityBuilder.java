@@ -50,11 +50,11 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT, false), idGenerator.generate()))
+                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
-                        buildEntity(bundle.applyUniqueName(e.getKey(), bundleType, false), (JdbcConnection)e.getValue(), document, bundle)
+                        buildEntity(bundle.applyUniqueName(e.getKey(), bundleType), (JdbcConnection)e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
@@ -62,7 +62,7 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    Entity buildEntity(String name, JdbcConnection jdbc, Document document, Bundle bundle) {
+    Entity buildEntity(String name, JdbcConnection jdbc, Document document) {
         String id = idGenerator.generate();
         Element jdbcElement = createElementWithAttributesAndChildren(
                 document,

@@ -155,7 +155,7 @@ public class EncassEntityBuilder implements EntityBuilder {
                     }
                 }
             } else {
-                encassName = annotatedBundle.applyUniqueName(name, BundleType.DEPLOYMENT, false);
+                encassName = annotatedBundle.applyUniqueName(name, BundleType.DEPLOYMENT);
                 //guid and id are regenerated in policy entity builder if this encass is referred by policy and it runs before this builder
                 //no need to regenerate id and guid
             }

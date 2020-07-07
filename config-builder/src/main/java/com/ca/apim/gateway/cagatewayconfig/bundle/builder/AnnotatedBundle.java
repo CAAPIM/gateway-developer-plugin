@@ -58,9 +58,9 @@ public class AnnotatedBundle extends Bundle {
         return dependentBundles;
     }
 
-    public String getNamespace(final EntityBuilder.BundleType bundleType, final boolean isContextVariable) {
+    public String getNamespace(final EntityBuilder.BundleType bundleType) {
         if(EntityBuilder.BundleType.ENVIRONMENT == bundleType) {
-            return super.getNamespace(bundleType, isContextVariable);
+            return super.getNamespace(bundleType);
         }
 
         StringBuilder namespace = new StringBuilder();

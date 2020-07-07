@@ -72,7 +72,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
     private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
         String baseName = PathUtils.extractName(servicePath);
         String basePath = PathUtils.extractPath(servicePath);
-        String uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT, false);
+        String uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT);
         String uniqueServicePath = basePath + uniqueName;
         service.setName(uniqueName);
 

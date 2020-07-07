@@ -13,13 +13,13 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 
 public class Http2AssertionBuilder implements PolicyAssertionBuilder {
     @Override
-    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) throws DocumentParseException {
+    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) {
         final Bundle bundle = policyBuilderContext.getBundle();
         final Element http2ClientNameEle = getSingleChildElement(assertionElement, HTTP2_CLIENT_CONFIG_NAME, true);
         if (http2ClientNameEle != null) {
             final String http2ClientName =
                     http2ClientNameEle.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
-            http2ClientNameEle.setAttribute(STRING_VALUE, bundle.applyUniqueName(http2ClientName, ENVIRONMENT, false));
+            http2ClientNameEle.setAttribute(STRING_VALUE, bundle.applyUniqueName(http2ClientName, ENVIRONMENT));
             final GenericEntity http2Client = bundle.getGenericEntities().get(http2ClientName);
             final String id = getIdFromAnnotableEntity(http2Client, policyBuilderContext.getIdGenerator());
             Element http2ClientGoidElement = createElementWithAttribute(

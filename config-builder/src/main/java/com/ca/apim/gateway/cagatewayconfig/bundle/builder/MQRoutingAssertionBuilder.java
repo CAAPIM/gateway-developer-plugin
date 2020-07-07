@@ -3,7 +3,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.SsgActiveConnector;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import org.w3c.dom.Element;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
@@ -13,13 +12,13 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 
 public class MQRoutingAssertionBuilder implements PolicyAssertionBuilder {
     @Override
-    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) throws DocumentParseException {
+    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) {
         final Bundle bundle = policyBuilderContext.getBundle();
         final IdGenerator idGenerator = policyBuilderContext.getIdGenerator();
         final Element activeConnectorNameElement = getSingleChildElement(assertionElement, ACTIVE_CONNECTOR_NAME, true);
         if (activeConnectorNameElement != null) {
             final String activeConnectorName = activeConnectorNameElement.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
-            activeConnectorNameElement.setAttribute(STRING_VALUE, bundle.applyUniqueName(activeConnectorName, ENVIRONMENT, false));
+            activeConnectorNameElement.setAttribute(STRING_VALUE, bundle.applyUniqueName(activeConnectorName, ENVIRONMENT));
             final SsgActiveConnector ssgActiveConnector = bundle.getSsgActiveConnectors().get(activeConnectorName);
             final String id = ssgActiveConnector != null && ssgActiveConnector.getAnnotatedEntity() != null && ssgActiveConnector.getAnnotatedEntity().getId() != null ?
                     ssgActiveConnector.getAnnotatedEntity().getId() : idGenerator.generate();

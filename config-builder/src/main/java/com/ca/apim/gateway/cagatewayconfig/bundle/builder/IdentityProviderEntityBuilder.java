@@ -45,11 +45,11 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
                         .map(
-                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, bundle.applyUniqueName(identityProviderEntry.getKey(), BundleType.ENVIRONMENT, false), ((IdentityProvider)identityProviderEntry.getValue()).getId())
+                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, bundle.applyUniqueName(identityProviderEntry.getKey(), BundleType.ENVIRONMENT), ((IdentityProvider)identityProviderEntry.getValue()).getId())
                         ).collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(identityProviderEntry ->
-                        buildIdentityProviderEntity(bundle, bundle.applyUniqueName(identityProviderEntry.getKey(), bundleType, false), (IdentityProvider)identityProviderEntry.getValue(), document)
+                        buildIdentityProviderEntity(bundle, bundle.applyUniqueName(identityProviderEntry.getKey(), bundleType), (IdentityProvider)identityProviderEntry.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

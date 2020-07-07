@@ -135,7 +135,7 @@ public class EncapsulatedAssertionBuilder implements PolicyAssertionBuilder {
                 encassGuid = idGenerator.generateGuid();
                 encass.setGuid(encassGuid);
                 encass.setId(idGenerator.generate());
-                encassName = annotatedBundle.applyUniqueName(encassName, EntityBuilder.BundleType.DEPLOYMENT, false);
+                encassName = annotatedBundle.applyUniqueName(encassName, EntityBuilder.BundleType.DEPLOYMENT);
             }
         }
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(

@@ -147,7 +147,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             if (annotatedEntity.isReusable()) {
                 policyName = policy.getName();
             } else {
-                policyName = annotatedBundle.applyUniqueName(policy.getName(), BundleType.DEPLOYMENT, false);
+                policyName = annotatedBundle.applyUniqueName(policy.getName(), BundleType.DEPLOYMENT);
             }
         } else {
             policyName = policy.getName();
@@ -211,7 +211,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         }
         if (annotatedBundle != null) {
             if (!isReusable) {
-                policyName = annotatedBundle.applyUniqueName(policyName, BundleType.DEPLOYMENT, false);
+                policyName = annotatedBundle.applyUniqueName(policyName, BundleType.DEPLOYMENT);
                 policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
             }
         }

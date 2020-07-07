@@ -23,7 +23,7 @@ public class IncludeAssertionBuilder implements PolicyAssertionBuilder {
     static final String POLICY_PATH = "policyPath";
 
     @Override
-    public void buildAssertionElement(Element includeAssertionElement, PolicyBuilderContext policyBuilderContext) throws DocumentParseException {
+    public void buildAssertionElement(Element includeAssertionElement, PolicyBuilderContext policyBuilderContext) {
         final Bundle bundle = policyBuilderContext.getBundle();
         final AnnotatedBundle annotatedBundle = policyBuilderContext.getAnnotatedBundle();
         final Policy policy = policyBuilderContext.getPolicy();

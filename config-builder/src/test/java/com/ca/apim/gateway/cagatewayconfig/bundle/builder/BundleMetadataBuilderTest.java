@@ -53,7 +53,7 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassBundleFileNames(final TemporaryFolder temporaryFolder) {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false, false, false);
+        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false, false, false, projectInfo);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
@@ -151,7 +151,7 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassMetadata() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false, projectInfo);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
@@ -177,7 +177,7 @@ public class BundleMetadataBuilderTest {
     public void testAnnotatedEncassMetadata_ExcludingOptionalAnnotationFields() throws JsonProcessingException {
                 BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, true);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, true, projectInfo);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, true);
         encass.getAnnotations().forEach(a -> {
             a.setId(null);
@@ -205,7 +205,7 @@ public class BundleMetadataBuilderTest {
     public void testHasRoutingInMetadata() {
         BundleEntityBuilder builder = createBundleEntityBuilder();
 
-        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false, false, false);
+        Bundle bundle = createBundle(BASIC_ENCASS_POLICY, false, false, false, projectInfo);
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, true);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
@@ -223,7 +223,7 @@ public class BundleMetadataBuilderTest {
     public void testEnvironmentBundleMetadata() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
         // create un-annotated bundle
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, true, false, projectInfo);
         // create encass with the empty set of annotations and add it to the bundle
         Encass encass = buildTestEncassWithAnnotation(TEST_ENCASS, TEST_ENCASS_ID, TEST_GUID, TEST_ENCASS_POLICY, Collections.emptySet());
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
@@ -250,7 +250,7 @@ public class BundleMetadataBuilderTest {
         definedEntities.stream().forEach(definedEntityData -> {
             switch (definedEntityData.getType()) {
                 case EntityTypes.JDBC_CONNECTION:
-                    assertEquals("some-jdbc", definedEntityData.getName());
+                    assertEquals("::" + metadata.getGroupName() + "::" + "some-jdbc" + "::1.0", definedEntityData.getName());
                     break;
                 case EntityTypes.TRUSTED_CERT_TYPE:
                     assertEquals("apim-hugh-new.lvn.broadcom.net", definedEntityData.getName());
@@ -269,7 +269,7 @@ public class BundleMetadataBuilderTest {
     public void testUnAnnotatedBundleMetadata() throws JsonProcessingException {
         BundleEntityBuilder builder = createBundleEntityBuilder();
         // create un-annotated bundle
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, false, false);
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_ENV_DEPENDENCIES, true, false, false, projectInfo);
         // create encass with the empty set of annotations and add it to the bundle
         Encass encass = buildTestEncassWithAnnotation(TEST_ENCASS, TEST_ENCASS_ID, TEST_GUID, TEST_ENCASS_POLICY, Collections.emptySet());
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));

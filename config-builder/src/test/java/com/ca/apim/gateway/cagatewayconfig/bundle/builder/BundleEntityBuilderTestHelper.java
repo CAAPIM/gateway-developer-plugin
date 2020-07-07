@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
@@ -61,8 +62,20 @@ public class BundleEntityBuilderTestHelper {
     }
 
     static BundleEntityBuilder createBundleEntityBuilder() {
+        Set<PolicyAssertionBuilder> policyAssertionBuilders = new HashSet<>();
+        Reflections reflections = new Reflections();
+        reflections.getSubTypesOf(PolicyAssertionBuilder.class).forEach(e -> {
+            try {
+                policyAssertionBuilders.add(e.newInstance());
+            } catch (InstantiationException ex) {
+                ex.printStackTrace();
+            } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
+            }
+        });
+        PolicyXMLBuilder policyXMLBuilder = new PolicyXMLBuilder(policyAssertionBuilders);
         FolderEntityBuilder folderBuilder = new FolderEntityBuilder(ID_GENERATOR);
-        PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR);
+        PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR, policyXMLBuilder);
         EncassEntityBuilder encassBuilder = new EncassEntityBuilder(ID_GENERATOR);
         StoredPasswordEntityBuilder storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(ID_GENERATOR);
         JdbcConnectionEntityBuilder jdbcConnectionEntityBuilder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
@@ -133,8 +146,8 @@ public class BundleEntityBuilderTestHelper {
         return encass;
     }
 
-    public static Bundle createBundleWithPolicyFragment(boolean makeFragmentReusable) {
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_FRAGMENT, true,false, false);
+    public static Bundle createBundleWithPolicyFragment(boolean makeFragmentReusable, ProjectInfo projectInfo) {
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_FRAGMENT, true,false, false, projectInfo);
 
         Policy encassPolicy = bundle.getPolicies().get(TEST_ENCASS_POLICY);
 
@@ -192,8 +205,8 @@ public class BundleEntityBuilderTestHelper {
     }
 
     static Bundle createBundle(String policyXmlString, boolean policyHasRouting, boolean includeDependencies,
-                               boolean includeReusableEntities) {
-        Bundle bundle = new Bundle();
+                               boolean includeReusableEntities, ProjectInfo projectInfo) {
+        Bundle bundle = new Bundle(projectInfo);
         Folder root = createRoot();
         bundle.getFolders().put(EMPTY, root);
 
@@ -325,8 +338,21 @@ public class BundleEntityBuilderTestHelper {
 
         for (Metadata envMeta : metadata.getReferencedEntities()) {
             assertTrue(expectedEnvMetadata.containsKey(envMeta.getType()));
-            assertEquals(expectedEnvMetadata.get(envMeta.getType()).getName(), envMeta.getName());
+            if(UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.contains(envMeta.getType())){
+                assertEquals(expectedEnvMetadata.get(envMeta.getType()).getName(), envMeta.getName());
+            } else {
+                assertEquals("::" + metadata.getGroupName() + "::" + expectedEnvMetadata.get(envMeta.getType()).getName() + "::" + metadata.getVersion(), envMeta.getName());
+            }
+
         }
+    }
+
+    static final Set<String> UNSUPPORTED_TYPES_FOR_UNIQUE_NAME = new HashSet<>();
+    static {
+        UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.add(EntityTypes.TRUSTED_CERT_TYPE);
+        UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.add(EntityTypes.PRIVATE_KEY_TYPE);
+        UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.add(EntityTypes.STORED_PASSWORD_TYPE);
+        UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.add(EntityTypes.CLUSTER_PROPERTY_TYPE);
     }
 
     static final String BASIC_ENCASS_POLICY = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +

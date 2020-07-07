@@ -3,7 +3,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.TrustedCert;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -13,7 +12,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 
 public class HttpRoutingAssertionBuilder implements PolicyAssertionBuilder {
     @Override
-    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) throws DocumentParseException {
+    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) {
         final Bundle bundle = policyBuilderContext.getBundle();
         final Element trustedCertNameElement = getSingleChildElement(assertionElement, TLS_TRUSTED_CERT_NAMES, true);
         if (trustedCertNameElement != null && trustedCertNameElement.getChildNodes().getLength() > 0) {

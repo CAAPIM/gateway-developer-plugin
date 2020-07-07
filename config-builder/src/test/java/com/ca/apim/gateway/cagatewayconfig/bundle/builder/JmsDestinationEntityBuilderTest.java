@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -42,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class JmsDestinationEntityBuilderTest {
     private static final String JMS_DESTINATION_ENTITY_NAME = "my-jms-endpoint";
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
+    private ProjectInfo projectInfo = new ProjectInfo("TestProject", "TestGroup", "1.0");
 
     @Test
     void buildFromEmptyBundle_noConnections() {
@@ -64,7 +66,7 @@ class JmsDestinationEntityBuilderTest {
 
     @Test
     void buildDeploymentBundle() {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildOutbound(bundle, true, true).build()));
 
         TestUtils.testDeploymentBundleWithOnlyMapping(
@@ -72,14 +74,14 @@ class JmsDestinationEntityBuilderTest {
                 bundle,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 EntityTypes.JMS_DESTINATION_TYPE,
-                Stream.of(JMS_DESTINATION_ENTITY_NAME).collect(Collectors.toList())
+                Stream.of("::" + projectInfo.getGroupName() + "::" + JMS_DESTINATION_ENTITY_NAME + "::" + projectInfo.getVersion()).collect(Collectors.toList())
         );
     }
     
     @Test
     void buildJmsDestination_Inbound() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildInbound(bundle, true).build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -90,7 +92,7 @@ class JmsDestinationEntityBuilderTest {
     @Test
     void buildJmsDestination_Inbound_MissingAssociatedService() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildInbound(bundle, false).build()));
 
         assertThrows(BundleLoadException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
@@ -99,7 +101,7 @@ class JmsDestinationEntityBuilderTest {
     @Test
     void buildJmsDestination_Outbound() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildOutbound(bundle, true, true).build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -110,7 +112,7 @@ class JmsDestinationEntityBuilderTest {
     @Test
     void buildJmsDestination_MissingJndiStoredPassword() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildOutbound(bundle, false, true).build()));
 
         assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
@@ -119,7 +121,7 @@ class JmsDestinationEntityBuilderTest {
     @Test
     void buildJmsDestination_MissingDestinationStoredPassword() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildOutbound(bundle, true, false).build()));
 
         assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
@@ -128,7 +130,7 @@ class JmsDestinationEntityBuilderTest {
     @Test
     void buildJmsDestination_TibcoEmsProvider() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildTibcoEmsProvider(bundle, true, true).build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -139,7 +141,7 @@ class JmsDestinationEntityBuilderTest {
     @Test
     void buildJmsDestination_TibcoEmsProvider_MissingJndiClientAuthPrivateKey() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildTibcoEmsProvider(bundle, false, true).build()));
 
         assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
@@ -148,7 +150,7 @@ class JmsDestinationEntityBuilderTest {
     @Test
     void buildJmsDestination_TibcoEmsProvider_MissingDestinationClientAuthPrivateKey() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildTibcoEmsProvider(bundle, true, false).build()));
 
         assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
@@ -157,7 +159,7 @@ class JmsDestinationEntityBuilderTest {
     @Test
     void buildJmsDestination_WebShpereOverLdapProvider() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildWebShpereMqOverLdapProvider(bundle, true).build()));
 
         final List<Entity> entities = builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -168,7 +170,7 @@ class JmsDestinationEntityBuilderTest {
     @Test
     void buildJmsDestination_WebShpereOverLdapProvider_MissingDestinationClientAuthPrivateKey() {
         JmsDestinationEntityBuilder builder = new JmsDestinationEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJmsDestinations(ImmutableMap.of(JMS_DESTINATION_ENTITY_NAME, buildWebShpereMqOverLdapProvider(bundle, false).build()));
 
         assertThrows(EntityBuilderException.class, () -> builder.build(bundle, EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
@@ -214,7 +216,7 @@ class JmsDestinationEntityBuilderTest {
 
     private static void verifyCommon(Entity entity) {
         assertNotNull(entity);
-        assertEquals(JMS_DESTINATION_ENTITY_NAME, entity.getName());
+        assertEquals("::TestGroup::" + JMS_DESTINATION_ENTITY_NAME + "::1.0", entity.getName());
         assertEquals(EntityTypes.JMS_DESTINATION_TYPE, entity.getType());
         assertNotNull(entity.getId());
         
@@ -229,7 +231,7 @@ class JmsDestinationEntityBuilderTest {
         
         assertEquals(entity.getId(), jmsDestinationEle.getAttribute(ATTRIBUTE_ID));
         assertEquals(entity.getId(), jmsDestinationDetailEle.getAttribute(ATTRIBUTE_ID));
-        assertEquals(JMS_DESTINATION_ENTITY_NAME, getSingleChildElementTextContent(jmsDestinationDetailEle, NAME));
+        assertEquals("::TestGroup::" + JMS_DESTINATION_ENTITY_NAME + "::1.0", getSingleChildElementTextContent(jmsDestinationDetailEle, NAME));
         assertEquals("true", getSingleChildElementTextContent(jmsDestinationDetailEle, ENABLED));
 
         Map<String, Object> jmsDestinationDetailProps = 
