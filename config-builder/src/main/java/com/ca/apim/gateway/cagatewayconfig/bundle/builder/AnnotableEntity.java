@@ -2,7 +2,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Set;
@@ -51,7 +50,7 @@ public interface AnnotableEntity {
             AnnotatedEntity<GatewayEntity> annotatedEntity = new AnnotatedEntity(this);
             annotations.forEach(annotation -> {
                 if (BUNDLE.equalsIgnoreCase(annotation.getType())) {
-                    annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+                    annotatedEntity.setEntityType(annotatedEntity.getEntity().getMetadata().getType());
                 } else if(BUNDLE_HINTS.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setId(annotation.getId());
                     annotatedEntity.setGuid(annotation.getGuid());
