@@ -4,7 +4,6 @@ import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.DependentBundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ public class AnnotatedBundle extends Bundle {
 
     private String getAnnotatedBundleName() {
         if (StringUtils.isBlank(annotatedEntity.getBundleName())) {
-            return projectInfo.getName() + "-" + PathUtils.extractName(annotatedEntity.getEntityName());
+            return projectInfo.getName() + "-" + annotatedEntity.getEntityName();
         } else {
             return annotatedEntity.getBundleName();
         }

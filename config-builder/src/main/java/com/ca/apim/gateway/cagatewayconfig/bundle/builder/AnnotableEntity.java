@@ -50,7 +50,7 @@ public interface AnnotableEntity {
             AnnotatedEntity<GatewayEntity> annotatedEntity = new AnnotatedEntity(this);
             annotations.forEach(annotation -> {
                 if (BUNDLE.equalsIgnoreCase(annotation.getType())) {
-                    annotatedEntity.setEntityType(annotatedEntity.getEntity().getMetadata().getType());
+                    annotatedEntity.setEntityType(this.getType());
                 } else if(BUNDLE_HINTS.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setId(annotation.getId());
                     annotatedEntity.setGuid(annotation.getGuid());
