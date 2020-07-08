@@ -93,7 +93,7 @@ class ServiceEntityBuilderTest {
 
         Entity serviceEntity = services.get(0);
 
-        verifyService(service, serviceEntity, 1, "::" + projectInfo.getGroupName() + "::" + "service" + 1 + "::" + projectInfo.getVersion());
+        verifyService(service, serviceEntity, 1, "service" + 1);
     }
 
     @Test
@@ -163,7 +163,7 @@ class ServiceEntityBuilderTest {
 
         Entity serviceEntity = services.get(0);
 
-        verifyService(service, serviceEntity, 1, "::" + projectInfo.getGroupName() + "::" + "soap-service" + 1 + "::" + projectInfo.getVersion());
+        verifyService(service, serviceEntity, 1,  "soap-service" + 1);
     }
 
     @Test
@@ -220,11 +220,11 @@ class ServiceEntityBuilderTest {
 
         assertEquals(2, services.size());
         if (services.get(0).getName().equals("service1")) {
-            verifyService(service1, services.get(0), 1, "::" + projectInfo.getGroupName() + "::" + "service" + 1 + "::" + projectInfo.getVersion());
-            verifyService(service2, services.get(1), 2, "::" + projectInfo.getGroupName() + "::" + "service" + 2 + "::" + projectInfo.getVersion());
+            verifyService(service1, services.get(0), 1,  "service" + 1 );
+            verifyService(service2, services.get(1), 2, "service" + 2 );
         } else {
-            verifyService(service2, services.get(0), 2, "::" + projectInfo.getGroupName() + "::" + "service" + 2 + "::" + projectInfo.getVersion());
-            verifyService(service1, services.get(1), 1, "::" + projectInfo.getGroupName() + "::" + "service" + 1 + "::" + projectInfo.getVersion());
+            verifyService(service2, services.get(0), 2, "service" + 2 );
+            verifyService(service1, services.get(1), 1,  "service" + 1 );
         }
     }
 

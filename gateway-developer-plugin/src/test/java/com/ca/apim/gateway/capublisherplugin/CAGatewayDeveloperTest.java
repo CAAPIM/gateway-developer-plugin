@@ -507,10 +507,10 @@ class CAGatewayDeveloperTest {
                         assertEquals("gateway", entityName);
                         break;
                     case "ID_PROVIDER_CONFIG":
-                        assertEquals("Tacoma MSAD", entityName);
+                        assertEquals("::com.ca::Tacoma MSAD::1.2", entityName);
                         break;
                     case "JDBC_CONNECTION":
-                        assertEquals("MySQL", entityName);
+                        assertEquals("::com.ca::MySQL::1.2", entityName);
                         break;
                     case "SSG_CONNECTOR":
                         break;
