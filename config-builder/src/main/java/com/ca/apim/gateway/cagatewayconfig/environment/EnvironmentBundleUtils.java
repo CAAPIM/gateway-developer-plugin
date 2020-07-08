@@ -93,5 +93,4 @@ public class EnvironmentBundleUtils {
     public static String buildBundleMappingKey(Element mapping) {
         return mapping.getAttribute(ATTRIBUTE_SRCID) + ":" + mapping.getAttribute(ATTRIBUTE_TYPE);
     }
-
 }
