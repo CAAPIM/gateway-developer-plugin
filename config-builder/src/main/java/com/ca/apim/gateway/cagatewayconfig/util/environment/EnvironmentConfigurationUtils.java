@@ -28,10 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -122,6 +119,7 @@ public class EnvironmentConfigurationUtils {
                 environmentEntities.stream().forEach(environmentEntitiy -> {
                     String entityType = environmentEntitiy.get("type");
                     String entityName = environmentEntitiy.get("name");
+                    entityName = EnvironmentConfigurationUtils.extractEntityName(entityName);
                     if (EntityTypes.CLUSTER_PROPERTY_TYPE.equals(entityType)) {
                         entityName = PREFIX_GATEWAY + environmentEntitiy.get("name");
                         entityType = "ENVIRONMENT_PROPERTY";
@@ -284,5 +282,14 @@ public class EnvironmentConfigurationUtils {
         envBundle.setVersion(projectInfo.getVersion());
         envBundle.setType("bundle");
         return envBundle;
+    }
+
+    public static String extractEntityName(final String entityName) {
+        String originalName = entityName;
+        final String[] originalNameArray = entityName.split("::");
+        if (originalNameArray.length > 2) {
+            originalName = originalNameArray[2];
+        }
+        return originalName;
     }
 }

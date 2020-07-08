@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.environment;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -70,7 +71,8 @@ class BundleEnvironmentValidator {
 
             String type = mapping.getAttribute(ATTRIBUTE_TYPE);
             if (mode.isRequired(type)) {
-                findInBundle(environmentBundle, type, mapToName);
+                final String entityName = EnvironmentConfigurationUtils.extractEntityName(mapToName);
+                findInBundle(environmentBundle, type, entityName);
             }
         }
     }
@@ -85,10 +87,10 @@ class BundleEnvironmentValidator {
                 }
                 break;
             case EntityTypes.ID_PROVIDER_CONFIG_TYPE:
-                entity = bundle.getIdentityProviders().get(extractEntityName(name));
+                entity = bundle.getIdentityProviders().get(name);
                 break;
             case EntityTypes.JDBC_CONNECTION:
-                entity = bundle.getJdbcConnections().get(extractEntityName(name));
+                entity = bundle.getJdbcConnections().get(name);
                 break;
             case EntityTypes.STORED_PASSWORD_TYPE:
                 entity = bundle.getStoredPasswords().get(name);
@@ -100,16 +102,16 @@ class BundleEnvironmentValidator {
                 entity = bundle.getPrivateKeys().get(name);
                 break;
             case EntityTypes.CASSANDRA_CONNECTION_TYPE:
-                entity = bundle.getCassandraConnections().get(extractEntityName(name));
+                entity = bundle.getCassandraConnections().get(name);
                 break;
             case EntityTypes.JMS_DESTINATION_TYPE:
-                entity = bundle.getJmsDestinations().get(extractEntityName(name));
+                entity = bundle.getJmsDestinations().get(name);
                 break;
             case EntityTypes.SSG_ACTIVE_CONNECTOR:
-                entity = bundle.getSsgActiveConnectors().get(extractEntityName(name));
+                entity = bundle.getSsgActiveConnectors().get(name);
                 break;
             case EntityTypes.GENERIC_TYPE:
-                entity = bundle.getGenericEntities().get(extractEntityName(name));
+                entity = bundle.getGenericEntities().get(name);
                 break;
             default:
                 LOGGER.log(Level.WARNING, "Unsupported gateway entity " + type);
@@ -125,12 +127,4 @@ class BundleEnvironmentValidator {
         }
     }
 
-    private String extractEntityName(final String name) {
-        String originalName = name;
-        final String[] originalNameArray = name.split("::");
-        if (originalNameArray.length > 2) {
-            originalName = originalNameArray[2];
-        }
-        return originalName;
-    }
 }
