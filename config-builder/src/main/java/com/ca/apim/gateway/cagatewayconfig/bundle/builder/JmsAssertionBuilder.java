@@ -10,7 +10,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 
 public class JmsAssertionBuilder implements PolicyAssertionBuilder {
     @Override
-    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) throws DocumentParseException {
+    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) {
         final Bundle bundle = policyBuilderContext.getBundle();
         final Element connectionNameElement = getSingleChildElement(assertionElement, JMS_ENDPOINT_NAME, true);
         if (connectionNameElement != null) {

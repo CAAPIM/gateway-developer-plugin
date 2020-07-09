@@ -13,7 +13,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 public class AuthenticationAssertionBuilder implements PolicyAssertionBuilder {
 
     @Override
-    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) throws DocumentParseException {
+    public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) {
         final Bundle bundle = policyBuilderContext.getBundle();
         final Element idProviderNameElement = getSingleChildElement(assertionElement, ID_PROV_NAME, true);
         if (idProviderNameElement != null) {
