@@ -204,11 +204,19 @@ public class Service extends Folderable implements AnnotableEntity {
 
             @Override
             public String getId() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && annotatedEntity.getId() != null) {
+                    return annotatedEntity.getId();
+                }
                 return Service.this.getId();
             }
 
             @Override
             public String getGuid() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && annotatedEntity.getGuid() != null) {
+                    return annotatedEntity.getGuid();
+                }
                 return Service.this.getGuid();
             }
 

@@ -8,7 +8,10 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.BundleFileBuilder;
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
-import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.DependentBundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.environment.BundleCache;
@@ -32,11 +35,10 @@ import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.BUNDLE_TYPE_ALL;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilderTestHelper.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({TemporaryFolderExtension.class, MockitoExtension.class})
@@ -167,6 +169,28 @@ public class BundleMetadataBuilderTest {
         assertTrue(metadata.isL7Template());
 
         verifyAnnotatedEncassBundleMetadata(bundles, bundle, encass, false, false, true);
+    }
+
+    @Test
+    public void testAnnotatedServiceMetadata() throws JsonProcessingException {
+        BundleEntityBuilder builder = createBundleEntityBuilder();
+        Bundle bundle = createBundleForService(true);
+
+        Service service = buildTestServiceWithAnnotation(TEST_SERVICE, TEST_SERVICE_ID, TEST_SERVICE);
+        bundle.getServices().put(TEST_SERVICE, service);
+
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        BundleMetadata metadata = bundles.get(TEST_SERVICE_ANNOTATION_NAME + "-1.0").getBundleMetadata();
+        assertNotNull(metadata);
+        assertEquals(TEST_SERVICE_ANNOTATION_NAME, metadata.getName());
+        assertEquals(TEST_SERVICE_ANNOTATION_DESC, metadata.getDescription());
+        assertEquals(TEST_SERVICE_ANNOTATION_TAGS, metadata.getTags());
+        //assertTrue(metadata.isL7Template());
+
+        verifyAnnotatedServiceBundleMetadata(bundles, bundle, service, false, true, true);
     }
 
     /**

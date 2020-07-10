@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
@@ -45,21 +46,22 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         if (bundle instanceof AnnotatedBundle) {
+            AnnotatedBundle annotatedBundle = ((AnnotatedBundle) bundle);
             Map<String, Service> serviceMap = Optional.ofNullable(bundle.getServices()).orElse(Collections.emptyMap());
-            return buildEntities(serviceMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
+            return buildEntities(serviceMap, annotatedBundle, annotatedBundle.getFullBundle(), bundleType, document);
         } else {
-            return buildEntities(bundle.getServices(), bundle, bundleType, document);
+            return buildEntities(bundle.getServices(), null, bundle, bundleType, document);
         }
     }
 
-    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> entities, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
         // no service has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
         return entities.entrySet().stream().map(serviceEntry ->
-                buildServiceEntity(bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
+                buildServiceEntity(annotatedBundle, bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
@@ -69,7 +71,14 @@ public class ServiceEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
+    private Entity buildServiceEntity(AnnotatedBundle annotatedBundle, Bundle bundle, String servicePath, Service service, Document document) {
+        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+        boolean isRedeployableBundle = false;
+        boolean isReusable = false;
+        if (annotatedEntity != null) {
+            isRedeployableBundle = annotatedEntity.isRedeployable();
+            isReusable = annotatedEntity.isReusable();
+        }
         String baseName = servicePath.substring(servicePath.lastIndexOf('/') + 1);
         service.setName(baseName);
 
@@ -88,8 +97,11 @@ public class ServiceEntityBuilder implements EntityBuilder {
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());
         }
-        String id = idGenerator.generate();
-        service.setId(id);
+
+        if (service.getId() == null) {
+            service.setId(idGenerator.generate());
+        }
+        String id = service.getId();
 
         Element serviceDetailElement = createElementWithAttributes(document, SERVICE_DETAIL, ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_FOLDER_ID, service.getParentFolder().getId()));
         serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, baseName));
@@ -141,8 +153,14 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         serviceElement.appendChild(resourcesElement);
-        return EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, servicePath, id,
+        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, servicePath, id,
                 serviceElement, false, service);
+        if (isRedeployableBundle || !isReusable) {
+            entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
+        } else {
+            entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
+        }
+        return entity;
     }
 
     private Element buildServiceMappings(Service service, Document document) {
