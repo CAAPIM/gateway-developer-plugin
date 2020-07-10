@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils.generateDependentEnvBundleFromProject;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.PREFIX_ENVIRONMENT;
 
 @Singleton
@@ -63,15 +61,7 @@ public class BundleMetadataBuilder {
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
             builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
-            boolean l7Template = false;
-            switch (annotatedEntity.getEntityType()) {
-                case EntityTypes.ENCAPSULATED_ASSERTION_TYPE:
-                    l7Template = Boolean.valueOf(String.valueOf(((Encass) annotatedEntity.getEntity()).getProperties().get(L7_TEMPLATE)));
-                    break;
-                case EntityTypes.SERVICE_TYPE:
-                    break;
-            }
-            builder.l7Template(l7Template);
+            builder.l7Template(annotatedEntity.isL7Template());
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
             final List<Metadata> definedEntities = new ArrayList<>();
