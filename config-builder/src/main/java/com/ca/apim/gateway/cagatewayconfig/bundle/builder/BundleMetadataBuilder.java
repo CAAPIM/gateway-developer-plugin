@@ -53,7 +53,7 @@ public class BundleMetadataBuilder {
                 name =  bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
             }
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getEntityType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
             final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(dependentEntities);
             builder.referencedEntities(referencedEntities);

@@ -6,15 +6,23 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Named;
 import java.io.File;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -27,7 +35,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Named("JDBC_CONNECTION")
 @ConfigurationFile(name = "jdbc-connections", type = JSON_YAML)
 @EnvironmentType("JDBC_CONNECTION")
-public class JdbcConnection extends GatewayEntity {
+public class JdbcConnection extends GatewayEntity implements AnnotableEntity {
 
     private String driverClass;
     private String jdbcUrl;
@@ -37,6 +45,36 @@ public class JdbcConnection extends GatewayEntity {
     private Integer minimumPoolSize;
     private Integer maximumPoolSize;
     private String password;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
+
+    @Override
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+        }
+        return annotatedEntity;
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.JDBC_CONNECTION;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity) {
+        this.annotatedEntity = annotatedEntity;
+    }
 
     public JdbcConnection() {
     }

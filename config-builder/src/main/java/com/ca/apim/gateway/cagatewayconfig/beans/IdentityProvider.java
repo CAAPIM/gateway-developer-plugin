@@ -6,16 +6,24 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Named;
 import java.io.File;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
@@ -25,7 +33,7 @@ import static java.util.Arrays.stream;
 @Named("ID_PROVIDER_CONFIG")
 @ConfigurationFile(name = "identity-providers", type = JSON_YAML)
 @EnvironmentType("IDENTITY_PROVIDER")
-public class IdentityProvider extends GatewayEntity {
+public class IdentityProvider extends GatewayEntity implements AnnotableEntity {
 
     public static final String INTERNAL_IDP_ID = "0000000000000000fffffffffffffffe";
     public static final String INTERNAL_IDP_NAME = "Internal Identity Provider";
@@ -52,6 +60,36 @@ public class IdentityProvider extends GatewayEntity {
 
     private IdentityProviderType type;
     private Map<String,Object> properties;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
+
+    @Override
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+        }
+        return annotatedEntity;
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.ID_PROVIDER_CONFIG_TYPE;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity) {
+        this.annotatedEntity = annotatedEntity;
+    }
 
     public IdentityProvider() {}
 
@@ -136,5 +174,13 @@ public class IdentityProvider extends GatewayEntity {
     @Override
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setId(idGenerator.generate());
+    }
+
+    @Override
+    public String getId(){
+        if (getAnnotatedEntity() != null && annotatedEntity.getId() != null) {
+            return annotatedEntity.getId();
+        }
+        return super.getId();
     }
 }

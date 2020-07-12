@@ -29,7 +29,7 @@ public interface AnnotableEntity {
      * @return String
      */
     @JsonIgnore
-    String getType();
+    String getEntityType();
 
     /**
      * This method returns all the Annotation applied to the entity.

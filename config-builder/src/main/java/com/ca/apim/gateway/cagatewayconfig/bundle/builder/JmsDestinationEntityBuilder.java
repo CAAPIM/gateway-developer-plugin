@@ -71,7 +71,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(JMS_DESTINATION_TYPE, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT), idGenerator.generate()))
+                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(JMS_DESTINATION_TYPE, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT), generateId((JmsDestination)e.getValue())))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
@@ -88,7 +88,7 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildEntity(Bundle bundle, String name, JmsDestination jmsDestination, Document document) {
-        String id = jmsDestination.getId();
+        String id = generateId(jmsDestination);
         boolean isInbound = jmsDestination.getInboundDetail() != null;
 
         // Build JMS Destination element.
@@ -339,6 +339,14 @@ public class JmsDestinationEntityBuilder implements EntityBuilder {
                 putToMapIfValueIsNotNull(contextPropertiesTemplateProps, SESSION_POOL_MAX_WAIT, sessionPoolingSettings.getMaxWaitMs());
             }
         }
+    }
+
+    private String generateId(JmsDestination jmsDestination) {
+        if (jmsDestination != null && jmsDestination.getAnnotatedEntity() != null
+                && StringUtils.isNotBlank(jmsDestination.getAnnotatedEntity().getId())) {
+            return jmsDestination.getAnnotatedEntity().getId();
+        }
+        return idGenerator.generate();
     }
 
     private static void putToMapIfValueIsNotNull(

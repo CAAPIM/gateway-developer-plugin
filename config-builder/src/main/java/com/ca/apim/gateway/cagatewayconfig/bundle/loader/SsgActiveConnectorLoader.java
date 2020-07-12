@@ -33,7 +33,6 @@ public class SsgActiveConnectorLoader implements BundleEntityLoader {
 
         final String name = getSingleChildElementTextContent(activeConnectorElement, NAME);
         final String type = getSingleChildElementTextContent(activeConnectorElement, TYPE);
-        final String enabled = getSingleChildElementTextContent(activeConnectorElement, ENABLED);
         final String targetServiceReference = getSingleChildElementTextContent(activeConnectorElement, HARDWIRED);
         final Map<String, Object> properties = mapPropertiesElements(getSingleChildElement(activeConnectorElement, PROPERTIES, true), PROPERTIES);
 

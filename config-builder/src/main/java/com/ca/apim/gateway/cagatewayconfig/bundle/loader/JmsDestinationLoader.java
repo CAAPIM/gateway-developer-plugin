@@ -6,18 +6,16 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.AcknowledgeType;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ContentTypeSource;
 import com.ca.apim.gateway.cagatewayconfig.beans.InboundJmsDestinationDetail.ServiceResolutionSettings;
-import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination;
 import com.ca.apim.gateway.cagatewayconfig.beans.JmsDestinationDetail.ReplyType;
-import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.ConnectionPoolingSettings;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.MessageFormat;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.PoolingType;
 import com.ca.apim.gateway.cagatewayconfig.beans.OutboundJmsDestinationDetail.SessionPoolingSettings;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +23,9 @@ import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.JmsDestination.*;
@@ -109,8 +109,14 @@ public class JmsDestinationLoader implements BundleEntityLoader {
             // none generic JMS providers.
             builder.additionalProperties(contextPropertiesTemplateProps);
         }
+        JmsDestination jmsDestination = builder.build();
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation bundleEntity = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleEntity.setId(jmsDestination.getId());
+        annotations.add(bundleEntity);
+        jmsDestination.setAnnotations(annotations);
         
-        bundle.getJmsDestinations().put(name, builder.build());
+        bundle.getJmsDestinations().put(name, jmsDestination);
     }
 
     private InboundJmsDestinationDetail loadInboundDetail(
