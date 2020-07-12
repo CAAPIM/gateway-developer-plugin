@@ -47,9 +47,8 @@ public class AuthenticationAssertionBuilderTest {
         policyBuilderContext.withPolicy(policy);
         authenticationAssertionBuilder.buildAssertionElement(authenticationAssertion, policyBuilderContext);
 
-        Element idProvideNameElement = getSingleChildElement(authenticationAssertion, ID_PROV_NAME, true);
-        assertNotNull(idProvideNameElement);
-        assertEquals("::" + projectInfo.getGroupName() + "::" + providerName + "::1.0", idProvideNameElement.getAttributes().getNamedItem(STRING_VALUE).getTextContent());
+        Element idProvideOidElement = getSingleChildElement(authenticationAssertion, ID_PROV_OID, true);
+        assertNotNull(idProvideOidElement);
     }
 
     @Test
@@ -61,9 +60,8 @@ public class AuthenticationAssertionBuilderTest {
         policyBuilderContext.withPolicy(policy);
         authenticationAssertionBuilder.buildAssertionElement(authenticationAssertion, policyBuilderContext);
 
-        Element idProvideNameElement = getSingleChildElement(authenticationAssertion, ID_PROV_NAME, true);
-        assertNotNull(idProvideNameElement);
-        assertEquals(providerName, idProvideNameElement.getAttributes().getNamedItem(STRING_VALUE).getTextContent());
+        Element idProvideOidElement = getSingleChildElement(authenticationAssertion, ID_PROV_OID, true);
+        assertNotNull(idProvideOidElement);
     }
 
     @NotNull
