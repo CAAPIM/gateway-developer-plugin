@@ -1,5 +1,6 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
@@ -17,6 +18,7 @@ import org.w3c.dom.Element;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,6 +30,7 @@ public class EncapsulatedAssertionBuilderTest {
     private final String TEST_ENCASS = "EncassName";
     private EncapsulatedAssertionBuilder encapsulatedAssertionBuilder = new EncapsulatedAssertionBuilder();
     private PolicyBuilderContext policyBuilderContext;
+    private static final ProjectInfo projectInfo = new ProjectInfo("my-bundle", "my-bundle-group", "1.0");
 
     @BeforeEach
     void beforeEach() {
@@ -89,7 +92,7 @@ public class EncapsulatedAssertionBuilderTest {
         encass.setName(TEST_ENCASS);
         encass.setPolicy(policyPath);
         Set<Annotation> annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationType.REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         Annotation annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("");
         annotation.setId("");
@@ -98,8 +101,8 @@ public class EncapsulatedAssertionBuilderTest {
         bundle.getEncasses().put(TEST_ENCASS, encass);
 
         //empty guid and goid
-        AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
-        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
+        AnnotatedEntity annotatedEntity = encass.getAnnotatedEntity();
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
         annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put(policyPath, policy);
         Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
@@ -110,22 +113,23 @@ public class EncapsulatedAssertionBuilderTest {
         encapsulatedAssertionBuilder.buildAssertionElement(encapsulatedAssertionElement, policyBuilderContext);
 
         Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
+        String name = annotatedBundle.applyUniqueName(TEST_ENCASS, DEPLOYMENT, false);
+        assertEquals(name, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
 
         Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
         assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
 
         //wrong guid and goid
-        annotatedEntity = new AnnotatedEntity(encass);
+        annotatedEntity = encass.getAnnotatedEntity();
         annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationType.REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
         annotation.setId("wrongId");
         annotations.add(annotation);
         encass.setAnnotations(annotations);
         encass.setAnnotatedEntity(null);
-        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
+        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
         annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put(policyPath, policy);
         encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);

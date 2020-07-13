@@ -58,18 +58,12 @@ public class AnnotatedBundle extends Bundle {
         return dependentBundles;
     }
 
-    public String getNamespace(final EntityBuilder.BundleType bundleType) {
-        if(EntityBuilder.BundleType.ENVIRONMENT == bundleType) {
-            return super.getNamespace(bundleType);
+    @Override
+    protected String getNamespace(final EntityBuilder.BundleType bundleType, boolean isShared) {
+        if (isShared || EntityBuilder.BundleType.ENVIRONMENT == bundleType) {
+            return super.getNamespace(bundleType, isShared);
         }
-
-        StringBuilder namespace = new StringBuilder();
-        if (StringUtils.isNotBlank(getProjectInfo().getGroupName())) {
-            namespace.append(getProjectInfo().getGroupName());
-            namespace.append(".");
-        }
-        namespace.append(getAnnotatedBundleName());
-        return namespace.toString();
+        return getProjectInfo().getGroupName() + '.' + getAnnotatedBundleName();
     }
 
 }

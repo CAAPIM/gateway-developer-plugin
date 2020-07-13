@@ -41,12 +41,14 @@ public class GenericEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 return genericEntities.entrySet().stream()
-                        .map(entry -> getEntityWithOnlyMapping(EntityTypes.GENERIC_TYPE, bundle.applyUniqueName(entry.getKey(), BundleType.ENVIRONMENT),
+                        .map(entry -> getEntityWithOnlyMapping(EntityTypes.GENERIC_TYPE,
+                                bundle.applyUniqueName(entry.getKey(), BundleType.ENVIRONMENT, false),
                                 generateId(entry.getValue())))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return genericEntities.entrySet().stream()
-                        .map(e -> buildGenericEntity(bundle.applyUniqueName(e.getKey(), bundleType), e.getValue(), document))
+                        .map(e -> buildGenericEntity(bundle.applyUniqueName(e.getKey(), bundleType, false), e.getValue(),
+                                document))
                         .collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

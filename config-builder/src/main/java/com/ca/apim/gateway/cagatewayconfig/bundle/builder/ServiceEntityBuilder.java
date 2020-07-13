@@ -75,7 +75,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         String uniqueName = baseName;
         String uniqueServicePath = servicePath;
         if(annotatedBundle != null){
-            uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT);
+            uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT, false);
             uniqueServicePath = basePath + uniqueName;
         }
         service.setName(uniqueName);

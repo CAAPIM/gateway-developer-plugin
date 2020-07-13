@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.IdValidator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.collect.ImmutableMap;
@@ -54,23 +53,17 @@ public class EncassEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        if (bundle instanceof AnnotatedBundle) {
-            AnnotatedBundle annotatedBundle = ((AnnotatedBundle) bundle);
-            Map<String, Encass> map = Optional.ofNullable(bundle.getEncasses()).orElse(Collections.emptyMap());
-            return buildEntities(map, annotatedBundle, annotatedBundle.getFullBundle(), bundleType, document);
-        } else {
-            return buildEntities(bundle.getEncasses(), null, bundle, bundleType, document);
-        }
+        return buildEntities(bundle.getEncasses(), bundle, bundleType, document);
     }
 
-    private List<Entity> buildEntities(Map<String, ?> entities, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         // no encass has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
         return entities.entrySet().stream().map(encassEntry ->
-                buildEncassEntity(annotatedBundle, bundle, encassEntry.getKey(), (Encass) encassEntry.getValue(), document)
+                buildEncassEntity(bundle, encassEntry.getKey(), (Encass) encassEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
@@ -80,7 +73,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private String getPolicyId(String policyWithPath, Bundle bundle, AnnotatedBundle annotatedBundle) {
+    private String getPolicyId(String policyWithPath, Bundle bundle) {
         final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyWithPath));
         if (includedPolicy.get() == null) {
             //check policy dependency in bundle dependencies
@@ -94,12 +87,8 @@ public class EncassEntityBuilder implements EntityBuilder {
                         }
                         //add dependent bundle if bundle type is not null
                         DependentBundle dependentBundle = b.getDependentBundleFrom();
-                        if (dependentBundle != null && dependentBundle.getType() != null){
-                            if(annotatedBundle != null) {
-                                annotatedBundle.addDependentBundle(dependentBundle);
-                            } else {
-                                bundle.addDependentBundle(dependentBundle);
-                            }
+                        if (dependentBundle != null && dependentBundle.getType() != null) {
+                            bundle.addDependentBundle(dependentBundle);
                         }
                     }
                 });
@@ -122,21 +111,21 @@ public class EncassEntityBuilder implements EntityBuilder {
         return includedPolicy.get().getId();
     }
 
-    private Entity buildEncassEntity(AnnotatedBundle annotatedBundle, Bundle bundle, String name, Encass encass, Document document) {
-        String policyId = getPolicyId(encass.getPolicy(), bundle, annotatedBundle);
+    private Entity buildEncassEntity(Bundle bundle, String name, Encass encass, Document document) {
+        String policyId = getPolicyId(encass.getPolicy(), bundle);
         String encassName = name;
         String guid = encass.getGuid();
         String id = encass.getId();
         AnnotatedEntity annotatedEncassEntity = null;
 
-        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+        AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
-        boolean isReusable = false;
+        boolean isShared = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
-            isReusable = annotatedEntity.isReusable();
+            isShared = encass.isParentEntityShared();
             annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (isReusable) {
+            if (isShared) {
                 //use the id and guid defined at bundle-hints annotation (if its annotated bundle)
                 if (annotatedEncassEntity != null) {
                     if (annotatedEncassEntity.getGuid() != null) {
@@ -155,10 +144,10 @@ public class EncassEntityBuilder implements EntityBuilder {
                     }
                 }
             } else {
-                encassName = annotatedBundle.applyUniqueName(name, BundleType.DEPLOYMENT);
                 //guid and id are regenerated in policy entity builder if this encass is referred by policy and it runs before this builder
                 //no need to regenerate id and guid
             }
+            encassName = bundle.applyUniqueName(name, BundleType.DEPLOYMENT, encass.isParentEntityShared());
         }
 
         Element encassAssertionElement = createElementWithAttributesAndChildren(
@@ -177,7 +166,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
         Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, encassName, id, encassAssertionElement, guid, encass);
 
-        if (isRedeployableBundle || !isReusable) {
+        if (isRedeployableBundle || !isShared) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

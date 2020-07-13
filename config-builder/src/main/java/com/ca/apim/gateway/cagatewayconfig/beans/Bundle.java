@@ -309,12 +309,15 @@ public class Bundle {
      * Applies unique name space and version to the given entity name
      * ::namespace::entityName::majorVersion.minorVersion
      *
-     * @param entityName String
-     * @return String
+     * If the entity or entity's parent is Shared entity, "namespace" is just the Project group name.
+     *
+     * @param entityName entityName
+     * @return Unique entity name
      */
-    public String applyUniqueName(final String entityName, final EntityBuilder.BundleType bundleType) {
+    public String applyUniqueName(final String entityName, final EntityBuilder.BundleType bundleType,
+                                  boolean isShared) {
         StringBuilder uniqueName = new StringBuilder(UNIQUE_NAME_SEPARATOR);
-        uniqueName.append(getNamespace(bundleType));
+        uniqueName.append(getNamespace(bundleType, isShared));
         uniqueName.append(UNIQUE_NAME_SEPARATOR);
         uniqueName.append(entityName);
 
@@ -330,8 +333,17 @@ public class Bundle {
         return uniqueName.toString();
     }
 
-    public String getNamespace(final EntityBuilder.BundleType bundleType) {
+    /**
+     * Returns namespace for the entity for unique naming.
+     *
+     * For non-shared entities, it returns &lt;groupName&lt;.&gt;bundleName&gt;
+     * For shared entities and non-annotated bundle, it returns just &lt;groupName&gt;
+     *
+     * @param bundleType bundle type
+     * @param isShared is a shared entity (or is any parent entity is Shared)
+     * @return namespace
+     */
+    protected String getNamespace(final EntityBuilder.BundleType bundleType, boolean isShared) {
         return getProjectInfo().getGroupName();
     }
-
 }

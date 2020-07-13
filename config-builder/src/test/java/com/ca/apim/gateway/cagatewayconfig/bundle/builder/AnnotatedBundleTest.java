@@ -16,28 +16,28 @@ public class AnnotatedBundleTest {
         encassAnnotatedEntity.setEntityName("TestEncass");
         ProjectInfo projectInfo = new ProjectInfo("TestName", "TestGroup", "unspecified");
         AnnotatedBundle annotatedBundle = new AnnotatedBundle(null, encassAnnotatedEntity, projectInfo);
-        String uniquePolicyName = annotatedBundle.applyUniqueName(policeName, EntityBuilder.BundleType.DEPLOYMENT);
+        String uniquePolicyName = annotatedBundle.applyUniqueName(policeName, EntityBuilder.BundleType.DEPLOYMENT, false);
         Assert.assertEquals(uniqueSeparator + projectInfo.getGroupName() + "."
                 + annotatedBundle.getBundleName() + uniqueSeparator + policeName, uniquePolicyName);
 
 
         projectInfo = new ProjectInfo("TestName", "TestGroup", "1");
         annotatedBundle = new AnnotatedBundle(null, encassAnnotatedEntity, projectInfo);
-        uniquePolicyName = annotatedBundle.applyUniqueName(policeName, EntityBuilder.BundleType.DEPLOYMENT);
+        uniquePolicyName = annotatedBundle.applyUniqueName(policeName, EntityBuilder.BundleType.DEPLOYMENT, false);
         Assert.assertEquals(uniqueSeparator + projectInfo.getGroupName() + "."
                 + "TestName-TestEncass" + uniqueSeparator + policeName + uniqueSeparator + "1.0", uniquePolicyName);
 
 
         projectInfo = new ProjectInfo("TestName", "TestGroup", "1.");
         annotatedBundle = new AnnotatedBundle(null, encassAnnotatedEntity, projectInfo);
-        uniquePolicyName = annotatedBundle.applyUniqueName(policeName, EntityBuilder.BundleType.DEPLOYMENT);
+        uniquePolicyName = annotatedBundle.applyUniqueName(policeName, EntityBuilder.BundleType.DEPLOYMENT, false);
         Assert.assertEquals(uniqueSeparator + projectInfo.getGroupName() + "."
                 + "TestName-TestEncass" + uniqueSeparator + policeName + uniqueSeparator + "1.0", uniquePolicyName);
 
         projectInfo = new ProjectInfo("TestName", "TestGroup", "1.2");
         encassAnnotatedEntity.setBundleName("TestBundle");
         annotatedBundle = new AnnotatedBundle(null, encassAnnotatedEntity, projectInfo);
-        uniquePolicyName = annotatedBundle.applyUniqueName(policeName, EntityBuilder.BundleType.DEPLOYMENT);
+        uniquePolicyName = annotatedBundle.applyUniqueName(policeName, EntityBuilder.BundleType.DEPLOYMENT, false);
         Assert.assertEquals(uniqueSeparator + projectInfo.getGroupName() + "."
                 + "TestBundle" + uniqueSeparator + policeName + uniqueSeparator + "1.2", uniquePolicyName);
     }
@@ -51,26 +51,26 @@ public class AnnotatedBundleTest {
         encassAnnotatedEntity.setEntityName("TestEncass");
         ProjectInfo projectInfo = new ProjectInfo("TestName", "TestGroup", "unspecified");
         AnnotatedBundle annotatedBundle = new AnnotatedBundle(null, encassAnnotatedEntity, projectInfo);
-        String uniqueEntityName = annotatedBundle.applyUniqueName(entityName, EntityBuilder.BundleType.ENVIRONMENT);
+        String uniqueEntityName = annotatedBundle.applyUniqueName(entityName, EntityBuilder.BundleType.ENVIRONMENT, false);
         Assert.assertEquals(uniqueSeparator + projectInfo.getGroupName()
                 + uniqueSeparator + entityName, uniqueEntityName);
 
 
         projectInfo = new ProjectInfo("TestName", "TestGroup", "1");
         annotatedBundle = new AnnotatedBundle(null, encassAnnotatedEntity, projectInfo);
-        uniqueEntityName = annotatedBundle.applyUniqueName(entityName, EntityBuilder.BundleType.ENVIRONMENT);
+        uniqueEntityName = annotatedBundle.applyUniqueName(entityName, EntityBuilder.BundleType.ENVIRONMENT, false);
         Assert.assertEquals(uniqueSeparator + projectInfo.getGroupName() + uniqueSeparator + entityName + uniqueSeparator + "1.0", uniqueEntityName);
 
 
         projectInfo = new ProjectInfo("TestName", "TestGroup", "1.");
         annotatedBundle = new AnnotatedBundle(null, encassAnnotatedEntity, projectInfo);
-        uniqueEntityName = annotatedBundle.applyUniqueName(entityName, EntityBuilder.BundleType.ENVIRONMENT);
+        uniqueEntityName = annotatedBundle.applyUniqueName(entityName, EntityBuilder.BundleType.ENVIRONMENT, false);
         Assert.assertEquals(uniqueSeparator + projectInfo.getGroupName() + uniqueSeparator + entityName + uniqueSeparator + "1.0", uniqueEntityName);
 
         projectInfo = new ProjectInfo("TestName", "TestGroup", "1.2");
         encassAnnotatedEntity.setBundleName("TestBundle");
         annotatedBundle = new AnnotatedBundle(null, encassAnnotatedEntity, projectInfo);
-        uniqueEntityName = annotatedBundle.applyUniqueName(entityName, EntityBuilder.BundleType.ENVIRONMENT);
+        uniqueEntityName = annotatedBundle.applyUniqueName(entityName, EntityBuilder.BundleType.ENVIRONMENT, false);
         Assert.assertEquals(uniqueSeparator + projectInfo.getGroupName() + uniqueSeparator + entityName + uniqueSeparator + "1.2", uniqueEntityName);
     }
 }

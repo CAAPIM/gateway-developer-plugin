@@ -22,7 +22,7 @@ public interface EntitiesLinker {
 
     /**
      *  It has to be overridden in entity specific likers to change the dependency name or type
-     * @param dependencies
+     * @param dependencies dependencies
      */
     default void link(Set<Dependency> dependencies) {
     }

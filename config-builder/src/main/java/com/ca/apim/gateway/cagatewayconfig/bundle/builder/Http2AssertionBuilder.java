@@ -19,7 +19,7 @@ public class Http2AssertionBuilder implements PolicyAssertionBuilder {
         if (http2ClientNameEle != null) {
             final String http2ClientName =
                     http2ClientNameEle.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
-            http2ClientNameEle.setAttribute(STRING_VALUE, bundle.applyUniqueName(http2ClientName, ENVIRONMENT));
+            http2ClientNameEle.setAttribute(STRING_VALUE, bundle.applyUniqueName(http2ClientName, ENVIRONMENT, false));
             final GenericEntity http2Client = bundle.getGenericEntities().get(http2ClientName);
             final String id = getIdFromAnnotableEntity(http2Client, policyBuilderContext.getIdGenerator());
             Element http2ClientGoidElement = createElementWithAttribute(

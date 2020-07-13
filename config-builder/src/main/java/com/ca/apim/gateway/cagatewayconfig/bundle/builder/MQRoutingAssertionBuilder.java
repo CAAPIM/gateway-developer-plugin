@@ -18,7 +18,8 @@ public class MQRoutingAssertionBuilder implements PolicyAssertionBuilder {
         final Element activeConnectorNameElement = getSingleChildElement(assertionElement, ACTIVE_CONNECTOR_NAME, true);
         if (activeConnectorNameElement != null) {
             final String activeConnectorName = activeConnectorNameElement.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
-            activeConnectorNameElement.setAttribute(STRING_VALUE, bundle.applyUniqueName(activeConnectorName, ENVIRONMENT));
+            activeConnectorNameElement.setAttribute(STRING_VALUE, bundle.applyUniqueName(activeConnectorName,
+                    ENVIRONMENT, false));
             final SsgActiveConnector ssgActiveConnector = bundle.getSsgActiveConnectors().get(activeConnectorName);
             final String id = ssgActiveConnector != null && ssgActiveConnector.getAnnotatedEntity() != null && ssgActiveConnector.getAnnotatedEntity().getId() != null ?
                     ssgActiveConnector.getAnnotatedEntity().getId() : idGenerator.generate();

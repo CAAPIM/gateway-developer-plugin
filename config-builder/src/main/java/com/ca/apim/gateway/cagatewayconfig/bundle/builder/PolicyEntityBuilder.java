@@ -13,7 +13,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
-import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -21,7 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.*;
 
@@ -29,7 +27,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -37,7 +34,6 @@ import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.insertPrefixToEnvironmentVariable;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
@@ -67,17 +63,17 @@ public class PolicyEntityBuilder implements EntityBuilder {
         this.policyXMLBuilder = policyXMLBuilder;
     }
 
-    public List<Entity> buildEntities(Map<String, ?> policyMap, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
+    public List<Entity> buildEntities(Map<String, ?> policyMap, Bundle bundle, BundleType bundleType, Document document) {
         // no policy has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
-        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+        AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
         policyMap.values().forEach(policy -> {
             Policy policyEntity = (Policy) policy;
             if (annotatedEntity != null) {
                 AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
-                if (annotatedEntity.isReusable()) {
+                if (policyEntity.isParentEntityShared()) {
                     if (annotatedPolicyEntity != null) {
                         if (annotatedPolicyEntity.getId() != null) {
                             if (IdValidator.isValidGoid(annotatedPolicyEntity.getId())) {
@@ -100,22 +96,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
                 }
             }
         });
-        policyMap.values().forEach(policy -> preparePolicy((Policy) policy, bundle, annotatedBundle));
+        policyMap.values().forEach(policy -> preparePolicy((Policy) policy, bundle));
 
         List<Policy> orderedPolicies = new LinkedList<>();
-        policyMap.forEach((path, policy) -> maybeAddPolicy(bundle, (Policy) policy, orderedPolicies, new HashSet<Policy>()));
+        policyMap.forEach((path, policy) -> maybeAddPolicy(bundle, (Policy) policy, orderedPolicies, new HashSet<>()));
 
-        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, annotatedBundle, bundle, document)).collect(toList());
+        return orderedPolicies.stream().map(policy -> buildPolicyEntity(policy, bundle, document)).collect(toList());
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        if (bundle instanceof AnnotatedBundle) {
-            AnnotatedBundle annotatedBundle = (AnnotatedBundle) bundle;
-            Map<String, Policy> map = Optional.ofNullable(bundle.getPolicies()).orElse(Collections.emptyMap());
-            return buildEntities(map, annotatedBundle, annotatedBundle.getFullBundle(), bundleType, document);
-        } else {
-            return buildEntities(bundle.getPolicies(), null, bundle, bundleType, document);
-        }
+        return buildEntities(bundle.getPolicies(), bundle, bundleType, document);
     }
 
     @NotNull
@@ -139,18 +129,14 @@ public class PolicyEntityBuilder implements EntityBuilder {
         orderedPolicies.add(policy);
     }
 
-    private void preparePolicy(Policy policy, Bundle bundle, AnnotatedBundle annotatedBundle) {
+    private void preparePolicy(Policy policy, Bundle bundle) {
         Document policyDocument = loadPolicyDocument(policy);
-        final String policyName;
-        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
-        if (annotatedEntity != null) {
-            if (annotatedEntity.isReusable()) {
-                policyName = policy.getName();
-            } else {
-                policyName = annotatedBundle.applyUniqueName(policy.getName(), BundleType.DEPLOYMENT);
-            }
-        } else {
-            policyName = policy.getName();
+        String policyName = policy.getName();
+        AnnotatedBundle annotatedBundle = null;
+
+        if (bundle instanceof AnnotatedBundle) {
+            annotatedBundle = (AnnotatedBundle) bundle;
+            policyName = bundle.applyUniqueName(policy.getName(), BundleType.DEPLOYMENT, false);
         }
 
         PolicyBuilderContext policyBuilderContext = new PolicyBuilderContext(policyName, policyDocument, bundle, idGenerator);
@@ -198,22 +184,17 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    Entity buildPolicyEntity(Policy policy, AnnotatedBundle annotatedBundle, Bundle bundle, Document document) {
+    Entity buildPolicyEntity(Policy policy, Bundle bundle, Document document) {
         String policyName = policy.getName();
         String policyNameWithPath = policy.getPath();
         policyNameWithPath = CharacterBlacklistUtil.decodePath(policyNameWithPath);
-        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+        AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
-        boolean isReusable = false;
+
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
-            isReusable = annotatedEntity.isReusable();
-        }
-        if (annotatedBundle != null) {
-            if (!isReusable) {
-                policyName = annotatedBundle.applyUniqueName(policyName, BundleType.DEPLOYMENT);
-                policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
-            }
+            policyName = bundle.applyUniqueName(policyName, BundleType.DEPLOYMENT, policy.isParentEntityShared());
+            policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
         }
 
         PolicyTags policyTags = getPolicyTags(policy, bundle);
@@ -255,7 +236,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
                 policy.getPath(), policyNameWithPath, policy.getId(), policyElement, policy.isHasRouting(), policy);
-        if (isRedeployableBundle || !isReusable) {
+        if (isRedeployableBundle || !policy.isParentEntityShared()) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

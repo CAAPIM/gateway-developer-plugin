@@ -92,7 +92,7 @@ public class BundleEntityBuilderTestHelper {
         entityBuilders.add(trustedCertEntityBuilder);
 
         return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(),
-                new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry);
+                new BundleMetadataBuilder(), entityTypeRegistry);
     }
 
     static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath, boolean isRedeployable) {
@@ -146,7 +146,7 @@ public class BundleEntityBuilderTestHelper {
         return encass;
     }
 
-    public static Bundle createBundleWithPolicyFragment(boolean makeFragmentReusable, ProjectInfo projectInfo) {
+    public static Bundle createBundleWithPolicyFragment(boolean makeFragmentShared, ProjectInfo projectInfo) {
         Bundle bundle = createBundle(ENCASS_POLICY_WITH_FRAGMENT, true,false, false, projectInfo);
 
         Policy encassPolicy = bundle.getPolicies().get(TEST_ENCASS_POLICY);
@@ -159,9 +159,9 @@ public class BundleEntityBuilderTestHelper {
         policyFragment.setPolicyXML(POLICY_FRAGMENT);
         policyFragment.setPath(TEST_POLICY_FRAGMENT);
         policyFragment.setHasRouting(true);
-        if (makeFragmentReusable) {
+        if (makeFragmentShared) {
             Set<Annotation> annotations = new HashSet<>();
-            Annotation annotation = new Annotation(AnnotationType.REUSABLE);
+            Annotation annotation = new Annotation(AnnotationType.SHARED);
             annotations.add(annotation);
             policyFragment.setAnnotations(annotations);
         }
@@ -205,7 +205,7 @@ public class BundleEntityBuilderTestHelper {
     }
 
     static Bundle createBundle(String policyXmlString, boolean policyHasRouting, boolean includeDependencies,
-                               boolean includeReusableEntities, ProjectInfo projectInfo) {
+                               boolean includeSharedEntities, ProjectInfo projectInfo) {
         Bundle bundle = new Bundle(projectInfo);
         Folder root = createRoot();
         bundle.getFolders().put(EMPTY, root);
@@ -222,9 +222,9 @@ public class BundleEntityBuilderTestHelper {
         policy.setPolicyXML(policyXmlString);
         policy.setPath(TEST_ENCASS_POLICY);
         policy.setHasRouting(policyHasRouting);
-        if (includeReusableEntities) {
+        if (includeSharedEntities) {
             Set<Annotation> annotations = new HashSet<>();
-            Annotation annotation = new Annotation(AnnotationType.REUSABLE);
+            Annotation annotation = new Annotation(AnnotationType.SHARED);
             annotations.add(annotation);
             policy.setAnnotations(annotations);
         }
@@ -287,7 +287,7 @@ public class BundleEntityBuilderTestHelper {
 
     static void verifyAnnotatedEncassBundleMetadata(Map<String, BundleArtifacts> bundles, Bundle bundle,
                                                     Encass encass, boolean isRedeployableBundle,
-                                                    boolean isBundleContainReusableEntity, boolean hasRouting) throws JsonProcessingException {
+                                                    boolean isBundleContainSharedEntity, boolean hasRouting) throws JsonProcessingException {
         Map<String, Metadata> expectedEnvMetadata = new HashMap<>();
         for (Dependency dependency : bundle.getDependencyMap().entrySet().iterator().next().getValue()) {
             expectedEnvMetadata.put(dependency.getType(), new Metadata() {
@@ -321,7 +321,7 @@ public class BundleEntityBuilderTestHelper {
         assertEquals("my-bundle-group", metadata.getGroupName());
         assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, metadata.getType());
         assertEquals("1.0", metadata.getVersion());
-        if (isRedeployableBundle || !isBundleContainReusableEntity) {
+        if (isRedeployableBundle || !isBundleContainSharedEntity) {
             assertTrue(metadata.isRedeployable());
         }
         assertEquals(hasRouting, metadata.isHasRouting());

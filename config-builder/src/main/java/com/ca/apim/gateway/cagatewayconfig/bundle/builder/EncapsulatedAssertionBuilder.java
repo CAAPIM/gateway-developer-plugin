@@ -113,7 +113,7 @@ public class EncapsulatedAssertionBuilder implements PolicyAssertionBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (encass != null && !encass.isExcluded() && annotatedEntity != null) {
             AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (annotatedEntity.isReusable()) {
+            if (encass.isParentEntityShared()) {
                 if (annotatedEncassEntity != null) {
                     if (annotatedEncassEntity.getGuid() != null) {
                         if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
@@ -135,8 +135,8 @@ public class EncapsulatedAssertionBuilder implements PolicyAssertionBuilder {
                 encassGuid = idGenerator.generateGuid();
                 encass.setGuid(encassGuid);
                 encass.setId(idGenerator.generate());
-                encassName = annotatedBundle.applyUniqueName(encassName, EntityBuilder.BundleType.DEPLOYMENT);
             }
+            encassName = annotatedBundle.applyUniqueName(encassName, EntityBuilder.BundleType.DEPLOYMENT, encass.isParentEntityShared());
         }
         Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
                 policyBuilderContext.getPolicyDocument(),

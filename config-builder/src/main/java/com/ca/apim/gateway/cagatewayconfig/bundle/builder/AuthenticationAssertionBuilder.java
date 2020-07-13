@@ -20,7 +20,8 @@ public class AuthenticationAssertionBuilder implements PolicyAssertionBuilder {
             final String idProviderName =
                     idProviderNameElement.getAttributes().getNamedItem(STRING_VALUE).getTextContent();
             if(!idProviderName.equals(INTERNAL_IDP_NAME)){
-                idProviderNameElement.setAttribute(STRING_VALUE, bundle.applyUniqueName(idProviderName, ENVIRONMENT));
+                idProviderNameElement.setAttribute(STRING_VALUE, bundle.applyUniqueName(idProviderName, ENVIRONMENT,
+                        false));
             }
         }
     }

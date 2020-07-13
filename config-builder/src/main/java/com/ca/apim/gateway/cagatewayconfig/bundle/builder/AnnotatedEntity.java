@@ -80,12 +80,7 @@ public class AnnotatedEntity<T> {
     }
 
     public boolean isBundle() {
-
         return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isBundle();
-    }
-
-    public boolean isReusable() {
-        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isReusable();
     }
 
     public boolean isRedeployable() {

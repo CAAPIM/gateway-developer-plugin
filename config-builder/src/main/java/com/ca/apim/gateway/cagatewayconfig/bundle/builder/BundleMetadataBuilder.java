@@ -27,13 +27,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.PR
 @Singleton
 public class BundleMetadataBuilder {
 
-    private final IdGenerator idGenerator;
-
-    @Inject
-    public BundleMetadataBuilder(final IdGenerator idGenerator) {
-        this.idGenerator = idGenerator;
-    }
-
     /**
      * Builds bundle metadata for Annotated bundle or Full bundle.
      *
@@ -53,7 +46,8 @@ public class BundleMetadataBuilder {
                 name =  bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
             }
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), name, projectInfo.getName()
+                    , projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
             final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(dependentEntities);
             builder.referencedEntities(referencedEntities);
@@ -62,8 +56,8 @@ public class BundleMetadataBuilder {
             }
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
-            builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
-            builder.l7Template(Boolean.valueOf(String.valueOf(encass.getProperties().get(L7_TEMPLATE))));
+            builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsSharedEntity(annotatedBundle));
+            builder.l7Template(Boolean.parseBoolean(String.valueOf(encass.getProperties().get(L7_TEMPLATE))));
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
             final List<Metadata> definedEntities = new ArrayList<>();
@@ -112,7 +106,8 @@ public class BundleMetadataBuilder {
      * @return Full bundle metadata
      */
     private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final Bundle bundle, ProjectInfo projectInfo) {
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(), projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(),
+                projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
         builder.redeployable(true);
@@ -135,11 +130,12 @@ public class BundleMetadataBuilder {
 
     private Collection<Metadata> getDefinedEntitiesMetadata(final List<Entity> definedEntities) {
         return definedEntities.stream().filter(FILTER_NON_ENV_ENTITIES_EXCLUDING_FOLDER)
-                .map(e -> ((GatewayEntity)e.getGatewayEntity()).getMetadata()).collect(Collectors.toList());
+                .map(e -> (e.getGatewayEntity()).getMetadata()).collect(Collectors.toList());
     }
 
-    private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
-        return annotatedBundle.getAnnotatedEntity().isReusable();
+    private boolean isBundleContainsSharedEntity(final AnnotatedBundle annotatedBundle) {
+        return annotatedBundle.getEncasses().values().stream().anyMatch(Encass::isParentEntityShared)
+               || annotatedBundle.getPolicies().values().stream().anyMatch(Policy::isParentEntityShared);
     }
 
     private boolean hasRoutingAssertion(final List<Entity> dependentEntities) {

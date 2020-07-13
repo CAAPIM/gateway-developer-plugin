@@ -21,14 +21,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Named;
 import java.io.File;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static java.util.stream.Collectors.toCollection;
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @JsonInclude(NON_NULL)
 @Named("ENCAPSULATED_ASSERTION")
@@ -40,9 +38,9 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     private String policy;
     private Set<EncassArgument> arguments;
     private Set<EncassResult> results;
-    private Map<String, Object> properties;
+    private Map<String, Object> properties = new HashMap<>();
     @JsonDeserialize(using = AnnotationDeserializer.class)
-    private Set<Annotation> annotations;
+    private Set<Annotation> annotations = new HashSet<>();
     @JsonIgnore
     private String guid;
     @JsonIgnore
@@ -51,6 +49,16 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     private String path;
     @JsonIgnore
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
+
+    /* Set to true if any Parent (Policy or Encass) in hierarchy is annotated with @shared */
+    @JsonIgnore
+    private boolean isParentEntityShared;
+
+    public Encass() { }
+
+    public Encass(Encass otherEncass) {
+        merge(otherEncass);
+    }
 
     public Set<EncassArgument> getArguments() {
         return arguments;
@@ -115,6 +123,28 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public boolean isParentEntityShared() {
+        return isParentEntityShared;
+    }
+
+    public void setParentEntityShared(boolean parentEntityShared) {
+        isParentEntityShared = parentEntityShared;
+    }
+
+    Encass merge(Encass otherEncass) {
+        this.guid = firstNonNull(otherEncass.guid, this.guid);
+        this.setName(firstNonNull(otherEncass.getName(), this.getName()));
+        this.setId(firstNonNull(otherEncass.getId(), this.getId()));
+        this.properties.putAll(firstNonNull(otherEncass.properties, Collections.emptyMap()));
+        this.policy = firstNonNull(otherEncass.policy, this.policy);
+        this.path = firstNonNull(otherEncass.path, this.path);
+        this.arguments = firstNonNull(firstNonNull(otherEncass.arguments, Collections.emptySet()));
+        this.results = firstNonNull(firstNonNull(otherEncass.results, Collections.emptySet()));
+        this.policyId = firstNonNull(otherEncass.policyId, this.policyId);
+        this.annotations.addAll(firstNonNull(otherEncass.annotations, Collections.emptySet()));
+        return this;
     }
 
     @Override
@@ -201,5 +231,22 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     @Override
     public String getType() {
         return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Encass)) {
+            return false;
+        }
+        Encass encass = (Encass) o;
+        return Objects.equals(getName(), encass.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
     }
 }

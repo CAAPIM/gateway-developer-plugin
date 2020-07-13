@@ -33,13 +33,12 @@ public class MQRoutingAssertionBuilderTest {
     private Document document;
     private MQRoutingAssertionBuilder mqRoutingAssertionBuilder = new MQRoutingAssertionBuilder();
     private PolicyBuilderContext policyBuilderContext;
-    private ProjectInfo projectInfo = new ProjectInfo("TestProject", "TestGroup", "1.0");
 
     @BeforeEach
     void beforeEach() {
         policy = new Policy();
         policy.setPath("test/policy/path.xml");
-        bundle = new Bundle(projectInfo);
+        bundle = new Bundle(new ProjectInfo("TestProject", "TestGroup", "1.0"));
         bundle.setDependencies(new HashSet<>());
         document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
     }
@@ -56,13 +55,10 @@ public class MQRoutingAssertionBuilderTest {
 
         final Element connectorGoid = getSingleChildElement(mqRoutingAssertionElement, ACTIVE_CONNECTOR_GOID, true);
         final Element connectorid = getSingleChildElement(mqRoutingAssertionElement, ACTIVE_CONNECTOR_ID, true);
-        final Element connectorName = getSingleChildElement(mqRoutingAssertionElement, ACTIVE_CONNECTOR_NAME, true);
         assertNotNull(connectorGoid);
         assertNotNull(connectorid);
-        assertNotNull(connectorName);
         assertEquals("2cd473fe16d98cd6b9348ffb404517bc", connectorGoid.getAttributes().getNamedItem(GOID_VALUE).getTextContent());
         assertEquals("2cd473fe16d98cd6b9348ffb404517bc", connectorid.getAttributes().getNamedItem(GOID_VALUE).getTextContent());
-        assertEquals("::" + projectInfo.getGroupName() + "::" + "activeConnector1" + "::1.0", connectorName.getAttributes().getNamedItem(STRING_VALUE).getTextContent());
     }
 
     @NotNull

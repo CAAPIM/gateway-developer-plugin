@@ -30,13 +30,12 @@ public class Http2AssertionBuilderTest {
     private Document document;
     private Http2AssertionBuilder http2AssertionBuilder = new Http2AssertionBuilder();
     private PolicyBuilderContext policyBuilderContext;
-    private ProjectInfo projectInfo = new ProjectInfo("TestProject", "TestGroup", "1.0");
 
     @BeforeEach
     void beforeEach() {
         policy = new Policy();
         policy.setPath("test/policy/path.xml");
-        bundle = new Bundle(projectInfo);
+        bundle = new Bundle(new ProjectInfo("TestProject", "TestGroup", "1.0"));
         bundle.setDependencies(new HashSet<>());
         document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
     }
@@ -55,10 +54,6 @@ public class Http2AssertionBuilderTest {
         final Element clientConfigId = getSingleChildElement(http2RoutingAssertionElement, HTTP2_CLIENT_CONFIG_GOID, true);
         assertNotNull(clientConfigId);
         assertEquals("a2097d7f50280e9411c277aafedc180d", clientConfigId.getAttributes().getNamedItem(GOID_VALUE).getTextContent());
-
-        final Element clientConfigName = getSingleChildElement(http2RoutingAssertionElement, HTTP2_CLIENT_CONFIG_NAME, true);
-        assertNotNull(clientConfigName);
-        assertEquals("::" + projectInfo.getGroupName() + "::" + "http2client" + "::1.0", clientConfigName.getAttributes().getNamedItem(STRING_VALUE).getTextContent());
     }
 
     @NotNull
