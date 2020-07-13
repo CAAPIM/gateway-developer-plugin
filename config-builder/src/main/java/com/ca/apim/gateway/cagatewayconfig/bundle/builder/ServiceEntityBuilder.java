@@ -45,23 +45,17 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        if (bundle instanceof AnnotatedBundle) {
-            AnnotatedBundle annotatedBundle = ((AnnotatedBundle) bundle);
-            Map<String, Service> serviceMap = Optional.ofNullable(bundle.getServices()).orElse(Collections.emptyMap());
-            return buildEntities(serviceMap, annotatedBundle, annotatedBundle.getFullBundle(), bundleType, document);
-        } else {
-            return buildEntities(bundle.getServices(), null, bundle, bundleType, document);
-        }
+        return buildEntities(bundle.getServices(), bundle, bundleType, document);
     }
 
-    private List<Entity> buildEntities(Map<String, ?> entities, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         // no service has to be added to environment bundle
         if (bundleType == ENVIRONMENT) {
             return emptyList();
         }
 
         return entities.entrySet().stream().map(serviceEntry ->
-                buildServiceEntity(annotatedBundle, bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
+                buildServiceEntity(bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
@@ -71,8 +65,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildServiceEntity(AnnotatedBundle annotatedBundle, Bundle bundle, String servicePath, Service service, Document document) {
-        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
+    private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
+        AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
         boolean isReusable = false;
         if (annotatedEntity != null) {

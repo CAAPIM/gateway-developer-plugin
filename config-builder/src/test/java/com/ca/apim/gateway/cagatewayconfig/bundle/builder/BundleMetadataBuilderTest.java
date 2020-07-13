@@ -188,7 +188,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(TEST_SERVICE_ANNOTATION_NAME, metadata.getName());
         assertEquals(TEST_SERVICE_ANNOTATION_DESC, metadata.getDescription());
         assertEquals(TEST_SERVICE_ANNOTATION_TAGS, metadata.getTags());
-        //assertTrue(metadata.isL7Template());
+        assertFalse(metadata.isL7Template());
 
         verifyAnnotatedServiceBundleMetadata(bundles, bundle, service, false, true, true);
     }
