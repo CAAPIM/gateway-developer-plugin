@@ -197,6 +197,61 @@ class PolicyXMLSimplifierTest {
     }
 
     @Test
+    void simplifySpecificUserAssertion() throws DocumentParseException {
+        String id = new IdGenerator().generate();
+        String testName = "test";
+        IdentityProvider identityProvider = new IdentityProvider.Builder()
+                .id(id)
+                .name(testName)
+                .build();
+        Bundle bundle = new Bundle();
+        bundle.addEntity(identityProvider);
+        Element authenticationAssertion = createSpecificUserAssertionElement(id);
+        new SpecificUserAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                bundle,
+                                null)
+                                .withAssertionElement(authenticationAssertion)
+                );
+
+        assertEquals(testName, getSingleChildElementAttribute(authenticationAssertion, ID_PROV_NAME, STRING_VALUE));
+        assertNull(getSingleChildElement(authenticationAssertion, ID_PROV_OID, true));
+    }
+
+    @Test
+    void simplifySpecificUserAssertionToInternalIDP() throws DocumentParseException {
+        Element authenticationAssertion = createSpecificUserAssertionElement(INTERNAL_IDP_ID);
+        new AuthenticationAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                new Bundle(),
+                                null)
+                                .withAssertionElement(authenticationAssertion)
+                );
+        assertEquals(INTERNAL_IDP_NAME, getSingleChildElementAttribute(authenticationAssertion, ID_PROV_NAME, STRING_VALUE));
+        assertNull(getSingleChildElement(authenticationAssertion, ID_PROV_OID, true));
+    }
+
+    @Test
+    void simplifySpecificUserAssertionToMissingIDP() throws DocumentParseException {
+        String id = new IdGenerator().generate();
+        Element authenticationAssertion = createSpecificUserAssertionElement(id);
+        new AuthenticationAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                new Bundle(),
+                                null)
+                                .withAssertionElement(authenticationAssertion)
+                );
+        assertEquals(id, getSingleChildElementAttribute(authenticationAssertion, ID_PROV_OID, GOID_VALUE));
+        assertNull(getSingleChildElement(authenticationAssertion, ID_PROV_NAME, true));
+    }
+
+    @Test
     void simplifyJmsRoutingAssertion() throws DocumentParseException {
         String id = new IdGenerator().generate();
         String name = "jms-test";
@@ -559,6 +614,17 @@ class PolicyXMLSimplifierTest {
 
     @NotNull
     private Element createAuthenticationAssertionElement(String id) {
+        Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        return createElementWithChildren(
+                document,
+                AUTHENTICATION,
+                createElementWithAttribute(document, ID_PROV_OID, GOID_VALUE, id),
+                createElementWithAttribute(document, TARGET, "target", "RESPONSE")
+        );
+    }
+
+    @NotNull
+    private Element createSpecificUserAssertionElement(String id) {
         Document document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
         return createElementWithChildren(
                 document,
