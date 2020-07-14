@@ -7,14 +7,17 @@
 package com.ca.apim.gateway.cagatewayimport.tasks;
 
 import com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClient;
+import com.ca.apim.gateway.cagatewayimport.config.GatewayImportConfig;
 import com.ca.apim.gateway.cagatewayimport.config.GatewayImportConnectionProperties;
 import org.apache.http.entity.FileEntity;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClient.getRestmanBundleEndpoint;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
@@ -30,12 +33,12 @@ public class ImportBundleTask extends DefaultTask {
 
     //Inputs
     private GatewayImportConnectionProperties gatewayConnectionProperties;
-    private RegularFileProperty importFile;
+    private GatewayImportConfig gatewayImportConfig;
 
     public ImportBundleTask() {
         this.gatewayClient = GatewayClient.INSTANCE;
         gatewayConnectionProperties = new GatewayImportConnectionProperties(getProject());
-        importFile = newInputFile();
+        gatewayImportConfig = new GatewayImportConfig(getProject());
 
         // makes it so that the export is always run
         getOutputs().upToDateWhen(t -> false);
@@ -50,23 +53,28 @@ public class ImportBundleTask extends DefaultTask {
         this.gatewayConnectionProperties = gatewayConnectionProperties;
     }
 
-    /**
-     * @return the bundle file to be imported
-     */
-    public RegularFileProperty getImportFile() {
-        return importFile;
+    public GatewayImportConfig getGatewayImportConfig() {
+        return gatewayImportConfig;
     }
+
+    public void setGatewayImportConfig(GatewayImportConfig gatewayImportConfig) {
+        this.gatewayImportConfig = gatewayImportConfig;
+    }
+
 
     @TaskAction
     public void perform() {
-        File bundleFile = importFile.getAsFile().get();
-        gatewayClient.makeGatewayAPICall(
-                create(METHOD_NAME)
-                        .setUri(getRestmanBundleEndpoint(gatewayConnectionProperties.getUrl().get()))
-                        .setEntity(new FileEntity(bundleFile))
-                        .setHeader(CONTENT_TYPE, "application/xml"),
-                gatewayConnectionProperties.getUserName().get(),
-                gatewayConnectionProperties.getUserPass().get()
-        );
+        ListProperty<File> bundlesProperty = gatewayImportConfig.getBundles();
+        List<File> bundleFiles = bundlesProperty.getOrElse(Collections.EMPTY_LIST);
+        bundleFiles.forEach(bundleFile -> {
+            gatewayClient.makeGatewayAPICall(
+                    create(METHOD_NAME)
+                            .setUri(getRestmanBundleEndpoint(gatewayConnectionProperties.getUrl().get()))
+                            .setEntity(new FileEntity(bundleFile))
+                            .setHeader(CONTENT_TYPE, "application/xml"),
+                    gatewayConnectionProperties.getUserName().get(),
+                    gatewayConnectionProperties.getUserPass().get()
+            );
+        });
     }
 }

@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayimport;
 
+import com.ca.apim.gateway.cagatewayimport.config.GatewayImportConfig;
 import com.ca.apim.gateway.cagatewayimport.config.GatewayImportConnectionProperties;
 import com.ca.apim.gateway.cagatewayimport.tasks.ImportBundleTask;
 import org.gradle.api.Plugin;
@@ -24,10 +25,14 @@ public class CAGatewayImport implements Plugin<Project> {
         project.getPlugins().apply("base");
 
         final GatewayImportConnectionProperties gatewayConnectionProperties = project.getExtensions().create("GatewayImportConnection", GatewayImportConnectionProperties.class, project);
+        final GatewayImportConfig gatewayImportConfig = project.getExtensions().create("GatewayImportConfig", GatewayImportConfig.class, project);
         // Set Defaults
         project.afterEvaluate(p -> setDefaults(gatewayConnectionProperties));
 
-        project.getTasks().create("import-bundle", ImportBundleTask.class, t -> t.setGatewayConnectionProperties(gatewayConnectionProperties));
+        project.getTasks().create("import-bundle", ImportBundleTask.class, t -> {
+            t.setGatewayConnectionProperties(gatewayConnectionProperties);
+            t.setGatewayImportConfig(gatewayImportConfig);
+        });
     }
 
 
