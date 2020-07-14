@@ -8,7 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"type", "name", "id", "guid"})
+@JsonPropertyOrder({"type", "name", "id", "guid", "uri", "soap", "arguments", "results"})
 public interface Metadata {
 
     String getType();

@@ -6,7 +6,12 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+
 import java.util.Collection;
+
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 
 public class AnnotatedEntity<T> {
     private final T entity;
@@ -94,6 +99,18 @@ public class AnnotatedEntity<T> {
 
     public boolean isExcluded() {
         return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isExcluded();
+    }
+
+    public boolean isL7Template() {
+        boolean l7Template = false;
+        switch (entityType) {
+            case EntityTypes.ENCAPSULATED_ASSERTION_TYPE:
+                l7Template = Boolean.valueOf(String.valueOf(((Encass) entity).getProperties().get(L7_TEMPLATE)));
+                break;
+            case EntityTypes.SERVICE_TYPE:
+                break;
+        }
+        return l7Template;
     }
 
     public Collection<String> getTags() {
