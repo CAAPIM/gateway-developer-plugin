@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.environment;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -70,7 +71,8 @@ class BundleEnvironmentValidator {
 
             String type = mapping.getAttribute(ATTRIBUTE_TYPE);
             if (mode.isRequired(type)) {
-                findInBundle(environmentBundle, type, mapToName);
+                final String entityName = EnvironmentConfigurationUtils.extractEntityName(mapToName);
+                findInBundle(environmentBundle, type, entityName);
             }
         }
     }
@@ -124,4 +126,5 @@ class BundleEnvironmentValidator {
             throw new MissingEnvironmentException("Missing environment value for " + type + ": " + name);
         }
     }
+
 }

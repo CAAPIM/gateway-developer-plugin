@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -31,12 +32,13 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceEntityBuilderTest {
+    private ProjectInfo projectInfo = new ProjectInfo("TestName", "TestGroup", "1.0");
 
     @Test
     void buildNoServices() {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
 
         List<Entity> serviceEntities = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
@@ -47,7 +49,7 @@ class ServiceEntityBuilderTest {
     void buildServicesWithoutPolicy() {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
 
         Service service = new Service();
         service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
@@ -67,7 +69,7 @@ class ServiceEntityBuilderTest {
     void buildOneServices() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
 
         Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
 
@@ -98,7 +100,7 @@ class ServiceEntityBuilderTest {
     void buildTwoServicesSamePolicy() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
         Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
 
         Service service1 = getService1(serviceParentFolder);
@@ -125,7 +127,7 @@ class ServiceEntityBuilderTest {
     void buildOneSoapServiceWithWSDLAndNoXSD() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
 
         Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/soap/policy.xml", "policy");
 
@@ -161,14 +163,14 @@ class ServiceEntityBuilderTest {
 
         Entity serviceEntity = services.get(0);
 
-        verifyService(service, serviceEntity, 1, "soap-service" + 1);
+        verifyService(service, serviceEntity, 1,  "soap-service" + 1);
     }
 
     @Test
     void buildTwoServicesOneSoapWithWSDLAndXSDAndOneRest() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
         Folder service1ParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
         Folder service2ParentFolder = setUpFolderAndPolicy(bundle, "/soap/policy.xml", "policy");
 
@@ -218,11 +220,11 @@ class ServiceEntityBuilderTest {
 
         assertEquals(2, services.size());
         if (services.get(0).getName().equals("service1")) {
-            verifyService(service1, services.get(0), 1, "service" + 1);
-            verifyService(service2, services.get(1), 2, "service" + 2);
+            verifyService(service1, services.get(0), 1,  "service" + 1 );
+            verifyService(service2, services.get(1), 2, "service" + 2 );
         } else {
-            verifyService(service2, services.get(0), 2, "service" + 2);
-            verifyService(service1, services.get(1), 1, "service" + 1);
+            verifyService(service2, services.get(0), 2, "service" + 2 );
+            verifyService(service1, services.get(1), 1,  "service" + 1 );
         }
     }
 

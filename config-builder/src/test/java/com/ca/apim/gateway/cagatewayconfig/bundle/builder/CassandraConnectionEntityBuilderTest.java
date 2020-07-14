@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
 import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
@@ -35,6 +36,7 @@ class CassandraConnectionEntityBuilderTest {
 
     private static final String TEST_CASSANDRA_CONNECTION = "TestConnection";
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
+    private ProjectInfo projectInfo = new ProjectInfo("TestProject", "TestGroup", "1.0");
 
     @Test
     void buildFromEmptyBundle_noConnections() {
@@ -47,7 +49,7 @@ class CassandraConnectionEntityBuilderTest {
     @Test
     void buildWithConnection_checkBundleContainsConnection() {
         CassandraConnectionEntityBuilder builder = new CassandraConnectionEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         addPasswordIfNecessary(true, bundle);
         bundle.putAllCassandraConnections(ImmutableMap.of(TEST_CASSANDRA_CONNECTION, buildCassandraConnection()));
 
@@ -70,7 +72,7 @@ class CassandraConnectionEntityBuilderTest {
 
     @Test
     void buildDeploymentBundle() {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         addPasswordIfNecessary(true, bundle);
         bundle.putAllCassandraConnections(ImmutableMap.of(TEST_CASSANDRA_CONNECTION, buildCassandraConnection()));
 
@@ -79,7 +81,7 @@ class CassandraConnectionEntityBuilderTest {
                 bundle,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 EntityTypes.CASSANDRA_CONNECTION_TYPE,
-                Stream.of("TestConnection").collect(Collectors.toList())
+                Stream.of("::" + projectInfo.getGroupName() + "::" + "TestConnection" + "::" + projectInfo.getVersion()).collect(Collectors.toList())
         );
     }
 
@@ -93,9 +95,9 @@ class CassandraConnectionEntityBuilderTest {
         assertThrows(EntityBuilderException.class, () -> buildAndCheckCassandraConnection(false));
     }
 
-    private static void buildAndCheckCassandraConnection(boolean password) {
+    private void buildAndCheckCassandraConnection(boolean password) {
         CassandraConnectionEntityBuilder builder = new CassandraConnectionEntityBuilder(ID_GENERATOR);
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
 
         addPasswordIfNecessary(password, bundle);
 

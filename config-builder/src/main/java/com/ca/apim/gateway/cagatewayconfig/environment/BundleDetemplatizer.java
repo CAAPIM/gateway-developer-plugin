@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 
 import java.util.Base64;
 import java.util.Map;
@@ -70,7 +71,7 @@ class BundleDetemplatizer {
         StringBuffer replacedBundle = new StringBuffer();
         while (setVariableMatcher.find()) {
             String varName = setVariableMatcher.group(1);
-            String value = mapToCheck.get(varName);
+            String value = mapToCheck.get(EnvironmentConfigurationUtils.extractEntityName(varName));
             if (value == null) {
                 throw new BundleDetemplatizeException("Missing environment value for property: " + varName);
             }
