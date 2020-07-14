@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils.generateDependentEnvBundleFromProject;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.PREFIX_ENVIRONMENT;
 
 @Singleton
@@ -46,14 +45,13 @@ public class BundleMetadataBuilder {
                                 ProjectInfo projectInfo) {
         if (annotatedBundle != null && annotatedBundle.getAnnotatedEntity() != null) {
             AnnotatedEntity<? extends GatewayEntity> annotatedEntity = annotatedBundle.getAnnotatedEntity();
-            final Encass encass = (Encass) annotatedEntity.getEntity();
             final String bundleName = annotatedBundle.getBundleName();
             String name = bundleName;
             if (StringUtils.isNotBlank(projectInfo.getVersion())) {
                 name =  bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
             }
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getEntityType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(annotatedEntity.getEntityType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
             final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(dependentEntities);
             builder.referencedEntities(referencedEntities);
@@ -63,7 +61,7 @@ public class BundleMetadataBuilder {
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
             builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
-            builder.l7Template(Boolean.valueOf(String.valueOf(encass.getProperties().get(L7_TEMPLATE))));
+            builder.l7Template(annotatedEntity.isL7Template());
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
             final List<Metadata> definedEntities = new ArrayList<>();

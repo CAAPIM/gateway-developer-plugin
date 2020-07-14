@@ -16,6 +16,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -203,11 +204,19 @@ public class Service extends Folderable implements AnnotableEntity {
 
             @Override
             public String getId() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && annotatedEntity.getId() != null) {
+                    return annotatedEntity.getId();
+                }
                 return Service.this.getId();
             }
 
             @Override
             public String getGuid() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && annotatedEntity.getGuid() != null) {
+                    return annotatedEntity.getGuid();
+                }
                 return Service.this.getGuid();
             }
 
@@ -230,5 +239,6 @@ public class Service extends Folderable implements AnnotableEntity {
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
         setId(idGenerator.generate());
+        setName(PathUtils.extractName(entityKey));
     }
 }

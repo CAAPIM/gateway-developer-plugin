@@ -13,19 +13,21 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.reflections.Reflections;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.reflections.Reflections;
+
 import java.util.*;
 
-import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilderTestHelper.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_NAME;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilderTestHelper.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createRoot;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.LISTEN_PORT_TYPE;
@@ -525,22 +527,68 @@ class BundleEntityBuilderTest {
         assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, mapping3.getAttribute("type"));
     }
 
-    private static Policy buildTestPolicyWithAnnotation(String policyName, String policyId, String policyGuid, Set<Annotation> annotations) {
-        Policy policy = new Policy();
-        policy.setParentFolder(Folder.ROOT_FOLDER);
-        policy.setName(policyName);
-        policy.setId(policyId);
-        policy.setGuid(policyGuid);
-        policy.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<wsp:Policy xmlns:L7p=\"http://www.layer7tech.com/ws/policy\" xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\">\n" +
-                "    <wsp:All wsp:Usage=\"Required\">\n" +
-                "        <L7p:CommentAssertion>\n" +
-                "            <L7p:Comment stringValue=\"Policy Fragment: includedPolicy\"/>\n" +
-                "        </L7p:CommentAssertion>\n" +
-                "    </wsp:All>\n" +
-                "</wsp:Policy>");
-        policy.setPath(policyName);
-        policy.setAnnotations(annotations);
-        return policy;
+    @Test
+    void testServiceAnnotatedBundle() throws DocumentParseException {
+        Bundle bundle = createBundleForService(false);
+        Service service = buildTestServiceWithAnnotation(TEST_SERVICE, TEST_SERVICE_ID, TEST_SERVICE);
+        bundle.getServices().put(TEST_SERVICE, service);
+
+        buildAndValidateAnnotatedServiceBundle(bundle, TEST_SERVICE, NEW_OR_EXISTING,
+                TEST_DEP_ENCASS_POLICY, NEW_OR_EXISTING, TEST_DEP_ENCASS, NEW_OR_EXISTING);
+    }
+
+    private static void buildAndValidateAnnotatedServiceBundle(Bundle bundle, String expServiceName, String expServiceAction, String expDepEncassPolicyName, String expDepEncassPolicyAction,
+                                                               String expDepEncassName, String expDepEncassAction) {
+        BundleEntityBuilder builder = createBundleEntityBuilder();
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
+                DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        for (Map.Entry<String, BundleArtifacts> bundleEntry : bundles.entrySet()) {
+            assertEquals(TEST_SERVICE_ANNOTATION_NAME + "-" + "1.0", bundleEntry.getKey());
+            final Element element = bundleEntry.getValue().getBundle();
+            assertNotNull(element);
+            assertEquals(BundleDocumentBuilder.GATEWAY_MANAGEMENT, element.getAttribute(BundleDocumentBuilder.L7));
+            assertEquals(BUNDLE, element.getTagName());
+            final Element references = getSingleChildElement(element, REFERENCES);
+            assertNotNull(references);
+            final List<Element> itemList = getChildElements(references, ITEM);
+            assertNotNull(itemList);
+            assertEquals(4, itemList.size());
+            final Element folderElement = itemList.get(0);
+            assertEquals(ROOT_FOLDER_NAME, getSingleChildElementTextContent(folderElement, NAME));
+            assertEquals(EntityTypes.FOLDER_TYPE, getSingleChildElementTextContent(folderElement, TYPE));
+            assertNotNull(getSingleChildElement(folderElement, RESOURCE));
+            final Element depPolicyElement = itemList.get(1);
+            assertEquals(expDepEncassPolicyName, getSingleChildElementTextContent(depPolicyElement, NAME));
+            assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(depPolicyElement, TYPE));
+            assertNotNull(getSingleChildElement(depPolicyElement, RESOURCE));
+            final Element depEncassElement = itemList.get(2);
+            assertEquals(expDepEncassName, getSingleChildElementTextContent(depEncassElement, NAME));
+            assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, getSingleChildElementTextContent(depEncassElement, TYPE));
+            assertNotNull(getSingleChildElement(depEncassElement, RESOURCE));
+            final Element serviceElement = itemList.get(3);
+            assertEquals("::my-bundle-group.TestServiceAnnotationName::" + expServiceName + "::1.0", getSingleChildElementTextContent(serviceElement, NAME));
+            assertEquals(EntityTypes.SERVICE_TYPE, getSingleChildElementTextContent(serviceElement, TYPE));
+            assertNotNull(getSingleChildElement(serviceElement, RESOURCE));
+
+            final Element mappings = getSingleChildElement(element, MAPPINGS);
+            assertNotNull(mappings);
+            final List<Element> mappingsList = getChildElements(mappings, MAPPING);
+            assertNotNull(mappingsList);
+            assertEquals(4, mappingsList.size());
+            final Element folderMapping = mappingsList.get(0);
+            assertEquals(NEW_OR_EXISTING, folderMapping.getAttribute(ATTRIBUTE_ACTION));
+            assertEquals(EntityTypes.FOLDER_TYPE, folderMapping.getAttribute(ATTRIBUTE_TYPE));
+            final Element depPolicyMapping = mappingsList.get(1);
+            assertEquals(expDepEncassPolicyAction, depPolicyMapping.getAttribute(ATTRIBUTE_ACTION));
+            assertEquals(EntityTypes.POLICY_TYPE, depPolicyMapping.getAttribute(ATTRIBUTE_TYPE));
+            final Element depEncassMapping = mappingsList.get(2);
+            assertEquals(expDepEncassAction, depEncassMapping.getAttribute(ATTRIBUTE_ACTION));
+            assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, depEncassMapping.getAttribute(ATTRIBUTE_TYPE));
+            final Element serviceMapping = mappingsList.get(3);
+            assertEquals(expServiceAction, serviceMapping.getAttribute(ATTRIBUTE_ACTION));
+            assertEquals(EntityTypes.SERVICE_TYPE, serviceMapping.getAttribute(ATTRIBUTE_TYPE));
+        }
     }
 }
