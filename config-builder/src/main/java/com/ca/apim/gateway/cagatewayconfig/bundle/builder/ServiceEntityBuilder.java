@@ -82,7 +82,12 @@ public class ServiceEntityBuilder implements EntityBuilder {
         if (isNotEmpty(soapResourceBeans)) {
             soapResourceBeans.forEach(soapResourceBean -> {
                 String path = PathUtils.unixPath(service.getParentFolder().getPath(), service.getName(), soapResourceBean.getFileName());
-                String content = bundle.getSoapResources().get(path).getContent();
+                String content;
+                if (bundle instanceof AnnotatedBundle) {
+                    content = ((AnnotatedBundle) bundle).getFullBundle().getSoapResources().get(path).getContent();
+                } else {
+                    content = bundle.getSoapResources().get(path).getContent();
+                }
                 soapResourceBean.setContent(content);
             });
         }
