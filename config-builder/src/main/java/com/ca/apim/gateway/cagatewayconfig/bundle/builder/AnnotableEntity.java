@@ -28,7 +28,7 @@ public interface AnnotableEntity {
      * @return String
      */
     @JsonIgnore
-    String getType();
+    String getEntityType();
 
     /**
      * This method returns all the Annotation applied to the entity.
@@ -50,7 +50,7 @@ public interface AnnotableEntity {
             AnnotatedEntity<GatewayEntity> annotatedEntity = new AnnotatedEntity(this);
             annotations.forEach(annotation -> {
                 if (BUNDLE.equalsIgnoreCase(annotation.getType())) {
-                    annotatedEntity.setEntityType(this.getType());
+                    annotatedEntity.setEntityType(this.getEntityType());
                 } else if(BUNDLE_HINTS.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setId(annotation.getId());
                     annotatedEntity.setGuid(annotation.getGuid());

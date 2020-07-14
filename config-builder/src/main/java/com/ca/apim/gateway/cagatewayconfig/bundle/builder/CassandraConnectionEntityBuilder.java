@@ -6,13 +6,11 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.beans.StoredPassword;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -47,8 +45,8 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
-                return entities.keySet().stream()
-                        .map(key -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, bundle.applyUniqueName(key, BundleType.ENVIRONMENT), idGenerator.generate()))
+                return entities.entrySet().stream()
+                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(CASSANDRA_CONNECTION_TYPE, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT), generateId((CassandraConnection) e.getValue())))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
@@ -72,7 +70,7 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
 
     @VisibleForTesting
     Entity buildEntity(Bundle bundle, String name, CassandraConnection connection, Document document) {
-        String id = idGenerator.generate();
+        String id = generateId(connection);
         Element cassandraElement = createElementWithAttributesAndChildren(
                 document,
                 CASSANDRA_CONNECTION,
@@ -102,6 +100,14 @@ public class CassandraConnectionEntityBuilder implements EntityBuilder {
 
         buildAndAppendPropertiesElement(connection.getProperties(), document, cassandraElement);
         return EntityBuilderHelper.getEntityWithNameMapping(CASSANDRA_CONNECTION_TYPE, name, id, cassandraElement);
+    }
+
+    private String generateId(CassandraConnection cassandraConnection) {
+        if (cassandraConnection != null && cassandraConnection.getAnnotatedEntity() != null
+                && StringUtils.isNotBlank(cassandraConnection.getAnnotatedEntity().getId())) {
+            return cassandraConnection.getAnnotatedEntity().getId();
+        }
+        return idGenerator.generate();
     }
 
     @Override

@@ -29,6 +29,7 @@ public class PolicyXMLElements {
     public static final String POLICY_GUID = "L7p:PolicyGuid";
     public static final String NO_OP_IF_CONFIG_MISSING = "L7p:NoOpIfConfigMissing";
     public static final String AUTHENTICATION = "L7p:Authentication";
+    public static final String SPECIFIC_USER = "L7p:SpecificUser";
     public static final String ID_PROV_OID = "L7p:IdentityProviderOid";
     public static final String ID_PROV_NAME = "L7p:IdentityProviderName";
     public static final String TARGET = "L7p:Target";

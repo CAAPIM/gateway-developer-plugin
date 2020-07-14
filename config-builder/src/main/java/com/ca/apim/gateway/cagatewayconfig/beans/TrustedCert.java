@@ -237,7 +237,7 @@ public class TrustedCert extends GatewayEntity implements AnnotableEntity {
     }
 
     @Override
-    public String getType() {
+    public String getEntityType() {
         return EntityTypes.TRUSTED_CERT_TYPE;
     }
 

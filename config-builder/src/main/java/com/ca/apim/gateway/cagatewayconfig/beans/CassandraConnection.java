@@ -6,10 +6,16 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.annotations.VisibleForTesting;
 
 import javax.inject.Named;
 import java.util.Map;
@@ -23,7 +29,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Named("CASSANDRA_CONFIGURATION")
 @ConfigurationFile(name = "cassandra-connections", type = JSON_YAML)
 @EnvironmentType("CASSANDRA_CONNECTION")
-public class CassandraConnection extends GatewayEntity {
+public class CassandraConnection extends GatewayEntity implements AnnotableEntity {
 
     private String keyspace;
     private String contactPoint;
@@ -36,6 +42,36 @@ public class CassandraConnection extends GatewayEntity {
     private Boolean ssl;
     private Set<String> tlsCiphers;
     private Map<String, Object> properties;
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
+
+    @Override
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+        }
+        return annotatedEntity;
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.CASSANDRA_CONNECTION_TYPE;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity) {
+        this.annotatedEntity = annotatedEntity;
+    }
 
     public CassandraConnection() {}
 

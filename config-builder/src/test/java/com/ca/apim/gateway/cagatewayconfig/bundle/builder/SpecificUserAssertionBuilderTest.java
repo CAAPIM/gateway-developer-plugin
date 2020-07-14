@@ -17,11 +17,9 @@ import java.util.HashSet;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.INTERNAL_IDP_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class AuthenticationAssertionBuilderTest {
-
+public class SpecificUserAssertionBuilderTest {
     private Policy policy;
     private Bundle bundle;
     private Document document;
@@ -41,7 +39,7 @@ public class AuthenticationAssertionBuilderTest {
     @Test
     public void testBuildAssertionElement() {
         String providerName = "testLdap";
-        Element authenticationAssertion = createAuthenticationAssertion(document, providerName);
+        Element authenticationAssertion = createSpecificUserAssertion(document, providerName);
 
         policyBuilderContext = new PolicyBuilderContext("path.xml", document, bundle, new IdGenerator());
         policyBuilderContext.withPolicy(policy);
@@ -54,7 +52,7 @@ public class AuthenticationAssertionBuilderTest {
     @Test
     public void testBuildAssertionElementForInternalIDProvider() {
         String providerName = INTERNAL_IDP_NAME;
-        Element authenticationAssertion = createAuthenticationAssertion(document, providerName);
+        Element authenticationAssertion = createSpecificUserAssertion(document, providerName);
 
         policyBuilderContext = new PolicyBuilderContext("path.xml", document, bundle, new IdGenerator());
         policyBuilderContext.withPolicy(policy);
@@ -65,14 +63,13 @@ public class AuthenticationAssertionBuilderTest {
     }
 
     @NotNull
-    private Element createAuthenticationAssertion(Document document, String providerName) {
+    private Element createSpecificUserAssertion(Document document, String providerName) {
         Element authenticationElement = createElementWithChildren(
                 document,
-                AUTHENTICATION,
+                SPECIFIC_USER,
                 createElementWithAttribute(document, PolicyXMLElements.ID_PROV_NAME, STRING_VALUE, providerName)
         );
 
         return authenticationElement;
     }
-
 }
