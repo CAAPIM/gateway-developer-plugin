@@ -10,7 +10,6 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.Metadata;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
-import com.ca.apim.gateway.cagatewayconfig.config.spec.BundleGeneration;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -36,7 +35,6 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 @JsonInclude(NON_EMPTY)
 @Named("POLICY")
-@BundleGeneration
 public class Policy extends Folderable implements AnnotableEntity {
 
     @JsonIgnore
