@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
@@ -23,32 +24,43 @@ import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createRoot;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PASS_METRICS_TO_PARENT;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BundleEntityBuilderTestHelper {
 
     static final IdGenerator ID_GENERATOR = new IdGenerator();
     static final String TEST_ENCASS = "TestEncass";
+    static final String TEST_SERVICE = "TestService";
     static final String TEST_ENCASS_POLICY = "TestEncassPolicy";
-    static final String TEST_POLICY_FRAGMENT = "TestPolicyFragment";
+    static final String TEST_DEP_ENCASS = "TestDepEncass";
+    static final String TEST_DEP_ENCASS_POLICY = "TestDepEncassPolicy";
     static final String TEST_ENCASS_ANNOTATION_NAME = "TestEncassAnnotationName";
     static final String TEST_ENCASS_ANNOTATION_DESC = "TestEncassAnnotationDesc";
     static final Collection<String> TEST_ENCASS_ANNOTATION_TAGS = new LinkedHashSet<>(Arrays.asList("someTag"
             , "anotherTag"));
-    static final String TEST_ENCASS_ID = "EncassID";
+    static final String TEST_SERVICE_ANNOTATION_NAME = "TestServiceAnnotationName";
+    static final String TEST_SERVICE_ANNOTATION_DESC = "TestServiceAnnotationDesc";
+    static final Collection<String> TEST_SERVICE_ANNOTATION_TAGS = new LinkedHashSet<>(Arrays.asList("tag1"
+            , "tag2"));
     static final String TEST_GUID = UUID.randomUUID().toString();
     static final String TEST_POLICY_ID = "PolicyID";
+    static final String TEST_ENCASS_ID = "EncassID";
+    static final String TEST_SERVICE_ID = "ServiceID";
+    static final String TEST_DEP_POLICY_ID = "DepPolicyID";
+    static final String TEST_DEP_ENCASS_ID = "DepEncassID";
+    static final String TEST_POLICY_FRAGMENT = "TestPolicyFragment";
     static final String TEST_POLICY_FRAGMENT_ID = "PolicyFragmentID";
-
     static final EntityTypeRegistry entityTypeRegistry = new EntityTypeRegistry(new Reflections());
+    static final ProjectInfo projectInfo = new ProjectInfo("my-bundle", "my-bundle-group", "1.0");
+
 
     static CertificateFactory certFact;
 
@@ -64,6 +76,7 @@ public class BundleEntityBuilderTestHelper {
         FolderEntityBuilder folderBuilder = new FolderEntityBuilder(ID_GENERATOR);
         PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR);
         EncassEntityBuilder encassBuilder = new EncassEntityBuilder(ID_GENERATOR);
+        ServiceEntityBuilder serviceBuilder = new ServiceEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR);
         StoredPasswordEntityBuilder storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(ID_GENERATOR);
         JdbcConnectionEntityBuilder jdbcConnectionEntityBuilder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
         ClusterPropertyEntityBuilder clusterPropertyEntityBuilder = new ClusterPropertyEntityBuilder(ID_GENERATOR);
@@ -73,6 +86,7 @@ public class BundleEntityBuilderTestHelper {
         entityBuilders.add(folderBuilder);
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
+        entityBuilders.add(serviceBuilder);
         entityBuilders.add(storedPasswordEntityBuilder);
         entityBuilders.add(jdbcConnectionEntityBuilder);
         entityBuilders.add(clusterPropertyEntityBuilder);
@@ -131,6 +145,49 @@ public class BundleEntityBuilderTestHelper {
             put(L7_TEMPLATE, "false");
         }});
         return encass;
+    }
+
+    static Service buildTestServiceWithAnnotation(final String serviceName, final String serviceId, final String policy) {
+        Set<Annotation> serviceAnnotations = new HashSet<>();
+        Annotation bundleAnnotation = new Annotation(AnnotationType.BUNDLE);
+        Annotation bundleHintsAnnotation = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleHintsAnnotation.setName(TEST_SERVICE_ANNOTATION_NAME);
+        bundleHintsAnnotation.setDescription(TEST_SERVICE_ANNOTATION_DESC);
+        bundleHintsAnnotation.setTags(TEST_SERVICE_ANNOTATION_TAGS);
+        Annotation reusableAnnotation = new Annotation(AnnotationType.REUSABLE);
+        serviceAnnotations.add(bundleAnnotation);
+        serviceAnnotations.add(bundleHintsAnnotation);
+        serviceAnnotations.add(reusableAnnotation);
+
+        Service service = new Service();
+        service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
+        service.setName(serviceName);
+        service.setId(serviceId);
+        service.setUrl("/test");
+        service.setParentFolder(Folder.ROOT_FOLDER);
+        service.setServiceDetailsElement(null);
+        service.setPolicy(policy);
+        service.setAnnotations(serviceAnnotations);
+        return service;
+    }
+
+    static Policy buildTestPolicyWithAnnotation(String policyName, String policyId, String policyGuid, Set<Annotation> annotations) {
+        Policy policy = new Policy();
+        policy.setParentFolder(Folder.ROOT_FOLDER);
+        policy.setName(policyName);
+        policy.setId(policyId);
+        policy.setGuid(policyGuid);
+        policy.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<wsp:Policy xmlns:L7p=\"http://www.layer7tech.com/ws/policy\" xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\">\n" +
+                "    <wsp:All wsp:Usage=\"Required\">\n" +
+                "        <L7p:CommentAssertion>\n" +
+                "            <L7p:Comment stringValue=\"Policy Fragment: includedPolicy\"/>\n" +
+                "        </L7p:CommentAssertion>\n" +
+                "    </wsp:All>\n" +
+                "</wsp:Policy>");
+        policy.setPath(policyName);
+        policy.setAnnotations(annotations);
+        return policy;
     }
 
     public static Bundle createBundleWithPolicyFragment(boolean makeFragmentReusable) {
@@ -272,6 +329,56 @@ public class BundleEntityBuilderTestHelper {
         return bundle;
     }
 
+    static Bundle createBundleForService(boolean includeDependencies) {
+        Bundle bundle = new Bundle();
+        Folder root = createRoot();
+        bundle.getFolders().put(EMPTY, root);
+
+        Folder dummyFolder = createFolder("dummy", TEST_GUID, ROOT_FOLDER);
+        dummyFolder.setParentFolder(Folder.ROOT_FOLDER);
+        bundle.getFolders().put(dummyFolder.getPath(), dummyFolder);
+
+        Policy depEncassPolicy = buildTestPolicyWithAnnotation(TEST_DEP_ENCASS_POLICY, TEST_DEP_POLICY_ID, TEST_GUID, Collections.emptySet());
+        bundle.getPolicies().put(TEST_DEP_ENCASS_POLICY, depEncassPolicy);
+        Encass depEncass = buildTestEncassWithAnnotation(TEST_DEP_ENCASS, TEST_DEP_ENCASS_ID, TEST_GUID, TEST_DEP_ENCASS_POLICY, Collections.emptySet());
+        bundle.getEncasses().put(TEST_DEP_ENCASS, depEncass);
+
+        Set<Dependency> usedEntities = new LinkedHashSet<>();
+        usedEntities.add(new Dependency(TEST_DEP_ENCASS_ID, Encass.class, TEST_DEP_ENCASS, EntityTypes.ENCAPSULATED_ASSERTION_TYPE));
+
+        Policy servicePolicy = buildTestPolicyWithAnnotation(TEST_SERVICE, TEST_POLICY_ID, TEST_GUID, Collections.emptySet());
+        servicePolicy.setUsedEntities(usedEntities);
+        bundle.getPolicies().put(TEST_SERVICE, servicePolicy);
+
+        Dependency servicePolicyDependency = new Dependency(TEST_POLICY_ID, Policy.class, TEST_SERVICE, EntityTypes.POLICY_TYPE);
+        Dependency encassDependency = new Dependency(TEST_DEP_ENCASS_ID, Encass.class, TEST_DEP_ENCASS, EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        bundle.setDependencyMap(new HashMap<>());
+        bundle.getDependencyMap().put(servicePolicyDependency, new ArrayList<>(Collections.singletonList(encassDependency)));
+
+        if (includeDependencies) {
+            JdbcConnection jdbcConnection = new JdbcConnection();
+            jdbcConnection.setDriverClass("com.l7tech.jdbc.mysql.MySQLDriver");
+            jdbcConnection.setJdbcUrl("jdbc:mysql://localhost:3306/ssg");
+            jdbcConnection.setUser("root");
+            jdbcConnection.setName("some-jdbc");
+            bundle.getJdbcConnections().put("some-jdbc", jdbcConnection);
+            Dependency jdbcDependency = new Dependency(jdbcConnection.getName(), "JDBC_CONNECTION");
+
+            StoredPassword storedPassword = new StoredPassword();
+            storedPassword.setName("secure-pass");
+            storedPassword.setProperties(Maps.newHashMap(ImmutableMap.of("description", "sec pass", "type", "Password", "usageFromVariable", true)));
+            bundle.getStoredPasswords().put("secure-pass", storedPassword);
+            Dependency passwordDependency = new Dependency(storedPassword.getName(), "SECURE_PASSWORD");
+
+            // Add dependencies
+            bundle.getDependencyMap().get(servicePolicyDependency).add(jdbcDependency);
+            bundle.getDependencyMap().get(servicePolicyDependency).add(passwordDependency);
+            servicePolicy.getUsedEntities().add(jdbcDependency);
+            servicePolicy.getUsedEntities().add(passwordDependency);
+        }
+        return bundle;
+    }
+
     static void verifyAnnotatedEncassBundleMetadata(Map<String, BundleArtifacts> bundles, Bundle bundle,
                                                     Encass encass, boolean isRedeployableBundle,
                                                     boolean isBundleContainReusableEntity, boolean hasRouting) throws JsonProcessingException {
@@ -322,6 +429,62 @@ public class BundleEntityBuilderTestHelper {
         Assert.assertThat(json, CoreMatchers.containsString("\"arguments\":[{\"type\":\"message\",\"name\":\"source\",\"requireExplicit\":true,\"label\":\"Some label\"}]"));
         Assert.assertThat(json, CoreMatchers.containsString("\"results\":[{\"name\":\"result.msg\",\"type\":\"message\"}]"));
         assertEquals(4, metadata.getReferencedEntities().size());
+
+        for (Metadata envMeta : metadata.getReferencedEntities()) {
+            assertTrue(expectedEnvMetadata.containsKey(envMeta.getType()));
+            assertEquals(expectedEnvMetadata.get(envMeta.getType()).getName(), envMeta.getName());
+        }
+    }
+
+    static void verifyAnnotatedServiceBundleMetadata(Map<String, BundleArtifacts> bundles, Bundle bundle,
+                                                    Service service, boolean isRedeployableBundle,
+                                                    boolean isBundleContainReusableEntity, boolean hasRouting) throws JsonProcessingException {
+        Map<String, Metadata> expectedEnvMetadata = new HashMap<>();
+        for (Dependency dependency : bundle.getDependencyMap().entrySet().iterator().next().getValue()) {
+            expectedEnvMetadata.put(dependency.getType(), new Metadata() {
+                @Override
+                public String getType() {
+                    return dependency.getType();
+                }
+
+                @Override
+                public String getName() {
+                    return dependency.getName();
+                }
+
+                @Override
+                public String getId() {
+                    return null;
+                }
+
+                @Override
+                public String getGuid() {
+                    return null;
+                }
+            });
+        }
+
+        assertNotNull(bundles);
+        assertEquals(1, bundles.size());
+        BundleMetadata metadata = bundles.entrySet().iterator().next().getValue().getBundleMetadata();
+        assertNotNull(metadata);
+        assertEquals("1.0", metadata.getMetaVersion());
+        assertEquals("my-bundle-group", metadata.getGroupName());
+        assertEquals(EntityTypes.SERVICE_TYPE, metadata.getType());
+        assertEquals("1.0", metadata.getVersion());
+        if (isRedeployableBundle || !isBundleContainReusableEntity) {
+            assertTrue(metadata.isRedeployable());
+        }
+        //assertEquals(hasRouting, metadata.isHasRouting());
+        assertEquals(1, metadata.getDefinedEntities().size());
+        Optional<Metadata> definedEntities = metadata.getDefinedEntities().stream().findFirst();
+        assertTrue(definedEntities.isPresent());
+        assertEquals(EntityTypes.SERVICE_TYPE, definedEntities.get().getType());
+        assertEquals(service.getName(), definedEntities.get().getName());
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(definedEntities.get());
+        Assert.assertThat(json, CoreMatchers.containsString("{\"type\":\"SERVICE\",\"name\":\"TestService\",\"id\":\"ServiceID\",\"guid\":null,\"uri\":\"/test\",\"soap\":false}"));
+        assertEquals(2, metadata.getReferencedEntities().size());
 
         for (Metadata envMeta : metadata.getReferencedEntities()) {
             assertTrue(expectedEnvMetadata.containsKey(envMeta.getType()));
