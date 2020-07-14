@@ -6,11 +6,9 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.FederatedIdentityProviderDetail;
-import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType;
-import com.ca.apim.gateway.cagatewayconfig.beans.BindOnlyLdapIdentityProviderDetail;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
@@ -19,6 +17,7 @@ import javax.inject.Singleton;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -45,6 +44,13 @@ public class IdentityProviderLoader implements BundleEntityLoader {
         identityProvider.setName(name);
         identityProvider.setProperties(properties);
         identityProvider.setType(type);
+
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation bundleEntity = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleEntity.setId(identityProviderElement.getAttribute(ATTRIBUTE_ID));
+        annotations.add(bundleEntity);
+        identityProvider.setAnnotations(annotations);
+
         bundle.getIdentityProviders().put(name, identityProvider);
 
         switch (type) {

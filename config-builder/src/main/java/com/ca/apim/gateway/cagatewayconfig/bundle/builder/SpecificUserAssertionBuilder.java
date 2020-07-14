@@ -11,8 +11,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
-public class AuthenticationAssertionBuilder implements PolicyAssertionBuilder {
-
+public class SpecificUserAssertionBuilder implements PolicyAssertionBuilder {
     @Override
     public void buildAssertionElement(Element assertionElement, PolicyBuilderContext policyBuilderContext) {
         final Bundle bundle = policyBuilderContext.getBundle();
@@ -50,6 +49,6 @@ public class AuthenticationAssertionBuilder implements PolicyAssertionBuilder {
 
     @Override
     public String getAssertionTagName() {
-        return AUTHENTICATION;
+        return SPECIFIC_USER;
     }
 }

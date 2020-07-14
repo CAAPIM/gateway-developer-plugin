@@ -8,6 +8,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -45,7 +46,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
                         .map(
-                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, bundle.applyUniqueName(identityProviderEntry.getKey(), BundleType.ENVIRONMENT), ((IdentityProvider)identityProviderEntry.getValue()).getId())
+                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, bundle.applyUniqueName(identityProviderEntry.getKey(), BundleType.ENVIRONMENT), generateId((IdentityProvider)identityProviderEntry.getValue()))
                         ).collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(identityProviderEntry ->
@@ -57,7 +58,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
     }
 
     private Entity buildIdentityProviderEntity(Bundle bundle, String name, IdentityProvider identityProvider, Document document) {
-        final String id = identityProvider.getId();
+        final String id = generateId(identityProvider);
         final Element identityProviderElement = createElementWithAttribute(document, ID_PROV, ATTRIBUTE_ID, id);
         identityProviderElement.appendChild(createElementWithTextContent(document, NAME, name));
         identityProviderElement.appendChild(createElementWithTextContent(document, ID_PROV_TYPE, identityProvider.getType().getValue()));
@@ -157,6 +158,14 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
         );
 
         return extensionElement;
+    }
+
+    private String generateId(IdentityProvider identityProvider) {
+        if (identityProvider != null && identityProvider.getAnnotatedEntity() != null
+                && StringUtils.isNotBlank(identityProvider.getAnnotatedEntity().getId())) {
+            return identityProvider.getAnnotatedEntity().getId();
+        }
+        return identityProvider.getId();
     }
 
     @Override

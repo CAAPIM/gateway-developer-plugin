@@ -6,17 +6,25 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotableEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotatedEntity;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.AnnotationDeserializer;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.ConfigLoadException;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.annotations.VisibleForTesting;
 import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Named;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -29,7 +37,7 @@ import static java.util.Arrays.stream;
 // sonarcloud believes this is a hardcoded password
 // sonarcloud believes variables declared in builder class duplicates variables declared in entity class
 @SuppressWarnings({"squid:S2068", "common-java:DuplicatedBlocks"})
-public class JmsDestination extends GatewayEntity {
+public class JmsDestination extends GatewayEntity implements AnnotableEntity {
 
     public static final String PROVIDER_TYPE_GENERIC = null;
     public static final String PROVIDER_TYPE_TIBCO_EMS = "TIBCO EMS";
@@ -69,6 +77,37 @@ public class JmsDestination extends GatewayEntity {
     // - TIBCO EMS 
     // - WebSphere MQ over LDAP
     private Map<String, Object> additionalProperties;
+
+    @JsonDeserialize(using = AnnotationDeserializer.class)
+    private Set<Annotation> annotations;
+    @JsonIgnore
+    private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
+
+    @Override
+    public Set<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(Set<Annotation> annotations) {
+        this.annotations = annotations;
+    }
+    @Override
+    public AnnotatedEntity getAnnotatedEntity() {
+        if (annotatedEntity == null && annotations != null) {
+            annotatedEntity = createAnnotatedEntity();
+        }
+        return annotatedEntity;
+    }
+
+    @Override
+    public String getEntityType() {
+        return EntityTypes.JMS_DESTINATION_TYPE;
+    }
+
+    @VisibleForTesting
+    public void setAnnotatedEntity(AnnotatedEntity<Encass> annotatedEntity) {
+        this.annotatedEntity = annotatedEntity;
+    }
     
     public JmsDestination() {
         super();
@@ -376,5 +415,13 @@ public class JmsDestination extends GatewayEntity {
         public JmsDestination build() {
             return new JmsDestination(this);
         }
+    }
+
+    @Override
+    public String getId(){
+        if (getAnnotatedEntity() != null && annotatedEntity.getId() != null) {
+            return annotatedEntity.getId();
+        }
+        return super.getId();
     }
 }

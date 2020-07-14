@@ -7,12 +7,12 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -50,7 +50,7 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT), idGenerator.generate()))
+                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT), generateId((JdbcConnection)e.getValue())))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
@@ -63,7 +63,7 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
 
     @VisibleForTesting
     Entity buildEntity(String name, JdbcConnection jdbc, Document document) {
-        String id = idGenerator.generate();
+        String id = generateId(jdbc);
         Element jdbcElement = createElementWithAttributesAndChildren(
                 document,
                 JDBC_CONNECTION,
@@ -94,6 +94,14 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
         ));
 
         return EntityBuilderHelper.getEntityWithNameMapping(EntityTypes.JDBC_CONNECTION, name, id, jdbcElement);
+    }
+
+    private String generateId(JdbcConnection jdbcConnection) {
+        if (jdbcConnection != null && jdbcConnection.getAnnotatedEntity() != null
+                && StringUtils.isNotBlank(jdbcConnection.getAnnotatedEntity().getId())) {
+            return jdbcConnection.getAnnotatedEntity().getId();
+        }
+        return idGenerator.generate();
     }
 
     @Override

@@ -231,7 +231,7 @@ public class Service extends Folderable implements AnnotableEntity {
     }
 
     @Override
-    public String getType(){
+    public String getEntityType(){
         return EntityTypes.SERVICE_TYPE;
     }
 
