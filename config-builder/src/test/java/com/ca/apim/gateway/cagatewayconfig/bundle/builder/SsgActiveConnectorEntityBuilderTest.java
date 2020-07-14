@@ -16,6 +16,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SsgActiveConnectorEntityBuilderTest {
+    private ProjectInfo projectInfo = new ProjectInfo("test", "testGroup", "1.0");
 
     @Test
     public void buildNoActiveConnectors() {
@@ -36,7 +37,7 @@ public class SsgActiveConnectorEntityBuilderTest {
         List<Entity> activeConnectors = builder.build(getTestBundle(), EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, activeConnectors.size());
         Entity ssgActiveConnector = activeConnectors.get(0);
-        assertEquals("testName", ssgActiveConnector.getName());
+        assertEquals("::testGroup::testName::1.0", ssgActiveConnector.getName());
         Element element = ssgActiveConnector.getXml();
         assertEquals("testServiceId", DocumentUtils.getSingleChildElementTextContent(element, BundleElementNames.HARDWIRED));
         activeConnectors = builder.build(getTestAnnotatedBundle(), EntityBuilder.BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -46,13 +47,13 @@ public class SsgActiveConnectorEntityBuilderTest {
 
     private Bundle getTestAnnotatedBundle() {
         Bundle bundle = getTestBundle();
-        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, new AnnotatedEntity<>(new Encass()), new ProjectInfo("test", "testGroup", "1.0"));
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, new AnnotatedEntity<>(new Encass()), projectInfo);
         annotatedBundle.putAllSsgActiveConnectors(bundle.getSsgActiveConnectors());
         return annotatedBundle;
     }
 
     private Bundle getTestBundle() {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         SsgActiveConnector ssgActiveConnector = new SsgActiveConnector();
         String name = "testName";
         String type = "MqNative";

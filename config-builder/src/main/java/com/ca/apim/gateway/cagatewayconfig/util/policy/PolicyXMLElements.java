@@ -47,6 +47,14 @@ public class PolicyXMLElements {
     public static final String HTTP2_CLIENT_CONFIG_GOID = "L7p:Http2ClientConfigGoid";
     public static final String HTTP2_CLIENT_CONFIG_NAME = "L7p:Http2ClientConfigName";
 
+    public static final String CASSANDRA_QUERY_ASSERTION  = "L7p:CassandraQuery";
+    public static final String CASSANDRA_CONNECTION_NAME  = "L7p:ConnectionName";
+
+    public static final String JDBC_QUERY_ASSERTION  = "L7p:JdbcQuery";
+    public static final String JDBC_CONNECTION_NAME  = "L7p:ConnectionName";
+
+
+
     public static final String ITEM = "L7p:item";
     public static final String ENABLED = "L7p:Enabled";
 

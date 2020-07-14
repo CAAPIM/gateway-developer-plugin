@@ -73,8 +73,20 @@ public class BundleEntityBuilderTestHelper {
     }
 
     static BundleEntityBuilder createBundleEntityBuilder() {
+        Set<PolicyAssertionBuilder> policyAssertionBuilders = new HashSet<>();
+        Reflections reflections = new Reflections();
+        reflections.getSubTypesOf(PolicyAssertionBuilder.class).forEach(e -> {
+            try {
+                policyAssertionBuilders.add(e.newInstance());
+            } catch (InstantiationException ex) {
+                ex.printStackTrace();
+            } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
+            }
+        });
+        PolicyXMLBuilder policyXMLBuilder = new PolicyXMLBuilder(policyAssertionBuilders);
         FolderEntityBuilder folderBuilder = new FolderEntityBuilder(ID_GENERATOR);
-        PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR);
+        PolicyEntityBuilder policyBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR, policyXMLBuilder);
         EncassEntityBuilder encassBuilder = new EncassEntityBuilder(ID_GENERATOR);
         ServiceEntityBuilder serviceBuilder = new ServiceEntityBuilder(DocumentTools.INSTANCE, ID_GENERATOR);
         StoredPasswordEntityBuilder storedPasswordEntityBuilder = new StoredPasswordEntityBuilder(ID_GENERATOR);
@@ -190,9 +202,8 @@ public class BundleEntityBuilderTestHelper {
         return policy;
     }
 
-    public static Bundle createBundleWithPolicyFragment(boolean makeFragmentReusable) {
-        Bundle bundle = createBundle(ENCASS_POLICY_WITH_FRAGMENT, true,false, false);
-
+    public static Bundle createBundleWithPolicyFragment(boolean makeFragmentReusable, ProjectInfo projectInfo) {
+        Bundle bundle = createBundle(ENCASS_POLICY_WITH_FRAGMENT, true,false, false, projectInfo);
         Policy encassPolicy = bundle.getPolicies().get(TEST_ENCASS_POLICY);
 
         Policy policyFragment = new Policy();
@@ -249,8 +260,8 @@ public class BundleEntityBuilderTestHelper {
     }
 
     static Bundle createBundle(String policyXmlString, boolean policyHasRouting, boolean includeDependencies,
-                               boolean includeReusableEntities) {
-        Bundle bundle = new Bundle();
+                               boolean includeReusableEntities, ProjectInfo projectInfo) {
+        Bundle bundle = new Bundle(projectInfo);
         Folder root = createRoot();
         bundle.getFolders().put(EMPTY, root);
 
@@ -432,10 +443,22 @@ public class BundleEntityBuilderTestHelper {
 
         for (Metadata envMeta : metadata.getReferencedEntities()) {
             assertTrue(expectedEnvMetadata.containsKey(envMeta.getType()));
-            assertEquals(expectedEnvMetadata.get(envMeta.getType()).getName(), envMeta.getName());
+            if(UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.contains(envMeta.getType())){
+                assertEquals(expectedEnvMetadata.get(envMeta.getType()).getName(), envMeta.getName());
+            } else {
+                assertEquals("::" + metadata.getGroupName() + "::" + expectedEnvMetadata.get(envMeta.getType()).getName() + "::" + metadata.getVersion(), envMeta.getName());
+            }
+
         }
     }
 
+    static final Set<String> UNSUPPORTED_TYPES_FOR_UNIQUE_NAME = new HashSet<>();
+    static {
+            UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.add(EntityTypes.TRUSTED_CERT_TYPE);
+            UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.add(EntityTypes.PRIVATE_KEY_TYPE);
+            UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.add(EntityTypes.STORED_PASSWORD_TYPE);
+            UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.add(EntityTypes.CLUSTER_PROPERTY_TYPE);
+        }
     static void verifyAnnotatedServiceBundleMetadata(Map<String, BundleArtifacts> bundles, Bundle bundle,
                                                     Service service, boolean isRedeployableBundle,
                                                     boolean isBundleContainReusableEntity, boolean hasRouting) throws JsonProcessingException {
@@ -483,12 +506,16 @@ public class BundleEntityBuilderTestHelper {
         assertEquals(service.getName(), definedEntities.get().getName());
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(definedEntities.get());
-        Assert.assertThat(json, CoreMatchers.containsString("{\"type\":\"SERVICE\",\"name\":\"TestService\",\"id\":\"ServiceID\",\"guid\":null,\"uri\":\"/test\",\"soap\":false}"));
+        Assert.assertThat(json, CoreMatchers.containsString("{\"type\":\"SERVICE\",\"name\":\"::my-bundle-group.TestServiceAnnotationName::TestService::1.0\",\"id\":\"ServiceID\",\"guid\":null,\"uri\":\"/test\",\"soap\":false}"));
         assertEquals(2, metadata.getReferencedEntities().size());
 
         for (Metadata envMeta : metadata.getReferencedEntities()) {
             assertTrue(expectedEnvMetadata.containsKey(envMeta.getType()));
-            assertEquals(expectedEnvMetadata.get(envMeta.getType()).getName(), envMeta.getName());
+            if(UNSUPPORTED_TYPES_FOR_UNIQUE_NAME.contains(envMeta.getType())){
+                assertEquals(expectedEnvMetadata.get(envMeta.getType()).getName(), envMeta.getName());
+            } else {
+                assertEquals("::my-bundle-group::" + expectedEnvMetadata.get(envMeta.getType()).getName() + "::1.0", envMeta.getName());
+            }
         }
     }
 

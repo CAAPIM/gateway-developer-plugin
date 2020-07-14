@@ -67,21 +67,26 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
     private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
         AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
+        String baseName = PathUtils.extractName(servicePath);
+        String basePath = PathUtils.extractPath(servicePath);
+        String uniqueName = baseName;
+        String uniqueServicePath = servicePath;
         boolean isRedeployableBundle = false;
         boolean isReusable = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
             isReusable = annotatedEntity.isReusable();
+            uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT);
+            uniqueServicePath = basePath + uniqueName;
         }
-        String baseName = servicePath.substring(servicePath.lastIndexOf('/') + 1);
-        service.setName(baseName);
+        service.setName(uniqueName);
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());
         final Set<SoapResource> soapResourceBeans = service.getSoapResources();
 
         if (isNotEmpty(soapResourceBeans)) {
             soapResourceBeans.forEach(soapResourceBean -> {
-                String path = PathUtils.unixPath(service.getParentFolder().getPath(), service.getName(), soapResourceBean.getFileName());
+                String path = PathUtils.unixPath(service.getParentFolder().getPath(), baseName, soapResourceBean.getFileName());
                 String content;
                 if (bundle instanceof AnnotatedBundle) {
                     content = ((AnnotatedBundle) bundle).getFullBundle().getSoapResources().get(path).getContent();
@@ -103,7 +108,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         String id = service.getId();
 
         Element serviceDetailElement = createElementWithAttributes(document, SERVICE_DETAIL, ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_FOLDER_ID, service.getParentFolder().getId()));
-        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, baseName));
+        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, uniqueName));
         serviceDetailElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));
         serviceDetailElement.appendChild(buildServiceMappings(service, document));
 
@@ -152,7 +157,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         serviceElement.appendChild(resourcesElement);
-        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, servicePath, id,
+        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, uniqueServicePath, uniqueServicePath, id,
                 serviceElement, false, service);
         if (isRedeployableBundle || !isReusable) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);

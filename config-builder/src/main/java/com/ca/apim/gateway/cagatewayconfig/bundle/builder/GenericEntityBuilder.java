@@ -33,20 +33,20 @@ public class GenericEntityBuilder implements EntityBuilder {
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         Map<String, GenericEntity> genericEntities =
                 Optional.ofNullable(bundle.getGenericEntities()).orElse(Collections.emptyMap());
-        return buildEntities(genericEntities, bundleType, document);
+        return buildEntities(genericEntities, bundle, bundleType, document);
     }
 
-    private List<Entity> buildEntities(Map<String, GenericEntity> genericEntities, BundleType bundleType,
+    private List<Entity> buildEntities(Map<String, GenericEntity> genericEntities, Bundle bundle, BundleType bundleType,
                                        Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
                 return genericEntities.entrySet().stream()
-                        .map(entry -> getEntityWithOnlyMapping(EntityTypes.GENERIC_TYPE, entry.getKey(),
+                        .map(entry -> getEntityWithOnlyMapping(EntityTypes.GENERIC_TYPE, bundle.applyUniqueName(entry.getKey(), BundleType.ENVIRONMENT),
                                 generateId(entry.getValue())))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return genericEntities.entrySet().stream()
-                        .map(e -> buildGenericEntity(e.getKey(), e.getValue(), document))
+                        .map(e -> buildGenericEntity(bundle.applyUniqueName(e.getKey(), bundleType), e.getValue(), document))
                         .collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

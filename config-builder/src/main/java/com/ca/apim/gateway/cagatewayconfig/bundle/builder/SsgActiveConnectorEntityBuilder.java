@@ -49,11 +49,11 @@ public class SsgActiveConnectorEntityBuilder implements EntityBuilder {
         switch (bundleType) {
             case DEPLOYMENT:
                 final Stream<Entity> activeConnectorOnlyMappings = entities.entrySet().stream().map(ssgActiveConnectorEntry ->
-                        EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.SSG_ACTIVE_CONNECTOR, ssgActiveConnectorEntry.getKey(), generateId(ssgActiveConnectorEntry.getValue())));
+                        EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.SSG_ACTIVE_CONNECTOR, bundle.applyUniqueName(ssgActiveConnectorEntry.getKey(), BundleType.ENVIRONMENT), generateId(ssgActiveConnectorEntry.getValue())));
                 return activeConnectorOnlyMappings.collect(toList());
             case ENVIRONMENT:
                 final Stream<Entity> activeConnectors = entities.entrySet().stream().map(ssgActiveConnectorEntry ->
-                        buildActiveConnectorEntity(bundle, ssgActiveConnectorEntry.getKey(), ssgActiveConnectorEntry.getValue(), document));
+                        buildActiveConnectorEntity(bundle, bundle.applyUniqueName(ssgActiveConnectorEntry.getKey(), BundleType.ENVIRONMENT), ssgActiveConnectorEntry.getValue(), document));
                 return activeConnectors.collect(toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

@@ -88,7 +88,7 @@ public class FullBundleCreator {
                                  String fullInstallBundleFilename, String environmentConfigurationFolderPath,
                                  boolean detemplatizeDeploymentBundles) {
         final Pair<Element, Element> elementPair = createFullAndDeleteBundles(bundleEnvironmentValues,
-                dependentBundles, bundleFolderPath, fullInstallBundleFilename, environmentConfigurationFolderPath, detemplatizeDeploymentBundles);
+                dependentBundles, bundleFolderPath, environmentConfigurationFolderPath, detemplatizeDeploymentBundles, projectInfo);
         final String bundle = documentTools.elementToString(elementPair.getLeft());
         // write the full bundle to a temporary file first
         final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), fullInstallBundleFilename);
@@ -150,8 +150,8 @@ public class FullBundleCreator {
 
     private Pair<Element, Element> createFullAndDeleteBundles(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
                                                               String bundleFolderPath,
-                                                              String bundleFileName, String environmentConfigurationFolderPath,
-                                                              boolean detemplatizeDeploymentBundles) {
+                                                              String environmentConfigurationFolderPath,
+                                                              boolean detemplatizeDeploymentBundles, ProjectInfo projectInfo) {
         final Map<String, String> environmentProperties = bundleEnvironmentValues.getRight();
         final List<File> deploymentBundles = collectFiles(bundleFolderPath,
                 bundleEnvironmentValues.getLeft() + INSTALL_BUNDLE_EXTENSION);
@@ -163,7 +163,7 @@ public class FullBundleCreator {
         List<TemplatizedBundle> templatizedBundles = bundleFiles.stream().map(f -> new StringTemplatizedBundle(f.getName(), fileUtils.getFileAsString(f))).collect(toList());
 
         // generate the environment one
-        Bundle environmentBundle = new Bundle();
+        Bundle environmentBundle = new Bundle(projectInfo);
         environmentBundleBuilder.build(environmentBundle, environmentProperties, environmentConfigurationFolderPath, PLUGIN);
 
         // validate and detemplatize
@@ -173,7 +173,7 @@ public class FullBundleCreator {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
-                EntityBuilder.BundleType.ENVIRONMENT, document, new ProjectInfo(bundleFileName, EMPTY, EMPTY, EMPTY));
+                EntityBuilder.BundleType.ENVIRONMENT, document, projectInfo);
         Element bundleElement = createFullBundleElement(bundleElements, templatizedBundles, document);
         Element deleteBundleElement = createDeleteBundleElement(bundleElements, deploymentDeleteBundle, dependentBundles, document);
 

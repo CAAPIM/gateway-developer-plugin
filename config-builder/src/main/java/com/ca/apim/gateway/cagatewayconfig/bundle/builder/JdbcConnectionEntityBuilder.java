@@ -44,17 +44,17 @@ public class JdbcConnectionEntityBuilder implements EntityBuilder {
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         Map<String, JdbcConnection> jdbcConnectionMap = Optional.ofNullable(bundle.getJdbcConnections()).orElse(Collections.emptyMap());
-       return buildEntities(jdbcConnectionMap, bundleType, document);
+       return buildEntities(jdbcConnectionMap, bundle, bundleType, document);
     }
-    private List<Entity> buildEntities(Map<String, ?> entities, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
         switch (bundleType) {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
-                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, e.getKey(), idGenerator.generate()))
+                        .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(EntityTypes.JDBC_CONNECTION, bundle.applyUniqueName(e.getKey(), BundleType.ENVIRONMENT), idGenerator.generate()))
                         .collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(e ->
-                        buildEntity(e.getKey(), (JdbcConnection)e.getValue(), document)
+                        buildEntity(bundle.applyUniqueName(e.getKey(), bundleType), (JdbcConnection)e.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);

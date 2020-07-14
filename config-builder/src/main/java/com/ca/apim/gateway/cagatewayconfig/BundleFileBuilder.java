@@ -67,7 +67,7 @@ public class BundleFileBuilder {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
 
         if (rootDir != null) {
             // Load the entities to build a deployment bundle
