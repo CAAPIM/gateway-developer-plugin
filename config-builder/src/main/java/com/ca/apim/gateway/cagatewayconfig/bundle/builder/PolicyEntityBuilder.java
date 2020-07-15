@@ -141,16 +141,10 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
     private void preparePolicy(Policy policy, Bundle bundle, AnnotatedBundle annotatedBundle) {
         Document policyDocument = loadPolicyDocument(policy);
-        final String policyName;
+        String policyName = policy.getName();
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
-            if (annotatedEntity.isShared()) {
-                policyName = policy.getName();
-            } else {
-                policyName = annotatedBundle.applyUniqueName(policy.getName(), BundleType.DEPLOYMENT);
-            }
-        } else {
-            policyName = policy.getName();
+            policyName = annotatedBundle.applyUniqueName(policy.getName(), BundleType.DEPLOYMENT, annotatedEntity.isShared());
         }
 
         PolicyBuilderContext policyBuilderContext = new PolicyBuilderContext(policyName, policyDocument, bundle, idGenerator);
@@ -210,10 +204,8 @@ public class PolicyEntityBuilder implements EntityBuilder {
             isShared = annotatedEntity.isShared();
         }
         if (annotatedBundle != null) {
-            if (!isShared) {
-                policyName = annotatedBundle.applyUniqueName(policyName, BundleType.DEPLOYMENT);
-                policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
-            }
+            policyName = annotatedBundle.applyUniqueName(policyName, BundleType.DEPLOYMENT, isShared);
+            policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
         }
 
         PolicyTags policyTags = getPolicyTags(policy, bundle);
