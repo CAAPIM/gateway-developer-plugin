@@ -11,13 +11,12 @@ import com.ca.apim.gateway.cagatewayimport.config.GatewayImportConfig;
 import com.ca.apim.gateway.cagatewayimport.config.GatewayImportConnectionProperties;
 import org.apache.http.entity.FileEntity;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.provider.ListProperty;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.connection.GatewayClient.getRestmanBundleEndpoint;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
@@ -53,6 +52,7 @@ public class ImportBundleTask extends DefaultTask {
         this.gatewayConnectionProperties = gatewayConnectionProperties;
     }
 
+    @Nested
     public GatewayImportConfig getGatewayImportConfig() {
         return gatewayImportConfig;
     }
@@ -64,8 +64,8 @@ public class ImportBundleTask extends DefaultTask {
 
     @TaskAction
     public void perform() {
-        ListProperty<File> bundlesProperty = gatewayImportConfig.getBundles();
-        List<File> bundleFiles = bundlesProperty.getOrElse(Collections.EMPTY_LIST);
+        ConfigurableFileCollection bundleFileCollection = gatewayImportConfig.getBundles();
+        Set<File> bundleFiles = bundleFileCollection.getFiles();
         bundleFiles.forEach(bundleFile -> {
             gatewayClient.makeGatewayAPICall(
                     create(METHOD_NAME)

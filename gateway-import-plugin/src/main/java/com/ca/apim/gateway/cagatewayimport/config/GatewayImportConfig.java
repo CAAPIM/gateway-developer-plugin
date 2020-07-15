@@ -1,21 +1,19 @@
 package com.ca.apim.gateway.cagatewayimport.config;
 
 import org.gradle.api.Project;
-import org.gradle.api.provider.ListProperty;
-
-import java.io.File;
+import org.gradle.api.file.ConfigurableFileCollection;
 
 public class GatewayImportConfig {
-    private ListProperty<File> bundles;
+    private ConfigurableFileCollection bundles;
     public GatewayImportConfig(Project project) {
-        bundles = project.getObjects().listProperty(File.class);
+        bundles = project.files();
     }
 
-    public ListProperty<File> getBundles() {
+    public ConfigurableFileCollection getBundles() {
         return bundles;
     }
 
-    public void setBundles(ListProperty<File> bundles) {
+    public void setBundles(ConfigurableFileCollection bundles) {
         this.bundles = bundles;
     }
 }
