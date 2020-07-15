@@ -77,7 +77,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             Policy policyEntity = (Policy) policy;
             if (annotatedEntity != null) {
                 AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
-                if (annotatedEntity.isReusable()) {
+                if (annotatedEntity.isShared()) {
                     if (annotatedPolicyEntity != null) {
                         if (annotatedPolicyEntity.getId() != null) {
                             if (IdValidator.isValidGoid(annotatedPolicyEntity.getId())) {
@@ -144,7 +144,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         final String policyName;
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
-            if (annotatedEntity.isReusable()) {
+            if (annotatedEntity.isShared()) {
                 policyName = policy.getName();
             } else {
                 policyName = annotatedBundle.applyUniqueName(policy.getName(), BundleType.DEPLOYMENT);
@@ -204,13 +204,13 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyNameWithPath = CharacterBlacklistUtil.decodePath(policyNameWithPath);
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
-        boolean isReusable = false;
+        boolean isShared = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
-            isReusable = annotatedEntity.isReusable();
+            isShared = annotatedEntity.isShared();
         }
         if (annotatedBundle != null) {
-            if (!isReusable) {
+            if (!isShared) {
                 policyName = annotatedBundle.applyUniqueName(policyName, BundleType.DEPLOYMENT);
                 policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
             }
@@ -255,7 +255,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
                 policy.getPath(), policyNameWithPath, policy.getId(), policyElement, policy.isHasRouting(), policy);
-        if (isRedeployableBundle || !isReusable) {
+        if (isRedeployableBundle || !isShared) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

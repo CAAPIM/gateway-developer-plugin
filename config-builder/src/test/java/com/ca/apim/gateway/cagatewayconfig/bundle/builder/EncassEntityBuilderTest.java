@@ -67,7 +67,7 @@ class EncassEntityBuilderTest {
         annotation.setGuid("");
         annotation.setId("");
         annotations.add(annotation);
-        annotations.add(new Annotation(AnnotationType.REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         encass.setAnnotations(annotations);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
@@ -95,7 +95,7 @@ class EncassEntityBuilderTest {
         annotation.setGuid("wrongGuid");
         annotation.setId("wrongId");
         annotations.add(annotation);
-        annotations.add(new Annotation(AnnotationType.REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         encass.setAnnotations(annotations);
         encass.setAnnotatedEntity(null);
         annotatedEntity = new AnnotatedEntity(encass);

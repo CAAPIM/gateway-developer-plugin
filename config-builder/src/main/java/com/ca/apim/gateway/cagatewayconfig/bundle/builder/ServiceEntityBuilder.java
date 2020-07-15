@@ -72,10 +72,10 @@ public class ServiceEntityBuilder implements EntityBuilder {
         String uniqueName = baseName;
         String uniqueServicePath = servicePath;
         boolean isRedeployableBundle = false;
-        boolean isReusable = false;
+        boolean isShared = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
-            isReusable = annotatedEntity.isReusable();
+            isShared = annotatedEntity.isShared();
             uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT);
             uniqueServicePath = basePath + uniqueName;
         }
@@ -159,7 +159,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         serviceElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, uniqueServicePath, uniqueServicePath, id,
                 serviceElement, false, service);
-        if (isRedeployableBundle || !isReusable) {
+        if (isRedeployableBundle || !isShared) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

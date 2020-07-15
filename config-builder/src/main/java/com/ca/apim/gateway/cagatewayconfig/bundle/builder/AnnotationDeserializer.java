@@ -37,7 +37,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  * 2) Array of Strings containing only "type". For example,
  * annotations:
  * - "@bundle"
- * - "@reusable"
+ * - "@shared"
  *
  * This deserialization implementation takes care of both these types and deserializes the input into
  * {@link java.util.Set} of {@link com.ca.apim.gateway.cagatewayconfig.beans.Annotation}

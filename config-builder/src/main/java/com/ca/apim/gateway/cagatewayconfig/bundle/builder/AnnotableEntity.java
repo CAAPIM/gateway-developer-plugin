@@ -11,7 +11,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType.*;
 public interface AnnotableEntity {
 
     Annotation BUNDLE_ANNOTATION = new Annotation(BUNDLE);
-    Annotation REUSABLE_ANNOTATION = new Annotation(REUSABLE);
+    Annotation SHARED_ANNOTATION = new Annotation(SHARED);
     Annotation REDEPLOYABLE_ANNOTATION = new Annotation(REDEPLOYABLE);
     Annotation EXCLUDE_ANNOTATION = new Annotation(EXCLUDE);
 
@@ -86,13 +86,13 @@ public interface AnnotableEntity {
     }
 
     /**
-     * Returns TRUE if "@reusable" annotation is added to the entity
+     * Returns TRUE if "@shared" annotation is added to the entity
      *
-     * @return TRUE if "@reusable" annotation is added
+     * @return TRUE if "@shared" annotation is added
      */
     @JsonIgnore
-    default boolean isReusable() {
-        return getAnnotations() != null && getAnnotations().contains(REUSABLE_ANNOTATION);
+    default boolean isShared() {
+        return getAnnotations() != null && getAnnotations().contains(SHARED_ANNOTATION);
     }
 
     /**

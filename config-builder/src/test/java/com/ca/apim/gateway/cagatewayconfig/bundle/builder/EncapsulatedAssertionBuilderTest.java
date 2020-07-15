@@ -89,7 +89,7 @@ public class EncapsulatedAssertionBuilderTest {
         encass.setName(TEST_ENCASS);
         encass.setPolicy(policyPath);
         Set<Annotation> annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationType.REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         Annotation annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("");
         annotation.setId("");
@@ -118,7 +118,7 @@ public class EncapsulatedAssertionBuilderTest {
         //wrong guid and goid
         annotatedEntity = new AnnotatedEntity(encass);
         annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationType.REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
         annotation.setId("wrongId");
