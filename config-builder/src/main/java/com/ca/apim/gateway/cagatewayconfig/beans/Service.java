@@ -239,6 +239,6 @@ public class Service extends Folderable implements AnnotableEntity {
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
         setId(idGenerator.generate());
-        setName(PathUtils.extractName(entityKey));
+        setName(entityKey);
     }
 }
