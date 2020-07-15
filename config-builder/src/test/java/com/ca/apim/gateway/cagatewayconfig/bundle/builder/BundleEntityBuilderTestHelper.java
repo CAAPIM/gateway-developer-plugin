@@ -166,10 +166,8 @@ public class BundleEntityBuilderTestHelper {
         bundleHintsAnnotation.setName(TEST_SERVICE_ANNOTATION_NAME);
         bundleHintsAnnotation.setDescription(TEST_SERVICE_ANNOTATION_DESC);
         bundleHintsAnnotation.setTags(TEST_SERVICE_ANNOTATION_TAGS);
-        Annotation sharedAnnotation = new Annotation(AnnotationType.SHARED);
         serviceAnnotations.add(bundleAnnotation);
         serviceAnnotations.add(bundleHintsAnnotation);
-        serviceAnnotations.add(sharedAnnotation);
 
         Service service = new Service();
         service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
@@ -351,7 +349,8 @@ public class BundleEntityBuilderTestHelper {
 
         Policy depEncassPolicy = buildTestPolicyWithAnnotation(TEST_DEP_ENCASS_POLICY, TEST_DEP_POLICY_ID, TEST_GUID, Collections.emptySet());
         bundle.getPolicies().put(TEST_DEP_ENCASS_POLICY, depEncassPolicy);
-        Encass depEncass = buildTestEncassWithAnnotation(TEST_DEP_ENCASS, TEST_DEP_ENCASS_ID, TEST_GUID, TEST_DEP_ENCASS_POLICY, Collections.emptySet());
+        Encass depEncass = buildTestEncassWithAnnotation(TEST_DEP_ENCASS, TEST_DEP_ENCASS_ID, TEST_GUID,
+                TEST_DEP_ENCASS_POLICY, Collections.singleton(AnnotableEntity.SHARED_ANNOTATION));
         bundle.getEncasses().put(TEST_DEP_ENCASS, depEncass);
 
         Set<Dependency> usedEntities = new LinkedHashSet<>();

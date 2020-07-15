@@ -35,8 +35,12 @@ public class IncludeAssertionBuilder implements PolicyAssertionBuilder {
         }
         final String policyPath = policyGuidElement.getAttribute(POLICY_PATH);
         LOGGER.log(Level.FINE, "Looking for referenced policy include: {0}", policyPath);
-
-        final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyPath));
+        final AtomicReference<Policy> includedPolicy;
+        if (annotatedBundle != null) {
+            includedPolicy = new AtomicReference<>(annotatedBundle.getPolicies().get(policyPath));
+        } else {
+            includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyPath));
+        }
         if (includedPolicy.get() != null) {
             policy.getDependencies().add(includedPolicy.get());
         } else {

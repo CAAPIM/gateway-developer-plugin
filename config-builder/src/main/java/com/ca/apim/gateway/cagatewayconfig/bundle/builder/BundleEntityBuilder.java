@@ -112,7 +112,8 @@ public class BundleEntityBuilder {
                                 AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
                                 Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
                                 bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-                                loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, false);
+                                loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle,
+                                        bundle, false, false);
                                 entityBuilders.forEach(builder -> entities.addAll(builder.build(annotatedBundle, bundleType, document)));
 
                                 // Create deployment bundle
@@ -169,7 +170,7 @@ public class BundleEntityBuilder {
             AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
             Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
             bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-            loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, true);
+            loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, true, false);
 
             Iterator<Entity> it = deleteBundleEntities.iterator();
             while (it.hasNext()) {
@@ -226,12 +227,13 @@ public class BundleEntityBuilder {
      * @param policyNameWithPath Name of the policy for which gateway dependencies needs to be found.
      * @param annotatedBundle    Annotated Bundle for which bundle is being created.
      * @param rawBundle          Bundle containing all the entities of the gateway.
-     * @param excludeShared    Exclude loading Shared entities as the dependencies of the policy
+     * @param excludeShared      Exclude loading Shared entities as the dependencies of the policy
+     * @param isParentShared  TRUE if any Parent (Policy or Encass) in the hierarchy was is annotated with @shared
      */
     private void loadPolicyDependenciesByPolicyName(String policyNameWithPath, AnnotatedBundle annotatedBundle,
-                                                    Bundle rawBundle, boolean excludeShared) {
+                                                    Bundle rawBundle, boolean excludeShared, boolean isParentShared) {
         final Policy policy = findPolicyByNameOrPath(policyNameWithPath, rawBundle);
-        loadPolicyDependencies(policy, annotatedBundle, rawBundle, excludeShared);
+        loadPolicyDependencies(policy, annotatedBundle, rawBundle, excludeShared, isParentShared);
     }
 
     /**
@@ -240,30 +242,35 @@ public class BundleEntityBuilder {
      * @param policy          Policy for which gateway dependencies needs to be loaded.
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param rawBundle       Bundle containing all the entities of the gateway.
-     * @param excludeShared Exclude loading Shared entities as the dependencies of the policy
+     * @param excludeShared   Exclude loading Shared entities as the dependencies of the policy
+     * @param isParentShared  TRUE if any Parent (Policy or Encass) in the hierarchy was is annotated with @shared
      */
     private void loadPolicyDependencies(Policy policy, AnnotatedBundle annotatedBundle, Bundle rawBundle,
-                                        boolean excludeShared) {
+                                        boolean excludeShared, boolean isParentShared) {
         if (policy == null || excludeGatewayEntity(Policy.class, policy, annotatedBundle, excludeShared)) {
             return;
         }
 
-        loadFolderDependencies(annotatedBundle, policy);
+        Policy policyCopy = new Policy(policy);
+        loadFolderDependencies(annotatedBundle, policyCopy);
+
+        isParentShared = isParentShared || policyCopy.isShared();
+        policyCopy.setParentEntityShared(isParentShared);
 
         Map<String, Policy> annotatedPolicyMap = annotatedBundle.getEntities(Policy.class);
-        annotatedPolicyMap.put(policy.getPath(), policy);
+        annotatedPolicyMap.put(policyCopy.getPath(), policyCopy);
 
-        Set<Dependency> dependencies = policy.getUsedEntities();
+        Set<Dependency> dependencies = policyCopy.getUsedEntities();
         if (dependencies != null) {
             for (Dependency dependency : dependencies) {
                 switch (dependency.getType()) {
                     case EntityTypes.POLICY_TYPE:
                         Policy dependentPolicy = findPolicyByNameOrPath(dependency.getName(), rawBundle);
-                        loadPolicyDependencies(dependentPolicy, annotatedBundle, rawBundle, excludeShared);
+                        loadPolicyDependencies(dependentPolicy, annotatedBundle, rawBundle, excludeShared, isParentShared);
                         break;
                     case EntityTypes.ENCAPSULATED_ASSERTION_TYPE:
                         Encass encass = rawBundle.getEncasses().get(dependency.getName());
-                        loadEncassDependencies(encass, annotatedBundle, rawBundle, excludeShared);
+                        loadEncassDependencies(encass, annotatedBundle, rawBundle, excludeShared, isParentShared);
                         break;
                     default:
                         loadGatewayEntity(dependency, annotatedBundle, rawBundle);
@@ -278,13 +285,18 @@ public class BundleEntityBuilder {
      * @param encass          Encass policy for which gateway dependencies needs to be loaded.
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param rawBundle       Bundle containing all the entities of the gateway.
-     * @param excludeShared Exclude loading Shared entities as the dependencies of the policy
+     * @param excludeShared   Exclude loading Shared entities as the dependencies of the policy
+     * @param isParentShared  TRUE if any Parent (Policy or Encass) in the hierarchy was is annotated with @shared
      */
     private void loadEncassDependencies(Encass encass, AnnotatedBundle annotatedBundle, Bundle rawBundle,
-                                        boolean excludeShared) {
+                                        boolean excludeShared, boolean isParentShared) {
         if (encass != null && !excludeGatewayEntity(Encass.class, encass, annotatedBundle, excludeShared)) {
-            annotatedBundle.getEncasses().put(encass.getName(), encass);
-            loadPolicyDependenciesByPolicyName(encass.getPolicy(), annotatedBundle, rawBundle, excludeShared);
+            Encass encassCopy = new Encass(encass);
+            isParentShared = isParentShared || encass.isShared();
+            encassCopy.setParentEntityShared(isParentShared);
+
+            annotatedBundle.getEncasses().put(encass.getName(), encassCopy);
+            loadPolicyDependenciesByPolicyName(encassCopy.getPolicy(), annotatedBundle, rawBundle, excludeShared, isParentShared);
         }
     }
 
@@ -348,7 +360,7 @@ public class BundleEntityBuilder {
      * @param entityType      Type of entity class
      * @param gatewayEntity   Gateway entity to be checked
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param excludeShared Exclude loading Shared entities as the dependency
+     * @param excludeShared   Exclude loading Shared entities as the dependency
      * @return TRUE if the Gateway entity needs to be excluded
      */
     private boolean excludeGatewayEntity(Class<? extends GatewayEntity> entityType, GatewayEntity gatewayEntity,
@@ -363,7 +375,7 @@ public class BundleEntityBuilder {
      *
      * @param gatewayEntity   Gateway entity to be checked
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param excludeShared Exclude loading Shared entities as the dependency
+     * @param excludeShared   Exclude loading Shared entities as the dependency
      * @return TRUE if the Gateway entity is @shared and needs to be excluded or entity is Policy and annotated
      * bundle already contains the policy
      */

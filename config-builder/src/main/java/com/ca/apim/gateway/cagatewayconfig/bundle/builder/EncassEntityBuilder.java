@@ -56,7 +56,7 @@ public class EncassEntityBuilder implements EntityBuilder {
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         if (bundle instanceof AnnotatedBundle) {
             AnnotatedBundle annotatedBundle = ((AnnotatedBundle) bundle);
-            Map<String, Encass> map = Optional.ofNullable(bundle.getEncasses()).orElse(Collections.emptyMap());
+            Map<String, Encass> map = Optional.ofNullable(annotatedBundle.getEncasses()).orElse(Collections.emptyMap());
             return buildEntities(map, annotatedBundle, annotatedBundle.getFullBundle(), bundleType, document);
         } else {
             return buildEntities(bundle.getEncasses(), null, bundle, bundleType, document);
@@ -81,7 +81,12 @@ public class EncassEntityBuilder implements EntityBuilder {
     }
 
     private String getPolicyId(String policyWithPath, Bundle bundle, AnnotatedBundle annotatedBundle) {
-        final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyWithPath));
+        final AtomicReference<Policy> includedPolicy;
+        if (annotatedBundle != null) {
+            includedPolicy = new AtomicReference<>(annotatedBundle.getPolicies().get(policyWithPath));
+        } else {
+            includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyWithPath));
+        }
         if (includedPolicy.get() == null) {
             //check policy dependency in bundle dependencies
             Set<Bundle> dependencies = bundle.getDependencies();
@@ -134,7 +139,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         boolean isShared = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
-            isShared = annotatedEntity.isShared();
+            isShared = encass.isParentEntityShared();
             annotatedEncassEntity = encass.getAnnotatedEntity();
             if (isShared) {
                 //use the id and guid defined at bundle-hints annotation (if its annotated bundle)
