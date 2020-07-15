@@ -113,7 +113,7 @@ public class EncapsulatedAssertionBuilder implements PolicyAssertionBuilder {
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (encass != null && !encass.isExcluded() && annotatedEntity != null) {
             AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (annotatedEntity.isReusable()) {
+            if (annotatedEntity.isShared()) {
                 if (annotatedEncassEntity != null) {
                     if (annotatedEncassEntity.getGuid() != null) {
                         if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
