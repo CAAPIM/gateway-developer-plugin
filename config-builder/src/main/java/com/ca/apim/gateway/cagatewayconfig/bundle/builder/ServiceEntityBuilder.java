@@ -158,7 +158,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
         serviceElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, uniqueServicePath, uniqueServicePath, id,
-                serviceElement, false, service);
+                serviceElement, policy.isHasRouting(), service);
         if (isRedeployableBundle || !isShared) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {

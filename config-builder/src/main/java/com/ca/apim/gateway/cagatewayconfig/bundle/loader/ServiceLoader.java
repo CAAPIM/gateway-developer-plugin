@@ -13,6 +13,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.SoapResource;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
+import org.apache.commons.lang3.BooleanUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -130,6 +131,11 @@ public class ServiceLoader implements BundleEntityLoader {
             final Element resource = getSingleChildElement(resourceSet, RESOURCE);
             serviceEntity.setPolicy(resource.getTextContent());
         }
+        boolean hasRouting = false;
+        if (allProperties.get(PROPERTY_HAS_ROUTING) != null) {
+            hasRouting = BooleanUtils.toBoolean(allProperties.get(PROPERTY_HAS_ROUTING).toString());
+        }
+        serviceEntity.setHasRouting(hasRouting);
     }
 
     private void extractResourceSetsForSoap(Element resources, Service serviceEntity) {
