@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createRoot;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
@@ -433,7 +434,10 @@ public class BundleEntityBuilderTestHelper {
         Optional<Metadata> definedEntities = metadata.getDefinedEntities().stream().findFirst();
         assertTrue(definedEntities.isPresent());
         assertEquals("ENCAPSULATED_ASSERTION", definedEntities.get().getType());
-        assertEquals(encass.getName(), definedEntities.get().getName());
+
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, encass.getAnnotatedEntity(), projectInfo);
+        String name = annotatedBundle.applyUniqueName(encass.getAnnotatedEntity().getEntityName(), DEPLOYMENT);
+        assertEquals(name, definedEntities.get().getName());
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(definedEntities.get());
         Assert.assertThat(json, CoreMatchers.containsString("\"arguments\":[{\"type\":\"message\",\"name\":\"source\",\"requireExplicit\":true,\"label\":\"Some label\"}]"));

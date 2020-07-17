@@ -129,7 +129,7 @@ public class EncassEntityBuilder implements EntityBuilder {
 
     private Entity buildEncassEntity(AnnotatedBundle annotatedBundle, Bundle bundle, String name, Encass encass, Document document) {
         String policyId = getPolicyId(encass.getPolicy(), bundle, annotatedBundle);
-        String encassName = name;
+        String uniqueEncassName = name;
         String guid = encass.getGuid();
         String id = encass.getId();
         AnnotatedEntity annotatedEncassEntity = null;
@@ -163,14 +163,14 @@ public class EncassEntityBuilder implements EntityBuilder {
                 //guid and id are regenerated in policy entity builder if this encass is referred by policy and it runs before this builder
                 //no need to regenerate id and guid
             }
-            encassName = annotatedBundle.applyUniqueName(name, BundleType.DEPLOYMENT, isShared);
+            uniqueEncassName = annotatedBundle.applyUniqueName(name, BundleType.DEPLOYMENT, isShared);
         }
-
+        encass.setUniqueEntityName(uniqueEncassName);
         Element encassAssertionElement = createElementWithAttributesAndChildren(
                 document,
                 ENCAPSULATED_ASSERTION,
                 ImmutableMap.of(ATTRIBUTE_ID, id),
-                createElementWithTextContent(document, NAME, encassName),
+                createElementWithTextContent(document, NAME, uniqueEncassName),
                 createElementWithTextContent(document, GUID, guid),
                 createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policyId),
                 buildArguments(encass, document),
@@ -180,7 +180,7 @@ public class EncassEntityBuilder implements EntityBuilder {
         final Map<String, Object> properties = Optional.ofNullable(encass.getProperties()).orElse(new HashMap<>());
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
-        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, encassName, id, encassAssertionElement, guid, encass);
+        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, uniqueEncassName, id, encassAssertionElement, guid, encass);
 
         if (isRedeployableBundle || !isShared) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);

@@ -52,7 +52,9 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
 
     /* Set to true if any Parent (Policy or Encass) in hierarchy is annotated with @shared */
     @JsonIgnore
-    private boolean isParentEntityShared;
+    private boolean parentEntityShared;
+    @JsonIgnore
+    private String uniqueEntityName;
 
     public Encass() { }
 
@@ -126,11 +128,19 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     }
 
     public boolean isParentEntityShared() {
-        return isParentEntityShared;
+        return parentEntityShared;
     }
 
     public void setParentEntityShared(boolean parentEntityShared) {
-        isParentEntityShared = parentEntityShared;
+        this.parentEntityShared = parentEntityShared;
+    }
+
+    public String getUniqueEntityName() {
+        return uniqueEntityName;
+    }
+
+    public void setUniqueEntityName(String uniqueEntityName) {
+        this.uniqueEntityName = uniqueEntityName;
     }
 
     Encass merge(Encass otherEncass) {
@@ -170,6 +180,9 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
 
             @Override
             public String getName() {
+                if (StringUtils.isNotBlank(getUniqueEntityName())) {
+                    return getUniqueEntityName();
+                }
                 return Encass.this.getName();
             }
 

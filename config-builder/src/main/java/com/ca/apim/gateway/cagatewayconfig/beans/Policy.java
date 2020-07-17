@@ -58,7 +58,7 @@ public class Policy extends Folderable implements AnnotableEntity {
     private boolean hasRouting;
     /* Set to true if any Parent (Policy or Encass) in hierarchy is annotated with @shared */
     @JsonIgnore
-    private boolean isParentEntityShared;
+    private boolean parentEntityShared;
 
     public Policy() {
     }
@@ -155,11 +155,11 @@ public class Policy extends Folderable implements AnnotableEntity {
     }
 
     public boolean isParentEntityShared() {
-        return isParentEntityShared;
+        return parentEntityShared;
     }
 
     public void setParentEntityShared(boolean parentEntityShared) {
-        isParentEntityShared = parentEntityShared;
+        this.parentEntityShared = parentEntityShared;
     }
 
     Policy merge(Policy otherPolicy) {
