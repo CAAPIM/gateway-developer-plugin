@@ -283,8 +283,14 @@ class PolicyEntityBuilderTest {
         policyToBuild.setGuid("global-policy-guid-123");
         policyToBuild.setTag("global-policy");
         policyToBuild.setPolicyType(PolicyType.GLOBAL);
+        Folder myFolder = new Folder();
+        myFolder.setId("myId");
+        myFolder.setName("my");
+        myFolder.setParentFolder(Folder.ROOT_FOLDER);
         Folder parentFolder = new Folder();
         parentFolder.setId("folder-id");
+        parentFolder.setName("policy");
+        parentFolder.setParentFolder(myFolder);
         policyToBuild.setParentFolder(parentFolder);
 
         Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
@@ -314,8 +320,14 @@ class PolicyEntityBuilderTest {
         policyToBuild.setGuid("internal-policy-guid-123");
         policyToBuild.setTag("internal-policy");
         policyToBuild.setPolicyType(PolicyType.INTERNAL);
+        Folder myFolder = new Folder();
+        myFolder.setId("myId");
+        myFolder.setName("my");
+        myFolder.setParentFolder(Folder.ROOT_FOLDER);
         Folder parentFolder = new Folder();
         parentFolder.setId("folder-id");
+        parentFolder.setName("policy");
+        parentFolder.setParentFolder(myFolder);
         policyToBuild.setParentFolder(parentFolder);
 
         Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
