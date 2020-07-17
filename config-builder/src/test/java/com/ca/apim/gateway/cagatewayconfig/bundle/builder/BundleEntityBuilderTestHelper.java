@@ -195,8 +195,12 @@ public class BundleEntityBuilderTestHelper {
                 "            <L7p:Comment stringValue=\"Policy Fragment: includedPolicy\"/>\n" +
                 "        </L7p:CommentAssertion>\n" +
                 "    </wsp:All>\n" +
+                "    <L7p:Http2Routing>\n" +
+                "        <L7p:ProtectedServiceUrl stringValue=\"http://apim-hugh-new.lvn.broadcom.net:90\"/>\n" +
+                "    </L7p:Http2Routing>\n" +
                 "</wsp:Policy>");
         policy.setPath(policyName);
+        policy.setHasRouting(true);
         policy.setAnnotations(annotations);
         return policy;
     }
