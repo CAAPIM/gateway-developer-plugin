@@ -13,9 +13,10 @@ public class ProjectInfo {
     private final String groupName;
     private final String version;
     private final String configName;
+    private String targetFolder;
 
     public ProjectInfo(String name, String groupName, String version) {
-       this(name, groupName, version, null);
+        this(name, groupName, version, null);
     }
 
     public ProjectInfo(String name, String groupName, String version, String configName) {
@@ -39,5 +40,14 @@ public class ProjectInfo {
 
     public String getConfigName() {
         return configName;
+    }
+
+    public String getTargetFolder() {
+        return targetFolder;
+    }
+
+    public ProjectInfo withTargetFolder(String targetFolder) {
+        this.targetFolder = targetFolder;
+        return this;
     }
 }

@@ -95,6 +95,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                 return dir.getAsFile().exists() ? dir : null;
             }));
             t.getInto().set(pluginConfig.getBuiltBundleDir());
+            t.getTargetFolder().set(pluginConfig.getTargetFolder());
             t.getDependencies().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
     }

@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -53,7 +54,7 @@ public class FolderEntityBuilder implements EntityBuilder {
             //No need to map root folder by name
             entity = new Entity(FOLDER_TYPE, folderName, id, folderElement, folder);
         } else {
-            String filteredPathName = folder.getPath();
+            String filteredPathName = folder.getParentFolder().getPath() + folderName;
             filteredPathName = CharacterBlacklistUtil.decodePath(filteredPathName);
             entity = EntityBuilderHelper.getEntityWithPathMapping(FOLDER_TYPE, filteredPathName, filteredPathName, id
                     , folderElement, false, folder);
@@ -63,21 +64,34 @@ public class FolderEntityBuilder implements EntityBuilder {
         return entity;
     }
 
-    private List<Entity> buildEntities(Map<String, ?> entities, BundleType bundleType, Document document) {
+    private List<Entity> buildEntities(Map<String, Folder> entities, BundleType bundleType, Document document, String targetFolder) {
         // no folder has to be added to environment bundle
-        if (entities.isEmpty() || bundleType == ENVIRONMENT) {
+        if ((entities.isEmpty() && StringUtils.isBlank(targetFolder)) || bundleType == ENVIRONMENT) {
             return Collections.emptyList();
         }
         Map<Folder, Collection<Folder>> folderChildrenMap = new HashMap<>();
-
-        entities.values().forEach(folder -> addFolder((Folder)folder, folderChildrenMap));
-
-        Folder rootFolder = (Folder)entities.get("");
+        Folder rootFolder = entities.remove("");
         if (rootFolder == null) {
             throw new EntityBuilderException("Could not locate root folder.");
         }
-        rootFolder.setId(Folder.ROOT_FOLDER_ID);
-        rootFolder.setName(Folder.ROOT_FOLDER_NAME);
+        String targetFolderPath = null;
+        if (StringUtils.isNotBlank(targetFolder)) {
+            Folder bundleTargetFolder = rootFolder;
+            targetFolderPath =  targetFolder + "/";
+            bundleTargetFolder.setId(idGenerator.generate());
+            bundleTargetFolder.setName(targetFolder);
+            bundleTargetFolder.setParentFolder(Folder.ROOT_FOLDER);
+            bundleTargetFolder.setPath(targetFolderPath);
+            entities.put(targetFolderPath , bundleTargetFolder);
+            rootFolder = Folder.ROOT_FOLDER;
+            entities.put("", rootFolder);
+
+        } else {
+            rootFolder.setId(Folder.ROOT_FOLDER_ID);
+            rootFolder.setName(Folder.ROOT_FOLDER_NAME);
+            entities.put("", rootFolder);
+        }
+        entities.values().forEach(folder -> addFolder(folder, folderChildrenMap));
         Stream<Folder> folderStream = Stream.of(rootFolder).flatMap(f -> expand(f, folderChildrenMap));
 
         return folderStream.map(f -> {
@@ -92,7 +106,7 @@ public class FolderEntityBuilder implements EntityBuilder {
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         Map<String, Folder> folderMap = Optional.ofNullable(bundle.getFolders()).orElse(Collections.emptyMap());
-        return buildEntities(folderMap, bundleType, document);
+        return buildEntities(folderMap, bundleType, document, bundle.getTargetFolder());
     }
 
     @Override

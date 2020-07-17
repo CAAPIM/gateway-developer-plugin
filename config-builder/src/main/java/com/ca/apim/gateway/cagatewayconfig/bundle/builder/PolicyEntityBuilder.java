@@ -200,7 +200,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
     @VisibleForTesting
     Entity buildPolicyEntity(Policy policy, AnnotatedBundle annotatedBundle, Bundle bundle, Document document) {
         String policyName = policy.getName();
-        String policyNameWithPath = policy.getPath();
+        String policyNameWithPath = policy.getParentFolder().getPath() + policyName;
         policyNameWithPath = CharacterBlacklistUtil.decodePath(policyNameWithPath);
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;

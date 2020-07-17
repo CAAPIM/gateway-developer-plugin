@@ -55,7 +55,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         return entities.entrySet().stream().map(serviceEntry ->
-                buildServiceEntity(bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
+                buildServiceEntity(bundle, (Service) serviceEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
@@ -65,8 +65,9 @@ public class ServiceEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
+    private Entity buildServiceEntity(Bundle bundle, Service service, Document document) {
         AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
+        String servicePath = service.getParentFolder().getPath();
         String baseName = PathUtils.extractName(servicePath);
         String basePath = PathUtils.extractPath(servicePath);
         String uniqueName = baseName;
