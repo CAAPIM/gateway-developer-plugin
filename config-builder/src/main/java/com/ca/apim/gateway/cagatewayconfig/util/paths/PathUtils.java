@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.util.paths;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -49,5 +50,13 @@ public class PathUtils {
     public static String extractPath(String nameWithPath) {
         int index = nameWithPath.lastIndexOf(UNIX_PATH_SEPARATOR);
         return index > -1 ? nameWithPath.substring(0, index + 1) : "";
+    }
+
+    public static String extractNameFromUniqueEntityName(String uniqueName) {
+        String[] nameParts = StringUtils.split(uniqueName, "::");
+        if (nameParts.length >= 2) {
+            return nameParts[1];
+        }
+        return StringUtils.remove(uniqueName, "::");
     }
 }
