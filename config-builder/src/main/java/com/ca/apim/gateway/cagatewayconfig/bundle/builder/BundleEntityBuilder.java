@@ -104,46 +104,49 @@ public class BundleEntityBuilder {
         // Filter the bundle to export only annotated entities
         entityTypeMap.values().stream().filter(EntityUtils.GatewayEntityInfo::isBundleGenerationSupported).forEach(entityInfo ->
                 bundle.getEntities(entityInfo.getEntityClass()).values().stream()
-                        .filter(entity -> entity instanceof AnnotableEntity)
-                        .map(entity -> ((AnnotableEntity) entity).getAnnotatedEntity())
-                        .forEach(annotatedEntity -> {
-                            if (annotatedEntity != null && annotatedEntity.isBundle()) {
-                                List<Entity> entities = new ArrayList<>();
-                                AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
-                                Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
-                                bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-                                loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle,
-                                        bundle, false, false);
-                                entityBuilders.forEach(builder -> entities.addAll(builder.build(annotatedBundle, bundleType, document)));
-
-                                // Create deployment bundle
-                                final Element bundleElement = bundleDocumentBuilder.build(document, entities);
-
-                                String bundleFilename = "";
-                                String deleteBundleFilename = "";
-
-                                Element deleteBundleElement = null;
-                                if (EntityBuilder.BundleType.DEPLOYMENT.equals(bundleType)) {
-                                    // Create DELETE bundle - ALWAYS skip environment entities for DEPLOYMENT bundle
-                                    deleteBundleElement = createDeleteBundle(document, entities, bundle,
-                                            annotatedEntity, projectInfo);
-
-                                    // Generate bundle filenames
-                                    bundleFilename = generateBundleFileName(false, annotatedBundle.getBundleName());
-                                    deleteBundleFilename = generateBundleFileName(true, annotatedBundle.getBundleName());
-                                }
-
-                                // Create bundle metadata
-                                BundleMetadata bundleMetadata = null;
-                                if (bundleType == DEPLOYMENT) {
-                                    bundleMetadata = bundleMetadataBuilder.build(annotatedBundle, bundle, entities,
-                                            projectInfo);
-                                }
-
-                                annotatedElements.put(annotatedBundle.getBundleName(),
-                                        new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata,
-                                                bundleFilename, deleteBundleFilename));
+                        .filter(entity -> entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isBundle())
+                        .forEach(gatewayEntity -> {
+                            AnnotatedEntity<GatewayEntity> annotatedEntity;
+                            if (gatewayEntity instanceof Encass) { // encass bundle - make copy and get AnnotatedEntity
+                                annotatedEntity = new Encass((Encass) gatewayEntity).getAnnotatedEntity();
+                            } else { // Service bundle - no need for copy
+                                annotatedEntity = ((AnnotableEntity) gatewayEntity).getAnnotatedEntity();
                             }
+                            List<Entity> entities = new ArrayList<>();
+                            AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
+                            Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
+                            bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
+                            loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle,
+                                    bundle, false, false);
+                            entityBuilders.forEach(builder -> entities.addAll(builder.build(annotatedBundle, bundleType, document)));
+
+                            // Create deployment bundle
+                            final Element bundleElement = bundleDocumentBuilder.build(document, entities);
+
+                            String bundleFilename = "";
+                            String deleteBundleFilename = "";
+
+                            Element deleteBundleElement = null;
+                            if (EntityBuilder.BundleType.DEPLOYMENT.equals(bundleType)) {
+                                // Create DELETE bundle - ALWAYS skip environment entities for DEPLOYMENT bundle
+                                deleteBundleElement = createDeleteBundle(document, entities, bundle,
+                                        annotatedEntity, projectInfo);
+
+                                // Generate bundle filenames
+                                bundleFilename = generateBundleFileName(false, annotatedBundle.getBundleName());
+                                deleteBundleFilename = generateBundleFileName(true, annotatedBundle.getBundleName());
+                            }
+
+                            // Create bundle metadata
+                            BundleMetadata bundleMetadata = null;
+                            if (bundleType == DEPLOYMENT) {
+                                bundleMetadata = bundleMetadataBuilder.build(annotatedBundle, bundle, entities,
+                                        projectInfo);
+                            }
+
+                            annotatedElements.put(annotatedBundle.getBundleName(),
+                                    new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata,
+                                            bundleFilename, deleteBundleFilename));
                         })
         );
 
