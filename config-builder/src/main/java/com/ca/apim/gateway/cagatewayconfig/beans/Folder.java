@@ -25,11 +25,4 @@ public class Folder extends Folderable {
         super.setPath(EMPTY);
     }
 
-    public String getPath(){
-        if(getParentFolder() != null){
-            return getParentFolder().getPath() + getName() + "/";
-        }
-        return super.getPath();
-    }
-
 }

@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +68,8 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
     private Entity buildServiceEntity(Bundle bundle, Service service, Document document) {
         AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
-        String servicePath = service.getParentFolder().getPath();
+        String servicePath = EntityBuilderHelper.getPath(service.getParentFolder(), service.getName());
+        servicePath = CharacterBlacklistUtil.decodePath(servicePath);
         String baseName = PathUtils.extractName(servicePath);
         String basePath = PathUtils.extractPath(servicePath);
         String uniqueName = baseName;

@@ -54,7 +54,7 @@ public class FolderEntityBuilder implements EntityBuilder {
             //No need to map root folder by name
             entity = new Entity(FOLDER_TYPE, folderName, id, folderElement, folder);
         } else {
-            String filteredPathName = folder.getParentFolder().getPath() + folderName;
+            String filteredPathName = EntityBuilderHelper.getPath(folder.getParentFolder(), folder.getName());
             filteredPathName = CharacterBlacklistUtil.decodePath(filteredPathName);
             entity = EntityBuilderHelper.getEntityWithPathMapping(FOLDER_TYPE, filteredPathName, filteredPathName, id
                     , folderElement, false, folder);

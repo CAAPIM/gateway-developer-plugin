@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
@@ -14,9 +15,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_ID;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.*;
@@ -79,5 +83,16 @@ class EntityBuilderHelper {
 
     static Entity getEntityWithDeleteMappings(final Entity entity){
         return getEntityWithMappings(entity.getType(), entity.getName(), entity.getId(), null, MappingActions.DELETE, entity.getMappingProperties());
+    }
+
+    static String getPath(Folder folder, String name) {
+        return PathUtils.unixPath(getPath(folder).toString(), name);
+    }
+
+    static Path getPath(Folder folder) {
+        if (folder.getParentFolder() == null) {
+            return Paths.get("");
+        }
+        return getPath(folder.getParentFolder()).resolve(folder.getName());
     }
 }
