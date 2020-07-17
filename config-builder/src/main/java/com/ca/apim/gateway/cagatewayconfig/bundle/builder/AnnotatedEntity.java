@@ -85,12 +85,7 @@ public class AnnotatedEntity<T> {
     }
 
     public boolean isBundle() {
-
         return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isBundle();
-    }
-
-    public boolean isShared() {
-        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isShared();
     }
 
     public boolean isRedeployable() {

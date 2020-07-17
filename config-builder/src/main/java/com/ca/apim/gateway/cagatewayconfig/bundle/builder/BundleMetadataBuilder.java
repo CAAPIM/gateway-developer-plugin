@@ -137,7 +137,8 @@ public class BundleMetadataBuilder {
     }
 
     private boolean isBundleContainsSharedEntity (final AnnotatedBundle annotatedBundle) {
-        return annotatedBundle.getAnnotatedEntity().isShared();
+        return annotatedBundle.getEncasses().values().stream().anyMatch(Encass::isParentEntityShared)
+               || annotatedBundle.getPolicies().values().stream().anyMatch(Policy::isParentEntityShared);
     }
 
     private boolean hasRoutingAssertion(final List<Entity> dependentEntities) {

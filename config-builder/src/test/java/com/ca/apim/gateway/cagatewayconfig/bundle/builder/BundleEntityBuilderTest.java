@@ -28,6 +28,7 @@ import java.util.*;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_NAME;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilderTestHelper.*;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createRoot;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.LISTEN_PORT_TYPE;
@@ -81,7 +82,7 @@ class BundleEntityBuilderTest {
         BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()),
                 new BundleDocumentBuilder(), new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry);
 
-        final Map<String, BundleArtifacts> element = builder.build(new Bundle(), BundleType.DEPLOYMENT,
+        final Map<String, BundleArtifacts> element = builder.build(new Bundle(), DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(element);
     }
@@ -116,12 +117,11 @@ class BundleEntityBuilderTest {
         Annotation bundleAnnotation = new Annotation(AnnotationType.BUNDLE);
         Annotation bundleHintsAnnotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         bundleHintsAnnotation.setName(TEST_ENCASS_ANNOTATION_NAME);
-        Annotation sharedAnnotation = new Annotation(AnnotationType.SHARED);
         encassAnnotations.add(bundleAnnotation);
         encassAnnotations.add(bundleHintsAnnotation);
-        encassAnnotations.add(sharedAnnotation);
 
         Set<Annotation> depPolicyAnnotations = new HashSet<>();
+        Annotation sharedAnnotation = new Annotation(AnnotationType.SHARED);
         depPolicyAnnotations.add(sharedAnnotation);
 
         Policy depPolicy = buildTestPolicyWithAnnotation(TEST_DEP_ENCASS_POLICY, TEST_DEP_POLICY_ID, TEST_GUID, depPolicyAnnotations);
@@ -131,7 +131,6 @@ class BundleEntityBuilderTest {
         bundle.getEncasses().put(TEST_DEP_ENCASS, depEncass);
 
         Set<Dependency> usedEntities = new LinkedHashSet<>();
-        usedEntities.add(new Dependency(TEST_DEP_POLICY_ID, Policy.class, TEST_DEP_ENCASS_POLICY, EntityTypes.POLICY_TYPE));
         usedEntities.add(new Dependency(TEST_DEP_ENCASS_ID, Encass.class, TEST_DEP_ENCASS, EntityTypes.ENCAPSULATED_ASSERTION_TYPE));
         usedEntities.add(new Dependency(TEST_ENCASS_ID, Encass.class, TEST_ENCASS, EntityTypes.ENCAPSULATED_ASSERTION_TYPE));
 
@@ -147,8 +146,9 @@ class BundleEntityBuilderTest {
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
 
-        buildAndValidateAnnotatedBundle(bundle, entityBuilders, TEST_ENCASS_POLICY, NEW_OR_EXISTING, TEST_ENCASS, NEW_OR_EXISTING,
-                TEST_DEP_ENCASS_POLICY, NEW_OR_EXISTING, TEST_DEP_ENCASS, NEW_OR_EXISTING);
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, encass.getAnnotatedEntity(), projectInfo);
+        buildAndValidateAnnotatedBundle(bundle, annotatedBundle, entityBuilders, TEST_ENCASS_POLICY, NEW_OR_UPDATE,
+                TEST_ENCASS, NEW_OR_UPDATE, TEST_DEP_ENCASS_POLICY, NEW_OR_EXISTING, TEST_DEP_ENCASS, NEW_OR_UPDATE);
     }
 
     @Test
@@ -201,17 +201,20 @@ class BundleEntityBuilderTest {
         entityBuilders.add(policyBuilder);
         entityBuilders.add(encassBuilder);
 
-        buildAndValidateAnnotatedBundle(bundle, entityBuilders, TEST_ENCASS_POLICY, NEW_OR_UPDATE, TEST_ENCASS, NEW_OR_UPDATE,
-                TEST_DEP_ENCASS_POLICY, NEW_OR_UPDATE, TEST_DEP_ENCASS, NEW_OR_UPDATE);
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, encass.getAnnotatedEntity(), projectInfo);
+        buildAndValidateAnnotatedBundle(bundle, annotatedBundle, entityBuilders, TEST_ENCASS_POLICY, NEW_OR_UPDATE,
+                TEST_ENCASS, NEW_OR_UPDATE, TEST_DEP_ENCASS_POLICY, NEW_OR_UPDATE, TEST_DEP_ENCASS, NEW_OR_UPDATE);
 
     }
 
-    private static void buildAndValidateAnnotatedBundle(Bundle bundle, Set<EntityBuilder> entityBuilders,
+    private static void buildAndValidateAnnotatedBundle(Bundle bundle,
+                                                        AnnotatedBundle annotatedBundle,
+                                                        Set<EntityBuilder> entityBuilders,
                                                         String expEncassPolicyName, String expEncassPolicyAction, String expEncassName, String expEncassAction,
                                                         String expDepEncassPolicyName, String expDepEncassPolicyAction, String expDepEncassName, String expDepEncassAction) {
         BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(),
                 new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry);
-        Map<String, BundleArtifacts> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
@@ -231,18 +234,29 @@ class BundleEntityBuilderTest {
             assertEquals(EntityTypes.FOLDER_TYPE, getSingleChildElementTextContent(folderElement, TYPE));
             assertNotNull(getSingleChildElement(folderElement, RESOURCE));
             final Element policyElement = itemList.get(1);
+
+            expEncassPolicyName = annotatedBundle.applyUniqueName(expEncassPolicyName, DEPLOYMENT, false);
             assertEquals(expEncassPolicyName, getSingleChildElementTextContent(policyElement, NAME));
             assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(policyElement, TYPE));
             assertNotNull(getSingleChildElement(policyElement, RESOURCE));
             final Element depPolicyElement = itemList.get(2);
+
+            Policy depEncassPolicy = bundle.getPolicies().get(expDepEncassPolicyName);
+            expDepEncassPolicyName = annotatedBundle.applyUniqueName(expDepEncassPolicyName, DEPLOYMENT,
+                    depEncassPolicy.isShared());
             assertEquals(expDepEncassPolicyName, getSingleChildElementTextContent(depPolicyElement, NAME));
             assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(depPolicyElement, TYPE));
             assertNotNull(getSingleChildElement(depPolicyElement, RESOURCE));
             final Element encassElement = itemList.get(3);
+
+            expEncassName = annotatedBundle.applyUniqueName(expEncassName, DEPLOYMENT, false);
             assertEquals(expEncassName, getSingleChildElementTextContent(encassElement, NAME));
             assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, getSingleChildElementTextContent(encassElement, TYPE));
             assertNotNull(getSingleChildElement(encassElement, RESOURCE));
             final Element depEncassElement = itemList.get(4);
+
+            Encass depEncass = bundle.getEncasses().get(expDepEncassName);
+            expDepEncassName = annotatedBundle.applyUniqueName(expDepEncassName, DEPLOYMENT, depEncass.isShared());
             assertEquals(expDepEncassName, getSingleChildElementTextContent(depEncassElement, NAME));
             assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, getSingleChildElementTextContent(depEncassElement, TYPE));
             assertNotNull(getSingleChildElement(depEncassElement, RESOURCE));
@@ -283,7 +297,7 @@ class BundleEntityBuilderTest {
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
-        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
@@ -334,7 +348,7 @@ class BundleEntityBuilderTest {
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
-        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
@@ -404,7 +418,7 @@ class BundleEntityBuilderTest {
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, true);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
-        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
@@ -474,7 +488,7 @@ class BundleEntityBuilderTest {
         Encass encass = buildTestEncassWithAnnotation(TEST_GUID, TEST_ENCASS_POLICY, false);
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
-        Map<String, BundleArtifacts> bundles = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT,
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
@@ -533,14 +547,17 @@ class BundleEntityBuilderTest {
         Service service = buildTestServiceWithAnnotation(TEST_SERVICE, TEST_SERVICE_ID, TEST_SERVICE);
         bundle.getServices().put(TEST_SERVICE, service);
 
-        buildAndValidateAnnotatedServiceBundle(bundle, TEST_SERVICE, NEW_OR_EXISTING,
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, service.getAnnotatedEntity(), projectInfo);
+        buildAndValidateAnnotatedServiceBundle(bundle, annotatedBundle, TEST_SERVICE, NEW_OR_EXISTING,
                 TEST_DEP_ENCASS_POLICY, NEW_OR_EXISTING, TEST_DEP_ENCASS, NEW_OR_EXISTING);
     }
 
-    private static void buildAndValidateAnnotatedServiceBundle(Bundle bundle, String expServiceName, String expServiceAction, String expDepEncassPolicyName, String expDepEncassPolicyAction,
+    private static void buildAndValidateAnnotatedServiceBundle(Bundle bundle, AnnotatedBundle annotatedBundle,
+                                                               String expServiceName, String expServiceAction,
+                                                               String expDepEncassPolicyName, String expDepEncassPolicyAction,
                                                                String expDepEncassName, String expDepEncassAction) {
         BundleEntityBuilder builder = createBundleEntityBuilder();
-        Map<String, BundleArtifacts> bundles = builder.build(bundle, BundleType.DEPLOYMENT,
+        Map<String, BundleArtifacts> bundles = builder.build(bundle, DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
@@ -560,10 +577,14 @@ class BundleEntityBuilderTest {
             assertEquals(EntityTypes.FOLDER_TYPE, getSingleChildElementTextContent(folderElement, TYPE));
             assertNotNull(getSingleChildElement(folderElement, RESOURCE));
             final Element depPolicyElement = itemList.get(1);
+
+            expDepEncassPolicyName = annotatedBundle.applyUniqueName(expDepEncassPolicyName, DEPLOYMENT, true);
             assertEquals(expDepEncassPolicyName, getSingleChildElementTextContent(depPolicyElement, NAME));
             assertEquals(EntityTypes.POLICY_TYPE, getSingleChildElementTextContent(depPolicyElement, TYPE));
             assertNotNull(getSingleChildElement(depPolicyElement, RESOURCE));
             final Element depEncassElement = itemList.get(2);
+
+            expDepEncassName = annotatedBundle.applyUniqueName(expDepEncassName, DEPLOYMENT, true);
             assertEquals(expDepEncassName, getSingleChildElementTextContent(depEncassElement, NAME));
             assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, getSingleChildElementTextContent(depEncassElement, TYPE));
             assertNotNull(getSingleChildElement(depEncassElement, RESOURCE));

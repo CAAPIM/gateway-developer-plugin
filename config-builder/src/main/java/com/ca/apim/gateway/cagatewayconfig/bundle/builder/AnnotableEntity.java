@@ -2,6 +2,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Set;
@@ -54,9 +55,12 @@ public interface AnnotableEntity {
                 } else if(BUNDLE_HINTS.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setId(annotation.getId());
                     annotatedEntity.setGuid(annotation.getGuid());
-                    annotatedEntity.setTags(annotation.getTags());
-                    annotatedEntity.setBundleName(annotation.getName());
-                    annotatedEntity.setDescription(annotation.getDescription());
+                    if (this.getEntityType().equals(EntityTypes.SERVICE_TYPE)
+                        || this.getEntityType().equals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE)) {
+                        annotatedEntity.setTags(annotation.getTags());
+                        annotatedEntity.setBundleName(annotation.getName());
+                        annotatedEntity.setDescription(annotation.getDescription());
+                    }
                 }
             });
             return annotatedEntity;
