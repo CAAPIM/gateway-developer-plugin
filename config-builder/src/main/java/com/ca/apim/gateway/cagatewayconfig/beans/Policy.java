@@ -263,11 +263,6 @@ public class Policy extends Folderable implements AnnotableEntity {
     public AnnotatedEntity getAnnotatedEntity() {
         if (annotatedEntity == null && annotations != null) {
             annotatedEntity = createAnnotatedEntity();
-            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
-                annotatedEntity.setDescription("");
-            }
-            annotatedEntity.setPolicyName(getName());
-            annotatedEntity.setEntityName(getName());
         }
         return annotatedEntity;
     }
