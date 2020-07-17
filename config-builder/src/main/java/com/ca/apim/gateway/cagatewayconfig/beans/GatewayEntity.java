@@ -66,9 +66,4 @@ public class GatewayEntity {
     public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
         //
     }
-
-    public Metadata getMetadata() {
-        return null;
-    }
-
 }

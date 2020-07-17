@@ -189,47 +189,6 @@ public class Service extends Folderable implements AnnotableEntity {
         return annotatedEntity;
     }
 
-    @JsonIgnore
-    @Override
-    public Metadata getMetadata() {
-        return new Metadata() {
-            public String getType() {
-                return EntityTypes.SERVICE_TYPE;
-            }
-
-            @Override
-            public String getName() {
-                return Service.this.getName();
-            }
-
-            @Override
-            public String getId() {
-                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
-                if (annotatedEntity != null && annotatedEntity.getId() != null) {
-                    return annotatedEntity.getId();
-                }
-                return Service.this.getId();
-            }
-
-            @Override
-            public String getGuid() {
-                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
-                if (annotatedEntity != null && annotatedEntity.getGuid() != null) {
-                    return annotatedEntity.getGuid();
-                }
-                return Service.this.getGuid();
-            }
-
-            public String getUri() {
-                return Service.this.getUrl();
-            }
-
-            public boolean isSoap() {
-                return  Service.this.getSoapResources() != null && StringUtils.isNotBlank(Service.this.getWsdlRootUrl());
-            }
-        };
-    }
-
     @Override
     public String getEntityType(){
         return EntityTypes.SERVICE_TYPE;

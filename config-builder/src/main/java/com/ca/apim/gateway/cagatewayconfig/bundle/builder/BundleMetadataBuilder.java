@@ -13,10 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
@@ -41,8 +38,8 @@ public class BundleMetadataBuilder {
      * @param projectInfo       Gradle Project info containing Gradle project name, groupName and version
      * @return Full bundle or Annotated bundle metadata
      */
-    public BundleMetadata build(final AnnotatedBundle annotatedBundle, final Bundle bundle, final List<Entity> dependentEntities,
-                                ProjectInfo projectInfo) {
+    public BundleMetadata build(final AnnotatedBundle annotatedBundle, final Bundle bundle,
+                                final List<Entity> dependentEntities, ProjectInfo projectInfo) {
         if (annotatedBundle != null && annotatedBundle.getAnnotatedEntity() != null) {
             AnnotatedEntity<? extends GatewayEntity> annotatedEntity = annotatedBundle.getAnnotatedEntity();
             final String bundleName = annotatedBundle.getBundleName();
@@ -51,7 +48,8 @@ public class BundleMetadataBuilder {
                 name =  bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
             }
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(annotatedEntity.getEntityType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(annotatedEntity.getEntityType(), name,
+                    projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
             final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(dependentEntities);
             builder.referencedEntities(referencedEntities);
@@ -65,7 +63,9 @@ public class BundleMetadataBuilder {
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
             final List<Metadata> definedEntities = new ArrayList<>();
-            definedEntities.add(annotatedEntity.getEntity().getMetadata());
+            Optional<Entity> definedEntity =
+                    dependentEntities.parallelStream().filter(e -> annotatedEntity.getEntity().getName().equals(e.getOriginalName())).findAny();
+            definedEntity.ifPresent(e -> definedEntities.add(e.getMetadata()));
 
             return builder.definedEntities(definedEntities).build();
         } else {
@@ -133,7 +133,7 @@ public class BundleMetadataBuilder {
 
     private Collection<Metadata> getDefinedEntitiesMetadata(final List<Entity> definedEntities) {
         return definedEntities.stream().filter(FILTER_NON_ENV_ENTITIES_EXCLUDING_FOLDER)
-                .map(e -> ((GatewayEntity)e.getGatewayEntity()).getMetadata()).collect(Collectors.toList());
+                .map(Entity::getMetadata).collect(Collectors.toList());
     }
 
     private boolean isBundleContainsSharedEntity (final AnnotatedBundle annotatedBundle) {
