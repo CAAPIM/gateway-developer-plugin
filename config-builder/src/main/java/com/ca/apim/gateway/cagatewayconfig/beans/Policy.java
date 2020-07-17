@@ -22,9 +22,7 @@ import org.w3c.dom.Element;
 
 import javax.inject.Named;
 import java.io.File;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
@@ -44,7 +42,7 @@ public class Policy extends Folderable implements AnnotableEntity {
     @JsonIgnore
     private Element policyDocument;
     @JsonIgnore
-    private Set<Annotation> annotations;
+    private Set<Annotation> annotations = new HashSet<>();
     @JsonIgnore
     private final Set<Policy> dependencies = new HashSet<>();
     private String tag;
@@ -53,11 +51,14 @@ public class Policy extends Folderable implements AnnotableEntity {
     @JsonIgnore
     private PolicyType policyType;
     @JsonIgnore
-    private Set<Dependency> usedEntities;
+    private Set<Dependency> usedEntities = new LinkedHashSet<>();
     @JsonIgnore
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
 
     private boolean hasRouting;
+    /* Set to true if any Parent (Policy or Encass) in hierarchy is annotated with @shared */
+    @JsonIgnore
+    private boolean parentEntityShared;
 
     public Policy() {
     }
@@ -70,6 +71,11 @@ public class Policy extends Folderable implements AnnotableEntity {
         this.tag = builder.tag;
         this.subtag = builder.subtag;
         setParentFolder(builder.parentFolderId != null ? new Folder(builder.parentFolderId, null) : null);
+    }
+
+    // Copy constructor
+    public Policy(Policy otherPolicy) {
+        merge(otherPolicy);
     }
 
     public Set<Dependency> getUsedEntities() {
@@ -149,17 +155,29 @@ public class Policy extends Folderable implements AnnotableEntity {
         this.hasRouting = hasRouting;
     }
 
+    public boolean isParentEntityShared() {
+        return parentEntityShared;
+    }
+
+    public void setParentEntityShared(boolean parentEntityShared) {
+        this.parentEntityShared = parentEntityShared;
+    }
+
     Policy merge(Policy otherPolicy) {
         this.policyXML = firstNonNull(otherPolicy.policyXML, this.policyXML);
+        this.setPath(firstNonNull(otherPolicy.getPath(), this.getPath()));
         this.setName(firstNonNull(otherPolicy.getName(), this.getName()));
         this.setParentFolder(firstNonNull(otherPolicy.getParentFolder(), this.getParentFolder()));
         this.guid = firstNonNull(otherPolicy.guid, this.guid);
         this.policyDocument = firstNonNull(otherPolicy.policyDocument, this.policyDocument);
-        this.dependencies.addAll(otherPolicy.dependencies);
+        this.dependencies.addAll(firstNonNull(otherPolicy.dependencies, Collections.emptySet()));
         this.setId(firstNonNull(otherPolicy.getId(), this.getId()));
         this.tag = firstNonNull(otherPolicy.tag, this.tag);
+        this.subtag = firstNonNull(otherPolicy.subtag, this.subtag);
         this.policyType = firstNonNull(otherPolicy.policyType, this.policyType);
         this.hasRouting = otherPolicy.hasRouting || this.hasRouting;
+        this.usedEntities.addAll(firstNonNull(otherPolicy.usedEntities, Collections.emptySet()));
+        this.annotations.addAll(firstNonNull(otherPolicy.annotations, Collections.emptySet()));
         return this;
     }
 
@@ -245,11 +263,6 @@ public class Policy extends Folderable implements AnnotableEntity {
     public AnnotatedEntity getAnnotatedEntity() {
         if (annotatedEntity == null && annotations != null) {
             annotatedEntity = createAnnotatedEntity();
-            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
-                annotatedEntity.setDescription("");
-            }
-            annotatedEntity.setPolicyName(getName());
-            annotatedEntity.setEntityName(getName());
         }
         return annotatedEntity;
     }
@@ -291,4 +304,20 @@ public class Policy extends Folderable implements AnnotableEntity {
         };
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Policy)) {
+            return false;
+        }
+        Policy policy = (Policy) o;
+        return Objects.equals(getPath(), policy.getPath());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPath());
+    }
 }

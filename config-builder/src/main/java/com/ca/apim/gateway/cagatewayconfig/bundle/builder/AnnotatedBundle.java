@@ -59,9 +59,10 @@ public class AnnotatedBundle extends Bundle {
         return dependentBundles;
     }
 
-    public String getNamespace(final EntityBuilder.BundleType bundleType) {
-        if(EntityBuilder.BundleType.ENVIRONMENT == bundleType) {
-            return super.getNamespace(bundleType);
+
+    public String getNamespace(final EntityBuilder.BundleType bundleType, boolean isShared) {
+        if (isShared || EntityBuilder.BundleType.ENVIRONMENT == bundleType) {
+            return super.getNamespace(bundleType, isShared);
         }
 
         StringBuilder namespace = new StringBuilder();

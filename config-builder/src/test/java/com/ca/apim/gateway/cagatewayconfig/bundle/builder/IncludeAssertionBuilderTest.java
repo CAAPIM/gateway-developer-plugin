@@ -1,5 +1,6 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
@@ -23,6 +24,7 @@ public class IncludeAssertionBuilderTest {
     private Document document;
     private IncludeAssertionBuilder includeAssertionBuilder = new IncludeAssertionBuilder();
     private PolicyBuilderContext policyBuilderContext;
+    private static final ProjectInfo projectInfo = new ProjectInfo("my-bundle", "my-bundle-group", "1.0");
 
     @BeforeEach
     void beforeEach() {
@@ -40,12 +42,14 @@ public class IncludeAssertionBuilderTest {
         Policy policy = new Policy();
         policy.setGuid("123-abc-567");
         bundle.getPolicies().put(policyPath, policy);
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, null, null);
+        annotatedBundle.putAllPolicies(bundle.getPolicies());
 
         Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
         document.appendChild(includeAssertionElement);
         policyBuilderContext = new PolicyBuilderContext("path.xml", document, bundle, new IdGenerator());
         policyBuilderContext.withPolicy(policy);
-        policyBuilderContext.withAnnotatedBundle(new AnnotatedBundle(bundle, null, null));
+        policyBuilderContext.withAnnotatedBundle(annotatedBundle);
         includeAssertionBuilder.buildAssertionElement(includeAssertionElement, policyBuilderContext);
 
         Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
@@ -59,13 +63,15 @@ public class IncludeAssertionBuilderTest {
         Policy policy = new Policy();
         policy.setGuid("123-abc-567");
         bundle.getPolicies().put(policyPath, policy);
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, null, null);
+        annotatedBundle.putAllPolicies(bundle.getPolicies());
 
         Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
         document.appendChild(includeAssertionElement);
 
         policyBuilderContext = new PolicyBuilderContext("path.xml", document, bundle, new IdGenerator());
         policyBuilderContext.withPolicy(policy);
-        policyBuilderContext.withAnnotatedBundle(new AnnotatedBundle(bundle, null, null));
+        policyBuilderContext.withAnnotatedBundle(annotatedBundle);
         includeAssertionBuilder.buildAssertionElement(includeAssertionElement, policyBuilderContext);
 
         Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
