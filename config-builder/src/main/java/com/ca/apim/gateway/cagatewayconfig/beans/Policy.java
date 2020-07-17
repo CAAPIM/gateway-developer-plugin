@@ -73,6 +73,7 @@ public class Policy extends Folderable implements AnnotableEntity {
         setParentFolder(builder.parentFolderId != null ? new Folder(builder.parentFolderId, null) : null);
     }
 
+    // Copy constructor
     public Policy(Policy otherPolicy) {
         merge(otherPolicy);
     }

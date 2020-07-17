@@ -59,7 +59,16 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     public Encass() { }
 
     public Encass(Encass otherEncass) {
-        merge(otherEncass);
+        this.guid = firstNonNull(otherEncass.guid, this.guid);
+        this.setName(firstNonNull(otherEncass.getName(), this.getName()));
+        this.setId(firstNonNull(otherEncass.getId(), this.getId()));
+        this.properties.putAll(firstNonNull(otherEncass.properties, Collections.emptyMap()));
+        this.policy = firstNonNull(otherEncass.policy, this.policy);
+        this.path = firstNonNull(otherEncass.path, this.path);
+        this.arguments = firstNonNull(firstNonNull(otherEncass.arguments, Collections.emptySet()));
+        this.results = firstNonNull(firstNonNull(otherEncass.results, Collections.emptySet()));
+        this.policyId = firstNonNull(otherEncass.policyId, this.policyId);
+        this.annotations.addAll(firstNonNull(otherEncass.annotations, Collections.emptySet()));
     }
 
     public Set<EncassArgument> getArguments() {
@@ -141,20 +150,6 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
 
     public void setUniqueEntityName(String uniqueEntityName) {
         this.uniqueEntityName = uniqueEntityName;
-    }
-
-    Encass merge(Encass otherEncass) {
-        this.guid = firstNonNull(otherEncass.guid, this.guid);
-        this.setName(firstNonNull(otherEncass.getName(), this.getName()));
-        this.setId(firstNonNull(otherEncass.getId(), this.getId()));
-        this.properties.putAll(firstNonNull(otherEncass.properties, Collections.emptyMap()));
-        this.policy = firstNonNull(otherEncass.policy, this.policy);
-        this.path = firstNonNull(otherEncass.path, this.path);
-        this.arguments = firstNonNull(firstNonNull(otherEncass.arguments, Collections.emptySet()));
-        this.results = firstNonNull(firstNonNull(otherEncass.results, Collections.emptySet()));
-        this.policyId = firstNonNull(otherEncass.policyId, this.policyId);
-        this.annotations.addAll(firstNonNull(otherEncass.annotations, Collections.emptySet()));
-        return this;
     }
 
     @Override
