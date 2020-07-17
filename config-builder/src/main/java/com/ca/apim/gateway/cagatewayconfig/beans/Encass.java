@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -23,9 +24,11 @@ import java.io.File;
 import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile.FileType.JSON_YAML;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 import static java.util.stream.Collectors.toCollection;
 
+@JsonInclude(NON_NULL)
 @Named("ENCAPSULATED_ASSERTION")
 @ConfigurationFile(name = "encass", type = JSON_YAML)
 @EnvironmentType("ENCAPSULATED_ASSERTION")
@@ -49,7 +52,7 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
 
     /* Set to true if any Parent (Policy or Encass) in hierarchy is annotated with @shared */
     @JsonIgnore
-    private boolean parentEntityShared;
+    private boolean isParentEntityShared;
 
     public Encass() { }
 
@@ -123,11 +126,11 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     }
 
     public boolean isParentEntityShared() {
-        return parentEntityShared;
+        return isParentEntityShared;
     }
 
     public void setParentEntityShared(boolean parentEntityShared) {
-        this.parentEntityShared = parentEntityShared;
+        isParentEntityShared = parentEntityShared;
     }
 
     Encass merge(Encass otherEncass) {
@@ -154,6 +157,48 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
     @Override
     public void preWrite(File configFolder, DocumentFileUtils documentFileUtils) {
         sortArgumentsAndResults();
+    }
+
+    @JsonIgnore
+    @Override
+    public Metadata getMetadata() {
+        return new Metadata() {
+            @Override
+            public String getType() {
+                return EntityTypes.ENCAPSULATED_ASSERTION_TYPE;
+            }
+
+            @Override
+            public String getName() {
+                return Encass.this.getName();
+            }
+
+            @Override
+            public String getId() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && StringUtils.isNotBlank(annotatedEntity.getId())) {
+                    return annotatedEntity.getId();
+                }
+                return Encass.this.getId();
+            }
+
+            @Override
+            public String getGuid() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && StringUtils.isNotBlank(annotatedEntity.getGuid())) {
+                    return annotatedEntity.getGuid();
+                }
+                return Encass.this.getGuid();
+            }
+
+            public Set<EncassArgument> getArguments() {
+                return Encass.this.getArguments();
+            }
+
+            public Set<EncassResult> getResults() {
+                return Encass.this.getResults();
+            }
+        };
     }
 
     @VisibleForTesting

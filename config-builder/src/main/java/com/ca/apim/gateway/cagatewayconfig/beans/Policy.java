@@ -58,7 +58,7 @@ public class Policy extends Folderable implements AnnotableEntity {
     private boolean hasRouting;
     /* Set to true if any Parent (Policy or Encass) in hierarchy is annotated with @shared */
     @JsonIgnore
-    private boolean parentEntityShared;
+    private boolean isParentEntityShared;
 
     public Policy() {
     }
@@ -155,11 +155,11 @@ public class Policy extends Folderable implements AnnotableEntity {
     }
 
     public boolean isParentEntityShared() {
-        return parentEntityShared;
+        return isParentEntityShared;
     }
 
     public void setParentEntityShared(boolean parentEntityShared) {
-        this.parentEntityShared = parentEntityShared;
+        isParentEntityShared = parentEntityShared;
     }
 
     Policy merge(Policy otherPolicy) {
@@ -262,6 +262,11 @@ public class Policy extends Folderable implements AnnotableEntity {
     public AnnotatedEntity getAnnotatedEntity() {
         if (annotatedEntity == null && annotations != null) {
             annotatedEntity = createAnnotatedEntity();
+            if (StringUtils.isBlank(annotatedEntity.getDescription())) {
+                annotatedEntity.setDescription("");
+            }
+            annotatedEntity.setPolicyName(getName());
+            annotatedEntity.setEntityName(getName());
         }
         return annotatedEntity;
     }
@@ -274,6 +279,33 @@ public class Policy extends Folderable implements AnnotableEntity {
     @Override
     public String getEntityType(){
         return EntityTypes.POLICY_TYPE;
+    }
+
+    @JsonIgnore
+    @Override
+    public Metadata getMetadata() {
+        return new Metadata() {
+            @Override
+            public String getType() {
+                return EntityTypes.POLICY_TYPE;
+            }
+
+            @Override
+            public String getName() {
+                return Policy.this.getName();
+            }
+
+            @Override
+            public String getId() {
+                return Policy.this.getId();
+            }
+
+            @Override
+            public String getGuid() {
+                return Policy.this.getGuid();
+            }
+
+        };
     }
 
     @Override
