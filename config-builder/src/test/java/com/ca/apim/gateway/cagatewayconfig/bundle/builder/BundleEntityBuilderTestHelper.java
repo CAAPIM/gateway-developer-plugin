@@ -23,6 +23,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -430,6 +431,8 @@ public class BundleEntityBuilderTestHelper {
         assertEquals("my-bundle-group", metadata.getGroupName());
         assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, metadata.getType());
         assertEquals("1.0", metadata.getVersion());
+        assertTrue(metadata.getTimestamp() > Instant.now().minusSeconds(3).getEpochSecond(),
+                () -> "Timestamp in metadata " + metadata.getTimestamp() + " is too old.");
         if (isRedeployableBundle || !isBundleContainSharedEntity) {
             assertTrue(metadata.isRedeployable());
         }
