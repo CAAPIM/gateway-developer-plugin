@@ -185,6 +185,7 @@ public class BundleMetadataBuilderTest {
         assertEquals(1, bundles.size());
         BundleMetadata metadata = bundles.get(TEST_SERVICE_ANNOTATION_NAME + "-1.0").getBundleMetadata();
         assertNotNull(metadata);
+        assertTrue(metadata.isHasRouting());
         assertEquals(TEST_SERVICE_ANNOTATION_NAME, metadata.getName());
         assertEquals(TEST_SERVICE_ANNOTATION_DESC, metadata.getDescription());
         assertEquals(TEST_SERVICE_ANNOTATION_TAGS, metadata.getTags());
