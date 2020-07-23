@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadException;
 import com.ca.apim.gateway.cagatewayconfig.util.injection.InjectionRegistry;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -45,7 +46,7 @@ public class ExplodeBundle {
         if (folderPath.equals("/")) {
             return true;
         }
-        return bundle.getFolders().values().stream().anyMatch( folder -> ("/" + folder.getPath()).equals(folderPath));
+        return bundle.getFolders().values().stream().anyMatch( folder -> ("/" + PathUtils.unixPath(folder.getPath())).equals(folderPath));
     }
 
     void explodeBundle(String folderPath, FilterConfiguration filterConfiguration, File bundleFile, File explodeDirectory) throws DocumentParseException {
