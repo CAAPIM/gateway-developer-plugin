@@ -56,6 +56,8 @@ public class Service extends Folderable implements AnnotableEntity {
     private String wsdlRootUrl;
     @JsonIgnore
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
+    @JsonIgnore
+    private boolean hasRouting;
 
     @Override
     public Set<Annotation> getAnnotations() {
@@ -173,6 +175,14 @@ public class Service extends Folderable implements AnnotableEntity {
         this.wsdlRootUrl = wsdlRootUrl;
     }
 
+    public boolean isHasRouting() {
+        return hasRouting;
+    }
+
+    public void setHasRouting(boolean hasRouting) {
+        this.hasRouting = hasRouting;
+    }
+
     @Override
     public AnnotatedEntity getAnnotatedEntity() {
         if (annotatedEntity == null && annotations != null) {
@@ -205,7 +215,7 @@ public class Service extends Folderable implements AnnotableEntity {
             @Override
             public String getId() {
                 AnnotatedEntity annotatedEntity = getAnnotatedEntity();
-                if (annotatedEntity != null && annotatedEntity.getId() != null) {
+                if (annotatedEntity != null && StringUtils.isNotBlank(annotatedEntity.getId())) {
                     return annotatedEntity.getId();
                 }
                 return Service.this.getId();
@@ -214,7 +224,7 @@ public class Service extends Folderable implements AnnotableEntity {
             @Override
             public String getGuid() {
                 AnnotatedEntity annotatedEntity = getAnnotatedEntity();
-                if (annotatedEntity != null && annotatedEntity.getGuid() != null) {
+                if (annotatedEntity != null && StringUtils.isNotBlank(annotatedEntity.getGuid())) {
                     return annotatedEntity.getGuid();
                 }
                 return Service.this.getGuid();
@@ -239,6 +249,6 @@ public class Service extends Folderable implements AnnotableEntity {
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
         setId(idGenerator.generate());
-        setName(PathUtils.extractName(entityKey));
+        setName(entityKey);
     }
 }

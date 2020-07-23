@@ -23,11 +23,13 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.DEPLOYMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createFolder;
 import static com.ca.apim.gateway.cagatewayconfig.util.TestUtils.createRoot;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
@@ -166,10 +168,8 @@ public class BundleEntityBuilderTestHelper {
         bundleHintsAnnotation.setName(TEST_SERVICE_ANNOTATION_NAME);
         bundleHintsAnnotation.setDescription(TEST_SERVICE_ANNOTATION_DESC);
         bundleHintsAnnotation.setTags(TEST_SERVICE_ANNOTATION_TAGS);
-        Annotation reusableAnnotation = new Annotation(AnnotationType.REUSABLE);
         serviceAnnotations.add(bundleAnnotation);
         serviceAnnotations.add(bundleHintsAnnotation);
-        serviceAnnotations.add(reusableAnnotation);
 
         Service service = new Service();
         service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
@@ -196,13 +196,17 @@ public class BundleEntityBuilderTestHelper {
                 "            <L7p:Comment stringValue=\"Policy Fragment: includedPolicy\"/>\n" +
                 "        </L7p:CommentAssertion>\n" +
                 "    </wsp:All>\n" +
+                "    <L7p:Http2Routing>\n" +
+                "        <L7p:ProtectedServiceUrl stringValue=\"http://apim-hugh-new.lvn.broadcom.net:90\"/>\n" +
+                "    </L7p:Http2Routing>\n" +
                 "</wsp:Policy>");
         policy.setPath(policyName);
+        policy.setHasRouting(true);
         policy.setAnnotations(annotations);
         return policy;
     }
 
-    public static Bundle createBundleWithPolicyFragment(boolean makeFragmentReusable, ProjectInfo projectInfo) {
+    public static Bundle createBundleWithPolicyFragment(boolean makeFragmentShared, ProjectInfo projectInfo) {
         Bundle bundle = createBundle(ENCASS_POLICY_WITH_FRAGMENT, true,false, false, projectInfo);
         Policy encassPolicy = bundle.getPolicies().get(TEST_ENCASS_POLICY);
 
@@ -214,9 +218,9 @@ public class BundleEntityBuilderTestHelper {
         policyFragment.setPolicyXML(POLICY_FRAGMENT);
         policyFragment.setPath(TEST_POLICY_FRAGMENT);
         policyFragment.setHasRouting(true);
-        if (makeFragmentReusable) {
+        if (makeFragmentShared) {
             Set<Annotation> annotations = new HashSet<>();
-            Annotation annotation = new Annotation(AnnotationType.REUSABLE);
+            Annotation annotation = new Annotation(AnnotationType.SHARED);
             annotations.add(annotation);
             policyFragment.setAnnotations(annotations);
         }
@@ -260,7 +264,7 @@ public class BundleEntityBuilderTestHelper {
     }
 
     static Bundle createBundle(String policyXmlString, boolean policyHasRouting, boolean includeDependencies,
-                               boolean includeReusableEntities, ProjectInfo projectInfo) {
+                               boolean includeSharedEntities, ProjectInfo projectInfo) {
         Bundle bundle = new Bundle(projectInfo);
         Folder root = createRoot();
         bundle.getFolders().put(EMPTY, root);
@@ -277,9 +281,9 @@ public class BundleEntityBuilderTestHelper {
         policy.setPolicyXML(policyXmlString);
         policy.setPath(TEST_ENCASS_POLICY);
         policy.setHasRouting(policyHasRouting);
-        if (includeReusableEntities) {
+        if (includeSharedEntities) {
             Set<Annotation> annotations = new HashSet<>();
-            Annotation annotation = new Annotation(AnnotationType.REUSABLE);
+            Annotation annotation = new Annotation(AnnotationType.SHARED);
             annotations.add(annotation);
             policy.setAnnotations(annotations);
         }
@@ -351,7 +355,8 @@ public class BundleEntityBuilderTestHelper {
 
         Policy depEncassPolicy = buildTestPolicyWithAnnotation(TEST_DEP_ENCASS_POLICY, TEST_DEP_POLICY_ID, TEST_GUID, Collections.emptySet());
         bundle.getPolicies().put(TEST_DEP_ENCASS_POLICY, depEncassPolicy);
-        Encass depEncass = buildTestEncassWithAnnotation(TEST_DEP_ENCASS, TEST_DEP_ENCASS_ID, TEST_GUID, TEST_DEP_ENCASS_POLICY, Collections.emptySet());
+        Encass depEncass = buildTestEncassWithAnnotation(TEST_DEP_ENCASS, TEST_DEP_ENCASS_ID, TEST_GUID,
+                TEST_DEP_ENCASS_POLICY, Collections.singleton(AnnotableEntity.SHARED_ANNOTATION));
         bundle.getEncasses().put(TEST_DEP_ENCASS, depEncass);
 
         Set<Dependency> usedEntities = new LinkedHashSet<>();
@@ -392,7 +397,7 @@ public class BundleEntityBuilderTestHelper {
 
     static void verifyAnnotatedEncassBundleMetadata(Map<String, BundleArtifacts> bundles, Bundle bundle,
                                                     Encass encass, boolean isRedeployableBundle,
-                                                    boolean isBundleContainReusableEntity, boolean hasRouting) throws JsonProcessingException {
+                                                    boolean isBundleContainSharedEntity, boolean hasRouting) throws JsonProcessingException {
         Map<String, Metadata> expectedEnvMetadata = new HashMap<>();
         for (Dependency dependency : bundle.getDependencyMap().entrySet().iterator().next().getValue()) {
             expectedEnvMetadata.put(dependency.getType(), new Metadata() {
@@ -426,7 +431,9 @@ public class BundleEntityBuilderTestHelper {
         assertEquals("my-bundle-group", metadata.getGroupName());
         assertEquals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE, metadata.getType());
         assertEquals("1.0", metadata.getVersion());
-        if (isRedeployableBundle || !isBundleContainReusableEntity) {
+        assertTrue(metadata.getTimestamp() > Instant.now().minusSeconds(3).getEpochSecond(),
+                () -> "Timestamp in metadata " + metadata.getTimestamp() + " is too old.");
+        if (isRedeployableBundle || !isBundleContainSharedEntity) {
             assertTrue(metadata.isRedeployable());
         }
         assertEquals(hasRouting, metadata.isHasRouting());
@@ -434,7 +441,10 @@ public class BundleEntityBuilderTestHelper {
         Optional<Metadata> definedEntities = metadata.getDefinedEntities().stream().findFirst();
         assertTrue(definedEntities.isPresent());
         assertEquals("ENCAPSULATED_ASSERTION", definedEntities.get().getType());
-        assertEquals(encass.getName(), definedEntities.get().getName());
+
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, encass.getAnnotatedEntity(), projectInfo);
+        String name = annotatedBundle.applyUniqueName(encass.getAnnotatedEntity().getEntityName(), DEPLOYMENT);
+        assertEquals(name, definedEntities.get().getName());
         ObjectMapper objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(definedEntities.get());
         Assert.assertThat(json, CoreMatchers.containsString("\"arguments\":[{\"type\":\"message\",\"name\":\"source\",\"requireExplicit\":true,\"label\":\"Some label\"}]"));
@@ -461,7 +471,7 @@ public class BundleEntityBuilderTestHelper {
         }
     static void verifyAnnotatedServiceBundleMetadata(Map<String, BundleArtifacts> bundles, Bundle bundle,
                                                     Service service, boolean isRedeployableBundle,
-                                                    boolean isBundleContainReusableEntity, boolean hasRouting) throws JsonProcessingException {
+                                                    boolean isBundleContainSharedEntity, boolean hasRouting) throws JsonProcessingException {
         Map<String, Metadata> expectedEnvMetadata = new HashMap<>();
         for (Dependency dependency : bundle.getDependencyMap().entrySet().iterator().next().getValue()) {
             expectedEnvMetadata.put(dependency.getType(), new Metadata() {
@@ -495,7 +505,7 @@ public class BundleEntityBuilderTestHelper {
         assertEquals("my-bundle-group", metadata.getGroupName());
         assertEquals(EntityTypes.SERVICE_TYPE, metadata.getType());
         assertEquals("1.0", metadata.getVersion());
-        if (isRedeployableBundle || !isBundleContainReusableEntity) {
+        if (isRedeployableBundle || !isBundleContainSharedEntity) {
             assertTrue(metadata.isRedeployable());
         }
         //assertEquals(hasRouting, metadata.isHasRouting());

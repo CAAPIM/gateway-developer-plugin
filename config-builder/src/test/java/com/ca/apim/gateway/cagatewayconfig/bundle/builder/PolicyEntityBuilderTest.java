@@ -90,7 +90,7 @@ class PolicyEntityBuilderTest {
         encass.setGuid("encass");
         encass.setName(TEST_ENCASS);
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationType.REUSABLE);
+        Annotation annotation = new Annotation(AnnotationType.SHARED);
         annotations.add(annotation);
         policy.setAnnotations(annotations);
         bundle.getEncasses().put(TEST_ENCASS, encass);
@@ -102,7 +102,7 @@ class PolicyEntityBuilderTest {
         include.setId("includeID");
         include.setGuid("includeGuid");
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationType.REUSABLE);
+        annotation = new Annotation(AnnotationType.SHARED);
         annotations.add(annotation);
         include.setAnnotations(annotations);
         include.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -158,20 +158,24 @@ class PolicyEntityBuilderTest {
         annotation.setGuid("");
         annotation.setId("");
         annotations.add(annotation);
+        annotation = new Annotation(AnnotationType.SHARED);
+        annotations.add(annotation);
         policy.setAnnotations(annotations);
+        policy.setParentEntityShared(policy.isShared());
 
         Encass encass = new Encass();
         encass.setGuid("encassGuid");
         encass.setName(TEST_ENCASS);
-        Annotation encassAnnotation = new Annotation(AnnotationType.REUSABLE);
+        Annotation encassAnnotation = new Annotation(AnnotationType.SHARED);
         annotations = new HashSet<>();
         annotations.add(encassAnnotation);
         encass.setAnnotations(annotations);
+        encass.setParentEntityShared(encass.isShared());
         bundle.getEncasses().put(TEST_ENCASS, encass);
         bundle.getPolicies().put("Policy", policy);
 
 
-        AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
+        AnnotatedEntity annotatedEntity = encass.getAnnotatedEntity();
         annotatedEntity.setEntityName(encass.getName());
         AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, new ProjectInfo("", "", ""));
         annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
@@ -188,7 +192,7 @@ class PolicyEntityBuilderTest {
 
         //wrong guid and id
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationType.REUSABLE);
+        annotation = new Annotation(AnnotationType.SHARED);
         annotations.add(annotation);
         annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
@@ -210,7 +214,11 @@ class PolicyEntityBuilderTest {
     @Test
     void maybeAddPolicy() {
         Policy policy1 = new Policy();
+        policy1.setName("policy1");
+        policy1.setPath("policy1");
         Policy policy2 = new Policy();
+        policy2.setName("policy2");
+        policy2.setPath("policy2");
         policy1.getDependencies().add(policy2);
 
         ArrayList<Policy> orderedPolicies = new ArrayList<>();

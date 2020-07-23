@@ -10,17 +10,19 @@ import com.ca.apim.gateway.cagatewayconfig.beans.DependentBundle;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.LinkedList;
 
-@JsonPropertyOrder({"metaVersion", "name", "groupName", "moduleName", "version", "type", "tags", "description", "l7Template",
-        "redeployable", "hasRouting", "definedEntities", "referencedEntities", "dependencies"})
+@JsonPropertyOrder({"metaVersion", "name", "groupName", "moduleName", "version", "timestamp", "type", "tags",
+                    "description", "l7Template", "redeployable", "hasRouting", "definedEntities", "referencedEntities", "dependencies"})
 public class BundleMetadata implements Metadata {
     @SuppressWarnings({"unused", "java:S1170"}) // Suppress IntelliJ warnings for this field
     private final String metaVersion = "1.0";
     private final String type;
     private final String name;
     private final String version;
+    private final long timestamp = Instant.now().getEpochSecond();
     private final String moduleName;
     private final String groupName;
     private String description;
@@ -66,6 +68,10 @@ public class BundleMetadata implements Metadata {
 
     public String getVersion() {
         return version;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     public String getModuleName() {

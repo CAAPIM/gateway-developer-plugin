@@ -60,7 +60,7 @@ public class BundleMetadataBuilder {
             }
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
-            builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
+            builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsSharedEntity(annotatedBundle));
             builder.l7Template(annotatedEntity.isL7Template());
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
@@ -136,8 +136,9 @@ public class BundleMetadataBuilder {
                 .map(e -> ((GatewayEntity)e.getGatewayEntity()).getMetadata()).collect(Collectors.toList());
     }
 
-    private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
-        return annotatedBundle.getAnnotatedEntity().isReusable();
+    private boolean isBundleContainsSharedEntity (final AnnotatedBundle annotatedBundle) {
+        return annotatedBundle.getEncasses().values().stream().anyMatch(Encass::isParentEntityShared)
+               || annotatedBundle.getPolicies().values().stream().anyMatch(Policy::isParentEntityShared);
     }
 
     private boolean hasRoutingAssertion(final List<Entity> dependentEntities) {
