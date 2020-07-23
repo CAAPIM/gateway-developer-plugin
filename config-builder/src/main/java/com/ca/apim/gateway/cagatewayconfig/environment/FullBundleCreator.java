@@ -116,8 +116,9 @@ public class FullBundleCreator {
             dependencies.removeIf(new Predicate<Map<String, String>>() {
                 @Override
                 public boolean test(Map<String, String> dependentBundleMap) {
+                    String version = StringUtils.isNotBlank(projectInfo.getVersion()) ? projectInfo.getMajorVersion() + "." + projectInfo.getMinorVersion() : "";
                     return dependentBundleMap.get("name").equals(projectInfo.getName() + "-" + PREFIX_ENVIRONMENT) && dependentBundleMap.get("groupName").equals(projectInfo.getGroupName()) &&
-                            dependentBundleMap.get("version").equals(projectInfo.getMajorVersion() + "." + projectInfo.getMinorVersion());
+                            dependentBundleMap.get("version").equals(version);
                 }
             });
 

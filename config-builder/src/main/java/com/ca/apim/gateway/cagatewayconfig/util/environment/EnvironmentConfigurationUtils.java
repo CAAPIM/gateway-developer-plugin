@@ -280,7 +280,8 @@ public class EnvironmentConfigurationUtils {
         DependentBundle envBundle = new DependentBundle();
         envBundle.setGroupName(projectInfo.getGroupName());
         envBundle.setName(projectInfo.getName() + "-" + PREFIX_ENVIRONMENT);
-        envBundle.setVersion(projectInfo.getMajorVersion() + "." + projectInfo.getMinorVersion());
+        String version = StringUtils.isNotBlank(projectInfo.getVersion()) ? projectInfo.getMajorVersion() + "." + projectInfo.getMinorVersion() : "";
+        envBundle.setVersion(version);
         envBundle.setType("bundle");
         return envBundle;
     }
