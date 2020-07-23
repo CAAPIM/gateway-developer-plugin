@@ -405,6 +405,7 @@ class PolicyXMLSimplifierTest {
     void simplifyEncapsulatedAssertion() throws DocumentParseException {
         Element encapsulatedAssertion = createEncapsulatedAssertion();
         Bundle bundle = new Bundle();
+        Bundle resultantBundle = new Bundle();
         Encass encass = new Encass();
         encass.setGuid("Test Guid");
         encass.setName("Test Name");
@@ -419,7 +420,7 @@ class PolicyXMLSimplifierTest {
                         new PolicySimplifierContext(
                                 "Policy",
                                 bundle,
-                                null)
+                                resultantBundle)
                                 .withAssertionElement(encapsulatedAssertion)
                 );
 
