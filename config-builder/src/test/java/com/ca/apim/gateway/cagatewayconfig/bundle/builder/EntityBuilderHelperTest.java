@@ -1,5 +1,6 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
@@ -35,5 +36,19 @@ public class EntityBuilderHelperTest {
                 document.getDocumentElement(), MappingActions.NEW_OR_UPDATE, mappingProperties);
         Assert.assertEquals(PathUtils.extractName(path), entity.getMappingProperties().get(MappingProperties.MAP_TO));
 
+    }
+
+    @Test
+    public void testGetPath(){
+        Folder rootFolder = new Folder();
+        rootFolder.setName("root");
+        String path = EntityBuilderHelper.getPath(rootFolder, "test");
+        Assert.assertEquals("test", path);
+
+        Folder subFolder = new Folder();
+        subFolder.setParentFolder(rootFolder);
+        subFolder.setName("subfolder");
+        path = EntityBuilderHelper.getPath(subFolder, "test");
+        Assert.assertEquals("subfolder/test", path);
     }
 }
