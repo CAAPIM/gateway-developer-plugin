@@ -104,45 +104,49 @@ public class BundleEntityBuilder {
         // Filter the bundle to export only annotated entities
         entityTypeMap.values().stream().filter(EntityUtils.GatewayEntityInfo::isBundleGenerationSupported).forEach(entityInfo ->
                 bundle.getEntities(entityInfo.getEntityClass()).values().stream()
-                        .filter(entity -> entity instanceof AnnotableEntity)
-                        .map(entity -> ((AnnotableEntity) entity).getAnnotatedEntity())
-                        .forEach(annotatedEntity -> {
-                            if (annotatedEntity != null && annotatedEntity.isBundle()) {
-                                List<Entity> entities = new ArrayList<>();
-                                AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
-                                Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
-                                bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-                                loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, false);
-                                entityBuilders.forEach(builder -> entities.addAll(builder.build(annotatedBundle, bundleType, document)));
-
-                                // Create deployment bundle
-                                final Element bundleElement = bundleDocumentBuilder.build(document, entities);
-
-                                String bundleFilename = "";
-                                String deleteBundleFilename = "";
-
-                                Element deleteBundleElement = null;
-                                if (EntityBuilder.BundleType.DEPLOYMENT.equals(bundleType)) {
-                                    // Create DELETE bundle - ALWAYS skip environment entities for DEPLOYMENT bundle
-                                    deleteBundleElement = createDeleteBundle(document, entities, bundle,
-                                            annotatedEntity, projectInfo);
-
-                                    // Generate bundle filenames
-                                    bundleFilename = generateBundleFileName(false, annotatedBundle.getBundleName());
-                                    deleteBundleFilename = generateBundleFileName(true, annotatedBundle.getBundleName());
-                                }
-
-                                // Create bundle metadata
-                                BundleMetadata bundleMetadata = null;
-                                if (bundleType == DEPLOYMENT) {
-                                    bundleMetadata = bundleMetadataBuilder.build(annotatedBundle, bundle, entities,
-                                            projectInfo);
-                                }
-
-                                annotatedElements.put(annotatedBundle.getBundleName(),
-                                        new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata,
-                                                bundleFilename, deleteBundleFilename));
+                        .filter(entity -> entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isBundle())
+                        .forEach(gatewayEntity -> {
+                            AnnotatedEntity<GatewayEntity> annotatedEntity;
+                            if (gatewayEntity instanceof Encass) { // encass bundle - make copy and get AnnotatedEntity
+                                annotatedEntity = new Encass((Encass) gatewayEntity).getAnnotatedEntity();
+                            } else { // Service bundle - no need for copy
+                                annotatedEntity = ((AnnotableEntity) gatewayEntity).getAnnotatedEntity();
                             }
+                            List<Entity> entities = new ArrayList<>();
+                            AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
+                            Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
+                            bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
+                            loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle,
+                                    bundle, false, false);
+                            entityBuilders.forEach(builder -> entities.addAll(builder.build(annotatedBundle, bundleType, document)));
+
+                            // Create deployment bundle
+                            final Element bundleElement = bundleDocumentBuilder.build(document, entities);
+
+                            String bundleFilename = "";
+                            String deleteBundleFilename = "";
+
+                            Element deleteBundleElement = null;
+                            if (EntityBuilder.BundleType.DEPLOYMENT.equals(bundleType)) {
+                                // Create DELETE bundle - ALWAYS skip environment entities for DEPLOYMENT bundle
+                                deleteBundleElement = createDeleteBundle(document, entities, bundle,
+                                        annotatedEntity, projectInfo);
+
+                                // Generate bundle filenames
+                                bundleFilename = generateBundleFileName(false, annotatedBundle.getBundleName());
+                                deleteBundleFilename = generateBundleFileName(true, annotatedBundle.getBundleName());
+                            }
+
+                            // Create bundle metadata
+                            BundleMetadata bundleMetadata = null;
+                            if (bundleType == DEPLOYMENT) {
+                                bundleMetadata = bundleMetadataBuilder.build(annotatedBundle, bundle, entities,
+                                        projectInfo);
+                            }
+
+                            annotatedElements.put(annotatedBundle.getBundleName(),
+                                    new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata,
+                                            bundleFilename, deleteBundleFilename));
                         })
         );
 
@@ -163,13 +167,13 @@ public class BundleEntityBuilder {
         List<Entity> deleteBundleEntities = copyFilteredEntitiesForDeleteBundle(entities, FILTER_NON_ENV_ENTITIES);
 
         // If @redeployable annotation is added, we can blindly include all the dependencies in the DELETE bundle.
-        // Else, we have to include only non-reusable entities
+        // Else, we have to include only non-shared entities
         if (annotatedEntity != null && !annotatedEntity.isRedeployable()) {
-            // Include only non-reusable entities
+            // Include only non-shared entities
             AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
             Map bundleEntities = annotatedBundle.getEntities(annotatedEntity.getEntity().getClass());
             bundleEntities.put(annotatedEntity.getEntityName(), annotatedEntity.getEntity());
-            loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, true);
+            loadPolicyDependenciesByPolicyName(annotatedEntity.getPolicyName(), annotatedBundle, bundle, true, false);
 
             Iterator<Entity> it = deleteBundleEntities.iterator();
             while (it.hasNext()) {
@@ -226,12 +230,13 @@ public class BundleEntityBuilder {
      * @param policyNameWithPath Name of the policy for which gateway dependencies needs to be found.
      * @param annotatedBundle    Annotated Bundle for which bundle is being created.
      * @param rawBundle          Bundle containing all the entities of the gateway.
-     * @param excludeReusable    Exclude loading Reusable entities as the dependencies of the policy
+     * @param excludeShared      Exclude loading Shared entities as the dependencies of the policy
+     * @param isParentShared  TRUE if any Parent (Policy or Encass) in the hierarchy was is annotated with @shared
      */
     private void loadPolicyDependenciesByPolicyName(String policyNameWithPath, AnnotatedBundle annotatedBundle,
-                                                    Bundle rawBundle, boolean excludeReusable) {
+                                                    Bundle rawBundle, boolean excludeShared, boolean isParentShared) {
         final Policy policy = findPolicyByNameOrPath(policyNameWithPath, rawBundle);
-        loadPolicyDependencies(policy, annotatedBundle, rawBundle, excludeReusable);
+        loadPolicyDependencies(policy, annotatedBundle, rawBundle, excludeShared, isParentShared);
     }
 
     /**
@@ -240,30 +245,35 @@ public class BundleEntityBuilder {
      * @param policy          Policy for which gateway dependencies needs to be loaded.
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param rawBundle       Bundle containing all the entities of the gateway.
-     * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
+     * @param excludeShared   Exclude loading Shared entities as the dependencies of the policy
+     * @param isParentShared  TRUE if any Parent (Policy or Encass) in the hierarchy was is annotated with @shared
      */
     private void loadPolicyDependencies(Policy policy, AnnotatedBundle annotatedBundle, Bundle rawBundle,
-                                        boolean excludeReusable) {
-        if (policy == null || excludeGatewayEntity(Policy.class, policy, annotatedBundle, excludeReusable)) {
+                                        boolean excludeShared, boolean isParentShared) {
+        if (policy == null || excludeGatewayEntity(Policy.class, policy, annotatedBundle, excludeShared)) {
             return;
         }
 
-        loadFolderDependencies(annotatedBundle, policy);
+        Policy policyCopy = new Policy(policy);
+        loadFolderDependencies(annotatedBundle, policyCopy);
+
+        isParentShared = isParentShared || policyCopy.isShared();
+        policyCopy.setParentEntityShared(isParentShared);
 
         Map<String, Policy> annotatedPolicyMap = annotatedBundle.getEntities(Policy.class);
-        annotatedPolicyMap.put(policy.getPath(), policy);
+        annotatedPolicyMap.put(policyCopy.getPath(), policyCopy);
 
-        Set<Dependency> dependencies = policy.getUsedEntities();
+        Set<Dependency> dependencies = policyCopy.getUsedEntities();
         if (dependencies != null) {
             for (Dependency dependency : dependencies) {
                 switch (dependency.getType()) {
                     case EntityTypes.POLICY_TYPE:
                         Policy dependentPolicy = findPolicyByNameOrPath(dependency.getName(), rawBundle);
-                        loadPolicyDependencies(dependentPolicy, annotatedBundle, rawBundle, excludeReusable);
+                        loadPolicyDependencies(dependentPolicy, annotatedBundle, rawBundle, excludeShared, isParentShared);
                         break;
                     case EntityTypes.ENCAPSULATED_ASSERTION_TYPE:
                         Encass encass = rawBundle.getEncasses().get(dependency.getName());
-                        loadEncassDependencies(encass, annotatedBundle, rawBundle, excludeReusable);
+                        loadEncassDependencies(encass, annotatedBundle, rawBundle, excludeShared, isParentShared);
                         break;
                     default:
                         loadGatewayEntity(dependency, annotatedBundle, rawBundle);
@@ -278,13 +288,18 @@ public class BundleEntityBuilder {
      * @param encass          Encass policy for which gateway dependencies needs to be loaded.
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
      * @param rawBundle       Bundle containing all the entities of the gateway.
-     * @param excludeReusable Exclude loading Reusable entities as the dependencies of the policy
+     * @param excludeShared   Exclude loading Shared entities as the dependencies of the policy
+     * @param isParentShared  TRUE if any Parent (Policy or Encass) in the hierarchy was is annotated with @shared
      */
     private void loadEncassDependencies(Encass encass, AnnotatedBundle annotatedBundle, Bundle rawBundle,
-                                        boolean excludeReusable) {
-        if (encass != null && !excludeGatewayEntity(Encass.class, encass, annotatedBundle, excludeReusable)) {
-            annotatedBundle.getEncasses().put(encass.getName(), encass);
-            loadPolicyDependenciesByPolicyName(encass.getPolicy(), annotatedBundle, rawBundle, excludeReusable);
+                                        boolean excludeShared, boolean isParentShared) {
+        if (encass != null && !excludeGatewayEntity(Encass.class, encass, annotatedBundle, excludeShared)) {
+            Encass encassCopy = new Encass(encass);
+            isParentShared = isParentShared || encass.isShared();
+            encassCopy.setParentEntityShared(isParentShared);
+
+            annotatedBundle.getEncasses().put(encass.getName(), encassCopy);
+            loadPolicyDependenciesByPolicyName(encassCopy.getPolicy(), annotatedBundle, rawBundle, excludeShared, isParentShared);
         }
     }
 
@@ -348,28 +363,28 @@ public class BundleEntityBuilder {
      * @param entityType      Type of entity class
      * @param gatewayEntity   Gateway entity to be checked
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param excludeReusable Exclude loading Reusable entities as the dependency
+     * @param excludeShared   Exclude loading Shared entities as the dependency
      * @return TRUE if the Gateway entity needs to be excluded
      */
     private boolean excludeGatewayEntity(Class<? extends GatewayEntity> entityType, GatewayEntity gatewayEntity,
-                                         AnnotatedBundle annotatedBundle, boolean excludeReusable) {
+                                         AnnotatedBundle annotatedBundle, boolean excludeShared) {
         return annotatedBundle.getEntities(entityType).containsKey(gatewayEntity.getName())
-                || excludeReusableOrPolicyEntity(gatewayEntity, annotatedBundle, excludeReusable);
+                || excludeSharedOrPolicyEntity(gatewayEntity, annotatedBundle, excludeShared);
     }
 
     /**
-     * Returns TRUE if the Gateway entity is annotated as @reusable and the reusable entity needs to excluded or the
+     * Returns TRUE if the Gateway entity is annotated as @shared and the shared entity needs to excluded or the
      * gateway entity is a policy entity and the annotated bundle already contains that policy.
      *
      * @param gatewayEntity   Gateway entity to be checked
      * @param annotatedBundle Annotated Bundle for which bundle is being created.
-     * @param excludeReusable Exclude loading Reusable entities as the dependency
-     * @return TRUE if the Gateway entity is @reusable and needs to be excluded or entity is Policy and annotated
+     * @param excludeShared   Exclude loading Shared entities as the dependency
+     * @return TRUE if the Gateway entity is @shared and needs to be excluded or entity is Policy and annotated
      * bundle already contains the policy
      */
-    private boolean excludeReusableOrPolicyEntity(GatewayEntity gatewayEntity, AnnotatedBundle annotatedBundle,
-                                                  boolean excludeReusable) {
-        if (gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isReusable() && excludeReusable) {
+    private boolean excludeSharedOrPolicyEntity(GatewayEntity gatewayEntity, AnnotatedBundle annotatedBundle,
+                                                  boolean excludeShared) {
+        if (gatewayEntity instanceof AnnotableEntity && ((AnnotableEntity) gatewayEntity).isShared() && excludeShared) {
             return true;
         }
         // Special case for policy because policies are stored by Path in the entities map and

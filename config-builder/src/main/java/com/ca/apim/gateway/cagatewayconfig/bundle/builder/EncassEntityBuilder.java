@@ -56,7 +56,7 @@ public class EncassEntityBuilder implements EntityBuilder {
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         if (bundle instanceof AnnotatedBundle) {
             AnnotatedBundle annotatedBundle = ((AnnotatedBundle) bundle);
-            Map<String, Encass> map = Optional.ofNullable(bundle.getEncasses()).orElse(Collections.emptyMap());
+            Map<String, Encass> map = Optional.ofNullable(annotatedBundle.getEncasses()).orElse(Collections.emptyMap());
             return buildEntities(map, annotatedBundle, annotatedBundle.getFullBundle(), bundleType, document);
         } else {
             return buildEntities(bundle.getEncasses(), null, bundle, bundleType, document);
@@ -81,7 +81,12 @@ public class EncassEntityBuilder implements EntityBuilder {
     }
 
     private String getPolicyId(String policyWithPath, Bundle bundle, AnnotatedBundle annotatedBundle) {
-        final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyWithPath));
+        final AtomicReference<Policy> includedPolicy;
+        if (annotatedBundle != null) {
+            includedPolicy = new AtomicReference<>(annotatedBundle.getPolicies().get(policyWithPath));
+        } else {
+            includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyWithPath));
+        }
         if (includedPolicy.get() == null) {
             //check policy dependency in bundle dependencies
             Set<Bundle> dependencies = bundle.getDependencies();
@@ -124,19 +129,19 @@ public class EncassEntityBuilder implements EntityBuilder {
 
     private Entity buildEncassEntity(AnnotatedBundle annotatedBundle, Bundle bundle, String name, Encass encass, Document document) {
         String policyId = getPolicyId(encass.getPolicy(), bundle, annotatedBundle);
-        String encassName = name;
+        String uniqueEncassName = name;
         String guid = encass.getGuid();
         String id = encass.getId();
         AnnotatedEntity annotatedEncassEntity = null;
 
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
-        boolean isReusable = false;
+        boolean isShared = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
-            isReusable = annotatedEntity.isReusable();
+            isShared = encass.isParentEntityShared();
             annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (isReusable) {
+            if (isShared) {
                 //use the id and guid defined at bundle-hints annotation (if its annotated bundle)
                 if (annotatedEncassEntity != null) {
                     if (annotatedEncassEntity.getGuid() != null) {
@@ -155,17 +160,17 @@ public class EncassEntityBuilder implements EntityBuilder {
                     }
                 }
             } else {
-                encassName = annotatedBundle.applyUniqueName(name, BundleType.DEPLOYMENT);
                 //guid and id are regenerated in policy entity builder if this encass is referred by policy and it runs before this builder
                 //no need to regenerate id and guid
             }
+            uniqueEncassName = annotatedBundle.applyUniqueName(name, BundleType.DEPLOYMENT, isShared);
         }
-
+        encass.setUniqueEntityName(uniqueEncassName);
         Element encassAssertionElement = createElementWithAttributesAndChildren(
                 document,
                 ENCAPSULATED_ASSERTION,
                 ImmutableMap.of(ATTRIBUTE_ID, id),
-                createElementWithTextContent(document, NAME, encassName),
+                createElementWithTextContent(document, NAME, uniqueEncassName),
                 createElementWithTextContent(document, GUID, guid),
                 createElementWithAttribute(document, POLICY_REFERENCE, ATTRIBUTE_ID, policyId),
                 buildArguments(encass, document),
@@ -175,9 +180,9 @@ public class EncassEntityBuilder implements EntityBuilder {
         final Map<String, Object> properties = Optional.ofNullable(encass.getProperties()).orElse(new HashMap<>());
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
-        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, encassName, id, encassAssertionElement, guid, encass);
+        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, uniqueEncassName, id, encassAssertionElement, guid, encass);
 
-        if (isRedeployableBundle || !isReusable) {
+        if (isRedeployableBundle || !isShared) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

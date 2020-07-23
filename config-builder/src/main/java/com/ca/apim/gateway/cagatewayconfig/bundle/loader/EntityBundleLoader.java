@@ -10,6 +10,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.*;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.w3c.dom.Document;
@@ -86,18 +87,19 @@ public class EntityBundleLoader {
         policy.setId(metadata.getId());
         policy.setGuid(metadata.getGuid());
         Set<Annotation> annotations = new HashSet<>();
-        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
+        annotations.add(AnnotableEntity.SHARED_ANNOTATION);
         policy.setAnnotations(annotations);
         return policy;
     }
 
     private Encass getEncassFromMetadata(final Metadata metadata) {
         Encass encass = new Encass();
-        encass.setName(metadata.getName());
+        encass.setUniqueEntityName(metadata.getName());
+        encass.setName(PathUtils.extractNameFromUniqueEntityName(metadata.getName()));
         encass.setId(metadata.getId());
         encass.setGuid(metadata.getGuid());
         Set<Annotation> annotations = new HashSet<>();
-        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
+        annotations.add(AnnotableEntity.SHARED_ANNOTATION);
         encass.setAnnotations(annotations);
         return encass;
     }

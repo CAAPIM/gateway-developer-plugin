@@ -2,6 +2,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Set;
@@ -11,7 +12,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType.*;
 public interface AnnotableEntity {
 
     Annotation BUNDLE_ANNOTATION = new Annotation(BUNDLE);
-    Annotation REUSABLE_ANNOTATION = new Annotation(REUSABLE);
+    Annotation SHARED_ANNOTATION = new Annotation(SHARED);
     Annotation REDEPLOYABLE_ANNOTATION = new Annotation(REDEPLOYABLE);
     Annotation EXCLUDE_ANNOTATION = new Annotation(EXCLUDE);
 
@@ -54,9 +55,12 @@ public interface AnnotableEntity {
                 } else if(BUNDLE_HINTS.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setId(annotation.getId());
                     annotatedEntity.setGuid(annotation.getGuid());
-                    annotatedEntity.setTags(annotation.getTags());
-                    annotatedEntity.setBundleName(annotation.getName());
-                    annotatedEntity.setDescription(annotation.getDescription());
+                    if (this.getEntityType().equals(EntityTypes.SERVICE_TYPE)
+                        || this.getEntityType().equals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE)) {
+                        annotatedEntity.setTags(annotation.getTags());
+                        annotatedEntity.setBundleName(annotation.getName());
+                        annotatedEntity.setDescription(annotation.getDescription());
+                    }
                 }
             });
             return annotatedEntity;
@@ -86,13 +90,13 @@ public interface AnnotableEntity {
     }
 
     /**
-     * Returns TRUE if "@reusable" annotation is added to the entity
+     * Returns TRUE if "@shared" annotation is added to the entity
      *
-     * @return TRUE if "@reusable" annotation is added
+     * @return TRUE if "@shared" annotation is added
      */
     @JsonIgnore
-    default boolean isReusable() {
-        return getAnnotations() != null && getAnnotations().contains(REUSABLE_ANNOTATION);
+    default boolean isShared() {
+        return getAnnotations() != null && getAnnotations().contains(SHARED_ANNOTATION);
     }
 
     /**
