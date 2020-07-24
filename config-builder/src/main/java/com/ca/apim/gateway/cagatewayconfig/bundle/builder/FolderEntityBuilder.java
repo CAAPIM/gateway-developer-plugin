@@ -75,7 +75,7 @@ public class FolderEntityBuilder implements EntityBuilder {
             throw new EntityBuilderException("Could not locate root folder.");
         }
         String targetFolderPath = null;
-        if (StringUtils.isNotBlank(targetFolder)) {
+        if (StringUtils.isNotBlank(targetFolder) && rootFolder != Folder.ROOT_FOLDER) {
             Folder bundleTargetFolder = rootFolder;
             targetFolderPath =  targetFolder + "/";
             bundleTargetFolder.setId(idGenerator.generate());

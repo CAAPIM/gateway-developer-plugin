@@ -68,7 +68,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
     private Entity buildServiceEntity(Bundle bundle, Service service, Document document) {
         AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
-        String servicePath = EntityBuilderHelper.getPath(service.getParentFolder(), service.getName());
+        String servicePath = EntityBuilderHelper.getPath(service.getParentFolder(), PathUtils.extractName(service.getName()));
         servicePath = CharacterBlacklistUtil.decodePath(servicePath);
         String baseName = PathUtils.extractName(servicePath);
         String basePath = PathUtils.extractPath(servicePath);
