@@ -54,7 +54,7 @@ public class IncludeAssertionSimplifier implements PolicyAssertionSimplifier {
 
             final MissingGatewayEntity missingEntity = new MissingGatewayEntity();
             missingEntity.setType(EntityTypes.POLICY_TYPE);
-            missingEntity.setName(policyEntity.isPresent() ? policyEntity.get().getName() : "Policy#" + includedPolicyGuid);
+            missingEntity.setName(policyEntity.isPresent() ? getPolicyPath(bundle, policyEntity.get()) : "Policy#" + includedPolicyGuid);
             missingEntity.setGuid(includedPolicyGuid);
             missingEntity.setExcluded(excluded);
             missingEntity.setId(policyEntity.isPresent() ? policyEntity.get().getId() : missingEntity.getGuid().replace("-", ""));
