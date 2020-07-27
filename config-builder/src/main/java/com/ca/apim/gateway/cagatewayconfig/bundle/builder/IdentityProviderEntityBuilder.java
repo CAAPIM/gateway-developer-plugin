@@ -17,9 +17,13 @@ import javax.inject.Singleton;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP;
+import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType.FEDERATED;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.ID_PROVIDER_CONFIG_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.buildAndAppendPropertiesElement;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.FAIL_ON_NEW;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithAttribute;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createElementWithTextContent;
 
@@ -46,11 +50,11 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             case DEPLOYMENT:
                 return entities.entrySet().stream()
                         .map(
-                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, bundle.applyUniqueName(identityProviderEntry.getKey(), BundleType.ENVIRONMENT), generateId((IdentityProvider)identityProviderEntry.getValue()))
+                                identityProviderEntry -> EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, generateUniqueName(bundle, identityProviderEntry.getKey(), (IdentityProvider)identityProviderEntry.getValue()), generateId((IdentityProvider)identityProviderEntry.getValue()))
                         ).collect(Collectors.toList());
             case ENVIRONMENT:
                 return entities.entrySet().stream().map(identityProviderEntry ->
-                        buildIdentityProviderEntity(bundle, bundle.applyUniqueName(identityProviderEntry.getKey(), bundleType), (IdentityProvider)identityProviderEntry.getValue(), document)
+                        buildIdentityProviderEntity(bundle, generateUniqueName(bundle, identityProviderEntry.getKey(), (IdentityProvider)identityProviderEntry.getValue()), (IdentityProvider)identityProviderEntry.getValue(), document)
                 ).collect(Collectors.toList());
             default:
                 throw new EntityBuilderException("Unknown bundle type: " + bundleType);
@@ -67,22 +71,28 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
                     document, identityProviderElement);
         }
 
+        Entity entity = null;
         switch (identityProvider.getType()) {
             case BIND_ONLY_LDAP:
                 identityProviderElement.appendChild(buildBindOnlyLdapIPDetails(identityProvider, document));
+                entity = EntityBuilderHelper.getEntityWithNameMapping(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
                 break;
             case FEDERATED:
                 final FederatedIdentityProviderDetail identityProviderDetail = (FederatedIdentityProviderDetail) identityProvider.getIdentityProviderDetail();
                 appendFedIdProvDetails(bundle, identityProviderDetail, document, identityProviderElement);
+                entity = EntityBuilderHelper.getEntityWithNameMapping(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
                 break;
             case LDAP:
             case INTERNAL:
             case POLICY_BACKED:
             default:
-                throw new EntityBuilderException("Please Specify the Identity Provider Type as one of: 'BIND_ONLY_LDAP', 'FEDERATED'");
+                entity = EntityBuilderHelper.getEntityWithNameMapping(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
+                entity.setMappingAction(NEW_OR_EXISTING);
+                entity.setMappingProperty(FAIL_ON_NEW, true);
+                break;
         }
 
-        return EntityBuilderHelper.getEntityWithNameMapping(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
+        return entity;
     }
 
     private void appendFedIdProvDetails(Bundle bundle,
@@ -166,6 +176,13 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             return identityProvider.getAnnotatedEntity().getId();
         }
         return identityProvider.getId();
+    }
+
+    private String generateUniqueName(Bundle bundle, String name, IdentityProvider identityProvider) {
+        if (identityProvider != null && (identityProvider.getType() == BIND_ONLY_LDAP || identityProvider.getType() == FEDERATED)) {
+            return bundle.applyUniqueName(name, BundleType.ENVIRONMENT);
+        }
+        return name;
     }
 
     @Override
