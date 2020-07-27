@@ -90,7 +90,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             case POLICY_BACKED:
             default:
                 LOGGER.log(Level.WARNING, "unsupported identity provider type, please add/migrate the entity {0} to target gateway by other utilities.", name);
-                entity = EntityBuilderHelper.getEntityWithNameMapping(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
+                entity = EntityBuilderHelper.getEntityWithOnlyMapping(ID_PROVIDER_CONFIG_TYPE, name, id);
                 entity.setMappingAction(NEW_OR_EXISTING);
                 entity.setMappingProperty(FAIL_ON_NEW, true);
                 break;
