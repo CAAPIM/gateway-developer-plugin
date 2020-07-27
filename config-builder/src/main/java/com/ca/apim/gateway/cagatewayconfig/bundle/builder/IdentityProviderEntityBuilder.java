@@ -15,6 +15,8 @@ import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP;
@@ -30,6 +32,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 @Singleton
 public class IdentityProviderEntityBuilder implements EntityBuilder {
 
+    private static final Logger LOGGER = Logger.getLogger(IdentityProviderEntityBuilder.class.getName());
     private static final Integer ORDER = 1100;
     private static final String TRUSTED_CERT_URI = "http://ns.l7tech.com/2010/04/gateway-management/trustedCertificates";
 
@@ -86,6 +89,7 @@ public class IdentityProviderEntityBuilder implements EntityBuilder {
             case INTERNAL:
             case POLICY_BACKED:
             default:
+                LOGGER.log(Level.WARNING, "unsupported identity provider type, please add/migrate the entity {0} to target gateway by other utilities.", name);
                 entity = EntityBuilderHelper.getEntityWithNameMapping(ID_PROVIDER_CONFIG_TYPE, name, id, identityProviderElement);
                 entity.setMappingAction(NEW_OR_EXISTING);
                 entity.setMappingProperty(FAIL_ON_NEW, true);
