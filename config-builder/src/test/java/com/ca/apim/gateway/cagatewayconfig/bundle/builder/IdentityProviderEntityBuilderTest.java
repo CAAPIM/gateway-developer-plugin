@@ -62,7 +62,7 @@ class IdentityProviderEntityBuilderTest {
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("unsupported idp", identityProvider);
         }});
-        final List<Entity> identityProviderEntities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> identityProviderEntities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, identityProviderEntities.size());
     }
 
