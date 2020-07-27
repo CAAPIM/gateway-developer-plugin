@@ -69,8 +69,7 @@ public class ProjectInfo {
         return targetFolder;
     }
 
-    public ProjectInfo withTargetFolder(String targetFolder) {
+    public void setTargetFolder(String targetFolder) {
         this.targetFolder = targetFolder;
-        return this;
     }
 }

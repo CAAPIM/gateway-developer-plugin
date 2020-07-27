@@ -77,7 +77,7 @@ public class BuildDeploymentBundleTask extends DefaultTask {
         final ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(),
                 getProject().getVersion().toString(), null);
         if(targetFolder.isPresent()){
-            projectInfo.withTargetFolder(targetFolder.get());
+            projectInfo.setTargetFolder(targetFolder.get());
         }
         final List<DependentBundle> dependentBundles = getDependentBundles(dependencies.getFiles());
         bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(),
