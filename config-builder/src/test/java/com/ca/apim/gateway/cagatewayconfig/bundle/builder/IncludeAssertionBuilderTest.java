@@ -2,6 +2,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.MissingGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
@@ -92,7 +93,6 @@ public class IncludeAssertionBuilderTest {
         policyBuilderContext.withPolicy(policy);
         policyBuilderContext.withAnnotatedBundle(new AnnotatedBundle(bundle, null, null));
 
-
         assertThrows(EntityBuilderException.class, () -> includeAssertionBuilder.buildAssertionElement(includeAssertion, policyBuilderContext));
     }
 
@@ -111,6 +111,33 @@ public class IncludeAssertionBuilderTest {
         policyBuilderContext.withAnnotatedBundle(new AnnotatedBundle(bundle, null, null));
 
         assertThrows(EntityBuilderException.class, () -> includeAssertionBuilder.buildAssertionElement(includeAssertionElement, policyBuilderContext));
+    }
+
+    @Test
+    void testPrepareIncludeAssertionButPolicyAsMissingEntity() throws DocumentParseException {
+        String policyPath = "folder1/policy1";
+        Policy policy = new Policy();
+        policy.setName("policy1");
+        policy.setGuid("123-abc-567");
+        policy.setPath("folder1");
+        MissingGatewayEntity missingGatewayEntity = new MissingGatewayEntity();
+        missingGatewayEntity.setType("POLICY");
+        missingGatewayEntity.setId("123456");
+        missingGatewayEntity.setGuid("123-abc-567");
+        missingGatewayEntity.setExcluded(true);
+        bundle.getMissingEntities().put(policyPath, missingGatewayEntity);
+
+        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
+        document.appendChild(includeAssertionElement);
+
+        policyBuilderContext = new PolicyBuilderContext("policy", document, bundle, new IdGenerator());
+        policyBuilderContext.withPolicy(policy);
+        policyBuilderContext.withAnnotatedBundle(new AnnotatedBundle(bundle, null, null));
+        includeAssertionBuilder.buildAssertionElement(includeAssertionElement, policyBuilderContext);
+
+        Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
+        assertEquals(policy.getGuid(), policyGuidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
+        assertFalse(policyGuidElement.hasAttribute(IncludeAssertionBuilder.POLICY_PATH));
     }
 
     @Test
