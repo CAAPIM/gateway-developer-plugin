@@ -33,6 +33,8 @@ import java.util.stream.Stream;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType.FEDERATED;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.FAIL_ON_NEW;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElementAttributeValues;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static java.util.Arrays.*;
@@ -64,6 +66,10 @@ class IdentityProviderEntityBuilderTest {
         }});
         final List<Entity> identityProviderEntities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(1, identityProviderEntities.size());
+        final Entity identityProviderEntity = identityProviderEntities.get(0);
+        assertEquals("ID_PROVIDER_CONFIG", identityProviderEntity.getType());
+        assertEquals(NEW_OR_EXISTING, identityProviderEntity.getMappingAction());
+        assertTrue(Boolean.valueOf(String.valueOf(identityProviderEntity.getMappingProperties().get(FAIL_ON_NEW))));
     }
 
     @Test
