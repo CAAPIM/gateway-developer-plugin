@@ -50,7 +50,23 @@ class ServiceEntityBuilderTest {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
         Bundle bundle = new Bundle(projectInfo);
+        Folder parentFolder = new Folder();
+        parentFolder.setId("asd");
+        parentFolder.setName("my");
+        parentFolder.setPath("my");
+        parentFolder.setParentFolder(Folder.ROOT_FOLDER);
 
+        Folder serviceParentFolder = new Folder();
+        serviceParentFolder.setId("test");
+        serviceParentFolder.setName("policy");
+        serviceParentFolder.setPath("my/v1");
+        serviceParentFolder.setParentFolder(parentFolder);
+
+        bundle.putAllFolders(new HashMap<String, Folder>() {{
+            put(parentFolder.getPath(), parentFolder);
+            put(serviceParentFolder.getPath(), serviceParentFolder);
+            put(Folder.ROOT_FOLDER.getPath(), Folder.ROOT_FOLDER);
+        }});
         Service service = new Service();
         service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
         service.setUrl("/my/service/url");
@@ -58,6 +74,8 @@ class ServiceEntityBuilderTest {
             put("key1", "value1");
             put("key2", "value2");
         }});
+        service.setName("path");
+        service.setParentFolder(serviceParentFolder);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("/my/policy/path", service);
@@ -82,6 +100,7 @@ class ServiceEntityBuilderTest {
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
+        service.setName("service1");
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("/v1/service1", service);
@@ -104,7 +123,7 @@ class ServiceEntityBuilderTest {
         Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
 
         Service service1 = getService1(serviceParentFolder);
-
+        service1.setName("service1");
         Service service2 = new Service();
         service2.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
         service2.setUrl("/my/url");
@@ -114,6 +133,7 @@ class ServiceEntityBuilderTest {
             put("key2", "value2");
             put("ENV.key.environment", "something");
         }});
+        service2.setName("service2");
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("my/v1/service1", service1);

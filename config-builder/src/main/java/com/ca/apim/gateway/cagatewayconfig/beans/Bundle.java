@@ -305,6 +305,10 @@ public class Bundle {
         this.loadingMode = loadingMode;
     }
 
+    public String getTargetFolder(){
+        return projectInfo.getTargetFolder();
+    }
+
     /**
      * Applies unique name space and version to the given entity name
      * ::namespace::entityName::majorVersion.minorVersion

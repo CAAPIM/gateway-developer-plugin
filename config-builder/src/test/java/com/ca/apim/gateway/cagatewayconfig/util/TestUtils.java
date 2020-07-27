@@ -297,7 +297,7 @@ public class TestUtils {
         folder.setName(folderName);
         folder.setId(folderId);
         folder.setParentFolder(parent);
-        if (parent == null) {
+        if (parent == null || ROOT_FOLDER_ID.equals(parent.getId())) {
             folder.setPath(folderName);
         } else {
             folder.setPath(parent.getPath() + "/" + folder.getName());

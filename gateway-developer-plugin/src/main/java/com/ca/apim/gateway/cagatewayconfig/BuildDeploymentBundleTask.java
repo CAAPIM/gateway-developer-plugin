@@ -14,7 +14,9 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.*;
 
 import javax.inject.Inject;
@@ -34,6 +36,7 @@ public class BuildDeploymentBundleTask extends DefaultTask {
     private DirectoryProperty from;
     private DirectoryProperty into;
     private ConfigurableFileCollection dependencies;
+    private Property<String> targetFolder;
 
     /**
      * Creates a new BuildBundle task to build a bundle from local source files
@@ -42,6 +45,7 @@ public class BuildDeploymentBundleTask extends DefaultTask {
     public BuildDeploymentBundleTask() {
         into = newOutputDirectory();
         from = newInputDirectory();
+        targetFolder = getProject().getObjects().property(String.class);
         dependencies = getProject().files();
     }
 
@@ -56,6 +60,12 @@ public class BuildDeploymentBundleTask extends DefaultTask {
         return into;
     }
 
+    @Input
+    @Optional
+    public Property<String> getTargetFolder(){
+        return targetFolder;
+    }
+
     @InputFiles
     public ConfigurableFileCollection getDependencies() {
         return dependencies;
@@ -66,6 +76,9 @@ public class BuildDeploymentBundleTask extends DefaultTask {
         BundleFileBuilder bundleFileBuilder = InjectionRegistry.getInjector().getInstance(BundleFileBuilder.class);
         final ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(),
                 getProject().getVersion().toString(), null);
+        if(targetFolder.isPresent()){
+            projectInfo.setTargetFolder(targetFolder.get());
+        }
         final List<DependentBundle> dependentBundles = getDependentBundles(dependencies.getFiles());
         bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(),
                 dependentBundles, projectInfo);

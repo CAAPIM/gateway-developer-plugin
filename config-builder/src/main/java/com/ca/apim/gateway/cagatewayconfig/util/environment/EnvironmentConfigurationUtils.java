@@ -34,6 +34,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.PREFIX_ENVIRONMENT;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.PEM_CERT_FILE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
@@ -278,8 +279,9 @@ public class EnvironmentConfigurationUtils {
     public static DependentBundle generateDependentEnvBundleFromProject(final ProjectInfo projectInfo) {
         DependentBundle envBundle = new DependentBundle();
         envBundle.setGroupName(projectInfo.getGroupName());
-        envBundle.setName(projectInfo.getName());
-        envBundle.setVersion(projectInfo.getVersion());
+        envBundle.setName(projectInfo.getName() + "-" + PREFIX_ENVIRONMENT);
+        String version = StringUtils.isNotBlank(projectInfo.getVersion()) ? projectInfo.getMajorVersion() + "." + projectInfo.getMinorVersion() : "";
+        envBundle.setVersion(version);
         envBundle.setType("bundle");
         return envBundle;
     }
