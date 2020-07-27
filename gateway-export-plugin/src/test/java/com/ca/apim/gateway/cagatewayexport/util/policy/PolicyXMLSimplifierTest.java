@@ -322,6 +322,7 @@ class PolicyXMLSimplifierTest {
 
         assertEquals(testName, getSingleChildElementAttribute(includeAssertion, POLICY_GUID, "policyPath"));
         assertNull(getSingleChildElementAttribute(includeAssertion, POLICY_GUID, STRING_VALUE));
+        assertTrue(resultantBundle.getMissingEntities().isEmpty());
     }
 
     @Test
@@ -344,8 +345,42 @@ class PolicyXMLSimplifierTest {
                                 .withAssertionElement(includeAssertion)
                 );
 
-        assertTrue(getSingleChildElementAttribute(includeAssertion, POLICY_GUID, "policyPath").startsWith("Policy#"));
+        assertNotEquals(testName, getSingleChildElementAttribute(includeAssertion, POLICY_GUID, "policyPath"));
         assertNull(getSingleChildElementAttribute(includeAssertion, POLICY_GUID, STRING_VALUE));
+        assertTrue(getSingleChildElementAttribute(includeAssertion, POLICY_GUID, "policyPath").startsWith("Policy#"));
+        assertFalse(resultantBundle.getMissingEntities().isEmpty());
+    }
+
+    @Test
+    void simplifyIncludeAssertionMissingPolicyInResultantBundleOnly() throws DocumentParseException {
+        String id = new IdGenerator().generate();
+        String testName = "test";
+        Policy policy = new Policy.Builder()
+                .setGuid(id)
+                .setName(testName)
+                .setParentFolderId(ROOT_FOLDER_ID)
+                .build();
+        Bundle bundle = new Bundle();
+        Bundle resultantBundle = new Bundle();
+        bundle.addEntity(ROOT_FOLDER);
+        FolderTree folderTree = new FolderTree(bundle.getEntities(Folder.class).values());
+        bundle.setFolderTree(folderTree);
+        bundle.addEntity(policy);
+
+        Element includeAssertion = createIncludeAssertionElement(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), id);
+        new IncludeAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "policy",
+                                bundle,
+                                resultantBundle)
+                                .withAssertionElement(includeAssertion)
+                );
+
+        assertEquals(testName, getSingleChildElementAttribute(includeAssertion, POLICY_GUID, "policyPath"));
+        assertNull(getSingleChildElementAttribute(includeAssertion, POLICY_GUID, STRING_VALUE));
+        assertFalse(resultantBundle.getMissingEntities().isEmpty());
+        assertNotNull(resultantBundle.getMissingEntities().get(policy.getId()));
     }
 
     @Test
@@ -405,6 +440,7 @@ class PolicyXMLSimplifierTest {
     void simplifyEncapsulatedAssertion() throws DocumentParseException {
         Element encapsulatedAssertion = createEncapsulatedAssertion();
         Bundle bundle = new Bundle();
+        Bundle resultantBundle = new Bundle();
         Encass encass = new Encass();
         encass.setGuid("Test Guid");
         encass.setName("Test Name");
@@ -413,31 +449,8 @@ class PolicyXMLSimplifierTest {
         policy.setId("Policy");
         bundle.getEncasses().put(encass.getGuid(), encass);
         bundle.getPolicies().put(policy.getId(), policy);
-
-        new EncapsulatedAssertionSimplifier()
-                .simplifyAssertionElement(
-                        new PolicySimplifierContext(
-                                "Policy",
-                                bundle,
-                                null)
-                                .withAssertionElement(encapsulatedAssertion)
-                );
-
-        assertEquals("Test Name", encapsulatedAssertion.getAttribute("encassName"));
-        assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME, true));
-        assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_GUID, true));
-    }
-
-    @Test
-    void simplifyEncapsulatedAssertionMissingPolicy() throws DocumentParseException {
-        Element encapsulatedAssertion = createEncapsulatedAssertion();
-        Bundle bundle = new Bundle();
-        Bundle resultantBundle = new Bundle();
-        Encass encass = new Encass();
-        encass.setGuid("Test Guid");
-        encass.setName("Test Name");
-        encass.setPolicyId("Policy");
-        bundle.getEncasses().put(encass.getGuid(), encass);
+        resultantBundle.getEncasses().put(encass.getGuid(), encass);
+        resultantBundle.getPolicies().put(policy.getId(), policy);
 
         new EncapsulatedAssertionSimplifier()
                 .simplifyAssertionElement(
@@ -451,6 +464,34 @@ class PolicyXMLSimplifierTest {
         assertEquals("Test Name", encapsulatedAssertion.getAttribute("encassName"));
         assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME, true));
         assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_GUID, true));
+        assertTrue(resultantBundle.getMissingEntities().isEmpty());
+    }
+
+    @Test
+    void simplifyEncapsulatedAssertionMissingPolicy() throws DocumentParseException {
+        Element encapsulatedAssertion = createEncapsulatedAssertion();
+        Bundle bundle = new Bundle();
+        Bundle resultantBundle = new Bundle();
+        Encass encass = new Encass();
+        encass.setGuid("Test Guid");
+        encass.setName("Test Name");
+        encass.setPolicyId("Policy");
+        bundle.getEncasses().put(encass.getGuid(), encass);
+        resultantBundle.getEncasses().put(encass.getGuid(), encass);
+
+        new EncapsulatedAssertionSimplifier()
+                .simplifyAssertionElement(
+                        new PolicySimplifierContext(
+                                "Policy",
+                                bundle,
+                                resultantBundle)
+                                .withAssertionElement(encapsulatedAssertion)
+                );
+
+        assertEquals("Test Name", encapsulatedAssertion.getAttribute("encassName"));
+        assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME, true));
+        assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_GUID, true));
+        assertNotNull(resultantBundle.getMissingEntities().get("Test Guid"));
     }
 
     @Test
@@ -470,6 +511,7 @@ class PolicyXMLSimplifierTest {
         assertEquals("Test Name", encapsulatedAssertion.getAttribute("encassName"));
         assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_NAME, true));
         assertNull(getSingleChildElement(encapsulatedAssertion, ENCAPSULATED_ASSERTION_CONFIG_GUID, true));
+        assertNotNull(resultantBundle.getMissingEntities().get("Test Guid"));
     }
 
     @Test
