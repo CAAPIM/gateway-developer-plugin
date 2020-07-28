@@ -16,6 +16,7 @@ import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -55,6 +56,8 @@ public class Service extends Folderable implements AnnotableEntity {
     private String wsdlRootUrl;
     @JsonIgnore
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
+    @JsonIgnore
+    private boolean hasRouting;
 
     @Override
     public Set<Annotation> getAnnotations() {
@@ -172,6 +175,14 @@ public class Service extends Folderable implements AnnotableEntity {
         this.wsdlRootUrl = wsdlRootUrl;
     }
 
+    public boolean isHasRouting() {
+        return hasRouting;
+    }
+
+    public void setHasRouting(boolean hasRouting) {
+        this.hasRouting = hasRouting;
+    }
+
     @Override
     public AnnotatedEntity getAnnotatedEntity() {
         if (annotatedEntity == null && annotations != null) {
@@ -203,11 +214,19 @@ public class Service extends Folderable implements AnnotableEntity {
 
             @Override
             public String getId() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && StringUtils.isNotBlank(annotatedEntity.getId())) {
+                    return annotatedEntity.getId();
+                }
                 return Service.this.getId();
             }
 
             @Override
             public String getGuid() {
+                AnnotatedEntity annotatedEntity = getAnnotatedEntity();
+                if (annotatedEntity != null && StringUtils.isNotBlank(annotatedEntity.getGuid())) {
+                    return annotatedEntity.getGuid();
+                }
                 return Service.this.getGuid();
             }
 
@@ -222,7 +241,7 @@ public class Service extends Folderable implements AnnotableEntity {
     }
 
     @Override
-    public String getType(){
+    public String getEntityType(){
         return EntityTypes.SERVICE_TYPE;
     }
 
@@ -230,5 +249,6 @@ public class Service extends Folderable implements AnnotableEntity {
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
         setGuid(idGenerator.generateGuid());
         setId(idGenerator.generate());
+        setName(entityKey);
     }
 }

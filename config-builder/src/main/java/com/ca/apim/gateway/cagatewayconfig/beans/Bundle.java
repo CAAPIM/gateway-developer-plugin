@@ -6,19 +6,21 @@
 
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Bundle {
 
@@ -31,7 +33,41 @@ public class Bundle {
     private FolderTree folderTree;
     private Map<Dependency, List<Dependency>> dependencyMap;
     private BundleLoadingOperation loadingMode;
-    private Set<BundleDefinedEntities> metadataDependencyBundles;
+    private DependentBundle dependentBundleFrom;
+    private List<DependentBundle> dependentBundles = new ArrayList<>();
+    private ProjectInfo projectInfo;
+    private static final String UNIQUE_NAME_SEPARATOR = "::";
+    private static final Pattern VARIABLE_NAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9._\\-]*$");
+
+    public Bundle(ProjectInfo projectInfo) {
+        this.projectInfo = projectInfo;
+    }
+
+    public Bundle(){}
+
+    public ProjectInfo getProjectInfo() {
+        return projectInfo;
+    }
+
+    public void setProjectInfo(ProjectInfo projectInfo) {
+        this.projectInfo = projectInfo;
+    }
+
+    public void addDependentBundle(DependentBundle dependentBundle){
+        dependentBundles.add(dependentBundle);
+    }
+
+    public List<DependentBundle> getDependentBundles() {
+        return dependentBundles;
+    }
+
+    public DependentBundle getDependentBundleFrom() {
+        return dependentBundleFrom;
+    }
+
+    public void setDependentBundleFrom(DependentBundle dependentBundleFrom) {
+        this.dependentBundleFrom = dependentBundleFrom;
+    }
 
     @SuppressWarnings("unchecked")
     public <E extends GatewayEntity> Map<String, E> getEntities(Class<E> entityType) {
@@ -169,6 +205,10 @@ public class Bundle {
         return getEntities(JdbcConnection.class);
     }
 
+    public Map<String, SsgActiveConnector> getSsgActiveConnectors() {
+        return getEntities(SsgActiveConnector.class);
+    }
+
     public void putAllJdbcConnections(@NotNull Map<String, JdbcConnection> jdbcConnections) {
         this.getJdbcConnections().putAll(jdbcConnections);
     }
@@ -195,6 +235,10 @@ public class Bundle {
 
     public void putAllPrivateKeys(@NotNull Map<String, PrivateKey> privateKeys) {
         this.getPrivateKeys().putAll(privateKeys);
+    }
+
+    public void putAllSsgActiveConnectors(@NotNull Map<String, SsgActiveConnector> ssgActiveConnectors) {
+        this.getSsgActiveConnectors().putAll(ssgActiveConnectors);
     }
 
     public Map<String, CassandraConnection> getCassandraConnections() {
@@ -228,7 +272,11 @@ public class Bundle {
     public void putAllJmsDestinations(@NotNull Map<String, JmsDestination> jmsDestinations) {
         this.getJmsDestinations().putAll(jmsDestinations);
     }
-    
+
+    public Map<String, GenericEntity> getGenericEntities() {
+        return getEntities(GenericEntity.class);
+    }
+
     public FolderTree getFolderTree() {
         return folderTree;
     }
@@ -257,11 +305,62 @@ public class Bundle {
         this.loadingMode = loadingMode;
     }
 
-    public Set<BundleDefinedEntities> getMetadataDependencyBundles() {
-        return metadataDependencyBundles;
+    public String getTargetFolder(){
+        return projectInfo.getTargetFolder();
     }
 
-    public void setMetadataDependencyBundles(Set<BundleDefinedEntities> metadataDependencyBundles) {
-        this.metadataDependencyBundles = metadataDependencyBundles;
+    /**
+     * Applies unique name space and version to the given entity name
+     * ::namespace::entityName::majorVersion.minorVersion
+     *
+     * @param entityName String
+     * @return String
+     */
+    public String applyUniqueName(final String entityName, final EntityBuilder.BundleType bundleType) {
+        return applyUniqueName(entityName, bundleType, false);
     }
+
+    /**
+     * Applies unique name space and version to the given entity name
+     * ::namespace::entityName::majorVersion.minorVersion
+     * If the entity or entity's parent is Shared entity, "namespace" is just the Project group name.
+     *
+     * @param entityName Entity name
+     * @param bundleType Bundle type
+     * @param isShared   Is shared entity
+     * @return Unique entity name
+     */
+    public String applyUniqueName(final String entityName, final EntityBuilder.BundleType bundleType,
+                                  boolean isShared) {
+        StringBuilder uniqueName = new StringBuilder(UNIQUE_NAME_SEPARATOR);
+        uniqueName.append(getNamespace(bundleType, isShared));
+        uniqueName.append(UNIQUE_NAME_SEPARATOR);
+        uniqueName.append(entityName);
+
+        String version = getProjectInfo().getVersion();
+        if (StringUtils.isNotBlank(version)) {
+            uniqueName.append(UNIQUE_NAME_SEPARATOR);
+            String[] subVersions = version.split("\\.");
+            uniqueName.append(subVersions.length > 0 ? subVersions[0] : version);
+            uniqueName.append(".");
+            uniqueName.append(subVersions.length > 1 ? subVersions[1] : "0");
+        }
+
+        return uniqueName.toString();
+    }
+
+    /**
+     * Returns namespace for the entity for unique naming.
+     *
+     * For non-shared entities, it returns &lt;groupName&lt;.&gt;bundleName&gt;
+     * For shared entities and non-annotated bundle, it returns just &lt;groupName&gt;
+     *
+     * @param bundleType bundle type
+     * @param isShared is a shared entity (or is any parent entity is Shared)
+     * @return namespace
+     */
+    public String getNamespace(final EntityBuilder.BundleType bundleType, boolean isShared) {
+        return getProjectInfo().getGroupName();
+    }
+
 }

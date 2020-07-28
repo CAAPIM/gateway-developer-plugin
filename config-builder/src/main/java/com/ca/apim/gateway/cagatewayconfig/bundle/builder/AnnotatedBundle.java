@@ -2,21 +2,24 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.DependentBundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AnnotatedBundle extends Bundle {
     private Bundle fullBundle;
     private AnnotatedEntity<? extends GatewayEntity> annotatedEntity;
-    private ProjectInfo projectInfo;
-    private String uniqueNameSeparator = "#";   // This can be different for environment entities.
+    private List<DependentBundle> dependentBundles = new ArrayList<>();
 
     public AnnotatedBundle(Bundle fullBundle, AnnotatedEntity<? extends GatewayEntity> annotatedEntity,
                            ProjectInfo projectInfo) {
+        super(projectInfo);
         this.fullBundle = fullBundle;
         this.annotatedEntity = annotatedEntity;
-        this.projectInfo = projectInfo;
     }
 
     public AnnotatedEntity<? extends GatewayEntity> getAnnotatedEntity() {
@@ -36,19 +39,39 @@ public class AnnotatedBundle extends Bundle {
     }
 
     public String getBundleName() {
+        String name = getAnnotatedBundleName();
+        return StringUtils.isBlank(getProjectInfo().getVersion()) ? name : name + "-" + getProjectInfo().getVersion();
+    }
+
+    private String getAnnotatedBundleName() {
         if (StringUtils.isBlank(annotatedEntity.getBundleName())) {
-            return projectInfo.getName() + "-" + annotatedEntity.getEntityName() + "-" + projectInfo.getVersion();
+            return getProjectInfo().getName() + "-" + PathUtils.extractName(annotatedEntity.getEntityName());
         } else {
-            return annotatedEntity.getBundleName() + "-" + projectInfo.getVersion();
+            return annotatedEntity.getBundleName();
         }
     }
 
-    public String getUniquePrefix() {
-        return projectInfo.getName() + uniqueNameSeparator + PathUtils.extractName(annotatedEntity.getEntityName()) + uniqueNameSeparator;
+    public void addDependentBundle(DependentBundle dependentBundle){
+        dependentBundles.add(dependentBundle);
     }
 
-    public String getUniqueSuffix() {
-        return "-" + projectInfo.getVersion();
+    public List<DependentBundle> getDependentBundles() {
+        return dependentBundles;
+    }
+
+
+    public String getNamespace(final EntityBuilder.BundleType bundleType, boolean isShared) {
+        if (isShared || EntityBuilder.BundleType.ENVIRONMENT == bundleType) {
+            return super.getNamespace(bundleType, isShared);
+        }
+
+        StringBuilder namespace = new StringBuilder();
+        if (StringUtils.isNotBlank(getProjectInfo().getGroupName())) {
+            namespace.append(getProjectInfo().getGroupName());
+            namespace.append(".");
+        }
+        namespace.append(getAnnotatedBundleName());
+        return namespace.toString();
     }
 
 }

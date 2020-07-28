@@ -47,7 +47,7 @@ class EnvironmentCreatorApplicationTest {
 
         new EnvironmentCreatorApplication(environmentProperties, testTemplatizedBundlesFolder.getPath(), testDetemplatizedBundlesFolder.getPath(), keyStoreFolder.getPath(), privateKeyFolder.getPath(), envFolder.getPath()).run();
 
-        File environmentBundle = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
+        File environmentBundle = new File(testDetemplatizedBundlesFolder, "_0_env.req.install.bundle");
 
         assertTrue(environmentBundle.exists());
     }
@@ -285,14 +285,14 @@ class EnvironmentCreatorApplicationTest {
     }
 
     private static void assertEnvironment(File testDetemplatizedBundlesFolder) {
-        File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.bundle");
+        File environmentBundleFile = new File(testDetemplatizedBundlesFolder, "_0_env.req.install.bundle");
         assertTrue(environmentBundleFile.exists());
 
         EntityBundleLoader bundleLoader = InjectionRegistry.getInjector().getInstance(EntityBundleLoader.class);
         Bundle environmentBundle = bundleLoader.load(environmentBundleFile, BundleLoadingOperation.EXPORT);
 
         assertEquals(1, environmentBundle.getIdentityProviders().size());
-        assertNotNull(environmentBundle.getIdentityProviders().get("simple ldap"));
+        assertNotNull(environmentBundle.getIdentityProviders().get("::::simple ldap"));
 
         assertEquals(3, environmentBundle.getListenPorts().size());
         assertNotNull(environmentBundle.getListenPorts().get("Custom HTTPS Port"));
@@ -300,7 +300,7 @@ class EnvironmentCreatorApplicationTest {
         assertNotNull(environmentBundle.getListenPorts().get(DEFAULT_HTTPS_8443));
 
         assertEquals(1, environmentBundle.getJdbcConnections().size());
-        assertNotNull(environmentBundle.getJdbcConnections().get("my-jdbc"));
+        assertNotNull(environmentBundle.getJdbcConnections().get("::::my-jdbc"));
 
         assertEquals(1, environmentBundle.getTrustedCerts().size());
         assertNotNull(environmentBundle.getTrustedCerts().get("my-cert"));

@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.config.loader;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * An Entity Loader is responsible for reading configuration files (either json/yaml or properties) and loading contents into their
@@ -27,6 +28,14 @@ public interface EntityLoader {
     Object loadSingle(String name, File entitiesFile);
 
     /**
+     * Load environment entities from the given config file. This method has to be implemented by environment entity loader
+     *
+     * @param entitiesFile file that contains the entity
+     * @return the entity map
+     */
+    Map<String, Object> load(File entitiesFile);
+
+    /**
      * Load all entities from a configuration file into a Bundle object.
      *
      * @param bundle the bundle object to receive loaded entities
@@ -42,6 +51,18 @@ public interface EntityLoader {
      * @param value value to be loaded, either json or property value
      */
     void load(Bundle bundle, String name, String value);
+
+    /**
+     * Load a single entity into a bundle from a String representation of json/yaml or properties value.
+     * default implementation does not consider configFolder path
+     * @param bundle the bundle to load the entity into
+     * @param name name of the entity
+     * @param value value to be loaded, either json or property value
+     * @param environmentConfigurationFolderPath folder from which value is taken
+     */
+    default void load(Bundle bundle, String name, String value, String environmentConfigurationFolderPath){
+        load(bundle, name, value);
+    }
 
     /**
      * @return the type of the entity managed by this loader

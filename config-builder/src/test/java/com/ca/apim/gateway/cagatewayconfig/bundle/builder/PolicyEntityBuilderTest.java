@@ -10,21 +10,20 @@ import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.reflections.Reflections;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
@@ -32,11 +31,9 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementName
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_BY;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.MAP_TO;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PolicyEntityBuilderTest {
@@ -45,6 +42,7 @@ class PolicyEntityBuilderTest {
     private Bundle bundle;
     private Document document;
     private final String TEST_ENCASS = "EncassName";
+    private PolicyXMLBuilder policyXMLBuilder;
 
     @BeforeEach
     void beforeEach() {
@@ -53,6 +51,19 @@ class PolicyEntityBuilderTest {
         bundle = new Bundle();
         bundle.setDependencies(new HashSet<>());
         document = DocumentTools.INSTANCE.getDocumentBuilder().newDocument();
+        Set<PolicyAssertionBuilder> policyAssertionBuilders = new HashSet<>();
+        Reflections reflections = new Reflections();
+        reflections.getSubTypesOf(PolicyAssertionBuilder.class).forEach(e -> {
+            try {
+                policyAssertionBuilders.add(e.newInstance());
+            } catch (InstantiationException ex) {
+                ex.printStackTrace();
+            } catch (IllegalAccessException ex) {
+                ex.printStackTrace();
+            }
+        });
+        policyXMLBuilder = new PolicyXMLBuilder(policyAssertionBuilders);
+
     }
 
     @Test
@@ -66,7 +77,7 @@ class PolicyEntityBuilderTest {
                 createHardcodedAssertionElement(document, "response")
         );
         Element encassElement = createEncapsulatedAssertionElement(document, TEST_ENCASS, "encass");
-        encassElement.setAttribute(PolicyEntityBuilder.ENCASS_NAME, TEST_ENCASS);
+        encassElement.setAttribute(EncapsulatedAssertionBuilder.ENCASS_NAME, TEST_ENCASS);
         policyElement.appendChild(encassElement);
         document.appendChild(policyElement);
 
@@ -79,7 +90,7 @@ class PolicyEntityBuilderTest {
         encass.setGuid("encass");
         encass.setName(TEST_ENCASS);
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        Annotation annotation = new Annotation(AnnotationType.SHARED);
         annotations.add(annotation);
         policy.setAnnotations(annotations);
         bundle.getEncasses().put(TEST_ENCASS, encass);
@@ -91,7 +102,7 @@ class PolicyEntityBuilderTest {
         include.setId("includeID");
         include.setGuid("includeGuid");
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        annotation = new Annotation(AnnotationType.SHARED);
         annotations.add(annotation);
         include.setAnnotations(annotations);
         include.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -104,12 +115,13 @@ class PolicyEntityBuilderTest {
                 "</wsp:Policy>");
         bundle.getPolicies().put("include", include);
 
-        PolicyEntityBuilder builder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+
+        PolicyEntityBuilder builder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator(), policyXMLBuilder);
         final List<Entity> entities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
         assertEquals(2, entities.size());
-        entities.stream().collect(toMap(Entity::getId, identity())).forEach((i,e) -> {
+        entities.stream().collect(toMap(Entity::getId, identity())).forEach((i, e) -> {
             assertEquals(EntityTypes.POLICY_TYPE, e.getType());
             assertNotNull(e.getXml());
             assertTrue(e.getMappingProperties().containsKey(MAP_BY));
@@ -131,7 +143,7 @@ class PolicyEntityBuilderTest {
                 createHardcodedAssertionElement(document, "response")
         );
         Element encassElement = createEncapsulatedAssertionElement(document, TEST_ENCASS, "encass");
-        encassElement.setAttribute(PolicyEntityBuilder.ENCASS_NAME, TEST_ENCASS);
+        encassElement.setAttribute(EncapsulatedAssertionBuilder.ENCASS_NAME, TEST_ENCASS);
         policyElement.appendChild(encassElement);
         document.appendChild(policyElement);
 
@@ -142,30 +154,34 @@ class PolicyEntityBuilderTest {
         policy.setName(policy.getPath());
 
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        Annotation annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("");
         annotation.setId("");
         annotations.add(annotation);
+        annotation = new Annotation(AnnotationType.SHARED);
+        annotations.add(annotation);
         policy.setAnnotations(annotations);
+        policy.setParentEntityShared(policy.isShared());
 
         Encass encass = new Encass();
         encass.setGuid("encassGuid");
         encass.setName(TEST_ENCASS);
-        Annotation encassAnnotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        Annotation encassAnnotation = new Annotation(AnnotationType.SHARED);
         annotations = new HashSet<>();
         annotations.add(encassAnnotation);
         encass.setAnnotations(annotations);
+        encass.setParentEntityShared(encass.isShared());
         bundle.getEncasses().put(TEST_ENCASS, encass);
         bundle.getPolicies().put("Policy", policy);
 
 
-        AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
+        AnnotatedEntity annotatedEntity = encass.getAnnotatedEntity();
         annotatedEntity.setEntityName(encass.getName());
         AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, new ProjectInfo("", "", ""));
         annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put("Policy", policy);
 
-        PolicyEntityBuilder builder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        PolicyEntityBuilder builder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator(), policyXMLBuilder);
         List<Entity> entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
@@ -176,16 +192,16 @@ class PolicyEntityBuilderTest {
 
         //wrong guid and id
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE);
+        annotation = new Annotation(AnnotationType.SHARED);
         annotations.add(annotation);
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
         annotation.setId("wrongId");
         annotations.add(annotation);
         policy.setAnnotations(annotations);
         policy.setAnnotatedEntity(null);
 
-        builder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        builder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator(), policyXMLBuilder);
         entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertFalse(entities.isEmpty());
@@ -196,563 +212,13 @@ class PolicyEntityBuilderTest {
     }
 
     @Test
-    void testPrepareSetVariableAssertionNoENV() throws DocumentParseException {
-        Element setVariableAssertionElement = createSetVariableAssertion(document, "my-var", "base64Text");
-        document.appendChild(setVariableAssertionElement);
-        String prefix = "prefix";
-
-        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertionElement);
-
-        Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
-        assertEquals("my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
-        String b64 = expressionElement.getAttribute(PolicyEntityBuilder.STRING_VALUE);
-        assertEquals(Base64.getEncoder().encodeToString("base64Text".getBytes(StandardCharsets.UTF_8)), b64);
-    }
-
-    @Test
-    void testPrepareSetVariableAssertionUnescaping() throws DocumentParseException {
-        Element setVariableAssertionElement = createSetVariableAssertion(document, "userSession", "&lt;usersession&gt;\n"
-                + " &lt;user&gt;&lt;![CDATA[${current.username}]]&gt;&lt;/user&gt;\n"
-                + " &lt;role&gt;&lt;![CDATA[${current.user.role}]]&gt;&lt;/role&gt;\n"
-                + " &lt;lookupUser&gt;&lt;![CDATA[${lookupUser}]]&gt;&lt;/lookupUser&gt;\n"
-                + " &lt;synchToken&gt;&lt;![CDATA[${xpathSynchToken.result}]]&gt;&lt;/synchToken&gt;\n"
-                + "&lt;/usersession&gt;");
-        document.appendChild(setVariableAssertionElement);
-        String prefix = "prefix";
-
-        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertionElement);
-
-        Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
-        assertEquals("userSession", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
-        String expectedB64 = "PHVzZXJzZXNzaW9uPgogPHVzZXI+PCFbQ0RBVEFbJHtjdXJyZW50LnVzZXJuYW1lfV1dPjwvdXNlcj4KIDxyb2xlPjwhW0NEQVRBWyR7Y3VycmVudC51c2VyLnJvbGV9XV0+PC9yb2xlPgogPGxvb2t1cFVzZXI+PCFbQ0RBVEFbJHtsb29rdXBVc2VyfV1dPjwvbG9va3VwVXNlcj4KIDxzeW5jaFRva2VuPjwhW0NEQVRBWyR7eHBhdGhTeW5jaFRva2VuLnJlc3VsdH1dXT48L3N5bmNoVG9rZW4+CjwvdXNlcnNlc3Npb24+";
-        String b64 = expressionElement.getAttribute(PolicyEntityBuilder.STRING_VALUE);
-        assertEquals(expectedB64, b64);
-
-        String value = new String(decodeBase64(b64));
-    assertEquals(
-        "<usersession>\n"
-            + " <user><![CDATA[${current.username}]]></user>\n"
-            + " <role><![CDATA[${current.user.role}]]></role>\n"
-            + " <lookupUser><![CDATA[${lookupUser}]]></lookupUser>\n"
-            + " <synchToken><![CDATA[${xpathSynchToken.result}]]></synchToken>\n"
-            + "</usersession>", value);
-    }
-
-    @Test
-    void testPrepareSetVariableAssertionENV() throws DocumentParseException {
-        Element setVariableAssertionElement = createSetVariableAssertion(document, "ENV.my-var", "base64Text");
-        document.appendChild(setVariableAssertionElement);
-        String prefix = "prefix";
-
-        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertionElement);
-
-        Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
-        assertEquals("ENV.my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
-        assertEquals(PREFIX_ENV + prefix + ".my-var", expressionElement.getAttribute(PolicyEntityBuilder.ENV_PARAM_NAME));
-        assertFalse(expressionElement.hasAttribute(PolicyEntityBuilder.STRING_VALUE));
-    }
-
-    @Test
-    void testPrepareSetVariableAssertionMissingVariableToSet() {
-        Element setVariableAssertion = document.createElement(SET_VARIABLE);
-        document.appendChild(setVariableAssertion);
-        Element expression = document.createElement(EXPRESSION);
-        expression.appendChild(document.createCDATASection("ashdkjsah"));
-        setVariableAssertion.appendChild(expression);
-        String prefix = "prefix";
-
-        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertion));
-    }
-
-    @Test
-    void testPrepareSetVariableAssertionMissingBase64Value() throws DocumentParseException {
-        Element setVariableAssertion = document.createElement(SET_VARIABLE);
-        document.appendChild(setVariableAssertion);
-        Element variableToSet = document.createElement(VARIABLE_TO_SET);
-        variableToSet.setAttribute(PolicyEntityBuilder.STRING_VALUE, "my.var");
-        setVariableAssertion.appendChild(variableToSet);
-        String prefix = "prefix";
-
-        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertion);
-
-        Element nameElement = getSingleElement(setVariableAssertion, VARIABLE_TO_SET);
-        assertEquals("my.var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element expressionElement = getSingleChildElement(setVariableAssertion, BASE_64_EXPRESSION, true);
-        assertNull(expressionElement);
-    }
-
-    @Test
-    void testPrepareSetVariableAssertionNotENVEmptyValue() throws DocumentParseException {
-        Element setVariableAssertionElement = createSetVariableAssertion(document, "my-var", null);
-        document.appendChild(setVariableAssertionElement);
-        String prefix = "prefix";
-
-        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertionElement);
-
-        Element nameElement = getSingleElement(setVariableAssertionElement, VARIABLE_TO_SET);
-        assertEquals("my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element expressionElement = getSingleElement(setVariableAssertionElement, BASE_64_EXPRESSION);
-        String b64 = expressionElement.getAttribute(PolicyEntityBuilder.STRING_VALUE);
-        assertTrue(b64.isEmpty());
-    }
-
-    @Test
-    void testPrepareSetVariableAssertionNotENVTextNode() throws DocumentParseException {
-        Element setVariableAssertion = document.createElement(SET_VARIABLE);
-        document.appendChild(setVariableAssertion);
-        Element expression = document.createElement(EXPRESSION);
-        expression.setTextContent("my \n Text \r\n Content");
-        setVariableAssertion.appendChild(expression);
-        Element variableToSet = document.createElement(VARIABLE_TO_SET);
-        variableToSet.setAttribute(PolicyEntityBuilder.STRING_VALUE, "my-var");
-        setVariableAssertion.appendChild(variableToSet);
-        String prefix = "prefix";
-
-        PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertion);
-
-        Element nameElement = getSingleElement(setVariableAssertion, VARIABLE_TO_SET);
-        assertEquals("my-var", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element expressionElement = getSingleElement(setVariableAssertion, BASE_64_EXPRESSION);
-        String b64 = expressionElement.getAttribute(PolicyEntityBuilder.STRING_VALUE);
-        assertEquals(Base64.getEncoder().encodeToString("my \n Text \r\n Content".getBytes(StandardCharsets.UTF_8)), b64);
-    }
-
-    @Test
-    void testPrepareSetVariableAssertionNotENVElementNode() {
-        Element setVariableAssertion = document.createElement(SET_VARIABLE);
-        document.appendChild(setVariableAssertion);
-        Element expression = document.createElement(EXPRESSION);
-        expression.appendChild(document.createElement("ashdkjsah"));
-        setVariableAssertion.appendChild(expression);
-        Element variableToSet = document.createElement(VARIABLE_TO_SET);
-        variableToSet.setAttribute(PolicyEntityBuilder.STRING_VALUE, "my-var");
-        setVariableAssertion.appendChild(variableToSet);
-        String prefix = "prefix";
-
-        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareSetVariableAssertion(prefix, document, setVariableAssertion));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertion() throws DocumentParseException {
-        String policyPath = "my/policy/path.xml";
-        Encass encass = new Encass();
-        encass.setGuid("123");
-        encass.setName(TEST_ENCASS);
-        encass.setPolicy(policyPath);
-        bundle.getEncasses().put(TEST_ENCASS, encass);
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        document.appendChild(encapsulatedAssertionElement);
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
-
-        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
-        assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionWithWrongGuidAndGoid() throws DocumentParseException {
-        String policyPath = "my/policy/path.xml";
-        Encass encass = new Encass();
-        encass.setGuid("123");
-        encass.setName(TEST_ENCASS);
-        encass.setPolicy(policyPath);
-        Set<Annotation> annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
-        annotation.setGuid("");
-        annotation.setId("");
-        annotations.add(annotation);
-        encass.setAnnotations(annotations);
-        bundle.getEncasses().put(TEST_ENCASS, encass);
-
-        //empty guid and goid
-        AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
-        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
-        annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
-        annotatedBundle.getPolicies().put(policyPath, policy);
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        document.appendChild(encapsulatedAssertionElement);
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, annotatedBundle);
-
-        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
-        assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        //wrong guid and goid
-        annotatedEntity = new AnnotatedEntity(encass);
-        annotations = new HashSet<>();
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
-        annotation.setGuid("wrongGuid");
-        annotation.setId("wrongId");
-        annotations.add(annotation);
-        encass.setAnnotations(annotations);
-        encass.setAnnotatedEntity(null);
-        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
-        annotatedBundle.putAllEncasses(org.testcontainers.shaded.com.google.common.collect.ImmutableMap.of(TEST_ENCASS, encass));
-        annotatedBundle.getPolicies().put(policyPath, policy);
-        encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, annotatedBundle);
-
-        guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
-        assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionEncoded() throws DocumentParseException {
-        String policyPath = "my/policy-_¯-¯_/_¯-¯_-path.xml";
-        Encass encass = new Encass();
-        encass.setGuid("123");
-        encass.setName(TEST_ENCASS);
-        encass.setPolicy(policyPath);
-        bundle.getEncasses().put(TEST_ENCASS, encass);
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        document.appendChild(encapsulatedAssertionElement);
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
-
-        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
-        assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionEncassInDependencyBundle() throws DocumentParseException {
-        String policyPath = "my/policy/path.xml";
-        Encass encass = new Encass();
-        encass.setGuid("123");
-        encass.setId("id1");
-        encass.setPolicy(policyPath);
-        encass.setName(TEST_ENCASS);
-
-        Bundle dependencyBundle = new Bundle();
-        dependencyBundle.getEncasses().put(TEST_ENCASS, encass);
-        bundle.getDependencies().add(dependencyBundle);
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        document.appendChild(encapsulatedAssertionElement);
-
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
-
-        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
-        assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionEncassInDependencyBundleMetadata() throws DocumentParseException {
-        String policyPath = "my/policy/path.xml";
-        Encass encass = new Encass();
-        encass.setGuid("123");
-        encass.setId("id1");
-        encass.setPolicy(policyPath);
-        encass.setName(TEST_ENCASS);
-        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
-        BundleDefinedEntities.DefaultMetadata metadata =  new BundleDefinedEntities.DefaultMetadata();
-        metadata.setName(encass.getName());
-        metadata.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-        metadata.setId(encass.getId());
-        metadata.setGuid(encass.getGuid());
-        metadataSet.add(metadata);
-        Set<BundleDefinedEntities> definedEntities = new HashSet<>();
-        BundleDefinedEntities bundleDefinedEntities = new BundleDefinedEntities();
-        bundleDefinedEntities.setDefinedEntities(metadataSet);
-        definedEntities.add(bundleDefinedEntities);
-        bundle.setMetadataDependencyBundles(definedEntities);
-
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        document.appendChild(encapsulatedAssertionElement);
-
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
-
-        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
-        assertEquals(encass.getGuid(), guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionEncassInMultipleDependencyBundle() {
-        String policyPath = "my/policy/path.xml";
-        Encass encass = new Encass();
-        encass.setGuid("123");
-        encass.setId("id1");
-        encass.setPolicy(policyPath);
-        encass.setName(TEST_ENCASS);
-        Bundle dependencyBundle = new Bundle();
-        dependencyBundle.getEncasses().put(TEST_ENCASS, encass);
-        bundle.getDependencies().add(dependencyBundle);
-
-        Bundle dependencyBundle2 = new Bundle();
-        dependencyBundle2.getEncasses().put(TEST_ENCASS, encass);
-        bundle.getDependencies().add(dependencyBundle2);
-
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        document.appendChild(encapsulatedAssertionElement);
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null));
-        assertTrue(exception.getMessage().contains(TEST_ENCASS));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionEncassInMultipleDependencyMetadata() {
-        String policyPath = "my/policy/path.xml";
-        Encass encass = new Encass();
-        encass.setGuid("123");
-        encass.setId("id1");
-        encass.setPolicy(policyPath);
-        encass.setName(TEST_ENCASS);
-        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
-        BundleDefinedEntities.DefaultMetadata metadata =  new BundleDefinedEntities.DefaultMetadata();
-        metadata.setName(encass.getName());
-        metadata.setType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-        metadata.setId(encass.getId());
-        metadata.setGuid(encass.getGuid());
-        metadataSet.add(metadata);
-        Set<BundleDefinedEntities> definedEntities = new HashSet<>();
-        BundleDefinedEntities bundleDefinedEntities = new BundleDefinedEntities();
-        bundleDefinedEntities.setDefinedEntities(metadataSet);
-
-        BundleDefinedEntities bundleDefinedEntities1 = new BundleDefinedEntities();
-        bundleDefinedEntities1.setDefinedEntities(metadataSet);
-        definedEntities.add(bundleDefinedEntities);
-        definedEntities.add(bundleDefinedEntities1);
-        bundle.setMetadataDependencyBundles(definedEntities);
-
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        document.appendChild(encapsulatedAssertionElement);
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null));
-        assertTrue(exception.getMessage().contains(TEST_ENCASS));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionMissingEncass() {
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        document.appendChild(encapsulatedAssertionElement);
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null));
-        assertTrue(exception.getMessage().contains(TEST_ENCASS));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionMissingEncassWithNoOp() throws DocumentParseException {
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document);
-        document.appendChild(encapsulatedAssertionElement);
-
-        Element noOpElement = document.createElement(NO_OP_IF_CONFIG_MISSING);
-        encapsulatedAssertionElement.appendChild(noOpElement);
-        noOpElement.setAttribute(PolicyEntityBuilder.BOOLEAN_VALUE, "true");
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
-
-        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals(TEST_ENCASS, nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
-        assertEquals(PolicyEntityBuilder.ZERO_GUID, guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionMissingPolicyPath() {
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, "my-encass", "ad620794-a27f-4d94-85b7-669ba838367b");
-        document.appendChild(encapsulatedAssertionElement);
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        EntityBuilderException exception = assertThrows(EntityBuilderException.class, () -> policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null));
-        assertTrue(exception.getMessage().contains(policy.getPath()));
-    }
-
-    @Test
-    void testPrepareEncapsulatedAssertionMissingPolicyPathWithNoOp() throws DocumentParseException {
-        Element encapsulatedAssertionElement = createEncapsulatedAssertionElement(document, "my-encass", "ad620794-a27f-4d94-85b7-669ba838367b");
-        document.appendChild(encapsulatedAssertionElement);
-
-        Element noOpElement = document.createElement(NO_OP_IF_CONFIG_MISSING);
-        encapsulatedAssertionElement.appendChild(noOpElement);
-        noOpElement.setAttribute(PolicyEntityBuilder.BOOLEAN_VALUE, "true");
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
-        policyEntityBuilder.prepareEncapsulatedAssertion(policy, bundle, document, encapsulatedAssertionElement, null);
-
-        Element nameElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME);
-        assertEquals("my-encass", nameElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-
-        Element guidElement = getSingleElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID);
-        assertEquals("ad620794-a27f-4d94-85b7-669ba838367b", guidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-    }
-
-    @Test
-    void testPrepareHardcodedResponseAssertion() throws DocumentParseException {
-        Element hardcodedAssertionElement = createHardcodedAssertionElement(document, "assertion body");
-        document.appendChild(hardcodedAssertionElement);
-
-        PolicyEntityBuilder.prepareHardcodedResponseAssertion(document, hardcodedAssertionElement);
-
-        Element b64BodyElement = getSingleElement(hardcodedAssertionElement, BASE_64_RESPONSE_BODY);
-        String b64 = b64BodyElement.getAttribute(PolicyEntityBuilder.STRING_VALUE);
-        assertEquals(Base64.getEncoder().encodeToString("assertion body".getBytes(StandardCharsets.UTF_8)), b64);
-
-    }
-
-    @Test
-    void testPrepareIncludeAssertion() throws DocumentParseException {
-        String policyPath = "my/policy/path.xml";
-        Policy policy = new Policy();
-        policy.setGuid("123-abc-567");
-        bundle.getPolicies().put(policyPath, policy);
-
-        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
-        document.appendChild(includeAssertionElement);
-
-        PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement);
-
-        Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
-        assertEquals(policy.getGuid(), policyGuidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-        assertFalse(policyGuidElement.hasAttribute(PolicyEntityBuilder.POLICY_PATH));
-    }
-
-    @Test
-    void testPrepareIncludeAssertionEncodedPath() throws DocumentParseException {
-        String policyPath = "my/policy-_¯-¯_/_¯-¯_-path.xml";
-        Policy policy = new Policy();
-        policy.setGuid("123-abc-567");
-        bundle.getPolicies().put(policyPath, policy);
-
-        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
-        document.appendChild(includeAssertionElement);
-
-        PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement);
-
-        Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
-        assertEquals(policy.getGuid(), policyGuidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-        assertFalse(policyGuidElement.hasAttribute(PolicyEntityBuilder.POLICY_PATH));
-    }
-
-    @Test
-    void testPrepareIncludeAssertionNoPolicyGuid() {
-        String policyPath = "my/policy/path.xml";
-        Policy policy = new Policy();
-        policy.setGuid("123-abc-567");
-        bundle.getPolicies().put(policyPath, policy);
-
-        Element includeAssertion = document.createElement(INCLUDE);
-        document.appendChild(includeAssertion);
-
-        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertion));
-    }
-
-    @Test
-    void testPrepareIncludeAssertionNoPolicyFound() {
-        String policyPath = "my/policy/path.xml";
-        Policy policy = new Policy();
-        policy.setGuid("123-abc-567");
-        bundle.getPolicies().put(policyPath, policy);
-
-        Element includeAssertionElement = createIncludeAssertionElement(document, "some/other/path.xml");
-        document.appendChild(includeAssertionElement);
-
-        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement));
-    }
-
-    @Test
-    void testPrepareIncludeAssertionPolicyInDependentBundle() throws DocumentParseException {
-        String policyPath = "my/policy/path.xml";
-        Policy policy = new Policy();
-        policy.setGuid("123-abc-567");
-        policy.setId("id1");
-        policy.setName("path.xml");
-        Bundle dependentBundle = new Bundle();
-        dependentBundle.getPolicies().put(policyPath, policy);
-        bundle.getDependencies().add(dependentBundle);
-
-        bundle.getDependencies().add(new Bundle());
-
-        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
-        document.appendChild(includeAssertionElement);
-
-        PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement);
-
-        Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
-        assertEquals(policy.getGuid(), policyGuidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-        assertFalse(policyGuidElement.hasAttribute(PolicyEntityBuilder.POLICY_PATH));
-    }
-
-    @Test
-    void testPrepareIncludeAssertionPolicyInDependentBundleMetadata() throws DocumentParseException {
-        String policyPath = "my/policy/path.xml";
-        Policy policy = new Policy();
-        policy.setGuid("123-abc-567");
-        policy.setId("id1");
-        policy.setName("path.xml");
-
-        Set<BundleDefinedEntities.DefaultMetadata> metadataSet = new HashSet<>();
-        BundleDefinedEntities.DefaultMetadata metadata =  new BundleDefinedEntities.DefaultMetadata();
-        metadata.setName(policy.getName());
-        metadata.setType(EntityTypes.POLICY_TYPE);
-        metadata.setId(policy.getId());
-        metadata.setGuid(policy.getGuid());
-        metadataSet.add(metadata);
-        Set<BundleDefinedEntities> definedEntities = new HashSet<>();
-        BundleDefinedEntities bundleDefinedEntities = new BundleDefinedEntities();
-        bundleDefinedEntities.setDefinedEntities(metadataSet);
-        definedEntities.add(bundleDefinedEntities);
-        bundle.setMetadataDependencyBundles(definedEntities);
-
-        bundle.getDependencies().add(new Bundle());
-
-        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
-        document.appendChild(includeAssertionElement);
-
-        PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement);
-
-        Element policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
-        assertEquals(policy.getGuid(), policyGuidElement.getAttribute(PolicyEntityBuilder.STRING_VALUE));
-        assertFalse(policyGuidElement.hasAttribute(PolicyEntityBuilder.POLICY_PATH));
-    }
-
-    @Test
-    void testPrepareIncludeAssertionPolicyInMultipleDependentBundle() {
-        String policyPath = "my/policy/path.xml";
-        Policy policy = new Policy();
-        policy.setGuid("123-abc-567");
-        Bundle dependentBundle = new Bundle();
-        dependentBundle.getPolicies().put(policyPath, policy);
-        bundle.getDependencies().add(dependentBundle);
-        Bundle dependentBundle2 = new Bundle();
-        dependentBundle2.getPolicies().put(policyPath, policy);
-        bundle.getDependencies().add(dependentBundle2);
-
-        Element includeAssertionElement = createIncludeAssertionElement(document, policyPath);
-        document.appendChild(includeAssertionElement);
-
-        assertThrows(EntityBuilderException.class, () -> PolicyEntityBuilder.prepareIncludeAssertion(policy, bundle, includeAssertionElement));
-    }
-
-    @Test
     void maybeAddPolicy() {
         Policy policy1 = new Policy();
+        policy1.setName("policy1");
+        policy1.setPath("policy1");
         Policy policy2 = new Policy();
+        policy2.setName("policy2");
+        policy2.setPath("policy2");
         policy1.getDependencies().add(policy2);
 
         ArrayList<Policy> orderedPolicies = new ArrayList<>();
@@ -776,7 +242,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTest() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator(), policyXMLBuilder);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("/path");
@@ -794,7 +260,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestPBS() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator(), policyXMLBuilder);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/path.xml");
@@ -816,7 +282,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestGlobal() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator(), policyXMLBuilder);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/global.xml");
@@ -825,8 +291,14 @@ class PolicyEntityBuilderTest {
         policyToBuild.setGuid("global-policy-guid-123");
         policyToBuild.setTag("global-policy");
         policyToBuild.setPolicyType(PolicyType.GLOBAL);
+        Folder myFolder = new Folder();
+        myFolder.setId("myId");
+        myFolder.setName("my");
+        myFolder.setParentFolder(Folder.ROOT_FOLDER);
         Folder parentFolder = new Folder();
         parentFolder.setId("folder-id");
+        parentFolder.setName("policy");
+        parentFolder.setParentFolder(myFolder);
         policyToBuild.setParentFolder(parentFolder);
 
         Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
@@ -847,7 +319,7 @@ class PolicyEntityBuilderTest {
 
     @Test
     void buildPolicyEntityTestInternal() {
-        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
+        PolicyEntityBuilder policyEntityBuilder = new PolicyEntityBuilder(DocumentTools.INSTANCE, new IdGenerator(), policyXMLBuilder);
 
         Policy policyToBuild = new Policy();
         policyToBuild.setPath("my/policy/internal.xml");
@@ -856,8 +328,14 @@ class PolicyEntityBuilderTest {
         policyToBuild.setGuid("internal-policy-guid-123");
         policyToBuild.setTag("internal-policy");
         policyToBuild.setPolicyType(PolicyType.INTERNAL);
+        Folder myFolder = new Folder();
+        myFolder.setId("myId");
+        myFolder.setName("my");
+        myFolder.setParentFolder(Folder.ROOT_FOLDER);
         Folder parentFolder = new Folder();
         parentFolder.setId("folder-id");
+        parentFolder.setName("policy");
+        parentFolder.setParentFolder(myFolder);
         policyToBuild.setParentFolder(parentFolder);
 
         Entity policyEntity = policyEntityBuilder.buildPolicyEntity(policyToBuild, null, bundle, document);
@@ -874,15 +352,6 @@ class PolicyEntityBuilderTest {
         assertFalse(properties.isEmpty());
         assertEquals("internal-policy", properties.get(PropertyConstants.PROPERTY_TAG));
         assertNull(properties.get(PropertyConstants.PROPERTY_SUBTAG));
-    }
-
-    private Element createIncludeAssertionElement(Document document, String policyPath) {
-        Element includeAssertion = document.createElement(INCLUDE);
-
-        Element guidElement = document.createElement(POLICY_GUID);
-        guidElement.setAttribute(PolicyEntityBuilder.POLICY_PATH, policyPath);
-        includeAssertion.appendChild(guidElement);
-        return includeAssertion;
     }
 
     private Element createHardcodedAssertionElement(Document document, String body) {
@@ -909,12 +378,15 @@ class PolicyEntityBuilderTest {
         return setVariableAssertion;
     }
 
-    private Element createEncapsulatedAssertionElement(Document document) {
-        Element setEncapsulatedAssertion = document.createElement(ENCAPSULATED);
+    private Element createIncludeAssertionElement(Document document, String policyPath) {
+        Element includeAssertion = document.createElement(INCLUDE);
 
-        setEncapsulatedAssertion.setAttribute(PolicyEntityBuilder.ENCASS_NAME, TEST_ENCASS);
-        return setEncapsulatedAssertion;
+        Element guidElement = document.createElement(POLICY_GUID);
+        guidElement.setAttribute(IncludeAssertionBuilder.POLICY_PATH, policyPath);
+        includeAssertion.appendChild(guidElement);
+        return includeAssertion;
     }
+
 
     @NotNull
     private Element createEncapsulatedAssertionElement(Document document, String name, String guid) {

@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverter;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.policy.PolicyConverterRegistry;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
@@ -96,8 +97,10 @@ public class PolicyWriter implements EntityWriter {
             policyMetadata.setTag(policyEntity.getTag());
             policyMetadata.setSubtag(policyEntity.getSubtag());
             policyMetadata.setHasRouting(policyEntity.isHasRouting());
+        } else if (folderableEntity instanceof Service) {
+            policyMetadata.setHasRouting(((Service) folderableEntity).isHasRouting());
         }
-        Set<Dependency> filteredDependencies = getFilteredPolicyDependencies(policyName, getPolicyDependencies(folderableEntity.getId(), rawBundle), rawBundle.getEncasses());
+        Set<Dependency> filteredDependencies = getFilteredPolicyDependencies(policyMetadata.getFullPath(), getPolicyDependencies(folderableEntity.getId(), rawBundle), rawBundle.getEncasses());
 
         final Collection<EntitiesLinker> entityLinkers = entityLinkerRegistry.getEntityLinkers();
         entityLinkers.forEach(e -> {
@@ -122,16 +125,16 @@ public class PolicyWriter implements EntityWriter {
 
     /**
      * This method filters out encasses that refers the same policy (recursive dependency)
-     * @param policyName         String
+     * @param policyWithPath         String
      * @param policyDependencies Set
      * @param encassMap          Map
      * @return Set
      */
-    private Set<Dependency> getFilteredPolicyDependencies(final String policyName, final Set<Dependency> policyDependencies, final Map<String, Encass> encassMap) {
+    private Set<Dependency> getFilteredPolicyDependencies(final String policyWithPath, final Set<Dependency> policyDependencies, final Map<String, Encass> encassMap) {
         return policyDependencies.stream().filter(dependency -> {
             if (EntityTypes.ENCAPSULATED_ASSERTION_TYPE.equals(dependency.getType())) {
                 Encass dependentEncass = encassMap.get(dependency.getName());
-                if (dependentEncass != null && policyName.equals(dependentEncass.getPolicy())) {
+                if (dependentEncass != null && policyWithPath.equals(dependentEncass.getPolicy())) {
                     return false;
                 }
             }
@@ -140,23 +143,41 @@ public class PolicyWriter implements EntityWriter {
     }
 
     /**
-     * This method finds policy dependencies from the bundle dependency graphf for a given policy id
+     * This method finds the policy dependencies from the bundle dependency graph for a given policy id.
      * @param id String
      * @param rawBundle Bundle
      * @return Set
      */
-    private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle) {
+    private Set<Dependency> getPolicyDependencies(final String id, final Bundle rawBundle){
+        final Set<Dependency> dependencyList = new HashSet<>();
         Map<Dependency, List<Dependency>> dependencyListMap = rawBundle.getDependencyMap();
         if (dependencyListMap != null) {
-            Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
-            for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
-                Dependency parent = entry.getKey();
-                if (parent.getId().equals(id)) { // Search for "id" to get its dependencies
-                    return new HashSet<>(entry.getValue());
+            populateDependencies(dependencyListMap, id, dependencyList);
+        }
+        return dependencyList;
+    }
+
+    /**
+     * This method adds the direct dependencies of a given policy and recursively adds the transitive dependencies of environmental entities.
+     *
+     * @param dependencyListMap List
+     * @param id String
+     * @param dependencies Set
+     */
+    private void populateDependencies(Map<Dependency, List<Dependency>> dependencyListMap, String id, Set<Dependency> dependencies) {
+        Set<Map.Entry<Dependency, List<Dependency>>> entrySet = dependencyListMap.entrySet();
+        for (Map.Entry<Dependency, List<Dependency>> entry : entrySet) {
+            Dependency parent = entry.getKey();
+            if (parent.getId().equals(id)) {
+                List<Dependency> dependencyList = entry.getValue();
+                for (Dependency dependency : dependencyList) {
+                    // add the dependency and populate the transitive dependencies for environmental entities
+                    if (dependencies.add(dependency) && !EntityTypeRegistry.NON_ENV_ENTITY_TYPES.contains(dependency.getType())) {
+                        populateDependencies(dependencyListMap, dependency.getId(), dependencies);
+                    }
                 }
             }
         }
-        return Collections.emptySet();
     }
 
     private void writePolicy(Bundle bundle, File policyFolder, Folderable folderableEntity, Element policy) {

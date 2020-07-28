@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
@@ -62,11 +63,11 @@ public class BundleFileBuilder {
         this.cache = cache;
     }
 
-    public void buildBundle(File rootDir, File outputDir, List<File> dependencies, ProjectInfo projectInfo) {
+    public void buildBundle(File rootDir, File outputDir, List<DependentBundle> dependencies, ProjectInfo projectInfo) {
         final DocumentBuilder documentBuilder = documentTools.getDocumentBuilder();
         final Document document = documentBuilder.newDocument();
 
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
 
         if (rootDir != null) {
             // Load the entities to build a deployment bundle
@@ -77,10 +78,10 @@ public class BundleFileBuilder {
             FolderLoaderUtils.createFolders(bundle, rootDir, bundle.getServices());
 
             //Load metadata Dependencies
-            final Set<BundleDefinedEntities> metadataDependencyBundles = new HashSet<>();
             final Set<Bundle> dependencyBundles = new HashSet<>();
-            for (File dependencyFile : dependencies) {
+            for (DependentBundle  dependentBundle: dependencies) {
                 List<File> metadataFiles = new ArrayList<>();
+                final File dependencyFile = dependentBundle.getDependencyFile();
                 //if the given file does not exists (in case of project dependency the dependency file is old artifact) read metadata file from parent folder
                 if (!dependencyFile.exists()) {
                     File bundleDirectory = dependencyFile.getParentFile();
@@ -92,22 +93,27 @@ public class BundleFileBuilder {
 
                 if (!metadataFiles.isEmpty()) {
                     metadataFiles.forEach(file -> {
-                        BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(file);
-                        if (bundleDefinedEntities != null) {
-                            metadataDependencyBundles.add(bundleDefinedEntities);
+                        Bundle bundleDependency = cache.getBundleFromMetadataFile(file);
+                        if (bundleDependency != null) {
+                            dependencyBundles.add(bundleDependency);
                         }
                     });
                 } else if (dependencyFile.getName().endsWith(JsonFileUtils.METADATA_FILE_NAME_SUFFIX)) {
-                    BundleDefinedEntities bundleDefinedEntities = cache.getBundleMetadataFromFile(dependencyFile);
-                    if (bundleDefinedEntities != null) {
-                        metadataDependencyBundles.add(bundleDefinedEntities);
+                    Bundle bundleDependency = cache.getBundleFromMetadataFile(dependencyFile);
+                    if (bundleDependency != null) {
+                        //add dependent bundle only for bundle tag dependencies
+                        bundleDependency.setDependentBundleFrom(dependentBundle);
+                        dependencyBundles.add(bundleDependency);
                     }
                 } else if (dependencyFile.getName().endsWith(BUNDLE_EXTENSION)) {
-                    dependencyBundles.add(cache.getBundleFromFile(dependencyFile));
+                    Bundle bundleDependency = cache.getBundleFromFile(dependencyFile);
+                    //add dependent bundle only for bundle tag dependencies
+                    bundleDependency.setDependentBundleFrom(dependentBundle);
+                    dependencyBundles.add(bundleDependency);
                 }
             }
             bundle.setDependencies(dependencyBundles);
-            bundle.setMetadataDependencyBundles(metadataDependencyBundles);
+
             // Log overridden entities
             if (!dependencyBundles.isEmpty()) {
                 logOverriddenEntities(bundle, dependencyBundles, Service.class);

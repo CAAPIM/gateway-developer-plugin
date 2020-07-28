@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
@@ -32,6 +33,8 @@ import java.util.stream.Stream;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType.BIND_ONLY_LDAP;
 import static com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider.IdentityProviderType.FEDERATED;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.FAIL_ON_NEW;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getChildElementAttributeValues;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static java.util.Arrays.*;
@@ -45,6 +48,7 @@ class IdentityProviderEntityBuilderTest {
     private static final String SIMPLE_LDAP_CONFIG = "simple ldap config";
     private static final String TEST_ID = "some id";
     private IdentityProviderEntityBuilder builder;
+    private ProjectInfo projectInfo = new ProjectInfo("TestProject","TestGroup",  "1.0");
 
     @BeforeEach
     void setUp() {
@@ -53,26 +57,31 @@ class IdentityProviderEntityBuilderTest {
 
     @Test
     void buildUnsupportedIDP() {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         final IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setId(TEST_ID);
         identityProvider.setType(IdentityProviderType.INTERNAL);
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("unsupported idp", identityProvider);
         }});
-        assertThrows(EntityBuilderException.class, () -> builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
+        final List<Entity> identityProviderEntities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        assertEquals(1, identityProviderEntities.size());
+        final Entity identityProviderEntity = identityProviderEntities.get(0);
+        assertEquals("ID_PROVIDER_CONFIG", identityProviderEntity.getType());
+        assertEquals(NEW_OR_EXISTING, identityProviderEntity.getMappingAction());
+        assertTrue(Boolean.valueOf(String.valueOf(identityProviderEntity.getMappingProperties().get(FAIL_ON_NEW))));
     }
 
     @Test
     void buildNoIdentityProviders() {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         final List<Entity> identityProviderEntities = builder.build(bundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
         assertEquals(0, identityProviderEntities.size());
     }
 
     @Test
     void buildBindOnlyIPWithoutIPDetail() {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         final IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setType(BIND_ONLY_LDAP);
         identityProvider.setId(TEST_ID);
@@ -84,7 +93,7 @@ class IdentityProviderEntityBuilderTest {
 
     @Test
     void buildBindOnlyIPWithMissingDetails() {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         final IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setType(BIND_ONLY_LDAP);
         identityProvider.setId(TEST_ID);
@@ -104,7 +113,7 @@ class IdentityProviderEntityBuilderTest {
 
     @Test
     void buildOneBindOnlyIP() throws DocumentParseException {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         final IdentityProvider identityProvider = createBindOnlyLdap();
         identityProvider.setId(TEST_ID);
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
@@ -114,7 +123,7 @@ class IdentityProviderEntityBuilderTest {
         final List<Entity> identityProviders = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertEquals(1, identityProviders.size());
-        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, "simple ldap config", BIND_ONLY_LDAP);
+        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, "::TestGroup::simple ldap config::1.0", BIND_ONLY_LDAP);
         final Element idProviderProperties = getSingleElement(identityProviderEntityXml, PROPERTIES);
         final NodeList propertyList = idProviderProperties.getElementsByTagName(PROPERTY);
         assertEquals(2, propertyList.getLength());
@@ -171,7 +180,7 @@ class IdentityProviderEntityBuilderTest {
         identityProviderDetail.setCertificateReferences(certReferences);
         identityProvider.setIdentityProviderDetail(identityProviderDetail);
         identityProvider.setId(TEST_ID);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("fail IDP", identityProvider);
         }});
@@ -186,7 +195,7 @@ class IdentityProviderEntityBuilderTest {
         final FederatedIdentityProviderDetail identityProviderDetail = new FederatedIdentityProviderDetail();
         identityProvider.setIdentityProviderDetail(identityProviderDetail);
         identityProvider.setId(TEST_ID);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("fail IDP", identityProvider);
         }});
@@ -199,14 +208,14 @@ class IdentityProviderEntityBuilderTest {
         final IdentityProvider identityProvider = new IdentityProvider();
         identityProvider.setType(FEDERATED);
         identityProvider.setId(TEST_ID);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllIdentityProviders(new HashMap<String, IdentityProvider>() {{
             put("fed IP no details", identityProvider);
         }});
 
         final List<Entity> identityProviders = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
-        Element identityProviderEntityXml = verifyIdProvider(identityProviders, "fed IP no details", FEDERATED);
+        Element identityProviderEntityXml = verifyIdProvider(identityProviders, "::TestGroup::fed IP no details::1.0", FEDERATED);
         //No identityProviderDetail element
         assertThrows(DocumentParseException.class, () -> getSingleElement(identityProviderEntityXml, FEDERATED_ID_PROV_DETAIL));
     }
@@ -214,7 +223,7 @@ class IdentityProviderEntityBuilderTest {
     @Test
     void buildOneFedIPWithCertReferences() throws DocumentParseException {
         final String FED_ID_NAME = "simple fed id with cert references";
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         final TrustedCert cert1 = new TrustedCert();
         cert1.setId("cert1");
         final TrustedCert cert2 = new TrustedCert();
@@ -237,7 +246,7 @@ class IdentityProviderEntityBuilderTest {
         final List<Entity> identityProviders = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertEquals(1, identityProviders.size());
-        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, FED_ID_NAME, FEDERATED);
+        final Element identityProviderEntityXml = verifyIdProvider(identityProviders, "::TestGroup::simple fed id with cert references::1.0", FEDERATED);
         final Element fedIdentityProviderDetailXml = getSingleElement(identityProviderEntityXml, FEDERATED_ID_PROV_DETAIL);
         final Element certRefs = getSingleElement(fedIdentityProviderDetailXml, CERTIFICATE_REFERENCES);
         final List<String> certList = getChildElementAttributeValues(certRefs, REFERENCE, ATTRIBUTE_ID);
@@ -264,7 +273,7 @@ class IdentityProviderEntityBuilderTest {
     void buildEmptyDeploymentBundle() {
         TestUtils.testDeploymentBundleWithOnlyMapping(
                 builder,
-                new Bundle(),
+                new Bundle(projectInfo),
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 EntityTypes.ID_PROVIDER_CONFIG_TYPE,
                 Collections.emptyList()
@@ -273,7 +282,7 @@ class IdentityProviderEntityBuilderTest {
 
     @Test
     void buildDeploymentBundle() {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllIdentityProviders(ImmutableMap.of(SIMPLE_LDAP_CONFIG, createBindOnlyLdap()));
 
         TestUtils.testDeploymentBundleWithOnlyMapping(
@@ -281,7 +290,7 @@ class IdentityProviderEntityBuilderTest {
                 bundle,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 EntityTypes.ID_PROVIDER_CONFIG_TYPE,
-                Stream.of(SIMPLE_LDAP_CONFIG).collect(Collectors.toList())
+                Stream.of("::TestGroup::simple ldap config::1.0").collect(Collectors.toList())
         );
     }
 

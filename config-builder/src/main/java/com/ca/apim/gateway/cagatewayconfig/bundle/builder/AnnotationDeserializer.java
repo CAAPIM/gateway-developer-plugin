@@ -7,7 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -25,9 +25,9 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  * AnnotationDeserializer deserializes the "annotations" tag in the entity elements. Annotation on entities are
  * supported in 2 ways:
  * 1) Array of objects containing "type" and the other optional fields like "name", "description" and "tags"
- * field. For example,
+ * fields. For example,
  * annotations:
- * - type: "@bundle"
+ * - type: "@bundle-hints"
  *   name: "encass-example"
  *   description: "description for encass-example"
  *   tags:
@@ -37,7 +37,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  * 2) Array of Strings containing only "type". For example,
  * annotations:
  * - "@bundle"
- * - "@reusable"
+ * - "@shared"
  *
  * This deserialization implementation takes care of both these types and deserializes the input into
  * {@link java.util.Set} of {@link com.ca.apim.gateway.cagatewayconfig.beans.Annotation}
@@ -62,7 +62,7 @@ public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
             node.elements().forEachRemaining(ele -> {
                 if (ele.isObject() && ele.hasNonNull("type")) {
                     final Annotation annotation = new Annotation(ele.get("type").asText());
-                    if (AnnotationConstants.SUPPORTED_ANNOTATION_TYPES.contains(annotation.getType()) && !annotations.contains(annotation)) {
+                    if (AnnotationType.SUPPORTED_ANNOTATION_TYPES.contains(annotation.getType()) && !annotations.contains(annotation)) {
                         annotation.setName(getNodeAttribute(ele, "name"));
                         annotation.setId(getNodeAttribute(ele, "id"));
                         annotation.setGuid(getNodeAttribute(ele, "guid"));
@@ -80,7 +80,7 @@ public class AnnotationDeserializer extends JsonDeserializer<Set<Annotation>> {
 
                 } else if (ele.isTextual()) {
                     final Annotation annotation = new Annotation(ele.asText());
-                    if (AnnotationConstants.SUPPORTED_ANNOTATION_TYPES.contains(annotation.getType()) && !annotations.contains(annotation)) {
+                    if (AnnotationType.SUPPORTED_ANNOTATION_TYPES.contains(annotation.getType()) && !annotations.contains(annotation)) {
                         annotations.add(annotation);
                     } else {
                         alertUser(annotation.getType());

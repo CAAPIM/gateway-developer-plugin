@@ -6,8 +6,10 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.CassandraConnection;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 
@@ -52,6 +54,12 @@ public class CassandraConnectionsLoader implements BundleEntityLoader {
         }
         cassandraConnection.setTlsCiphers(ciphers);
         cassandraConnection.setProperties(mapPropertiesElements(getSingleChildElement(cassandraConnectionElement, PROPERTIES, true), PROPERTIES));
+
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation bundleEntity = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleEntity.setId(cassandraConnectionElement.getAttribute(ATTRIBUTE_ID));
+        annotations.add(bundleEntity);
+        cassandraConnection.setAnnotations(annotations);
 
         bundle.getCassandraConnections().put(name, cassandraConnection);
     }

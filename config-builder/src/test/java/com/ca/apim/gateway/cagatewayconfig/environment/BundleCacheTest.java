@@ -36,4 +36,21 @@ class BundleCacheTest {
 
         Assert.assertTrue(cache.contains(file.getPath()));
     }
+
+    @Test
+    void getBundleFromMetadataFile() {
+        File file = new File(TEST_STRING);
+        Policy policy = new Policy();
+        policy.setName(TEST_STRING);
+        policy.setPath(TEST_STRING);
+        Bundle bundle = new Bundle();
+        bundle.getPolicies().put(policy.getPath(), policy);
+
+        when(entityBundleLoader.loadMetadata(file, BundleLoadingOperation.EXPORT)).thenReturn(bundle);
+
+        BundleCache cache = new BundleCache(entityBundleLoader);
+        cache.getBundleFromMetadataFile(file);
+
+        Assert.assertTrue(cache.contains(file.getPath()));
+    }
 }

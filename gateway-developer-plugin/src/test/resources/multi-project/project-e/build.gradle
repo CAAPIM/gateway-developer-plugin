@@ -9,9 +9,11 @@ dependencies {
 }
 
 GatewaySourceConfig {
-    environmentConfig = [
-            "PASSWORD.gateway"           : "7layer",
-            "PROPERTY.gateway.log.levels": "com.l7tech.level = FINE"
-    ]
-    configFolder = file('src/main/gateway/config')
+    EnvironmentConfig {
+        includeFolder = file('src/main/gateway/config')
+        map = [
+                "PASSWORD.gateway"           : "7layer",
+                "PROPERTY.gateway.log.levels": "com.l7tech.level = FINE"
+        ]
+    }
 }

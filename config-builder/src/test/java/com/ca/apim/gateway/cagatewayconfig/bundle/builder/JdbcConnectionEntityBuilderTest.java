@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
@@ -41,6 +42,7 @@ class JdbcConnectionEntityBuilderTest {
     private static final String TEST_JDBC_CONNECTION = "TestConnection";
     private static final String TEST_JDBC_URL = "jdbc:test//localhost:12345/testdb";
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
+    private ProjectInfo projectInfo = new ProjectInfo("TestProject", "TestGroup", "1.0");
 
     @Test
     void buildFromEmptyBundle_noConnections() {
@@ -53,7 +55,7 @@ class JdbcConnectionEntityBuilderTest {
     @Test
     void buildWithConnection_checkBundleContainsConnection() {
         JdbcConnectionEntityBuilder builder = new JdbcConnectionEntityBuilder(ID_GENERATOR);
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJdbcConnections(ImmutableMap.of(TEST_JDBC_CONNECTION, buildJdbcConnection(emptyMap())));
 
         final List<Entity> entities = builder.build(bundle, BundleType.ENVIRONMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -125,7 +127,7 @@ class JdbcConnectionEntityBuilderTest {
     void buildEmptyDeploymentBundle() {
         TestUtils.testDeploymentBundleWithOnlyMapping(
                 new JdbcConnectionEntityBuilder(ID_GENERATOR),
-                new Bundle(),
+                new Bundle(projectInfo),
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 EntityTypes.JDBC_CONNECTION,
                 Collections.emptyList()
@@ -134,7 +136,7 @@ class JdbcConnectionEntityBuilderTest {
 
     @Test
     void buildDeploymentBundle() {
-        final Bundle bundle = new Bundle();
+        final Bundle bundle = new Bundle(projectInfo);
         bundle.putAllJdbcConnections(ImmutableMap.of(TEST_JDBC_CONNECTION, buildJdbcConnection(emptyMap())));
 
         TestUtils.testDeploymentBundleWithOnlyMapping(
@@ -142,7 +144,7 @@ class JdbcConnectionEntityBuilderTest {
                 bundle,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 EntityTypes.JDBC_CONNECTION,
-                Stream.of(TEST_JDBC_CONNECTION).collect(Collectors.toList())
+                Stream.of("::" + projectInfo.getGroupName() + "::" + TEST_JDBC_CONNECTION + "::" + projectInfo.getVersion()).collect(Collectors.toList())
         );
     }
 }

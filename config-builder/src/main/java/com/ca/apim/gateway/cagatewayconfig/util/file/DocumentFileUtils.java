@@ -23,8 +23,8 @@ public class DocumentFileUtils {
     public static final String BUNDLE_EXTENSION = ".bundle";
     public static final String DELETE_BUNDLE_EXTENSION = ".delete.bundle";
     public static final String INSTALL_BUNDLE_EXTENSION = ".install.bundle";
-    public static final String ENV_INSTALL_BUNDLE_NAME_SUFFIX = "env" + INSTALL_BUNDLE_EXTENSION;
-    public static final String FULL_INSTALL_BUNDLE_NAME_SUFFIX = "-full" + INSTALL_BUNDLE_EXTENSION;
+    public static final String PREFIX_ENVIRONMENT = "environment";
+    public static final String PREFIX_FULL = "-full";
 
     private DocumentFileUtils(DocumentTools documentTools) {
         this.documentTools = documentTools;

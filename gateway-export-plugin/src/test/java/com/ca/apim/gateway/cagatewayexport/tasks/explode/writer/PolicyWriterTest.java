@@ -229,6 +229,7 @@ class PolicyWriterTest {
         Bundle bundle = new Bundle();
         bundle.addEntity(ROOT_FOLDER);
         bundle.setFolderTree(new FolderTree(bundle.getEntities(Folder.class).values()));
+        // create and add root policy to bundle
         Policy policy = new Policy();
         policy.setGuid("123");
         policy.setPath("assertionPolicy");
@@ -247,6 +248,24 @@ class PolicyWriterTest {
         policy.setPolicyDocument(DocumentTools.INSTANCE.parse(policy.getPolicyXML()).getDocumentElement());
         bundle.getPolicies().put("assertionPolicy", policy);
 
+        // create and add dependency policy to bundle
+        Policy depPolicy = new Policy();
+        depPolicy.setGuid("456");
+        depPolicy.setPath("assertionDepPolicy");
+        depPolicy.setParentFolder(Folder.ROOT_FOLDER);
+        depPolicy.setName("assertionDepPolicy");
+        depPolicy.setId("qwe");
+        depPolicy.setPolicyXML("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<wsp:Policy xmlns:L7p=\"http://www.layer7tech.com/ws/policy\" xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\">\n" +
+                "    <wsp:All wsp:Usage=\"Required\">\n" +
+                "        <L7p:CommentAssertion>\n" +
+                "            <L7p:Comment stringValue=\"Policy Fragment: includedPolicy\"/>\n" +
+                "        </L7p:CommentAssertion>\n" +
+                "    </wsp:All>\n" +
+                "</wsp:Policy>");
+        depPolicy.setPolicyDocument(DocumentTools.INSTANCE.parse(depPolicy.getPolicyXML()).getDocumentElement());
+        bundle.getPolicies().put("assertionDepPolicy", depPolicy);
+
         Encass encass = new Encass();
         encass.setName("encassOne");
         encass.setPolicy("assertionPolicy");
@@ -262,6 +281,12 @@ class PolicyWriterTest {
         encass.setPolicy("assertionPolicy");
         bundle.getEncasses().put("encassTwo", encass);
 
+        // create encass for dependency policy
+        encass = new Encass();
+        encass.setName("encassThree");
+        encass.setPolicy("assertionDepPolicy");
+        bundle.getEncasses().put("encassThree", encass);
+
         JdbcConnection.Builder builder = new JdbcConnection.Builder();
         builder.id("jdbcid");
         builder.name("testjdbc");
@@ -271,14 +296,33 @@ class PolicyWriterTest {
         bundle.addEntity(jdbcConnection);
         Map<Dependency, List<Dependency>> dependencyListMap = new HashMap<>();
         List<Dependency> dependencies = new ArrayList<>();
-        dependencies.add(new Dependency("jdbcid", JdbcConnection.class, "testjdbc", EntityTypes.JDBC_CONNECTION));
+        // create dependency for jdbc connection
+        Dependency jdbcCon = new Dependency("jdbcid", JdbcConnection.class, "testjdbc", EntityTypes.JDBC_CONNECTION);
+        // add jdbc connection as direct dependency to root policy
+        dependencies.add(jdbcCon);
         Dependency encassDependency = new Dependency(null, null, "encassDep", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
         dependencies.add(encassDependency);
         Dependency encassOne = new Dependency(null, null, "encassOne", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
         dependencies.add(encassOne);
         Dependency encassTwo = new Dependency(null, null, "encassTwo", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
         dependencies.add(encassTwo);
+        // create dependency for dependency policy
+        Dependency policyDep = new Dependency("qwe", Policy.class, "assertionDepPolicy", EntityTypes.POLICY_TYPE);
+        // add dependency policy as direct dependency to root policy
+        dependencies.add(policyDep);
         dependencyListMap.put(new Dependency("asd", Policy.class, "assertionPolicy", EntityTypes.POLICY_TYPE), dependencies);
+        // create dependency list for jdbc connection
+        List<Dependency> jdbcDependencies = new ArrayList<>();
+        // create and add stored password as direct dependency to jdbc connection
+        Dependency jdncConPass = new Dependency(null, null, "jdbcpass", EntityTypes.STORED_PASSWORD_TYPE);
+        jdbcDependencies.add(jdncConPass);
+        dependencyListMap.put(jdbcCon, jdbcDependencies);
+        // create dependency list for dependency policy
+        List<Dependency> depPolicyDependencies = new ArrayList<>();
+        // create and add encassThree as direct dependency to dependency policy
+        Dependency encassThree = new Dependency(null, null, "encassThree", EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
+        depPolicyDependencies.add(encassThree);
+        dependencyListMap.put(policyDep, depPolicyDependencies);
         bundle.setDependencyMap(dependencyListMap);
         writer.write(bundle, temporaryFolder.getRoot(), bundle);
 
@@ -291,11 +335,18 @@ class PolicyWriterTest {
         File policyMetadataFile = new File(configFolder, "policies.yml");
         assertTrue(policyMetadataFile.exists());
         Map<String, PolicyMetadata> policyMetadataMap = getPolicyMetadata(policyMetadataFile);
+        // get policy metadata of root policy
         PolicyMetadata policyMetadata = policyMetadataMap.get("assertionPolicy");
         Set<Dependency> usedEntities = policyMetadata.getUsedEntities();
         assertTrue(usedEntities.contains(encassDependency));
         assertFalse(usedEntities.contains(encassOne));
         assertFalse(usedEntities.contains(encassTwo));
+        // policy metadata should contain direct dependency jdbc connection and also transitive dependency stored password
+        assertTrue(usedEntities.contains(new Dependency(null, null, "testjdbc", EntityTypes.JDBC_CONNECTION)));
+        assertTrue(usedEntities.contains(jdncConPass));
+        // policy metadata should contain only direct dependency - only dependency policy as it is non environmental entity
+        assertTrue(usedEntities.contains(new Dependency(null, null, "assertionDepPolicy", EntityTypes.POLICY_TYPE)));
+        assertFalse(usedEntities.contains(encassThree));
     }
 
     private Map<String, PolicyMetadata> getPolicyMetadata(File policyMetadataFile) {

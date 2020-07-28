@@ -7,14 +7,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Set;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType.*;
 
 public interface AnnotableEntity {
 
-    Annotation BUNDLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_BUNDLE);
-    Annotation REUSABLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_REUSABLE);
-    Annotation REDEPLOYABLE_ANNOTATION = new Annotation(ANNOTATION_TYPE_REDEPLOYABLE);
-    Annotation EXCLUDE_ANNOTATION = new Annotation(ANNOTATION_TYPE_EXCLUDE);
+    Annotation BUNDLE_ANNOTATION = new Annotation(BUNDLE);
+    Annotation SHARED_ANNOTATION = new Annotation(SHARED);
+    Annotation REDEPLOYABLE_ANNOTATION = new Annotation(REDEPLOYABLE);
+    Annotation EXCLUDE_ANNOTATION = new Annotation(EXCLUDE);
 
     /**
      * This method creates annotated entity from annotations defined and then returns AnnotatedEntity
@@ -29,10 +29,9 @@ public interface AnnotableEntity {
      * @return String
      */
     @JsonIgnore
-    String getType();
+    String getEntityType();
 
     /**
-
      * This method returns all the Annotation applied to the entity.
      *
      * @return Set of all the annotations
@@ -51,15 +50,17 @@ public interface AnnotableEntity {
         if (annotations != null) {
             AnnotatedEntity<GatewayEntity> annotatedEntity = new AnnotatedEntity(this);
             annotations.forEach(annotation -> {
-                if (ANNOTATION_TYPE_BUNDLE.equalsIgnoreCase(annotation.getType())) {
-                    annotatedEntity.setMetadataId(annotation.getId());
-                    annotatedEntity.setTags(annotation.getTags());
-                    annotatedEntity.setEntityType(EntityTypes.ENCAPSULATED_ASSERTION_TYPE);
-                    annotatedEntity.setBundleName(annotation.getName());
-                    annotatedEntity.setDescription(annotation.getDescription());
-                } else if(ANNOTATION_TYPE_BUNDLE_ENTITY.equalsIgnoreCase(annotation.getType())) {
+                if (BUNDLE.equalsIgnoreCase(annotation.getType())) {
+                    annotatedEntity.setEntityType(this.getEntityType());
+                } else if(BUNDLE_HINTS.equalsIgnoreCase(annotation.getType())) {
                     annotatedEntity.setId(annotation.getId());
                     annotatedEntity.setGuid(annotation.getGuid());
+                    if (this.getEntityType().equals(EntityTypes.SERVICE_TYPE)
+                        || this.getEntityType().equals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE)) {
+                        annotatedEntity.setTags(annotation.getTags());
+                        annotatedEntity.setBundleName(annotation.getName());
+                        annotatedEntity.setDescription(annotation.getDescription());
+                    }
                 }
             });
             return annotatedEntity;
@@ -89,13 +90,13 @@ public interface AnnotableEntity {
     }
 
     /**
-     * Returns TRUE if "@reusable" annotation is added to the entity
+     * Returns TRUE if "@shared" annotation is added to the entity
      *
-     * @return TRUE if "@reusable" annotation is added
+     * @return TRUE if "@shared" annotation is added
      */
     @JsonIgnore
-    default boolean isReusable() {
-        return getAnnotations() != null && getAnnotations().contains(REUSABLE_ANNOTATION);
+    default boolean isShared() {
+        return getAnnotations() != null && getAnnotations().contains(SHARED_ANNOTATION);
     }
 
     /**

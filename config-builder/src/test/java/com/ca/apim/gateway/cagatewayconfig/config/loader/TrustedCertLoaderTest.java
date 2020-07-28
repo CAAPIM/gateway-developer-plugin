@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 @Extensions({ @ExtendWith(MockitoExtension.class), @ExtendWith(TemporaryFolderExtension.class) })
 public class TrustedCertLoaderTest {
@@ -108,7 +108,10 @@ public class TrustedCertLoaderTest {
                 "    revocationCheckingEnabled: true\n" +
                 "    trustedForSigningClientCerts: true\n" +
                 "    trustedForSigningServerCerts: true\n" +
-                "    trustedAsSamlIssuer: false";
+                "    trustedAsSamlIssuer: false\n" +
+                "    annotations:\n" +
+                "    - type: \"@bundle-hints\"\n" +
+                "      id: \"28be78b936aa61bc75bd0df2089789cd\"";
         final File configFolder = rootProjectDir.createDirectory("config");
         final File identityProvidersFile = new File(configFolder, "trusted-certs.yml");
         Files.touch(identityProvidersFile);
@@ -120,6 +123,8 @@ public class TrustedCertLoaderTest {
         assertEquals(1, bundle.getTrustedCerts().size());
         final TrustedCert trustedCert = bundle.getTrustedCerts().get("fake-cert");
         assertEquals(8, trustedCert.createProperties().size());
+        assertNotNull(trustedCert.getAnnotatedEntity().getId());
+        assertEquals("28be78b936aa61bc75bd0df2089789cd", trustedCert.getAnnotatedEntity().getId());
     }
 
 }

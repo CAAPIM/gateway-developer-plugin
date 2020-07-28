@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
@@ -31,12 +32,13 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceEntityBuilderTest {
+    private ProjectInfo projectInfo = new ProjectInfo("TestName", "TestGroup", "1.0");
 
     @Test
     void buildNoServices() {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
 
         List<Entity> serviceEntities = builder.build(bundle, EntityBuilder.BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
@@ -47,8 +49,24 @@ class ServiceEntityBuilderTest {
     void buildServicesWithoutPolicy() {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
+        Folder parentFolder = new Folder();
+        parentFolder.setId("asd");
+        parentFolder.setName("my");
+        parentFolder.setPath("my");
+        parentFolder.setParentFolder(Folder.ROOT_FOLDER);
 
+        Folder serviceParentFolder = new Folder();
+        serviceParentFolder.setId("test");
+        serviceParentFolder.setName("policy");
+        serviceParentFolder.setPath("my/v1");
+        serviceParentFolder.setParentFolder(parentFolder);
+
+        bundle.putAllFolders(new HashMap<String, Folder>() {{
+            put(parentFolder.getPath(), parentFolder);
+            put(serviceParentFolder.getPath(), serviceParentFolder);
+            put(Folder.ROOT_FOLDER.getPath(), Folder.ROOT_FOLDER);
+        }});
         Service service = new Service();
         service.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
         service.setUrl("/my/service/url");
@@ -56,6 +74,8 @@ class ServiceEntityBuilderTest {
             put("key1", "value1");
             put("key2", "value2");
         }});
+        service.setName("path");
+        service.setParentFolder(serviceParentFolder);
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("/my/policy/path", service);
@@ -67,7 +87,7 @@ class ServiceEntityBuilderTest {
     void buildOneServices() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
 
         Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
 
@@ -80,6 +100,7 @@ class ServiceEntityBuilderTest {
             put("key1", "value1");
             put("ENV.key.environment", "something");
         }});
+        service.setName("service1");
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("/v1/service1", service);
@@ -98,11 +119,11 @@ class ServiceEntityBuilderTest {
     void buildTwoServicesSamePolicy() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
         Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
 
         Service service1 = getService1(serviceParentFolder);
-
+        service1.setName("service1");
         Service service2 = new Service();
         service2.setHttpMethods(Stream.of("POST", "GET").collect(Collectors.toSet()));
         service2.setUrl("/my/url");
@@ -112,6 +133,7 @@ class ServiceEntityBuilderTest {
             put("key2", "value2");
             put("ENV.key.environment", "something");
         }});
+        service2.setName("service2");
 
         bundle.putAllServices(new HashMap<String, Service>() {{
             put("my/v1/service1", service1);
@@ -125,7 +147,7 @@ class ServiceEntityBuilderTest {
     void buildOneSoapServiceWithWSDLAndNoXSD() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
 
         Folder serviceParentFolder = setUpFolderAndPolicy(bundle, "/soap/policy.xml", "policy");
 
@@ -161,14 +183,14 @@ class ServiceEntityBuilderTest {
 
         Entity serviceEntity = services.get(0);
 
-        verifyService(service, serviceEntity, 1, "soap-service" + 1);
+        verifyService(service, serviceEntity, 1,  "soap-service" + 1);
     }
 
     @Test
     void buildTwoServicesOneSoapWithWSDLAndXSDAndOneRest() throws DocumentParseException {
         ServiceEntityBuilder builder = new ServiceEntityBuilder(DocumentTools.INSTANCE, new IdGenerator());
 
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
         Folder service1ParentFolder = setUpFolderAndPolicy(bundle, "/my/policy.xml", "policy");
         Folder service2ParentFolder = setUpFolderAndPolicy(bundle, "/soap/policy.xml", "policy");
 
@@ -218,11 +240,11 @@ class ServiceEntityBuilderTest {
 
         assertEquals(2, services.size());
         if (services.get(0).getName().equals("service1")) {
-            verifyService(service1, services.get(0), 1, "service" + 1);
-            verifyService(service2, services.get(1), 2, "service" + 2);
+            verifyService(service1, services.get(0), 1,  "service" + 1 );
+            verifyService(service2, services.get(1), 2, "service" + 2 );
         } else {
-            verifyService(service2, services.get(0), 2, "service" + 2);
-            verifyService(service1, services.get(1), 1, "service" + 1);
+            verifyService(service2, services.get(0), 2, "service" + 2 );
+            verifyService(service1, services.get(1), 1,  "service" + 1 );
         }
     }
 

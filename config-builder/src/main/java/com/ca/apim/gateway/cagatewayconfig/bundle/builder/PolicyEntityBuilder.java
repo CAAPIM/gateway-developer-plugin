@@ -14,6 +14,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements;
+import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.annotations.VisibleForTesting;
@@ -49,12 +50,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @Singleton
 public class PolicyEntityBuilder implements EntityBuilder {
     private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
-
     static final String STRING_VALUE = "stringValue";
-    static final String BOOLEAN_VALUE = "booleanValue";
-    static final String POLICY_PATH = "policyPath";
-    static final String ENCASS_NAME = "encassName";
-    static final String ENV_PARAM_NAME = "ENV_PARAM_NAME";
     private static final String TYPE = "type";
     private static final Integer ORDER = 200;
     public static final String POLICY = "policy";
@@ -62,16 +58,13 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
     private final DocumentTools documentTools;
     private final IdGenerator idGenerator;
+    private final PolicyXMLBuilder policyXMLBuilder;
 
     @Inject
-    PolicyEntityBuilder(DocumentTools documentTools, IdGenerator idGenerator) {
+    PolicyEntityBuilder(DocumentTools documentTools, IdGenerator idGenerator, PolicyXMLBuilder policyXMLBuilder) {
         this.documentTools = documentTools;
         this.idGenerator = idGenerator;
-    }
-
-    private boolean isAnnotatedEntity(Policy policy, AnnotatedEntity annotatedEntity) {
-        return annotatedEntity != null && annotatedEntity.getEntityName().equals(policy.getName()) &&
-                EntityTypes.POLICY_TYPE.equals(annotatedEntity.getEntityType());
+        this.policyXMLBuilder = policyXMLBuilder;
     }
 
     public List<Entity> buildEntities(Map<String, ?> policyMap, AnnotatedBundle annotatedBundle, Bundle bundle, BundleType bundleType, Document document) {
@@ -84,7 +77,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
             Policy policyEntity = (Policy) policy;
             if (annotatedEntity != null) {
                 AnnotatedEntity annotatedPolicyEntity = policyEntity.getAnnotatedEntity();
-                if (annotatedEntity.isReusable() || isAnnotatedEntity(policyEntity, annotatedEntity)) {
+                if (policyEntity.isParentEntityShared()) {
                     if (annotatedPolicyEntity != null) {
                         if (annotatedPolicyEntity.getId() != null) {
                             if (IdValidator.isValidGoid(annotatedPolicyEntity.getId())) {
@@ -148,25 +141,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
 
     private void preparePolicy(Policy policy, Bundle bundle, AnnotatedBundle annotatedBundle) {
         Document policyDocument = loadPolicyDocument(policy);
-        Element policyElement = policyDocument.getDocumentElement();
-        final String policyName;
+        String policyName = policy.getName();
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         if (annotatedEntity != null) {
-            if (annotatedEntity.isReusable() || isAnnotatedEntity(policy, annotatedEntity)) {
-                policyName = policy.getName();
-            } else {
-                policyName = annotatedBundle.getUniquePrefix() + policy.getName();
-            }
-        } else {
-            policyName = policy.getName();
+            policyName = annotatedBundle.applyUniqueName(policy.getName(), BundleType.DEPLOYMENT, policy.isParentEntityShared());
         }
 
-        prepareAssertion(policyElement, PolicyXMLElements.INCLUDE, assertionElement -> prepareIncludeAssertion(policy, bundle, assertionElement));
-        prepareAssertion(policyElement, ENCAPSULATED, assertionElement -> prepareEncapsulatedAssertion(policy, bundle, policyDocument, assertionElement, annotatedBundle));
-        prepareAssertion(policyElement, SET_VARIABLE, assertionElement -> prepareSetVariableAssertion(policyName, policyDocument, assertionElement));
-        prepareAssertion(policyElement, HARDCODED_RESPONSE, assertionElement -> prepareHardcodedResponseAssertion(policyDocument, assertionElement));
-
-        policy.setPolicyDocument(policyElement);
+        PolicyBuilderContext policyBuilderContext = new PolicyBuilderContext(policyName, policyDocument, bundle, idGenerator);
+        policyBuilderContext.withPolicy(policy).withAnnotatedBundle(annotatedBundle);
+        policyXMLBuilder.buildPolicyXML(policyBuilderContext);
+        policy.setPolicyDocument(policyDocument.getDocumentElement());
     }
 
     private Document loadPolicyDocument(Policy policy) {
@@ -177,63 +161,6 @@ public class PolicyEntityBuilder implements EntityBuilder {
             throw new EntityBuilderException("Could not load policy: " + e.getMessage(), e);
         }
         return policyDocument;
-    }
-
-    @VisibleForTesting
-    static void prepareHardcodedResponseAssertion(Document policyDocument, Element assertionElement) {
-        prepareBase64Element(policyDocument, assertionElement, RESPONSE_BODY, BASE_64_RESPONSE_BODY);
-    }
-
-    @VisibleForTesting
-    static void prepareSetVariableAssertion(String policyName, Document policyDocument, Element assertionElement) {
-        Element nameElement;
-        try {
-            nameElement = getSingleElement(assertionElement, VARIABLE_TO_SET);
-        } catch (DocumentParseException e) {
-            throw new EntityBuilderException("Could not find VariableToSet element in a SetVariable Assertion.");
-        }
-
-        String variableName = nameElement.getAttribute(STRING_VALUE);
-        if (variableName.startsWith(PREFIX_ENV)) {
-            assertionElement.insertBefore(
-                    createElementWithAttribute(policyDocument, BASE_64_EXPRESSION, ENV_PARAM_NAME, insertPrefixToEnvironmentVariable(variableName, policyName)),
-                    assertionElement.getFirstChild()
-            );
-        } else {
-            prepareBase64Element(policyDocument, assertionElement, EXPRESSION, BASE_64_EXPRESSION);
-        }
-    }
-
-    private static void prepareBase64Element(Document policyDocument, Element assertionElement, String elementName, String base64ElementName) {
-        Element element;
-        try {
-            element = getSingleElement(assertionElement, elementName);
-        } catch (DocumentParseException e) {
-            LOGGER.log(Level.FINE, "Did not find '" + elementName + "' tag for SetVariableAssertion. Not generating Base64ed version");
-            return;
-        }
-
-        String expression = getCDataOrText(element);
-        String encoded = Base64.getEncoder().encodeToString(expression.getBytes());
-        assertionElement.insertBefore(createElementWithAttribute(policyDocument, base64ElementName, STRING_VALUE, encoded), element);
-        assertionElement.removeChild(element);
-    }
-
-    private static String getCDataOrText(Element element) {
-        StringBuilder content = new StringBuilder();
-        NodeList children = element.getChildNodes();
-        for (Node child : nodeList(children)) {
-            short nodeType = child.getNodeType();
-            if (nodeType == Node.TEXT_NODE) {
-                content.append(child.getTextContent());
-            } else if (nodeType == Node.CDATA_SECTION_NODE) {
-                content.append(((CDATASection) child).getData());
-                break;
-            } else {
-                throw new EntityBuilderException("Unexpected set variable assertion expression node type: " + child.getNodeName());
-            }
-        }
-        return StringEscapeUtils.unescapeXml(content.toString());
     }
 
     public static void resolvePossibleMissingEncapsulatedAssertionDependencies(Bundle bundle, Element encapsulatedAssertionElement) {
@@ -265,270 +192,16 @@ public class PolicyEntityBuilder implements EntityBuilder {
     }
 
     @VisibleForTesting
-    void prepareEncapsulatedAssertion(Policy policy, Bundle bundle, Document policyDocument, Element encapsulatedAssertionElement, AnnotatedBundle annotatedBundle) {
-        if (encapsulatedAssertionElement.hasAttribute(ENCASS_NAME)) {
-            final String encassName = encapsulatedAssertionElement.getAttribute(ENCASS_NAME);
-            Encass encass = getEncass(bundle, encassName);
-            final String guid = findEncassReferencedGuid(policy, encass, encapsulatedAssertionElement, encassName);
-            updateEncapsulatedAssertion(policyDocument, encapsulatedAssertionElement, encass, encassName, guid, annotatedBundle);
-        } else if (!isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
-            Element guidElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_GUID, true);
-            Element nameElement = getSingleChildElement(encapsulatedAssertionElement, ENCAPSULATED_ASSERTION_CONFIG_NAME, true);
-            throw new EntityBuilderException("No encassName specified for encass in policy: '" + policy.getPath() + "' GUID: '" + (guidElement != null ? guidElement.getAttribute(STRING_VALUE) : null) + "' Name: '" + (nameElement != null ? nameElement.getAttribute(STRING_VALUE) : null) + "'");
-        } else {
-            LOGGER.log(Level.FINE, "No encassName specified for encass in policy: \"{0}\". Since NoOp is true, this will be treated as a No Op.", policy.getPath());
-        }
-    }
-
-    private Encass getEncass(Bundle bundle, String name) {
-        LOGGER.log(Level.FINE, "Looking for referenced encass: {0}", name);
-        final AtomicReference<Encass> referenceEncass = new AtomicReference<>(bundle.getEncasses().get(name));
-
-        if (referenceEncass.get() == null) {
-            Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
-            Encass encass = null;
-            //check the dependency in the metadata file
-            if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
-                for (BundleDefinedEntities bundleMetadata : bundleMetadataSet) {
-                    Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleMetadata.getDefinedEntities();
-                    if (metadataCollection != null) {
-                        Optional<BundleDefinedEntities.DefaultMetadata> optionalMetadata = metadataCollection.stream().
-                                filter(metadata -> metadata.getName().equals(name)
-                                        && metadata.getType().equals(EntityTypes.ENCAPSULATED_ASSERTION_TYPE)).findFirst();
-                        if (optionalMetadata.isPresent()) {
-                            encass = getEncassFromMetadata(optionalMetadata.get());
-                            encass.setName(name);
-                        }
-                    }
-                    if (encass != null && !referenceEncass.compareAndSet(null, encass)) {
-                        throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
-                    }
-                }
-            }
-
-            //check the dependency in the given dependent bundle
-            bundle.getDependencies().forEach(b -> {
-                Encass encassDependency = b.getEncasses().get(name);
-                if (encassDependency != null && !referenceEncass.compareAndSet(null, encassDependency)) {
-                    throw new EntityBuilderException("Found multiple encasses in dependency bundles with name: " + name);
-                }
-            });
-
-            //if encass is not found in any of the bundles, check this entity in missing entities
-            if (referenceEncass.get() == null) {
-                final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(name);
-                if (missingEntity != null && missingEntity.isExcluded()) {
-                    LOGGER.log(Level.WARNING, "Resolving the referenced encass {0} as known excluded entity with guid: {1}",
-                            new Object[] {name, missingEntity.getGuid()});
-                    referenceEncass.set(getExcludedEncass(missingEntity.getGuid()));
-                }
-            }
-        }
-        return referenceEncass.get();
-    }
-
-    private Encass getExcludedEncass(final String guid){
-        Encass missingEncass = new Encass();
-        missingEncass.setGuid(guid);
-        Set<Annotation> annotations = new HashSet<>();
-        annotations.add(AnnotableEntity.EXCLUDE_ANNOTATION);
-        missingEncass.setAnnotations(annotations);
-        return missingEncass;
-    }
-
-    private Encass getEncassFromMetadata(final Metadata metadata) {
-        Encass encass = new Encass();
-        encass.setId(metadata.getId());
-        encass.setGuid(metadata.getGuid());
-        Set<Annotation> annotations = new HashSet<>();
-        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
-        encass.setAnnotations(annotations);
-        return encass;
-    }
-
-    private static String findEncassReferencedGuid(Policy policy, Encass encass, Element encapsulatedAssertionElement, String name) {
-        final String guid;
-        if (encass == null) {
-            if (isNoOpIfConfigMissing(encapsulatedAssertionElement)) {
-                LOGGER.log(Level.FINE, "Could not find referenced encass with name: \"{0}\". In policy: \"{1}\". Since NoOp is true, this will be treated as a No Op.", new String[]{name, policy.getPath()});
-                guid = ZERO_GUID;
-            } else {
-                throw new EntityBuilderException("Could not find referenced encass with name: '" + name + "'. In policy: " + policy.getPath());
-            }
-        } else {
-            guid = encass.getGuid();
-        }
-        return guid;
-    }
-
-    private void updateEncapsulatedAssertion(Document policyDocument, Node encapsulatedAssertionElement, Encass encass, String name, String guid, AnnotatedBundle annotatedBundle) {
-        String encassName = name;
-        String encassGuid = guid;
-        AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
-        if (encass != null && !encass.isExcluded() && annotatedEntity != null) {
-            AnnotatedEntity annotatedEncassEntity = encass.getAnnotatedEntity();
-            if (annotatedEntity.isReusable()) {
-                if(annotatedEncassEntity != null){
-                    if (annotatedEncassEntity.getGuid() != null) {
-                        if (IdValidator.isValidGuid(annotatedEncassEntity.getGuid())) {
-                            encassGuid = annotatedEncassEntity.getGuid();
-                            encass.setGuid(encassGuid);
-                        } else {
-                            LOGGER.log(Level.WARNING, "ignoring given invalid guid {0} for entity {1}", new String[]{annotatedEncassEntity.getGuid(), name});
-                        }
-                    }
-                    if (annotatedEncassEntity.getId() != null) {
-                        if (IdValidator.isValidGoid(annotatedEncassEntity.getId())) {
-                            encass.setId(annotatedEncassEntity.getId());
-                        } else {
-                            LOGGER.log(Level.WARNING, "ignoring given invalid goid {0} for entity {1}", new String[]{annotatedEncassEntity.getId(), name});
-                        }
-                    }
-                }
-            } else {
-                encassGuid = idGenerator.generateGuid();
-                encass.setGuid(encassGuid);
-                encass.setId(idGenerator.generate());
-                encassName = annotatedBundle.getUniquePrefix() + encassName;
-            }
-        }
-        Element encapsulatedAssertionConfigNameElement = createElementWithAttribute(
-                policyDocument,
-                ENCAPSULATED_ASSERTION_CONFIG_NAME,
-                STRING_VALUE,
-                encassName
-        );
-        Node firstChild = encapsulatedAssertionElement.getFirstChild();
-        if (firstChild != null) {
-            encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigNameElement, firstChild);
-        } else {
-            encapsulatedAssertionElement.appendChild(encapsulatedAssertionConfigNameElement);
-        }
-
-        Element encapsulatedAssertionConfigGuidElement = createElementWithAttribute(
-                policyDocument,
-                ENCAPSULATED_ASSERTION_CONFIG_GUID,
-                STRING_VALUE,
-                encassGuid
-        );
-        encapsulatedAssertionElement.insertBefore(encapsulatedAssertionConfigGuidElement, encapsulatedAssertionElement.getFirstChild());
-
-        ((Element) encapsulatedAssertionElement).removeAttribute(ENCASS_NAME);
-    }
-
-    private static boolean isNoOpIfConfigMissing(Element encapsulatedAssertionElement) {
-        Element noOpElement = getSingleChildElement(encapsulatedAssertionElement, NO_OP_IF_CONFIG_MISSING, true);
-        if (noOpElement == null) {
-            return false;
-        }
-        final String isNoOp = noOpElement.getAttribute(BOOLEAN_VALUE);
-        return Boolean.valueOf(isNoOp);
-    }
-
-    @VisibleForTesting
-    static void prepareIncludeAssertion(Policy policy, Bundle bundle, Element includeAssertionElement) {
-        Element policyGuidElement;
-        try {
-            policyGuidElement = getSingleElement(includeAssertionElement, POLICY_GUID);
-        } catch (DocumentParseException e) {
-            throw new EntityBuilderException("Could not find PolicyGuid element in Include Assertion", e);
-        }
-        final String policyPath = policyGuidElement.getAttribute(POLICY_PATH);
-        LOGGER.log(Level.FINE, "Looking for referenced policy include: {0}", policyPath);
-
-        final AtomicReference<Policy> includedPolicy = new AtomicReference<>(bundle.getPolicies().get(policyPath));
-        if (includedPolicy.get() != null) {
-            policy.getDependencies().add(includedPolicy.get());
-        } else {
-            Set<BundleDefinedEntities> bundleMetadataSet = bundle.getMetadataDependencyBundles();
-
-            //check policy dependency in dependent metadata file
-            if (bundleMetadataSet != null && !bundleMetadataSet.isEmpty()) {
-                Policy policyFromMetadata = null;
-                for (BundleDefinedEntities bundleMetadata : bundleMetadataSet) {
-                    if(bundleMetadata != null){
-                        Collection<BundleDefinedEntities.DefaultMetadata> metadataCollection = bundleMetadata.getDefinedEntities();
-                        if (metadataCollection != null) {
-                            Optional<BundleDefinedEntities.DefaultMetadata> optionalMetadata = metadataCollection.stream().
-                                    filter(metadata -> metadata.getName().equals(PathUtils.extractName(policyPath))
-                                            && metadata.getType().equals(EntityTypes.POLICY_TYPE)).findFirst();
-                            if (optionalMetadata.isPresent()) {
-                                Metadata metadata = optionalMetadata.get();
-                                policyFromMetadata = getPolicyFromMetadata(metadata);
-                                policyFromMetadata.setPath(policyPath);
-                            }
-                        }
-
-                        if (policyFromMetadata != null && !includedPolicy.compareAndSet(null, policyFromMetadata)) {
-                            throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
-                        }
-                    }
-                }
-            }
-
-            //check policy dependency in bundle dependencies
-            bundle.getDependencies().forEach(b -> {
-                Policy policyFromDependencies = b.getPolicies().get(policyPath);
-                if (policyFromDependencies != null && !includedPolicy.compareAndSet(null, policyFromDependencies)) {
-                    throw new EntityBuilderException("Found multiple policies in dependency bundles with policy path: " + policyPath);
-                }
-            });
-
-            //if policy is not found in any bundles then check if it missing and excluded
-            final MissingGatewayEntity missingEntity = bundle.getMissingEntities().get(policyPath);
-            if (missingEntity != null && missingEntity.isExcluded()) {
-                LOGGER.log(Level.WARNING, "Resolving the referenced policy {0} as known excluded entity with guid: {1}",
-                        new Object[] {policyPath, missingEntity.getGuid()});
-                includedPolicy.set(new Policy());
-                includedPolicy.get().setGuid(missingEntity.getGuid());
-            }
-
-        }
-
-        if (includedPolicy.get() == null) {
-            throw new EntityBuilderException("Could not find referenced policy include with path: " + policyPath);
-        }
-        policyGuidElement.setAttribute(STRING_VALUE, includedPolicy.get().getGuid());
-        policyGuidElement.removeAttribute(POLICY_PATH);
-    }
-
-    private static Policy getPolicyFromMetadata(final Metadata metadata) {
-        Policy policy = new Policy();
-        policy.setId(metadata.getId());
-        policy.setGuid(metadata.getGuid());
-        Set<Annotation> annotations = new HashSet<>();
-        annotations.add(AnnotableEntity.REUSABLE_ANNOTATION);
-        policy.setAnnotations(annotations);
-        return policy;
-    }
-
-    private void prepareAssertion(Element policyElement, String assertionTag, Consumer<Element> prepareAssertionMethod) {
-        NodeList assertionReferences = policyElement.getElementsByTagName(assertionTag);
-        for (int i = 0; i < assertionReferences.getLength(); i++) {
-            Node assertionElement = assertionReferences.item(i);
-            if (!(assertionElement instanceof Element)) {
-                throw new EntityBuilderException("Unexpected assertion node type: " + assertionElement.getNodeName());
-            }
-            prepareAssertionMethod.accept((Element) assertionElement);
-        }
-    }
-
-    @VisibleForTesting
     Entity buildPolicyEntity(Policy policy, AnnotatedBundle annotatedBundle, Bundle bundle, Document document) {
         String policyName = policy.getName();
-        String policyNameWithPath = policy.getPath();
+        String policyNameWithPath = EntityBuilderHelper.getPath(policy.getParentFolder(), policyName);
+        policyNameWithPath = CharacterBlacklistUtil.decodePath(policyNameWithPath);
         AnnotatedEntity annotatedEntity = annotatedBundle != null ? annotatedBundle.getAnnotatedEntity() : null;
         boolean isRedeployableBundle = false;
-        boolean isReusable = false;
-        if(annotatedEntity != null){
+        if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
-            isReusable = annotatedEntity.isReusable();
-        }
-        if (annotatedBundle != null) {
-            if (!isReusable && !isAnnotatedEntity(policy, annotatedEntity)) {
-                policyName = annotatedBundle.getUniquePrefix() + policyName;
-                policyNameWithPath = PathUtils.extractPath(policy.getPath()) + policyName;
-            }
+            policyName = annotatedBundle.applyUniqueName(policyName, BundleType.DEPLOYMENT, policy.isParentEntityShared());
+            policyNameWithPath = PathUtils.extractPath(policyNameWithPath) + policyName;
         }
 
         PolicyTags policyTags = getPolicyTags(policy, bundle);
@@ -570,7 +243,7 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
                 policy.getPath(), policyNameWithPath, policy.getId(), policyElement, policy.isHasRouting(), policy);
-        if (isRedeployableBundle || !(isReusable || isAnnotatedEntity(policy, annotatedEntity))) {
+        if (isRedeployableBundle || !policy.isParentEntityShared()) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);

@@ -7,9 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
-import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,6 +20,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils.generateDependentEnvBundleFromProject;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.PREFIX_ENVIRONMENT;
 
 @Singleton
 public class BundleMetadataBuilder {
@@ -41,22 +41,27 @@ public class BundleMetadataBuilder {
      * @param projectInfo       Gradle Project info containing Gradle project name, groupName and version
      * @return Full bundle or Annotated bundle metadata
      */
-    public BundleMetadata build(final AnnotatedBundle annotatedBundle, final List<Entity> dependentEntities,
+    public BundleMetadata build(final AnnotatedBundle annotatedBundle, final Bundle bundle, final List<Entity> dependentEntities,
                                 ProjectInfo projectInfo) {
         if (annotatedBundle != null && annotatedBundle.getAnnotatedEntity() != null) {
             AnnotatedEntity<? extends GatewayEntity> annotatedEntity = annotatedBundle.getAnnotatedEntity();
-            final Encass encass = (Encass) annotatedEntity.getEntity();
             final String bundleName = annotatedBundle.getBundleName();
-            final String name = bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
-            final String metadataId = StringUtils.isBlank(annotatedEntity.getMetadataId()) ? idGenerator.generate() :
-                    annotatedEntity.getMetadataId();
+            String name = bundleName;
+            if (StringUtils.isNotBlank(projectInfo.getVersion())) {
+                name =  bundleName.substring(0, bundleName.indexOf(projectInfo.getVersion()) - 1);
+            }
 
-            BundleMetadata.Builder builder = new BundleMetadata.Builder(encass.getType(), metadataId, name,
-                    projectInfo.getGroupName(), projectInfo.getVersion());
+            BundleMetadata.Builder builder = new BundleMetadata.Builder(annotatedEntity.getEntityType(), name, projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
             builder.description(annotatedEntity.getDescription());
-            builder.environmentEntities(getEnvironmentDependenciesMetadata(dependentEntities));
+            final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(dependentEntities);
+            builder.referencedEntities(referencedEntities);
+            if (!referencedEntities.isEmpty()) {
+                annotatedBundle.getDependentBundles().add(generateDependentEnvBundleFromProject(projectInfo));
+            }
+            builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
-            builder.reusableAndRedeployable(true, annotatedEntity.isRedeployable() || !isBundleContainsReusableEntity(annotatedBundle));
+            builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsSharedEntity(annotatedBundle));
+            builder.l7Template(annotatedEntity.isL7Template());
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
             final List<Metadata> definedEntities = new ArrayList<>();
@@ -64,8 +69,37 @@ public class BundleMetadataBuilder {
 
             return builder.definedEntities(definedEntities).build();
         } else {
-            return buildFullBundleMetadata(dependentEntities, projectInfo);
+            return buildFullBundleMetadata(dependentEntities, bundle, projectInfo);
         }
+    }
+
+    /**
+     * Generates metadata for environment bundle
+     * @param entities List of environment entities
+     * @param projectInfo project information configured in build.gradle
+     * @return BundleMetaData
+     */
+    public BundleMetadata buildEnvironmentMetadata(final List<Entity> entities, ProjectInfo projectInfo) {
+        final boolean isConfigNamePresent = StringUtils.isNotBlank(projectInfo.getConfigName());
+        String version = projectInfo.getVersion();
+        if (StringUtils.isNotBlank(version) && isConfigNamePresent) {
+            version = version + "-" + projectInfo.getConfigName();
+        }
+
+        final String name = projectInfo.getName() + "-" + PREFIX_ENVIRONMENT;
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(EntityBuilder.BundleType.ENVIRONMENT.name(), name,
+                projectInfo.getName(), projectInfo.getGroupName(), version);
+        builder.description(StringUtils.EMPTY);
+        final List<String> tags = new ArrayList<>();
+        if (isConfigNamePresent) {
+            tags.add(projectInfo.getConfigName());
+        }
+        builder.tags(tags);
+        builder.redeployable(true);
+        builder.hasRouting(false);
+        builder.definedEntities(getEnvironmentDependenciesMetadata(entities));
+
+        return builder.build();
     }
 
     /**
@@ -75,14 +109,18 @@ public class BundleMetadataBuilder {
      * @param projectInfo   Gradle Project info containing Gradle project name, groupName and version
      * @return Full bundle metadata
      */
-    private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, ProjectInfo projectInfo) {
-        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, idGenerator.generate(),
-                projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
+    private BundleMetadata buildFullBundleMetadata(final List<Entity> entities, final Bundle bundle, ProjectInfo projectInfo) {
+        BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(), projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
-        builder.reusableAndRedeployable(true, true);
+        builder.redeployable(true);
         builder.hasRouting(hasRoutingAssertion(entities));
-        builder.environmentEntities(getEnvironmentDependenciesMetadata(entities));
+        final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(entities);
+        builder.referencedEntities(referencedEntities);
+        if (!referencedEntities.isEmpty()) {
+            bundle.getDependentBundles().add(generateDependentEnvBundleFromProject(projectInfo));
+        }
+        builder.dependencies(bundle.getDependentBundles());
         builder.definedEntities(getDefinedEntitiesMetadata(entities));
 
         return builder.build();
@@ -98,9 +136,9 @@ public class BundleMetadataBuilder {
                 .map(e -> ((GatewayEntity)e.getGatewayEntity()).getMetadata()).collect(Collectors.toList());
     }
 
-    private boolean isBundleContainsReusableEntity (final AnnotatedBundle annotatedBundle) {
-        return annotatedBundle.getEntities(Policy.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable()) ||
-                annotatedBundle.getEntities(Encass.class).entrySet().stream().anyMatch(entity -> entity.getValue().isReusable());
+    private boolean isBundleContainsSharedEntity (final AnnotatedBundle annotatedBundle) {
+        return annotatedBundle.getEncasses().values().stream().anyMatch(Encass::isParentEntityShared)
+               || annotatedBundle.getPolicies().values().stream().anyMatch(Policy::isParentEntityShared);
     }
 
     private boolean hasRoutingAssertion(final List<Entity> dependentEntities) {

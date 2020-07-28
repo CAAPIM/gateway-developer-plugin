@@ -51,9 +51,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class CAGatewayDeveloperTest {
     private static final Logger LOGGER = Logger.getLogger(CAGatewayDeveloperTest.class.getName());
     private final String projectVersion = "-1.2.3-SNAPSHOT";
-    private final String POLICY_INSTALL_BUNDLE_SUFFIX = "-policy" + INSTALL_BUNDLE_EXTENSION;
-    private final String ENV_INSTALL_BUNDLE_SUFFIX = "env" + INSTALL_BUNDLE_EXTENSION;
-    private final String ENV_DELETE_BUNDLE_SUFFIX = "env" + DELETE_BUNDLE_EXTENSION;
+    private final String POLICY_INSTALL_BUNDLE_SUFFIX = INSTALL_BUNDLE_EXTENSION;
+    private final String ENV_INSTALL_BUNDLE_SUFFIX = INSTALL_BUNDLE_EXTENSION;
+    private final String ENV_DELETE_BUNDLE_SUFFIX = DELETE_BUNDLE_EXTENSION;
+    private final String ENV_PREFIX = "-environment";
 
     @Test
     @ExtendWith(TemporaryFolderExtension.class)
@@ -79,7 +80,7 @@ class CAGatewayDeveloperTest {
         File buildGatewayBundlesDir = new File(buildGatewayDir, "bundle");
         File builtBundleFile = new File(buildGatewayBundlesDir,  bundleFileName);
         assertTrue(builtBundleFile.isFile());
-        String deleteBundleFileName = projectFolder + projectVersion + "-policy" + DELETE_BUNDLE_EXTENSION;
+        String deleteBundleFileName = projectFolder + projectVersion + DELETE_BUNDLE_EXTENSION;
         File builtDeleteBundleFile = new File(buildGatewayBundlesDir,  deleteBundleFileName);
         assertTrue(builtDeleteBundleFile.isFile());
     }
@@ -140,7 +141,7 @@ class CAGatewayDeveloperTest {
                 .build();
 
         assertMultiProject(testProjectDir, result);
-        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + "-" + ENV_INSTALL_BUNDLE_SUFFIX);
+        File projectC_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-c"), "build"), "gateway"), "bundle"), "project-c" + projectVersion + ENV_INSTALL_BUNDLE_SUFFIX);
         assertTrue(projectC_EnvBundle.exists());
         assertFalse(readFileToString(projectC_EnvBundle, defaultCharset()).isEmpty());
     }
@@ -160,7 +161,7 @@ class CAGatewayDeveloperTest {
                 .build();
 
         assertMultiProject(testProjectDir, result);
-        File projectE_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-e"), "build"), "gateway"), "bundle"), "project-e" + projectVersion + "-" + ENV_INSTALL_BUNDLE_SUFFIX);
+        File projectE_EnvBundle = new File(new File(new File(new File(new File(testProjectDir, "project-e"), "build"), "gateway"), "bundle"), "project-e" + projectVersion + ENV_INSTALL_BUNDLE_SUFFIX);
         assertTrue(projectE_EnvBundle.exists());
         assertFalse(readFileToString(projectE_EnvBundle, defaultCharset()).isEmpty());
         final Element envBundleElement = DocumentTools.INSTANCE.parse(projectE_EnvBundle).getDocumentElement();
@@ -208,10 +209,10 @@ class CAGatewayDeveloperTest {
         while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
             entries.add(entry.getName());
         }
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-b-1.2.3-SNAPSHOT-policy.install.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-d-1.2.3-SNAPSHOT-policy.install.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-a-1.2.3-SNAPSHOT-policy.install.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_4_project-c-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-b-1.2.3-SNAPSHOT.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-d-1.2.3-SNAPSHOT.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-a-1.2.3-SNAPSHOT.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_4_project-c-1.2.3-SNAPSHOT.install.req.bundle"));
         tarArchiveInputStream.close();
     }
 
@@ -243,7 +244,7 @@ class CAGatewayDeveloperTest {
             entries.add(entry.getName());
         }
         assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_my-bundle-1.0.00.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions-dependencies-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_example-project-with-assertions-dependencies-1.2.3-SNAPSHOT.install.req.bundle"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/assertions/Test-2.0.0.aar"));
     }
@@ -281,9 +282,9 @@ class CAGatewayDeveloperTest {
         while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
             entries.add(entry.getName());
         }
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-a-1.2.3-SNAPSHOT-policy.install.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-b-1.2.3-SNAPSHOT-policy.install.req.bundle"));
-        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-c-1.2.3-SNAPSHOT-policy.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_1_project-a-1.2.3-SNAPSHOT.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_2_project-b-1.2.3-SNAPSHOT.install.req.bundle"));
+        assertTrue(entries.contains("opt/docker/rc.d/bundle/templatized/_3_project-c-1.2.3-SNAPSHOT.install.req.bundle"));
         assertTrue(entries.contains("opt/SecureSpan/Gateway/runtime/modules/lib/Test-1.0.0.jar"));
         tarArchiveInputStream.close();
     }
@@ -310,15 +311,14 @@ class CAGatewayDeveloperTest {
                 .build();
 
         LOGGER.log(Level.INFO, result.getOutput());
-        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
-        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        String envBundleFilename = projectFolder + ENV_PREFIX + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
         File buildDir = new File(testProjectDir, "build");
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
+        File buildGatewayDir = validateBuildDirExceptGW7File(envBundleFilename, buildDir);
 
         //Environment bundle name format : <bundleName>-<version>-[<configName>]env.install.bundle
-        String envBundleFilename = bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
+
         File envBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
         assertTrue(envBundleFile.isFile());
 
@@ -333,10 +333,10 @@ class CAGatewayDeveloperTest {
                     assertEquals("gateway", entityName);
                     break;
                 case "ID_PROVIDER_CONFIG":
-                    assertEquals("Tacoma MSAD", entityName);
+                    assertEquals("::com.ca::Tacoma MSAD::1.2", entityName);
                     break;
                 case "JDBC_CONNECTION":
-                    assertEquals("MySQL", entityName);
+                    assertEquals("::com.ca::MySQL::1.2", entityName);
                     break;
                 case "SSG_CONNECTOR":
                     break;
@@ -371,10 +371,10 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
+        String envDeleteBundleFilename = projectFolder + ENV_PREFIX + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
+        File buildGatewayDir = validateBuildDirExceptGW7File(envDeleteBundleFilename, buildDir);
 
-        String envDeleteBundleFilename = bundleName + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
+
         File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), envDeleteBundleFilename);
         assertTrue(builtDeleteEnvBundleFile.isFile());
     }
@@ -401,42 +401,20 @@ class CAGatewayDeveloperTest {
                 .build();
 
         LOGGER.log(Level.INFO, result.getOutput());
-        assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-bundle")).getOutcome());
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-environment-bundle")).getOutcome());
 
-        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
-        String deleteBundleFilename = bundleName + projectVersion + "-policy" + DELETE_BUNDLE_EXTENSION;
-        File buildDir = new File(testProjectDir, "build");
-        File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
-        //Environment bundle name format : <bundleName>-<version>.(<configName>.)environment.bundle
-        String envBundleFilename = bundleName + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
+        //Environment bundle name format : <bundleName>-environment-<version>.(<configName>.).bundle
+        String envBundleFilename = projectFolder + ENV_PREFIX + projectVersion + "-config" + ENV_INSTALL_BUNDLE_SUFFIX;
+        File buildDir = new File(testProjectDir, "build");
+        File buildGatewayDir = validateBuildDirExceptGW7File(envBundleFilename, buildDir);
         File builtBundleFile = new File(new File(buildGatewayDir, "bundle"), envBundleFilename);
         assertTrue(builtBundleFile.isFile());
 
-        String envDeleteBundleFilename = bundleName + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
+        String envDeleteBundleFilename = projectFolder + ENV_PREFIX + projectVersion + "-config" + ENV_DELETE_BUNDLE_SUFFIX;
         File builtDeleteEnvBundleFile = new File(new File(buildGatewayDir, "bundle"), envDeleteBundleFilename);
         assertTrue(builtDeleteEnvBundleFile.isFile());
 
-        File builtDeleteBundleFile = new File(new File(buildGatewayDir, "bundle"), deleteBundleFilename);
-        assertTrue(builtDeleteBundleFile.isFile());
-    }
-
-    @Test
-    @ExtendWith(TemporaryFolderExtension.class)
-    void testExampleProjectGeneratingEnvironmentJsonWithoutExpectedEntity(TemporaryFolder temporaryFolder) throws IOException, URISyntaxException {
-        String projectFolder = "example-project-generating-environment";
-        File testProjectDir = new File(temporaryFolder.getRoot(), projectFolder);
-        FileUtils.copyDirectory(new File(Objects.requireNonNull(getClass().getClassLoader().getResource(projectFolder)).toURI()), testProjectDir);
-
-        assertThrows(UnexpectedBuildFailure.class, () -> GradleRunner.create()
-                .withProjectDir(testProjectDir)
-                .withArguments("build-environment-bundle", "--stacktrace", "-PjarDir=" + System.getProperty("user.dir") + "/build/test-mvn-repo",
-                        "-DconfigFolder=src/main/gateway/config/jdbc_wrong",
-                        "-DconfigName=jdbc_wrong")
-                .withPluginClasspath()
-                .withDebug(true)
-                .build());
     }
 
     @Test
@@ -515,7 +493,7 @@ class CAGatewayDeveloperTest {
         bundleMappingsIds.addAll(getChildElements(getSingleChildElement(dependencyBundle, MAPPINGS), MAPPING).stream().map(EnvironmentBundleUtils::buildBundleMappingKey).collect(toSet()));
 
         //Full bundle name format : <bundleName>-<version>-full.install.bundle
-        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + FULL_INSTALL_BUNDLE_NAME_SUFFIX);
+        File builtFullBundleFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + PREFIX_FULL + INSTALL_BUNDLE_EXTENSION);
         assertTrue(builtFullBundleFile.isFile());
 
         final Element fullBundleElement = DocumentTools.INSTANCE.parse(builtFullBundleFile).getDocumentElement();
@@ -529,10 +507,10 @@ class CAGatewayDeveloperTest {
                         assertEquals("gateway", entityName);
                         break;
                     case "ID_PROVIDER_CONFIG":
-                        assertEquals("Tacoma MSAD", entityName);
+                        assertEquals("::com.ca::Tacoma MSAD::1.2", entityName);
                         break;
                     case "JDBC_CONNECTION":
-                        assertEquals("MySQL", entityName);
+                        assertEquals("::com.ca::MySQL::1.2", entityName);
                         break;
                     case "SSG_CONNECTOR":
                         break;
@@ -560,12 +538,13 @@ class CAGatewayDeveloperTest {
         });
         assertTrue(bundleItemsIds.isEmpty(), "Mappings on deployment bundle not found on full bundle: " + bundleMappingsIds.toString());
 
-        // validate the environmentIncluded flag in bundle metadata file
-        File bundleMetadataFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + METADATA_FILE_NAME_SUFFIX);
+        // validate the full bundle metadata - dependencies list should be empty
+        File bundleMetadataFile = new File(new File(buildGatewayDir, "bundle"), bundleName + projectVersion + PREFIX_FULL + METADATA_FILE_NAME_SUFFIX);
         assertTrue(bundleMetadataFile.isFile());
         final ObjectMapper objectMapper = JsonTools.INSTANCE.getObjectMapper();
         final MapType type = objectMapper.getTypeFactory().constructMapType(LinkedHashMap.class, String.class, Object.class);
         Map<String, Object> metadataProperties = objectMapper.readValue(bundleMetadataFile, type);
-        assertTrue((boolean) metadataProperties.get("environmentIncluded"));
+        List<Map<String, String>> dependencies = ((List) metadataProperties.get("dependencies"));
+        assertTrue(dependencies.isEmpty());
     }
 }

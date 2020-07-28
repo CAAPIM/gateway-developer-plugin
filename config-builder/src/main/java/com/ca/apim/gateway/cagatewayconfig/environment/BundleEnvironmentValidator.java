@@ -7,7 +7,9 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -15,6 +17,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -23,7 +27,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConsta
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 
 class BundleEnvironmentValidator {
-
+    private static final Logger LOGGER = Logger.getLogger(BundleEnvironmentValidator.class.getName());
     private final Bundle environmentBundle;
     private DocumentTools documentTools = DocumentTools.INSTANCE;
 
@@ -67,13 +71,14 @@ class BundleEnvironmentValidator {
 
             String type = mapping.getAttribute(ATTRIBUTE_TYPE);
             if (mode.isRequired(type)) {
-                findInBundle(environmentBundle, type, mapToName);
+                final String entityName = EnvironmentConfigurationUtils.extractEntityName(mapToName);
+                findInBundle(environmentBundle, type, entityName);
             }
         }
     }
 
     private void findInBundle(Bundle bundle, String type, String name) {
-        Object entity;
+        Object entity = null;
         switch (type) {
             case EntityTypes.CLUSTER_PROPERTY_TYPE:
                 entity = bundle.getGlobalEnvironmentProperties().get(PREFIX_GATEWAY + name);
@@ -102,12 +107,24 @@ class BundleEnvironmentValidator {
             case EntityTypes.JMS_DESTINATION_TYPE:
                 entity = bundle.getJmsDestinations().get(name);
                 break;
+            case EntityTypes.SSG_ACTIVE_CONNECTOR:
+                entity = bundle.getSsgActiveConnectors().get(name);
+                break;
+            case EntityTypes.GENERIC_TYPE:
+                entity = bundle.getGenericEntities().get(name);
+                break;
             default:
-                throw new MissingEnvironmentException("Unexpected entity type " + type);
+                LOGGER.log(Level.WARNING, "Unsupported gateway entity " + type);
+                UnsupportedGatewayEntity unsupportedGatewayEntity = bundle.getUnsupportedEntities().get(name);
+                if (unsupportedGatewayEntity != null && type.equals(unsupportedGatewayEntity.getType())) {
+                    entity = unsupportedGatewayEntity;
+                }
+
         }
 
         if (entity == null) {
             throw new MissingEnvironmentException("Missing environment value for " + type + ": " + name);
         }
     }
+
 }

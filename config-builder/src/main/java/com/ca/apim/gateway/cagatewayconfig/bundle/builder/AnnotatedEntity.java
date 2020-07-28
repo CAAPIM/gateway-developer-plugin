@@ -6,11 +6,15 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+
 import java.util.Collection;
+
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 
 public class AnnotatedEntity<T> {
     private final T entity;
-    private String metadataId;
     private String entityName;
     private String entityType;
     private String bundleName;
@@ -19,14 +23,6 @@ public class AnnotatedEntity<T> {
     private Collection<String> tags;
     private String id;
     private String guid;
-
-    public String getMetadataId() {
-        return metadataId;
-    }
-
-    public void setMetadataId(String metadataId) {
-        this.metadataId = metadataId;
-    }
 
     public String getId() {
         return id;
@@ -89,12 +85,7 @@ public class AnnotatedEntity<T> {
     }
 
     public boolean isBundle() {
-
         return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isBundle();
-    }
-
-    public boolean isReusable() {
-        return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isReusable();
     }
 
     public boolean isRedeployable() {
@@ -103,6 +94,18 @@ public class AnnotatedEntity<T> {
 
     public boolean isExcluded() {
         return entity instanceof AnnotableEntity && ((AnnotableEntity) entity).isExcluded();
+    }
+
+    public boolean isL7Template() {
+        boolean l7Template = false;
+        switch (entityType) {
+            case EntityTypes.ENCAPSULATED_ASSERTION_TYPE:
+                l7Template = Boolean.valueOf(String.valueOf(((Encass) entity).getProperties().get(L7_TEMPLATE)));
+                break;
+            case EntityTypes.SERVICE_TYPE:
+                break;
+        }
+        return l7Template;
     }
 
     public Collection<String> getTags() {

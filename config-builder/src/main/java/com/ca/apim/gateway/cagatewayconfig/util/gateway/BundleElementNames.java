@@ -52,6 +52,7 @@ public class BundleElementNames {
     public static final String TYPE = "l7:Type";
     public static final String GUID = "l7:Guid";
     public static final String ENABLED = "l7:Enabled";
+    public static final String DESCRIPTION = "l7:Description";
 
     // Service
     public static final String SERVICE = "l7:Service";
@@ -120,6 +121,10 @@ public class BundleElementNames {
     public static final String JDBC_URL = "l7:JdbcUrl";
     public static final String CONNECTION_PROPERTIES = "l7:ConnectionProperties";
 
+    // SSG Active Connectors
+    public static final String ACTIVE_CONNECTOR = "l7:ActiveConnector";
+    public static final String HARDWIRED = "l7:HardwiredId";
+
     //Trusted Cert Elements
     public static final String TRUSTED_CERT = "l7:TrustedCertificate";
     public static final String CERT_DATA = "l7:CertificateData";
@@ -172,6 +177,11 @@ public class BundleElementNames {
     public static final String JMS_CONNECTION = "l7:JMSConnection";
     public static final String JMS_PROVIDER_TYPE = "l7:ProviderType";
     public static final String CONTEXT_PROPERTIES_TEMPLATE = "l7:ContextPropertiesTemplate";
+
+    // Generic Entity
+    public static final String GENERIC_ENTITY = "l7:GenericEntity";
+    public static final String ENTITY_CLASS_NAME = "l7:EntityClassName";
+    public static final String VALUE_XML = "l7:ValueXml";
     
     private BundleElementNames() {
         //

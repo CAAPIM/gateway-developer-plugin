@@ -10,8 +10,9 @@ import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationConstants;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
+import com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
@@ -34,6 +35,7 @@ class EncassEntityBuilderTest {
     private static final String TEST_GUID = UUID.randomUUID().toString();
     private static final String TEST_POLICY_ID = "PolicyID";
     private static final String TEST_GOID = ID_GENERATOR.generate();
+    private static final ProjectInfo projectInfo = new ProjectInfo("my-bundle", "my-bundle-group", "1.0", "qa");
 
     @Test
     void buildFromEmptyBundle_noEncass() {
@@ -63,20 +65,21 @@ class EncassEntityBuilderTest {
         Encass encass = buildTestEncass(TEST_GUID, TEST_GOID, TEST_POLICY_PATH);
         encass.setName(TEST_ENCASS);
         Set<Annotation> annotations = new HashSet<>();
-        Annotation annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        Annotation annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("");
         annotation.setId("");
         annotations.add(annotation);
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         encass.setAnnotations(annotations);
+        encass.setParentEntityShared(encass.getAnnotations().contains(new Annotation(AnnotationType.SHARED)));
         bundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
 
         Policy policy = new Policy();
         policy.setName(TEST_POLICY_PATH);
         policy.setId(TEST_POLICY_ID);
         bundle.getPolicies().put(TEST_POLICY_PATH, policy);
-        AnnotatedEntity annotatedEntity = new AnnotatedEntity(encass);
-        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
+        AnnotatedEntity annotatedEntity = encass.getAnnotatedEntity();
+        AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
         annotatedBundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put(TEST_POLICY_PATH, policy);
         List<Entity> entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
@@ -85,27 +88,30 @@ class EncassEntityBuilderTest {
         assertEquals(1, entities.size());
 
         Entity entity = entities.get(0);
-        assertEquals(TEST_ENCASS, entity.getName());
+        String name = annotatedBundle.applyUniqueName(TEST_ENCASS, BundleType.DEPLOYMENT, true);
+        assertEquals(name, entity.getName());
         assertNotNull(entity.getId(), TEST_GOID);
         assertEquals(entity.getGuid(), TEST_GUID);
 
 
         annotations = new HashSet<>();
-        annotation = new Annotation(AnnotationConstants.ANNOTATION_TYPE_BUNDLE_ENTITY);
+        annotation = new Annotation(AnnotationType.BUNDLE_HINTS);
         annotation.setGuid("wrongGuid");
         annotation.setId("wrongId");
         annotations.add(annotation);
-        annotations.add(new Annotation(AnnotationConstants.ANNOTATION_TYPE_REUSABLE));
+        annotations.add(new Annotation(AnnotationType.SHARED));
         encass.setAnnotations(annotations);
+        encass.setParentEntityShared(encass.getAnnotations().contains(new Annotation(AnnotationType.SHARED)));
         encass.setAnnotatedEntity(null);
-        annotatedEntity = new AnnotatedEntity(encass);
-        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, null);
+        annotatedEntity = encass.getAnnotatedEntity();
+        annotatedBundle = new AnnotatedBundle(bundle, annotatedEntity, projectInfo);
         annotatedBundle.putAllEncasses(ImmutableMap.of(TEST_ENCASS, encass));
         annotatedBundle.getPolicies().put(TEST_POLICY_PATH, policy);
         entities = builder.build(annotatedBundle, BundleType.DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         entity = entities.get(0);
-        assertEquals(TEST_ENCASS, entity.getName());
+        name = annotatedBundle.applyUniqueName(TEST_ENCASS, BundleType.DEPLOYMENT, true);
+        assertEquals(name, entity.getName());
         assertNotNull(entity.getId(), TEST_GOID);
         assertEquals(entity.getGuid(), TEST_GUID);
     }
@@ -168,7 +174,7 @@ class EncassEntityBuilderTest {
         assertEquals(DEFAULT_PALETTE_FOLDER_LOCATION, props.get(PALETTE_FOLDER));
         assertEquals("someImage", props.get(PALETTE_ICON_RESOURCE_NAME));
         assertEquals("false", props.get(ALLOW_TRACING));
-        assertEquals("someDescription", props.get(DESCRIPTION));
+        assertEquals("someDescription", props.get(PropertyConstants.DESCRIPTION));
         assertEquals("false", props.get(PASS_METRICS_TO_PARENT));
 
         Element arguments = getSingleChildElement(xml, ENCAPSULATED_ARGUMENTS);
@@ -228,7 +234,7 @@ class EncassEntityBuilderTest {
                 PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION,
                 PALETTE_ICON_RESOURCE_NAME, "someImage",
                 ALLOW_TRACING, "false",
-                DESCRIPTION, "someDescription",
+                PropertyConstants.DESCRIPTION, "someDescription",
                 PASS_METRICS_TO_PARENT, "false"));
         return encass;
     }

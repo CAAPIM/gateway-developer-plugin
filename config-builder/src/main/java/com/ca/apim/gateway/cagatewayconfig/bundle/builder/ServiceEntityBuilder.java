@@ -8,7 +8,9 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.string.CharacterBlacklistUtil;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
@@ -44,12 +46,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
     }
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
-        if (bundle instanceof AnnotatedBundle) {
-            Map<String, Service> serviceMap = Optional.ofNullable(bundle.getServices()).orElse(Collections.emptyMap());
-            return buildEntities(serviceMap, ((AnnotatedBundle)bundle).getFullBundle(), bundleType, document);
-        } else {
-            return buildEntities(bundle.getServices(), bundle, bundleType, document);
-        }
+        return buildEntities(bundle.getServices(), bundle, bundleType, document);
     }
 
     private List<Entity> buildEntities(Map<String, ?> entities, Bundle bundle, BundleType bundleType, Document document) {
@@ -59,7 +56,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         return entities.entrySet().stream().map(serviceEntry ->
-                buildServiceEntity(bundle, serviceEntry.getKey(), (Service) serviceEntry.getValue(), document)
+                buildServiceEntity(bundle, (Service) serviceEntry.getValue(), document)
         ).collect(Collectors.toList());
     }
 
@@ -69,17 +66,34 @@ public class ServiceEntityBuilder implements EntityBuilder {
         return ORDER;
     }
 
-    private Entity buildServiceEntity(Bundle bundle, String servicePath, Service service, Document document) {
-        String baseName = servicePath.substring(servicePath.lastIndexOf('/') + 1);
-        service.setName(baseName);
+    private Entity buildServiceEntity(Bundle bundle, Service service, Document document) {
+        AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
+        String servicePath = EntityBuilderHelper.getPath(service.getParentFolder(), PathUtils.extractName(service.getName()));
+        servicePath = CharacterBlacklistUtil.decodePath(servicePath);
+        String baseName = PathUtils.extractName(servicePath);
+        String basePath = PathUtils.extractPath(servicePath);
+        String uniqueName = baseName;
+        String uniqueServicePath = servicePath;
+        boolean isRedeployableBundle = false;
+        if (annotatedEntity != null) {
+            isRedeployableBundle = annotatedEntity.isRedeployable();
+            uniqueName = bundle.applyUniqueName(baseName, BundleType.DEPLOYMENT);
+            uniqueServicePath = basePath + uniqueName;
+        }
+        service.setName(uniqueName);
 
         Policy policy = bundle.getPolicies().get(service.getPolicy());
         final Set<SoapResource> soapResourceBeans = service.getSoapResources();
 
         if (isNotEmpty(soapResourceBeans)) {
             soapResourceBeans.forEach(soapResourceBean -> {
-                String path = PathUtils.unixPath(service.getParentFolder().getPath(), service.getName(), soapResourceBean.getFileName());
-                String content = bundle.getSoapResources().get(path).getContent();
+                String path = PathUtils.unixPath(service.getParentFolder().getPath(), baseName, soapResourceBean.getFileName());
+                String content;
+                if (bundle instanceof AnnotatedBundle) {
+                    content = ((AnnotatedBundle) bundle).getFullBundle().getSoapResources().get(path).getContent();
+                } else {
+                    content = bundle.getSoapResources().get(path).getContent();
+                }
                 soapResourceBean.setContent(content);
             });
         }
@@ -88,11 +102,14 @@ public class ServiceEntityBuilder implements EntityBuilder {
         if (policy == null) {
             throw new EntityBuilderException("Could not find policy for service. Policy Path: " + service.getPolicy());
         }
-        String id = idGenerator.generate();
-        service.setId(id);
+
+        if (service.getId() == null) {
+            service.setId(idGenerator.generate());
+        }
+        String id = service.getId();
 
         Element serviceDetailElement = createElementWithAttributes(document, SERVICE_DETAIL, ImmutableMap.of(ATTRIBUTE_ID, id, ATTRIBUTE_FOLDER_ID, service.getParentFolder().getId()));
-        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, baseName));
+        serviceDetailElement.appendChild(createElementWithTextContent(document, NAME, uniqueName));
         serviceDetailElement.appendChild(createElementWithTextContent(document, ENABLED, Boolean.TRUE.toString()));
         serviceDetailElement.appendChild(buildServiceMappings(service, document));
 
@@ -141,8 +158,14 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         serviceElement.appendChild(resourcesElement);
-        return EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, servicePath, id,
-                serviceElement, false, service);
+        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, uniqueServicePath, uniqueServicePath, id,
+                serviceElement, policy.isHasRouting(), service);
+        if (isRedeployableBundle) {
+            entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
+        } else {
+            entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
+        }
+        return entity;
     }
 
     private Element buildServiceMappings(Service service, Document document) {

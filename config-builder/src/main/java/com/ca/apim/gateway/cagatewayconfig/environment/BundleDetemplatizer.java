@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.environment;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.util.environment.EnvironmentConfigurationUtils;
 
 import java.util.Base64;
 import java.util.Map;
@@ -39,17 +40,6 @@ class BundleDetemplatizer {
                 "L7p:Base64Expression ENV_PARAM_NAME=\\\"ENV\\.(.+?)\\\"",
                 v -> "L7p:Base64Expression stringValue=\"" + Base64.getEncoder().encodeToString(v.getBytes()) + "\"");
 
-        //Replaces Id prov name with goid in authentication assertions
-        bundleString = replaceVariableInBundle(bundleString, createIdProviderNameGoid(bundle),
-                ID_PROV_NAME + " " + STRING_VALUE + "=\\\"(.+?)\\\"",
-                v -> ID_PROV_OID + " " + GOID_VALUE + "=\"" + v + "\"");
-
-        //Add Jms Destination GOID in JMS Routing assertions.
-        bundleString = replaceVariableInBundle(bundleString, createJmsDestinationNameGoid(bundle),
-                "&lt;" + JMS_ENDPOINT_NAME + " " + STRING_VALUE +"=\\\"(.+?)\\\"",
-                (varname, goid) -> "&lt;" + JMS_ENDPOINT_OID + " " + GOID_VALUE + "=\"" + goid + "\"/&gt;" +
-                        "&lt;" + JMS_ENDPOINT_NAME + " " + STRING_VALUE + "=\"" + varname + "\"");
-        
         //Replaces service property variables
         bundleString = replaceVariableInBundle(bundleString, serviceEnvironmentVariables,
                 "l7:StringValue>SERVICE_PROPERTY_ENV\\.(.+?)<",
@@ -70,7 +60,7 @@ class BundleDetemplatizer {
         StringBuffer replacedBundle = new StringBuffer();
         while (setVariableMatcher.find()) {
             String varName = setVariableMatcher.group(1);
-            String value = mapToCheck.get(varName);
+            String value = mapToCheck.get(EnvironmentConfigurationUtils.extractEntityName(varName));
             if (value == null) {
                 throw new BundleDetemplatizeException("Missing environment value for property: " + varName);
             }
@@ -80,17 +70,4 @@ class BundleDetemplatizer {
         return replacedBundle;
     }
 
-    private Map<String, String> createIdProviderNameGoid(Bundle bundle) {
-        Map<String, String> idProviders = bundle.getIdentityProviders().entrySet().stream().collect(toMap(
-                Entry::getKey,
-                e -> e.getValue().getId()));
-        idProviders.put(INTERNAL_IDP_NAME, INTERNAL_IDP_ID);
-        return idProviders;
-    }
-
-    private Map<String, String> createJmsDestinationNameGoid(Bundle bundle) {
-        return bundle.getJmsDestinations().entrySet().stream().collect(toMap(
-                Entry::getKey,
-                e -> e.getValue().getId()));
-    }
 }

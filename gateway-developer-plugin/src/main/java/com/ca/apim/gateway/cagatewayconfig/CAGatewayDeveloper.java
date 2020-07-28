@@ -59,7 +59,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         configureEnvironmentApplication(project);
 
         final BuildDeploymentBundleTask buildDeploymentBundleTask = createBuildDeploymentBundleTask(project, pluginConfig);
-        final BuildEnvironmentBundleTask buildEnvironmentBundleTask = createBuildEnvironmentBundleTask(project, pluginConfig, buildDeploymentBundleTask);
+        final BuildEnvironmentBundleTask buildEnvironmentBundleTask = createBuildEnvironmentBundleTask(project, pluginConfig);
         final BuildFullBundleTask buildFullBundleTask = createBuildFullBundleTask(project, pluginConfig, buildDeploymentBundleTask);
         final PackageTask packageGW7Task = createPackageTask(project, pluginConfig, buildDeploymentBundleTask);
 
@@ -68,9 +68,11 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 
     @NotNull
     private static GatewayDeveloperPluginConfig createPluginConfig(@NotNull Project project) {
-        final GatewayDeveloperPluginConfig pluginConfig = project.getExtensions().create("GatewaySourceConfig", GatewayDeveloperPluginConfig.class, project);
+        final EnvironmentConfig environmentConfig = project.getExtensions().create("EnvironmentConfig", EnvironmentConfig.class, project);
+        final GatewayDeveloperPluginConfig pluginConfig = project.getExtensions().create("GatewaySourceConfig", GatewayDeveloperPluginConfig.class, project, environmentConfig);
+
         // Set Defaults
-        project.afterEvaluate(p -> setDefaults(pluginConfig, project));
+        project.afterEvaluate(p -> setDefaults(pluginConfig, environmentConfig, project));
         return pluginConfig;
     }
 
@@ -93,38 +95,43 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                 return dir.getAsFile().exists() ? dir : null;
             }));
             t.getInto().set(pluginConfig.getBuiltBundleDir());
+            t.getTargetFolder().set(pluginConfig.getTargetFolder());
             t.getDependencies().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
     }
 
     @NotNull
-    private static BuildEnvironmentBundleTask createBuildEnvironmentBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
+    private static BuildEnvironmentBundleTask createBuildEnvironmentBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig) {
         // Create build-environment-bundle task
         final BuildEnvironmentBundleTask buildEnvironmentBundleTask = project.getTasks().create(BUILD_ENVIRONMENT_BUNDLE, BuildEnvironmentBundleTask.class, t -> {
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
+            t.getEnvConfig().set(pluginConfig.getEnvConfig().getMap());
+            //for backward compatibility
             t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
+
             t.getConfigFolder().set(new DefaultProvider<>(() -> {
-                Directory dir = pluginConfig.getConfigFolder().get();
-                return dir.getAsFile().exists() ? dir : null;
+                Directory dir = pluginConfig.getEnvConfig().getIncludeFolder().getOrNull();
+                return dir != null ? (dir.getAsFile().exists() ? dir : null) : null;
             }));
-            t.getConfigName().set(pluginConfig.getConfigName());
+            t.getConfigName().set(pluginConfig.getEnvConfig().getName());
         });
-        buildEnvironmentBundleTask.dependsOn(buildDeploymentBundleTask);
         return buildEnvironmentBundleTask;
     }
 
     private static BuildFullBundleTask createBuildFullBundleTask(@NotNull Project project, GatewayDeveloperPluginConfig pluginConfig, BuildDeploymentBundleTask buildDeploymentBundleTask) {
         // Create build-full-bundle task
         final BuildFullBundleTask buildFullBundleTask = project.getTasks().create(BUILD_FULL_BUNDLE, BuildFullBundleTask.class, t -> {
+            t.getEnvConfig().set(pluginConfig.getEnvConfig().getMap());
+            //for backward compatibility
             t.getEnvironmentConfig().set(pluginConfig.getEnvironmentConfig());
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getDetemplatizeDeploymentBundles().set(pluginConfig.getDetemplatizeDeploymentBundles().getOrElse(true));
             t.getInto().set(pluginConfig.getBuiltEnvironmentBundleDir());
             t.getConfigFolder().set(new DefaultProvider<>(() -> {
-                Directory dir = pluginConfig.getConfigFolder().get();
-                return dir.getAsFile().exists() ? dir : null;
+                Directory dir = pluginConfig.getEnvConfig().getIncludeFolder().getOrNull();
+                return dir != null ? (dir.getAsFile().exists() ? dir : null) : null;
             }));
-            t.getConfigName().set(pluginConfig.getConfigName());
+            t.getConfigName().set(pluginConfig.getEnvConfig().getName());
         });
         buildFullBundleTask.dependsOn(buildDeploymentBundleTask);
         return buildFullBundleTask;
@@ -136,7 +143,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         return project.getTasks().create("package-gw7", PackageTask.class, t -> {
             t.dependsOn(buildDeploymentBundleTask);
             t.getInto().set(new DefaultProvider<RegularFile>(() -> () -> new File(new File(project.getBuildDir(), GATEWAY_BUILD_DIRECTORY), getBuiltArtifactName(project, EMPTY,"gw7"))));
-            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, "-policy.install", BUNDLE_FILE_EXTENSION))));
+            t.getBundle().set(pluginConfig.getBuiltBundleDir().file(new DefaultProvider<>(() -> getBuiltArtifactName(project, ".install", BUNDLE_FILE_EXTENSION))));
             t.getDependencyBundles().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
             t.getContainerApplicationDependencies().setFrom(project.getConfigurations().getByName(ENV_APPLICATION_CONFIGURATION));
             t.getDependencyModularAssertions().setFrom(project.getConfigurations().getByName(MODULAR_ASSERTION_CONFIGURATION));
@@ -216,10 +223,13 @@ public class CAGatewayDeveloper implements Plugin<Project> {
 
     @NotNull
     private static String getBuiltArtifactName(@NotNull Project project, String classifier, String bundleRequiredFileExtension) {
+        if (StringUtils.equalsAnyIgnoreCase(project.getVersion().toString().trim(), "", "unspecified")) {
+            return project.getName() + classifier + "." + bundleRequiredFileExtension;
+        }
         return project.getName() + '-' + project.getVersion() + classifier + "." + bundleRequiredFileExtension;
     }
 
-    private static void setDefaults(GatewayDeveloperPluginConfig pluginConfig, Project project) {
+    private static void setDefaults(GatewayDeveloperPluginConfig pluginConfig, EnvironmentConfig environmentConfig, Project project) {
         if (!pluginConfig.getSolutionDir().isPresent()) {
             pluginConfig.getSolutionDir().set(new File(project.getProjectDir(), "src/main/gateway"));
         }
@@ -230,14 +240,9 @@ public class CAGatewayDeveloper implements Plugin<Project> {
         if (!pluginConfig.getBuiltEnvironmentBundleDir().isPresent()) {
             pluginConfig.getBuiltEnvironmentBundleDir().set(defaultBuildDir);
         }
-        if (!pluginConfig.getEnvironmentConfig().isPresent()) {
-            pluginConfig.getEnvironmentConfig().set(Collections.EMPTY_MAP);
-        }
-        if (!pluginConfig.getConfigFolder().isPresent()) {
-            pluginConfig.getConfigFolder().set(new File(project.getProjectDir(),"src/main/gateway/config"));
-        }
-        if (!pluginConfig.getConfigName().isPresent()) {
-            pluginConfig.getConfigName().set(EMPTY);
+
+        if (!environmentConfig.getName().isPresent()) {
+            environmentConfig.getName().set(EMPTY);
         }
     }
 }

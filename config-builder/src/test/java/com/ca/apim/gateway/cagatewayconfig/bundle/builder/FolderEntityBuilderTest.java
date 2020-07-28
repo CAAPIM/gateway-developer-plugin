@@ -6,6 +6,7 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
@@ -33,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FolderEntityBuilderTest {
-
+    private ProjectInfo projectInfo = new ProjectInfo("TestName", "TestGroup", "1.0");
     private static final IdGenerator ID_GENERATOR = new IdGenerator();
     private static final String FOLDER_1 = "Folder1";
     private static final String FOLDER_2 = "Folder2";
@@ -42,7 +43,7 @@ class FolderEntityBuilderTest {
     @Test
     void buildFromEmptyBundle_noFolders() {
         FolderEntityBuilder builder = new FolderEntityBuilder(ID_GENERATOR);
-        final List<Entity> entities = builder.build(new Bundle(), DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
+        final List<Entity> entities = builder.build(new Bundle(projectInfo), DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument());
 
         assertTrue(entities.isEmpty());
     }
@@ -50,7 +51,7 @@ class FolderEntityBuilderTest {
     @Test
     void buildMissingRoot() {
         FolderEntityBuilder builder = new FolderEntityBuilder(ID_GENERATOR);
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
         bundle.putAllFolders(createTestFolders(null));
 
         assertThrows(EntityBuilderException.class, () -> builder.build(bundle, DEPLOYMENT, DocumentTools.INSTANCE.getDocumentBuilder().newDocument()));
@@ -59,7 +60,7 @@ class FolderEntityBuilderTest {
     @Test
     void buildEnvironment() {
         FolderEntityBuilder builder = new FolderEntityBuilder(ID_GENERATOR);
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
         Folder root = createRoot();
         bundle.getFolders().put(EMPTY, root);
         bundle.putAllFolders(createTestFolders(root));
@@ -73,7 +74,7 @@ class FolderEntityBuilderTest {
     @Test
     void buildDeployment() {
         FolderEntityBuilder builder = new FolderEntityBuilder(ID_GENERATOR);
-        Bundle bundle = new Bundle();
+        Bundle bundle = new Bundle(projectInfo);
         Folder root = createRoot();
         bundle.getFolders().put(EMPTY, root);
         bundle.putAllFolders(createTestFolders(root));

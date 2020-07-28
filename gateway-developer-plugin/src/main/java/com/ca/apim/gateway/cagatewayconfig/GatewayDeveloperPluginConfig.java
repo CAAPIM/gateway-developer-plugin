@@ -15,21 +15,22 @@ import java.util.Map;
 public class GatewayDeveloperPluginConfig {
 
     private final DirectoryProperty solutionDir;
+    private Property<String> targetFolder;
     private DirectoryProperty builtBundleDir;
-    private final Property<Map> environmentConfig;
     private DirectoryProperty builtEnvironmentBundleDir;
     private final Property<Boolean> detemplatizeDeploymentBundles;
-    private final DirectoryProperty configFolder;
-    private final Property<String> configName;
+    private final EnvironmentConfig envConfig;
+    //for backward compatibility
+    private final Property<Map> environmentConfig;
 
-    public GatewayDeveloperPluginConfig(Project project) {
+    public GatewayDeveloperPluginConfig(Project project, EnvironmentConfig environmentConfig) {
         solutionDir = project.getLayout().directoryProperty();
+        targetFolder = project.getObjects().property(String.class);
         builtBundleDir = project.getLayout().directoryProperty();
-        environmentConfig = project.getObjects().property(Map.class);
         builtEnvironmentBundleDir = project.getLayout().directoryProperty();
         detemplatizeDeploymentBundles = project.getObjects().property(Boolean.class);
-        configFolder = project.getLayout().directoryProperty();
-        configName = project.getObjects().property(String.class);
+        this.environmentConfig = project.getObjects().property(Map.class);
+        this.envConfig = environmentConfig;
     }
 
     DirectoryProperty getSolutionDir() {
@@ -40,10 +41,6 @@ public class GatewayDeveloperPluginConfig {
         return builtBundleDir;
     }
 
-    Property<Map> getEnvironmentConfig() {
-        return environmentConfig;
-    }
-
     DirectoryProperty getBuiltEnvironmentBundleDir() {
         return builtEnvironmentBundleDir;
     }
@@ -52,11 +49,15 @@ public class GatewayDeveloperPluginConfig {
         return detemplatizeDeploymentBundles;
     }
 
-    DirectoryProperty getConfigFolder() {
-        return configFolder;
+    public EnvironmentConfig getEnvConfig() {
+        return envConfig;
     }
 
-    Property<String> getConfigName() {
-        return configName;
+    public Property<Map> getEnvironmentConfig() {
+        return environmentConfig;
+    }
+
+    public Property<String> getTargetFolder() {
+        return targetFolder;
     }
 }

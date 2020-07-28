@@ -6,35 +6,38 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.DependentBundle;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.LinkedList;
 
-@JsonPropertyOrder({"metaVersion", "id", "name", "groupName", "version", "type", "tags", "description", "reusable",
-        "redeployable", "hasRouting", "environmentIncluded", "definedEntities", "environmentEntities", "dependencies"})
+@JsonPropertyOrder({"metaVersion", "name", "groupName", "moduleName", "version", "timestamp", "type", "tags",
+                    "description", "l7Template", "redeployable", "hasRouting", "definedEntities", "referencedEntities", "dependencies"})
 public class BundleMetadata implements Metadata {
     @SuppressWarnings({"unused", "java:S1170"}) // Suppress IntelliJ warnings for this field
     private final String metaVersion = "1.0";
     private final String type;
     private final String name;
-    private final String id;
     private final String version;
+    private final long timestamp = Instant.now().getEpochSecond();
+    private final String moduleName;
     private final String groupName;
     private String description;
     private Collection<Metadata> definedEntities;
     private Collection<String> tags;
-    private boolean reusable;
+    private boolean l7Template;
     private boolean redeployable;
     private boolean hasRouting;
-    private boolean environmentIncluded;
-    private Collection<Metadata> environmentEntities;
+    private Collection<Metadata> referencedEntities;
+    private Collection<DependentBundle> dependencies;
 
-    private BundleMetadata(String type, String id, String name, String groupName, String version) {
-        this.id = id;
+    private BundleMetadata(String type, String name, String moduleName, String groupName, String version) {
         this.type = type;
         this.name = name;
+        this.moduleName = moduleName;
         this.groupName = groupName;
         this.version = version;
     }
@@ -53,16 +56,26 @@ public class BundleMetadata implements Metadata {
         return name;
     }
 
+    @JsonIgnore
     public String getId() {
-        return id;
+        return null;
     }
 
     @JsonIgnore
     public String getGuid(){
         return null;
     }
+
     public String getVersion() {
         return version;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getModuleName() {
+        return moduleName;
     }
 
     public String getGroupName() {
@@ -81,8 +94,8 @@ public class BundleMetadata implements Metadata {
         return tags;
     }
 
-    public boolean isReusable() {
-        return reusable;
+    public boolean isL7Template() {
+        return l7Template;
     }
 
     public boolean isRedeployable() {
@@ -93,34 +106,33 @@ public class BundleMetadata implements Metadata {
         return hasRouting;
     }
 
-    public boolean isEnvironmentIncluded() {
-        return environmentIncluded;
+    public Collection<Metadata> getReferencedEntities() {
+        return referencedEntities;
     }
 
-    public Collection<Metadata> getEnvironmentEntities() {
-        return environmentEntities;
+    public Collection<DependentBundle> getDependencies() {
+        return dependencies;
     }
 
     public static class Builder {
-        private final String id;
         private final String name;
         private final String type;
+        private String moduleName;
         private String groupName;
         private final String version;
         private String description;
-        private boolean reusable;
+        private boolean l7Template;
         private boolean redeployable;
         private boolean hasRouting;
-        private boolean environmentIncluded;
         private Collection<String> tags;
         private Collection<Metadata> definedEntities = new LinkedList<>();
-        private Collection<Metadata> environmentEntities = new LinkedList<>();
-        private Collection<Metadata> dependencies = new LinkedList<>();
+        private Collection<Metadata> referencedEntities = new LinkedList<>();
+        private Collection<DependentBundle> dependencies = new LinkedList<>();
 
-        public Builder(String type, String id, String name, String groupName, String version) {
-            this.id = id;
+        public Builder(String type, String name, String moduleName, String groupName, String version) {
             this.type = type;
             this.name = name;
+            this.moduleName = moduleName;
             this.groupName = groupName;
             this.version = version;
         }
@@ -131,9 +143,15 @@ public class BundleMetadata implements Metadata {
             return this;
         }
 
-        public Builder environmentEntities(final Collection<Metadata> environmentEntities) {
-            this.environmentEntities.clear();
-            this.environmentEntities.addAll(environmentEntities);
+        public Builder referencedEntities(final Collection<Metadata> referencedEntities) {
+            this.referencedEntities.clear();
+            this.referencedEntities.addAll(referencedEntities);
+            return this;
+        }
+
+        public Builder dependencies(final Collection<DependentBundle> dependencies) {
+            this.dependencies.clear();
+            this.dependencies.addAll(dependencies);
             return this;
         }
 
@@ -142,19 +160,18 @@ public class BundleMetadata implements Metadata {
             return this;
         }
 
-        public Builder reusableAndRedeployable(boolean reusable, boolean redeployable) {
-            this.reusable = reusable;
+        public Builder redeployable(boolean redeployable) {
             this.redeployable = redeployable;
+            return this;
+        }
+
+        public Builder l7Template(boolean l7Template) {
+            this.l7Template = l7Template;
             return this;
         }
 
         public Builder hasRouting(boolean hasRouting) {
             this.hasRouting = hasRouting;
-            return this;
-        }
-
-        public Builder environmentIncluded(boolean environmentIncluded) {
-            this.environmentIncluded = environmentIncluded;
             return this;
         }
 
@@ -164,15 +181,15 @@ public class BundleMetadata implements Metadata {
         }
 
         public BundleMetadata build() {
-            BundleMetadata bundleMetadata = new BundleMetadata(type, id, name, groupName, version);
+            BundleMetadata bundleMetadata = new BundleMetadata(type, name, moduleName, groupName, version);
             bundleMetadata.description = description;
             bundleMetadata.definedEntities = definedEntities;
-            bundleMetadata.reusable = reusable;
+            bundleMetadata.l7Template = l7Template;
             bundleMetadata.redeployable = redeployable;
             bundleMetadata.hasRouting = hasRouting;
-            bundleMetadata.environmentIncluded = environmentIncluded;
             bundleMetadata.tags = tags;
-            bundleMetadata.environmentEntities = environmentEntities;
+            bundleMetadata.referencedEntities = referencedEntities;
+            bundleMetadata.dependencies = dependencies;
             return bundleMetadata;
         }
     }

@@ -6,14 +6,18 @@
 
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
+import com.ca.apim.gateway.cagatewayconfig.beans.Annotation;
 import com.ca.apim.gateway.cagatewayconfig.beans.JdbcConnection;
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.google.common.annotations.VisibleForTesting;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.mapPropertiesElements;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
@@ -55,6 +59,12 @@ public class JdbcConnectionLoader implements BundleEntityLoader {
         jdbcConnection.setMinimumPoolSize(minPoolSize);
         jdbcConnection.setMaximumPoolSize(maxPoolSize);
         jdbcConnection.setProperties(connectionProperties);
+
+        Set<Annotation> annotations = new HashSet<>();
+        Annotation bundleEntity = new Annotation(AnnotationType.BUNDLE_HINTS);
+        bundleEntity.setId(jdbcConnectionElement.getAttribute(ATTRIBUTE_ID));
+        annotations.add(bundleEntity);
+        jdbcConnection.setAnnotations(annotations);
 
         bundle.getJdbcConnections().put(name, jdbcConnection);
     }
