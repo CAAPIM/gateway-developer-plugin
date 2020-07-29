@@ -158,7 +158,7 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         serviceElement.appendChild(resourcesElement);
-        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, uniqueServicePath, uniqueServicePath, id,
+        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, uniqueServicePath, id,
                 serviceElement, policy.isHasRouting(), service);
         if (isRedeployableBundle) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
