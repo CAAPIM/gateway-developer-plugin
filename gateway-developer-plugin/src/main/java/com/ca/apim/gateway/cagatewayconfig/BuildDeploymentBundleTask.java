@@ -14,7 +14,6 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.file.ConfigurableFileCollection;
-import org.gradle.api.file.Directory;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.*;
@@ -36,7 +35,7 @@ public class BuildDeploymentBundleTask extends DefaultTask {
     private DirectoryProperty from;
     private DirectoryProperty into;
     private ConfigurableFileCollection dependencies;
-    private Property<String> targetFolder;
+    private Property<String> targetFolderPath;
 
     /**
      * Creates a new BuildBundle task to build a bundle from local source files
@@ -45,7 +44,7 @@ public class BuildDeploymentBundleTask extends DefaultTask {
     public BuildDeploymentBundleTask() {
         into = newOutputDirectory();
         from = newInputDirectory();
-        targetFolder = getProject().getObjects().property(String.class);
+        targetFolderPath = getProject().getObjects().property(String.class);
         dependencies = getProject().files();
     }
 
@@ -62,8 +61,8 @@ public class BuildDeploymentBundleTask extends DefaultTask {
 
     @Input
     @Optional
-    public Property<String> getTargetFolder(){
-        return targetFolder;
+    public Property<String> getTargetFolderPath(){
+        return targetFolderPath;
     }
 
     @InputFiles
@@ -76,8 +75,8 @@ public class BuildDeploymentBundleTask extends DefaultTask {
         BundleFileBuilder bundleFileBuilder = InjectionRegistry.getInjector().getInstance(BundleFileBuilder.class);
         final ProjectInfo projectInfo = new ProjectInfo(getProject().getName(), getProject().getGroup().toString(),
                 getProject().getVersion().toString(), null);
-        if(targetFolder.isPresent()){
-            projectInfo.setTargetFolder(targetFolder.get());
+        if(targetFolderPath.isPresent()){
+            projectInfo.setTargetFolderPath(targetFolderPath.get());
         }
         final List<DependentBundle> dependentBundles = getDependentBundles(dependencies.getFiles());
         bundleFileBuilder.buildBundle(from.isPresent() ? from.getAsFile().get() : null, into.getAsFile().get(),

@@ -21,7 +21,6 @@ import org.gradle.api.provider.Provider;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -95,7 +94,7 @@ public class CAGatewayDeveloper implements Plugin<Project> {
                 return dir.getAsFile().exists() ? dir : null;
             }));
             t.getInto().set(pluginConfig.getBuiltBundleDir());
-            t.getTargetFolder().set(pluginConfig.getTargetFolder());
+            t.getTargetFolderPath().set(pluginConfig.getTargetFolderPath());
             t.getDependencies().setFrom(project.getConfigurations().getByName(BUNDLE_CONFIGURATION));
         });
     }
