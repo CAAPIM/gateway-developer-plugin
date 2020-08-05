@@ -128,6 +128,10 @@ public class BundleBuilder {
         entity.setName(getSingleChildElement(element, NAME).getTextContent());
         entity.setElement(element);
 
+        if ("SERVER_MODULE_FILE".equals(entity.getType())) {
+            entity.setExcluded(true);
+        }
+
         LOGGER.log(Level.WARNING, "Recording the {0}/{1} with id: {2} as unsupported entity",
                 new Object[] {entity.getType(), entity.getName(), entity.getId()});
         bundle.addEntity(entity);
