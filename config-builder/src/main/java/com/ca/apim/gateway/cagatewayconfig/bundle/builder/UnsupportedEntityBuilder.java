@@ -24,12 +24,12 @@ public class UnsupportedEntityBuilder implements EntityBuilder {
                 UnsupportedGatewayEntity unsupportedGatewayEntity = entry.getValue();
                 Element resourceElement = (Element) document.adoptNode(unsupportedGatewayEntity.getElement());
                 unsupportedEntities.add(EntityBuilderHelper.getEntityWithNameMapping(unsupportedGatewayEntity.getType(),
-                        entry.getKey(), unsupportedGatewayEntity.getId(), resourceElement));
+                        unsupportedGatewayEntity.getName(), unsupportedGatewayEntity.getId(), resourceElement));
             });
         } else {
             unsupportedGatewayEntityMap.entrySet().forEach(entry -> {
                 UnsupportedGatewayEntity unsupportedGatewayEntity = entry.getValue();
-                unsupportedEntities.add(EntityBuilderHelper.getEntityWithOnlyMapping(unsupportedGatewayEntity.getType(), entry.getKey(),
+                unsupportedEntities.add(EntityBuilderHelper.getEntityWithOnlyMapping(unsupportedGatewayEntity.getType(), unsupportedGatewayEntity.getName(),
                         unsupportedGatewayEntity.getId()));
             });
         }

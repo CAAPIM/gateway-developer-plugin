@@ -1,8 +1,10 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
 import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -15,6 +17,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UnsupportedEntityWriterTest {
 
     @Test
-    void testWrite(final TemporaryFolder temporaryFolder) throws DocumentParseException {
+    void testWrite(final TemporaryFolder temporaryFolder) throws DocumentParseException, IOException {
         UnsupportedEntityWriter writer = new UnsupportedEntityWriter(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
         String entityName = "Test MQ";
         String xml = "<l7:Items xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\"><l7:Item>\n" +
@@ -106,5 +111,12 @@ public class UnsupportedEntityWriterTest {
 
         File unsupportedEntitiesXml = new File(configFolder, "unsupported-entities.xml");
         assertTrue(unsupportedEntitiesXml.exists());
+
+        WriterHelper.write(bundle, temporaryFolder.getRoot(), EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class), DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+        File unsupportedEntitiesYml = new File(configFolder, "unsupported-entities.yml");
+        assertTrue(unsupportedEntitiesYml.exists());
+
+        final String ymlContent = new String(Files.readAllBytes(unsupportedEntitiesYml.toPath()), Charset.forName("utf-8"));
+        assertTrue(ymlContent.contains("SSG_ACTIVE/Test MQ:"));
     }
 }

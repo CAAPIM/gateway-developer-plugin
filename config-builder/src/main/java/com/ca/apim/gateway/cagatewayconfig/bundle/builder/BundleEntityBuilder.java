@@ -353,7 +353,7 @@ public class BundleEntityBuilder {
                                 return dependency.getName().equals(PathUtils.extractName(e.getKey())) && dependency.getType().equals(gatewayEntity.getType());
                             }).findFirst();
             Map entityMap = annotatedBundle.getUnsupportedEntities();
-            optionalGatewayEntity.ifPresent(e -> entityMap.put(e.getKey(), e.getValue()));
+            optionalGatewayEntity.ifPresent(e -> entityMap.put(e.getValue().getMappingValue(), e.getValue()));
         }
     }
 

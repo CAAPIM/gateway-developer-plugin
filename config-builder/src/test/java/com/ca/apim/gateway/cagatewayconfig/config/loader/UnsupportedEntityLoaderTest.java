@@ -64,7 +64,7 @@ public class UnsupportedEntityLoaderTest {
     void testLoadYaml(TemporaryFolder temporaryFolder) throws IOException, SAXException, DocumentParseException {
         DocumentTools documentTools = Mockito.mock(DocumentTools.class);
         UnsupportedEntityLoader unsupportedEntityLoader = new UnsupportedEntityLoader(jsonTools, new IdGenerator(), documentTools);
-        String yaml = "Test MQ:\n" +
+        String yaml = "SSG_ACTIVE/Test MQ:\n" +
                 "  type: \"SSG_ACTIVE\"\n" +
                 "  id: \"101c874561f1c09907094335ae786924\"\n";
         File configFolder = temporaryFolder.createDirectory("config");
@@ -154,9 +154,9 @@ public class UnsupportedEntityLoaderTest {
         gatewayEntity.setId("101c874561f1c09907094335ae786924");
         String yaml = jsonTools.getObjectWriter(JSON).writeValueAsString(gatewayEntity);
         Bundle bundle = new Bundle();
-        unsupportedEntityLoader.load(bundle, "Test MQ", yaml, null);
+        unsupportedEntityLoader.load(bundle, "SSG_ACTIVE/Test MQ", yaml, null);
 
-        UnsupportedGatewayEntity entity = bundle.getUnsupportedEntities().get("Test MQ");
+        UnsupportedGatewayEntity entity = bundle.getUnsupportedEntities().get("SSG_ACTIVE/Test MQ");
         assertEquals(1, bundle.getUnsupportedEntities().size());
         assertEquals("SSG_ACTIVE", entity.getType());
     }
@@ -238,16 +238,17 @@ public class UnsupportedEntityLoaderTest {
         gatewayEntity.setId("101c874561f1c09907094335ae786924");
         String yaml = jsonTools.getObjectWriter(JSON).writeValueAsString(gatewayEntity);
         Bundle bundle = new Bundle();
-        unsupportedEntityLoader.load(bundle, "Test MQ", yaml, configFolder.getPath());
+        unsupportedEntityLoader.load(bundle, "SSG_ACTIVE/Test MQ", yaml, configFolder.getPath());
 
         verifyConfig(bundle);
     }
 
     private void verifyConfig(Bundle bundle) {
-        UnsupportedGatewayEntity entity = bundle.getUnsupportedEntities().get("Test MQ");
+        UnsupportedGatewayEntity entity = bundle.getUnsupportedEntities().get("SSG_ACTIVE/Test MQ");
         Element element = entity.getElement();
         assertEquals(1, bundle.getUnsupportedEntities().size());
         assertEquals("SSG_ACTIVE", entity.getType());
+        assertEquals("Test MQ", entity.getName());
         assertEquals("l7:ActiveConnector", element.getTagName());
     }
 }
