@@ -174,8 +174,8 @@ public class ServiceLoader implements BundleEntityLoader {
         final String content = resource.getTextContent();
         final String type = resource.getAttribute(ATTRIBUTE_TYPE);
 
-        if (isEmpty(content) || isEmpty(rootUrl)) {
-            throw new BundleLoadException("No content or sourceUrl found under " + RESOURCE + " for service " + service.getName());
+        if (isEmpty(content) && isEmpty(rootUrl)) {
+            throw new BundleLoadException("No content and sourceUrl found under " + RESOURCE + " for service " + service.getName());
         } else {
             SoapResource soapResource = new SoapResource();
             soapResource.setRootUrl(rootUrl);
