@@ -163,8 +163,11 @@ public class ServiceEntityBuilder implements EntityBuilder {
         if (isRedeployableBundle) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
+            // TODO: Once we change the default value of entity mapping action to NewOrExisting,
+            //      we should change the below statement to use EntityBundleHelper.getDefaultEntityMappingAction()
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
         }
+
         return entity;
     }
 

@@ -9,7 +9,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.IdValidator;
-import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.collect.ImmutableMap;
@@ -180,15 +179,17 @@ public class EncassEntityBuilder implements EntityBuilder {
         final Map<String, Object> properties = Optional.ofNullable(encass.getProperties()).orElse(new HashMap<>());
         properties.putIfAbsent(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         buildAndAppendPropertiesElement(properties, document, encassAssertionElement);
-        Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, uniqueEncassName, id, encassAssertionElement, guid, encass);
 
-        if (isRedeployableBundle || !isShared) {
+        final Entity entity = getEntityWithNameMapping(ENCAPSULATED_ASSERTION_TYPE, name, uniqueEncassName, id, encassAssertionElement, guid, encass);
+        if (isRedeployableBundle) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
-        } else {
+        } else if (isShared) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
+        } else {
+            entity.setMappingAction(EntityBuilderHelper.getDefaultEntityMappingAction());
         }
-        return entity;
 
+        return entity;
     }
 
     private Element buildResults(Encass encass, Document document) {
