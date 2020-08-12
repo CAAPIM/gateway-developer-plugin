@@ -18,17 +18,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.ALWAYS_CREATE_NEW;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_UPDATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.*;
 
 class EntityBuilderHelper {
+    private static final Logger LOGGER = Logger.getLogger(EntityBuilderHelper.class.getName());
     // TODO: reconsider the default value. NewOrExisting is the safest and acceptable action for most of the customer's scenarios.
-    private static final String DEFAULT_ENTITY_MAPPING_ACTION = "NewOrUpdate";
+    private static final String DEFAULT_ENTITY_MAPPING_ACTION = NEW_OR_UPDATE;
     private static final String DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY = "com.ca.apim.build.defaultEntityMappingAction";
     private static String defaultEntityMappingAction;
 
@@ -45,10 +46,11 @@ class EntityBuilderHelper {
         if (defaultEntityMappingAction == null) {
             String action = System.getProperty(DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY);
             if (action == null ||
-                    !Pattern.matches(NEW_OR_EXISTING + "|" + NEW_OR_UPDATE + "|" + ALWAYS_CREATE_NEW, action)) {
+                    !Pattern.matches(NEW_OR_EXISTING + "|" + NEW_OR_UPDATE, action)) {
                 action = DEFAULT_ENTITY_MAPPING_ACTION;
             }
             defaultEntityMappingAction = action;
+            LOGGER.info("Using default entity mapping action as " + defaultEntityMappingAction);
         }
 
         return defaultEntityMappingAction;

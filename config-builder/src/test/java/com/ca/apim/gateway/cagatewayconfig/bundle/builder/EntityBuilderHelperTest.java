@@ -31,8 +31,11 @@ public class EntityBuilderHelperTest {
         Assert.assertTrue(MappingActions.NEW_OR_EXISTING.equals(EntityBuilderHelper.getDefaultEntityMappingAction()) ||
                 MappingActions.NEW_OR_UPDATE.equals(EntityBuilderHelper.getDefaultEntityMappingAction()));
 
-        EntityBuilderHelper.resetDefaultEntityMappingAction(MappingActions.ALWAYS_CREATE_NEW);
-        Assert.assertEquals(MappingActions.ALWAYS_CREATE_NEW, EntityBuilderHelper.getDefaultEntityMappingAction());
+        EntityBuilderHelper.resetDefaultEntityMappingAction(MappingActions.NEW_OR_EXISTING);
+        Assert.assertEquals(MappingActions.NEW_OR_EXISTING, EntityBuilderHelper.getDefaultEntityMappingAction());
+
+        EntityBuilderHelper.resetDefaultEntityMappingAction(MappingActions.NEW_OR_UPDATE);
+        Assert.assertEquals(MappingActions.NEW_OR_UPDATE, EntityBuilderHelper.getDefaultEntityMappingAction());
     }
 
     @Test
