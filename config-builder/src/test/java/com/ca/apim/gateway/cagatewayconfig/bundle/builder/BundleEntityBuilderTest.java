@@ -548,7 +548,7 @@ class BundleEntityBuilderTest {
         bundle.getServices().put(TEST_SERVICE, service);
 
         AnnotatedBundle annotatedBundle = new AnnotatedBundle(bundle, service.getAnnotatedEntity(), projectInfo);
-        buildAndValidateAnnotatedServiceBundle(bundle, annotatedBundle, TEST_SERVICE, NEW_OR_EXISTING,
+        buildAndValidateAnnotatedServiceBundle(bundle, annotatedBundle, TEST_SERVICE, NEW_OR_UPDATE,
                 TEST_DEP_ENCASS_POLICY, NEW_OR_EXISTING, TEST_DEP_ENCASS, NEW_OR_EXISTING);
     }
 

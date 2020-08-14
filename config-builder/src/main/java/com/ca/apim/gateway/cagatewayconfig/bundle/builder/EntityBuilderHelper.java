@@ -12,22 +12,48 @@ import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import org.w3c.dom.Element;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
-import static com.ca.apim.gateway.cagatewayconfig.beans.Folder.ROOT_FOLDER_ID;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.Entity.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_EXISTING;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions.NEW_OR_UPDATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties.*;
 
 class EntityBuilderHelper {
+    private static final Logger LOGGER = Logger.getLogger(EntityBuilderHelper.class.getName());
+    // TODO: reconsider the default value. NewOrExisting is the safest and acceptable action for most of the customer's scenarios.
+    private static final String DEFAULT_ENTITY_MAPPING_ACTION = NEW_OR_UPDATE;
+    private static final String DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY = "com.ca.apim.build.defaultEntityMappingAction";
+    private static String defaultEntityMappingAction;
 
     private EntityBuilderHelper() {
+    }
+
+    @VisibleForTesting
+    static void resetDefaultEntityMappingAction(String value) {
+        defaultEntityMappingAction = null;
+        System.setProperty(DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY, value != null ? value : DEFAULT_ENTITY_MAPPING_ACTION);
+    }
+
+    static String getDefaultEntityMappingAction() {
+        if (defaultEntityMappingAction == null) {
+            String action = System.getProperty(DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY);
+            if (action == null ||
+                    !Pattern.matches(NEW_OR_EXISTING + "|" + NEW_OR_UPDATE, action)) {
+                action = DEFAULT_ENTITY_MAPPING_ACTION;
+            }
+            defaultEntityMappingAction = action;
+            LOGGER.info("Using default entity mapping action as " + defaultEntityMappingAction);
+        }
+
+        return defaultEntityMappingAction;
     }
 
     static Entity getEntityWithOnlyMapping(String entityType, String name, String id) {

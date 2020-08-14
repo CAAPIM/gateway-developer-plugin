@@ -163,8 +163,9 @@ public class ServiceEntityBuilder implements EntityBuilder {
         if (isRedeployableBundle) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
-            entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
+            entity.setMappingAction(EntityBuilderHelper.getDefaultEntityMappingAction());
         }
+
         return entity;
     }
 

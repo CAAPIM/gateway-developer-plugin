@@ -9,6 +9,7 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
+import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingActions;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
@@ -60,7 +61,8 @@ public class BundleMetadataBuilder {
             }
             builder.dependencies(annotatedBundle.getDependentBundles());
             builder.tags(annotatedEntity.getTags());
-            builder.redeployable(annotatedEntity.isRedeployable() || !isBundleContainsSharedEntity(annotatedBundle));
+            builder.redeployable(annotatedEntity.isRedeployable() ||
+                    (MappingActions.NEW_OR_UPDATE.equals(EntityBuilderHelper.getDefaultEntityMappingAction()) && !isBundleContainsSharedEntity(annotatedBundle)));
             builder.l7Template(annotatedEntity.isL7Template());
             builder.hasRouting(hasRoutingAssertion(dependentEntities));
 
@@ -95,7 +97,7 @@ public class BundleMetadataBuilder {
             tags.add(projectInfo.getConfigName());
         }
         builder.tags(tags);
-        builder.redeployable(true);
+        builder.redeployable(MappingActions.NEW_OR_UPDATE.equals(EntityBuilderHelper.getDefaultEntityMappingAction()));
         builder.hasRouting(false);
         builder.definedEntities(getEnvironmentDependenciesMetadata(entities));
 
@@ -113,7 +115,7 @@ public class BundleMetadataBuilder {
         BundleMetadata.Builder builder = new BundleMetadata.Builder(BUNDLE_TYPE_ALL, projectInfo.getName(), projectInfo.getName(), projectInfo.getGroupName(), projectInfo.getVersion());
         builder.description(StringUtils.EMPTY);
         builder.tags(Collections.emptyList());
-        builder.redeployable(true);
+        builder.redeployable(MappingActions.NEW_OR_UPDATE.equals(EntityBuilderHelper.getDefaultEntityMappingAction()));
         builder.hasRouting(hasRoutingAssertion(entities));
         final Collection<Metadata> referencedEntities = getEnvironmentDependenciesMetadata(entities);
         builder.referencedEntities(referencedEntities);
