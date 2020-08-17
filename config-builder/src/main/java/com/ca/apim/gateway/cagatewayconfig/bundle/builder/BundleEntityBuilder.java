@@ -21,6 +21,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.*;
@@ -33,7 +35,7 @@ import static java.util.Collections.unmodifiableSet;
 
 @Singleton
 public class BundleEntityBuilder {
-
+    private static final Logger LOGGER = Logger.getLogger(BundleEntityBuilder.class.getName());
     private final Set<EntityBuilder> entityBuilders;
     private final BundleDocumentBuilder bundleDocumentBuilder;
     private final BundleMetadataBuilder bundleMetadataBuilder;
@@ -57,6 +59,9 @@ public class BundleEntityBuilder {
 
     public Map<String, BundleArtifacts> build(Bundle bundle, BundleType bundleType,
                                               Document document, ProjectInfo projectInfo, boolean generateMetadata) {
+        if (Bundle.isEnvironmentEntityUniqueNamingDisabled()) {
+            LOGGER.log(Level.WARNING, "Environment entity unique-naming is disabled");
+        }
 
         Map<String, BundleArtifacts> artifacts = buildAnnotatedEntities(bundleType, bundle, document, projectInfo);
         if (artifacts.isEmpty()) {

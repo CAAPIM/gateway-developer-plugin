@@ -7,8 +7,6 @@
 package com.ca.apim.gateway.cagatewayconfig.beans;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleMetadata;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation;
 import com.ca.apim.gateway.cagatewayconfig.util.file.SupplierWithIO;
@@ -19,10 +17,11 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Bundle {
+
+    private static final String DISABLE_ENVIRONMENT_ENTITY_UNIQUE_NAMING = "com.ca.apim.build.disableEnvironmentEntityUniqueNaming";
 
     // simple map of entities to avoid having to add here a new map for each entity
     private final Map<Class, Map<String, ?>> entities = new ConcurrentHashMap<>();
@@ -332,6 +331,10 @@ public class Bundle {
      */
     public String applyUniqueName(final String entityName, final EntityBuilder.BundleType bundleType,
                                   boolean isShared) {
+        if (bundleType == EntityBuilder.BundleType.ENVIRONMENT && isEnvironmentEntityUniqueNamingDisabled()) {
+            return entityName;
+        }
+
         StringBuilder uniqueName = new StringBuilder(UNIQUE_NAME_SEPARATOR);
         uniqueName.append(getNamespace(bundleType, isShared));
         uniqueName.append(UNIQUE_NAME_SEPARATOR);
@@ -361,6 +364,10 @@ public class Bundle {
      */
     public String getNamespace(final EntityBuilder.BundleType bundleType, boolean isShared) {
         return getProjectInfo().getGroupName();
+    }
+
+    public static boolean isEnvironmentEntityUniqueNamingDisabled() {
+        return Boolean.getBoolean(DISABLE_ENVIRONMENT_ENTITY_UNIQUE_NAMING);
     }
 
 }
