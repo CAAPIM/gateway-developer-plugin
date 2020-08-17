@@ -15,7 +15,7 @@ public class ProjectInfo {
     private String majorVersion;
     private String minorVersion;
     private final String configName;
-    private String targetFolder;
+    private String targetFolderPath;
 
     public ProjectInfo(String name, String groupName, String version) {
         this(name, groupName, version, null);
@@ -65,11 +65,11 @@ public class ProjectInfo {
         return configName;
     }
 
-    public String getTargetFolder() {
-        return targetFolder;
+    public String getTargetFolderPath() {
+        return targetFolderPath;
     }
 
-    public void setTargetFolder(String targetFolder) {
-        this.targetFolder = targetFolder;
+    public void setTargetFolderPath(String targetFolderPath) {
+        this.targetFolderPath = targetFolderPath;
     }
 }

@@ -64,9 +64,9 @@ public class FolderEntityBuilder implements EntityBuilder {
         return entity;
     }
 
-    private List<Entity> buildEntities(Map<String, Folder> entities, BundleType bundleType, Document document, String targetFolder) {
+    private List<Entity> buildEntities(Map<String, Folder> entities, BundleType bundleType, Document document, String targetFolderPath) {
         // no folder has to be added to environment bundle
-        if ((entities.isEmpty() && StringUtils.isBlank(targetFolder)) || bundleType == ENVIRONMENT) {
+        if ((entities.isEmpty() && StringUtils.isBlank(targetFolderPath)) || bundleType == ENVIRONMENT) {
             return Collections.emptyList();
         }
         Map<Folder, Collection<Folder>> folderChildrenMap = new HashMap<>();
@@ -74,23 +74,22 @@ public class FolderEntityBuilder implements EntityBuilder {
         if (rootFolder == null) {
             throw new EntityBuilderException("Could not locate root folder.");
         }
-        String targetFolderPath = null;
-        if (StringUtils.isNotBlank(targetFolder) && rootFolder != Folder.ROOT_FOLDER) {
+
+        if (StringUtils.isNotBlank(targetFolderPath) && rootFolder != Folder.ROOT_FOLDER) {
             Folder bundleTargetFolder = rootFolder;
-            targetFolderPath =  targetFolder + "/";
             bundleTargetFolder.setId(idGenerator.generate());
-            bundleTargetFolder.setName(targetFolder);
+            bundleTargetFolder.setName(targetFolderPath);
             bundleTargetFolder.setParentFolder(Folder.ROOT_FOLDER);
-            bundleTargetFolder.setPath(targetFolderPath);
-            entities.put(targetFolderPath , bundleTargetFolder);
+            bundleTargetFolder.setPath(targetFolderPath + "/");
+            entities.put(bundleTargetFolder.getPath() , bundleTargetFolder);
             rootFolder = Folder.ROOT_FOLDER;
             entities.put("", rootFolder);
-
         } else {
             rootFolder.setId(Folder.ROOT_FOLDER_ID);
             rootFolder.setName(Folder.ROOT_FOLDER_NAME);
             entities.put("", rootFolder);
         }
+
         entities.values().forEach(folder -> addFolder(folder, folderChildrenMap));
         Stream<Folder> folderStream = Stream.of(rootFolder).flatMap(f -> expand(f, folderChildrenMap));
 
@@ -106,7 +105,7 @@ public class FolderEntityBuilder implements EntityBuilder {
 
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         Map<String, Folder> folderMap = Optional.ofNullable(bundle.getFolders()).orElse(Collections.emptyMap());
-        return buildEntities(folderMap, bundleType, document, bundle.getTargetFolder());
+        return buildEntities(folderMap, bundleType, document, bundle.getTargetFolderPath());
     }
 
     @Override

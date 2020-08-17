@@ -304,8 +304,8 @@ public class Bundle {
         this.loadingMode = loadingMode;
     }
 
-    public String getTargetFolder(){
-        return projectInfo.getTargetFolder();
+    public String getTargetFolderPath(){
+        return projectInfo.getTargetFolderPath();
     }
 
     /**
