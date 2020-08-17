@@ -68,12 +68,14 @@ public class ServiceEntityBuilder implements EntityBuilder {
 
     private Entity buildServiceEntity(Bundle bundle, Service service, Document document) {
         AnnotatedEntity annotatedEntity = bundle instanceof AnnotatedBundle ? ((AnnotatedBundle) bundle).getAnnotatedEntity() : null;
-        String servicePath = EntityBuilderHelper.getPath(service.getParentFolder(), PathUtils.extractName(service.getName()));
-        servicePath = CharacterBlacklistUtil.decodePath(servicePath);
-        String baseName = PathUtils.extractName(servicePath);
-        String basePath = PathUtils.extractPath(servicePath);
+
+        final String serviceOriginalPath = service.getName();
+        String servicePathWithTargetFolder = EntityBuilderHelper.getPath(service.getParentFolder(), PathUtils.extractName(service.getName()));
+        servicePathWithTargetFolder = CharacterBlacklistUtil.decodePath(servicePathWithTargetFolder);
+        String baseName = PathUtils.extractName(servicePathWithTargetFolder);
+        String basePath = PathUtils.extractPath(servicePathWithTargetFolder);
         String uniqueName = baseName;
-        String uniqueServicePath = servicePath;
+        String uniqueServicePath = servicePathWithTargetFolder;
         boolean isRedeployableBundle = false;
         if (annotatedEntity != null) {
             isRedeployableBundle = annotatedEntity.isRedeployable();
@@ -158,13 +160,14 @@ public class ServiceEntityBuilder implements EntityBuilder {
         }
 
         serviceElement.appendChild(resourcesElement);
-        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, servicePath, uniqueServicePath, id,
+        Entity entity = EntityBuilderHelper.getEntityWithPathMapping(SERVICE_TYPE, serviceOriginalPath, uniqueServicePath, id,
                 serviceElement, policy.isHasRouting(), service);
         if (isRedeployableBundle) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
         } else {
-            entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
+            entity.setMappingAction(EntityBuilderHelper.getDefaultEntityMappingAction());
         }
+
         return entity;
     }
 

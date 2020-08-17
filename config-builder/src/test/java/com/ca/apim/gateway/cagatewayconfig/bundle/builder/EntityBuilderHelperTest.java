@@ -8,14 +8,36 @@ import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class EntityBuilderHelperTest {
+
+    @Before
+    public void beforeTest() {
+        EntityBuilderHelper.resetDefaultEntityMappingAction(null);
+    }
+
+    @Test
+    public void testDefaultEntityMappingAction() {
+        Assert.assertTrue(StringUtils.isNotBlank(EntityBuilderHelper.getDefaultEntityMappingAction()));
+        Assert.assertTrue(MappingActions.NEW_OR_EXISTING.equals(EntityBuilderHelper.getDefaultEntityMappingAction()) ||
+                MappingActions.NEW_OR_UPDATE.equals(EntityBuilderHelper.getDefaultEntityMappingAction()));
+
+        EntityBuilderHelper.resetDefaultEntityMappingAction(MappingActions.NEW_OR_EXISTING);
+        Assert.assertEquals(MappingActions.NEW_OR_EXISTING, EntityBuilderHelper.getDefaultEntityMappingAction());
+
+        EntityBuilderHelper.resetDefaultEntityMappingAction(MappingActions.NEW_OR_UPDATE);
+        Assert.assertEquals(MappingActions.NEW_OR_UPDATE, EntityBuilderHelper.getDefaultEntityMappingAction());
+    }
+
     @Test
     public void testGetEntityWithMappings() throws DocumentParseException {
         Map<String, Object> mappingProperties = new HashMap<>();

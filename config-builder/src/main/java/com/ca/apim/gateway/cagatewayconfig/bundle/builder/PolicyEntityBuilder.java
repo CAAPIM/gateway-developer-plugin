@@ -243,11 +243,15 @@ public class PolicyEntityBuilder implements EntityBuilder {
         policyElement.appendChild(resourcesElement);
         Entity entity = EntityBuilderHelper.getEntityWithPathMapping(EntityTypes.POLICY_TYPE,
                 policy.getPath(), policyNameWithPath, policy.getId(), policyElement, policy.isHasRouting(), policy);
-        if (isRedeployableBundle || !policy.isParentEntityShared()) {
+
+        if (isRedeployableBundle) {
             entity.setMappingAction(MappingActions.NEW_OR_UPDATE);
-        } else {
+        } else if (policy.isParentEntityShared()) {
             entity.setMappingAction(MappingActions.NEW_OR_EXISTING);
+        } else {
+            entity.setMappingAction(EntityBuilderHelper.getDefaultEntityMappingAction());
         }
+
         return entity;
     }
 

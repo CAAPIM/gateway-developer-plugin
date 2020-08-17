@@ -15,7 +15,7 @@ import java.util.Map;
 public class GatewayDeveloperPluginConfig {
 
     private final DirectoryProperty solutionDir;
-    private Property<String> targetFolder;
+    private Property<String> targetFolderPath;
     private DirectoryProperty builtBundleDir;
     private DirectoryProperty builtEnvironmentBundleDir;
     private final Property<Boolean> detemplatizeDeploymentBundles;
@@ -25,7 +25,7 @@ public class GatewayDeveloperPluginConfig {
 
     public GatewayDeveloperPluginConfig(Project project, EnvironmentConfig environmentConfig) {
         solutionDir = project.getLayout().directoryProperty();
-        targetFolder = project.getObjects().property(String.class);
+        targetFolderPath = project.getObjects().property(String.class);
         builtBundleDir = project.getLayout().directoryProperty();
         builtEnvironmentBundleDir = project.getLayout().directoryProperty();
         detemplatizeDeploymentBundles = project.getObjects().property(Boolean.class);
@@ -57,7 +57,7 @@ public class GatewayDeveloperPluginConfig {
         return environmentConfig;
     }
 
-    public Property<String> getTargetFolder() {
-        return targetFolder;
+    public Property<String> getTargetFolderPath() {
+        return targetFolderPath;
     }
 }
