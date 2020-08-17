@@ -479,7 +479,7 @@ class CAGatewayDeveloperTest {
         assertEquals(TaskOutcome.SUCCESS, Objects.requireNonNull(result.task(":build-full-bundle")).getOutcome());
 
         File buildDir = new File(testProjectDir, "build");
-        String bundleFilename = bundleName + projectVersion + POLICY_INSTALL_BUNDLE_SUFFIX;
+        String bundleFilename = bundleName + projectVersion + "-full" + POLICY_INSTALL_BUNDLE_SUFFIX;
         File buildGatewayDir = validateBuildDirExceptGW7File(bundleFilename, buildDir);
 
         //Deployment bundle name format : <bundleName>-<version>.bundle
