@@ -139,7 +139,7 @@ public class UnsupportedEntityWriterTest {
 
         File configFolder = new File(temporaryFolder.getRoot(), "config");
         assertTrue(configFolder.exists());
-        File unsupportedEntitiesYml = new File(configFolder, gatewayEntityInfo.getFileName() + JsonTools.INSTANCE.getFileExtension());
+        File unsupportedEntitiesYml = new File(configFolder, gatewayEntityInfo.getFileName() + jsonTools.getFileExtension());
         assertTrue(unsupportedEntitiesYml.exists());
 
         final String ymlContent = new String(Files.readAllBytes(unsupportedEntitiesYml.toPath()), StandardCharsets.UTF_8);
