@@ -19,20 +19,16 @@ public class UnsupportedEntityBuilder implements EntityBuilder {
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         List<Entity> unsupportedEntities = new ArrayList<>();
         Map<String, UnsupportedGatewayEntity> unsupportedGatewayEntityMap = bundle.getUnsupportedEntities();
-        if (bundleType == ENVIRONMENT) {
-            unsupportedGatewayEntityMap.entrySet().forEach(entry -> {
-                UnsupportedGatewayEntity unsupportedGatewayEntity = entry.getValue();
-                Element resourceElement = (Element) document.adoptNode(unsupportedGatewayEntity.getElement());
-                unsupportedEntities.add(EntityBuilderHelper.getEntityWithNameMapping(unsupportedGatewayEntity.getType(),
-                        unsupportedGatewayEntity.getName(), unsupportedGatewayEntity.getId(), resourceElement));
-            });
-        } else {
-            unsupportedGatewayEntityMap.entrySet().forEach(entry -> {
-                UnsupportedGatewayEntity unsupportedGatewayEntity = entry.getValue();
-                unsupportedEntities.add(EntityBuilderHelper.getEntityWithOnlyMapping(unsupportedGatewayEntity.getType(), unsupportedGatewayEntity.getName(),
-                        unsupportedGatewayEntity.getId()));
-            });
-        }
+        unsupportedGatewayEntityMap.forEach((key, value) -> {
+            if (bundleType != ENVIRONMENT || value.isExcluded()) {
+                unsupportedEntities.add(EntityBuilderHelper.getEntityWithOnlyMapping(value.getType(), value.getName()
+                        , value.getId()));
+            } else {
+                Element resourceElement = (Element) document.adoptNode(value.getElement());
+                unsupportedEntities.add(EntityBuilderHelper.getEntityWithNameMapping(value.getType(), value.getName()
+                        , value.getId(), resourceElement));
+            }
+        });
         return unsupportedEntities;
     }
 
