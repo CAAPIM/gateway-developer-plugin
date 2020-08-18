@@ -132,7 +132,7 @@ public class BundleBuilder {
             entity.setExcluded(true);
         }
 
-        LOGGER.log(Level.WARNING, "Recording the {0}/{1} with id: {2} as unsupported entity",
+        LOGGER.log(Level.INFO, "Recording the {0}/{1} with id: {2} as unsupported entity",
                 new Object[] {entity.getType(), entity.getName(), entity.getId()});
         bundle.addEntity(entity);
     }

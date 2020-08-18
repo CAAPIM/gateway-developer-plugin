@@ -66,9 +66,7 @@ public class UnsupportedGatewayEntity extends GatewayEntity {
 
     public void postLoad(String entityKey, Bundle bundle, @Nullable File rootFolder, IdGenerator idGenerator) {
         final String prefix = getType() + "/";
-        if (entityKey.startsWith(prefix)) {
-            setName(entityKey.substring(prefix.length()));
-        }
+        setName(entityKey.startsWith(prefix) ? entityKey.substring(prefix.length()) : entityKey);
     }
 
     @JsonIgnore

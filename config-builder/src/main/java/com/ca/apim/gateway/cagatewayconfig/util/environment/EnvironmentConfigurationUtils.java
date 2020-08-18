@@ -15,6 +15,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderRegistry;
 import com.ca.apim.gateway.cagatewayconfig.config.spec.ConfigurationFile;
+import com.ca.apim.gateway.cagatewayconfig.config.spec.EnvironmentType;
 import com.ca.apim.gateway.cagatewayconfig.environment.MissingEnvironmentException;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils;
@@ -117,7 +118,7 @@ public class EnvironmentConfigurationUtils {
             final Map<String, String> environmentValues = new LinkedHashMap<>();
             if (configFolder != null) {
                 final List<Map<String, String>> environmentEntities = environmentBundleData.getReferencedEntities();
-                environmentEntities.stream().forEach(environmentEntitiy -> {
+                environmentEntities.forEach(environmentEntitiy -> {
                     String entityType = environmentEntitiy.get("type");
                     String entityName = environmentEntitiy.get("name");
                     entityName = EnvironmentConfigurationUtils.extractEntityName(entityName);
@@ -138,6 +139,9 @@ public class EnvironmentConfigurationUtils {
                     final File envConfigFile = new File(configFolder, configFileName);
                     if (envConfigFile.exists()) {
                         try {
+                            if (environmentType.equals(UnsupportedGatewayEntity.class.getAnnotation(EnvironmentType.class).value())) {
+                                entityName = entityType + "/" + entityName;
+                            }
                             environmentValues.put(PREFIX_ENV + environmentType + "." + entityName,
                                     loadConfigFromFile(envConfigFile, environmentType, entityName));
 
