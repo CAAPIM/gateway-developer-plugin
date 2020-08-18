@@ -5,6 +5,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
 import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
@@ -129,9 +130,11 @@ public class UnsupportedEntityWriterTest {
 
         bundle.getUnsupportedEntities().put("Test MQ", unsupportedGatewayEntity);
 
+        final JsonTools jsonTools = new JsonTools(FileUtils.INSTANCE);
         EntityUtils.GatewayEntityInfo gatewayEntityInfo = EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class);
         assertEquals("unsupported-entities", gatewayEntityInfo.getFileName());
-        WriterHelper.writeFile(temporaryFolder.getRoot(), DocumentFileUtils.INSTANCE, JsonTools.INSTANCE,
+        assertEquals(".yml", jsonTools.getFileExtension());
+        WriterHelper.writeFile(temporaryFolder.getRoot(), DocumentFileUtils.INSTANCE, jsonTools,
                 bundle.getUnsupportedEntities(), gatewayEntityInfo.getFileName(), UnsupportedGatewayEntity.class);
 
         File configFolder = new File(temporaryFolder.getRoot(), "config");
