@@ -1,8 +1,12 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
+import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
+import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils;
+import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
@@ -15,14 +19,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(TemporaryFolderExtension.class)
 public class UnsupportedEntityWriterTest {
 
     @Test
-    void testWrite(final TemporaryFolder temporaryFolder) throws DocumentParseException {
+    void testWrite(final TemporaryFolder temporaryFolder) throws DocumentParseException, IOException {
         UnsupportedEntityWriter writer = new UnsupportedEntityWriter(DocumentFileUtils.INSTANCE, DocumentTools.INSTANCE);
         String entityName = "Test MQ";
         String xml = "<l7:Items xmlns:l7=\"http://ns.l7tech.com/2010/04/gateway-management\"><l7:Item>\n" +
@@ -106,5 +116,33 @@ public class UnsupportedEntityWriterTest {
 
         File unsupportedEntitiesXml = new File(configFolder, "unsupported-entities.xml");
         assertTrue(unsupportedEntitiesXml.exists());
+    }
+
+    @Test
+    public void testYamlWrite(final TemporaryFolder temporaryFolder) throws IOException {
+        String entityName = "Test MQ";
+
+        Bundle bundle = new Bundle();
+        UnsupportedGatewayEntity unsupportedGatewayEntity = new UnsupportedGatewayEntity();
+        unsupportedGatewayEntity.setName(entityName);
+        unsupportedGatewayEntity.setId("testId");
+        unsupportedGatewayEntity.setType("SSG_ACTIVE");
+
+        bundle.getUnsupportedEntities().put("Test MQ", unsupportedGatewayEntity);
+
+        final JsonTools jsonTools = new JsonTools(FileUtils.INSTANCE);
+        EntityUtils.GatewayEntityInfo gatewayEntityInfo = EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class);
+        assertEquals("unsupported-entities", gatewayEntityInfo.getFileName());
+        assertEquals(".yml", jsonTools.getFileExtension());
+        WriterHelper.writeFile(temporaryFolder.getRoot(), DocumentFileUtils.INSTANCE, jsonTools,
+                bundle.getUnsupportedEntities(), gatewayEntityInfo.getFileName(), UnsupportedGatewayEntity.class);
+
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+        File unsupportedEntitiesYml = new File(configFolder, gatewayEntityInfo.getFileName() + jsonTools.getFileExtension());
+        assertTrue(unsupportedEntitiesYml.exists());
+
+        final String ymlContent = new String(Files.readAllBytes(unsupportedEntitiesYml.toPath()), StandardCharsets.UTF_8);
+        assertEquals("SSG_ACTIVE/Test MQ:", ymlContent.split("\n")[0]);
     }
 }

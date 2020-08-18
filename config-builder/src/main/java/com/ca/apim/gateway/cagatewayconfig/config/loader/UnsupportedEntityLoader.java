@@ -19,13 +19,14 @@ import javax.inject.Singleton;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 
 @Singleton
 public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGatewayEntity> implements EntityLoader {
-
+    private static final Logger LOGGER = Logger.getLogger(UnsupportedEntityLoader.class.getName());
     private final EntityUtils.GatewayEntityInfo gatewayEntityInfo;
     private final DocumentTools documentTools;
 
@@ -49,6 +50,10 @@ public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGateway
             File configFolder = new File(environmentConfigurationFolderPath);
             updateItemXml(bundle, configFolder);
         }
+
+        bundle.getUnsupportedEntities().values().stream()
+                .filter(UnsupportedGatewayEntity::isExcluded)
+                .forEach(item -> LOGGER.warning("Excluding the unsupported entity " + item.getMappingValue()));
     }
 
     private void updateItemXml(Bundle bundle, File configFolder) {
@@ -60,6 +65,7 @@ public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGateway
                 final List<Element> items = getChildElements(document.getDocumentElement(), ITEM);
                 items.forEach(item -> {
                     final String itemName = getSingleChildElementTextContent(item, NAME);
+                    final String itemType = getSingleChildElementTextContent(item, TYPE);
                     final Element resource = getSingleChildElement(item, RESOURCE);
                     NodeList nodeList = resource.getChildNodes();
                     Element resourceXml = null;
@@ -70,8 +76,9 @@ public class UnsupportedEntityLoader extends EntityLoaderBase<UnsupportedGateway
                         }
                     }
                     if (itemName != null) {
-                        final UnsupportedGatewayEntity unsupportedGatewayEntity = unsupportedGatewayEntityMap.get(itemName);
-                        if (unsupportedGatewayEntity != null) {
+                        final UnsupportedGatewayEntity unsupportedGatewayEntity = unsupportedGatewayEntityMap.get(UnsupportedGatewayEntity.getMappingValue(itemType, itemName));
+                        if (unsupportedGatewayEntity != null && !unsupportedGatewayEntity.isExcluded()) {
+                            unsupportedGatewayEntity.setName(itemName);
                             unsupportedGatewayEntity.setElement(resourceXml);
                         }
                     }

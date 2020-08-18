@@ -115,7 +115,7 @@ class BundleEnvironmentValidator {
                 break;
             default:
                 LOGGER.log(Level.WARNING, "Unsupported gateway entity " + type);
-                UnsupportedGatewayEntity unsupportedGatewayEntity = bundle.getUnsupportedEntities().get(name);
+                UnsupportedGatewayEntity unsupportedGatewayEntity = bundle.getUnsupportedEntities().get(UnsupportedGatewayEntity.getMappingValue(type, name));
                 if (unsupportedGatewayEntity != null && type.equals(unsupportedGatewayEntity.getType())) {
                     entity = unsupportedGatewayEntity;
                 }
