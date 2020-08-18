@@ -2,6 +2,7 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.writer;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils;
+import com.ca.apim.gateway.cagatewayconfig.beans.IdentityProvider;
 import com.ca.apim.gateway.cagatewayconfig.beans.UnsupportedGatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -112,7 +114,13 @@ public class UnsupportedEntityWriterTest {
         File unsupportedEntitiesXml = new File(configFolder, "unsupported-entities.xml");
         assertTrue(unsupportedEntitiesXml.exists());
 
-        WriterHelper.write(bundle, temporaryFolder.getRoot(), EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class), DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+        try {
+            EntityUtils.GatewayEntityInfo gatewayEntityInfo = EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class);
+            System.out.println("Gateway entity Info for unsupported entity: " + gatewayEntityInfo);
+            WriterHelper.write(bundle, temporaryFolder.getRoot(), gatewayEntityInfo, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         File unsupportedEntitiesYml = new File(configFolder, "unsupported-entities.yml");
         assertTrue(unsupportedEntitiesYml.exists());
 
