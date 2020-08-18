@@ -20,6 +20,7 @@ import org.w3c.dom.NodeList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
 
@@ -138,7 +139,7 @@ public class UnsupportedEntityWriterTest {
         File unsupportedEntitiesYml = new File(configFolder, gatewayEntityInfo.getFileName() + JsonTools.INSTANCE.getFileExtension());
         assertTrue(unsupportedEntitiesYml.exists());
 
-        final String ymlContent = new String(Files.readAllBytes(unsupportedEntitiesYml.toPath()), Charset.forName("utf-8"));
-        assertTrue(ymlContent.contains("SSG_ACTIVE/Test MQ:"));
+        final String ymlContent = new String(Files.readAllBytes(unsupportedEntitiesYml.toPath()), StandardCharsets.UTF_8);
+        assertEquals("SSG_ACTIVE/Test MQ:", ymlContent.split("\n")[0]);
     }
 }
