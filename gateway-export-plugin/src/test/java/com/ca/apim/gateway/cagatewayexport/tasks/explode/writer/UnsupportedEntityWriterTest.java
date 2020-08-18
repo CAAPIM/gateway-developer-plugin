@@ -114,13 +114,12 @@ public class UnsupportedEntityWriterTest {
         File unsupportedEntitiesXml = new File(configFolder, "unsupported-entities.xml");
         assertTrue(unsupportedEntitiesXml.exists());
 
-        try {
-            EntityUtils.GatewayEntityInfo gatewayEntityInfo = EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class);
-            System.out.println("Gateway entity Info for unsupported entity: " + gatewayEntityInfo);
-            WriterHelper.write(bundle, temporaryFolder.getRoot(), gatewayEntityInfo, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        EntityUtils.GatewayEntityInfo gatewayEntityInfo = EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class);
+        System.out.println("Gateway entity Info for unsupported entity: " + gatewayEntityInfo);
+        WriterHelper.write(bundle, temporaryFolder.getRoot(), gatewayEntityInfo, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+
+        configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
         File unsupportedEntitiesYml = new File(configFolder, "unsupported-entities.yml");
         assertTrue(unsupportedEntitiesYml.exists());
 
