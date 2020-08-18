@@ -41,6 +41,7 @@ import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleC
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
+import static com.ca.apim.gateway.cagatewayconfig.util.file.JsonFileUtils.METADATA_FILE_NAME_SUFFIX;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 import static java.nio.charset.Charset.defaultCharset;
@@ -48,7 +49,6 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.ListUtils.union;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.SystemUtils.JAVA_IO_TMPDIR;
 
 /**
@@ -123,7 +123,7 @@ public class FullBundleCreator {
             });
 
             //clean up intermediate file
-            cleanIntermediateFile(bundleFolderPath, bundleEnvironmentValues.getLeft() + JsonFileUtils.METADATA_FILE_NAME_SUFFIX);
+            cleanIntermediateFiles(bundleFolderPath, bundleEnvironmentValues.getLeft());
 
             String bundleMetaFileName = bundleEnvironmentValues.getLeft();
             if (StringUtils.isNotBlank(projectInfo.getVersion())) {
@@ -139,13 +139,19 @@ public class FullBundleCreator {
     /**
      * Removes intermediate file generated during deployment bundle task
      * @param bundleFolderPath build folder
-     * @param fileName file name
+     * @param filenamePrefix file name without extension
      */
-    private void cleanIntermediateFile(final String bundleFolderPath, final String fileName) {
-        final File intermediateFile = new File(bundleFolderPath, fileName);
-        boolean deleted = intermediateFile.delete();
-        if (!deleted) {
-            LOGGER.log(Level.WARNING, () -> "intermediate file was not deleted: " + intermediateFile.toString());
+    private void cleanIntermediateFiles(final String bundleFolderPath, final String filenamePrefix) {
+        final File[] interimFiles = {
+                new File(bundleFolderPath, filenamePrefix + METADATA_FILE_NAME_SUFFIX),
+                new File(bundleFolderPath, filenamePrefix + INSTALL_BUNDLE_EXTENSION),
+                new File(bundleFolderPath, filenamePrefix + DELETE_BUNDLE_EXTENSION)
+        };
+        for (File interimFile : interimFiles) {
+            boolean deleted = interimFile.delete();
+            if (!deleted) {
+                LOGGER.log(Level.WARNING, () -> "Couldn't delete Intermediate file: " + interimFile.toString());
+            }
         }
     }
 
