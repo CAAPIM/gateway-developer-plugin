@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(TemporaryFolderExtension.class)
@@ -115,11 +116,10 @@ public class UnsupportedEntityWriterTest {
         assertTrue(unsupportedEntitiesXml.exists());
 
         EntityUtils.GatewayEntityInfo gatewayEntityInfo = EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class);
-        System.out.println("Gateway entity Info for unsupported entity: " + gatewayEntityInfo);
-        WriterHelper.write(bundle, temporaryFolder.getRoot(), gatewayEntityInfo, DocumentFileUtils.INSTANCE, JsonTools.INSTANCE);
+        assertEquals("unsupported-entities", gatewayEntityInfo.getFileName());
+        WriterHelper.writeFile(temporaryFolder.getRoot(), DocumentFileUtils.INSTANCE, JsonTools.INSTANCE,
+                bundle.getUnsupportedEntities(), gatewayEntityInfo.getFileName(), UnsupportedGatewayEntity.class);
 
-        configFolder = new File(temporaryFolder.getRoot(), "config");
-        assertTrue(configFolder.exists());
         File unsupportedEntitiesYml = new File(configFolder, "unsupported-entities.yml");
         assertTrue(unsupportedEntitiesYml.exists());
 
