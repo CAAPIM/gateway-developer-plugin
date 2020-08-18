@@ -114,13 +114,28 @@ public class UnsupportedEntityWriterTest {
 
         File unsupportedEntitiesXml = new File(configFolder, "unsupported-entities.xml");
         assertTrue(unsupportedEntitiesXml.exists());
+    }
+
+    @Test
+    public void testYamlWrite(final TemporaryFolder temporaryFolder) throws IOException {
+        String entityName = "Test MQ";
+
+        Bundle bundle = new Bundle();
+        UnsupportedGatewayEntity unsupportedGatewayEntity = new UnsupportedGatewayEntity();
+        unsupportedGatewayEntity.setName(entityName);
+        unsupportedGatewayEntity.setId("testId");
+        unsupportedGatewayEntity.setType("SSG_ACTIVE");
+
+        bundle.getUnsupportedEntities().put("Test MQ", unsupportedGatewayEntity);
 
         EntityUtils.GatewayEntityInfo gatewayEntityInfo = EntityUtils.createEntityInfo(UnsupportedGatewayEntity.class);
         assertEquals("unsupported-entities", gatewayEntityInfo.getFileName());
         WriterHelper.writeFile(temporaryFolder.getRoot(), DocumentFileUtils.INSTANCE, JsonTools.INSTANCE,
                 bundle.getUnsupportedEntities(), gatewayEntityInfo.getFileName(), UnsupportedGatewayEntity.class);
 
-        File unsupportedEntitiesYml = new File(configFolder, "unsupported-entities.yml");
+        File configFolder = new File(temporaryFolder.getRoot(), "config");
+        assertTrue(configFolder.exists());
+        File unsupportedEntitiesYml = new File(configFolder, gatewayEntityInfo.getFileName() + JsonTools.INSTANCE.getFileExtension());
         assertTrue(unsupportedEntitiesYml.exists());
 
         final String ymlContent = new String(Files.readAllBytes(unsupportedEntitiesYml.toPath()), Charset.forName("utf-8"));
