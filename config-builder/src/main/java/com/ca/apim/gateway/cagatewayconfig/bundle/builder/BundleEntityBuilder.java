@@ -24,10 +24,8 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_ENV_ENTITIES;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.*;
-import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_NON_ENV_ENTITIES;
-import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.FILTER_OUT_DEFAULT_LISTEN_PORTS;
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.FOLDER_TYPE;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.DELETE_BUNDLE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.INSTALL_BUNDLE_EXTENSION;
@@ -203,7 +201,8 @@ public class BundleEntityBuilder {
      * @return Delete bundle Element for the Annotated Bundle
      */
     private Element createDeleteEnvBundle(final Document document, List<Entity> entities) {
-        List<Entity> filteredEntities = copyFilteredEntitiesForDeleteBundle(entities, FILTER_ENV_ENTITIES.and(FILTER_OUT_DEFAULT_LISTEN_PORTS));
+        List<Entity> filteredEntities = copyFilteredEntitiesForDeleteBundle(entities,
+                FILTER_ENV_ENTITIES.and(FILTER_OUT_DEFAULT_LISTEN_PORTS).and(FILTER_OUT_PRIVATE_KEYS));
         filteredEntities.forEach(e -> e.setMappingAction(MappingActions.DELETE));
         return bundleDocumentBuilder.build(document, filteredEntities);
     }

@@ -28,6 +28,8 @@ public class Bundle {
 
     // some special things need their own maps
     private final Map<String, SupplierWithIO<InputStream>> certificateFiles = new HashMap<>();
+    private final Map<String, SupplierWithIO<InputStream>> privateKeyFiles = new HashMap<>();
+
     private Set<Bundle> dependencies;
     private FolderTree folderTree;
     private Map<Dependency, List<Dependency>> dependencyMap;
@@ -234,6 +236,14 @@ public class Bundle {
 
     public void putAllPrivateKeys(@NotNull Map<String, PrivateKey> privateKeys) {
         this.getPrivateKeys().putAll(privateKeys);
+    }
+
+    public Map<String, SupplierWithIO<InputStream>> getPrivateKeyFiles() {
+        return privateKeyFiles;
+    }
+
+    public void putAllPrivateKeyFiles(@NotNull Map<String, SupplierWithIO<InputStream>> privateKeys) {
+        this.privateKeyFiles.putAll(privateKeys);
     }
 
     public void putAllSsgActiveConnectors(@NotNull Map<String, SsgActiveConnector> ssgActiveConnectors) {

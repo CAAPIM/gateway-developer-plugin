@@ -7,8 +7,6 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
-import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
@@ -27,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes.PRIVATE_KEY_TYPE;
@@ -55,28 +54,41 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
     @Override
     public List<Entity> build(Bundle bundle, BundleType bundleType, Document document) {
         Map<String, PrivateKey> privateKeyMap = Optional.ofNullable(bundle.getPrivateKeys()).orElse(Collections.emptyMap());
-        return buildEntities(privateKeyMap, document);
+        return buildEntities(bundle, bundleType, privateKeyMap, document);
     }
 
-    private List<Entity> buildEntities(Map<String, ?> entities, Document document) {
-        return entities.entrySet().stream().map(e -> buildPrivateKeyEntity(e.getKey(), (PrivateKey)e.getValue(), document)).collect(toList());
+    private List<Entity> buildEntities(Bundle bundle, BundleType bundleType, Map<String, ?> entities,
+                                       Document document) {
+        switch (bundleType) {
+            case DEPLOYMENT:
+                return entities.entrySet().stream()
+                               .map(e -> EntityBuilderHelper.getEntityWithOnlyMapping(PRIVATE_KEY_TYPE, e.getKey(), generatePrivateKeyId((PrivateKey) e.getValue())))
+                               .collect(Collectors.toList());
+            case ENVIRONMENT:
+                return entities.entrySet().stream().map(e -> buildPrivateKeyEntity(bundle, e.getKey(),
+                        (PrivateKey) e.getValue(), document)).collect(toList());
+            default:
+                throw new EntityBuilderException("Unknown bundle type: " + bundleType);
+        }
     }
 
-    private Entity buildPrivateKeyEntity(String alias, PrivateKey privateKey, Document document) {
-        final String id = privateKey.getKeyStoreType().generateKeyId(alias);
-        privateKey.setId(id);
+    private Entity buildPrivateKeyEntity(Bundle bundle, String alias, PrivateKey privateKey, Document document) {
+        privateKey.setId(generatePrivateKeyId(privateKey));
+        if (privateKey.getPrivateKeyFile() == null) {
+            privateKey.setPrivateKeyFile(bundle.getPrivateKeyFiles().get(alias));
+        }
         final Element privateKeyElem = createElementWithAttributes(
                 document,
                 PRIVATE_KEY,
                 ImmutableMap.of(
-                        ATTRIBUTE_ID, id,
+                        ATTRIBUTE_ID, privateKey.getId(),
                         ATTRIBUTE_KEYSTORE_ID, privateKey.getKeyStoreType().getId(),
                         ATTRIBUTE_ALIAS, alias)
         );
         buildAndAppendCertificateChainElement(privateKey, privateKeyElem, document);
         buildAndAppendPropertiesElement(ImmutableMap.of(ATTRIBUTE_KEY_ALGORITHM, privateKey.getAlgorithm()), document, privateKeyElem);
 
-        Entity entity = EntityBuilderHelper.getEntityWithNameMapping(PRIVATE_KEY_TYPE, alias, id, privateKeyElem);
+        Entity entity = EntityBuilderHelper.getEntityWithNameMapping(PRIVATE_KEY_TYPE, alias, privateKey.getId(), privateKeyElem);
         entity.setMappingAction(NEW_OR_EXISTING);
         entity.setMappingProperty(FAIL_ON_NEW, true);
         return entity;
@@ -93,6 +105,10 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
             //add a dummy certificate. This is needed for the gateway to be able to parse the bundle xml, it is not actually used
             privateKeyElem.appendChild(createElementWithChildren(document, CERTIFICATE_CHAIN, CertificateUtils.createCertDataElementFromCert("", BigInteger.valueOf(0), "", DUMMY_CERTIFICATE, document)));
         }
+    }
+
+    private String generatePrivateKeyId(PrivateKey privateKey) {
+        return privateKey.getKeyStoreType().generateKeyId(privateKey.getAlias());
     }
 
     @Override

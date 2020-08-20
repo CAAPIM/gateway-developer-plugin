@@ -15,6 +15,8 @@ import com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools;
 import com.ca.apim.gateway.cagatewayconfig.util.json.JsonToolsException;
 import io.github.glytching.junit.extension.folder.TemporaryFolder;
 import io.github.glytching.junit.extension.folder.TemporaryFolderExtension;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,11 +25,10 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.*;
 import org.testcontainers.shaded.com.google.common.io.Files;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 import static com.ca.apim.gateway.cagatewayconfig.beans.EntityUtils.createEntityInfo;
 import static com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoaderUtils.createEntityLoader;
@@ -43,13 +44,16 @@ class PrivateKeyLoaderTest {
     @Mock
     private FileUtils fileUtils;
     private File config;
+    private byte[] testPrivateKeyContent;
 
     @BeforeEach
-    void setUp(final TemporaryFolder temporaryFolder) {
+    void setUp(final TemporaryFolder temporaryFolder) throws IOException {
         rootProjectDir = temporaryFolder;
         jsonTools = new JsonTools(fileUtils);
 
         config = temporaryFolder.createDirectory("config");
+        testPrivateKeyContent = IOUtils.toByteArray(new FileInputStream(new File(
+                        Objects.requireNonNull(getClass().getClassLoader().getResource("test.p12")).getFile())));
     }
 
     @Test
@@ -67,7 +71,7 @@ class PrivateKeyLoaderTest {
                 "  algorithm: \"RSA\"\n" +
                 "  keyPassword: \"\"\n" +
                 "\n";
-        createPrivateKeys("key1", "test", "key2");
+        createPrivateKeys(new Object[]{"key1"}, new Object[]{"test"}, new Object[]{"key2"});
         loadPrivateKeys(yaml, "yml", false);
     }
 
@@ -90,15 +94,46 @@ class PrivateKeyLoaderTest {
                 "    \"keyPassword\": \"\"\n" +
                 "  }\n" +
                 "}";
-        createPrivateKeys("key1", "test", "key2");
+        createPrivateKeys(new Object[]{"key1"}, new Object[]{"test"}, new Object[]{"key2"});
         loadPrivateKeys(json, "json", false);
     }
 
-    private void createPrivateKeys(String... keys) throws IOException {
+    @Test
+    void loadSingle() throws IOException {
+        PrivateKeyLoader loader = new PrivateKeyLoader();
+        createPrivateKeys(new Object[]{"key1", testPrivateKeyContent});
+        Object certContent = loader.loadSingle("key1", new File(new File(config, "privateKeys"), "key1.p12"));
+
+        assertNotNull(certContent);
+        assertTrue(certContent instanceof String);
+        assertTrue(Base64.isBase64(certContent.toString()));
+    }
+
+    @Test
+    void loadSingleInvalidExtension() throws IOException {
+        PrivateKeyLoader loader = new PrivateKeyLoader();
+        createPrivateKeys(new Object[]{"key1", testPrivateKeyContent});
+        assertThrows(ConfigLoadException.class, () -> loader.loadSingle("key1", new File(new File(config,
+                "privateKeys"), "key1.pfx")));
+    }
+
+    @Test
+    void loadNoCerts() {
+        CertificatesLoader loader = new CertificatesLoader(FileUtils.INSTANCE);
+        Bundle bundle = new Bundle();
+        loader.load(bundle, rootProjectDir.getRoot());
+
+        assertTrue(bundle.getPrivateKeyFiles().isEmpty());
+    }
+
+    private void createPrivateKeys(Object[]... keys) throws IOException {
         File keysDir = new File(config, "privateKeys");
         assertTrue(keysDir.mkdir());
-        for (String k : keys) {
-            Files.touch(new File(keysDir, k + ".p12"));
+        for (Object[] k : keys) {
+            Files.touch(new File(keysDir, k[0] + ".p12"));
+            if (k.length > 1 && k[1] != null) {
+                Files.write((byte[]) k[1], new File(keysDir, k[0] + ".p12"));
+            }
         }
     }
 
@@ -143,13 +178,16 @@ class PrivateKeyLoaderTest {
     }
 
     private void loadPrivateKeys(String content, String fileTyoe, boolean expectException) throws IOException {
+        final Bundle bundle = new Bundle();
+        PrivateKeyLoader privateKeyFilesLoader = new PrivateKeyLoader();
+        privateKeyFilesLoader.load(bundle, rootProjectDir.getRoot());
+
         EntityLoader loader = createEntityLoader(jsonTools, new IdGenerator(), createEntityInfo(PrivateKey.class));
         final File privateKeys = new File(config, "private-keys." + fileTyoe);
         Files.touch(privateKeys);
 
         when(fileUtils.getInputStream(any(File.class))).thenReturn(new ByteArrayInputStream(content.getBytes()));
 
-        final Bundle bundle = new Bundle();
         if (expectException) {
             assertThrows(JsonToolsException.class, () -> loader.load(bundle, rootProjectDir.getRoot()));
             return;

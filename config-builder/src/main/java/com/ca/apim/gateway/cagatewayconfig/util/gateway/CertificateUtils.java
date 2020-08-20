@@ -32,6 +32,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.createE
 public class CertificateUtils {
 
     public static final String PEM_CERT_FILE_EXTENSION = ".pem";
+    public static final String P12_CERT_FILE_EXTENSION = ".p12";
     static final String PEM_CERT_BEGIN_MARKER = "-----BEGIN CERTIFICATE-----";
     static final String PEM_CERT_END_MARKER = "-----END CERTIFICATE-----";
     static final String LINE_SEPARATOR = System.lineSeparator();

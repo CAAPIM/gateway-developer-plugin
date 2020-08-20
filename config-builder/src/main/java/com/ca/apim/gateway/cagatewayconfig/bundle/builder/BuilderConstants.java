@@ -43,6 +43,8 @@ public final class BuilderConstants {
         }
     };
 
+    public static final Predicate<Entity> FILTER_OUT_PRIVATE_KEYS = entity -> !EntityTypes.PRIVATE_KEY_TYPE.equals(entity.getType());
+
     public static final Predicate<Entity> FILTER_NON_ENV_ENTITIES = new Predicate<Entity>() {
         @Override
         public boolean test(Entity entity) {
