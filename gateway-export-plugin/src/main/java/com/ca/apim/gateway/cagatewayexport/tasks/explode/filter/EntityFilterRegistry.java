@@ -8,22 +8,51 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableSet;
 
 @Singleton
 public class EntityFilterRegistry {
 
     private final Collection<EntityFilter> entityFilters;
+    private Map<String, EntityFilter> sortedFilters = new LinkedHashMap<>();
 
     @Inject
     public EntityFilterRegistry(final Set<EntityFilter> entityFilters) {
-        // TreeSet is needed here to sort the Entity Filter in the proper order to get a correctly filtered bundle
         // Ordering is necessary for the filtering, otherwise it may not work appropriately.
-        this.entityFilters = unmodifiableSet(new TreeSet<>(entityFilters));
+        for (EntityFilter entityFilter : entityFilters)
+        {
+            addFilterWithDependencies(entityFilter.getClass());
+            sortedFilters.put(entityFilter.getClass().getName(), entityFilter);
+        }
+        this.entityFilters = unmodifiableCollection(sortedFilters.values());
+    }
+
+    private void addFilterWithDependencies(Class<? extends EntityFilter> entityFilter) {
+        Collection<Class<? extends EntityFilter>> dependentFilters = getDependentFilters(entityFilter);
+        if(dependentFilters.isEmpty()){
+            EntityFilter value = sortedFilters.get(entityFilter.getName());
+            if(value == null){
+                sortedFilters.put(entityFilter.getName(), null);
+            }
+        } else {
+            for(Class<? extends EntityFilter> dependentFilter : dependentFilters) {
+                addFilterWithDependencies(dependentFilter);
+            }
+            EntityFilter value = sortedFilters.get(entityFilter.getName());
+            if(value == null){
+                sortedFilters.put(entityFilter.getName(), null);
+            }
+        }
+    }
+
+    private Collection<Class<? extends EntityFilter>> getDependentFilters(Class<? extends EntityFilter> entityFilterClass) {
+        EntityFilter entityFilter = EntityFilter.getEntityFilterFromClass(entityFilterClass);
+        return (Collection<Class<? extends EntityFilter>>) entityFilter.getDependencyEntityFilters();
     }
 
     public Collection<EntityFilter> getEntityFilters() {

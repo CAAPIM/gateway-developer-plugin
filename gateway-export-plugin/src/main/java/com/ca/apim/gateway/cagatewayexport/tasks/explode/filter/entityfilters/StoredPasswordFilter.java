@@ -21,7 +21,8 @@ public class StoredPasswordFilter implements EntityFilter<StoredPassword> {
             PolicyFilter.class,
             ServiceFilter.class,
             JDBCConnectionFilter.class,
-            CassandraConnectionFilter.class).collect(Collectors.toSet());
+            CassandraConnectionFilter.class,
+            SsgActiveConnectorFilter.class).collect(Collectors.toSet());
     private static final String ENTITY_NAME = "passwords";
 
     @Override
