@@ -8,12 +8,9 @@ package com.ca.apim.gateway.cagatewayexport.tasks.explode.filter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 import static java.util.Collections.unmodifiableCollection;
-import static java.util.Collections.unmodifiableSet;
 
 @Singleton
 public class EntityFilterRegistry {
@@ -35,18 +32,14 @@ public class EntityFilterRegistry {
     private void addFilterWithDependencies(Class<? extends EntityFilter> entityFilter) {
         Collection<Class<? extends EntityFilter>> dependentFilters = getDependentFilters(entityFilter);
         if(dependentFilters.isEmpty()){
-            EntityFilter value = sortedFilters.get(entityFilter.getName());
-            if(value == null){
-                sortedFilters.put(entityFilter.getName(), null);
-            }
+            sortedFilters.putIfAbsent(entityFilter.getName(), null);
         } else {
             for(Class<? extends EntityFilter> dependentFilter : dependentFilters) {
-                addFilterWithDependencies(dependentFilter);
+                if(!sortedFilters.containsKey(dependentFilter.getName())){
+                    addFilterWithDependencies(dependentFilter);
+                }
             }
-            EntityFilter value = sortedFilters.get(entityFilter.getName());
-            if(value == null){
-                sortedFilters.put(entityFilter.getName(), null);
-            }
+            sortedFilters.putIfAbsent(entityFilter.getName(), null);
         }
     }
 
