@@ -16,27 +16,27 @@ import static java.util.Collections.unmodifiableCollection;
 public class EntityFilterRegistry {
 
     private final Collection<EntityFilter> entityFilters;
-    private Map<String, EntityFilter> sortedFilters = new LinkedHashMap<>();
 
     @Inject
     public EntityFilterRegistry(final Set<EntityFilter> entityFilters) {
         // Ordering is necessary for the filtering, otherwise it may not work appropriately.
+        final Map<String, EntityFilter> sortedFilters = new LinkedHashMap<>();
         for (EntityFilter entityFilter : entityFilters)
         {
-            addFilterWithDependencies(entityFilter.getClass());
+            addFilterWithDependencies(entityFilter.getClass(), sortedFilters);
             sortedFilters.put(entityFilter.getClass().getName(), entityFilter);
         }
         this.entityFilters = unmodifiableCollection(sortedFilters.values());
     }
 
-    private void addFilterWithDependencies(Class<? extends EntityFilter> entityFilter) {
+    private void addFilterWithDependencies(Class<? extends EntityFilter> entityFilter, Map<String, EntityFilter> sortedFilters) {
         Collection<Class<? extends EntityFilter>> dependentFilters = getDependentFilters(entityFilter);
         if(dependentFilters.isEmpty()){
             sortedFilters.putIfAbsent(entityFilter.getName(), null);
         } else {
             for(Class<? extends EntityFilter> dependentFilter : dependentFilters) {
                 if(!sortedFilters.containsKey(dependentFilter.getName())){
-                    addFilterWithDependencies(dependentFilter);
+                    addFilterWithDependencies(dependentFilter, sortedFilters);
                 }
             }
             sortedFilters.putIfAbsent(entityFilter.getName(), null);
