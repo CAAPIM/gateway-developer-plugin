@@ -132,12 +132,14 @@ public class PrivateKey extends GatewayEntity {
 
     @Override
     public void postLoad(String entityKey, Bundle bundle, File rootFolder, IdGenerator idGenerator) {
-        if (rootFolder != null) {
-            loadPrivateKey(this, new File(rootFolder, "config/privateKeys"), false);
-        }
-
         setAlias(entityKey);
         setKeyStoreType(KeyStoreType.fromName(getKeystore()));
+        if (bundle.getPrivateKeyFiles().get(getAlias()) != null) {
+            setPrivateKeyFile(bundle.getPrivateKeyFiles().get(getAlias()));
+        }
+        if (rootFolder != null && getPrivateKeyFile() == null) {
+            loadPrivateKey(this, new File(rootFolder, "config/privateKeys"), false);
+        }
     }
 
     public static void loadFromDirectory(Collection<PrivateKey> privateKeys, File privateKeysDirectory, boolean failOnMissingKeys) {

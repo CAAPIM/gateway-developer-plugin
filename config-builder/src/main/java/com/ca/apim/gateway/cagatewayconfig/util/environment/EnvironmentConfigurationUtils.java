@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.PREFIX_ENVIRONMENT;
+import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.P12_CERT_FILE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils.PEM_CERT_FILE_EXTENSION;
 import static com.ca.apim.gateway.cagatewayconfig.util.json.JsonTools.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.PREFIX_ENV;
@@ -149,6 +150,15 @@ public class EnvironmentConfigurationUtils {
                                 final File certDataFile = new File(configFolder + "/certificates", entityName + PEM_CERT_FILE_EXTENSION);
                                 environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entityName + PEM_CERT_FILE_EXTENSION,
                                         loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entityName));
+                            } else if (EntityTypes.PRIVATE_KEY_TYPE.equals(entityType)) {
+                                final File privateKeysFolder = new File(configFolder, "privateKeys");
+                                if (privateKeysFolder.exists()) {
+                                    File privateKeyFile = new File(privateKeysFolder, entityName + P12_CERT_FILE_EXTENSION);
+                                    if (privateKeyFile.exists()) {
+                                        environmentValues.put(PREFIX_ENV + "PRIVATE_KEY_FILE." + entityName + P12_CERT_FILE_EXTENSION,
+                                                loadConfigFromFile(privateKeyFile, "PRIVATE_KEY_FILE", entityName));
+                                    }
+                                }
                             }
                         } catch (MissingEnvironmentException ex) {
                             LOGGER.log(Level.INFO, "could not find dependent environment entity in the configured folder " + entityName);
@@ -190,6 +200,15 @@ public class EnvironmentConfigurationUtils {
                             final File certDataFile = new File(configFolder + "/certificates", entry.getKey() + PEM_CERT_FILE_EXTENSION);
                             environmentValues.put(PREFIX_ENV + "CERTIFICATE_FILE" + "." + entry.getKey() + PEM_CERT_FILE_EXTENSION,
                                     loadConfigFromFile(certDataFile, "CERTIFICATE_FILE", entry.getKey()));
+                        } else if (EntityTypes.PRIVATE_KEY_TYPE.equals(entityType)) {
+                            final File privateKeysFolder = new File(configFolder, "privateKeys");
+                            if (privateKeysFolder.exists()) {
+                                File privateKeyFile = new File(privateKeysFolder, entry.getKey() + P12_CERT_FILE_EXTENSION);
+                                if (privateKeyFile.exists()) {
+                                    environmentValues.put(PREFIX_ENV + "PRIVATE_KEY_FILE." + entry.getKey() + P12_CERT_FILE_EXTENSION,
+                                            loadConfigFromFile(privateKeyFile, "PRIVATE_KEY_FILE", entry.getKey()));
+                                }
+                            }
                         }
                     });
                 }
