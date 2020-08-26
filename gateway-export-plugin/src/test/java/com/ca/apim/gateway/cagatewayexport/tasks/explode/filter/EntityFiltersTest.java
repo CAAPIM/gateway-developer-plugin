@@ -14,17 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EntityFiltersTest {
 
-    @Test
-    void testDependencies() {
-        assertFalse(EntityFilter.isDependency(new TestEntityFilter1(), Sets.newHashSet()));
-
-
-        Set<Class<? extends EntityFilter>> FILTER_DEPENDENCIES = Stream.of(
-                TestEntityFilter2.class).collect(Collectors.toSet());
-
-        assertTrue(EntityFilter.isDependency(new TestEntityFilter1(), FILTER_DEPENDENCIES));
-
-    }
 
     @Test
     void testRegistry() {
