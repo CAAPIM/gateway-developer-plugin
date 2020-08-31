@@ -107,7 +107,7 @@ public class BundleEntityBuilderTestHelper {
         entityBuilders.add(trustedCertEntityBuilder);
 
         return new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(),
-                new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry);
+                new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry, new PrivateKeyImportContextBuilder());
     }
 
     static Encass buildTestEncassWithAnnotation(String encassGuid, String policyPath, boolean isRedeployable) {

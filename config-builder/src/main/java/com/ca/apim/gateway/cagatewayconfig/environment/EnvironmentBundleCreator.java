@@ -31,7 +31,6 @@ import static com.ca.apim.gateway.cagatewayconfig.util.file.DocumentFileUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.file.FileUtils.collectFiles;
 import static java.util.stream.Collectors.toList;
 import static com.ca.apim.gateway.cagatewayconfig.environment.EnvironmentBundleCreationMode.PLUGIN;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Singleton
 public class EnvironmentBundleCreator {
@@ -78,11 +77,16 @@ public class EnvironmentBundleCreator {
         Map<String, BundleArtifacts> bundleElements = bundleEntityBuilder.build(environmentBundle,
                 EntityBuilder.BundleType.ENVIRONMENT, document, projectInfo, true);
         for (BundleArtifacts bundleArtifacts : bundleElements.values()) {
-            documentFileUtils.createFile(bundleArtifacts.getBundle(), new File(bundleFolderPath,
+            documentFileUtils.createFile(bundleArtifacts.getInstallBundle().getElement(), new File(bundleFolderPath,
                     envInstallBundleFilename).toPath());
-            documentFileUtils.createFile(bundleArtifacts.getDeleteBundle(), new File(bundleFolderPath,
+            documentFileUtils.createFile(bundleArtifacts.getDeleteBundle().getElement(), new File(bundleFolderPath,
                     envInstallBundleFilename.replace(INSTALL_BUNDLE_EXTENSION, DELETE_BUNDLE_EXTENSION)).toPath());
             jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), envInstallBundleFilename.replace(INSTALL_BUNDLE_EXTENSION, ""), new File(bundleFolderPath));
+            if (!bundleArtifacts.getPrivateKeyContexts().isEmpty()) {
+                bundleArtifacts.getPrivateKeyContexts().forEach(privateKey -> {
+                    documentFileUtils.createFile(privateKey.getElement(), new File(bundleFolderPath, privateKey.getFilename()).toPath());
+                });
+            }
         }
         return environmentBundle;
     }

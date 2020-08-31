@@ -8,7 +8,6 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import com.ca.apim.gateway.cagatewayconfig.ProjectInfo;
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType;
 import com.ca.apim.gateway.cagatewayconfig.util.IdGenerator;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
@@ -80,7 +79,7 @@ class BundleEntityBuilderTest {
     @Test
     void build() {
         BundleEntityBuilder builder = new BundleEntityBuilder(singleton(new TestEntityBuilder()),
-                new BundleDocumentBuilder(), new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry);
+                new BundleDocumentBuilder(), new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry, new PrivateKeyImportContextBuilder());
 
         final Map<String, BundleArtifacts> element = builder.build(new Bundle(), DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
@@ -213,14 +212,14 @@ class BundleEntityBuilderTest {
                                                         String expEncassPolicyName, String expEncassPolicyAction, String expEncassName, String expEncassAction,
                                                         String expDepEncassPolicyName, String expDepEncassPolicyAction, String expDepEncassName, String expDepEncassAction) {
         BundleEntityBuilder builder = new BundleEntityBuilder(entityBuilders, new BundleDocumentBuilder(),
-                new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry);
+                new BundleMetadataBuilder(ID_GENERATOR), entityTypeRegistry, new PrivateKeyImportContextBuilder());
         Map<String, BundleArtifacts> bundles = builder.build(bundle, DEPLOYMENT,
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
         for (Map.Entry<String, BundleArtifacts> bundleEntry : bundles.entrySet()) {
             assertEquals(TEST_ENCASS_ANNOTATION_NAME + "-" + "1.0", bundleEntry.getKey());
-            final Element element = bundleEntry.getValue().getBundle();
+            final Element element = bundleEntry.getValue().getInstallBundle().getElement();
             assertNotNull(element);
             assertEquals(BundleDocumentBuilder.GATEWAY_MANAGEMENT, element.getAttribute(BundleDocumentBuilder.L7));
             assertEquals(BUNDLE, element.getTagName());
@@ -301,7 +300,7 @@ class BundleEntityBuilderTest {
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteBundle();
+        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteBundle().getElement();
         assertNotNull(deleteBundleElement);
 
         // Assert Bundle
@@ -352,7 +351,7 @@ class BundleEntityBuilderTest {
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteBundle();
+        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteBundle().getElement();
         assertNotNull(deleteBundleElement);
 
         // Assert Bundle
@@ -422,7 +421,7 @@ class BundleEntityBuilderTest {
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteBundle();
+        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteBundle().getElement();
         assertNotNull(deleteBundleElement);
 
         // Assert Bundle
@@ -492,7 +491,7 @@ class BundleEntityBuilderTest {
                 DocumentTools.INSTANCE.getDocumentBuilder().newDocument(), projectInfo);
         assertNotNull(bundles);
         assertEquals(1, bundles.size());
-        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteBundle();
+        Element deleteBundleElement = bundles.get(TEST_ENCASS_ANNOTATION_NAME + "-1.0").getDeleteBundle().getElement();
         assertNotNull(deleteBundleElement);
 
         // Assert Bundle
@@ -563,7 +562,7 @@ class BundleEntityBuilderTest {
         assertEquals(1, bundles.size());
         for (Map.Entry<String, BundleArtifacts> bundleEntry : bundles.entrySet()) {
             assertEquals(TEST_SERVICE_ANNOTATION_NAME + "-" + "1.0", bundleEntry.getKey());
-            final Element element = bundleEntry.getValue().getBundle();
+            final Element element = bundleEntry.getValue().getInstallBundle().getElement();
             assertNotNull(element);
             assertEquals(BundleDocumentBuilder.GATEWAY_MANAGEMENT, element.getAttribute(BundleDocumentBuilder.L7));
             assertEquals(BUNDLE, element.getTagName());

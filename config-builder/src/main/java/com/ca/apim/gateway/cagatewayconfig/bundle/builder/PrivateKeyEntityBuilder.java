@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.PrivateKey;
 import com.ca.apim.gateway.cagatewayconfig.util.gateway.CertificateUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.keystore.KeystoreHelper;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -25,6 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,6 +43,8 @@ import static java.util.stream.Collectors.toList;
 
 @Singleton
 public class PrivateKeyEntityBuilder implements EntityBuilder {
+
+    private static final Logger LOGGER = Logger.getLogger(PolicyEntityBuilder.class.getName());
 
     private static final Integer ORDER = 800;
     private static final String DUMMY_CERTIFICATE = "MIIBfTCCASegAwIBAgIJAPH69zKKw4ixMA0GCSqGSIb3DQEBBQUAMA8xDTALBgNVBAMTBHRlc3QwHhcNMTgxMDEzMDMyODI1WhcNMzgxMDA4MDMyODI1WjAPMQ0wCwYDVQQDEwR0ZXN0MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAIS+Vr8zPOBmSclkUtW/z0UXaMjhg7dix6IUZs+UoSiw/2GXfU2vc3renVAbn3AZaJEqnxgrcX4nldqt0WBIP4sCAwEAAaNmMGQwDgYDVR0PAQH/BAQDAgXgMBIGA1UdJQEB/wQIMAYGBFUdJQAwHQYDVR0OBBYEFN/aeDDEAB6MTxZhMhf/eJKnmaE5MB8GA1UdIwQYMBaAFN/aeDDEAB6MTxZhMhf/eJKnmaE5MA0GCSqGSIb3DQEBBQUAA0EAdolvh7bMX5ZMkM/yntJlBdzS8ukM/ULh8I11wKd6dDltyMuk9rOP0iEk1nsSFuFL0uQ4kIe12KyDwr8ns7VKvQ==";
@@ -96,6 +101,10 @@ public class PrivateKeyEntityBuilder implements EntityBuilder {
 
     private void buildAndAppendCertificateChainElement(PrivateKey privateKey, Element privateKeyElem, Document document) {
         if (privateKey.getPrivateKeyFile() != null) {
+            if (StringUtils.isBlank(privateKey.getKeyPassword())) {
+                LOGGER.log(Level.WARNING, "PrivateKey password not provided, attempting with blank password.");
+                privateKey.setKeyPassword("");
+            }
             final KeyStore keyStore = keystoreHelper.loadKeyStore(privateKey);
             final Certificate[] certificates = keystoreHelper.loadCertificatesForPrivateKey(privateKey, keyStore);
             final Element[] certificatesElements = Stream.of(certificates)
