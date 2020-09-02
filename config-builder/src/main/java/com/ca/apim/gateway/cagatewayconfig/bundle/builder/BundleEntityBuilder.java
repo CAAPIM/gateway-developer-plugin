@@ -448,7 +448,11 @@ public class BundleEntityBuilder {
     }
 
     private String generatePrivateKeyFileName(PrivateKey privateKey, ProjectInfo projectInfo) {
-        return projectInfo.getName() + "-" + privateKey.getAlias() + "-" + projectInfo.getVersion() + ".privatekey.xml";
+        StringBuilder filename = new StringBuilder(projectInfo.getName()).append("-").append(privateKey.getAlias());
+        if (StringUtils.isNotBlank(projectInfo.getVersion())) {
+            filename.append("-").append(projectInfo.getVersion());
+        }
+        return filename.append(".privatekey.xml").toString();
     }
 
     @VisibleForTesting

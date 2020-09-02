@@ -120,7 +120,7 @@ public class FullBundleCreator {
                 public boolean test(Map<String, String> dependentBundleMap) {
                     String version = StringUtils.isNotBlank(projectInfo.getVersion()) ? projectInfo.getMajorVersion() + "." + projectInfo.getMinorVersion() : "";
                     return dependentBundleMap.get("name").equals(projectInfo.getName() + "-" + PREFIX_ENVIRONMENT) && dependentBundleMap.get("groupName").equals(projectInfo.getGroupName()) &&
-                            dependentBundleMap.get("version").equals(version);
+                            (dependentBundleMap.get("version") == null || dependentBundleMap.get("version").equals(version));
                 }
             });
 
