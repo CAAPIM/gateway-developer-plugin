@@ -136,9 +136,9 @@ public class PrivateKey extends GatewayEntity {
         setKeyStoreType(KeyStoreType.fromName(getKeystore()));
         if (bundle.getPrivateKeyFiles().get(getAlias()) != null) {
             setPrivateKeyFile(bundle.getPrivateKeyFiles().get(getAlias()));
-        }
-        if (rootFolder != null && getPrivateKeyFile() == null) {
+        } else if (rootFolder != null && getPrivateKeyFile() == null) {
             loadPrivateKey(this, new File(rootFolder, "config/privateKeys"), false);
+            bundle.getPrivateKeyFiles().put(getAlias(), getPrivateKeyFile());
         }
     }
 

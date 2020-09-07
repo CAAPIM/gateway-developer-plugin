@@ -115,11 +115,7 @@ public class BuildFullBundleTask extends DefaultTask {
 
             final Pair<String, Map<String, String>> bundleEnvironmentValues = environmentConfigurationUtils.parseBundleMetadata(metaDataFile, configuredFolder);
             if (null != bundleEnvironmentValues) {
-                String fullInstallBundleFilename = bundleEnvironmentValues.getLeft();
-                if (StringUtils.isNotBlank(projectInfo.getVersion())) {
-                    fullInstallBundleFilename = fullInstallBundleFilename + PREFIX_FULL;
-                }
-                fullInstallBundleFilename = fullInstallBundleFilename + INSTALL_BUNDLE_EXTENSION;
+                String fullInstallBundleFilename = bundleEnvironmentValues.getLeft() + PREFIX_FULL + INSTALL_BUNDLE_EXTENSION;
                 //read environment properties from environmentConfig and merge it with config folder entities
                 if(environmentEntities != null){
                     bundleEnvironmentValues.getRight().putAll(environmentConfigurationUtils.parseEnvironmentValues(environmentEntities));

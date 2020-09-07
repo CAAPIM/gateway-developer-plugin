@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.*;
@@ -37,17 +38,20 @@ public class BundleEntityBuilder {
     private final Set<EntityBuilder> entityBuilders;
     private final BundleDocumentBuilder bundleDocumentBuilder;
     private final BundleMetadataBuilder bundleMetadataBuilder;
+    private final PrivateKeyImportContextBuilder privateKeyImportContextBuilder;
     private final EntityTypeRegistry entityTypeRegistry;
 
     @Inject
     BundleEntityBuilder(final Set<EntityBuilder> entityBuilders, final BundleDocumentBuilder bundleDocumentBuilder,
-                        final BundleMetadataBuilder bundleMetadataBuilder, final EntityTypeRegistry entityTypeRegistry) {
+                        final BundleMetadataBuilder bundleMetadataBuilder,
+                        final EntityTypeRegistry entityTypeRegistry, PrivateKeyImportContextBuilder privateKeyImportContextBuilder) {
         // treeset is needed here to sort the builders in the proper order to get a correct bundle build
         // Ordering is necessary for the bundle, for the gateway to load it properly.
         this.entityBuilders = unmodifiableSet(new TreeSet<>(entityBuilders));
         this.bundleDocumentBuilder = bundleDocumentBuilder;
         this.bundleMetadataBuilder = bundleMetadataBuilder;
         this.entityTypeRegistry = entityTypeRegistry;
+        this.privateKeyImportContextBuilder = privateKeyImportContextBuilder;
     }
 
     public Map<String, BundleArtifacts> build(Bundle bundle, BundleType bundleType,
@@ -93,9 +97,10 @@ public class BundleEntityBuilder {
                 // Create DELETE Environment bundle
                 deleteBundleElement = createDeleteEnvBundle(document, entities);
             }
-
-            artifacts.put(bundleNamePrefix, new BundleArtifacts(fullBundle, deleteBundleElement, bundleMetadata,
-                    bundleFileName, deleteBundleFileName));
+            BundleArtifacts bundleArtifacts = new BundleArtifacts(fullBundle, deleteBundleElement, bundleMetadata,
+                    bundleFileName, deleteBundleFileName);
+            addPrivateKeyContexts(bundle, projectInfo, bundleArtifacts, document);
+            artifacts.put(bundleNamePrefix, bundleArtifacts);
         }
         return artifacts;
     }
@@ -147,9 +152,11 @@ public class BundleEntityBuilder {
                                         projectInfo);
                             }
 
-                            annotatedElements.put(annotatedBundle.getBundleName(),
-                                    new BundleArtifacts(bundleElement, deleteBundleElement, bundleMetadata,
-                                            bundleFilename, deleteBundleFilename));
+                            BundleArtifacts artifacts = new BundleArtifacts(bundleElement, deleteBundleElement,
+                                    bundleMetadata, bundleFilename, deleteBundleFilename);
+                            addPrivateKeyContexts(annotatedBundle, projectInfo, artifacts, document);
+                            annotatedElements.put(annotatedBundle.getBundleName(), artifacts);
+
                         })
         );
 
@@ -422,6 +429,33 @@ public class BundleEntityBuilder {
     private String generateBundleFileName(boolean isDeleteBundle, String bundleName) {
         String filenameSuffix = isDeleteBundle ? DELETE_BUNDLE_EXTENSION : INSTALL_BUNDLE_EXTENSION;
         return bundleName + filenameSuffix;
+    }
+
+    public void addPrivateKeyContexts(Bundle bundle, ProjectInfo projectInfo, BundleArtifacts bundleArtifacts,
+                                      Document document) {
+        if (!bundle.getPrivateKeys().isEmpty()) {
+            bundle.getPrivateKeys().forEach((alias, privateKey) -> {
+                if (privateKey.getPrivateKeyFile() == null) {
+                    privateKey.setPrivateKeyFile(bundle.getPrivateKeyFiles().get(privateKey.getAlias()));
+                }
+                if (privateKey.getPrivateKeyFile() != null) {
+                    Element element = privateKeyImportContextBuilder.build(privateKey, document);
+                    String filename = generatePrivateKeyFileName(privateKey, projectInfo);
+                    bundleArtifacts.addPrivateKeyContext(element, filename);
+                }
+            });
+        }
+    }
+
+    private String generatePrivateKeyFileName(PrivateKey privateKey, ProjectInfo projectInfo) {
+        StringBuilder filename = new StringBuilder(projectInfo.getName()).append("-").append(privateKey.getAlias());
+        if (StringUtils.isNotBlank(projectInfo.getVersion())) {
+            filename.append("-").append(projectInfo.getVersion());
+            if (StringUtils.isNotBlank(projectInfo.getConfigName())) {
+                filename.append("-").append(projectInfo.getConfigName());
+            }
+        }
+        return filename.append(".privatekey").toString();
     }
 
     @VisibleForTesting

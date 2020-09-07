@@ -12,7 +12,6 @@ import com.ca.apim.gateway.cagatewayconfig.beans.GatewayEntity;
 import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
 import com.ca.apim.gateway.cagatewayconfig.beans.Service;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleArtifacts;
-import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleDefinedEntities;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.BundleEntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder;
 import com.ca.apim.gateway.cagatewayconfig.config.loader.EntityLoader;
@@ -128,10 +127,10 @@ public class BundleFileBuilder {
     }
 
     private void writeBundleArtifacts(final String bundleName, final BundleArtifacts bundleArtifacts, File outputDir) {
-        documentFileUtils.createFile(bundleArtifacts.getBundle(), new File(outputDir,
-                bundleArtifacts.getBundleFileName()).toPath());
-        documentFileUtils.createFile(bundleArtifacts.getDeleteBundle(), new File(outputDir,
-                bundleArtifacts.getDeleteBundleFileName()).toPath());
+        documentFileUtils.createFile(bundleArtifacts.getInstallBundle().getElement(), new File(outputDir,
+                bundleArtifacts.getInstallBundle().getFilename()).toPath());
+        documentFileUtils.createFile(bundleArtifacts.getDeleteBundle().getElement(), new File(outputDir,
+                bundleArtifacts.getDeleteBundle().getFilename()).toPath());
         jsonFileUtils.createBundleMetadataFile(bundleArtifacts.getBundleMetadata(), bundleName, outputDir);
     }
 

@@ -148,6 +148,10 @@ public class BundleElementNames {
     // Private Key
     public static final String PRIVATE_KEY = "l7:PrivateKey";
     public static final String CERTIFICATE_CHAIN = "l7:CertificateChain";
+    public static final String PRIVATE_KEY_IMPORT_CONTEXT = "l7:PrivateKeyImportContext";
+    public static final String PRIVATE_KEY_PKCS12_DATA = "l7:Pkcs12Data";
+    public static final String PRIVATE_KEY_ALIAS = "l7:Alias";
+    public static final String PRIVATE_KEY_PASSWORD= "l7:Password";
 
     // Cassandra Connection
     public static final String CASSANDRA_CONNECTION = "l7:CassandraConnection";

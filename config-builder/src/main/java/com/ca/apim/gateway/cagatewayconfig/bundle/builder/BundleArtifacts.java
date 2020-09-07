@@ -8,28 +8,31 @@ package com.ca.apim.gateway.cagatewayconfig.bundle.builder;
 
 import org.w3c.dom.Element;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 public class BundleArtifacts {
 
-    private final Element bundle;
-    private final Element deleteBundle;
+    private final Artifact installBundle;
+    private final Artifact deleteBundle;
     private final BundleMetadata bundleMetadata;
-    private final String bundleFileName;
-    private final String deleteBundleFileName;
+
+    // Private Key Import Context XMLs
+    private final Set<Artifact> privateKeyContexts = new HashSet<>();
 
     public BundleArtifacts(Element bundle, Element deleteBundle, BundleMetadata bundleMetadata, String bundleFileName
             , String deleteBundleFileName) {
-        this.bundle = bundle;
-        this.deleteBundle = deleteBundle;
+        this.installBundle = new Artifact(bundle, bundleFileName);
+        this.deleteBundle = new Artifact(deleteBundle, deleteBundleFileName);
         this.bundleMetadata = bundleMetadata;
-        this.bundleFileName = bundleFileName;
-        this.deleteBundleFileName = deleteBundleFileName;
     }
 
-    public Element getBundle() {
-        return bundle;
+    public Artifact getInstallBundle() {
+        return installBundle;
     }
 
-    public Element getDeleteBundle() {
+    public Artifact getDeleteBundle() {
         return deleteBundle;
     }
 
@@ -37,11 +40,42 @@ public class BundleArtifacts {
         return bundleMetadata;
     }
 
-    public String getBundleFileName() {
-        return bundleFileName;
+    public void addPrivateKeyContext(Element contextXml, String filename) {
+        privateKeyContexts.add(new Artifact(contextXml, filename));
     }
 
-    public String getDeleteBundleFileName() {
-        return deleteBundleFileName;
+    public Set<Artifact> getPrivateKeyContexts() {
+        return privateKeyContexts;
+    }
+
+    public static class Artifact {
+        private final Element element;
+        private final String filename;
+
+        public Artifact(Element element, String filename) {
+            this.element = element;
+            this.filename = filename;
+        }
+
+        public Element getElement() {
+            return element;
+        }
+
+        public String getFilename() {
+            return filename;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Artifact artifact = (Artifact) o;
+            return Objects.equals(filename, artifact.filename);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(filename);
+        }
     }
 }

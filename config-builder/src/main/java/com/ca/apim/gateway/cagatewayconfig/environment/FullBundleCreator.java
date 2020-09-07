@@ -87,9 +87,10 @@ public class FullBundleCreator {
                                  String bundleFolderPath, ProjectInfo projectInfo,
                                  String fullInstallBundleFilename, String environmentConfigurationFolderPath,
                                  boolean detemplatizeDeploymentBundles) {
-        final Pair<Element, Element> elementPair = createFullAndDeleteBundles(bundleEnvironmentValues,
-                dependentBundles, bundleFolderPath, environmentConfigurationFolderPath, detemplatizeDeploymentBundles, projectInfo);
-        final String bundle = documentTools.elementToString(elementPair.getLeft());
+        final BundleArtifacts fullBundleArtifacts = createFullAndDeleteBundles(bundleEnvironmentValues,
+                dependentBundles, bundleFolderPath, environmentConfigurationFolderPath, detemplatizeDeploymentBundles
+                , projectInfo, fullInstallBundleFilename);
+        final String bundle = documentTools.elementToString(fullBundleArtifacts.getInstallBundle().getElement());
         // write the full bundle to a temporary file first
         final File fullBundleFile = new File(System.getProperty(JAVA_IO_TMPDIR), fullInstallBundleFilename);
         try {
@@ -102,7 +103,8 @@ public class FullBundleCreator {
         dependencyBundlesProcessor.process(singletonList(fullBundleFile), bundleFolderPath);
 
         final String fullDeleteBundleFilename = fullInstallBundleFilename.replace(INSTALL_BUNDLE_EXTENSION, DELETE_BUNDLE_EXTENSION);
-        documentFileUtils.createFile(elementPair.getRight(), new File(bundleFolderPath, fullDeleteBundleFilename).toPath());
+        documentFileUtils.createFile(fullBundleArtifacts.getDeleteBundle().getElement(), new File(bundleFolderPath,
+                fullDeleteBundleFilename).toPath());
         // delete the temp file
         boolean deleted = fullBundleFile.delete();
         if (!deleted) {
@@ -118,7 +120,7 @@ public class FullBundleCreator {
                 public boolean test(Map<String, String> dependentBundleMap) {
                     String version = StringUtils.isNotBlank(projectInfo.getVersion()) ? projectInfo.getMajorVersion() + "." + projectInfo.getMinorVersion() : "";
                     return dependentBundleMap.get("name").equals(projectInfo.getName() + "-" + PREFIX_ENVIRONMENT) && dependentBundleMap.get("groupName").equals(projectInfo.getGroupName()) &&
-                            dependentBundleMap.get("version").equals(version);
+                            (dependentBundleMap.get("version") == null || dependentBundleMap.get("version").equals(version));
                 }
             });
 
@@ -133,6 +135,12 @@ public class FullBundleCreator {
             //generated metadata file
             jsonFileUtils.createBundleMetadataFile(bundleMetadata, bundleMetaFileName, new File(bundleFolderPath));
 
+        }
+
+        if (!fullBundleArtifacts.getPrivateKeyContexts().isEmpty()) {
+            fullBundleArtifacts.getPrivateKeyContexts().forEach(privateKey -> {
+                documentFileUtils.createFile(privateKey.getElement(), new File(bundleFolderPath, privateKey.getFilename()).toPath());
+            });
         }
     }
 
@@ -155,10 +163,11 @@ public class FullBundleCreator {
         }
     }
 
-    private Pair<Element, Element> createFullAndDeleteBundles(final Pair<String, Map<String, String>> bundleEnvironmentValues, final List<File> dependentBundles,
-                                                              String bundleFolderPath,
-                                                              String environmentConfigurationFolderPath,
-                                                              boolean detemplatizeDeploymentBundles, ProjectInfo projectInfo) {
+    private BundleArtifacts createFullAndDeleteBundles(Pair<String, Map<String, String>> bundleEnvironmentValues,
+                                                       List<File> dependentBundles, String bundleFolderPath,
+                                                       String environmentConfigurationFolderPath,
+                                                       boolean detemplatizeDeploymentBundles, ProjectInfo projectInfo,
+                                                       String fullInstallBundleFilename) {
         final Map<String, String> environmentProperties = bundleEnvironmentValues.getRight();
         final List<File> deploymentBundles = collectFiles(bundleFolderPath,
                 bundleEnvironmentValues.getLeft() + INSTALL_BUNDLE_EXTENSION);
@@ -184,15 +193,18 @@ public class FullBundleCreator {
         Element bundleElement = createFullBundleElement(bundleElements, templatizedBundles, document);
         Element deleteBundleElement = createDeleteBundleElement(bundleElements, deploymentDeleteBundle, dependentBundles, document);
 
-
-        return ImmutablePair.of(bundleElement, deleteBundleElement);
+        String fullDeleteBundleFilename = fullInstallBundleFilename.replace(INSTALL_BUNDLE_EXTENSION, DELETE_BUNDLE_EXTENSION);
+        BundleArtifacts fullBundleArtifacts = new BundleArtifacts(bundleElement, deleteBundleElement, null,
+                fullInstallBundleFilename, fullDeleteBundleFilename);
+        bundleEntityBuilder.addPrivateKeyContexts(environmentBundle, projectInfo, fullBundleArtifacts, document);
+        return fullBundleArtifacts;
     }
 
     private Element createFullBundleElement(final Map<String, BundleArtifacts> bundleElements, final List<TemplatizedBundle> templatizedBundles, final Document document) {
         Element bundleElement = null;
         for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
             // generate the environment bundle
-            bundleElement = entry.getValue().getBundle();
+            bundleElement = entry.getValue().getInstallBundle().getElement();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
             Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
 
@@ -220,7 +232,7 @@ public class FullBundleCreator {
     private Element createDeleteBundleElement(final Map<String, BundleArtifacts> bundleElements, final List<File> deploymentDeleteBundles, final List<File> dependentBundles, final Document document) {
         Element bundleElement = null;
         for (Map.Entry<String, BundleArtifacts> entry : bundleElements.entrySet()) {
-            bundleElement = entry.getValue().getDeleteBundle();
+            bundleElement = entry.getValue().getDeleteBundle().getElement();
             Element referencesElement = getSingleChildElement(bundleElement, REFERENCES);
             Element mappingsElement = getSingleChildElement(bundleElement, MAPPINGS);
 

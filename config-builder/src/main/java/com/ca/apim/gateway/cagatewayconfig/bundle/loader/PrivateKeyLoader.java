@@ -36,6 +36,7 @@ public class PrivateKeyLoader implements BundleEntityLoader {
         key.setKeyStoreType(keystore);
         key.setKeystore(keystore.getName());
         key.setAlgorithm((String) properties.get("keyAlgorithm"));
+        key.setKeyPassword("");
 
         bundle.getPrivateKeys().put(alias, key);
     }
