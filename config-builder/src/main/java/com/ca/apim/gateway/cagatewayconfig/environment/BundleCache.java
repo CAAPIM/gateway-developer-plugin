@@ -40,14 +40,14 @@ public class BundleCache {
     }
 
     public Bundle getBundleFromFile(File file) {
-        if (!cache.containsValue(file.getPath())) {
+        if (!cache.containsKey(file.getPath())) {
             cache.put(file.getPath(), entityBundleLoader.load(file, BundleLoadingOperation.EXPORT));
         }
         return cache.get(file.getPath());
     }
 
     public Bundle getBundleFromMetadataFile(File file) {
-        if (!cache.containsValue(file.getPath())) {
+        if (!cache.containsKey(file.getPath())) {
             Bundle bundle = entityBundleLoader.loadMetadata(file, BundleLoadingOperation.EXPORT);
             if (bundle != null) {
                 cache.put(file.getPath(), bundle);
