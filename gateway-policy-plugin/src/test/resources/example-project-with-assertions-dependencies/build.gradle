@@ -5,7 +5,7 @@
  */
 
 plugins {
-    id 'com.ca.apim.gateway.gateway-developer-plugin'
+    id 'com.ca.apim.gateway.gateway-policy-plugin'
 }
 
 group 'com.ca'
