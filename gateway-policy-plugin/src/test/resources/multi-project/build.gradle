@@ -5,11 +5,11 @@
  */
 
 plugins {
-    id 'com.ca.apim.gateway.gateway-developer-plugin' apply false
+    id 'com.ca.apim.gateway.gateway-policy-plugin' apply false
 }
 
 subprojects {
-    apply plugin: 'com.ca.apim.gateway.gateway-developer-plugin'
+    apply plugin: 'com.ca.apim.gateway.gateway-policy-plugin'
 
     group 'com.ca'
     version '1.2.3-SNAPSHOT'

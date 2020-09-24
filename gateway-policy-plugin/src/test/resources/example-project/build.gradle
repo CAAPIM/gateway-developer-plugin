@@ -5,7 +5,7 @@
  */
 
 plugins {
-    id 'com.ca.apim.gateway.gateway-developer-plugin'
+    id 'com.ca.apim.gateway.gateway-policy-plugin'
 }
 
 group 'com.ca'
@@ -23,6 +23,4 @@ repositories {
 
 dependencies {
     bundle group: 'my-bundle', name: 'my-bundle', version: '1.0.00', ext: 'bundle'
-    assertion group: "Test", name: "Test", version: "2.0.0", ext: "aar"
-    customassertion group: "Test", name: "Test", version: "1.0.0"
 }

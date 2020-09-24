@@ -5,22 +5,20 @@
  */
 
 plugins {
-    id 'com.ca.apim.gateway.gateway-developer-plugin'
+    id 'com.ca.apim.gateway.gateway-policy-plugin'
 }
 
 group 'com.ca'
 version '1.2.3-SNAPSHOT'
 
 repositories {
-    flatDir {
-        dirs "lib"
-    }
     maven {
         url "file:///" + project.property('jarDir')
     }
     mavenCentral()
 }
 
-dependencies {
-    bundle group: 'my-bundle', name: 'my-bundle', version: '1.0.00', ext: 'bundle'
+GatewaySourceConfig {
+    solutionDir = new File("export/gateway/solution")
+    builtBundleDir = new File("dist")
 }

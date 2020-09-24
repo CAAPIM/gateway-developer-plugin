@@ -12,7 +12,7 @@ To use this plugin, add the following to your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.gateway.gateway-developer-plugin" version "0.10.+"
+    id "com.ca.apim.gateway.gateway-policy-plugin" version "0.10.+"
     id "com.ca.apim.gateway.gateway-export-plugin" version "0.10.+"
 }
 

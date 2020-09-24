@@ -4,4 +4,4 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-rootProject.name = 'gateway-developer-plugin'
+rootProject.name = 'gateway-policy-plugin'
