@@ -10,7 +10,7 @@ plugins {
     id 'maven'
 }
 
-description = 'The gateway-developer-plugin enables developing gateway configuration.'
+description = 'The gateway-policy-plugin enables developing gateway configuration.'
 
 project.ext.'gradle.publish.key' = System.env.GRADLE_PUBLISH_KEY
 project.ext.'gradle.publish.secret' = System.env.GRADLE_PUBLISH_SECRET
@@ -28,11 +28,11 @@ dependencies {
 gradlePlugin {
     plugins {
         gatewayPlugin {
-            id = 'com.ca.apim.gateway.gateway-developer-plugin'
+            id = 'com.ca.apim.gateway.gateway-policy-plugin'
             implementationClass = 'com.ca.apim.gateway.cagatewayconfig.CAGatewayDeveloper'
         }
         gatewayPluginBase {
-            id = 'com.ca.apim.gateway.gateway-developer-plugin-base'
+            id = 'com.ca.apim.gateway.gateway-policy-plugin-base'
             implementationClass = 'com.ca.apim.gateway.cagatewayconfig.CAGatewayDeveloperBase'
         }
     }
@@ -44,13 +44,13 @@ pluginBundle {
 
     plugins {
         gatewayPlugin {
-            displayName = 'CA API Gateway Developer Gradle Plugin'
-            description = 'The Gateway developer plugin can be used to develop Gateway configuration'
+            displayName = 'CA API Gateway Policy Gradle Plugin'
+            description = 'The Gateway policy plugin can be used to develop Gateway configuration'
             tags = ['ca api gateway', 'building']
         }
         gatewayPluginBase {
-            displayName = 'CA API Gateway Developer Base Gradle Plugin'
-            description = 'The Gateway developer plugin can be used to develop Custom Gateway configuration'
+            displayName = 'CA API Gateway Policy Base Gradle Plugin'
+            description = 'The Gateway policy plugin can be used to develop Custom Gateway configuration'
             tags = ['ca api gateway', 'building']
         }
     }
