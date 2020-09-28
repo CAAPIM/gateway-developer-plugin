@@ -5,14 +5,14 @@
 
 # About
 The Gateway Developer plugin is used to develop Gateway configuration: it reads configuration files, converts them to the Gateway Restman bundle.
- 
+
 # Usage
 To use this plugin, add the following to your gradle file:
 
 ```groovy
 plugins {
-    id "com.ca.apim.gateway.gateway-policy-plugin" version "0.10.+"
-    id "com.ca.apim.gateway.gateway-export-plugin" version "0.10.+"
+    id "com.ca.apim.gateway.gateway-policy-plugin" version "1.0.+"
+    id "com.ca.apim.gateway.gateway-export-plugin" version "1.0.+"
 }
 
 repositories {
