@@ -4,39 +4,10 @@
 [![Gradle Plugin](https://img.shields.io/maven-metadata/v/https/plugins.gradle.org/m2/com/ca/apim/gateway/gateway-developer-plugin/com.ca.apim.gateway.gateway-developer-plugin.gradle.plugin/maven-metadata.xml.svg?label=gradle-plugin)](https://plugins.gradle.org/plugin/com.ca.apim.gateway.gateway-developer-plugin)
 
 # About
-The Gateway Developer plugin is used to develop Gateway configuration: it reads configuration files, converts them to the Gateway Restman bundle.
+The Gateway Policy Plugin is used to develop Gateway configuration: it reads configuration files, converts them to the Gateway Restman bundle.
 
 # Usage
-To use this plugin, add the following to your gradle file:
-
-```groovy
-plugins {
-    id "com.ca.apim.gateway.gateway-policy-plugin" version "1.0.+"
-    id "com.ca.apim.gateway.gateway-export-plugin" version "1.0.+"
-}
-
-repositories {
-    // This is needed in order to get dependencies for the environment 
-    // creator application.
-    mavenCentral()
-}
-
-// The Gateway Export Config is needed by the gateway-export plugin in order to export from a gateway
-GatewayExportConfig {
-    folderPath = '/my-solution-folder'
-}
-
-// The Gateway Connection Config is required if setting mentioned in main [build.gradle](https://github.com/ca-api-gateway-examples/gateway-developer-example/blob/master/build.gradle) is not applicable to this folder.
-GatewayConnection {
-    url = 'https://<gateway-host>:8443/restman'
-}
-```
-
-After this is added run `./gradlew build` in order to build a bundle and deployment package from a Gateway solution located in `src/main/Gateway`. 
-The build will create a deployment bundle and a deployment package in `build/gateway`.
-Run `gradle export` in order to export a gateway solution into `src/main/Gateway`.
-
-**[See more details on the usage of the plugin in the Wiki](https://github.com/ca-api-gateway/gateway-developer-plugin/wiki)**
+Usage guide [API Gateway Policy Plugin.](https://techdocs.broadcom.com/content/broadcom/techdocs/us/en/ca-enterprise-software/layer7-api-management/gateway-policy-plugin/1-0.html)
 
 # Building Your Gateway Project with the Plugin
 The build is done using gradle. To build the plugin run ```./gradlew build```.
