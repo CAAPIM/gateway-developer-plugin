@@ -7,7 +7,7 @@
 The Gateway Policy Plugin is used to develop Gateway configuration: it reads configuration files, converts them to the Gateway Restman bundle.
 
 # Usage
-Usage guide [API Gateway Policy Plugin.](https://techdocs.broadcom.com/content/broadcom/techdocs/us/en/ca-enterprise-software/layer7-api-management/gateway-policy-plugin/1-0.html)
+Usage documentation [API Gateway Policy Plugin.](https://techdocs.broadcom.com/content/broadcom/techdocs/us/en/ca-enterprise-software/layer7-api-management/gateway-policy-plugin/1-0.html)
 
 # Building Your Gateway Project with the Plugin
 The build is done using gradle. To build the plugin run ```./gradlew build```.
