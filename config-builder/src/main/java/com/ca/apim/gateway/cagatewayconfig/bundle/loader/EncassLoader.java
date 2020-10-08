@@ -7,21 +7,20 @@
 package com.ca.apim.gateway.cagatewayconfig.bundle.loader;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.entity.EntityTypes;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.inject.Singleton;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.BundleLoadingOperation.VALIDATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BuilderUtils.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.POLICY_GUID_PROP;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.*;
 

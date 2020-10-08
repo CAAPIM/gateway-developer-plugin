@@ -33,6 +33,8 @@ class EntityBuilderHelper {
     private static final String DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY = "com.ca.apim.build.defaultEntityMappingAction";
     private static String defaultEntityMappingAction;
 
+    private static final String IGNORE_ANNOTATIONS_PROPERTY = "com.ca.apim.build.ignoreAnnotations";
+    private static final String IGNORE_ANNOTATIONS = System.getProperty(IGNORE_ANNOTATIONS_PROPERTY);
     private EntityBuilderHelper() {
     }
 
@@ -54,6 +56,14 @@ class EntityBuilderHelper {
         }
 
         return defaultEntityMappingAction;
+    }
+
+    /**
+     * Returns system property ignore annotations value, default is false
+     * @return boolean
+     */
+    static boolean isIgnoreAnnotations() {
+       return IGNORE_ANNOTATIONS != null && "true".equals(IGNORE_ANNOTATIONS.trim());
     }
 
     static Entity getEntityWithOnlyMapping(String entityType, String name, String id) {

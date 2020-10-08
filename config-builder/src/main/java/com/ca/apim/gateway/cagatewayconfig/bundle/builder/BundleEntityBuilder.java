@@ -108,6 +108,9 @@ public class BundleEntityBuilder {
     private Map<String, BundleArtifacts> buildAnnotatedEntities(BundleType bundleType, Bundle bundle,
                                                                 Document document, ProjectInfo projectInfo) {
         final Map<String, BundleArtifacts> annotatedElements = new LinkedHashMap<>();
+        if (EntityBuilderHelper.isIgnoreAnnotations()) {
+            return annotatedElements;
+        }
         Map<String, EntityUtils.GatewayEntityInfo> entityTypeMap = entityTypeRegistry.getEntityTypeMap();
         // Filter the bundle to export only annotated entities
         entityTypeMap.values().stream().filter(EntityUtils.GatewayEntityInfo::isBundleGenerationSupported).forEach(entityInfo ->
