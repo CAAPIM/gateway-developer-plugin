@@ -43,7 +43,7 @@ public class IdentityProvider extends GatewayEntity implements AnnotableEntity {
         LDAP("LDAP"),
         FEDERATED("Federated"),
         BIND_ONLY_LDAP("Simple LDAP"),
-        POLICY_BACKED("Policy-backed");
+        POLICY_BACKED("Policy-Backed");
 
         private String value;
         IdentityProviderType(String value) {
