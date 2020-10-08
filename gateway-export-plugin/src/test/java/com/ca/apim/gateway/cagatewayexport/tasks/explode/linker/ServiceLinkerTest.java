@@ -11,6 +11,7 @@ import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
+import com.ca.apim.gateway.cagatewayexport.util.policy.ServicePolicyXMLSimplifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,11 +28,13 @@ class ServiceLinkerTest {
 
     @Mock
     private PolicyXMLSimplifier policyXMLSimplifier;
+    @Mock
+    private ServicePolicyXMLSimplifier servicePolicyXMLSimplifier;
     private ServiceLinker linker;
 
     @BeforeEach
     void before() {
-        linker = new ServiceLinker(DocumentTools.INSTANCE, policyXMLSimplifier);
+        linker = new ServiceLinker(DocumentTools.INSTANCE, policyXMLSimplifier, servicePolicyXMLSimplifier);
     }
 
     @Test

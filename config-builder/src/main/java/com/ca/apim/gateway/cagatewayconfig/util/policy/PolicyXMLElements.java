@@ -26,6 +26,9 @@ public class PolicyXMLElements {
     public static final String ENCAPSULATED_ASSERTION_CONFIG_GUID = "L7p:EncapsulatedAssertionConfigGuid";
     public static final String ENCAPSULATED_ASSERTION_CONFIG_NAME = "L7p:EncapsulatedAssertionConfigName";
     public static final String API_PORTAL_ENCASS_INTEGRATION = "L7p:ApiPortalEncassIntegration";
+    public static final String API_PORTAL_INTEGRATION = "L7p:ApiPortalIntegration";
+    public static final String PORTAL_MANAGED_API_FLAG = "L7p:PortalManagedApiFlag";
+    public static final String API_PORTAL_SERVICE_ASSERTION = "L7p:ApiPortalManagedServiceAssertion";
     public static final String POLICY_GUID = "L7p:PolicyGuid";
     public static final String NO_OP_IF_CONFIG_MISSING = "L7p:NoOpIfConfigMissing";
     public static final String AUTHENTICATION = "L7p:Authentication";
