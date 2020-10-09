@@ -4,6 +4,7 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folderable;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
+import com.google.common.annotations.VisibleForTesting;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -13,11 +14,16 @@ import java.util.stream.Collectors;
 public class ServiceAndPolicyLoaderUtil {
 
     public static final String HANDLE_DUPLICATE_NAMES = "com.ca.apim.export.handleDuplicateNames";
-    private static final String ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS_PROP = "com.ca.apim.export.migratePortalIntegrationAssertions";
-    private static final String ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS = System.getProperty(ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS_PROP);
+    public static final String ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS_PROP = "com.ca.apim.export.migratePortalIntegrationAssertions";
+    private static String ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS = System.getProperty(ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS_PROP);
 
     public static boolean isAnnotatePortalApisSet() {
         return ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS != null && "true".equals(ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS.trim());
+    }
+
+    @VisibleForTesting
+    public static void setAnnotatePortalIntegrationAssertion(String value) {
+        ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS = value;
     }
 
     /**

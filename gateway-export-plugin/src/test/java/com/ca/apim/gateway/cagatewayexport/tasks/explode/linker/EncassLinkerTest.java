@@ -7,6 +7,8 @@
 package com.ca.apim.gateway.cagatewayexport.tasks.explode.linker;
 
 import com.ca.apim.gateway.cagatewayconfig.beans.*;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil;
+import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.API_PORTAL_ENCASS_INTEGRATION;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
@@ -22,6 +25,7 @@ import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSing
 import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.*;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EncassLinkerTest {
     private EncassLinker encassLinker;
@@ -106,6 +110,7 @@ class EncassLinkerTest {
     @Test
     void linkPortalTemplateFlag() throws DocumentParseException {
         Bundle fullBundle = new Bundle();
+        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("false");
         myEncass.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});
@@ -120,6 +125,8 @@ class EncassLinkerTest {
         assertEquals("myEncassPolicy", linkedEncass.getPath());
         assertEquals(2, linkedEncass.getProperties().size());
         assertTrue(Boolean.valueOf(linkedEncass.getProperties().get(L7_TEMPLATE).toString()));
+        Set<Annotation> annotations = linkedEncass.getAnnotations();
+        assertTrue(annotations.isEmpty());
 
         Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
         assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
@@ -128,6 +135,7 @@ class EncassLinkerTest {
     @Test
     void linkPortalTemplateDisabledFlag() throws DocumentParseException {
         Bundle fullBundle = new Bundle();
+        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("false");
         myEncass.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});
@@ -142,8 +150,60 @@ class EncassLinkerTest {
         assertEquals("myEncassPolicy", linkedEncass.getPath());
         assertEquals(2, linkedEncass.getProperties().size());
         assertFalse(Boolean.valueOf(linkedEncass.getProperties().get(L7_TEMPLATE).toString()));
+        Set<Annotation> annotations = linkedEncass.getAnnotations();
+        assertTrue(annotations.isEmpty());
+        Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
+        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
+    }
+
+    @Test
+    void testMigratePortalAssertionFlag() throws DocumentParseException {
+        Bundle fullBundle = new Bundle();
+        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("true");
+        myEncass.setProperties(new HashMap<String, Object>() {{
+            put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
+        }});
+        fullBundle.addEntity(myEncass);
+        fullBundle.addEntity(createPolicy("myEncassPolicy", "1","1", "1", DocumentUtils.stringToXML(DocumentTools.INSTANCE, ENCASS_POLICY_WITH_PORTAL_INTEGRATION), EMPTY));
+        fullBundle.addEntity(createFolder("myFolder", "1", null));
+
+        FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
+        fullBundle.setFolderTree(folderTree);
+        encassLinker.link(bundle, fullBundle);
+        Encass linkedEncass = bundle.getEntities(Encass.class).get("1");
+        assertEquals("myEncassPolicy", linkedEncass.getPath());
+        assertEquals(2, linkedEncass.getProperties().size());
+        assertTrue(Boolean.valueOf(linkedEncass.getProperties().get(L7_TEMPLATE).toString()));
+        Set<Annotation> annotations = linkedEncass.getAnnotations();
+        assertTrue(annotations.contains(new Annotation(AnnotationType.BUNDLE)));
 
         Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
         assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
     }
+
+
+    @Test
+    void testPortalFlagForNonPortalManagedEncass() throws DocumentParseException {
+        Bundle fullBundle = new Bundle();
+        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("true");
+        myEncass.setProperties(new HashMap<String, Object>() {{
+            put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
+        }});
+        fullBundle.addEntity(myEncass);
+        fullBundle.addEntity(createPolicy("myEncassPolicy", "1","1", "1", DocumentUtils.stringToXML(DocumentTools.INSTANCE, ENCASS_POLICY_WITH_PORTAL_INTEGRATION_DISABLED), EMPTY));
+        fullBundle.addEntity(createFolder("myFolder", "1", null));
+
+        FolderTree folderTree = new FolderTree(fullBundle.getEntities(Folder.class).values());
+        fullBundle.setFolderTree(folderTree);
+        encassLinker.link(bundle, fullBundle);
+        Encass linkedEncass = bundle.getEntities(Encass.class).get("1");
+        assertEquals("myEncassPolicy", linkedEncass.getPath());
+        assertEquals(2, linkedEncass.getProperties().size());
+        assertFalse(Boolean.valueOf(linkedEncass.getProperties().get(L7_TEMPLATE).toString()));
+        Set<Annotation> annotations = linkedEncass.getAnnotations();
+        assertTrue(annotations.isEmpty());
+        Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
+        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
+    }
+
 }
