@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 import java.util.HashMap;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.SERVICE_DETAIL;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.API_PORTAL_ENCASS_INTEGRATION;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.PORTAL_MANAGED_API_FLAG;
@@ -71,6 +72,8 @@ class ServiceLinkerTest {
 
     @BeforeEach
     void before() {
+        System.setProperty(MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY,
+                ServiceAndPolicyLoaderUtil.MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY_DEFAULT);
         linker = new ServiceLinker(DocumentTools.INSTANCE, policyXMLSimplifier, new ServicePolicyXMLSimplifier());
     }
 
@@ -147,7 +150,6 @@ class ServiceLinkerTest {
         myService = createService("myService", SERVICE_POLICY_WITH_PORTAL_INTEGRATION);
         bundle = new Bundle();
         bundle.addEntity(myService);
-        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("false");
         myService.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});
@@ -172,7 +174,6 @@ class ServiceLinkerTest {
         myService = createService("myService", SERVICE_POLICY_WITH_PORTAL_INTEGRATION_DISABLED);
         bundle = new Bundle();
         bundle.addEntity(myService);
-        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("false");
         myService.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});
@@ -197,7 +198,7 @@ class ServiceLinkerTest {
         myService = createService("myService", SERVICE_POLICY_WITH_PORTAL_INTEGRATION);
         bundle = new Bundle();
         bundle.addEntity(myService);
-        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("true");
+        System.setProperty(MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY, "true");
         myService.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});
@@ -224,7 +225,7 @@ class ServiceLinkerTest {
         myService = createService("myService", SERVICE_POLICY_WITH_PORTAL_INTEGRATION_DISABLED);
         bundle = new Bundle();
         bundle.addEntity(myService);
-        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("true");
+        System.setProperty(MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY, "true");
         myService.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});

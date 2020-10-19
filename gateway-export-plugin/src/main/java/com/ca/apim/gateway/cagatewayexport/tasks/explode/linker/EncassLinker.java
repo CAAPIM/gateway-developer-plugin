@@ -45,7 +45,7 @@ public class EncassLinker implements EntityLinker<Encass> {
         }
         final String l7template = encassPolicyXMLSimplifier.simplifyEncassPolicyXML(policy);
         encass.getProperties().put(L7_TEMPLATE, l7template);
-        if ("true".equals(l7template) && ServiceAndPolicyLoaderUtil.isAnnotatePortalApisSet()) {
+        if ("true".equals(l7template) && ServiceAndPolicyLoaderUtil.migratePortalIntegrationsAssertions()) {
             Set<Annotation> annotations = new HashSet<>();
             Annotation bundleEntity = new Annotation(AnnotationType.BUNDLE);
             annotations.add(bundleEntity);

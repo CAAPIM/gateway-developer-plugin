@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Set;
 
+import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY;
 import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.API_PORTAL_ENCASS_INTEGRATION;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
@@ -55,6 +56,8 @@ class EncassLinkerTest {
 
     @BeforeEach
     void setUp() {
+        System.setProperty(MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY,
+                ServiceAndPolicyLoaderUtil.MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY_DEFAULT);
         encassLinker = new EncassLinker(new EncassPolicyXMLSimplifier());
         myEncass = createEncass("myEncass", "1", "1", "1");
         bundle = new Bundle();
@@ -110,7 +113,6 @@ class EncassLinkerTest {
     @Test
     void linkPortalTemplateFlag() throws DocumentParseException {
         Bundle fullBundle = new Bundle();
-        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("false");
         myEncass.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});
@@ -135,7 +137,6 @@ class EncassLinkerTest {
     @Test
     void linkPortalTemplateDisabledFlag() throws DocumentParseException {
         Bundle fullBundle = new Bundle();
-        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("false");
         myEncass.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});
@@ -159,7 +160,7 @@ class EncassLinkerTest {
     @Test
     void testMigratePortalAssertionFlag() throws DocumentParseException {
         Bundle fullBundle = new Bundle();
-        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("true");
+        System.setProperty(MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY, "true");
         myEncass.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});
@@ -185,7 +186,7 @@ class EncassLinkerTest {
     @Test
     void testPortalFlagForNonPortalManagedEncass() throws DocumentParseException {
         Bundle fullBundle = new Bundle();
-        ServiceAndPolicyLoaderUtil.setAnnotatePortalIntegrationAssertion("true");
+        System.setProperty(MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY, "true");
         myEncass.setProperties(new HashMap<String, Object>() {{
             put(PALETTE_FOLDER, DEFAULT_PALETTE_FOLDER_LOCATION);
         }});

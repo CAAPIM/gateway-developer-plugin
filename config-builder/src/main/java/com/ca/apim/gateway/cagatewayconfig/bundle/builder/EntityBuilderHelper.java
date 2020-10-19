@@ -29,41 +29,33 @@ import static com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties
 class EntityBuilderHelper {
     private static final Logger LOGGER = Logger.getLogger(EntityBuilderHelper.class.getName());
     // TODO: reconsider the default value. NewOrExisting is the safest and acceptable action for most of the customer's scenarios.
-    private static final String DEFAULT_ENTITY_MAPPING_ACTION = NEW_OR_UPDATE;
-    private static final String DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY = "com.ca.apim.build.defaultEntityMappingAction";
-    private static String defaultEntityMappingAction;
+    public static final String DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY = "com.ca.apim.build.defaultEntityMappingAction";
+    public static final String DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY_DEFAULT = NEW_OR_UPDATE;
+    private static final Pattern DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY_PATTERN = Pattern.compile(NEW_OR_EXISTING + "|" + NEW_OR_UPDATE);
 
     private static final String IGNORE_ANNOTATIONS_PROPERTY = "com.ca.apim.build.ignoreAnnotations";
+    private static final String IGNORE_ANNOTATIONS_PROPERTY_DEFAULT = "false";
     private EntityBuilderHelper() {
     }
 
-    @VisibleForTesting
-    static void resetDefaultEntityMappingAction(String value) {
-        defaultEntityMappingAction = null;
-        System.setProperty(DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY, value != null ? value : DEFAULT_ENTITY_MAPPING_ACTION);
-    }
-
     static String getDefaultEntityMappingAction() {
-        if (defaultEntityMappingAction == null) {
-            String action = System.getProperty(DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY);
-            if (action == null ||
-                    !Pattern.matches(NEW_OR_EXISTING + "|" + NEW_OR_UPDATE, action)) {
-                action = DEFAULT_ENTITY_MAPPING_ACTION;
-            }
-            defaultEntityMappingAction = action;
-            LOGGER.info("Using default entity mapping action as " + defaultEntityMappingAction);
+        String action = System.getProperty(DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY,
+                DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY_DEFAULT);
+        if (!DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY_PATTERN.matcher(action).matches()) {
+            action = DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY_DEFAULT;
+            LOGGER.info("Using default entity mapping action as " + action);
         }
 
-        return defaultEntityMappingAction;
+        return action;
     }
 
     /**
      * Returns system property ignore annotations value, default is false
      * @return boolean
      */
-    static boolean isIgnoreAnnotations() {
-        final String ignoreAnnotations = System.getProperty(IGNORE_ANNOTATIONS_PROPERTY);
-        return ignoreAnnotations != null && "true".equals(ignoreAnnotations.trim());
+    static boolean ignoreAnnotations() {
+        return Boolean.parseBoolean(System.getProperty(IGNORE_ANNOTATIONS_PROPERTY,
+                IGNORE_ANNOTATIONS_PROPERTY_DEFAULT));
     }
 
     static Entity getEntityWithOnlyMapping(String entityType, String name, String id) {

@@ -4,7 +4,6 @@ import com.ca.apim.gateway.cagatewayconfig.beans.Bundle;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folder;
 import com.ca.apim.gateway.cagatewayconfig.beans.Folderable;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
-import com.google.common.annotations.VisibleForTesting;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -13,17 +12,19 @@ import java.util.stream.Collectors;
 
 public class ServiceAndPolicyLoaderUtil {
 
-    public static final String HANDLE_DUPLICATE_NAMES = "com.ca.apim.export.handleDuplicateNames";
-    public static final String ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS_PROP = "com.ca.apim.export.migratePortalIntegrationAssertions";
-    private static String ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS = System.getProperty(ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS_PROP);
+    public static final String HANDLE_DUPLICATE_NAMES_PROPERTY = "com.ca.apim.export.handleDuplicateNames";
+    public static final String HANDLE_DUPLICATE_NAMES_PROPERTY_DEFAULT = "true";
+    public static final String MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY = "com.ca.apim.export.migratePortalIntegrationAssertions";
+    public static final String MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY_DEFAULT = "false";
 
-    public static boolean isAnnotatePortalApisSet() {
-        return ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS != null && "true".equals(ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS.trim());
+    public static boolean handleDuplicateNames() {
+        return Boolean.parseBoolean(System.getProperty(HANDLE_DUPLICATE_NAMES_PROPERTY,
+                HANDLE_DUPLICATE_NAMES_PROPERTY_DEFAULT));
     }
 
-    @VisibleForTesting
-    public static void setAnnotatePortalIntegrationAssertion(String value) {
-        ANNOTATE_PORTAL_INTEGRATION_ASSERTIONS = value;
+    public static boolean migratePortalIntegrationsAssertions() {
+        return Boolean.parseBoolean(System.getProperty(MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY,
+                MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY_DEFAULT));
     }
 
     /**
@@ -67,8 +68,8 @@ public class ServiceAndPolicyLoaderUtil {
         int duplicateCounter = 2;
         String basePath = entity.getPath();
         String clonePath = basePath;
-        final String handleDuplicates = System.getProperty(HANDLE_DUPLICATE_NAMES);
-        if (handleDuplicates == null || "true".equals(handleDuplicates.trim())) {
+
+        if (handleDuplicateNames()) {
             while (bundleEntity.containsKey(clonePath)) {
                 Folderable service = bundleEntity.get(clonePath);
                 if (!service.getId().equals(entity.getId())

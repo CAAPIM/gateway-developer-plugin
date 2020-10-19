@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
@@ -72,7 +71,7 @@ public class ServiceLinker implements EntityLinker<Service> {
             }
         }
 
-        if ("true".equals(portalManagedService) && ServiceAndPolicyLoaderUtil.isAnnotatePortalApisSet()) {
+        if ("true".equals(portalManagedService) && ServiceAndPolicyLoaderUtil.migratePortalIntegrationsAssertions()) {
             Set<Annotation> annotations = new HashSet<>();
             Annotation bundleEntity = new Annotation(AnnotationType.BUNDLE);
             annotations.add(bundleEntity);

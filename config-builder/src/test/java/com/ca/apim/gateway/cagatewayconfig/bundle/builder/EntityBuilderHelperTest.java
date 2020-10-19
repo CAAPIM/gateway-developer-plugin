@@ -7,7 +7,6 @@ import com.ca.apim.gateway.cagatewayconfig.util.gateway.MappingProperties;
 import com.ca.apim.gateway.cagatewayconfig.util.paths.PathUtils;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,13 +15,16 @@ import org.w3c.dom.Document;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
+
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderHelper.DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY;
+import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilderHelper.DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY_DEFAULT;
 
 public class EntityBuilderHelperTest {
 
     @Before
     public void beforeTest() {
-        EntityBuilderHelper.resetDefaultEntityMappingAction(null);
+        System.setProperty(DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY,
+                DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY_DEFAULT);
     }
 
     @Test
@@ -31,10 +33,10 @@ public class EntityBuilderHelperTest {
         Assert.assertTrue(MappingActions.NEW_OR_EXISTING.equals(EntityBuilderHelper.getDefaultEntityMappingAction()) ||
                 MappingActions.NEW_OR_UPDATE.equals(EntityBuilderHelper.getDefaultEntityMappingAction()));
 
-        EntityBuilderHelper.resetDefaultEntityMappingAction(MappingActions.NEW_OR_EXISTING);
+        System.setProperty(DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY, MappingActions.NEW_OR_EXISTING);
         Assert.assertEquals(MappingActions.NEW_OR_EXISTING, EntityBuilderHelper.getDefaultEntityMappingAction());
 
-        EntityBuilderHelper.resetDefaultEntityMappingAction(MappingActions.NEW_OR_UPDATE);
+        System.setProperty(DEFAULT_ENTITY_MAPPING_ACTION_PROPERTY, MappingActions.NEW_OR_UPDATE);
         Assert.assertEquals(MappingActions.NEW_OR_UPDATE, EntityBuilderHelper.getDefaultEntityMappingAction());
     }
 
