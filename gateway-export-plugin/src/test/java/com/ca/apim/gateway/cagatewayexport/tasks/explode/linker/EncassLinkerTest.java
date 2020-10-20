@@ -131,7 +131,7 @@ class EncassLinkerTest {
         assertTrue(annotations.isEmpty());
 
         Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
-        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
+        assertDoesNotThrow(() -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
     }
 
     @Test
@@ -154,7 +154,7 @@ class EncassLinkerTest {
         Set<Annotation> annotations = linkedEncass.getAnnotations();
         assertTrue(annotations.isEmpty());
         Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
-        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
+        assertDoesNotThrow(() -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
     }
 
     @Test
@@ -204,7 +204,7 @@ class EncassLinkerTest {
         Set<Annotation> annotations = linkedEncass.getAnnotations();
         assertTrue(annotations.isEmpty());
         Policy updatedPolicy =  fullBundle.getEntities(Policy.class).get("1");
-        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
+        assertDoesNotThrow(() -> getSingleElement(updatedPolicy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION));
     }
 
 }

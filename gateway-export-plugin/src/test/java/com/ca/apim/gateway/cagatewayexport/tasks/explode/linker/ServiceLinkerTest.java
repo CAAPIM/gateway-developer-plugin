@@ -11,7 +11,6 @@ import com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderU
 import com.ca.apim.gateway.cagatewayconfig.util.entity.AnnotationType;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentTools;
-import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
 import com.ca.apim.gateway.cagatewayexport.tasks.explode.writer.WriteException;
 import com.ca.apim.gateway.cagatewayexport.util.TestUtils;
 import com.ca.apim.gateway.cagatewayexport.util.policy.PolicyXMLSimplifier;
@@ -29,13 +28,10 @@ import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil.MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY;
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.SERVICE_DETAIL;
-import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.API_PORTAL_ENCASS_INTEGRATION;
-import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.PORTAL_MANAGED_API_FLAG;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.API_PORTAL_INTEGRATION_FLAG;
 import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.*;
-import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 import static com.ca.apim.gateway.cagatewayexport.util.TestUtils.*;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -64,6 +60,12 @@ class ServiceLinkerTest {
     private static final String SERVICE_POLICY_WITH_PORTAL_INTEGRATION_DISABLED = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<wsp:Policy xmlns:L7p=\"http://www.layer7tech.com/ws/policy\" xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2002/12/policy\">\n" +
             "    <wsp:All wsp:Usage=\"Required\">\n" +
+            "        <L7p:ApiPortalIntegration>\n" +
+            "        <L7p:Enabled booleanValue=\"false\"/>" +
+            "            <L7p:ApiGroup stringValue=\"\"/>\n" +
+            "            <L7p:ApiId stringValue=\"71886958-5b81-4058-85c0-3505aeb14231\"/>\n" +
+            "            <L7p:PortalManagedApiFlag stringValue=\"L7p:ApiPortalManagedServiceAssertion\"/>\n" +
+            "        </L7p:ApiPortalIntegration>" +
             "        <L7p:CommentAssertion>\n" +
             "            <L7p:Comment stringValue=\"Policy Fragment: includedPolicy\"/>\n" +
             "        </L7p:CommentAssertion>\n" +
@@ -162,10 +164,10 @@ class ServiceLinkerTest {
         fullBundle.setFolderTree(folderTree);
         linker.link(myService, fullBundle, bundle);
         Set<Annotation> annotations = myService.getAnnotations();
-        assertNull(annotations);
+        assertTrue(annotations.isEmpty());
 
         Element updatedPolicy =  myService.getPolicyXML();
-        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy, PORTAL_MANAGED_API_FLAG));
+        assertDoesNotThrow(() -> getSingleElement(updatedPolicy, API_PORTAL_INTEGRATION_FLAG));
     }
 
     @Test
@@ -186,10 +188,10 @@ class ServiceLinkerTest {
         fullBundle.setFolderTree(folderTree);
         linker.link(myService, fullBundle, bundle);
         Set<Annotation> annotations = myService.getAnnotations();
-        assertNull(annotations);
+        assertTrue(annotations.isEmpty());
 
         Element updatedPolicy =  myService.getPolicyXML();
-        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy, PORTAL_MANAGED_API_FLAG));
+        assertDoesNotThrow(() -> getSingleElement(updatedPolicy, API_PORTAL_INTEGRATION_FLAG));
     }
 
     @Test
@@ -211,11 +213,11 @@ class ServiceLinkerTest {
         fullBundle.setFolderTree(folderTree);
         linker.link(myService, fullBundle, bundle);
         Set<Annotation> annotations = myService.getAnnotations();
-        assertNotNull(annotations);
+        assertFalse(annotations.isEmpty());
         assertTrue(annotations.contains(new Annotation(AnnotationType.BUNDLE)));
 
         Element updatedPolicy =  myService.getPolicyXML();
-        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy, PORTAL_MANAGED_API_FLAG));
+        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy, API_PORTAL_INTEGRATION_FLAG));
     }
 
 
@@ -238,10 +240,10 @@ class ServiceLinkerTest {
         fullBundle.setFolderTree(folderTree);
         linker.link(myService, fullBundle, bundle);
         Set<Annotation> annotations = myService.getAnnotations();
-        assertNull(annotations);
+        assertTrue(annotations.isEmpty());
 
         Element updatedPolicy =  myService.getPolicyXML();
-        assertThrows(DocumentParseException.class, () -> getSingleElement(updatedPolicy, PORTAL_MANAGED_API_FLAG));
+        assertDoesNotThrow(() -> getSingleElement(updatedPolicy, API_PORTAL_INTEGRATION_FLAG));
     }
 
 }

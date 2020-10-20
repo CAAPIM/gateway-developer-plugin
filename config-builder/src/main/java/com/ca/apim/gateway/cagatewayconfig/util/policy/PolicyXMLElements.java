@@ -13,6 +13,7 @@ public class PolicyXMLElements {
 
     public static final String GOID_VALUE = "goidValue";
     public static final String STRING_VALUE = "stringValue";
+    public static final String BOOLEAN_VALUE = "booleanValue";
     public static final String GOID_ARRAY_VALUE = "goidArrayValue";
     public static final String INCLUDE = "L7p:Include";
     public static final String ENCAPSULATED = "L7p:Encapsulated";
@@ -25,10 +26,16 @@ public class PolicyXMLElements {
     public static final String EXPRESSION = "L7p:Expression";
     public static final String ENCAPSULATED_ASSERTION_CONFIG_GUID = "L7p:EncapsulatedAssertionConfigGuid";
     public static final String ENCAPSULATED_ASSERTION_CONFIG_NAME = "L7p:EncapsulatedAssertionConfigName";
+    public static final String COMMENT_ASSERTION = "L7p:CommentAssertion";
+    public static final String COMMENT = "L7p:Comment";
     public static final String API_PORTAL_ENCASS_INTEGRATION = "L7p:ApiPortalEncassIntegration";
     public static final String API_PORTAL_INTEGRATION = "L7p:ApiPortalIntegration";
-    public static final String PORTAL_MANAGED_API_FLAG = "L7p:PortalManagedApiFlag";
-    public static final String API_PORTAL_SERVICE_ASSERTION = "L7p:ApiPortalManagedServiceAssertion";
+    public static final String API_PORTAL_INTEGRATION_FLAG = "L7p:PortalManagedApiFlag";
+    public static final String API_PORTAL_INTEGRATION_FLAG_SERVICE = "L7p:ApiPortalManagedServiceAssertion";
+    public static final String API_PORTAL_INTEGRATION_VARIABLE_PREFIX = "L7p:VariablePrefix";
+    public static final String API_PORTAL_INTEGRATION_API_ID = "L7p:ApiId";
+    public static final String API_PORTAL_INTEGRATION_API_GROUP = "L7p:ApiGroup";
+
     public static final String POLICY_GUID = "L7p:PolicyGuid";
     public static final String NO_OP_IF_CONFIG_MISSING = "L7p:NoOpIfConfigMissing";
     public static final String AUTHENTICATION = "L7p:Authentication";

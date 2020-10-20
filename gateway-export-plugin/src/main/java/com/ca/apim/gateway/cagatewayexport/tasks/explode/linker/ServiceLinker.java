@@ -22,10 +22,11 @@ import org.w3c.dom.NodeList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 
 import static com.ca.apim.gateway.cagatewayconfig.util.gateway.BundleElementNames.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
 
 @Singleton
@@ -52,7 +53,7 @@ public class ServiceLinker implements EntityLinker<Service> {
         try {
             Element policyElement = DocumentUtils.stringToXML(documentTools, service.getPolicy());
             policyXMLSimplifier.simplifyPolicyXML(policyElement, service.getName(), bundle, targetBundle);
-            portalManagedService = servicePolicyXMLSimplifier.simplifyServicePolicyXML(policyElement);
+            servicePolicyXMLSimplifier.simplifyServicePolicyXML(policyElement, service);
             service.setPolicyXML(policyElement);
         } catch (DocumentParseException e) {
             throw new WriteException("Exception linking and simplifying service: " + service.getName() + " Message: " + e.getMessage(), e);
@@ -71,11 +72,9 @@ public class ServiceLinker implements EntityLinker<Service> {
             }
         }
 
-        if ("true".equals(portalManagedService) && ServiceAndPolicyLoaderUtil.migratePortalIntegrationsAssertions()) {
-            Set<Annotation> annotations = new HashSet<>();
-            Annotation bundleEntity = new Annotation(AnnotationType.BUNDLE);
-            annotations.add(bundleEntity);
-            service.setAnnotations(annotations);
+        if ("true".equals(service.getProperties().get(L7_TEMPLATE)) &&
+                ServiceAndPolicyLoaderUtil.migratePortalIntegrationsAssertions() && !service.isBundle()) {
+            service.setAnnotations(new HashSet<>(Collections.singletonList(new Annotation(AnnotationType.BUNDLE))));
         }
     }
 
