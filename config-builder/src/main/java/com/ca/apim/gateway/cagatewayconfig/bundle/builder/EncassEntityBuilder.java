@@ -163,6 +163,11 @@ public class EncassEntityBuilder implements EntityBuilder {
                 //no need to regenerate id and guid
             }
             uniqueEncassName = annotatedBundle.applyUniqueName(name, BundleType.DEPLOYMENT, isShared);
+            // Use consistent machine identities for the bundle/shared entities across generations
+            if (encass.isBundle()) {
+                id = IdGenerator.generate(uniqueEncassName);
+                guid = IdGenerator.generateGuid(uniqueEncassName);
+            }
         }
         encass.setUniqueEntityName(uniqueEncassName);
         Element encassAssertionElement = createElementWithAttributesAndChildren(

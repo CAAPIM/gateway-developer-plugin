@@ -183,6 +183,9 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
 
             @Override
             public String getId() {
+                if (StringUtils.isNotBlank(getUniqueEntityName()) && isBundle()) {
+                    return IdGenerator.generate(getUniqueEntityName());
+                }
                 AnnotatedEntity annotatedEntity = getAnnotatedEntity();
                 if (annotatedEntity != null && StringUtils.isNotBlank(annotatedEntity.getId())) {
                     return annotatedEntity.getId();
@@ -192,6 +195,9 @@ public class Encass extends GatewayEntity implements AnnotableEntity {
 
             @Override
             public String getGuid() {
+                if (StringUtils.isNotBlank(getUniqueEntityName()) && isBundle()) {
+                    return IdGenerator.generateGuid(getUniqueEntityName());
+                }
                 AnnotatedEntity annotatedEntity = getAnnotatedEntity();
                 if (annotatedEntity != null && StringUtils.isNotBlank(annotatedEntity.getGuid())) {
                     return annotatedEntity.getGuid();
