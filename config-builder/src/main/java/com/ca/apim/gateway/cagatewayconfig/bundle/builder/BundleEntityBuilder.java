@@ -23,7 +23,6 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.BuilderConstants.*;
 import static com.ca.apim.gateway.cagatewayconfig.bundle.builder.EntityBuilder.BundleType.*;
@@ -108,6 +107,9 @@ public class BundleEntityBuilder {
     private Map<String, BundleArtifacts> buildAnnotatedEntities(BundleType bundleType, Bundle bundle,
                                                                 Document document, ProjectInfo projectInfo) {
         final Map<String, BundleArtifacts> annotatedElements = new LinkedHashMap<>();
+        if (EntityBuilderHelper.ignoreAnnotations()) {
+            return annotatedElements;
+        }
         Map<String, EntityUtils.GatewayEntityInfo> entityTypeMap = entityTypeRegistry.getEntityTypeMap();
         // Filter the bundle to export only annotated entities
         entityTypeMap.values().stream().filter(EntityUtils.GatewayEntityInfo::isBundleGenerationSupported).forEach(entityInfo ->

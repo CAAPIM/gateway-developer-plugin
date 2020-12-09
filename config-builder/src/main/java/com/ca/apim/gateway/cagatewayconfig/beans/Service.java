@@ -26,6 +26,8 @@ import org.w3c.dom.Element;
 
 import javax.inject.Named;
 import java.io.File;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -43,9 +45,9 @@ public class Service extends Folderable implements AnnotableEntity {
     private String url;
     private String policy;
     private Set<String> httpMethods;
-    private Map<String,Object> properties;
+    private Map<String,Object> properties = new HashMap<>();
     @JsonDeserialize(using = AnnotationDeserializer.class)
-    private Set<Annotation> annotations;
+    private Set<Annotation> annotations = new HashSet<>();
     @JsonIgnore
     private Element serviceDetailsElement;
     @JsonIgnore

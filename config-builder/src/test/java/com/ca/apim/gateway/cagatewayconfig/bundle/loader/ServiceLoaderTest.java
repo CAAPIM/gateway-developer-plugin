@@ -68,7 +68,6 @@ class ServiceLoaderTest {
         folder.setName(TEST_FOLDER);
         folder.setPath(TEST_FOLDER);
         bundle.getFolders().put(TEST_FOLDER, folder);
-        System.setProperty(ServiceAndPolicyLoaderUtil.HANDLE_DUPLICATE_NAMES, "true");
 
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 true, false, false, false, false));
@@ -77,7 +76,7 @@ class ServiceLoaderTest {
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 true, true, false, false, false));
 
-        System.clearProperty(ServiceAndPolicyLoaderUtil.HANDLE_DUPLICATE_NAMES);
+        System.clearProperty(ServiceAndPolicyLoaderUtil.HANDLE_DUPLICATE_NAMES_PROPERTY);
 
         assertFalse(bundle.getServices().isEmpty());
         assertEquals(2, bundle.getServices().size());
@@ -108,7 +107,7 @@ class ServiceLoaderTest {
         folder.setName(TEST_FOLDER);
         folder.setPath(TEST_FOLDER);
         bundle.getFolders().put(TEST_FOLDER, folder);
-
+        System.setProperty(ServiceAndPolicyLoaderUtil.HANDLE_DUPLICATE_NAMES_PROPERTY, "false");
         loader.load(bundle, createServiceXml(DocumentTools.INSTANCE.getDocumentBuilder().newDocument(),
                 true, false, false, false, false));
 

@@ -12,7 +12,20 @@ import java.util.stream.Collectors;
 
 public class ServiceAndPolicyLoaderUtil {
 
-    public static final String HANDLE_DUPLICATE_NAMES = "com.ca.apim.export.handleDuplicateNames";
+    public static final String HANDLE_DUPLICATE_NAMES_PROPERTY = "com.ca.apim.export.handleDuplicateNames";
+    public static final String HANDLE_DUPLICATE_NAMES_PROPERTY_DEFAULT = "true";
+    public static final String MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY = "com.ca.apim.export.migratePortalIntegrationAssertions";
+    public static final String MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY_DEFAULT = "false";
+
+    public static boolean handleDuplicateNames() {
+        return Boolean.parseBoolean(System.getProperty(HANDLE_DUPLICATE_NAMES_PROPERTY,
+                HANDLE_DUPLICATE_NAMES_PROPERTY_DEFAULT));
+    }
+
+    public static boolean migratePortalIntegrationsAssertions() {
+        return Boolean.parseBoolean(System.getProperty(MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY,
+                MIGRATE_PORTAL_INTEGRATIONS_ASSERTIONS_PROPERTY_DEFAULT));
+    }
 
     /**
      * Get path with file name
@@ -56,7 +69,7 @@ public class ServiceAndPolicyLoaderUtil {
         String basePath = entity.getPath();
         String clonePath = basePath;
 
-        if (Boolean.getBoolean(HANDLE_DUPLICATE_NAMES)) {
+        if (handleDuplicateNames()) {
             while (bundleEntity.containsKey(clonePath)) {
                 Folderable service = bundleEntity.get(clonePath);
                 if (!service.getId().equals(entity.getId())

@@ -6,17 +6,19 @@
 
 package com.ca.apim.gateway.cagatewayexport.util.policy;
 
-import com.ca.apim.gateway.cagatewayconfig.beans.Policy;
+import com.ca.apim.gateway.cagatewayconfig.beans.Encass;
+import com.ca.apim.gateway.cagatewayconfig.bundle.loader.ServiceAndPolicyLoaderUtil;
 import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentParseException;
+import com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.inject.Singleton;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.API_PORTAL_ENCASS_INTEGRATION;
-import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.ENABLED;
-import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;
+import static com.ca.apim.gateway.cagatewayconfig.util.policy.PolicyXMLElements.*;
+import static com.ca.apim.gateway.cagatewayconfig.util.properties.PropertyConstants.L7_TEMPLATE;
+import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleChildElement;;
 import static com.ca.apim.gateway.cagatewayconfig.util.xml.DocumentUtils.getSingleElement;
 
 /**
@@ -27,23 +29,35 @@ public class EncassPolicyXMLSimplifier {
     private static final Logger LOGGER = Logger.getLogger(EncassPolicyXMLSimplifier.class.getName());
     /**
      *
-     * @param policy encass policy.
-     * @return true if ApiPortalEncassIntegration assertion is present and enabled else false.
+     * @param policyElement encass policy document.
+     * @param  encass encapsulated assertion
      */
-    public String simplifyEncassPolicyXML(Policy policy) {
-        Element encassPortalIntegrationElement = null;
-        Element encassPortalIntegrationEnabledElement = null;
-        try {
-            encassPortalIntegrationElement = getSingleElement(policy.getPolicyDocument(), API_PORTAL_ENCASS_INTEGRATION);
-        } catch (DocumentParseException e) {
-            LOGGER.log(Level.INFO, "ApiPortalEncassIntegration assertion is not found in encass policy : {0}, setting portalTemplate as false : ", policy.getName());
-        }
+    public void simplifyEncassPolicyXML(Element policyElement, Encass encass) {
+        encass.getProperties().putIfAbsent(L7_TEMPLATE, "false");
 
-        if (encassPortalIntegrationElement != null) {
-            Element encassPortalIntegrationParentElement = (Element) encassPortalIntegrationElement.getParentNode();
-            encassPortalIntegrationEnabledElement = getSingleChildElement(encassPortalIntegrationElement, ENABLED, true);
-            encassPortalIntegrationParentElement.removeChild(encassPortalIntegrationElement);
+        // look for [Set as Portal Publishable Fragment] assertion
+        simplifyPortalManagedAssertion(policyElement, encass);
+    }
+
+    private void simplifyPortalManagedAssertion(Element policyElement, Encass encass) {
+        try {
+            Element portalManagedElement = getSingleElement(policyElement, API_PORTAL_ENCASS_INTEGRATION);
+            Element enabledElement = getSingleChildElement(portalManagedElement, ENABLED, true);
+            Element parentElement = (Element) portalManagedElement.getParentNode();
+            Document document = policyElement.getOwnerDocument();
+            boolean isEnabled = (enabledElement == null || Boolean.parseBoolean(enabledElement.getAttribute(BOOLEAN_VALUE)));
+
+            encass.getProperties().put(L7_TEMPLATE, Boolean.toString(isEnabled));
+            if (isEnabled && ServiceAndPolicyLoaderUtil.migratePortalIntegrationsAssertions()) {
+                LOGGER.info("Migrating [Set as Portal Publishable Fragment] assertion for " + encass.getPath());
+                parentElement.insertBefore(
+                        DocumentUtils.createElementWithChildren(document, COMMENT_ASSERTION,
+                                DocumentUtils.createElementWithAttribute(document, COMMENT, STRING_VALUE, "Migrated: Set as Portal Publishable Fragment")),
+                        portalManagedElement);
+                parentElement.removeChild(portalManagedElement);
+            }
+        } catch (DocumentParseException e) {
+            // ignoring the exception
         }
-        return encassPortalIntegrationElement != null && encassPortalIntegrationEnabledElement == null ? "true" : "false";
     }
 }
