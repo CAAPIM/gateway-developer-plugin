@@ -7,6 +7,7 @@
 package com.ca.apim.gateway.cagatewayconfig.util;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.UUID;
@@ -69,5 +70,18 @@ public class IdGenerator {
 
     public String generateGuid() {
         return UUID.randomUUID().toString();
+    }
+
+    public static String generateGuid(String forName) {
+        return generateUUID(forName + "::guid").toString();
+    }
+
+    public static String generate(String forName) {
+        final UUID uuid = generateUUID(forName + "::id");
+        return hexDump(ByteBuffer.allocate(16).putLong(uuid.getMostSignificantBits()).putLong(uuid.getLeastSignificantBits()).array());
+    }
+
+    private static UUID generateUUID(String forName) {
+        return UUID.nameUUIDFromBytes(forName.getBytes(Charset.forName("utf-8")));
     }
 }
